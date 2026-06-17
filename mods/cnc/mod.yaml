@@ -240,6 +240,12 @@ Rules:
 	cnc|rules/husks.yaml
 	cnc|rules/map-generators.yaml
 	cnchd|rules/overrides.yaml
+    # === Age of Tiberium (aotmod) ===
+	cnchd|rules/aot-structures.yaml
+	cnchd|rules/aot-units.yaml
+	cnchd|rules/aot-factions.yaml
+	cnchd|rules/aot-balance.yaml
+    # === Ende aotmod ===
 
 Sequences:
 	cnc|sequences/structures.yaml
