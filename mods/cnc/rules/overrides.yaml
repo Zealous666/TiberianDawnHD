@@ -9,3 +9,7 @@ STNK:
 C17:
 	Cloak:
 		CloakStyle: Alpha
+
+NUKE:
+    Valued:
+        Cost: 200
