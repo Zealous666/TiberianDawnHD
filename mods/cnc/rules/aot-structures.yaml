@@ -4,15 +4,11 @@ aot-upgrade-ltnk:
 
 	Buildable:
 		BuildPaletteOrder: 10
-		# Keine Prerequisites: Tab wird aktiv sobald FACT gebaut ist.
-		# Hinweis: Die Engine aktiviert den Tab-Button nur wenn BuildableItems().Any()
-		# true ist (ProductionTabsLogic.cs:37). Prerequisites hier würden den Tab
-		# erst nach Bau von Airfield+HQ freischalten — nicht mit FACT allein.
-		# Für ein hartes Airfield+HQ-Gate: Prerequisites: vehicleproduction, anyhq
+		Prerequisites: vehicleproduction, anyhq
 		Queue: Upgrade
 		BuildLimit: 1
 		MoveIntoWorld: false
-		Description: Rüstet alle leichten Panzer mit der\n120mm-Kanone des GDI-Kampfpanzers aus.\nBenötigt: Airfield + HQ
+		Description: Rüstet alle leichten Panzer mit der\n120mm-Kanone des GDI-Kampfpanzers aus.
 
 	Valued:
 		Cost: 100
