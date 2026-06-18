@@ -38,9 +38,14 @@ LTNK:
 
 # === Age of Tiberium (aotmod) - Upgrade-Produktionsqueue auf FACT ===
 # Fügt dem Bauhof (FACT) eine eigene Produktionswarteschlange für Upgrades hinzu.
-# Alle aot-Upgrade-Aktoren (aot-structures.yaml) verwenden Queue: Upgrade.
+# Production@UPGRADE ist zwingend nötig: ProductionQueue.productionTraits sucht
+# auf dem selben Aktor nach Production.Produces.Contains("Upgrade"). Ohne diesen
+# Trait bleibt Enabled=false und der Tab ist dauerhaft ausgegraut.
 # ProductionTabsWidget erkennt diese Queue automatisch wenn FACT gebaut wird.
 FACT:
+	Production@UPGRADE:
+		Produces: Upgrade
+		MoveIntoWorld: false
 	ProductionQueue@Upgrade:
 		Type: Upgrade
 		Group: Upgrade
