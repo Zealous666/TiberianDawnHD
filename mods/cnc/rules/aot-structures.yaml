@@ -1,3 +1,22 @@
-HAND:
-    Valued:
-        Cost: 100
+aot-upgrade-ltnk:
+	Tooltip:
+		Name: Panzerkanonen-Upgrade
+
+	Buildable:
+		BuildPaletteOrder: 10
+		Prerequisites: vehicleproduction, hand
+		Queue: Upgrade
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Rüstet alle leichten Panzer mit der\n120mm-Kanone des GDI-Kampfpanzers aus.
+
+	Valued:
+		Cost: 100
+
+	RenderSprites:
+		Image: aot-upgrade-ltnk
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-ltnk-upgrade
+
+	Interactable:

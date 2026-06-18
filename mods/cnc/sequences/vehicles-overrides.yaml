@@ -57,10 +57,25 @@ mtnk.destroyed:
 ltnk:
 	Defaults:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\LTNK.ZIP
+	# === Age of Tiberium (aotmod) ltnk ===
+	aot-turret-upgraded:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\MTNK.ZIP
+		Start: 32
+		Facings: 32
+		UseClassicFacings: True
+	aot-icon-upgrade:
+		RemasteredFilename: aot-ltnk-upgrade-icon.png
 	muzzle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\GUNFIRE.ZIP
 	icon:
 		RemasteredFilename:
+        
+        
+aot-upgrade-ltnk:
+	icon:
+		RemasteredFilename: aot-ltnk-upgrade-icon.png        
+        
+    # === Ende aotmod ===        
 
 ltnk.destroyed:
 	Defaults:

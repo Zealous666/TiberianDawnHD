@@ -1,0 +1,27 @@
+LTNK:
+	GrantConditionOnPrerequisite:
+		Condition: aot-ltnk-upgraded
+		Prerequisites: aot-ltnk-upgrade
+
+	-WithSpriteTurret:
+
+	WithSpriteTurret@normal:
+		Sequence: turret
+		RequiresCondition: !aot-ltnk-upgraded
+
+	WithSpriteTurret@upgraded:
+		Sequence: aot-turret-upgraded
+		RequiresCondition: aot-ltnk-upgraded
+
+	Armament:
+		Weapon: 70mm
+		RequiresCondition: !aot-ltnk-upgraded
+		Recoil: 85
+		RecoilRecovery: 17
+		LocalOffset: 720,0,90
+		MuzzleSequence: muzzle
+
+	Armament@upgraded:
+		Weapon: aot-LtnkLaser
+		RequiresCondition: aot-ltnk-upgraded
+		LocalOffset: 768,0,90

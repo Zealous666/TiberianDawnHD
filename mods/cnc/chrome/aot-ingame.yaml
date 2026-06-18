@@ -1,0 +1,152 @@
+Container@PRODUCTION_TYPES:
+	X: 18
+	Y: 267
+	Width: 194
+	Height: 52
+	Children:
+		ProductionTypeButton@BUILDING:
+			Logic: AddFactionSuffixLogic
+			X: 0
+			Y: 0
+			Width: 64
+			Height: 26
+			Background: chrome-button-background
+			TooltipText: button-production-types-building-tooltip
+			TooltipContainer: TOOLTIP_CONTAINER
+			TooltipTemplate: BUTTON_TOOLTIP_FACTIONSUFFIX
+			ProductionGroup: Building
+			Key: ProductionTypeBuilding
+			Children:
+				Image@ICON:
+					X: 11
+					Y: 5
+					ImageCollection: production-icons
+				Image@SEPARATOR:
+					Logic: AddFactionSuffixLogic
+					X: 64
+					Y: 2
+					ImageCollection: chrome-button
+					ImageName: separator
+		ProductionTypeButton@SUPPORT:
+			Logic: AddFactionSuffixLogic
+			X: 65
+			Y: 0
+			Width: 64
+			Height: 26
+			Background: chrome-button-background
+			TooltipText: button-production-types-support-tooltip
+			TooltipContainer: TOOLTIP_CONTAINER
+			TooltipTemplate: BUTTON_TOOLTIP_FACTIONSUFFIX
+			ProductionGroup: Support
+			Key: ProductionTypeDefense
+			Children:
+				Image@ICON:
+					X: 11
+					Y: 5
+					ImageCollection: production-icons
+				Image@SEPARATOR:
+					Logic: AddFactionSuffixLogic
+					X: 64
+					Y: 2
+					ImageCollection: chrome-button
+					ImageName: separator
+		ProductionTypeButton@INFANTRY:
+			Logic: AddFactionSuffixLogic
+			X: 130
+			Y: 0
+			Width: 64
+			Height: 26
+			Background: chrome-button-background
+			TooltipText: button-production-types-infantry-tooltip
+			TooltipContainer: TOOLTIP_CONTAINER
+			TooltipTemplate: BUTTON_TOOLTIP_FACTIONSUFFIX
+			ProductionGroup: Infantry
+			Key: ProductionTypeInfantry
+			Children:
+				Image@ICON:
+					X: 11
+					Y: 5
+					ImageCollection: production-icons
+				Image@SEPARATOR:
+					Logic: AddFactionSuffixLogic
+					X: 64
+					Y: 2
+					ImageCollection: chrome-button
+					ImageName: separator
+		ProductionTypeButton@VEHICLE:
+			Logic: AddFactionSuffixLogic
+			X: 0
+			Y: 26
+			Width: 64
+			Height: 26
+			Background: chrome-button-background
+			TooltipText: button-production-types-vehicle-tooltip
+			TooltipContainer: TOOLTIP_CONTAINER
+			TooltipTemplate: BUTTON_TOOLTIP_FACTIONSUFFIX
+			ProductionGroup: Vehicle
+			Key: ProductionTypeVehicle
+			Children:
+				Image@ICON:
+					X: 11
+					Y: 5
+					ImageCollection: production-icons
+				Image@SEPARATOR:
+					Logic: AddFactionSuffixLogic
+					X: 64
+					Y: 2
+					ImageCollection: chrome-button
+					ImageName: separator
+		ProductionTypeButton@AIRCRAFT:
+			Logic: AddFactionSuffixLogic
+			X: 65
+			Y: 26
+			Width: 64
+			Height: 26
+			Background: chrome-button-background
+			TooltipText: button-production-types-aircraft-tooltip
+			TooltipContainer: TOOLTIP_CONTAINER
+			TooltipTemplate: BUTTON_TOOLTIP_FACTIONSUFFIX
+			ProductionGroup: Aircraft
+			Key: ProductionTypeAircraft
+			Children:
+				Image@ICON:
+					X: 11
+					Y: 5
+					ImageCollection: production-icons
+				Image@SEPARATOR:
+					Logic: AddFactionSuffixLogic
+					X: 64
+					Y: 2
+					ImageCollection: chrome-button
+					ImageName: separator
+		ProductionTypeButton@UPGRADE:
+			Logic: AddFactionSuffixLogic
+			X: 130
+			Y: 26
+			Width: 64
+			Height: 26
+			Background: chrome-button-background
+			TooltipText: button-production-types-upgrade-tooltip
+			TooltipContainer: TOOLTIP_CONTAINER
+			TooltipTemplate: BUTTON_TOOLTIP_FACTIONSUFFIX
+			ProductionGroup: Upgrade
+			Key: ProductionTypeUpgrade
+			Children:
+				Image@ICON:
+					X: 11
+					Y: 5
+					ImageCollection: production-icons
+
+Container@PRODUCTION_BACKGROUND:
+	X: WINDOW_WIDTH - 5 - 18 - 194
+	Y: 345
+
+ProductionPalette@PRODUCTION_PALETTE:
+	X: WINDOW_WIDTH - 5 - 17 - 194
+	Y: 346
+
+ProductionTabs@PRODUCTION_TABS:
+	X: WINDOW_WIDTH - 5 - 18 - 194
+	Y: 325
+	Width: 194
+	Height: 20

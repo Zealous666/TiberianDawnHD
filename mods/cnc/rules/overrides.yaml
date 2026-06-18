@@ -1,3 +1,7 @@
+# TiberianDawnHD engine overrides (non-aot)
+# Diese Datei überschreibt Basis-Aktoren des cnc-Hauptspiels.
+# Alle Age-of-Tiberium-Ergänzungen sind mit # === Age of Tiberium (aotmod) === markiert.
+
 ^BaseWorld:
 	-TerrainRenderer:
 	RemasterTerrainRenderer:
@@ -10,6 +14,41 @@ C17:
 	Cloak:
 		CloakStyle: Alpha
 
+# === Age of Tiberium (aotmod) - Entwicklungs-Cheats (Baukosten reduziert) ===
 NUKE:
-    Valued:
-        Cost: 200
+	Valued:
+		Cost: 10
+
+PROC:
+	Valued:
+		Cost: 10
+
+AFLD:
+	Valued:
+		Cost: 10
+
+HQ:
+	Valued:
+		Cost: 10
+
+LTNK:
+	Valued:
+		Cost: 10
+# === Ende aotmod Cheats ===
+
+# === Age of Tiberium (aotmod) - Upgrade-Produktionsqueue auf FACT ===
+# Fügt dem Bauhof (FACT) eine eigene Produktionswarteschlange für Upgrades hinzu.
+# Alle aot-Upgrade-Aktoren (aot-structures.yaml) verwenden Queue: Upgrade.
+# ProductionTabsWidget erkennt diese Queue automatisch wenn FACT gebaut wird.
+FACT:
+	ProductionQueue@Upgrade:
+		Type: Upgrade
+		Group: Upgrade
+		ReadyAudio: ConstructionComplete
+		ReadyTextNotification: notification-construction-complete
+		BlockedAudio: NoBuild
+		BlockedTextNotification: notification-unable-to-build-more
+		QueuedAudio: Building
+		OnHoldAudio: OnHold
+		CancelledAudio: Cancelled
+# === Ende aotmod ===

@@ -45,3 +45,6 @@ _ReSharper.*/
 
 # IntelliJ files
 .idea
+
+# Lokale Kopien von Hauptspiel-Dateien (werden nicht geladen, nur als Referenz)
+mods/cnc/rules/structures.yaml

@@ -240,12 +240,12 @@ Rules:
 	cnc|rules/husks.yaml
 	cnc|rules/map-generators.yaml
 	cnchd|rules/overrides.yaml
-    # === Age of Tiberium (aotmod) ===
+	# === Age of Tiberium (aotmod) rules ===
+	cnchd|rules/aot-balance.yaml
+	cnchd|rules/aot-factions.yaml
 	cnchd|rules/aot-structures.yaml
 	cnchd|rules/aot-units.yaml
-	cnchd|rules/aot-factions.yaml
-	cnchd|rules/aot-balance.yaml
-    # === Ende aotmod ===
+	# === Ende aotmod ===
 
 Sequences:
 	cnc|sequences/structures.yaml
@@ -266,6 +266,9 @@ Sequences:
 	cnchd|sequences/civilian-overrides.yaml
 	cnc|sequences/campaign.yaml
 	cnchd|sequences/campaign-overrides.yaml
+	# === Age of Tiberium (aotmod) sequences ===
+	cnchd|sequences/aot-sequences.yaml
+	# === Ende aotmod ===
 
 TileSets:
 	cnchd|tilesets/desert.yaml
@@ -280,12 +283,18 @@ Weapons:
 	cnc|weapons/other.yaml
 	cnc|weapons/smallcaliber.yaml
 	cnc|weapons/superweapons.yaml
+	# === Age of Tiberium (aotmod) weapons ===
+	cnchd|weapons/aot-weapons.yaml
+	# === Ende aotmod ===
 
 Cursors:
 	cnc|cursors.yaml
 
 Chrome:
 	cnc|chrome.yaml
+	# === Age of Tiberium (aotmod) chrome ===
+	cnchd|chrome.yaml
+	# === Ende aotmod ===
 
 Assemblies: OpenRA.Mods.Common.dll, OpenRA.Mods.Cnc.dll, OpenRA.Mods.Mobius.dll
 
@@ -311,7 +320,10 @@ ChromeLayout:
 	cnc|chrome/replaybrowser.yaml
 	cnc|chrome/gamesave-browser.yaml
 	cnc|chrome/gamesave-loading.yaml
-	cnc|chrome/ingame.yaml
+	# === Age of Tiberium (aotmod) chrome layout ===
+	cnchd|chrome/ingame.yaml
+	# === Ende aotmod ===
+
 	cnc|chrome/ingame-chat.yaml
 	common|chrome/ingame-transients.yaml
 	cnc|chrome/ingame-menu.yaml

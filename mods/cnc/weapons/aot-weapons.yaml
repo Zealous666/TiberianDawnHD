@@ -1,0 +1,19 @@
+aot-LtnkLaser:
+	ReloadDelay: 60
+	Range: 6c0
+	Report: obelray1.aud
+	Burst: 3
+	BurstDelay: 8
+	Projectile: LaserZap
+		Width: 40
+		HitAnim: laserfire
+		ZOffset: 2047
+	Warhead@1Dam: SpreadDamage
+		Spread: 42
+		Damage: 4000
+		Versus:
+			Wood: 50
+		DamageTypes: Prone50Percent, TriggerProne, FireDeath
+	Warhead@2Smu: LeaveSmudge
+		SmudgeType: Scorch
+		InvalidTargets: Vehicle, Structure, Wall, Husk, Trees, Creep
