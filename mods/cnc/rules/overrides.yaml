@@ -36,6 +36,25 @@ LTNK:
 		Cost: 10
 # === Ende aotmod Cheats ===
 
+# === Age of Tiberium (aotmod) - Age-1-Support-Power auf HQ ===
+# SpawnActorPower spawnt aot-age1-marker permanent (LifeTime: -1).
+# OneShot: true → einmalig verwendbar.
+# ChargeInterval: 0 → sofort verfügbar sobald HQ gebaut ist.
+HQ:
+	SpawnActorPower@AGE1:
+		Actor: aot-age1-marker
+		LifeTime: -1
+		OneShot: true
+		ChargeInterval: 0
+		Icon: aot-age1
+		Name: Zeitalter 1 — Eskalation
+		Description: Aktiviert das erste Zeitalter.\nSchaltet Upgrades und den Tempel of Nod frei.
+		SelectTargetSpeechNotification: SelectTarget
+		SelectTargetTextNotification: notification-select-target
+		SupportPowerPaletteOrder: 50
+	SupportPowerChargeBar:
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - TMPL erfordert Age 1 ===
 # Temple of Nod ist erst baubar nachdem aot-age1 aktiviert wurde.
 TMPL:

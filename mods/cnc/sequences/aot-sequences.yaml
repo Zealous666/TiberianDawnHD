@@ -1,0 +1,11 @@
+# === Age of Tiberium (aotmod) sequences ===
+
+# Support-Power-Icons (IconImage: "icon" in SupportPower.cs)
+# Erweitert die icon-Sequenz aus misc.yaml um aot-spezifische Powers.
+icon:
+	# === Age of Tiberium (aotmod) - Age-1-Power-Icon ===
+	# Platzhalter: verwendet das LTNK-Upgrade-Icon bis ein eigenes Asset existiert.
+	aot-age1:
+		Filename: aot-ltnk-upgrade-icon.png
+		Length: 1
+# === Ende aotmod ===

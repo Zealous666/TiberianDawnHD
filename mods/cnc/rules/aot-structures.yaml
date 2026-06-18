@@ -1,26 +1,16 @@
-# === Age of Tiberium (aotmod) - Age-1-Freischaltung ===
-# Platzhalter für die spätere Super-Power-UI.
-# Einmalig baubar (BuildLimit:1), erfordert HQ.
-# Stellt aot-age1 permanent bereit → schaltet Age-1-Content frei.
-aot-age1-unlock:
-	Tooltip:
-		Name: Zeitalter 1 — Militärische Eskalation
-
-	Buildable:
-		BuildPaletteOrder: 1
-		Prerequisites: anyhq
-		Queue: Upgrade
-		BuildLimit: 1
-		MoveIntoWorld: false
-		Description: Aktiviert das erste Zeitalter.\nSchaltet Upgrades und neue Gebäude frei.
-
-	Valued:
-		Cost: 0
-
+# === Age of Tiberium (aotmod) - Age-1-Marker ===
+# Unsichtbarer, unzerstörbarer Aktor der von der Age-1-Support-Power gespawnt wird.
+# Lebt permanent (LifeTime: -1 in SpawnActorPower) und stellt aot-age1 bereit.
+# Keine Render-Traits → unsichtbar auf der Karte.
+aot-age1-marker:
 	ProvidesPrerequisite:
 		Prerequisite: aot-age1
 
-	Interactable:
+	Selectable:
+		Priority: 0
+
+	Health:
+		HP: 1000000000
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - LTNK Upgrade ===
