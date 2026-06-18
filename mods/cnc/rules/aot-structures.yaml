@@ -1,10 +1,36 @@
+# === Age of Tiberium (aotmod) - Age-1-Freischaltung ===
+# Platzhalter für die spätere Super-Power-UI.
+# Einmalig baubar (BuildLimit:1), erfordert HQ.
+# Stellt aot-age1 permanent bereit → schaltet Age-1-Content frei.
+aot-age1-unlock:
+	Tooltip:
+		Name: Zeitalter 1 — Militärische Eskalation
+
+	Buildable:
+		BuildPaletteOrder: 1
+		Prerequisites: anyhq
+		Queue: Upgrade
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Aktiviert das erste Zeitalter.\nSchaltet Upgrades und neue Gebäude frei.
+
+	Valued:
+		Cost: 0
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-age1
+
+	Interactable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - LTNK Upgrade ===
 aot-upgrade-ltnk:
 	Tooltip:
 		Name: Panzerkanonen-Upgrade
 
 	Buildable:
 		BuildPaletteOrder: 10
-		Prerequisites: vehicleproduction, anyhq
+		Prerequisites: vehicleproduction, anyhq, aot-age1
 		Queue: Upgrade
 		BuildLimit: 1
 		MoveIntoWorld: false

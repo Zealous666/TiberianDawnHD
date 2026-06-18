@@ -36,6 +36,14 @@ LTNK:
 		Cost: 10
 # === Ende aotmod Cheats ===
 
+# === Age of Tiberium (aotmod) - TMPL erfordert Age 1 ===
+# Temple of Nod ist erst baubar nachdem aot-age1 aktiviert wurde.
+TMPL:
+	Buildable:
+		Prerequisites: anyhq, ~techlevel.high, aot-age1
+		Queue: Building.Nod
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - Upgrade-Produktionsqueue auf FACT ===
 # Fügt dem Bauhof (FACT) eine eigene Produktionswarteschlange für Upgrades hinzu.
 # Production@UPGRADE ist zwingend nötig: ProductionQueue.productionTraits sucht
