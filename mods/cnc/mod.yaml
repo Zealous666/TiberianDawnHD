@@ -369,6 +369,7 @@ FluentMessages:
 	cnc|fluent/hotkeys.ftl
 	cnc|fluent/rules.ftl
 	cnchd|fluent/aot-chrome.ftl
+	cnchd|fluent/aot-rules.ftl
 
 AllowUnusedFluentMessagesInExternalPackages: false
 

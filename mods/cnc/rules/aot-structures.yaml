@@ -1,3 +1,96 @@
+# === Age of Tiberium (aotmod) - Light Factory (LITE) ===
+# Günstigere Fahrzeugfabrik für GDI & NOD. Nur Powerplant nötig (kein Refinery).
+# Sprite: RA War Factory (WEAP.ZIP). Stats wie Barracks (500 Credits, 60000 HP).
+# Factions: gdi/nod auf ProductionQueue trennt die Fahrzeug-Tabs sauber (wie FACT).
+LITE:
+	Inherits: ^BaseBuilding
+	Inherits@shape: ^3x2Shape
+	Tooltip:
+		Name: actor-lite.name
+	Valued:
+		Cost: 500
+	Health:
+		HP: 60000
+	Buildable:
+		BuildPaletteOrder: 38
+		Prerequisites: anypower
+		Queue: Building.GDI, Building.Nod
+		Description: actor-lite.description
+	Building:
+		Footprint: xxx xxx ===
+		Dimensions: 3,3
+		LocalCenterOffset: 0,-512,0
+	ProvidesPrerequisite:
+		Prerequisite: vehicleproduction
+	ProvidesPrerequisite@lite:
+		Prerequisite: lite
+	ProvidesPrerequisite@buildingname:
+	RallyPoint:
+	CommandBarBlacklist:
+		DisableStop: false
+	WithBuildingBib:
+	WithMakeAnimation:
+		Condition: build-incomplete
+	RevealsShroud:
+		Range: 4c0
+	Exit@1:
+		SpawnOffset: 0,512,0
+		ExitCell: 1,2
+		ExitDelay: 3
+	Production@GDI:
+		Produces: Vehicle.GDI
+	Production@NOD:
+		Produces: Vehicle.Nod
+	ProductionQueue@GDI:
+		Type: Vehicle.GDI
+		DisplayOrder: 3
+		Factions: gdi
+		Group: Vehicle
+		LowPowerModifier: 150
+		ReadyAudio: UnitReady
+		ReadyTextNotification: notification-unit-ready
+		BlockedAudio: NoBuild
+		BlockedTextNotification: notification-unable-to-build-more
+		LimitedAudio: BuildingInProgress
+		LimitedTextNotification: notification-unable-to-comply-building-in-progress
+		QueuedAudio: Training
+		OnHoldAudio: OnHold
+		CancelledAudio: Cancelled
+	ProductionQueue@NOD:
+		Type: Vehicle.Nod
+		DisplayOrder: 3
+		Factions: nod
+		Group: Vehicle
+		LowPowerModifier: 150
+		ReadyAudio: UnitReady
+		ReadyTextNotification: notification-unit-ready
+		BlockedAudio: NoBuild
+		BlockedTextNotification: notification-unable-to-build-more
+		LimitedAudio: BuildingInProgress
+		LimitedTextNotification: notification-unable-to-comply-building-in-progress
+		QueuedAudio: Training
+		OnHoldAudio: OnHold
+		CancelledAudio: Cancelled
+	ProductionBar@GDI:
+		ProductionType: Vehicle.GDI
+	ProductionBar@NOD:
+		ProductionType: Vehicle.Nod
+	Power:
+		Amount: -20
+	RenderSprites:
+		Image: lite
+	WithSpriteBody:
+		Sequence: idle
+		Name: body
+	WithIdleOverlay@ROOF:
+		Sequence: roof
+		RequiresCondition: !build-incomplete
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: place
+		SequenceAlpha: 0.65
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - Ore Mine ===
 # Neutrales Gebäude, via Map-Editor platziert. Kein Buildable-Trait.
 # DockHost Typ "OreLoad" — ORET-Fahrzeug dockt hier an um Erz zu laden.
@@ -5,24 +98,49 @@
 aot-ore-mine:
 	Inherits: ^Building
 	Tooltip:
-		Name: Ore Mine
-		GenericName: Ore Mine
+		Name: actor-aot-ore-mine.name
+		GenericName: actor-aot-ore-mine.generic-name
 	Building:
-		Footprint: =
+		Footprint: x
 		Dimensions: 1,1
 		TerrainTypes: Clear,Rough,Road,Rock
 	Health:
 		HP: 100
 	DamageMultiplier:
 		Modifier: 0
-	RevealsShroud:
-		Range: 4c0
+	StoresResources:
+		Capacity: 10
+		Resources: Tiberium
+	WithStoresResourcesPipsDecoration:
+		Position: BottomLeft
+		Margin: 4, 3
+		PipCount: 10
+		ResourceSequences:
+			Tiberium: pip-green
+	OreMineDurability:
+		ResourceType: Tiberium
+	Explodes:
+		Weapon: UnitExplodeSmall
+		EmptyWeapon: UnitExplodeSmall
 	DockHost:
 		Type: OreLoad
 		DockAngle: 0
-		DockOffset: 0,0,0
+		DockOffset: -1c0,-1c0,0
 	MapEditorData:
 		Categories: Neutral
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - FACT: DockHost für ORET-Abladepunkt ===
+# ORET fährt zum Construction Yard statt zur Refinery um Credits abzuliefern.
+FACT:
+	DockHost:
+		Type: Unload
+		DockAngle: 0
+		DockOffset: -1c0,1c512,0
+	FreeActor:
+		Actor: ORET
+		SpawnOffset: 0,1
+		Facing: 384
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - FACT: RA sprites in Age 0, TD ab Age 1 ===
