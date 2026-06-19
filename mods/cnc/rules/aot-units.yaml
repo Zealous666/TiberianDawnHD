@@ -186,9 +186,9 @@ aot-jeep-base:
 	RenderSprites:
 		Image: jeep
 	Buildable:
-		Queue: Vehicle.GDI
+		Queue: LightVehicle.GDI
 		BuildPaletteOrder: 20
-		Prerequisites: weap, pyle, ~!aot-humvee-upgrade, ~!aot-apc-upgrade
+		Prerequisites: lite, ~pyle, ~!aot-humvee-upgrade, ~!aot-apc-upgrade
 		Description: Fast reconnaissance vehicle. Can carry 1 soldier.
 	Tooltip:
 		Name: Recon Jeep
@@ -198,9 +198,9 @@ aot-jeep-humvee:
 	RenderSprites:
 		Image: jeep
 	Buildable:
-		Queue: Vehicle.GDI
+		Queue: LightVehicle.GDI
 		BuildPaletteOrder: 20
-		Prerequisites: weap, pyle, ~aot-humvee-upgrade, ~!aot-apc-upgrade
+		Prerequisites: lite, ~pyle, ~aot-humvee-upgrade, ~!aot-apc-upgrade
 		Icon: aot-humvee-icon
 		Description: Fast reconnaissance vehicle with HUMVEE armor. Can carry 1 soldier.
 	Tooltip:
@@ -252,7 +252,7 @@ aot-oret-lite:
 	Buildable:
 		BuildPaletteOrder: 15
 		Prerequisites: lite
-		Queue: Vehicle.GDI, Vehicle.Nod
+		Queue: LightVehicle.GDI, LightVehicle.Nod
 		Description: actor-oret.description
 	Tooltip:
 		Name: actor-oret.name

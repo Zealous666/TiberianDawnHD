@@ -1,5 +1,55 @@
 # === Age of Tiberium (aotmod) sequences ===
 
+# === HQ (GDI): EYE-Sprites nach Ion Cannon Upgrade ===
+# Erweitert das hq-Image-Set um EYE-Sequences für den Zustand nach aot-ion-cannon-upgrade.
+# eye.shp ist ein CnC-Basisasset; EYE.ZIP ist der HD-Remaster-Pfad.
+hq:
+	aot-eye-idle:
+		Filename: eye.shp
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\EYE.ZIP
+		Length: 16
+		Tick: 100
+	aot-eye-damaged-idle:
+		Filename: eye.shp
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\EYE.ZIP
+		Start: 16
+		Length: 16
+		Tick: 100
+# === Ende aotmod ===
+
+# === NOD Radar (aot-nod-radar): RA DOME Sprites ===
+# Frames aus DOME.ZIP extrahiert — ZIP hat zwei Präfix-Gruppen (dome-0000-/dome-0001-)
+# die der OpenRA RemasteredLoader nicht verarbeiten kann. PNG-Extrakt als Workaround.
+# idle: 8 Frames (dome-0000-*), damaged: 8 Frames (dome-0001-*).
+# Icon: domeicon.shp aus allies.mix (Classic Content Installer), bis dahin kein Icon.
+aot-nod-radar:
+	idle:
+		Filename: aot-nod-radar-idle-0000.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.18
+	damaged-idle:
+		Filename: aot-nod-radar-damaged-idle-0000.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.18
+	make:
+		Filename: weapmake.shp
+		RemasteredFilename:
+		Tick: 80
+	bib:
+		TilesetFilenames:
+			DESERT: bib3.des
+			WINTER: bib3.win
+			SNOW: bib3.sno
+			TEMPERAT: bib3.tem
+		Length: *
+	icon:
+		Filename: aot-nod-radar-icon.png
+		RemasteredFilename:
+		Length: 1
+# === Ende aotmod ===
+
 # === Recon Jeep: RA Allied Jeep Sprites ===
 # Erweitert das jeep-Image-Set um RA-Texturen für den Tier-0-Zustand.
 # Gleiche Frame-Struktur wie der TD-Jeep: idle 0-31, turret 32-63.

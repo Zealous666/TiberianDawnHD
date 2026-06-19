@@ -14,15 +14,20 @@ C17:
 	Cloak:
 		CloakStyle: Alpha
 
-# === Age of Tiberium (aotmod) - Age-1-Support-Power auf HQ ===
-# AutoActivateSpawnActorPower spawnt aot-age1-marker permanent (LifeTime: -1).
-# OneShot: true → einmalig verwendbar.
-# ChargeInterval: 250 → 10 Sekunden Ladezeit.
+# === Age of Tiberium (aotmod) - HQ: nur GDI + Age-1-Power + EYE-Sprite nach Ion Cannon Upgrade ===
+# HQ ist jetzt GDI-exklusiv. NOD bekommt eigenen Radar (aot-nod-radar).
+# Ion Cannon Upgrade (aot-age2) schaltet EYE-Sprites frei (kein Ion Cannon Power vorerst).
 HQ:
+	Buildable:
+		Queue: Building.GDI
+		Prerequisites: vehicleproduction, ~techlevel.medium
+	-AirstrikePower:
+	-SupportPowerChargeBar:
 	AotAge1Power:
 		Actor: aot-age1-marker
 		LifeTime: -1
 		OneShot: true
+		Prerequisites: barracks
 		ChargeInterval: 250
 		BuildDuration: 25
 		Icon: aot-age1
@@ -30,6 +35,24 @@ HQ:
 		Description: Unlocks the Tiberium era with new units, buildings and the capability to harvest Tiberium.
 		SupportPowerPaletteOrder: 50
 	SupportPowerChargeBar:
+	ProvidesPrerequisite@gdihq:
+		Prerequisite: gdi-hq
+	GrantConditionOnPrerequisite@ionupgrade:
+		Condition: aot-ion-cannon-active
+		Prerequisites: aot-ion-cannon-upgrade
+	-WithSpriteBody:
+	WithSpriteBody@hq:
+		Sequence: idle
+		Name: body
+		RequiresCondition: !aot-ion-cannon-active
+	WithSpriteBody@eye:
+		Sequence: aot-eye-idle
+		Name: body-eye
+		RequiresCondition: aot-ion-cannon-active
+	-WithMakeAnimation:
+	WithMakeAnimation@aot:
+		BodyNames: body, body-eye
+		Condition: build-incomplete
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - EYE (GDI): erfordert Age 1 + schaltet Age 2 + Age 3 frei ===
@@ -62,11 +85,25 @@ EYE:
 		SupportPowerPaletteOrder: 52
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - NOD Radar (aot-nod-radar): Age-1-Power für Nod ===
+aot-nod-radar:
+	AotAge1Power:
+		Actor: aot-age1-marker
+		LifeTime: -1
+		OneShot: true
+		Prerequisites: barracks
+		ChargeInterval: 250
+		BuildDuration: 25
+		Icon: aot-age1
+		Name: 1st Tiberium Age
+		Description: Unlocks the Tiberium era with new units, buildings and the capability to harvest Tiberium.
+		SupportPowerPaletteOrder: 50
+	SupportPowerChargeBar:
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - TMPL: erfordert Age 1 + schaltet Age 2 + Age 3 frei ===
 # Buildable: erst baubar nach aot-age1.
-# AGE2: Voraussetzung aot-age1, AGE3: Voraussetzung aot-age2.
-# ChargeInterval: 250 → 10 Sekunden Ladezeit.
-# AllowMultiple: true → eigener Power-Slot pro Instanz (verhindert Key-Kollision mit AGE1).
+# AGE2 + AGE3 auf TMPL für Nod (Pendant zu EYE für GDI).
 TMPL:
 	Buildable:
 		Prerequisites: anyhq, ~techlevel.high, aot-age1
@@ -128,8 +165,8 @@ WEAP:
 # Verhindert APC-Produktion bis der Spieler das APC Upgrade (Entweder/Oder) kauft.
 APC:
 	Buildable:
-		Prerequisites: pyle, ~aot-apc-upgrade, ~!aot-humvee-upgrade
-		Queue: Vehicle.GDI
+		Prerequisites: lite, ~aot-apc-upgrade, ~!aot-humvee-upgrade
+		Queue: LightVehicle.GDI
 		Description: Armored Personnel Carrier. Can carry 5 soldiers.
 # === Ende aotmod ===
 

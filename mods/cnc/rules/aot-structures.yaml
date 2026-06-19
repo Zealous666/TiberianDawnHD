@@ -38,11 +38,11 @@ LITE:
 		ExitCell: 1,2
 		ExitDelay: 3
 	Production@GDI:
-		Produces: Vehicle.GDI
+		Produces: LightVehicle.GDI
 	Production@NOD:
-		Produces: Vehicle.Nod
+		Produces: LightVehicle.Nod
 	ProductionQueue@GDI:
-		Type: Vehicle.GDI
+		Type: LightVehicle.GDI
 		DisplayOrder: 3
 		Factions: gdi
 		Group: Vehicle
@@ -57,7 +57,7 @@ LITE:
 		OnHoldAudio: OnHold
 		CancelledAudio: Cancelled
 	ProductionQueue@NOD:
-		Type: Vehicle.Nod
+		Type: LightVehicle.Nod
 		DisplayOrder: 3
 		Factions: nod
 		Group: Vehicle
@@ -72,9 +72,9 @@ LITE:
 		OnHoldAudio: OnHold
 		CancelledAudio: Cancelled
 	ProductionBar@GDI:
-		ProductionType: Vehicle.GDI
+		ProductionType: LightVehicle.GDI
 	ProductionBar@NOD:
-		ProductionType: Vehicle.Nod
+		ProductionType: LightVehicle.Nod
 	Power:
 		Amount: -20
 	RenderSprites:
@@ -109,19 +109,10 @@ aot-ore-mine:
 	DamageMultiplier:
 		Modifier: 0
 	StoresResources:
-		Capacity: 10
+		Capacity: 30
 		Resources: Tiberium
-	WithStoresResourcesPipsDecoration:
-		Position: BottomLeft
-		Margin: 4, 3
-		PipCount: 10
-		ResourceSequences:
-			Tiberium: pip-green
 	OreMineDurability:
 		ResourceType: Tiberium
-	Explodes:
-		Weapon: UnitExplodeSmall
-		EmptyWeapon: UnitExplodeSmall
 	DockHost:
 		Type: OreLoad
 		DockAngle: 0
@@ -216,7 +207,7 @@ aot-upgrade-humvee:
 
 	Buildable:
 		BuildPaletteOrder: 30
-		Prerequisites: vehicleproduction, pyle, aot-age1, !aot-apc-upgrade
+		Prerequisites: lite, ~pyle, aot-age1, !aot-apc-upgrade
 		Queue: Upgrade
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -242,7 +233,7 @@ aot-upgrade-apc:
 
 	Buildable:
 		BuildPaletteOrder: 31
-		Prerequisites: vehicleproduction, pyle, aot-age1, !aot-humvee-upgrade
+		Prerequisites: lite, ~pyle, aot-age1, !aot-humvee-upgrade
 		Queue: Upgrade
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -307,6 +298,79 @@ aot-upgrade-ltnk2:
 		Prerequisite: aot-ltnk-upgrade2
 
 	Interactable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Ion Cannon Upgrade (GDI HQ → EYE-Sprites) ===
+# Erfordert Age 2 + HQ. Schaltet aot-ion-cannon-upgrade frei →
+# HQ wechselt Sprite von hq.shp zu eye.shp (kein Ion Cannon Power vorerst).
+aot-upgrade-ion-cannon:
+	Tooltip:
+		Name: Ion Cannon Uplink
+
+	Buildable:
+		BuildPaletteOrder: 5
+		Prerequisites: gdi-hq, aot-age2
+		Queue: Upgrade
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Upgrades the Comm Centre with an Uplink to call Ion Cannon Strikes.
+
+	Valued:
+		Cost: 1500
+
+	RenderSprites:
+		Image: aot-upgrade-ion-cannon
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-ion-cannon-upgrade
+
+	Interactable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - NOD Radar (aot-nod-radar) ===
+# NOD-exklusives Radar-Gebäude auf Basis des RA DOME-Sprites.
+# Stellt anyhq bereit (gleiche Funktion wie GDI HQ).
+aot-nod-radar:
+	Inherits: ^BaseBuilding
+	Inherits@IDISABLE: ^DisabledOverlay
+	HitShape:
+		UseTargetableCellsOffsets: false
+		TargetableOffsets: 0,0,0, 630,-384,0, 630,384,0, -700,-512,0, -700,512,0
+	Valued:
+		Cost: 1000
+	Tooltip:
+		Name: actor-aot-nod-radar.name
+	ProvidesPrerequisite:
+		Prerequisite: anyhq
+	ProvidesPrerequisite@buildingname:
+	Buildable:
+		BuildPaletteOrder: 70
+		Prerequisites: vehicleproduction, ~techlevel.medium
+		Queue: Building.Nod
+		Description: actor-aot-nod-radar.description
+	Building:
+		Footprint: xx xx ==
+		Dimensions: 2,3
+		LocalCenterOffset: 0,-512,0
+	Selectable:
+		Bounds: 2048, 2048
+	WithSpriteBody:
+		PauseOnCondition: lowpower
+	Health:
+		HP: 80000
+	RevealsShroud:
+		Range: 10c0
+	WithBuildingBib:
+	ProvidesRadar:
+		RequiresCondition: !lowpower
+	RenderDetectionCircle:
+	DetectCloaked:
+		Range: 5c0
+		RequiresCondition: !lowpower
+	Power:
+		Amount: -50
+	RenderSprites:
+		Image: aot-nod-radar
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - MTNK Predator Upgrade ===

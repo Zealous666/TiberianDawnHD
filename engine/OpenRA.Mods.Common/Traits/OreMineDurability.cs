@@ -7,6 +7,7 @@
 #endregion
 
 using System.Linq;
+using OpenRA.Primitives;
 using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Traits
@@ -20,7 +21,7 @@ namespace OpenRA.Mods.Common.Traits
 		public override object Create(ActorInitializer init) { return new OreMineDurability(this); }
 	}
 
-	public class OreMineDurability : INotifyCreated
+	public class OreMineDurability : INotifyCreated, ISelectionBar
 	{
 		readonly OreMineDurabilityInfo info;
 		IStoresResources store;
@@ -43,5 +44,15 @@ namespace OpenRA.Mods.Common.Traits
 			if (concreteStore != null && concreteStore.ContentsSum == 0)
 				self.Kill(transporter);
 		}
+
+		float ISelectionBar.GetValue()
+		{
+			if (store == null || store.Capacity == 0) return 0f;
+			var stored = concreteStore != null ? concreteStore.ContentsSum : 0;
+			return (float)stored / store.Capacity;
+		}
+
+		Color ISelectionBar.GetColor() => Color.Red;
+		bool ISelectionBar.DisplayWhenEmpty => false;
 	}
 }
