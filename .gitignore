@@ -12,6 +12,8 @@ engine/**
 !engine/OpenRA.Mods.Common/Traits/
 !engine/OpenRA.Mods.Common/Traits/SupportPowers/
 !engine/OpenRA.Mods.Common/Traits/SupportPowers/AutoActivateSpawnActorPower.cs
+!engine/OpenRA.Mods.Common/Traits/OreTransporter.cs
+!engine/OpenRA.Mods.Common/Traits/OreMineDurability.cs
 
 # Visual Studio
 Release
