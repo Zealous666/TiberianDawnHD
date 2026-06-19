@@ -58,6 +58,7 @@ aot-ore-mine:
 		Filename: aot-oremine.png
 		RemasteredFilename:
 		Length: 1
+		Scale: 0.25
 # === Ende aotmod ===
 
 # === Ore Transporter (ORET): RA Harvester Sprites ===
@@ -67,6 +68,58 @@ oret:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\HARV.ZIP
 		Facings: 32
 		UseClassicFacings: True
+		Scale: 0.9
+	icon:
+		Filename: oret_base.png
+		RemasteredFilename:
+		Length: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Light Factory (LITE): RA War Factory Sprites ===
+lite:
+	idle:
+		Filename: lite-body.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.17
+	damaged-idle:
+		Filename: lite-body.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.17
+	roof:
+		Filename: lite-roof.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.17
+		ZOffset: 2048
+	damaged-roof:
+		Filename: lite-roof-damaged.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.17
+		ZOffset: 2048
+	make:
+		Filename: weapmake.shp
+		RemasteredFilename:
+		Tick: 80
+	place:
+		Filename: lite-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.17
+	bib:
+		TilesetFilenames:
+			DESERT: bib2.des
+			WINTER: bib2.win
+			SNOW: bib2.sno
+			TEMPERAT: bib2.tem
+			JUNGLE: bib2.jun
+		Length: *
+	icon:
+		Filename: lite_base.png
+		RemasteredFilename:
+		Length: 1
 # === Ende aotmod ===
 
 # Support-Power-Icons (IconImage: "icon" in SupportPower.cs)

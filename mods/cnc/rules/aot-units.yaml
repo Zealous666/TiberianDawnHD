@@ -209,19 +209,15 @@ aot-jeep-humvee:
 
 
 # === Age of Tiberium (aotmod) - Ore Transporter ===
-# Fährt zur Ore Mine, lädt Erz, fährt zur Raffinerie. Custom-Trait kommt später.
+# Fährt zur Ore Mine, lädt Erz, fährt zum Construction Yard.
+# Doppel-Aktor-Pattern: aot-oret-gdi (Barracks) + aot-oret-nod (Hand of Nod).
 ORET:
 	Inherits: ^Tank
 	Valued:
 		Cost: 500
 	Tooltip:
-		Name: Ore Transporter
-		GenericName: Ore Transporter
-	Buildable:
-		BuildPaletteOrder: 15
-		Prerequisites: weap, proc
-		Queue: Vehicle.GDI, Vehicle.Nod
-		Description: Collects ore from mines and delivers it to the refinery.
+		Name: actor-oret.name
+		GenericName: actor-oret.generic-name
 	Selectable:
 		DecorationBounds: 1536, 1536
 	Mobile:
@@ -234,6 +230,32 @@ ORET:
 		Range: 4c0
 	Repairable:
 		HpPerStep: 2000
+	StoresResources:
+		Capacity: 1
+		Resources: Tiberium
+	DockClientManager:
+	OreTransporter:
+		OreLoadAmount: 100
+		OreLoadDelay: 25
+	WithStoresResourcesPipsDecoration:
+		Position: BottomLeft
+		Margin: 4, 3
+		RequiresSelection: true
+		PipCount: 1
+		ResourceSequences:
+			Tiberium: pip-green
+
+aot-oret-lite:
+	Inherits: ORET
+	RenderSprites:
+		Image: oret
+	Buildable:
+		BuildPaletteOrder: 15
+		Prerequisites: lite
+		Queue: Vehicle.GDI, Vehicle.Nod
+		Description: actor-oret.description
+	Tooltip:
+		Name: actor-oret.name
 # === Ende aotmod ===
 
 LTNK:
