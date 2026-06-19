@@ -1,11 +1,85 @@
 # === Age of Tiberium (aotmod) sequences ===
 
+# === Recon Jeep: RA Allied Jeep Sprites ===
+# Erweitert das jeep-Image-Set um RA-Texturen für den Tier-0-Zustand.
+# Gleiche Frame-Struktur wie der TD-Jeep: idle 0-31, turret 32-63.
+jeep:
+	aot-ra-idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\JEEP.ZIP
+		Facings: 32
+		UseClassicFacings: True
+	aot-ra-turret:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\JEEP.ZIP
+		Start: 32
+		Facings: 32
+		UseClassicFacings: True
+# === Ende aotmod ===
+
+# === Construction Yard (FACT): RA sprites für Age 0 ===
+# RA FACT.ZIP Frame-Layout: idle=0, build=1-25, damaged-idle=26, damaged-build=27-51
+fact:
+	aot-ra-idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\FACT.ZIP
+		RemasteredLength: 1
+	damaged-aot-ra-idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\FACT.ZIP
+		RemasteredStart: 26
+		RemasteredLength: 1
+	aot-ra-build:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\FACT.ZIP
+		RemasteredStart: 1
+		RemasteredLength: 25
+	damaged-aot-ra-build:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\FACT.ZIP
+		RemasteredStart: 27
+		RemasteredLength: 25
+# === Ende aotmod ===
+
+# === MCV: RA sprites für Age 0 ===
+# Gleiche Frame-Struktur wie TD MCV: 32 Facings, UseClassicFacings.
+mcv:
+	aot-ra-icon:
+		Filename: mcv_base.png
+		RemasteredFilename:
+		Length: 1
+	aot-ages-icon:
+		Filename: mcv_ages.png
+		RemasteredFilename:
+		Length: 1
+	aot-ra-idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\MCV.ZIP
+		Facings: 32
+		UseClassicFacings: True
+# === Ende aotmod ===
+
+# === Ore Mine (aot-ore-mine): RA OREMINE Terrain-Tile als Gebäude-Sprite ===
+aot-ore-mine:
+	idle:
+		Filename: aot-oremine.png
+		RemasteredFilename:
+		Length: 1
+# === Ende aotmod ===
+
+# === Ore Transporter (ORET): RA Harvester Sprites ===
+# HARV.ZIP Frame-Layout: idle 0-31 (32 Facings, UseClassicFacings), harvest 32-63, dock 64-110
+oret:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\HARV.ZIP
+		Facings: 32
+		UseClassicFacings: True
+# === Ende aotmod ===
+
 # Support-Power-Icons (IconImage: "icon" in SupportPower.cs)
 # Erweitert die icon-Sequenz aus misc.yaml um aot-spezifische Powers.
 icon:
-	# === Age of Tiberium (aotmod) - Age-1-Power-Icon ===
-	# Platzhalter: verwendet das LTNK-Upgrade-Icon bis ein eigenes Asset existiert.
+	# === Age of Tiberium (aotmod) - Age-Power-Icons ===
 	aot-age1:
-		Filename: aot-ltnk-upgrade-icon.png
+		Filename: aot-age1-icon.png
+		Length: 1
+	aot-age2:
+		Filename: aot-age2-icon.png
+		Length: 1
+	aot-age3:
+		Filename: aot-age3-icon.png
 		Length: 1
 # === Ende aotmod ===

@@ -559,9 +559,9 @@ production-icons:
 		aircraft-disabled: 836, 85, 16, 16
 		aircraft-alert: 836, 102, 16, 16
 		# === Age of Tiberium (aotmod) upgrade button ===
-		upgrade: 836, 68, 16, 16
-		upgrade-disabled: 836, 85, 16, 16
-		upgrade-alert: 836, 102, 16, 16
+		upgrade: 853, 68, 16, 16
+		upgrade-disabled: 853, 85, 16, 16
+		upgrade-alert: 853, 102, 16, 16
 		# === Ende aotmod ===
     
 order-icons:

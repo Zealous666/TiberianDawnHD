@@ -1,3 +1,60 @@
+# === Age of Tiberium (aotmod) - Ore Mine ===
+# Neutrales Gebäude, via Map-Editor platziert. Kein Buildable-Trait.
+# DockHost Typ "OreLoad" — ORET-Fahrzeug dockt hier an um Erz zu laden.
+# Hohe HP = praktisch unzerstörbar (kann später finite Ressourcen erhalten).
+aot-ore-mine:
+	Inherits: ^Building
+	Tooltip:
+		Name: Ore Mine
+		GenericName: Ore Mine
+	Building:
+		Footprint: =
+		Dimensions: 1,1
+		TerrainTypes: Clear,Rough,Road,Rock
+	Health:
+		HP: 100
+	DamageMultiplier:
+		Modifier: 0
+	RevealsShroud:
+		Range: 4c0
+	DockHost:
+		Type: OreLoad
+		DockAngle: 0
+		DockOffset: 0,0,0
+	MapEditorData:
+		Categories: Neutral
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - FACT: RA sprites in Age 0, TD ab Age 1 ===
+# Zwei WithSpriteBody (body/body-td) gegenseitig exklusiv via aot-age1-active.
+# RA idle = Frame 0 (eingefroren). Keine Build-Placed-Animation — Originalverhalten.
+FACT:
+	GrantConditionOnPrerequisite@aotage1:
+		Condition: aot-age1-active
+		Prerequisites: aot-age1
+	-WithSpriteBody:
+	WithSpriteBody@ra:
+		Sequence: aot-ra-idle
+		Name: body
+		RequiresCondition: !aot-age1-active
+	WithSpriteBody@td:
+		Sequence: idle
+		Name: body-td
+		RequiresCondition: aot-age1-active
+	-WithMakeAnimation:
+	WithMakeAnimation@aot:
+		BodyNames: body, body-td
+		Condition: build-incomplete
+	-WithBuildingPlacedAnimation:
+	WithBuildingPlacedAnimation@ra:
+		Body: body
+		Sequence: aot-ra-build
+		RequiresCondition: !aot-age1-active
+	WithBuildingPlacedAnimation@td:
+		Body: body-td
+		RequiresCondition: aot-age1-active
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - Age-1-Marker ===
 # Unsichtbarer, unzerstörbarer Aktor der von der Age-1-Support-Power gespawnt wird.
 # Lebt permanent (LifeTime: -1 in SpawnActorPower) und stellt aot-age1 bereit.
@@ -8,23 +65,95 @@ aot-age1-marker:
 
 	Selectable:
 		Priority: 0
+# === Ende aotmod ===
 
-	Health:
-		HP: 1000000000
+# === Age of Tiberium (aotmod) - Age-2-Marker ===
+# Unsichtbarer Aktor gespawnt von der Age-2-Support-Power auf TMPL.
+# Stellt aot-age2 Prerequisite permanent bereit.
+aot-age2-marker:
+	ProvidesPrerequisite:
+		Prerequisite: aot-age2
+
+	Selectable:
+		Priority: 0
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Age-3-Marker ===
+# Unsichtbarer Aktor gespawnt von der Age-3-Support-Power.
+# Stellt aot-age3 Prerequisite permanent bereit.
+aot-age3-marker:
+	ProvidesPrerequisite:
+		Prerequisite: aot-age3
+
+	Selectable:
+		Priority: 0
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Recon Jeep: HUMVEE Upgrade ===
+# Tier 1 / Entweder-Oder mit APC Upgrade (!aot-apc-upgrade).
+# Schaltet HUMVEE-Sprite + stärkeres MG auf dem JEEP frei.
+aot-upgrade-humvee:
+	Tooltip:
+		Name: HUMVEE Upgrade
+
+	Buildable:
+		BuildPaletteOrder: 30
+		Prerequisites: vehicleproduction, pyle, aot-age1, !aot-apc-upgrade
+		Queue: Upgrade
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Upgrades the Recon Jeep with HUMVEE armor and a stronger machine gun. Can carry 1 soldier. Excludes the APC Upgrade.
+
+	Valued:
+		Cost: 100
+
+	RenderSprites:
+		Image: aot-upgrade-humvee
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-humvee-upgrade
+
+	Interactable:
+
+# === Age of Tiberium (aotmod) - Recon Jeep: APC Upgrade ===
+# Tier 1 / Entweder-Oder mit HUMVEE Upgrade (!aot-humvee-upgrade).
+# Schaltet den GDI APC in der Fahrzeugproduktion frei und sperrt weitere Jeeps.
+aot-upgrade-apc:
+	Tooltip:
+		Name: APC Upgrade
+
+	Buildable:
+		BuildPaletteOrder: 31
+		Prerequisites: vehicleproduction, pyle, aot-age1, !aot-humvee-upgrade
+		Queue: Upgrade
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Unlocks the APC with 5 cargo slots. Excludes the HUMVEE Upgrade.
+
+	Valued:
+		Cost: 200
+
+	RenderSprites:
+		Image: aot-upgrade-apc
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-apc-upgrade
+
+	Interactable:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - LTNK Upgrade ===
 aot-upgrade-ltnk:
 	Tooltip:
-		Name: Panzerkanonen-Upgrade
+		Name: TickTank Enhancement
 
 	Buildable:
 		BuildPaletteOrder: 10
-		Prerequisites: vehicleproduction, anyhq, aot-age1
+		Prerequisites: vehicleproduction, anyhq, aot-age1, ~afld
 		Queue: Upgrade
 		BuildLimit: 1
 		MoveIntoWorld: false
-		Description: Rüstet alle leichten Panzer mit der\n120mm-Kanone des GDI-Kampfpanzers aus.
+		Description: Light Tank upgrade with TickTank-enhancements to dig in.
 
 	Valued:
 		Cost: 100
@@ -36,3 +165,77 @@ aot-upgrade-ltnk:
 		Prerequisite: aot-ltnk-upgrade
 
 	Interactable:
+
+# === Age of Tiberium (aotmod) - LTNK Upgrade 2 ===
+aot-upgrade-ltnk2:
+	Tooltip:
+		Name: Scorpio Laser
+
+	Buildable:
+		BuildPaletteOrder: 11
+		Prerequisites: aot-ltnk-upgrade, aot-age2, ~afld
+		Queue: Upgrade
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Light Tank upgrade with Scorpio Lasers for higher firepower.
+
+	Valued:
+		Cost: 200
+
+	RenderSprites:
+		Image: aot-upgrade-ltnk2
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-ltnk-upgrade2
+
+	Interactable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - MTNK Predator Upgrade ===
+aot-upgrade-mtnk-predator:
+	Tooltip:
+		Name: Predator Upgrade
+
+	Buildable:
+		BuildPaletteOrder: 20
+		Prerequisites: ~aot-weap,anyhq, ~techlevel.medium, aot-age2
+		Queue: Upgrade
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Main Tank upgrade with Predator-Turret for faster fire-rate.
+
+	Valued:
+		Cost: 500
+
+	RenderSprites:
+		Image: aot-upgrade-mtnk-predator
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-mtnk-predator-upgrade
+
+	Interactable:
+
+# === Age of Tiberium (aotmod) - MTNK Railgun Upgrade ===
+aot-upgrade-mtnk-railgun:
+	Tooltip:
+		Name: Railgun Upgrade
+
+	Buildable:
+		BuildPaletteOrder: 21
+		Prerequisites: ~aot-weap,anyhq, ~techlevel.medium, aot-mtnk-predator-upgrade, aot-age3
+		Queue: Upgrade
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Main Tank & Titan upgrade with Railguns for higher damage.
+
+	Valued:
+		Cost: 1000
+
+	RenderSprites:
+		Image: aot-upgrade-mtnk-railgun
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-mtnk-railgun-upgrade
+
+	Interactable:
+# === Ende aotmod ===

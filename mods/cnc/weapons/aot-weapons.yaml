@@ -1,3 +1,44 @@
+# === Age of Tiberium (aotmod) - Recon Jeep HUMVEE: stärkeres MG ===
+# Tier 1: MachineGunH-Basis, Damage 1150→1500 (~30% mehr), gleiche Versus-Werte.
+aot-JeepHumvee:
+	Inherits: MachineGunH
+	Warhead@1Dam: SpreadDamage
+		Damage: 1500
+		Versus:
+			Light: 70
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - MTNK Predator: schnelleres 120mm ===
+# Tier 2: ReloadDelay 40→25 (37.5% schneller), gleiche Projektil/Warhead-Basis.
+aot-MtnkPredator:
+	Inherits: ^BallisticWeapon
+	ReloadDelay: 25
+	Report: tnkfire4.aud
+
+# === Age of Tiberium (aotmod) - MTNK Railgun: Hochschaden-Laser ===
+# Tier 3: LaserZap-Projektil, ~50% mehr Schaden (6000 statt 4000), kein Spread.
+aot-MtnkRailgun:
+	ReloadDelay: 50
+	Range: 6c0
+	Report: obelray1.aud
+	Projectile: LaserZap
+		Width: 50
+		Color: FFFFFF
+		HitAnim: laserfire
+		ZOffset: 2047
+	Warhead@1Dam: SpreadDamage
+		Spread: 42
+		Damage: 6000
+		Versus:
+			None: 25
+			Wood: 100
+			Light: 100
+			Heavy: 100
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+	Warhead@2Smu: LeaveSmudge
+		SmudgeType: Scorch
+		InvalidTargets: Vehicle, Structure, Wall, Husk, Trees, Creep
+
 aot-LtnkLaser:
 	ReloadDelay: 60
 	Range: 6c0

@@ -1,27 +1,310 @@
+# === Age of Tiberium (aotmod) - MCV: RA sprites in Age 0, TD ab Age 1 ===
+# Gleiche Logik wie FACT: GrantConditionOnPrerequisite → zwei WithFacingSpriteBody.
+# Kein WithMakeAnimation auf Fahrzeugen nötig.
+MCV:
+	GrantConditionOnPrerequisite@aotage1:
+		Condition: aot-age1-active
+		Prerequisites: aot-age1
+	-WithFacingSpriteBody:
+	WithFacingSpriteBody@ra:
+		Sequence: aot-ra-idle
+		Name: body-ra
+		RequiresCondition: !aot-age1-active
+	WithFacingSpriteBody@td:
+		Sequence: idle
+		Name: body-td
+		RequiresCondition: aot-age1-active
+	-Buildable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - MCV Queue-Proxies (Doppel-Aktor-Pattern) ===
+# aot-mcv-age0: RA-Icon in Age 0; aot-mcv-age1: TD-Icon ab Age 1.
+# Beide erben alle MCV-Traits. RenderSprites.Image: mcv explizit gesetzt
+# (sonst würde OpenRA den Aktornamen als Image-Name verwenden → fehlende Sequences).
+aot-mcv-age0:
+	Inherits: MCV
+	RenderSprites:
+		Image: mcv
+	Buildable:
+		Queue: Vehicle.GDI, Vehicle.Nod
+		BuildPaletteOrder: 100
+		Prerequisites: ~!aot-age1
+		Icon: aot-ra-icon
+		Description: Mobile Construction Vehicle. Deploy to establish a base.
+	Tooltip:
+		Name: Mobile Construction Vehicle
+
+aot-mcv-age1:
+	Inherits: MCV
+	RenderSprites:
+		Image: mcv
+	Buildable:
+		Queue: Vehicle.GDI, Vehicle.Nod
+		BuildPaletteOrder: 100
+		Prerequisites: ~aot-age1
+		Icon: aot-ages-icon
+		Description: Mobile Construction Vehicle. Deploy to establish a base.
+	Tooltip:
+		Name: Mobile Construction Vehicle
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Recon Jeep / HUMVEE ===
+JEEP:
+	GrantConditionOnPrerequisite@HUMVEE:
+		Condition: aot-jeep-humvee
+		Prerequisites: aot-humvee-upgrade
+
+	-Tooltip:
+
+	Tooltip@base:
+		Name: Recon Jeep
+		RequiresCondition: !aot-jeep-humvee
+
+	Tooltip@humvee:
+		Name: GDI HUMVEE
+		RequiresCondition: aot-jeep-humvee
+
+	-Buildable:
+
+	Cargo:
+		Types: Infantry
+		MaxWeight: 1
+		UnloadVoice: Unload
+		LoadingCondition: notmobile
+
+	WithCargoPipsDecoration:
+		Position: BottomLeft
+		Margin: 4, 3
+		RequiresSelection: true
+		CustomPipSequences:
+			gray: pip-gray
+			yellow: pip-yellow
+			red: pip-red
+
+	-WithFacingSpriteBody:
+
+	WithFacingSpriteBody@base:
+		Sequence: aot-ra-idle
+		RequiresCondition: !aot-jeep-humvee
+
+	WithFacingSpriteBody@humvee:
+		Sequence: idle
+		RequiresCondition: aot-jeep-humvee
+
+	-WithSpriteTurret:
+
+	WithSpriteTurret@base:
+		Sequence: aot-ra-turret
+		RequiresCondition: !aot-jeep-humvee
+
+	WithSpriteTurret@humvee:
+		Sequence: turret
+		RequiresCondition: aot-jeep-humvee
+
+	Armament:
+		Weapon: MachineGunH
+		LocalOffset: 171,0,85
+		MuzzleSequence: muzzle
+		RequiresCondition: !aot-jeep-humvee
+
+	Armament@humvee:
+		Weapon: aot-JeepHumvee
+		LocalOffset: 171,0,85
+		MuzzleSequence: muzzle
+		RequiresCondition: aot-jeep-humvee
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - MTNK Upgrade-Conditions ===
+MTNK:
+	GrantConditionOnPrerequisite@PREDATOR:
+		Condition: aot-mtnk-predator
+		Prerequisites: aot-mtnk-predator-upgrade
+
+	GrantConditionOnPrerequisite@RAILGUN:
+		Condition: aot-mtnk-railgun
+		Prerequisites: aot-mtnk-railgun-upgrade
+
+	-Tooltip:
+
+	Tooltip@normal:
+		Name: Medium Tank
+		RequiresCondition: !aot-mtnk-predator
+
+	Tooltip@predator:
+		Name: Medium Tank (Predator)
+		RequiresCondition: aot-mtnk-predator && !aot-mtnk-railgun
+
+	Tooltip@railgun:
+		Name: Medium Tank (Railgun)
+		RequiresCondition: aot-mtnk-railgun
+
+	Armament:
+		Weapon: 120mm
+		RequiresCondition: !aot-mtnk-predator
+		Recoil: 128
+		RecoilRecovery: 26
+		LocalOffset: 768,0,90
+		MuzzleSequence: muzzle
+
+	Armament@predator:
+		Weapon: aot-MtnkPredator
+		RequiresCondition: aot-mtnk-predator && !aot-mtnk-railgun
+		Recoil: 128
+		RecoilRecovery: 26
+		LocalOffset: 768,0,90
+		MuzzleSequence: muzzle
+
+	Armament@railgun:
+		Weapon: aot-MtnkRailgun
+		RequiresCondition: aot-mtnk-railgun
+		LocalOffset: 768,0,90
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - APC: kein Turret, schießt frontal ===
+APC:
+	-WithSpriteTurret:
+	-WithSpriteTurret@AIR:
+	-Turreted:
+	-AttackTurreted:
+
+	AttackFrontal:
+		FacingTolerance: 0
+		Voice: Attack
+
+	Armament@PRIMARY:
+		Weapon: aot-JeepHumvee
+		LocalOffset: 255,0,189
+		MuzzleSequence: muzzle
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Jeep Queue-Proxies (Doppel-Aktor-Pattern) ===
+# aot-jeep-base: Recon-Jeep-Icon vor HUMVEE-Upgrade.
+# aot-jeep-humvee: HUMVEE-Icon nach HUMVEE-Upgrade.
+# Beide verschwinden wenn APC-Upgrade aktiv (~!aot-apc-upgrade).
+aot-jeep-base:
+	Inherits: JEEP
+	RenderSprites:
+		Image: jeep
+	Buildable:
+		Queue: Vehicle.GDI
+		BuildPaletteOrder: 20
+		Prerequisites: weap, pyle, ~!aot-humvee-upgrade, ~!aot-apc-upgrade
+		Description: Fast reconnaissance vehicle. Can carry 1 soldier.
+	Tooltip:
+		Name: Recon Jeep
+
+aot-jeep-humvee:
+	Inherits: JEEP
+	RenderSprites:
+		Image: jeep
+	Buildable:
+		Queue: Vehicle.GDI
+		BuildPaletteOrder: 20
+		Prerequisites: weap, pyle, ~aot-humvee-upgrade, ~!aot-apc-upgrade
+		Icon: aot-humvee-icon
+		Description: Fast reconnaissance vehicle with HUMVEE armor. Can carry 1 soldier.
+	Tooltip:
+		Name: GDI HUMVEE
+# === Ende aotmod ===
+
+
+# === Age of Tiberium (aotmod) - Ore Transporter ===
+# Fährt zur Ore Mine, lädt Erz, fährt zur Raffinerie. Custom-Trait kommt später.
+ORET:
+	Inherits: ^Tank
+	Valued:
+		Cost: 500
+	Tooltip:
+		Name: Ore Transporter
+		GenericName: Ore Transporter
+	Buildable:
+		BuildPaletteOrder: 15
+		Prerequisites: weap, proc
+		Queue: Vehicle.GDI, Vehicle.Nod
+		Description: Collects ore from mines and delivers it to the refinery.
+	Selectable:
+		DecorationBounds: 1536, 1536
+	Mobile:
+		Speed: 72
+	Health:
+		HP: 50000
+	Armor:
+		Type: Heavy
+	RevealsShroud:
+		Range: 4c0
+	Repairable:
+		HpPerStep: 2000
+# === Ende aotmod ===
+
 LTNK:
+	-Tooltip:
+
+	Tooltip@normal:
+		Name: Light Tank
+		RequiresCondition: !aot-ltnk-upgraded
+
+	Tooltip@upgrade1:
+		Name: Light Tank (Enhanced)
+		RequiresCondition: aot-ltnk-upgraded && !aot-ltnk-upgraded2
+
+	Tooltip@upgrade2:
+		Name: Light Tank (Laser)
+		RequiresCondition: aot-ltnk-upgraded2
+
 	GrantConditionOnPrerequisite:
 		Condition: aot-ltnk-upgraded
 		Prerequisites: aot-ltnk-upgrade
+
+	GrantConditionOnPrerequisite@upgrade2:
+		Condition: aot-ltnk-upgraded2
+		Prerequisites: aot-ltnk-upgrade2
 
 	-WithSpriteTurret:
 
 	WithSpriteTurret@normal:
 		Sequence: turret
-		RequiresCondition: !aot-ltnk-upgraded
+		RequiresCondition: !aot-ltnk-upgraded2
 
-	WithSpriteTurret@upgraded:
+	WithSpriteTurret@upgraded2:
 		Sequence: aot-turret-upgraded
-		RequiresCondition: aot-ltnk-upgraded
+		RequiresCondition: aot-ltnk-upgraded2
 
 	Armament:
 		Weapon: 70mm
-		RequiresCondition: !aot-ltnk-upgraded
+		RequiresCondition: !aot-ltnk-upgraded2
 		Recoil: 85
 		RecoilRecovery: 17
 		LocalOffset: 720,0,90
 		MuzzleSequence: muzzle
 
-	Armament@upgraded:
+	Armament@upgraded2:
 		Weapon: aot-LtnkLaser
-		RequiresCondition: aot-ltnk-upgraded
+		RequiresCondition: aot-ltnk-upgraded2
 		LocalOffset: 768,0,90
+
+	-WithFacingSpriteBody:
+
+	WithFacingSpriteBody@normal:
+		Sequence: idle
+		RequiresCondition: !aot-ltnk-upgraded
+
+	WithFacingSpriteBody@upgraded:
+		Sequence: aot-chassis-upgraded
+		RequiresCondition: aot-ltnk-upgraded && !aot-ltnk-siegemode
+
+	WithFacingSpriteBody@siegemode:
+		Sequence: aot-chassis-siegemode
+		RequiresCondition: aot-ltnk-siegemode
+
+	GrantConditionOnDeploy:
+		DeployedCondition: aot-ltnk-siegemode
+		RequiresCondition: aot-ltnk-upgraded
+		DeploySounds: cashturn.aud
+		UndeploySounds: text2.aud
+
+	Mobile:
+		PauseOnCondition: aot-ltnk-siegemode
+
+	DamageMultiplier:
+		Modifier: 50
+		RequiresCondition: aot-ltnk-siegemode

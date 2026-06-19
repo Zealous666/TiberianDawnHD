@@ -72,6 +72,13 @@ FileSystem: RemasterFileSystem
 				data|Data/MUSIC.MEG
 				cnchd|bits/tilesets
 				cnchd|bits/harvlost.zip
+				# Red Alert classic sprite fallbacks — extracted once via ra-classic-content mod
+				# allies.mix / russian.mix / snow.mix: konfliktfrei (einzigartige RA-Dateinamen)
+				# temperat.mix / conquer.mix / interior.mix: NICHT gemountet — überschreiben sonst TD-Terrain-Tiles
+				# Bei Bedarf gezielt als ~^SupportDir|Content/ra/v2/temperat.mix: temperat_ra eintragen
+				~^SupportDir|Content/ra/v2/allies.mix
+				~^SupportDir|Content/ra/v2/russian.mix
+				~^SupportDir|Content/ra/v2/snow.mix
 		tuc:
 			Origins:
 				steam-en: Steam
@@ -361,6 +368,7 @@ FluentMessages:
 	cnc|fluent/chrome.ftl
 	cnc|fluent/hotkeys.ftl
 	cnc|fluent/rules.ftl
+	cnchd|fluent/aot-chrome.ftl
 
 AllowUnusedFluentMessagesInExternalPackages: false
 

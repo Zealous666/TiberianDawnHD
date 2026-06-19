@@ -14,53 +14,84 @@ C17:
 	Cloak:
 		CloakStyle: Alpha
 
-# === Age of Tiberium (aotmod) - Entwicklungs-Cheats (Baukosten reduziert) ===
-NUKE:
-	Valued:
-		Cost: 10
-
-PROC:
-	Valued:
-		Cost: 10
-
-AFLD:
-	Valued:
-		Cost: 10
-
-HQ:
-	Valued:
-		Cost: 10
-
-LTNK:
-	Valued:
-		Cost: 10
-# === Ende aotmod Cheats ===
-
 # === Age of Tiberium (aotmod) - Age-1-Support-Power auf HQ ===
-# SpawnActorPower spawnt aot-age1-marker permanent (LifeTime: -1).
+# AutoActivateSpawnActorPower spawnt aot-age1-marker permanent (LifeTime: -1).
 # OneShot: true → einmalig verwendbar.
-# ChargeInterval: 0 → sofort verfügbar sobald HQ gebaut ist.
+# ChargeInterval: 250 → 10 Sekunden Ladezeit.
 HQ:
-	SpawnActorPower@AGE1:
+	AotAge1Power:
 		Actor: aot-age1-marker
 		LifeTime: -1
 		OneShot: true
-		ChargeInterval: 0
+		ChargeInterval: 250
+		BuildDuration: 25
 		Icon: aot-age1
-		Name: Zeitalter 1 — Eskalation
-		Description: Aktiviert das erste Zeitalter.\nSchaltet Upgrades und den Tempel of Nod frei.
-		SelectTargetSpeechNotification: SelectTarget
-		SelectTargetTextNotification: notification-select-target
+		Name: 1st Tiberium Age
+		Description: Unlocks the Tiberium era with new units, buildings and the capability to harvest Tiberium.
 		SupportPowerPaletteOrder: 50
 	SupportPowerChargeBar:
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - TMPL erfordert Age 1 ===
-# Temple of Nod ist erst baubar nachdem aot-age1 aktiviert wurde.
+# === Age of Tiberium (aotmod) - EYE (GDI): erfordert Age 1 + schaltet Age 2 + Age 3 frei ===
+# Advanced Communications Center ist erst baubar nach aot-age1.
+# Spiegelt die Nod-TMPL-Logik für GDI.
+EYE:
+	Buildable:
+		Prerequisites: anyhq, ~techlevel.high, aot-age1
+		Queue: Building.GDI
+	AotAge2Power:
+		Actor: aot-age2-marker
+		LifeTime: -1
+		OneShot: true
+		ChargeInterval: 250
+		BuildDuration: 25
+		Icon: aot-age2
+		Name: 2nd Tiberium Age
+		Description: Moves forward in the Tiberium technologies with new upgrades and additional equipment.
+		SupportPowerPaletteOrder: 51
+	AotAge3Power:
+		Actor: aot-age3-marker
+		LifeTime: -1
+		OneShot: true
+		Prerequisites: aot-age2
+		ChargeInterval: 250
+		BuildDuration: 25
+		Icon: aot-age3
+		Name: 3rd Tiberium Age
+		Description: Upgrades to the most advanced Tiberium units, buildings and upgrades.
+		SupportPowerPaletteOrder: 52
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - TMPL: erfordert Age 1 + schaltet Age 2 + Age 3 frei ===
+# Buildable: erst baubar nach aot-age1.
+# AGE2: Voraussetzung aot-age1, AGE3: Voraussetzung aot-age2.
+# ChargeInterval: 250 → 10 Sekunden Ladezeit.
+# AllowMultiple: true → eigener Power-Slot pro Instanz (verhindert Key-Kollision mit AGE1).
 TMPL:
 	Buildable:
 		Prerequisites: anyhq, ~techlevel.high, aot-age1
 		Queue: Building.Nod
+	AotAge2Power:
+		Actor: aot-age2-marker
+		LifeTime: -1
+		OneShot: true
+		ChargeInterval: 250
+		BuildDuration: 25
+		Icon: aot-age2
+		Name: 2nd Tiberium Age
+		Description: Moves forward in the Tiberium technologies with new upgrades and additional equipment.
+		SupportPowerPaletteOrder: 51
+	AotAge3Power:
+		Actor: aot-age3-marker
+		LifeTime: -1
+		OneShot: true
+		Prerequisites: aot-age2
+		ChargeInterval: 250
+		BuildDuration: 25
+		Icon: aot-age3
+		Name: 3rd Tiberium Age
+		Description: Upgrades to the most advanced Tiberium units, buildings and upgrades.
+		SupportPowerPaletteOrder: 52
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Upgrade-Produktionsqueue auf FACT ===
@@ -83,4 +114,29 @@ FACT:
 		QueuedAudio: Building
 		OnHoldAudio: OnHold
 		CancelledAudio: Cancelled
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - WEAP: eigener Prerequisite-String ===
+# vehicleproduction wird auch von AFLD (Nod) bereitgestellt.
+# aot-weap stellt sicher, dass MTNK-Upgrades nur mit GDI-Waffenfabrik sichtbar sind.
+WEAP:
+	ProvidesPrerequisite@aot:
+		Prerequisite: aot-weap
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - APC: erst nach APC Upgrade baubar ===
+# Verhindert APC-Produktion bis der Spieler das APC Upgrade (Entweder/Oder) kauft.
+APC:
+	Buildable:
+		Prerequisites: pyle, ~aot-apc-upgrade, ~!aot-humvee-upgrade
+		Queue: Vehicle.GDI
+		Description: Armored Personnel Carrier. Can carry 5 soldiers.
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - MTNK Tier-0: reduzierte HP ===
+# Tier 0 (vor Age 1): 33750 HP (= 45000 * 3/4).
+# Tier 1+ HP-Scaling per Condition: braucht Custom Trait (TODO, Engine-Patch).
+MTNK:
+	Health:
+		HP: 33750
 # === Ende aotmod ===

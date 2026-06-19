@@ -9,6 +9,9 @@ engine/**
 !engine/OpenRA.Mods.Common/Widgets/Logic/
 !engine/OpenRA.Mods.Common/Widgets/Logic/Ingame/
 !engine/OpenRA.Mods.Common/Widgets/Logic/Ingame/ProductionTabsLogic.cs
+!engine/OpenRA.Mods.Common/Traits/
+!engine/OpenRA.Mods.Common/Traits/SupportPowers/
+!engine/OpenRA.Mods.Common/Traits/SupportPowers/AutoActivateSpawnActorPower.cs
 
 # Visual Studio
 Release
