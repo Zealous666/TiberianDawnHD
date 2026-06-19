@@ -1,5 +1,17 @@
 user.config
-engine
+
+# Engine-Quellcode wird nicht getrackt (zu groß, wird separat heruntergeladen).
+# Ausnahmen: Dateien die für aotmod gepatcht wurden.
+# Hinweis: engine/** statt engine damit !-Ausnahmen funktionieren.
+engine/**
+!engine/OpenRA.Mods.Common/
+!engine/OpenRA.Mods.Common/Widgets/
+!engine/OpenRA.Mods.Common/Widgets/Logic/
+!engine/OpenRA.Mods.Common/Widgets/Logic/Ingame/
+!engine/OpenRA.Mods.Common/Widgets/Logic/Ingame/ProductionTabsLogic.cs
+!engine/OpenRA.Mods.Common/Traits/
+!engine/OpenRA.Mods.Common/Traits/SupportPowers/
+!engine/OpenRA.Mods.Common/Traits/SupportPowers/AutoActivateSpawnActorPower.cs
 
 # Visual Studio
 Release
@@ -45,3 +57,6 @@ _ReSharper.*/
 
 # IntelliJ files
 .idea
+
+# Lokale Kopien von Hauptspiel-Dateien (werden nicht geladen, nur als Referenz)
+mods/cnc/rules/structures.yaml

@@ -57,10 +57,64 @@ mtnk.destroyed:
 ltnk:
 	Defaults:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\LTNK.ZIP
+	# === Age of Tiberium (aotmod) ltnk ===
+	aot-chassis-upgraded:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\MTNK.ZIP
+		Facings: 32
+		UseClassicFacings: True
+	aot-chassis-siegemode:
+		RemasteredFilename: aot-ltnk-siegemode.zip
+		Facings: 32
+		UseClassicFacings: True
+	aot-turret-upgraded:
+		RemasteredFilename: aot-ltnk-turret.zip
+		Facings: 32
+		UseClassicFacings: True
+	aot-icon-upgrade:
+		RemasteredFilename: aot-ltnk-upgrade-icon.png
 	muzzle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\GUNFIRE.ZIP
 	icon:
-		RemasteredFilename:
+		RemasteredFilename: ltnk_1_base.png
+
+
+aot-upgrade-ltnk:
+	icon:
+		RemasteredFilename: ltnk_2_ttnk.png
+
+aot-upgrade-ltnk2:
+	icon:
+		RemasteredFilename: ltnk_3_lsr.png
+
+# === Age of Tiberium (aotmod) - Recon Jeep / HUMVEE / APC Icons ===
+jeep:
+	icon:
+		RemasteredFilename: jeep_1_base.png
+	aot-humvee-icon:
+		RemasteredFilename: jeep_2_humvee.png
+
+apc:
+	icon:
+		RemasteredFilename: jeep_3_apc.png
+
+aot-upgrade-humvee:
+	icon:
+		RemasteredFilename: jeep_2_humvee.png
+
+aot-upgrade-apc:
+	icon:
+		RemasteredFilename: jeep_3_apc.png
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - MTNK Upgrade Icons (Platzhalter) ===
+aot-upgrade-mtnk-predator:
+	icon:
+		RemasteredFilename: aot-upgrade-mtnk-predator.png
+
+aot-upgrade-mtnk-railgun:
+	icon:
+		RemasteredFilename: aot-upgrade-mtnk-railgun.png
+# === Ende aotmod ===
 
 ltnk.destroyed:
 	Defaults:
