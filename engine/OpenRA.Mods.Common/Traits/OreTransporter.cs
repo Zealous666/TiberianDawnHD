@@ -29,27 +29,45 @@ namespace OpenRA.Mods.Common.Traits
 		public override object Create(ActorInitializer init) { return new OreTransporter(init.Self, this); }
 	}
 
-	public class OreTransporter : DockClientBase<OreTransporterInfo>
+	public class OreTransporter : DockClientBase<OreTransporterInfo>, INotifyAddedToWorld
 	{
 		static readonly BitSet<DockType> OreLoadType = new("OreLoad");
-		static readonly BitSet<DockType> UnloadType = new("Unload");
+		static readonly BitSet<DockType> UnloadType = new("OreDeliver");
 
 		enum TransportState { Empty, Loading, Full }
 		TransportState state = TransportState.Empty;
 		int loadTicks;
 		IStoresResources storesResources;
+		readonly Actor self;
 
 		public override BitSet<DockType> GetDockType =>
 			state == TransportState.Full ? UnloadType : OreLoadType;
 
+		public override bool CanDockAt(Actor hostActor, IDockHost host, bool forceEnter = false, bool ignoreOccupancy = false)
+		{
+			if (host.GetDockType.Overlaps(UnloadType) && hostActor.Owner != self.Owner)
+				return false;
+			return base.CanDockAt(hostActor, host, forceEnter, ignoreOccupancy);
+		}
+
 		public OreTransporter(Actor self, OreTransporterInfo info)
-			: base(self, info) { }
+			: base(self, info) { this.self = self; }
 
 		protected override void Created(Actor self)
 		{
 			storesResources = self.TraitsImplementing<IStoresResources>()
 				.FirstOrDefault(sr => sr.HasType(Info.OreResourceType));
 			base.Created(self);
+		}
+
+		void INotifyAddedToWorld.AddedToWorld(Actor self)
+		{
+			self.World.AddFrameEndTask(w =>
+			{
+				if (self.IsDead || !self.IsInWorld || self.CurrentActivity != null)
+					return;
+				self.QueueActivity(new MoveToDock(self));
+			});
 		}
 
 		public override void OnDockStarted(Actor self, Actor hostActor, IDockHost host)
@@ -79,7 +97,11 @@ namespace OpenRA.Mods.Common.Traits
 
 			if (state == TransportState.Full)
 			{
-				self.Owner.PlayerActor.Trait<PlayerResources>().ChangeCash(Info.OreLoadAmount);
+				var playerResources = self.Owner.PlayerActor.Trait<PlayerResources>();
+				if (!playerResources.CanGiveResources(Info.OreLoadAmount))
+					return false;
+
+				playerResources.GiveResources(Info.OreLoadAmount);
 				state = TransportState.Empty;
 				storesResources?.RemoveResource(Info.OreResourceType, storesResources.Capacity);
 				return true;

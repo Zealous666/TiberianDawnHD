@@ -172,8 +172,71 @@ lite:
 		Length: 1
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - ATEC (Allied Tech Centre): RA ATEK Sprites ===
+# 2 Frames: atek-0000 = idle, atek-0001 = damaged. Statisch wie DOME.
+# Make-Animation: weapmake.shp (kein eigenes Make-Sprite vorhanden).
+atec:
+	idle:
+		Filename: atec-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.17
+	damaged-idle:
+		Filename: atec-damaged-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.17
+	make:
+		Filename: weapmake.shp
+		RemasteredFilename:
+		Tick: 80
+	place:
+		Filename: atec-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.17
+	bib:
+		TilesetFilenames:
+			DESERT: bib3.des
+			WINTER: bib3.win
+			SNOW: bib3.sno
+			TEMPERAT: bib3.tem
+		Length: *
+		Offset: 0,0
+	icon:
+		Filename: atec_base.png
+		RemasteredFilename:
+		Length: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Age Upgrade Sprites ===
+# Für die Upgrade-Queue: icon-Sequenz zeigt das jeweilige Age-Icon.
+aot-age1-upgrade:
+	icon:
+		Filename: aot-age1-icon.png
+		Length: 1
+
+aot-age2-upgrade:
+	icon:
+		Filename: aot-age2-icon.png
+		Length: 1
+
+aot-age3-upgrade:
+	icon:
+		Filename: aot-age3-icon.png
+		Length: 1
+# === Ende aotmod ===
+
 # Support-Power-Icons (IconImage: "icon" in SupportPower.cs)
 # Erweitert die icon-Sequenz aus misc.yaml um aot-spezifische Powers.
+# === Age of Tiberium (aotmod) - Ion Cannon Upgrade: ionicnh.tem (wie EYE IonCannonPower) ===
+aot-upgrade-ion-cannon:
+	icon:
+		Filename: ionicnh.tem
+	ioncannon:
+		Filename: ionicnh.tem
+# === Ende aotmod ===
+
 icon:
 	# === Age of Tiberium (aotmod) - Age-Power-Icons ===
 	aot-age1:
@@ -184,5 +247,9 @@ icon:
 		Length: 1
 	aot-age3:
 		Filename: aot-age3-icon.png
+		Length: 1
+	# === Age of Tiberium (aotmod) - ATEC Support-Power-Icons ===
+	aot-satellite:
+		Filename: aot-satellite-icon.png
 		Length: 1
 # === Ende aotmod ===

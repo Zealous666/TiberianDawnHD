@@ -16,3 +16,7 @@ actor-oret =
     .name = Ore Transporter
     .generic-name = Ore Transporter
     .description = Collects ore from mines and delivers it to the refinery.
+
+actor-atec =
+    .name = Tech Centre
+    .description = Advanced research facility. Enables Tier 3 technologies and Satellite Surveillance.

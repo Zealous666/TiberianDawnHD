@@ -24,6 +24,7 @@ harv:
 		RemasteredMaskFilename: harvdock_loop_mask.png
 		RemasteredOffset: 80, -43
 	icon:
+		Filename: harv_base.png
 		RemasteredFilename:
 
 harv.destroyed:
@@ -48,7 +49,11 @@ mtnk:
 	muzzle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\GUNFIRE.ZIP
 	icon:
-		RemasteredFilename:
+		RemasteredFilename: mtnk_1_base.png
+	aot-mtnk-pred-icon:
+		RemasteredFilename: mtnk_2_pred.png
+	aot-mtnk-rail-icon:
+		RemasteredFilename: mtnk_3_rail.png
 
 mtnk.destroyed:
 	Defaults:
@@ -119,6 +124,15 @@ aot-upgrade-mtnk-predator:
 aot-upgrade-mtnk-railgun:
 	icon:
 		RemasteredFilename: aot-upgrade-mtnk-railgun.png
+
+# === Age of Tiberium (aotmod) - HTNK Laser Upgrade Icons (Platzhalter) ===
+htnk:
+	aot-htnk-laser-icon:
+		RemasteredFilename: htnk_rail.png
+
+aot-upgrade-htnk-railgun:
+	icon:
+		RemasteredFilename: htnk_rail.png
 # === Ende aotmod ===
 
 ltnk.destroyed:
@@ -131,7 +145,7 @@ htnk:
 	muzzle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\GUNFIRE.ZIP
 	icon:
-		RemasteredFilename:
+		RemasteredFilename: htnk_base.png
 
 htnk.destroyed:
 	Defaults:
@@ -205,7 +219,7 @@ msam:
 	Defaults:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\MSAM.ZIP
 	icon:
-		RemasteredFilename:
+		RemasteredFilename: msam_base.png
 
 msam.destroyed:
 	Defaults:
@@ -264,6 +278,7 @@ truck:
 	Defaults:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\TRUK.ZIP
 	icon:
+		Filename: truk_base.png
 		RemasteredFilename:
 
 truck.destroyed:

@@ -14,29 +14,19 @@ C17:
 	Cloak:
 		CloakStyle: Alpha
 
-# === Age of Tiberium (aotmod) - HQ: nur GDI + Age-1-Power + EYE-Sprite nach Ion Cannon Upgrade ===
+# === Age of Tiberium (aotmod) - HQ: nur GDI + EYE-Sprite nach Ion Cannon Upgrade ===
 # HQ ist jetzt GDI-exklusiv. NOD bekommt eigenen Radar (aot-nod-radar).
-# Ion Cannon Upgrade (aot-age2) schaltet EYE-Sprites frei (kein Ion Cannon Power vorerst).
+# Age-Powers liegen auf FACT. Ion Cannon Upgrade schaltet EYE-Sprites frei.
 HQ:
 	Buildable:
 		Queue: Building.GDI
-		Prerequisites: vehicleproduction, ~techlevel.medium
+		Prerequisites: vehicleproduction, barracks, ~techlevel.medium
 	-AirstrikePower:
 	-SupportPowerChargeBar:
-	AotAge1Power:
-		Actor: aot-age1-marker
-		LifeTime: -1
-		OneShot: true
-		Prerequisites: barracks
-		ChargeInterval: 250
-		BuildDuration: 25
-		Icon: aot-age1
-		Name: 1st Tiberium Age
-		Description: Unlocks the Tiberium era with new units, buildings and the capability to harvest Tiberium.
-		SupportPowerPaletteOrder: 50
-	SupportPowerChargeBar:
 	ProvidesPrerequisite@gdihq:
 		Prerequisite: gdi-hq
+	ProvidesPrerequisite@anyhq:
+		Prerequisite: anyhq
 	GrantConditionOnPrerequisite@ionupgrade:
 		Condition: aot-ion-cannon-active
 		Prerequisites: aot-ion-cannon-upgrade
@@ -53,96 +43,59 @@ HQ:
 	WithMakeAnimation@aot:
 		BodyNames: body, body-eye
 		Condition: build-incomplete
+	IonCannonPower:
+		RequiresCondition: aot-ion-cannon-active
+		PauseOnCondition: lowpower
+		Prerequisites: ~techlevel.superweapons
+		Icon: ioncannon
+		Cursor: ioncannon
+		ChargeInterval: 9000
+		Name: actor-eye.ioncannonpower-name
+		Description: actor-eye.ioncannonpower-description
+		BeginChargeSpeechNotification: IonCannonCharging
+		EndChargeSpeechNotification: IonCannonReady
+		SelectTargetSpeechNotification: SelectTarget
+		InsufficientPowerSpeechNotification: InsufficientPower
+		BeginChargeTextNotification: notification-ion-cannon-charging
+		EndChargeTextNotification: notification-ion-cannon-ready
+		SelectTargetTextNotification: notification-select-target
+		InsufficientPowerTextNotification: notification-insufficient-power
+		OnFireSound: ion1.aud
+		DisplayRadarPing: True
+		CameraActor: camera.small
+		SupportPowerPaletteOrder: 20
+	SupportPowerChargeBar@ion:
+		RequiresCondition: aot-ion-cannon-active
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - EYE (GDI): erfordert Age 1 + schaltet Age 2 + Age 3 frei ===
-# Advanced Communications Center ist erst baubar nach aot-age1.
-# Spiegelt die Nod-TMPL-Logik für GDI.
+# === Age of Tiberium (aotmod) - EYE: nicht baubar (wird durch HQ+Ion Cannon Upgrade ersetzt) ===
 EYE:
-	Buildable:
-		Prerequisites: anyhq, ~techlevel.high, aot-age1
-		Queue: Building.GDI
-	AotAge2Power:
-		Actor: aot-age2-marker
-		LifeTime: -1
-		OneShot: true
-		ChargeInterval: 250
-		BuildDuration: 25
-		Icon: aot-age2
-		Name: 2nd Tiberium Age
-		Description: Moves forward in the Tiberium technologies with new upgrades and additional equipment.
-		SupportPowerPaletteOrder: 51
-	AotAge3Power:
-		Actor: aot-age3-marker
-		LifeTime: -1
-		OneShot: true
-		Prerequisites: aot-age2
-		ChargeInterval: 250
-		BuildDuration: 25
-		Icon: aot-age3
-		Name: 3rd Tiberium Age
-		Description: Upgrades to the most advanced Tiberium units, buildings and upgrades.
-		SupportPowerPaletteOrder: 52
+	-Buildable:
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - NOD Radar (aot-nod-radar): Age-1-Power für Nod ===
-aot-nod-radar:
-	AotAge1Power:
-		Actor: aot-age1-marker
-		LifeTime: -1
-		OneShot: true
-		Prerequisites: barracks
-		ChargeInterval: 250
-		BuildDuration: 25
-		Icon: aot-age1
-		Name: 1st Tiberium Age
-		Description: Unlocks the Tiberium era with new units, buildings and the capability to harvest Tiberium.
-		SupportPowerPaletteOrder: 50
-	SupportPowerChargeBar:
-# === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - TMPL: erfordert Age 1 + schaltet Age 2 + Age 3 frei ===
+# === Age of Tiberium (aotmod) - TMPL: erfordert Age 1 ===
 # Buildable: erst baubar nach aot-age1.
-# AGE2 + AGE3 auf TMPL für Nod (Pendant zu EYE für GDI).
 TMPL:
 	Buildable:
-		Prerequisites: anyhq, ~techlevel.high, aot-age1
+		Prerequisites: anyhq, ~techlevel.high, ~aot-age1
 		Queue: Building.Nod
-	AotAge2Power:
-		Actor: aot-age2-marker
-		LifeTime: -1
-		OneShot: true
-		ChargeInterval: 250
-		BuildDuration: 25
-		Icon: aot-age2
-		Name: 2nd Tiberium Age
-		Description: Moves forward in the Tiberium technologies with new upgrades and additional equipment.
-		SupportPowerPaletteOrder: 51
-	AotAge3Power:
-		Actor: aot-age3-marker
-		LifeTime: -1
-		OneShot: true
-		Prerequisites: aot-age2
-		ChargeInterval: 250
-		BuildDuration: 25
-		Icon: aot-age3
-		Name: 3rd Tiberium Age
-		Description: Upgrades to the most advanced Tiberium units, buildings and upgrades.
-		SupportPowerPaletteOrder: 52
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - Upgrade-Produktionsqueue auf FACT ===
-# Fügt dem Bauhof (FACT) eine eigene Produktionswarteschlange für Upgrades hinzu.
-# Production@UPGRADE ist zwingend nötig: ProductionQueue.productionTraits sucht
-# auf dem selben Aktor nach Production.Produces.Contains("Upgrade"). Ohne diesen
-# Trait bleibt Enabled=false und der Tab ist dauerhaft ausgegraut.
-# ProductionTabsWidget erkennt diese Queue automatisch wenn FACT gebaut wird.
+# === Age of Tiberium (aotmod) - Upgrade-Queue + Age Super Powers auf FACT ===
+# Upgrade-Queue: normale Upgrades (Age 1/2/3 kaufbar hier).
+# Super Powers: sichtbar sobald FACT steht, HOLD bis Upgrade gekauft,
+#   dann 10 Sek Auto-Countdown, danach auto-fire → spawnt Marker → aot-age1/2/3 aktiv.
 FACT:
-	Production@UPGRADE:
-		Produces: Upgrade
+	Production@UPGRADEGDI:
+		Produces: Upgrade.GDI
 		MoveIntoWorld: false
-	ProductionQueue@Upgrade:
-		Type: Upgrade
+	Production@UPGRADENOD:
+		Produces: Upgrade.Nod
+		MoveIntoWorld: false
+	ProductionQueue@UpgradeGDI:
+		Type: Upgrade.GDI
+		Factions: gdi
 		Group: Upgrade
 		ReadyAudio: ConstructionComplete
 		ReadyTextNotification: notification-construction-complete
@@ -151,14 +104,88 @@ FACT:
 		QueuedAudio: Building
 		OnHoldAudio: OnHold
 		CancelledAudio: Cancelled
+	ProductionQueue@UpgradeNod:
+		Type: Upgrade.Nod
+		Factions: nod
+		Group: Upgrade
+		ReadyAudio: ConstructionComplete
+		ReadyTextNotification: notification-construction-complete
+		BlockedAudio: NoBuild
+		BlockedTextNotification: notification-unable-to-build-more
+		QueuedAudio: Building
+		OnHoldAudio: OnHold
+		CancelledAudio: Cancelled
+	SupportPowerChargeBar:
+	GrantConditionOnPrerequisite@age1purchased:
+		Condition: aot-age1-purchased-cond
+		Prerequisites: aot-age1-purchased
+	GrantConditionOnPrerequisite@age2purchased:
+		Condition: aot-age2-purchased-cond
+		Prerequisites: aot-age2-purchased
+	GrantConditionOnPrerequisite@age3purchased:
+		Condition: aot-age3-purchased-cond
+		Prerequisites: aot-age3-purchased
+	AotAge1SuperPower:
+		Actor: aot-age1-marker
+		LifeTime: -1
+		OneShot: true
+		PauseOnCondition: !aot-age1-purchased-cond
+		ChargeInterval: 250
+		Icon: aot-age1
+		Name: 1st Tiberium Age
+		Description: Requires: 1st Tiberium Age Upgrade. The Tiberium era is emerging. New units and buildings are becoming available.
+		SupportPowerPaletteOrder: 50
+	AotAge2SuperPower:
+		Actor: aot-age2-marker
+		LifeTime: -1
+		OneShot: true
+		RequiresCondition: aot-age1-active
+		PauseOnCondition: !aot-age2-purchased-cond
+		ChargeInterval: 250
+		Icon: aot-age2
+		Name: 2nd Tiberium Age
+		Description: Requires: 2nd Tiberium Age Upgrade. Advanced Tiberium technologies are emerging. New upgrades and equipment becoming available.
+		SupportPowerPaletteOrder: 51
+	AotAge3SuperPower:
+		Actor: aot-age3-marker
+		LifeTime: -1
+		OneShot: true
+		RequiresCondition: aot-age2-active
+		PauseOnCondition: !aot-age3-purchased-cond
+		ChargeInterval: 250
+		Icon: aot-age3
+		Name: 3rd Tiberium Age
+		Description: Requires: 3rd Tiberium Age Upgrade. Peak Tiberium technology is emerging. The most advanced units and buildings are becoming available.
+		SupportPowerPaletteOrder: 52
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - WEAP: eigener Prerequisite-String ===
+# === Age of Tiberium (aotmod) - WEAP: Prerequisite + eigener aot-weap-String ===
 # vehicleproduction wird auch von AFLD (Nod) bereitgestellt.
 # aot-weap stellt sicher, dass MTNK-Upgrades nur mit GDI-Waffenfabrik sichtbar sind.
+# ProvidesPrerequisite@buildingname: → stellt "weap" bereit (für Tooltip-Lookup in age2-upgrade-gdi).
 WEAP:
+	Buildable:
+		Prerequisites: lite
+		Queue: Building.GDI
 	ProvidesPrerequisite@aot:
 		Prerequisite: aot-weap
+	ProvidesPrerequisite@buildingname:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - AFLD: Prerequisite auf lite ===
+# ProvidesPrerequisite@buildingname: → stellt "afld" bereit (für Tooltip-Lookup in age2-upgrade-nod).
+AFLD:
+	Buildable:
+		Prerequisites: lite
+		Queue: Building.Nod
+	ProvidesPrerequisite@buildingname:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - PROC: erst nach Age-1-Upgrade baubar ===
+PROC:
+	Buildable:
+		Prerequisites: ~aot-age1
+		Queue: Building.GDI, Building.Nod
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - APC: erst nach APC Upgrade baubar ===
@@ -168,12 +195,24 @@ APC:
 		Prerequisites: lite, ~aot-apc-upgrade, ~!aot-humvee-upgrade
 		Queue: LightVehicle.GDI
 		Description: Armored Personnel Carrier. Can carry 5 soldiers.
+		BuildPaletteOrder: 3
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - MTNK Tier-0: reduzierte HP ===
 # Tier 0 (vor Age 1): 33750 HP (= 45000 * 3/4).
-# Tier 1+ HP-Scaling per Condition: braucht Custom Trait (TODO, Engine-Patch).
+# Buildable entfernt → wird über Proxy-Aktoren (aot-mtnk-base/pred/rail) gesteuert.
 MTNK:
 	Health:
 		HP: 33750
+	-Buildable:
+
+
+HTNK:
+	-Buildable:
+
+MSAM:
+	Buildable:
+		Prerequisites: anyhq, ~techlevel.medium, ~aot-age1, aot-age1, weap
+		Queue: Vehicle.GDI
+		BuildPaletteOrder: 4
 # === Ende aotmod ===

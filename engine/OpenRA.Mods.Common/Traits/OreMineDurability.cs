@@ -12,6 +12,9 @@ using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Traits
 {
+	/// <summary>Marker interface: actor has a Health trait but should not display the HP bar.</summary>
+	public interface IHideHealthBar { }
+
 	[Desc("Fills the actor's resource store on creation and destroys it when depleted by ore trips.")]
 	public class OreMineDurabilityInfo : TraitInfo
 	{
@@ -21,7 +24,7 @@ namespace OpenRA.Mods.Common.Traits
 		public override object Create(ActorInitializer init) { return new OreMineDurability(this); }
 	}
 
-	public class OreMineDurability : INotifyCreated, ISelectionBar
+	public class OreMineDurability : INotifyCreated, ISelectionBar, IHideHealthBar
 	{
 		readonly OreMineDurabilityInfo info;
 		IStoresResources store;
