@@ -65,3 +65,11 @@ _ReSharper.*/
 
 # Lokale Kopien von Hauptspiel-Dateien (werden nicht geladen, nur als Referenz)
 mods/cnc/rules/structures.yaml
+
+# Exportierte Sprite-Sheets und temporäre Asset-Dateien im Root
+*.sequences.desert.png
+*.sequences.winter.png
+*.sequences.snow.png
+*.sequences.temperat.png
+*.cursors.png
+"DATA\\ART\\TEXTURES\\SRGB\\TIBERIAN_DAWN\\STRUCTURES\\GUN.ZIP"

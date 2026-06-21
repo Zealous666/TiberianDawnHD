@@ -16,7 +16,8 @@ using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Traits
 {
-	[Desc("aotmod: Launches a missile visual from the actor using the Nod nuke animation, then reveals the entire map. " +
+	[Desc("aotmod: Launches a missile visual from the actor, then reveals the entire map. " +
+		"Disappears after use via RequiresCondition. Resets when the actor is rebuilt. " +
 		"Resets map exploration when the actor is destroyed or sold.")]
 	public class AotSatellitePowerInfo : SupportPowerInfo
 	{
@@ -36,14 +37,17 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Missile flight velocity in WDist per tick.")]
 		public readonly WDist FlightVelocity = new(512);
 
-		[Desc("Total missile flight time in ticks. Missile ascends for FlightDelay/2, then continues off-screen.")]
+		[Desc("Total missile flight time in ticks.")]
 		public readonly int FlightDelay = 150;
 
-		[Desc("Ticks after activation before ExploreAll is called. Should be <= FlightDelay / 2 (during ascent).")]
+		[Desc("Ticks after activation before ExploreAll is called.")]
 		public readonly int RevealDelay = 50;
 
 		[PaletteReference]
 		public readonly string MissilePalette = "effect";
+
+		[Desc("Condition granted on the actor after the power fires. Use with RequiresCondition: !<this> to hide the power after use.")]
+		public readonly string FiredCondition = "satellite-used";
 
 		public WeaponInfo WeaponInfo { get; private set; }
 
@@ -74,7 +78,7 @@ namespace OpenRA.Mods.Common.Traits
 		public override void SelectTarget(Actor self, string order, SupportPowerManager manager)
 		{
 			// Fire immediately without target selection cursor.
-			self.World.IssueOrder(new Order(order, self, Target.Invalid, false));
+			self.World.IssueOrder(new Order(order, self.Owner.PlayerActor, Target.Invalid, false));
 		}
 
 		public override void Activate(Actor self, Order order, SupportPowerManager manager)
@@ -112,6 +116,11 @@ namespace OpenRA.Mods.Common.Traits
 			self.World.AddFrameEndTask(w => w.Add(missile));
 
 			revealCountdown = info.RevealDelay;
+
+			// Grant condition to disable/hide the power on this actor instance.
+			// When ATEC is sold/destroyed and rebuilt, the new instance has no condition → power resets.
+			if (!string.IsNullOrEmpty(info.FiredCondition))
+				self.GrantCondition(info.FiredCondition);
 		}
 
 		void ITick.Tick(Actor self)

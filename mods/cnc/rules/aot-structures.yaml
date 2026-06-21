@@ -382,7 +382,8 @@ ATEC:
 	AotSatellitePower:
 		Prerequisites: aot-atec
 		ChargeInterval: 250
-		OneShot: true
+		RequiresCondition: !satellite-used
+		PauseOnCondition: lowpower
 		Icon: aot-satellite
 		Name: Satellite Surveillance
 		Description: Reveals the entire map.
