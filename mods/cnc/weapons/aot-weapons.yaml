@@ -1,3 +1,10 @@
+# === Age of Tiberium (aotmod) - Satellite Launch: Dummy-Waffe ohne Schaden ===
+# Wird von AotSatellitePower genutzt um NukeLaunch-Effekt zu spawnen.
+# Kein Warhead = keine Wirkung. Target-Position ist weit oberhalb der Karte.
+aot-satellite-launch:
+	ValidTargets: Air
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - Recon Jeep HUMVEE: stärkeres MG ===
 # Tier 1: MachineGunH-Basis, Damage 1150→1500 (~30% mehr), gleiche Versus-Werte.
 aot-JeepHumvee:
@@ -23,12 +30,37 @@ aot-MtnkRailgun:
 	Report: obelray1.aud
 	Projectile: LaserZap
 		Width: 50
-		Color: FFFFFF
+		Color: A0C8FF
 		HitAnim: laserfire
 		ZOffset: 2047
 	Warhead@1Dam: SpreadDamage
 		Spread: 42
 		Damage: 6000
+		Versus:
+			None: 25
+			Wood: 100
+			Light: 100
+			Heavy: 100
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+	Warhead@2Smu: LeaveSmudge
+		SmudgeType: Scorch
+		InvalidTargets: Vehicle, Structure, Wall, Husk, Trees, Creep
+
+# === Age of Tiberium (aotmod) - HTNK Laser: weißer LaserZap wie MTNK Railgun ===
+aot-HtnkLaser:
+	ReloadDelay: 50
+	Burst: 2
+	BurstDelays: 8
+	Range: 6c0
+	Report: obelray1.aud
+	Projectile: LaserZap
+		Width: 50
+		Color: A0C8FF
+		HitAnim: laserfire
+		ZOffset: 2047
+	Warhead@1Dam: SpreadDamage
+		Spread: 42
+		Damage: 8000
 		Versus:
 			None: 25
 			Wood: 100

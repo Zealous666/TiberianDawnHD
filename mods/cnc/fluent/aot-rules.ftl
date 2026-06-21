@@ -8,7 +8,15 @@ actor-aot-ore-mine =
     .name = Ore Mine
     .generic-name = Ore Mine
 
+actor-aot-nod-radar =
+    .name = Radar Dome
+    .description = Provides radar and cloaked unit detection for NOD.
+
 actor-oret =
     .name = Ore Transporter
     .generic-name = Ore Transporter
     .description = Collects ore from mines and delivers it to the refinery.
+
+actor-atec =
+    .name = Tech Centre
+    .description = Advanced research facility. Enables Tier 3 technologies and Satellite Surveillance.

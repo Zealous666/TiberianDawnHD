@@ -38,11 +38,11 @@ LITE:
 		ExitCell: 1,2
 		ExitDelay: 3
 	Production@GDI:
-		Produces: Vehicle.GDI
+		Produces: LightVehicle.GDI
 	Production@NOD:
-		Produces: Vehicle.Nod
+		Produces: LightVehicle.Nod
 	ProductionQueue@GDI:
-		Type: Vehicle.GDI
+		Type: LightVehicle.GDI
 		DisplayOrder: 3
 		Factions: gdi
 		Group: Vehicle
@@ -57,7 +57,7 @@ LITE:
 		OnHoldAudio: OnHold
 		CancelledAudio: Cancelled
 	ProductionQueue@NOD:
-		Type: Vehicle.Nod
+		Type: LightVehicle.Nod
 		DisplayOrder: 3
 		Factions: nod
 		Group: Vehicle
@@ -72,9 +72,9 @@ LITE:
 		OnHoldAudio: OnHold
 		CancelledAudio: Cancelled
 	ProductionBar@GDI:
-		ProductionType: Vehicle.GDI
+		ProductionType: LightVehicle.GDI
 	ProductionBar@NOD:
-		ProductionType: Vehicle.Nod
+		ProductionType: LightVehicle.Nod
 	Power:
 		Amount: -20
 	RenderSprites:
@@ -105,23 +105,14 @@ aot-ore-mine:
 		Dimensions: 1,1
 		TerrainTypes: Clear,Rough,Road,Rock
 	Health:
-		HP: 100
+		HP: 99999
 	DamageMultiplier:
 		Modifier: 0
 	StoresResources:
-		Capacity: 10
+		Capacity: 30
 		Resources: Tiberium
-	WithStoresResourcesPipsDecoration:
-		Position: BottomLeft
-		Margin: 4, 3
-		PipCount: 10
-		ResourceSequences:
-			Tiberium: pip-green
 	OreMineDurability:
 		ResourceType: Tiberium
-	Explodes:
-		Weapon: UnitExplodeSmall
-		EmptyWeapon: UnitExplodeSmall
 	DockHost:
 		Type: OreLoad
 		DockAngle: 0
@@ -133,8 +124,16 @@ aot-ore-mine:
 # === Age of Tiberium (aotmod) - FACT: DockHost für ORET-Abladepunkt ===
 # ORET fährt zum Construction Yard statt zur Refinery um Credits abzuliefern.
 FACT:
+	StoresPlayerResources:
+		Capacity: 500
+	WithResourceStoragePipsDecoration:
+		Position: BottomLeft
+		Margin: 4, 3
+		RequiresSelection: true
+		PipCount: 10
+		FullSequence: pip-yellow
 	DockHost:
-		Type: Unload
+		Type: OreDeliver
 		DockAngle: 0
 		DockOffset: -1c0,1c512,0
 	FreeActor:
@@ -150,6 +149,12 @@ FACT:
 	GrantConditionOnPrerequisite@aotage1:
 		Condition: aot-age1-active
 		Prerequisites: aot-age1
+	GrantConditionOnPrerequisite@aotage2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
+	GrantConditionOnPrerequisite@aotage3:
+		Condition: aot-age3-active
+		Prerequisites: aot-age3
 	-WithSpriteBody:
 	WithSpriteBody@ra:
 		Sequence: aot-ra-idle
@@ -216,8 +221,8 @@ aot-upgrade-humvee:
 
 	Buildable:
 		BuildPaletteOrder: 30
-		Prerequisites: vehicleproduction, pyle, aot-age1, !aot-apc-upgrade
-		Queue: Upgrade
+		Prerequisites: lite, ~pyle, ~aot-age1, aot-age1, fix, ~!aot-apc-upgrade
+		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
 		Description: Upgrades the Recon Jeep with HUMVEE armor and a stronger machine gun. Can carry 1 soldier. Excludes the APC Upgrade.
@@ -242,8 +247,8 @@ aot-upgrade-apc:
 
 	Buildable:
 		BuildPaletteOrder: 31
-		Prerequisites: vehicleproduction, pyle, aot-age1, !aot-humvee-upgrade
-		Queue: Upgrade
+		Prerequisites: lite, ~pyle, ~aot-age1, aot-age1, fix, ~!aot-humvee-upgrade
+		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
 		Description: Unlocks the APC with 5 cargo slots. Excludes the HUMVEE Upgrade.
@@ -268,7 +273,7 @@ aot-upgrade-ltnk:
 	Buildable:
 		BuildPaletteOrder: 10
 		Prerequisites: vehicleproduction, anyhq, aot-age1, ~afld
-		Queue: Upgrade
+		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
 		Description: Light Tank upgrade with TickTank-enhancements to dig in.
@@ -292,7 +297,7 @@ aot-upgrade-ltnk2:
 	Buildable:
 		BuildPaletteOrder: 11
 		Prerequisites: aot-ltnk-upgrade, aot-age2, ~afld
-		Queue: Upgrade
+		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
 		Description: Light Tank upgrade with Scorpio Lasers for higher firepower.
@@ -309,6 +314,248 @@ aot-upgrade-ltnk2:
 	Interactable:
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - Ion Cannon Upgrade (GDI HQ → EYE-Sprites) ===
+# Erfordert Age 2 + HQ. Schaltet aot-ion-cannon-upgrade frei →
+# HQ wechselt Sprite von hq.shp zu eye.shp (kein Ion Cannon Power vorerst).
+aot-upgrade-ion-cannon:
+	Tooltip:
+		Name: Ion Cannon Uplink
+
+	Buildable:
+		BuildPaletteOrder: 5
+		Prerequisites: ~gdi-hq, ~aot-atec, ~aot-age3, aot-age3
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		Icon: ioncannon
+		MoveIntoWorld: false
+		Description: Upgrades the Comm Centre with an Uplink to call Ion Cannon Strikes.
+
+	Valued:
+		Cost: 1500
+
+	RenderSprites:
+		Image: aot-upgrade-ion-cannon
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-ion-cannon-upgrade
+
+	Interactable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - ATEC (Allied Tech Centre) ===
+# GDI Tier-2-Gebäude. Sichtbar + baubar ab Age 2 (~aot-age2).
+# Stellt aot-atec bereit → schaltet Ion Cannon Uplink + HTNK Dual-Railgun Upgrade sichtbar.
+# AotSatellitePower: einmalige Kartenenthüllung nach Aktivierung (OneShot).
+ATEC:
+	Inherits: ^BaseBuilding
+	Inherits@IDISABLE: ^DisabledOverlay
+	Tooltip:
+		Name: Allied Tech Centre
+	Valued:
+		Cost: 1500
+	Health:
+		HP: 60000
+	Buildable:
+		BuildPaletteOrder: 75
+		Prerequisites: anypower, anyhq, ~aot-age2
+		Queue: Building.GDI
+		BuildLimit: 1
+		Description: Advanced GDI research facility. Enables high-tier upgrades and satellite surveillance.
+	Building:
+		Footprint: xx xx ==
+		Dimensions: 2,3
+		LocalCenterOffset: 0,-512,0
+	ProvidesPrerequisite:
+		Prerequisite: aot-atec
+	ProvidesRadar:
+		RequiresCondition: !lowpower
+	RevealsShroud:
+		Range: 5c0
+	WithBuildingBib:
+	WithMakeAnimation:
+		Condition: build-incomplete
+	SpawnActorsOnSell:
+		ActorTypes: e1, e1, c2
+	Power:
+		Amount: -200
+	SupportPowerChargeBar:
+	AotSatellitePower:
+		Prerequisites: aot-atec
+		ChargeInterval: 250
+		RequiresCondition: !satellite-used
+		PauseOnCondition: lowpower
+		Icon: aot-satellite
+		Name: Satellite Surveillance
+		Description: Reveals the entire map.
+		SupportPowerPaletteOrder: 55
+	RenderSprites:
+		Image: atec
+	WithSpriteBody:
+		Sequence: idle
+		Name: body
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - NOD Radar (aot-nod-radar) ===
+# NOD-exklusives Radar-Gebäude auf Basis des RA DOME-Sprites.
+# Stellt anyhq bereit (gleiche Funktion wie GDI HQ).
+aot-nod-radar:
+	Inherits: ^BaseBuilding
+	Inherits@IDISABLE: ^DisabledOverlay
+	HitShape:
+		UseTargetableCellsOffsets: false
+		TargetableOffsets: 0,0,0, 630,-384,0, 630,384,0, -700,-512,0, -700,512,0
+	Valued:
+		Cost: 1000
+	Tooltip:
+		Name: actor-aot-nod-radar.name
+	ProvidesPrerequisite:
+		Prerequisite: anyhq
+	ProvidesPrerequisite@buildingname:
+	Buildable:
+		BuildPaletteOrder: 70
+		Prerequisites: vehicleproduction, ~techlevel.medium
+		Queue: Building.Nod
+		Description: actor-aot-nod-radar.description
+	Building:
+		Footprint: xx xx ==
+		Dimensions: 2,3
+		LocalCenterOffset: 0,-512,0
+	Selectable:
+		Bounds: 2048, 2048
+	WithSpriteBody:
+		PauseOnCondition: lowpower
+	Health:
+		HP: 80000
+	RevealsShroud:
+		Range: 10c0
+	WithBuildingBib:
+	ProvidesRadar:
+		RequiresCondition: !lowpower
+	RenderDetectionCircle:
+	DetectCloaked:
+		Range: 5c0
+		RequiresCondition: !lowpower
+	Power:
+		Amount: -50
+	RenderSprites:
+		Image: aot-nod-radar
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Age Upgrades (GDI/NOD Split) ===
+# GDI → Upgrade.GDI, NOD → Upgrade.Nod (Factions auf FACT trennt Tabs).
+# ~aot-ageX-purchased = sichtbar sobald vorheriges Upgrade gekauft (Super Power beginnt zu laden).
+# ~!aot-ageX-purchased = verschwindet nach eigenem Kauf.
+# Age-2: proc (Refinery) + fix (Repair Bay) + weap/afld (Waffenfabrik/Airfield) als harte Pflicht.
+# Age-3: aot-atec (ATEC) als harte Pflicht.
+aot-age1-upgrade-gdi:
+	Interactable:
+	Tooltip:
+		Name: 1st Tiberium Age
+	Valued:
+		Cost: 1000
+	Buildable:
+		BuildPaletteOrder: 5
+		Prerequisites: anyhq, ~!aot-age1-purchased
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Unlocks the Tiberium era with new units, buildings and the capability to harvest Tiberium.
+	ProvidesPrerequisite:
+		Prerequisite: aot-age1-purchased
+	RenderSprites:
+		Image: aot-age1-upgrade
+
+aot-age1-upgrade-nod:
+	Interactable:
+	Tooltip:
+		Name: 1st Tiberium Age
+	Valued:
+		Cost: 1000
+	Buildable:
+		BuildPaletteOrder: 5
+		Prerequisites: anyhq, ~!aot-age1-purchased
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Unlocks the Tiberium era with new units, buildings and the capability to harvest Tiberium.
+	ProvidesPrerequisite:
+		Prerequisite: aot-age1-purchased
+	RenderSprites:
+		Image: aot-age1-upgrade
+
+aot-age2-upgrade-gdi:
+	Interactable:
+	Tooltip:
+		Name: 2nd Tiberium Age
+	Valued:
+		Cost: 1000
+	Buildable:
+		BuildPaletteOrder: 6
+		Prerequisites: ~aot-age1-purchased, ~!aot-age2-purchased, aot-age1-purchased, proc, fix, weap
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Moves forward in the Tiberium technologies with new upgrades and additional equipment.
+	ProvidesPrerequisite:
+		Prerequisite: aot-age2-purchased
+	RenderSprites:
+		Image: aot-age2-upgrade
+
+aot-age2-upgrade-nod:
+	Interactable:
+	Tooltip:
+		Name: 2nd Tiberium Age
+	Valued:
+		Cost: 1000
+	Buildable:
+		BuildPaletteOrder: 6
+		Prerequisites: ~aot-age1-purchased, ~!aot-age2-purchased, aot-age1-purchased, proc, fix, afld
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Moves forward in the Tiberium technologies with new upgrades and additional equipment.
+	ProvidesPrerequisite:
+		Prerequisite: aot-age2-purchased
+	RenderSprites:
+		Image: aot-age2-upgrade
+
+aot-age3-upgrade-gdi:
+	Interactable:
+	Tooltip:
+		Name: 3rd Tiberium Age
+	Valued:
+		Cost: 1000
+	Buildable:
+		BuildPaletteOrder: 7
+		Prerequisites: ~aot-age2-purchased, ~!aot-age3-purchased, aot-age2-purchased, aot-atec
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Upgrades to the most advanced Tiberium units, buildings and upgrades.
+	ProvidesPrerequisite:
+		Prerequisite: aot-age3-purchased
+	RenderSprites:
+		Image: aot-age3-upgrade
+
+aot-age3-upgrade-nod:
+	Interactable:
+	Tooltip:
+		Name: 3rd Tiberium Age
+	Valued:
+		Cost: 1000
+	Buildable:
+		BuildPaletteOrder: 7
+		Prerequisites: ~aot-age2-purchased, ~!aot-age3-purchased, aot-age2-purchased, aot-atec
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Upgrades to the most advanced Tiberium units, buildings and upgrades.
+	ProvidesPrerequisite:
+		Prerequisite: aot-age3-purchased
+	RenderSprites:
+		Image: aot-age3-upgrade
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - MTNK Predator Upgrade ===
 aot-upgrade-mtnk-predator:
 	Tooltip:
@@ -316,8 +563,8 @@ aot-upgrade-mtnk-predator:
 
 	Buildable:
 		BuildPaletteOrder: 20
-		Prerequisites: ~aot-weap,anyhq, ~techlevel.medium, aot-age2
-		Queue: Upgrade
+		Prerequisites: ~aot-weap, anyhq, ~techlevel.medium, ~aot-age2, aot-age2
+		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
 		Description: Main Tank upgrade with Predator-Turret for faster fire-rate.
@@ -340,8 +587,8 @@ aot-upgrade-mtnk-railgun:
 
 	Buildable:
 		BuildPaletteOrder: 21
-		Prerequisites: ~aot-weap,anyhq, ~techlevel.medium, aot-mtnk-predator-upgrade, aot-age3
-		Queue: Upgrade
+		Prerequisites: ~aot-weap, anyhq, ~techlevel.medium, ~aot-mtnk-predator-upgrade, ~aot-age3, aot-mtnk-predator-upgrade, aot-age3
+		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
 		Description: Main Tank & Titan upgrade with Railguns for higher damage.
@@ -354,6 +601,33 @@ aot-upgrade-mtnk-railgun:
 
 	ProvidesPrerequisite:
 		Prerequisite: aot-mtnk-railgun-upgrade
+
+	Interactable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - HTNK Dual-Railgun Upgrade ===
+# Erfordert Age 3 + ATEC + GDI War Factory. Schaltet aot-htnk-railgun-upgrade frei →
+# HTNK wechselt von Standard-Railguns zu Dual-Railguns (aot-HtnkLaser Waffe).
+aot-upgrade-htnk-railgun:
+	Tooltip:
+		Name: Dual-Railgun Upgrade
+
+	Buildable:
+		BuildPaletteOrder: 25
+		Prerequisites: ~aot-weap, ~aot-age3, aot-age3, aot-atec
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Upgrades the Mammoth Tank with Dual Railguns for maximum firepower.
+
+	Valued:
+		Cost: 1500
+
+	RenderSprites:
+		Image: aot-upgrade-htnk-railgun
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-htnk-railgun-upgrade
 
 	Interactable:
 # === Ende aotmod ===

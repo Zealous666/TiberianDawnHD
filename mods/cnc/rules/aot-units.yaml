@@ -27,8 +27,8 @@ aot-mcv-age0:
 		Image: mcv
 	Buildable:
 		Queue: Vehicle.GDI, Vehicle.Nod
-		BuildPaletteOrder: 100
-		Prerequisites: ~!aot-age1
+		BuildPaletteOrder: 1
+		Prerequisites: ~!aot-age1, fix
 		Icon: aot-ra-icon
 		Description: Mobile Construction Vehicle. Deploy to establish a base.
 	Tooltip:
@@ -40,8 +40,8 @@ aot-mcv-age1:
 		Image: mcv
 	Buildable:
 		Queue: Vehicle.GDI, Vehicle.Nod
-		BuildPaletteOrder: 100
-		Prerequisites: ~aot-age1
+		BuildPaletteOrder: 1
+		Prerequisites: ~aot-age1, fix
 		Icon: aot-ages-icon
 		Description: Mobile Construction Vehicle. Deploy to establish a base.
 	Tooltip:
@@ -114,6 +114,49 @@ JEEP:
 		RequiresCondition: aot-jeep-humvee
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - MTNK Queue-Proxies (Doppel-Aktor-Pattern) ===
+# aot-mtnk-base: sichtbar sobald WEAP steht, verschwindet wenn Predator-Upgrade aktiv.
+# aot-mtnk-pred: sichtbar wenn Predator aktiv, verschwindet wenn Railgun aktiv.
+# aot-mtnk-rail: sichtbar wenn Railgun aktiv.
+aot-mtnk-base:
+	Inherits: MTNK
+	RenderSprites:
+		Image: mtnk
+	Buildable:
+		Queue: Vehicle.GDI
+		BuildPaletteOrder: 3
+		Prerequisites: ~aot-weap, ~!aot-mtnk-predator-upgrade
+		Description: actor-mtnk.description
+	Tooltip:
+		Name: Medium Tank
+
+aot-mtnk-pred:
+	Inherits: MTNK
+	RenderSprites:
+		Image: mtnk
+	Buildable:
+		Queue: Vehicle.GDI
+		BuildPaletteOrder: 3
+		Prerequisites: ~aot-mtnk-predator-upgrade, ~!aot-mtnk-railgun-upgrade
+		Icon: aot-mtnk-pred-icon
+		Description: actor-mtnk.description
+	Tooltip:
+		Name: Medium Tank (Predator)
+
+aot-mtnk-rail:
+	Inherits: MTNK
+	RenderSprites:
+		Image: mtnk
+	Buildable:
+		Queue: Vehicle.GDI
+		BuildPaletteOrder: 3
+		Prerequisites: ~aot-mtnk-railgun-upgrade
+		Icon: aot-mtnk-rail-icon
+		Description: actor-mtnk.description
+	Tooltip:
+		Name: Medium Tank (Railgun)
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - MTNK Upgrade-Conditions ===
 MTNK:
 	GrantConditionOnPrerequisite@PREDATOR:
@@ -160,6 +203,59 @@ MTNK:
 		LocalOffset: 768,0,90
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - HTNK Laser Upgrade ===
+# Queue-Proxies: htnk-base verschwindet wenn Laser-Upgrade aktiv, htnk-laser erscheint.
+aot-htnk-base:
+	Inherits: HTNK
+	RenderSprites:
+		Image: htnk
+	Buildable:
+		Queue: Vehicle.GDI
+		BuildPaletteOrder: 60
+		Prerequisites: ~aot-weap, ~aot-age2, aot-age2, aot-atec, ~!aot-htnk-railgun-upgrade
+		Description: actor-htnk.description
+	Tooltip:
+		Name: Mammoth Tank
+
+aot-htnk-laser:
+	Inherits: HTNK
+	RenderSprites:
+		Image: htnk
+	Buildable:
+		Queue: Vehicle.GDI
+		BuildPaletteOrder: 60
+		Prerequisites: ~aot-age2, aot-age2, aot-atec, ~aot-htnk-railgun-upgrade
+		Icon: aot-htnk-laser-icon
+		Description: actor-htnk.description
+	Tooltip:
+		Name: Mammoth Tank (Laser)
+
+HTNK:
+	GrantConditionOnPrerequisite@LASER:
+		Condition: aot-htnk-laser
+		Prerequisites: aot-htnk-railgun-upgrade
+
+	Tooltip@laser:
+		Name: Mammoth Tank (Laser)
+		RequiresCondition: aot-htnk-laser
+
+	-Armament@PRIMARY:
+
+	Armament@PRIMARY:
+		Weapon: 120mmDual
+		LocalOffset: 900,180,340, 900,-180,340
+		Recoil: 170
+		RecoilRecovery: 42
+		MuzzleSequence: muzzle
+		RequiresCondition: !aot-htnk-laser
+
+	Armament@laser:
+		Weapon: aot-HtnkLaser
+		LocalOffset: 900,180,340, 900,-180,340
+		RequiresCondition: aot-htnk-laser
+# === Ende aotmod ===
+
+
 # === Age of Tiberium (aotmod) - APC: kein Turret, schießt frontal ===
 APC:
 	-WithSpriteTurret:
@@ -186,9 +282,9 @@ aot-jeep-base:
 	RenderSprites:
 		Image: jeep
 	Buildable:
-		Queue: Vehicle.GDI
-		BuildPaletteOrder: 20
-		Prerequisites: weap, pyle, ~!aot-humvee-upgrade, ~!aot-apc-upgrade
+		Queue: LightVehicle.GDI
+		BuildPaletteOrder: 3
+		Prerequisites: lite, pyle, ~!aot-humvee-upgrade, ~!aot-apc-upgrade
 		Description: Fast reconnaissance vehicle. Can carry 1 soldier.
 	Tooltip:
 		Name: Recon Jeep
@@ -198,9 +294,9 @@ aot-jeep-humvee:
 	RenderSprites:
 		Image: jeep
 	Buildable:
-		Queue: Vehicle.GDI
-		BuildPaletteOrder: 20
-		Prerequisites: weap, pyle, ~aot-humvee-upgrade, ~!aot-apc-upgrade
+		Queue: LightVehicle.GDI
+		BuildPaletteOrder: 3
+		Prerequisites: lite, pyle, ~aot-humvee-upgrade, ~!aot-apc-upgrade
 		Icon: aot-humvee-icon
 		Description: Fast reconnaissance vehicle with HUMVEE armor. Can carry 1 soldier.
 	Tooltip:
@@ -221,7 +317,7 @@ ORET:
 	Selectable:
 		DecorationBounds: 1536, 1536
 	Mobile:
-		Speed: 72
+		Speed: 50
 	Health:
 		HP: 50000
 	Armor:
@@ -250,9 +346,9 @@ aot-oret-lite:
 	RenderSprites:
 		Image: oret
 	Buildable:
-		BuildPaletteOrder: 15
+		BuildPaletteOrder: 1
 		Prerequisites: lite
-		Queue: Vehicle.GDI, Vehicle.Nod
+		Queue: LightVehicle.GDI, LightVehicle.Nod
 		Description: actor-oret.description
 	Tooltip:
 		Name: actor-oret.name
@@ -330,3 +426,27 @@ LTNK:
 	DamageMultiplier:
 		Modifier: 50
 		RequiresCondition: aot-ltnk-siegemode
+
+# TRUCK: aus Vehicle-Queue heraus, jetzt in LITE (LightVehicle-Queue), nur lite als Prerequisite
+TRUCK:
+	-Buildable:
+	Buildable:
+		BuildPaletteOrder: 2
+		Prerequisites: lite
+		Queue: LightVehicle.GDI, LightVehicle.Nod
+		Description: actor-truck.description
+
+# HARV: ab Age 1 sichtbar (ausgegraut bis PROC gebaut), baubar erst mit PROC
+# Proxy-Aktor-Pattern wie MCV/JEEP/MTNK: -Buildable: im Basis-Aktor, Buildable im Proxy.
+HARV:
+	-Buildable:
+
+aot-harv:
+	Inherits: HARV
+	RenderSprites:
+		Image: harv
+	Buildable:
+		BuildPaletteOrder: 2
+		Prerequisites: ~aot-age1, proc
+		Queue: Vehicle.GDI, Vehicle.Nod
+		Description: actor-harv.description

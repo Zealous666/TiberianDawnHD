@@ -7,10 +7,14 @@
 #endregion
 
 using System.Linq;
+using OpenRA.Primitives;
 using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Traits
 {
+	/// <summary>Marker interface: actor has a Health trait but should not display the HP bar.</summary>
+	public interface IHideHealthBar { }
+
 	[Desc("Fills the actor's resource store on creation and destroys it when depleted by ore trips.")]
 	public class OreMineDurabilityInfo : TraitInfo
 	{
@@ -20,7 +24,7 @@ namespace OpenRA.Mods.Common.Traits
 		public override object Create(ActorInitializer init) { return new OreMineDurability(this); }
 	}
 
-	public class OreMineDurability : INotifyCreated
+	public class OreMineDurability : INotifyCreated, ISelectionBar, IHideHealthBar
 	{
 		readonly OreMineDurabilityInfo info;
 		IStoresResources store;
@@ -43,5 +47,15 @@ namespace OpenRA.Mods.Common.Traits
 			if (concreteStore != null && concreteStore.ContentsSum == 0)
 				self.Kill(transporter);
 		}
+
+		float ISelectionBar.GetValue()
+		{
+			if (store == null || store.Capacity == 0) return 0f;
+			var stored = concreteStore != null ? concreteStore.ContentsSum : 0;
+			return (float)stored / store.Capacity;
+		}
+
+		Color ISelectionBar.GetColor() => Color.Red;
+		bool ISelectionBar.DisplayWhenEmpty => false;
 	}
 }
