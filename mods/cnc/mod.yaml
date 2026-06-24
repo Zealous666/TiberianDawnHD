@@ -79,6 +79,10 @@ FileSystem: RemasterFileSystem
 				~^SupportDir|Content/ra/v2/allies.mix
 				~^SupportDir|Content/ra/v2/russian.mix
 				~^SupportDir|Content/ra/v2/snow.mix
+				# TS audio: local.mix (Einheiten-SFX inkl. cygun1.aud) + speech02.mix (NOD-Stimmen).
+				# sounds.mix = Umgebungs-SFX, nicht nötig. Optionale Packages.
+				~^SupportDir|Content/ts/local.mix
+				~^SupportDir|Content/ts/speech02.mix
 		tuc:
 			Origins:
 				steam-en: Steam

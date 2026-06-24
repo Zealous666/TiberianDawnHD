@@ -15,6 +15,10 @@ engine/**
 !engine/OpenRA.Mods.Common/Traits/SupportPowers/AotSatellitePower.cs
 !engine/OpenRA.Mods.Common/Traits/OreTransporter.cs
 !engine/OpenRA.Mods.Common/Traits/OreMineDurability.cs
+!engine/OpenRA.Mods.Common/Traits/OretSpawnStateCarrier.cs
+!engine/OpenRA.Mods.Common/Traits/Render/WithMakeAnimation.cs
+!engine/OpenRA.Mods.Common/Activities/Transform.cs
+!engine/OpenRA.Mods.Common/Traits/Sellable.cs
 !engine/OpenRA.Mods.Common/Graphics/
 !engine/OpenRA.Mods.Common/Graphics/SelectionBarsAnnotationRenderable.cs
 

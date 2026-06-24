@@ -67,3 +67,16 @@ DinoVoice:
 		Burned: TDR_SFX_DINODIE1
 		Zapped: TDR_SFX_DINODIE1
 		Poisoned: TDR_SFX_DINODIE1
+
+# === Age of Tiberium (aotmod) - NOD Cyborg ===
+# TS-Originalsounds aus speech02.mix (jetzt als optionales Package gemountet).
+# Dateinamen: 22-i000.aud = Select, 22-i008.aud = Move/Attack, 22-n104.aud = Die.
+CyborgVoice:
+	Voices:
+		Select: 22-i000, 22-i002, 22-i006
+		Action: 22-i008, 22-i010, 22-i014, 22-i016, 22-i020
+		Attack: 22-i008, 22-i010, 22-i012, 22-i018
+		Die: 22-n104, 22-n106, 22-n108
+		Burned: 22-n104, 22-n106, 22-n108
+		Zapped: 22-n104, 22-n106, 22-n108
+		Poisoned: 22-n104, 22-n106, 22-n108

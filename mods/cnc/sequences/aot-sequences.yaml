@@ -1,9 +1,39 @@
 # === Age of Tiberium (aotmod) sequences ===
 
+# === HTNK Basis-Sprite ohne Raketenwerfer ===
+# Turret-Frames (32-63) mit grün gefärbten Raketen-Boxen; wird von aot-htnk-base genutzt.
+aot-htnk-norocket:
+	idle:
+		Filename: htnk.shp
+		RemasteredFilename: aot-htnk-norocket.zip
+		Facings: 32
+		UseClassicFacings: True
+	turret:
+		Filename: htnk.shp
+		RemasteredFilename: aot-htnk-norocket.zip
+		Start: 32
+		Facings: 32
+		UseClassicFacings: True
+	muzzle:
+		Filename: gunfire.shp
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\GUNFIRE.ZIP
+	icon:
+		Filename: htnk_base.png
+		RemasteredFilename: htnk_base.png
+		Length: 1
+
 # === HQ (GDI): EYE-Sprites nach Ion Cannon Upgrade ===
 # Erweitert das hq-Image-Set um EYE-Sequences für den Zustand nach aot-ion-cannon-upgrade.
 # eye.shp ist ein CnC-Basisasset; EYE.ZIP ist der HD-Remaster-Pfad.
 hq:
+	aot-base-icon:
+		Filename: hq_base.png
+		RemasteredFilename:
+		Length: 1
+	aot-ion-icon:
+		Filename: hq_ion.png
+		RemasteredFilename:
+		Length: 1
 	aot-eye-idle:
 		Filename: eye.shp
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\EYE.ZIP
@@ -24,15 +54,24 @@ hq:
 # Icon: domeicon.shp aus allies.mix (Classic Content Installer), bis dahin kein Icon.
 aot-nod-radar:
 	idle:
-		Filename: aot-nod-radar-idle-0000.png
+		Filename: aot-nod-radar-age0-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.18
+		Scale: 0.37
+		Offset: 0,-5
 	damaged-idle:
-		Filename: aot-nod-radar-damaged-idle-0000.png
+		Filename: aot-nod-radar-age0-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.18
+		Scale: 0.37
+		Offset: 0,-5
+	aot-age1-idle:
+		Filename: aot-nod-radar-age1-idle.png
+		RemasteredFilename:
+		Length: 12
+		Tick: 120
+		Scale: 0.57
+		Offset: 0,-30
 	make:
 		Filename: weapmake.shp
 		RemasteredFilename:
@@ -44,10 +83,68 @@ aot-nod-radar:
 			SNOW: bib3.sno
 			TEMPERAT: bib3.tem
 		Length: *
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\TEMPERATE\BIB3\BIB3.TEM-{0:D4}.DDS
+			Count: 4
+		RemasteredTilesetFilenamesPattern:
+			WINTER: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\BIB3.WIN\BIB3.WIN-{0:D4}.DDS
+				Count: 4
+			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\BIB3.DES\BIB3.DES-{0:D4}.DDS
+				Count: 4
+		RemasteredPremultiplied: false
 	icon:
 		Filename: aot-nod-radar-icon.png
 		RemasteredFilename:
 		Length: 1
+	aot-age2-icon:
+		Filename: aot-nod-radar-age2-icon.png
+		RemasteredFilename:
+		Length: 1
+	# === TS NOD Radar (NARADR) ab Age 2 — Zwei-Layer + animierte Schüssel ===
+	# Alle age2-Sequenzen gleiche Scale/Offset → Basis, Schüssel, Remap, Make decken sich.
+	aot-age2-idle:
+		Filename: radar-base-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.5
+		Offset: 0,10
+	damaged-aot-age2-idle:
+		Filename: radar-base-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.5
+		Offset: 0,10
+	aot-age2-remap:
+		Filename: radar-base-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.5
+		Offset: 0,10
+	damaged-aot-age2-remap:
+		Filename: radar-base-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.5
+		Offset: 0,10
+	aot-age2-dish:
+		Filename: radar-dish.png
+		RemasteredFilename:
+		Length: 24
+		Tick: 120
+		Scale: 0.5
+		Offset: 0,10
+	aot-age2-dish-remap:
+		Filename: radar-dish-remap.png
+		RemasteredFilename:
+		Length: 24
+		Tick: 120
+		Scale: 0.5
+		Offset: 0,10
+	aot-age2-make:
+		Filename: radar-make.png
+		RemasteredFilename:
+		Length: 20
+		Scale: 0.5
+		Offset: 0,10
 # === Ende aotmod ===
 
 # === Recon Jeep: RA Allied Jeep Sprites ===
@@ -71,18 +168,32 @@ fact:
 	aot-ra-idle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\FACT.ZIP
 		RemasteredLength: 1
+		Scale: 0.85
 	damaged-aot-ra-idle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\FACT.ZIP
 		RemasteredStart: 26
 		RemasteredLength: 1
+		Scale: 0.85
+	aot-ra-make:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\FACT.ZIP
+		RemasteredStart: 1
+		RemasteredLength: 25
+		Scale: 0.85
+	damaged-aot-ra-make:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\FACT.ZIP
+		RemasteredStart: 27
+		RemasteredLength: 25
+		Scale: 0.85
 	aot-ra-build:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\FACT.ZIP
 		RemasteredStart: 1
 		RemasteredLength: 25
+		Scale: 0.85
 	damaged-aot-ra-build:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\FACT.ZIP
 		RemasteredStart: 27
 		RemasteredLength: 25
+		Scale: 0.85
 # === Ende aotmod ===
 
 # === MCV: RA sprites für Age 0 ===
@@ -98,6 +209,19 @@ mcv:
 		Length: 1
 	aot-ra-idle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\MCV.ZIP
+		Facings: 32
+		UseClassicFacings: True
+	# Testrender (VXL→PNG Sprite-Baker): TS-MCV-Voxel als gebackene Sprites, ab Age 2.
+	aot-age2-idle:
+		RemasteredFilename: aot-mcv-test.zip
+		Facings: 32
+		UseClassicFacings: True
+	# Player-Color-Overlay (indizierte Sheet, Indizes 176-191 → player-Palette).
+	# MUSS RemasteredFilename sein (nicht Filename): sonst skaliert GetScale() um den
+	# classicUpscaleFactor hoch → Overlay viel größer als der Body.
+	aot-age2-remap:
+		RemasteredFilename: aot-mcv-test-remap.png
+		RemasteredPremultiplied: False
 		Facings: 32
 		UseClassicFacings: True
 # === Ende aotmod ===
@@ -125,7 +249,7 @@ oret:
 		Length: 1
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - Light Factory (LITE): RA War Factory Sprites ===
+# === Age of Tiberium (aotmod) - Vehicle Factory (LITE): RA War Factory Sprites ===
 lite:
 	idle:
 		Filename: lite-body.png
@@ -166,15 +290,38 @@ lite:
 			TEMPERAT: bib2.tem
 			JUNGLE: bib2.jun
 		Length: *
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\TEMPERATE\BIB2\BIB2.TEM-{0:D4}.DDS
+			Count: 6
+		RemasteredTilesetFilenamesPattern:
+			WINTER: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\BIB2.WIN\BIB2.WIN-{0:D4}.DDS
+				Count: 6
+			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\BIB2.DES\BIB2.DES-{0:D4}.DDS
+				Count: 6
+		RemasteredPremultiplied: false
 	icon:
 		Filename: lite_base.png
 		RemasteredFilename:
 		Length: 1
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - ATEC (Allied Tech Centre): RA ATEK Sprites ===
-# 2 Frames: atek-0000 = idle, atek-0001 = damaged. Statisch wie DOME.
-# Make-Animation: weapmake.shp (kein eigenes Make-Sprite vorhanden).
+# === Age of Tiberium (aotmod) - PROC (Tiberium Refinery): Custom Icon ===
+proc:
+	icon:
+		Filename: proc_base.png
+		RemasteredFilename:
+		Length: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - WEAP (Weapons Factory): Custom Icon ===
+weap:
+	icon:
+		Filename: weap_base.png
+		RemasteredFilename:
+		Length: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - ATEC (Allied Tech Centre) ===
+# Age 0: RA ATEK Sprite (atec-idle.png). Age 1+: TD MISS (Technology Center, MISS.ZIP).
 atec:
 	idle:
 		Filename: atec-idle.png
@@ -186,25 +333,129 @@ atec:
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.17
+	aot-td-idle:
+		Filename: atec-td-idle.png
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\MISS.ZIP
+		RemasteredStart: 0
+		RemasteredLength: 1
+		Scale: 0.85
+	aot-td-damaged-idle:
+		Filename: atec-td-damaged-idle.png
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\MISS.ZIP
+		RemasteredStart: 1
+		RemasteredLength: 1
+		Scale: 0.85
 	make:
 		Filename: weapmake.shp
 		RemasteredFilename:
 		Tick: 80
+	aot-td-make:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\MISS.ZIP
+		RemasteredStart: 0
+		RemasteredLength: 1
+		Scale: 0.85
 	place:
 		Filename: atec-idle.png
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.17
+	aot-td-place:
+		Filename: atec-td-idle.png
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\MISS.ZIP
+		RemasteredStart: 0
+		RemasteredLength: 1
+		Scale: 0.85
 	bib:
 		TilesetFilenames:
-			DESERT: bib3.des
-			WINTER: bib3.win
-			SNOW: bib3.sno
-			TEMPERAT: bib3.tem
+			DESERT: bib2.des
+			WINTER: bib2.win
+			SNOW: bib2.sno
+			TEMPERAT: bib2.tem
 		Length: *
-		Offset: 0,0
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\TEMPERATE\BIB2\BIB2.TEM-{0:D4}.DDS
+			Count: 6
+		RemasteredTilesetFilenamesPattern:
+			WINTER: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\BIB2.WIN\BIB2.WIN-{0:D4}.DDS
+				Count: 6
+			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\BIB2.DES\BIB2.DES-{0:D4}.DDS
+				Count: 6
+		RemasteredPremultiplied: false
 	icon:
 		Filename: atec_base.png
+		RemasteredFilename:
+		Length: 1
+	aot-age1-icon:
+		Filename: atec_age_1.png
+		RemasteredFilename:
+		Length: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - STEC Sprites ===
+# Age 0: RA STEKMAKE Frame 19 (stec-idle.png). Age 1+: TD BIO (Bio Research Lab, BIO.ZIP).
+stec:
+	idle:
+		Filename: stec-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.17
+	damaged-idle:
+		Filename: stec-damaged-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.17
+	aot-td-idle:
+		Filename: stec-td-idle.png
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\BIO.ZIP
+		RemasteredStart: 0
+		RemasteredLength: 1
+		Scale: 0.85
+	aot-td-damaged-idle:
+		Filename: stec-td-damaged-idle.png
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\BIO.ZIP
+		RemasteredStart: 1
+		RemasteredLength: 1
+		Scale: 0.85
+	make:
+		Filename: weapmake.shp
+		RemasteredFilename:
+		Tick: 80
+	aot-td-make:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\BIO.ZIP
+		RemasteredStart: 0
+		RemasteredLength: 1
+		Scale: 0.85
+	place:
+		Filename: stec-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.17
+	aot-td-place:
+		Filename: stec-td-idle.png
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\BIO.ZIP
+		RemasteredStart: 0
+		RemasteredLength: 1
+		Scale: 0.85
+	bib:
+		TilesetFilenames:
+			DESERT: bib2.des
+			WINTER: bib2.win
+			SNOW: bib2.sno
+			TEMPERAT: bib2.tem
+		Length: *
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\TEMPERATE\BIB2\BIB2.TEM-{0:D4}.DDS
+			Count: 6
+		RemasteredTilesetFilenamesPattern:
+			WINTER: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\BIB2.WIN\BIB2.WIN-{0:D4}.DDS
+				Count: 6
+			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\BIB2.DES\BIB2.DES-{0:D4}.DDS
+				Count: 6
+		RemasteredPremultiplied: false
+	icon:
+		Filename: stec_base.png
+		RemasteredFilename:
+		Length: 1
+	aot-age1-icon:
+		Filename: stec_age_1.png
 		RemasteredFilename:
 		Length: 1
 # === Ende aotmod ===
@@ -252,4 +503,563 @@ icon:
 	aot-satellite:
 		Filename: aot-satellite-icon.png
 		Length: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - aot-heli: Gemeinsamer Image-Block für Apache + ORCA ===
+# Beide Sprite-Sets in einem Block — ermöglicht konditionellen Sprite-Switch on-the-fly.
+# Apache (Tier 0): aot-apache-idle / aot-apache-rotor / aot-apache-slow-rotor (RA Longbow)
+# ORCA (Tier 1): idle / move (CnC ORCA)
+aot-heli:
+	Defaults:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\ORCA.ZIP
+	idle:
+		Filename: orca.shp
+		Facings: 32
+		UseClassicFacings: True
+	move:
+		Filename: orca.shp
+		Start: 32
+		Facings: 32
+		UseClassicFacings: True
+	aot-apache-idle:
+		Filename: heli.shp
+		Facings: 32
+		UseClassicFacings: True
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\HELI.ZIP
+	aot-apache-rotor:
+		Filename: lrotor.shp
+		Length: 4
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\COMMON\VFX\LROTOR.ZIP
+		RemasteredAlpha: 0.5
+	aot-apache-slow-rotor:
+		Filename: lrotor.shp
+		Start: 4
+		Length: 8
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\COMMON\VFX\LROTOR.ZIP
+	icon:
+		Filename: helo_base.png
+		Length: 1
+		RemasteredFilename:
+	aot-orca-icon:
+		Filename: helo_orca.png
+		Length: 1
+		RemasteredFilename:
+
+aot-upgrade-orca:
+	icon:
+		Filename: helo_orca.png
+		Length: 1
+		RemasteredFilename:
+
+# === Age of Tiberium (aotmod) - aot-hind: Gemeinsamer Image-Block für HIND (Tier 0) + Harpy (Tier 1) ===
+# HIND (Tier 0): RA Soviet HIND Sprites (hind.shp aus RA bits)
+# Harpy (Tier 1, nach Harpy Upgrade): Original CnC NOD Helicopter Sprites (heli.shp)
+aot-hind:
+	Defaults:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\HELI.ZIP
+	idle:
+		Filename: heli.shp
+		Facings: 32
+		UseClassicFacings: True
+	move:
+		Filename: heli.shp
+		Facings: 32
+		UseClassicFacings: True
+	rotor:
+		Filename: lrotor.shp
+		Length: 4
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\COMMON\VFX\LROTOR.ZIP
+		RemasteredAlpha: 0.5
+	slow-rotor:
+		Filename: lrotor.shp
+		Start: 4
+		Length: 8
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\COMMON\VFX\LROTOR.ZIP
+	aot-hind-idle:
+		Filename: hind.shp
+		Facings: 32
+		UseClassicFacings: True
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\HIND.ZIP
+	aot-hind-rotor:
+		Filename: lrotorlg.shp
+		Length: 4
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\COMMON\VFX\LROTOR.ZIP
+		RemasteredAlpha: 0.5
+	aot-hind-slow-rotor:
+		Filename: lrotorlg.shp
+		Start: 4
+		Length: 8
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\COMMON\VFX\LROTOR.ZIP
+	icon:
+		Filename: hind_base.png
+		Length: 1
+		RemasteredFilename:
+	aot-harpy-icon:
+		Filename: hind_hrpy.png
+		Length: 1
+		RemasteredFilename:
+	# Testrender (VXL→PNG): TS-Harpy-Voxel (apache.vxl) als Harpy-Body ab Upgrade.
+	aot-harpy-test-idle:
+		RemasteredFilename: aot-harpy-test.zip
+		Facings: 32
+		UseClassicFacings: True
+	# Player-Color-Overlay (indizierte Sheet, Indizes 176-191 → player-Palette).
+	aot-harpy-test-remap:
+		RemasteredFilename: aot-harpy-test-remap.png
+		RemasteredPremultiplied: False
+		Facings: 32
+		UseClassicFacings: True
+
+aot-upgrade-harpy:
+	icon:
+		Filename: hind_hrpy.png
+		Length: 1
+		RemasteredFilename:
+
+# === Age of Tiberium (aotmod) - aot-ajet: AJET Fighter Sprites (A10-Sprites kopiert) ===
+# Sprites identisch zu A10 — A10-Aktor selbst bleibt unverändert.
+aot-ajet:
+	Defaults:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\A10.ZIP
+	idle:
+		Filename: a10.shp
+		Facings: 32
+		UseClassicFacings: True
+	muzzle:
+		Filename: minigun.shp
+		Length: 6
+		Facings: 8
+		RemasteredFilename:
+	icon:
+		Filename: ajet_icon.png
+		Length: 1
+		RemasteredFilename:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - HAND: RA Soviet Barracks Sprites für Age 0 ===
+# BARR.ZIP: 20 Frames — 0-9 undamaged idle, 10-19 damaged idle
+# BARRMAKE.ZIP: 13 Frames — Build-Animation
+hand:
+	aot-ra-icon:
+		Filename: hand_base.png
+		RemasteredFilename:
+		Length: 1
+	aot-td-icon:
+		Filename: hand_ages.png
+		RemasteredFilename:
+		Length: 1
+	aot-ra-idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\BARR.ZIP
+		RemasteredLength: 1
+	damaged-aot-ra-idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\BARR.ZIP
+		RemasteredStart: 10
+		RemasteredLength: 1
+	aot-ra-make:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\BARRMAKE.ZIP
+		RemasteredLength: 13
+	damaged-aot-ra-make:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\BARRMAKE.ZIP
+		RemasteredLength: 13
+	aot-ra-build:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\BARRMAKE.ZIP
+		RemasteredLength: 13
+	damaged-aot-ra-build:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\BARRMAKE.ZIP
+		RemasteredLength: 13
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - FIX: RA Repair Facility Sprites für Age 0 ===
+# FIX.ZIP: 14 Frames — 0-6 undamaged idle, 7-13 damaged idle
+# FIXMAKE.ZIP: 14 Frames — Build-Animation
+fix:
+	aot-ra-icon:
+		Filename: fix_base.png
+		RemasteredFilename:
+		Length: 1
+	aot-td-icon:
+		Filename: fix_ages.png
+		RemasteredFilename:
+		Length: 1
+	aot-ra-idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\FIX.ZIP
+		RemasteredLength: 1
+	damaged-aot-ra-idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\FIX.ZIP
+		RemasteredStart: 7
+		RemasteredLength: 1
+	aot-ra-make:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\FIXMAKE.ZIP
+		RemasteredLength: 14
+	damaged-aot-ra-make:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\FIXMAKE.ZIP
+		RemasteredLength: 14
+	aot-ra-build:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\FIXMAKE.ZIP
+		RemasteredLength: 14
+	damaged-aot-ra-build:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\FIXMAKE.ZIP
+		RemasteredLength: 14
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - PYLE: RA Allied Barracks Sprites für Age 0 ===
+# TENT.ZIP: 20 Frames — 0-9 undamaged idle, 10-19 damaged idle
+# TENTMAKE.ZIP: 13 Frames — Build-Animation
+pyle:
+	aot-ra-icon:
+		Filename: pyle_base.png
+		RemasteredFilename:
+		Length: 1
+	aot-td-icon:
+		Filename: pyle_ages.png
+		RemasteredFilename:
+		Length: 1
+	aot-ra-idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\TENT.ZIP
+		RemasteredLength: 1
+	damaged-aot-ra-idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\TENT.ZIP
+		RemasteredStart: 10
+		RemasteredLength: 1
+	aot-ra-make:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\TENTMAKE.ZIP
+		RemasteredLength: 13
+	damaged-aot-ra-make:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\TENTMAKE.ZIP
+		RemasteredLength: 13
+	aot-ra-build:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\TENTMAKE.ZIP
+		RemasteredLength: 13
+	damaged-aot-ra-build:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\TENTMAKE.ZIP
+		RemasteredLength: 13
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - NUKE Power Plant: RA POWR vor Age 1, TD danach ===
+# POWR.ZIP: RA Allied Power Plant. Frame 0 = undamaged, Frame 1 = damaged.
+# POWRMAKE.ZIP: Build-Animation — Frameanzahl ggf. anpassen wenn abweichend von 13.
+# nuke_turbine.png wird benötigt sobald Turbine-Upgrade-Sprite vorliegt.
+nuke:
+	idle:
+		Scale: 0.87
+	damaged-idle:
+		Scale: 0.87
+	aot-ra-icon:
+		Filename: nuke_base.png
+		RemasteredFilename:
+		Length: 1
+	aot-td-icon:
+		Filename: nuke_ages.png
+		RemasteredFilename:
+		Length: 1
+	aot-turbine-icon:
+		Filename: nuke_turbine.png
+		RemasteredFilename:
+		Length: 1
+	aot-ra-idle:
+		Filename: nuke-ra-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.17
+	damaged-aot-ra-idle:
+		Filename: nuke-ra-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.17
+	# GDI Turbinen-Kraftwerk (TS gtpowr.shp, silbergrau + Turbinen-Kuppeln) — Sprite ab Turbine-Upgrade.
+	# Scale 0.5 (= 0.4 +25%); Offset 0,24 schiebt das Gebäude ~halbe Zelle nach unten.
+	aot-turbine-idle:
+		Filename: nuke-turbine-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+		Offset: 0, 10
+	damaged-aot-turbine-idle:
+		Filename: nuke-turbine-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+		Offset: 0, 10
+	# Player-Color-Overlay (indiziert, Indizes 176-191 → player-Palette). Gleiche Scale/Offset
+	# wie der Body, damit es deckungsgleich sitzt. Filename (klassisch) = gleicher Scale-Pfad.
+	aot-turbine-remap:
+		Filename: nuke-turbine-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+		Offset: 0, 10
+	damaged-aot-turbine-remap:
+		Filename: nuke-turbine-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+		Offset: 0, 10
+	aot-ra-make:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\POWRMAKE.ZIP
+		RemasteredLength: 5
+	# TS GDI-Kraftwerk Auf-/Abbau-Animation (gtpowrmk.shp Frames 0-19, silbergrau).
+	# 20er-Sheet (FrameSize/FrameAmount eingebettet). Scale/Offset wie Body → deckungsgleich.
+	aot-turbine-make:
+		Filename: nuke-turbine-make.png
+		RemasteredFilename:
+		Length: 20
+		Scale: 0.55
+		Offset: 0, 24
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - NUK2 Advanced Power Plant: RA APWR vor Age 1, TD danach ===
+# APWR.ZIP: RA Soviet Advanced Power Plant. Sprite 0 = undamaged static, Sprite 1 = animiert.
+# APWRMAKE.ZIP: Build-Animation, 3 Frames.
+nuk2:
+	idle:
+		Scale: 0.87
+	damaged-idle:
+		Scale: 0.87
+	aot-ra-icon:
+		Filename: nuk2_base.png
+		RemasteredFilename:
+		Length: 1
+	aot-td-icon:
+		Filename: nuk2_ages.png
+		RemasteredFilename:
+		Length: 1
+	aot-ra-idle:
+		Filename: nuk2-ra-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.17
+	damaged-aot-ra-idle:
+		Filename: nuk2-ra-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.17
+	aot-ra-make:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\APWRMAKE.ZIP
+		RemasteredLength: 3
+	bib:
+		TilesetFilenames:
+			DESERT: bib2.des
+			WINTER: bib2.win
+			SNOW: bib2.sno
+			TEMPERAT: bib2.tem
+		Length: *
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Turbine Technology Upgrade Icon ===
+aot-upgrade-nuke-turbine:
+	icon:
+		Filename: nuke_turbine.png
+		RemasteredFilename:
+		Length: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - NOD Cyborg (TS-Infanterie-Import) ===
+# cyborg.shp direkt referenziert (klassischer Pfad) + aot-ts-player-Palette (House-Color 16-31).
+# Frame-Layout aus TS engine/mods/ts/sequences/infantry.yaml. Scale/Offset Startwerte.
+# crippled-* Sequences: ab Critical-HP aktiv via TakeCover (ProneSequencePrefix: crippled-)
+cyborg:
+	Defaults:
+		Filename: cyborg.shp
+		Scale: 0.5
+		Tick: 80
+	stand:
+		Facings: 8
+	run:
+		Start: 8
+		Length: 6
+		Facings: 8
+	idle1:
+		Start: 56
+		Length: 15
+	idle2:
+		Start: 71
+		Length: 15
+	crippled-run:
+		Start: 86
+		Length: 6
+		Facings: 8
+	crippled-stand:
+		Start: 86
+		Facings: 8
+		Stride: 6
+	attack:
+		Start: 164
+		Length: 6
+		Facings: 8
+	crippled-attack:
+		Start: 212
+		Length: 6
+		Facings: 8
+	die:
+		Facings: 8
+		Length: 1
+	die-crushed:
+		Length: 1
+	icon:
+		Filename: inf_cyborg.png
+		Length: 1
+		RemasteredFilename:
+
+# === Age of Tiberium (aotmod) - TTNK Heavy Tank ===
+# Basis: ltnk.shp (liefert Facing-Count 32), HD: aot-ttnk-3tnk.zip (3TNK-Sprites).
+ttnk:
+	Defaults:
+		Filename: ltnk.shp
+		RemasteredFilename: aot-ttnk-3tnk.zip
+	idle:
+		Facings: 32
+		UseClassicFacings: True
+	turret:
+		Start: 32
+		Facings: 32
+	muzzle:
+		Filename: gunfire2.shp
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\GUNFIRE.ZIP
+		Length: *
+	icon:
+		Filename: ttnk_base.png
+		RemasteredFilename:
+		Length: 1
+	# Tick Tank Upgrade (Phase 2) — TS Voxel-Baked Sprites
+	# Flame Tank Upgrade — FTNK Sprites
+	aot-flame-idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\FTNK.ZIP
+		Facings: 32
+		UseClassicFacings: True
+	# Toxin Tank Upgrade — recolored FTNK, gas tanks grün
+	aot-toxin-idle:
+		RemasteredFilename: aot-ttnk-toxin.zip
+		Facings: 32
+		UseClassicFacings: True
+	aot-flame-muzzle:
+		Combine:
+			0:
+				Filename: flame-n.shp
+				RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\FLAME-N.ZIP
+				Length: *
+				Offset: 3,6
+				RemasteredOffset: 16, 32
+			1:
+				Filename: flame-nw.shp
+				RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\FLAME-NW.ZIP
+				Length: *
+				Offset: 8,7
+				RemasteredOffset: 43, 37
+			2:
+				Filename: flame-w.shp
+				RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\FLAME-W.ZIP
+				Length: *
+				Offset: 8,2
+				RemasteredOffset: 43, 11
+			3:
+				Filename: flame-sw.shp
+				RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\FLAME-SW.ZIP
+				Length: *
+				Offset: 7,-2
+				RemasteredOffset: 37, -11
+			4:
+				Filename: flame-s.shp
+				RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\FLAME-S.ZIP
+				Length: *
+				Offset: 3,-2
+				RemasteredOffset: 16, -11
+			5:
+				Filename: flame-se.shp
+				RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\FLAME-SE.ZIP
+				Length: *
+				Offset: -5,-2
+				RemasteredOffset: -27, -11
+			6:
+				Filename: flame-e.shp
+				RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\FLAME-E.ZIP
+				Length: *
+				Offset: -7,2
+				RemasteredOffset: -37, 11
+			7:
+				Filename: flame-ne.shp
+				RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\FLAME-NE.ZIP
+				Length: *
+				Offset: -7,8
+				RemasteredOffset: -37, 43
+		Facings: 8
+		Length: 13
+	aot-toxin-muzzle:
+		Combine:
+			0:
+				Filename: chem-n.shp
+				RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\CHEM-N.ZIP
+				Length: *
+				Offset: 1,2
+				RemasteredOffset: 5, 11
+			1:
+				Filename: chem-nw.shp
+				RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\CHEM-NW.ZIP
+				Length: *
+				Offset: 8,2
+				RemasteredOffset: 43, 11
+			2:
+				Filename: chem-w.shp
+				RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\CHEM-W.ZIP
+				Length: *
+				Offset: 8,-3
+				RemasteredOffset: 43, -16
+			3:
+				Filename: chem-sw.shp
+				RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\CHEM-SW.ZIP
+				Length: *
+				Offset: 7,-6
+				RemasteredOffset: 37, -32
+			4:
+				Filename: chem-s.shp
+				RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\CHEM-S.ZIP
+				Length: *
+				Offset: 1,-6
+				RemasteredOffset: 27, -32
+			5:
+				Filename: chem-se.shp
+				RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\CHEM-SE.ZIP
+				Length: *
+				Offset: -5,-6
+				RemasteredOffset: -27, -32
+			6:
+				Filename: chem-e.shp
+				RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\CHEM-E.ZIP
+				Length: *
+				Offset: -7,-3
+				RemasteredOffset: -37, -16
+			7:
+				Filename: chem-ne.shp
+				RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\CHEM-NE.ZIP
+				Length: *
+				Offset: -3,2
+				RemasteredOffset: -16, 11
+		Facings: 8
+		Length: 13
+	aot-flame-icon:
+		Filename: ttnk_flame.png
+		RemasteredFilename:
+		Length: 1
+	aot-toxin-icon:
+		Filename: ttnk_gas.png
+		RemasteredFilename:
+		Length: 1
+	aot-cloak-icon:
+		Filename: ttnk_cloak.png
+		RemasteredFilename:
+		Length: 1
+
+ttnk.destroyed:
+	idle:
+		Filename: ltnk.shp
+		RemasteredFilename: aot-ttnk-3tnk.zip
+		Facings: 32
+		UseClassicFacings: True
+		ZOffset: -512
+	turret:
+		Filename: ltnk.shp
+		RemasteredFilename: aot-ttnk-3tnk.zip
+		Start: 32
+		Facings: 32
+		UseClassicFacings: True
+		ZOffset: -512
 # === Ende aotmod ===

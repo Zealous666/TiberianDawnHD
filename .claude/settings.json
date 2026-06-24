@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -t /Users/moritzgiuliani/Library/Application Support/OpenRA/Logs/*)",
+      "Bash(ls /Users/moritzgiuliani/Library/Application Support/OpenRA/Logs/*)",
+      "Bash(cat /Users/moritzgiuliani/Library/Application Support/OpenRA/Logs/*)",
+      "Bash(find /Users/moritzgiuliani/Documents/openRA Projekte/TiberianDawnHD*)",
+      "Bash(grep -rn * /Users/moritzgiuliani/Documents/openRA Projekte/TiberianDawnHD*)",
+      "Bash(grep -n * /Applications/OpenRA*)",
+      "Bash(sed -n * /Applications/OpenRA*)"
+    ]
+  }
+}

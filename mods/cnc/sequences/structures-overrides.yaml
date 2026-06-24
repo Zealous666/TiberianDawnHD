@@ -158,6 +158,8 @@ afld:
 				Count: 8
 		RemasteredPremultiplied: false
 	icon:
+		Filename: afld_icon.png
+		Length: 1
 		RemasteredFilename:
 
 hq:
@@ -183,13 +185,13 @@ nuk2:
 	make:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\NUK2MAKE.ZIP
 	bib:
-		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\TEMPERATE\BIB3\BIB3.TEM-{0:D4}.DDS
-			Count: 4
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\TEMPERATE\BIB2\BIB2.TEM-{0:D4}.DDS
+			Count: 6
 		RemasteredTilesetFilenamesPattern:
-			WINTER: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\BIB3.WIN\BIB3.WIN-{0:D4}.DDS
-				Count: 4
-			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\BIB3.DES\BIB3.DES-{0:D4}.DDS
-				Count: 4
+			WINTER: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\BIB2.WIN\BIB2.WIN-{0:D4}.DDS
+				Count: 6
+			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\BIB2.DES\BIB2.DES-{0:D4}.DDS
+				Count: 6
 		RemasteredPremultiplied: false
 	icon:
 		RemasteredFilename:
@@ -201,6 +203,51 @@ hpad:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\HPADMAKE.ZIP
 	icon:
 		RemasteredFilename:
+	hpad-blue-icon:
+		Filename: hpad_blue.png
+		Length: 1
+		RemasteredFilename:
+	hpad-red-icon:
+		Filename: hpad_red.png
+		Length: 1
+		RemasteredFilename:
+
+# === Age of Tiberium (aotmod) - AFLT: Air Field Sprites (RA Soviet Airfield) ===
+# 0–7:  Idle-Loop unbeschädigt (leuchtende Lichter)
+# 8–15: Idle-Loop beschädigt (gleiche Lichter, Schadensstufen)
+# active / damaged-active spielen während Resupply (WithResupplyAnimation Sequence: "active")
+aflt:
+	Defaults:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\AFLD.ZIP
+	idle:
+		Length: 1
+		ZOffset: -1023
+	active:
+		Length: 8
+		Tick: 100
+		ZOffset: -1023
+	damaged-idle:
+		Start: 8
+		Length: 1
+		ZOffset: -1023
+	damaged-active:
+		Start: 8
+		Length: 8
+		Tick: 100
+		ZOffset: -1023
+	make:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\AFLDMAKE.ZIP
+		Length: 11
+		Tick: 80
+	icon:
+		Filename: aflt_blue.png
+		Length: 1
+		RemasteredFilename:
+	aflt-gdi-icon:
+		Filename: aflt_blue.png
+		Length: 1
+		RemasteredFilename:
+# === Ende aotmod ===
 
 fix:
 	Defaults:

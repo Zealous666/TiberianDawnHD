@@ -274,7 +274,7 @@ Container@OBSERVER_WIDGETS:
 					Y: 4
 					Width: 32
 					Height: 16
-				Label@LABEL:
+				LabelWithTooltip@LABEL:
 					X: 40
 					Width: PARENT_WIDTH
 					Height: 25
@@ -1119,7 +1119,7 @@ Container@OBSERVER_WIDGETS:
 							Width: PARENT_WIDTH
 							Height: PARENT_HEIGHT
 							Color: 00000090
-						LineGraph@INCOME_GRAPH:
+						ScrollableLineGraph@INCOME_GRAPH:
 							X: 0
 							Y: 0
 							Width: PARENT_WIDTH - 5
@@ -1145,7 +1145,7 @@ Container@OBSERVER_WIDGETS:
 							Width: PARENT_WIDTH
 							Height: PARENT_HEIGHT
 							Color: 00000090
-						LineGraph@ARMY_VALUE_GRAPH:
+						ScrollableLineGraph@ARMY_VALUE_GRAPH:
 							X: 0
 							Y: 0
 							Width: PARENT_WIDTH - 5

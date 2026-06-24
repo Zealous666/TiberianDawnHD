@@ -27,7 +27,7 @@ aot-MtnkPredator:
 aot-MtnkRailgun:
 	ReloadDelay: 50
 	Range: 6c0
-	Report: obelray1.aud
+	Report: bigggun1.aud
 	Projectile: LaserZap
 		Width: 50
 		Color: A0C8FF
@@ -52,7 +52,7 @@ aot-HtnkLaser:
 	Burst: 2
 	BurstDelays: 8
 	Range: 6c0
-	Report: obelray1.aud
+	Report: bigggun1.aud
 	Projectile: LaserZap
 		Width: 50
 		Color: A0C8FF
@@ -90,3 +90,120 @@ aot-LtnkLaser:
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: Scorch
 		InvalidTargets: Vehicle, Structure, Wall, Husk, Trees, Creep
+# === Age of Tiberium (aotmod) - Apache AG Missiles ===
+OrcaAGMissiles:
+	Warhead@1Dam: SpreadDamage
+		Damage: 2000
+
+# Apache: gleicher Schaden wie ORCA (2000), aber kein AA.
+aot-ApacheAGMissiles:
+	Inherits: OrcaAGMissiles
+	Warhead@1Dam: SpreadDamage
+		Damage: 2000
+
+# === Age of Tiberium (aotmod) - HIND / Harpy Waffen ===
+# HIND: 1500 Schaden, Burst 2, kein AA.
+# Harpy: 2000 Schaden, Burst 3, kein AA.
+aot-HindAGGun:
+	Inherits: HeliAGGun
+	Burst: 2
+	BurstDelays: 0
+	ReloadDelay: 40
+	Warhead@1Dam: SpreadDamage
+		Damage: 1500
+
+aot-HarpyAGGun:
+	Inherits: HeliAGGun
+	Burst: 2
+	BurstDelays: 0
+	ReloadDelay: 20
+	Warhead@1Dam: SpreadDamage
+		Damage: 2000
+
+# === Age of Tiberium (aotmod) - AJET Waffen ===
+# Basieren auf A10-Waffen (Vulcan/Napalm), aber ohne Burst-Offsets die für den
+# stationären A10-Überflug ausgelegt sind. AJET greift per AttackAircraft an.
+
+# Vulcan-Kanone ohne FirstBurst/FollowingBurst-Offsets — trifft direkt das Ziel
+aot-AjetVulcan:
+	Inherits: Vulcan
+	Range: 5c0
+	FirstBurstTargetOffset: 0,0,0
+	FollowingBurstTargetOffset: 0,0,0
+
+# Napalm-Kette: 5 Bomben mit Fallverzögerung (GravityBomb Delay)
+aot-AjetNapalm:
+	Inherits: ^FlameWeapon
+	ReloadDelay: 4
+	Range: 5c0
+	Burst: 5
+	BurstDelays: 1
+	-Projectile:
+	Projectile: GravityBomb
+		Image: BOMBLET
+		Shadow: true
+		Delay: 8
+	Warhead@1Dam: SpreadDamage
+		Spread: 341
+		Damage: 2250
+		Falloff: 1000, 368, 135, 50, 18, 7, 0
+		Versus:
+			Wood: 35
+			Heavy: 80
+			Concrete: 80
+	Warhead@3Eff: CreateEffect
+		Explosions: med_napalm
+
+# === Age of Tiberium (aotmod) - TTNK Battle Tank: Dual-Kanone ===
+# Tier 0 NOD: Burst:2 wie 120mmDual, aber Damage 2000 statt 4000 (50% weniger als HTNK).
+# Einzelner LocalOffset (2TNK-Sprite hat nur eine Kanone), trotzdem zweimal feuern.
+aot-TtnkDual:
+	Inherits: ^BallisticWeapon
+	Burst: 2
+	BurstDelays: 8
+	Report: tnkfire4.aud
+	Warhead@1Dam: SpreadDamage
+		Damage: 2000
+
+aot-TtnkChemspray:
+	Inherits: Chemspray
+	Burst: 2
+	BurstDelays: 10
+
+aot-TtnkTick:
+	Inherits: ^BallisticWeapon
+	Report: tnkfire4.aud
+	Warhead@1Dam: SpreadDamage
+		Damage: 5000
+
+# === Age of Tiberium (aotmod) - NOD Cyborg: Chain Gun ===
+# Repliziert TS Vulcan3 (Burst 3, ReloadDelay 30, Damage 1000/Schuss).
+# cygun1.aud aus TS sounds.mix (optionales Package in mod.yaml).
+aot-CyborgChainGun:
+	Inherits: MachineGun
+	Range: 5c0
+	Burst: 3
+	BurstDelays: 4
+	ReloadDelay: 30
+	Report: cygun1.aud
+	Warhead@1Dam: SpreadDamage
+		Spread: 108
+		Damage: 1000
+		Versus:
+			None: 100
+			Wood: 60
+			Light: 40
+			Heavy: 25
+			Concrete: 10
+		DamageTypes: Prone70Percent, TriggerProne, BulletDeath
+
+# === Age of Tiberium (aotmod) - NOD Cyborg: Cripple-Effekt ===
+# Feuert auf sich selbst wenn Critical-HP erreicht (ExplosionOnDamageTransition).
+# Size: 1,0 = nur die unmittelbare Zelle + 1er-Ring = 2-3 Tiberium-Blüten.
+aot-CyborgCrippleEffect:
+	Warhead@1Res: CreateResource
+		AddsResourceType: Tiberium
+		Size: 0,0
+	Warhead@2Eff: CreateEffect
+		Explosions: chemball
+# === Ende aotmod ===

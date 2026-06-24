@@ -1,0 +1,22 @@
+cncr-steam: C&C Remastered Collection (Steam)
+	Type: Steam
+		AppId: 1213210
+	IDFiles:
+		Data/CNCDATA/RED_ALERT/CD1/REDALERT.MIX: 0e58f4b54f44f6cd29fecf8cf379d33cf2d4caef
+	Install:
+		ContentPackage@base:
+			Name: base
+			Actions:
+				ExtractMix@1: Data/CNCDATA/RED_ALERT/CD1/REDALERT.MIX
+					^SupportDir|Content/ra/v2/hires.mix: hires.mix
+					^SupportDir|Content/ra/v2/local.mix: local.mix
+					^SupportDir|Content/ra/v2/lores.mix: lores.mix
+					^SupportDir|Content/ra/v2/speech.mix: speech.mix
+				ExtractMix@2: Data/CNCDATA/RED_ALERT/CD1/MAIN.MIX
+					^SupportDir|Content/ra/v2/allies.mix: allies.mix
+					^SupportDir|Content/ra/v2/conquer.mix: conquer.mix
+					^SupportDir|Content/ra/v2/interior.mix: interior.mix
+					^SupportDir|Content/ra/v2/russian.mix: russian.mix
+					^SupportDir|Content/ra/v2/snow.mix: snow.mix
+					^SupportDir|Content/ra/v2/sounds.mix: sounds.mix
+					^SupportDir|Content/ra/v2/temperat.mix: temperat.mix

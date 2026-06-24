@@ -85,7 +85,7 @@ ltnk:
 		Facings: 32
 		UseClassicFacings: True
 	aot-turret-dark:
-		RemasteredFilename: aot-ltnk-dark-turret.zip
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\LTNK.ZIP
 		Start: 32
 		Facings: 32
 		UseClassicFacings: True
@@ -98,11 +98,7 @@ ltnk:
 		RemasteredFilename: aot-ttnk-tick-test.zip
 		Facings: 32
 		UseClassicFacings: True
-	aot-tick-remap:
-		RemasteredFilename: aot-ttnk-tick-test-remap.png
-		RemasteredPremultiplied: False
-		Facings: 32
-		UseClassicFacings: True
+		Scale: 1.0
 	aot-tick-deploy:
 		Filename: gatickmk.shp
 		Length: 24
@@ -355,17 +351,22 @@ truck.destroyed:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\TRUK.ZIP
 
 aot-gatick:
+	Defaults:
+		RemasteredFilename: aot-gatick-body.zip
+		Scale: 3.0
 	idle:
-		Filename: gatickmk.shp
 		Start: 24
 		Length: 1
-		Palette: aot-ts-player
 	buried:
-		Filename: gatickmk.shp
 		Start: 24
 		Length: 1
-		Palette: aot-ts-player
 	deploy:
-		Filename: gatickmk.shp
 		Length: 24
-		Palette: aot-ts-player
+	turret:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\LTNK.ZIP
+		Start: 32
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 1.0
+	muzzle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\GUNFIRE.ZIP

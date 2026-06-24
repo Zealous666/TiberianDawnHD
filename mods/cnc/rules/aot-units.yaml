@@ -504,10 +504,6 @@ LTNK:
 		Sequence: aot-tick-idle
 		RequiresCondition: aot-ltnk-upgraded
 
-	WithFacingSpriteBody@ttnk-remap:
-		Sequence: aot-tick-remap
-		RequiresCondition: aot-ltnk-upgraded
-
 	-WithSpriteTurret:
 
 	WithSpriteTurret@normal:
@@ -537,6 +533,7 @@ LTNK:
 
 	Transforms:
 		IntoActor: aot-ltnk-deployed
+		Facing: 640
 		RequiresCondition: aot-ltnk-upgraded
 		TransformSounds: cashturn.aud
 
@@ -559,10 +556,20 @@ aot-ltnk-deployed:
 	-CommandBarBlacklist:
 	-AcceptsDeliveredCash:
 	-Guardable:
+	-ShakeOnDeath:
+
+	ActorLostNotification:
+		Notification: UnitLost
+		TextNotification: notification-unit-lost
+
+	FireWarheadsOnDeath:
+		Type: Footprint
+		Weapon: UnitExplodeSmall
+		EmptyWeapon: UnitExplodeSmall
 
 	RenderSprites:
 		Image: aot-gatick
-		PlayerPalette: aot-ts-player
+		PlayerPalette: player
 
 	-WithSpriteBody:
 	WithSpriteBody:
@@ -587,8 +594,29 @@ aot-ltnk-deployed:
 	Armor:
 		Type: Concrete
 
+	Turreted:
+		InitialFacing: 640
+		TurnSpeed: 28
+		Offset: -150, 150, 0
+
+	Armament@PRIMARY:
+		Weapon: 70mm
+		Turret: primary
+		LocalOffset: 720,0,90
+		MuzzleSequence: muzzle
+		Recoil: 85
+		RecoilRecovery: 17
+
+	AttackTurreted:
+
+	WithSpriteTurret:
+		Sequence: turret
+
+	WithMuzzleOverlay:
+
 	Transforms:
 		IntoActor: ltnk
+		Facing: 640
 		TransformSounds: text2.aud
 		RequiresCondition: !build-incomplete
 

@@ -37,6 +37,8 @@ orca:
 	Defaults:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\ORCA.ZIP
 	icon:
+		Filename: helo_orca.png
+		Length: 1
 		RemasteredFilename:
 
 a10:

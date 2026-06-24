@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BuildPaletteOrder Manager — Age of Tiberium</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --col-bg: #1a1d27;
+      --card-bg: #252938;
+      --border: #2e3347;
+      --text: #d4d8ee;
+      --text-dim: #6b7194;
+      --blue: #5b8def;
+      --blue-bg: #111827;
+      --blue-dim: #1e2d50;
+      --red: #e05555;
+      --red-bg: #1a0f0f;
+      --red-dim: #4a1a1a;
+      --upgrade: #b06bdb;
+      --green: #4caf6a;
+      --orange: #e09240;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; min-height: 100vh; padding-top: 42px; }
+    .top-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; gap: 2px; padding: 6px 16px; background: rgba(15,17,23,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
+    .top-nav a { padding: 5px 14px; border-radius: 5px; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; color: var(--text-dim); text-decoration: none; transition: color .15s, background .15s; }
+    .top-nav a:hover { color: var(--text); background: var(--card-bg); }
+    .top-nav a.active { color: var(--text); background: var(--card-bg); }
+
+    header { padding: 22px 28px 14px; border-bottom: 1px solid var(--border); }
+    header h1 { font-size: 17px; font-weight: 700; letter-spacing: 0.02em; }
+    header p { margin-top: 4px; color: var(--text-dim); font-size: 12px; }
+
+    .toolbar { padding: 12px 28px; display: flex; gap: 10px; align-items: center; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+    .btn { padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text); font-size: 12px; cursor: pointer; transition: border-color .15s, color .15s, background .15s; }
+    .btn:hover { border-color: var(--blue); color: var(--blue); }
+    .btn.primary { background: var(--blue); border-color: var(--blue); color: #fff; font-weight: 600; }
+    .btn.primary:hover { background: #4a7de0; }
+    .changed-badge { font-size: 11px; color: var(--orange); display: none; }
+    .changed-badge.visible { display: inline; }
+
+    /* ── Tier filter ── */
+    .tier-filter { display: flex; align-items: center; gap: 6px; margin-left: 8px; padding-left: 12px; border-left: 1px solid var(--border); }
+    .tier-filter-label { font-size: 11px; color: var(--text-dim); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+    .tier-btn {
+      padding: 4px 11px; border-radius: 5px; border: 1px solid var(--border);
+      background: var(--card-bg); color: var(--text-dim); font-size: 11px; font-weight: 700;
+      cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase;
+      transition: border-color .15s, color .15s, background .15s;
+    }
+    .tier-btn[data-tier="0"].active { border-color: var(--text-dim); color: var(--text); }
+    .tier-btn[data-tier="1"].active { border-color: var(--green); color: var(--green); background: rgba(76,175,106,0.08); }
+    .tier-btn[data-tier="2"].active { border-color: var(--orange); color: var(--orange); background: rgba(224,146,64,0.08); }
+    .tier-btn[data-tier="3"].active { border-color: var(--red); color: var(--red); background: rgba(224,85,85,0.08); }
+    tr[data-tier].tier-hidden { display: none; }
+
+    main { padding: 20px 28px 60px; }
+
+    /* ── Board: 2-column grid, rows align automatically ── */
+    .board {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 16px;
+    }
+
+    /* ── Faction headers (sticky) ── */
+    .faction-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border-radius: 8px 8px 0 0;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+    .faction-header.gdi { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
+    .faction-header.nod { background: var(--red-bg); border-color: var(--red); color: var(--red); }
+    .faction-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .faction-header.gdi .faction-dot { background: var(--blue); }
+    .faction-header.nod .faction-dot { background: var(--red); }
+
+    /* ── Category cell ── */
+    .cat-cell {
+      border: 1px solid var(--border);
+      border-top: none;
+      background: var(--col-bg);
+      display: flex;
+      flex-direction: column;
+    }
+    .cat-cell:last-child, .cat-cell.last { border-radius: 0 0 8px 8px; }
+
+    /* Give GDI cells a subtle blue tint on the border */
+    .board-gdi .cat-cell { border-color: color-mix(in srgb, var(--blue) 20%, var(--border)); }
+    .board-nod .cat-cell { border-color: color-mix(in srgb, var(--red) 20%, var(--border)); }
+
+    /* ── Category header ── */
+    .cat-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      user-select: none;
+      min-height: 36px;
+    }
+    .cat-header:hover { background: var(--card-bg); }
+    .cat-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); flex: 1; }
+    .queue-tag { font-size: 9px; padding: 1px 5px; border-radius: 3px; background: var(--col-bg); border: 1px solid var(--border); color: var(--text-dim); font-family: monospace; }
+    .toggle-btn {
+      width: 20px; height: 20px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text-dim);
+      font-size: 13px;
+      line-height: 1;
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color .15s, color .15s;
+    }
+    .board-gdi .toggle-btn:hover { border-color: var(--blue); color: var(--blue); }
+    .board-nod .toggle-btn:hover { border-color: var(--red); color: var(--red); }
+
+    /* ── Cat body / table ── */
+    .cat-body { display: none; } /* collapsed by default */
+    .cat-body.open { display: block; }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th { padding: 5px 10px; text-align: left; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-dim); border-bottom: 1px solid var(--border); background: var(--bg); cursor: pointer; user-select: none; white-space: nowrap; }
+    thead th:hover { color: var(--text); }
+    thead th.sort-asc::after  { content: ' ↑'; opacity: 0.7; }
+    thead th.sort-desc::after { content: ' ↓'; opacity: 0.7; }
+    thead th.sort-asc, thead th.sort-desc { color: var(--text); }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--card-bg); }
+    tbody tr.row-changed { background: color-mix(in srgb, var(--orange) 8%, transparent); }
+    tbody td { padding: 5px 10px; vertical-align: middle; }
+
+    td.actor-id { font-family: monospace; font-size: 11px; }
+    .board-gdi td.actor-id { color: var(--blue); }
+    .board-nod td.actor-id { color: var(--red); }
+    .upgrade-col td.actor-id { color: var(--upgrade); }
+    td.display-name { color: var(--text); font-size: 12px; }
+    td.order-cell { width: 100px; }
+    .order-wrap { display: flex; align-items: center; gap: 5px; }
+    input.order-input { width: 52px; padding: 3px 6px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 5px; color: var(--text); font-size: 12px; font-family: monospace; transition: border-color .15s; }
+    input.order-input:focus { outline: none; border-color: var(--blue); }
+    .board-nod input.order-input:focus { border-color: var(--red); }
+    input.order-input.changed { border-color: var(--orange); color: var(--orange); }
+    input.order-input.duplicate { border-color: var(--red) !important; color: var(--red) !important; }
+    .original-val { font-size: 10px; color: var(--text-dim); font-family: monospace; }
+    .original-val.hidden { display: none; }
+    .dup-warn { font-size: 11px; color: var(--red); font-weight: 700; margin-left: 2px; display: none; }
+    .dup-warn.visible { display: inline; }
+
+    .source-chip { display: inline-block; font-size: 9px; padding: 1px 5px; border-radius: 3px; border: 1px solid var(--border); color: var(--text-dim); background: var(--bg); }
+    .source-chip.mod { border-color: var(--upgrade); color: var(--upgrade); }
+
+    .faction-badge { font-size: 9px; padding: 1px 5px; border-radius: 3px; font-weight: 600; white-space: nowrap; }
+    .faction-badge.gdi { background: var(--blue-dim); color: var(--blue); border: 1px solid var(--blue); }
+    .faction-badge.nod { background: var(--red-dim); color: var(--red); border: 1px solid var(--red); }
+    .faction-badge.both { background: var(--col-bg); color: var(--text-dim); border: 1px solid var(--border); }
+
+    /* ── Output ── */
+    #output-section { display: none; margin-top: 24px; }
+    #output-section.visible { display: block; }
+    #output-box { width: 100%; min-height: 200px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; color: var(--text); font-family: monospace; font-size: 12px; line-height: 1.6; resize: vertical; }
+    .output-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .output-header h3 { font-size: 13px; font-weight: 600; }
+    .copy-btn { margin-left: auto; padding: 4px 10px; font-size: 11px; }
+    .copy-btn.copied { border-color: var(--green); color: var(--green); }
+    .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--card-bg); border: 1px solid var(--green); color: var(--green); padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; pointer-events: none; opacity: 0; transition: opacity .2s, transform .2s; z-index: 999; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Upgrade section heading above the board */
+    .upgrade-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 14px;
+      font-weight: 700; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase;
+      border-radius: 8px 8px 0 0;
+      border: 1px solid color-mix(in srgb, var(--upgrade) 40%, var(--border));
+      border-bottom: none;
+      background: color-mix(in srgb, var(--upgrade) 8%, var(--bg));
+      color: var(--upgrade);
+    }
+    .upgrade-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--upgrade); flex-shrink: 0; }
+
+    .upgrade-board {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 16px;
+      margin-bottom: 0;
+    }
+    .upgrade-col .cat-cell {
+      border-color: color-mix(in srgb, var(--upgrade) 25%, var(--border));
+    }
+    .upgrade-col .toggle-btn:hover { border-color: var(--upgrade); color: var(--upgrade); }
+    .upgrade-col input.order-input:focus { border-color: var(--upgrade); }
+
+    /* Section spacing */
+    .section-gap { margin-bottom: 0; }
+  </style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<nav class="top-nav">
+  <a href="kanban-board.html">Planning</a>
+  <a href="buildorder.html" class="active">Build Order</a>
+  <a href="techtree-blue.html">Techtree Blue</a>
+  <a href="techtree-red.html">Techtree Red</a>
+</nav>
+
+<header>
+  <h1>BuildPaletteOrder Manager</h1>
+  <p>Age of Tiberium — GDI (Blue) · NOD (Red) · Upgrades getrennt nach Fraktion</p>
+</header>
+
+<div class="toolbar">
+  <button class="btn primary" onclick="generateOutput()">Generate Changes</button>
+  <button class="btn" onclick="expandAll()">Expand All</button>
+  <button class="btn" onclick="collapseAll()">Collapse All</button>
+  <button class="btn" onclick="resetAll()">Reset</button>
+  <span class="changed-badge" id="changed-badge">⬤ Unsaved changes</span>
+  <div class="tier-filter">
+    <span class="tier-filter-label">Tier</span>
+    <button class="tier-btn active" data-tier="0" onclick="toggleTierFilter(0)">T0</button>
+    <button class="tier-btn active" data-tier="1" onclick="toggleTierFilter(1)">T1</button>
+    <button class="tier-btn active" data-tier="2" onclick="toggleTierFilter(2)">T2</button>
+    <button class="tier-btn active" data-tier="3" onclick="toggleTierFilter(3)">T3</button>
+  </div>
+</div>
+
+<main>
+
+  <!-- ═══════════════════════════════════════ UPGRADES ═══════════════════════════════════════ -->
+  <div class="section-gap">
+    <div class="upgrade-board">
+
+      <!-- GDI Upgrades -->
+      <div class="upgrade-col board-gdi">
+        <div class="faction-header gdi"><div class="faction-dot"></div> GDI — Blue</div>
+        <div class="cat-cell" data-cat="upgrade">
+          <div class="cat-header" onclick="toggleCat('upgrade')">
+            <span class="cat-title">Upgrades</span>
+            <span class="queue-tag">Upgrade Queue</span>
+            <span class="queue-tag">FACT</span>
+            <button class="toggle-btn" data-cat="upgrade">+</button>
+          </div>
+          <div class="cat-body" id="cat-gdi-upgrade">
+            <table data-queue="Upgrade" data-faction="GDI">
+              <thead><tr><th>Display Name</th><th>Actor ID</th><th>Faction</th><th>Order</th><th>Src</th></tr></thead>
+              <tbody>
+                <tr data-tier="0" data-actor="aot-age1-upgrade-gdi" data-file="aot-structures.yaml" data-orig="5">
+                  <td class="display-name">1st Tiberium Age</td><td class="actor-id">aot-age1-upgrade-gdi</td><td><span class="faction-badge gdi">GDI</span></td>
+                  <td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="5" oninput="onValueChange(this)"><span class="original-val hidden">5</span></div></td>
+                  <td><span class="source-chip mod">mod</span></td>
+                </tr>
+                <tr data-tier="1" data-actor="aot-age2-upgrade-gdi" data-file="aot-structures.yaml" data-orig="6">
+                  <td class="display-name">2nd Tiberium Age</td><td class="actor-id">aot-age2-upgrade-gdi</td><td><span class="faction-badge gdi">GDI</span></td>
+                  <td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="6" oninput="onValueChange(this)"><span class="original-val hidden">6</span></div></td>
+                  <td><span class="source-chip mod">mod</span></td>
+                </tr>
+                <tr data-tier="2" data-actor="aot-age3-upgrade-gdi" data-file="aot-structures.yaml" data-orig="7">
+                  <td class="display-name">3rd Tiberium Age</td><td class="actor-id">aot-age3-upgrade-gdi</td><td><span class="faction-badge gdi">GDI</span></td>
+                  <td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="7" oninput="onValueChange(this)"><span class="original-val hidden">7</span></div></td>
+                  <td><span class="source-chip mod">mod</span></td>
+                </tr>
+                <tr data-tier="3" data-actor="aot-upgrade-ion-cannon" data-file="aot-structures.yaml" data-orig="5">
+                  <td class="display-name">Ion Cannon Uplink</td><td class="actor-id">aot-upgrade-ion-cannon</td><td><span class="faction-badge gdi">GDI</span></td>
+                  <td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="5" oninput="onValueChange(this)"><span class="original-val hidden">5</span></div></td>
+                  <td><span class="source-chip mod">mod</span></td>
+                </tr>
+                <tr data-tier="2" data-actor="aot-upgrade-mtnk-predator" data-file="aot-structures.yaml" data-orig="20">
+                  <td class="display-name">Predator Upgrade</td><td class="actor-id">aot-upgrade-mtnk-predator</td><td><span class="faction-badge gdi">GDI</span></td>
+                  <td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="20" oninput="onValueChange(this)"><span class="original-val hidden">20</span></div></td>
+                  <td><span class="source-chip mod">mod</span></td>
+                </tr>
+                <tr data-tier="3" data-actor="aot-upgrade-mtnk-railgun" data-file="aot-structures.yaml" data-orig="21">
+                  <td class="display-name">Railgun Upgrade</td><td class="actor-id">aot-upgrade-mtnk-railgun</td><td><span class="faction-badge gdi">GDI</span></td>
+                  <td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="21" oninput="onValueChange(this)"><span class="original-val hidden">21</span></div></td>
+                  <td><span class="source-chip mod">mod</span></td>
+                </tr>
+                <tr data-tier="1" data-actor="aot-upgrade-humvee" data-file="aot-structures.yaml" data-orig="30">
+                  <td class="display-name">HUMVEE Upgrade</td><td class="actor-id">aot-upgrade-humvee</td><td><span class="faction-badge gdi">GDI</span></td>
+                  <td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="30" oninput="onValueChange(this)"><span class="original-val hidden">30</span></div></td>
+                  <td><span class="source-chip mod">mod</span></td>
+                </tr>
+                <tr data-tier="1" data-actor="aot-upgrade-apc" data-file="aot-structures.yaml" data-orig="31">
+                  <td class="display-name">APC Upgrade</td><td class="actor-id">aot-upgrade-apc</td><td><span class="faction-badge gdi">GDI</span></td>
+                  <td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="31" oninput="onValueChange(this)"><span class="original-val hidden">31</span></div></td>
+                  <td><span class="source-chip mod">mod</span></td>
+                </tr>
+                <tr data-tier="1" data-actor="aot-upgrade-ltnk" data-file="aot-structures.yaml" data-orig="10">
+                  <td class="display-name">TickTank Enhancement</td><td class="actor-id">aot-upgrade-ltnk</td><td><span class="faction-badge gdi">GDI</span></td>
+                  <td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="10" oninput="onValueChange(this)"><span class="original-val hidden">10</span></div></td>
+                  <td><span class="source-chip mod">mod</span></td>
+                </tr>
+                <tr data-tier="2" data-actor="aot-upgrade-ltnk2" data-file="aot-structures.yaml" data-orig="11">
+                  <td class="display-name">Scorpio Laser</td><td class="actor-id">aot-upgrade-ltnk2</td><td><span class="faction-badge gdi">GDI</span></td>
+                  <td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="11" oninput="onValueChange(this)"><span class="original-val hidden">11</span></div></td>
+                  <td><span class="source-chip mod">mod</span></td>
+                </tr>
+                <tr data-tier="2" data-actor="aot-upgrade-nuke-turbine" data-file="aot-structures.yaml" data-orig="15">
+                  <td class="display-name">Turbine Technology</td><td class="actor-id">aot-upgrade-nuke-turbine</td><td><span class="faction-badge gdi">GDI</span></td>
+                  <td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="15" oninput="onValueChange(this)"><span class="original-val hidden">15</span></div></td>
+                  <td><span class="source-chip mod">mod</span></td>
+                </tr>
+                <tr data-tier="3" data-actor="aot-upgrade-htnk-railgun" data-file="aot-structures.yaml" data-orig="25">
+                  <td class="display-name">Dual Railgun Upgrade</td><td class="actor-id">aot-upgrade-htnk-railgun</td><td><span class="faction-badge gdi">GDI</span></td>
+                  <td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="25" oninput="onValueChange(this)"><span class="original-val hidden">25</span></div></td>
+                  <td><span class="source-chip mod">mod</span></td>
+                </tr>
+                <tr data-tier="1" data-actor="aot-upgrade-orca" data-file="aot-structures.yaml" data-orig="40">
+                  <td class="display-name">ORCA Upgrade</td><td class="actor-id">aot-upgrade-orca</td><td><span class="faction-badge gdi">GDI</span></td>
+                  <td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="40" oninput="onValueChange(this)"><span class="original-val hidden">40</span></div></td>
+                  <td><span class="source-chip mod">mod</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOD Upgrades -->
+      <div class="upgrade-col board-nod">
+        <div class="faction-header nod"><div class="faction-dot"></div> NOD — Red</div>
+        <div class="cat-cell" data-cat="upgrade">
+          <div class="cat-header" onclick="toggleCat('upgrade')">
+            <span class="cat-title">Upgrades</span>
+            <span class="queue-tag">Upgrade Queue</span>
+            <span class="queue-tag">FACT</span>
+            <button class="toggle-btn" data-cat="upgrade">+</button>
+          </div>
+          <div class="cat-body" id="cat-nod-upgrade">
+            <table data-queue="Upgrade" data-faction="NOD">
+              <thead><tr><th>Display Name</th><th>Actor ID</th><th>Faction</th><th>Order</th><th>Src</th></tr></thead>
+              <tbody>
+                <tr data-tier="0" data-actor="aot-age1-upgrade-nod" data-file="aot-structures.yaml" data-orig="5">
+                  <td class="display-name">1st Tiberium Age</td><td class="actor-id">aot-age1-upgrade-nod</td><td><span class="faction-badge nod">NOD</span></td>
+                  <td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="5" oninput="onValueChange(this)"><span class="original-val hidden">5</span></div></td>
+                  <td><span class="source-chip mod">mod</span></td>
+                </tr>
+                <tr data-tier="1" data-actor="aot-age2-upgrade-nod" data-file="aot-structures.yaml" data-orig="6">
+                  <td class="display-name">2nd Tiberium Age</td><td class="actor-id">aot-age2-upgrade-nod</td><td><span class="faction-badge nod">NOD</span></td>
+                  <td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="6" oninput="onValueChange(this)"><span class="original-val hidden">6</span></div></td>
+                  <td><span class="source-chip mod">mod</span></td>
+                </tr>
+                <tr data-tier="2" data-actor="aot-age3-upgrade-nod" data-file="aot-structures.yaml" data-orig="7">
+                  <td class="display-name">3rd Tiberium Age</td><td class="actor-id">aot-age3-upgrade-nod</td><td><span class="faction-badge nod">NOD</span></td>
+                  <td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="7" oninput="onValueChange(this)"><span class="original-val hidden">7</span></div></td>
+                  <td><span class="source-chip mod">mod</span></td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /upgrade-board -->
+  </div>
+
+  <!-- ═══════════════════════════════════════ MAIN BOARD ═══════════════════════════════════════ -->
+  <div class="board">
+
+    <!-- ── GDI column (left) ── -->
+    <div class="board-gdi">
+
+      <!-- Light Vehicle -->
+      <div class="cat-cell" data-cat="lightvehicle">
+        <div class="cat-header" onclick="toggleCat('lightvehicle')">
+          <span class="cat-title">Light Vehicle</span>
+          <span class="queue-tag">LightVehicle.GDI</span>
+          <span class="queue-tag">LITE</span>
+          <button class="toggle-btn" data-cat="lightvehicle">+</button>
+        </div>
+        <div class="cat-body" id="cat-gdi-lightvehicle">
+          <table data-queue="LightVehicle.GDI">
+            <thead><tr><th>Display Name</th><th>Actor ID</th><th>Order</th><th>Src</th></tr></thead>
+            <tbody>
+              <tr data-tier="0" data-actor="aot-oret-lite" data-file="aot-units.yaml" data-orig="1"><td class="display-name">Ore Transporter</td><td class="actor-id">aot-oret-lite</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="1" oninput="onValueChange(this)"><span class="original-val hidden">1</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="0" data-actor="aot-jeep-base" data-file="aot-units.yaml" data-orig="3"><td class="display-name">Recon Jeep</td><td class="actor-id">aot-jeep-base</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="3" oninput="onValueChange(this)"><span class="original-val hidden">3</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="0" data-actor="aot-jeep-humvee" data-file="aot-units.yaml" data-orig="3"><td class="display-name">GDI HUMVEE</td><td class="actor-id">aot-jeep-humvee</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="3" oninput="onValueChange(this)"><span class="original-val hidden">3</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="0" data-actor="TRUCK" data-file="aot-units.yaml" data-orig="2"><td class="display-name">Supply Truck</td><td class="actor-id">TRUCK</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="2" oninput="onValueChange(this)"><span class="original-val hidden">2</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="0" data-actor="APC" data-file="overrides.yaml" data-orig="4"><td class="display-name">APC</td><td class="actor-id">APC</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="4" oninput="onValueChange(this)"><span class="original-val hidden">4</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="0" data-actor="aot-mcv-age0" data-file="aot-units.yaml" data-orig="6"><td class="display-name">MCV (Age 0)</td><td class="actor-id">aot-mcv-age0</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="6" oninput="onValueChange(this)"><span class="original-val hidden">6</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="1" data-actor="aot-mcv-age1" data-file="aot-units.yaml" data-orig="6"><td class="display-name">MCV (Age 1+)</td><td class="actor-id">aot-mcv-age1</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="6" oninput="onValueChange(this)"><span class="original-val hidden">6</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="0" data-actor="aot-mtnk-base" data-file="aot-units.yaml" data-orig="5"><td class="display-name">Medium Tank</td><td class="actor-id">aot-mtnk-base</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="5" oninput="onValueChange(this)"><span class="original-val hidden">5</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="0" data-actor="aot-mtnk-pred" data-file="aot-units.yaml" data-orig="5"><td class="display-name">Medium Tank (Predator)</td><td class="actor-id">aot-mtnk-pred</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="5" oninput="onValueChange(this)"><span class="original-val hidden">5</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="0" data-actor="aot-mtnk-rail" data-file="aot-units.yaml" data-orig="5"><td class="display-name">Medium Tank (Railgun)</td><td class="actor-id">aot-mtnk-rail</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="5" oninput="onValueChange(this)"><span class="original-val hidden">5</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Vehicle -->
+      <div class="cat-cell" data-cat="vehicle">
+        <div class="cat-header" onclick="toggleCat('vehicle')">
+          <span class="cat-title">Vehicle</span>
+          <span class="queue-tag">Vehicle.GDI</span>
+          <span class="queue-tag">WEAP</span>
+          <button class="toggle-btn" data-cat="vehicle">+</button>
+        </div>
+        <div class="cat-body" id="cat-gdi-vehicle">
+          <table data-queue="Vehicle.GDI">
+            <thead><tr><th>Display Name</th><th>Actor ID</th><th>Order</th><th>Src</th></tr></thead>
+            <tbody>
+              <tr data-tier="1" data-actor="aot-harv" data-file="aot-units.yaml" data-orig="2"><td class="display-name">Harvester (AoT)</td><td class="actor-id">aot-harv</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="2" oninput="onValueChange(this)"><span class="original-val hidden">2</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="0" data-actor="HARV" data-file="engine/vehicles.yaml" data-orig="10"><td class="display-name">Harvester</td><td class="actor-id">HARV</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="10" oninput="onValueChange(this)"><span class="original-val hidden">10</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="1" data-actor="MSAM" data-file="engine/vehicles.yaml" data-orig="50"><td class="display-name">Rocket Launcher</td><td class="actor-id">MSAM</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="50" oninput="onValueChange(this)"><span class="original-val hidden">50</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="2" data-actor="aot-htnk-base" data-file="aot-units.yaml" data-orig="60"><td class="display-name">Mammoth Tank</td><td class="actor-id">aot-htnk-base</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="60" oninput="onValueChange(this)"><span class="original-val hidden">60</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="2" data-actor="aot-htnk-laser" data-file="aot-units.yaml" data-orig="60"><td class="display-name">Mammoth Tank (Dual Railgun)</td><td class="actor-id">aot-htnk-laser</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="60" oninput="onValueChange(this)"><span class="original-val hidden">60</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Infantry -->
+      <div class="cat-cell" data-cat="infantry">
+        <div class="cat-header" onclick="toggleCat('infantry')">
+          <span class="cat-title">Infantry</span>
+          <span class="queue-tag">Infantry.GDI</span>
+          <span class="queue-tag">PYLE</span>
+          <button class="toggle-btn" data-cat="infantry">+</button>
+        </div>
+        <div class="cat-body" id="cat-gdi-infantry">
+          <table data-queue="Infantry.GDI">
+            <thead><tr><th>Display Name</th><th>Actor ID</th><th>Order</th><th>Src</th></tr></thead>
+            <tbody>
+              <tr data-tier="0" data-actor="E1" data-file="engine/infantry.yaml" data-orig="10"><td class="display-name">Minigunner</td><td class="actor-id">E1</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="10" oninput="onValueChange(this)"><span class="original-val hidden">10</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="E3" data-file="engine/infantry.yaml" data-orig="20"><td class="display-name">Bazooka</td><td class="actor-id">E3</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="20" oninput="onValueChange(this)"><span class="original-val hidden">20</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="E6" data-file="engine/infantry.yaml" data-orig="30"><td class="display-name">Engineer</td><td class="actor-id">E6</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="30" oninput="onValueChange(this)"><span class="original-val hidden">30</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="E2" data-file="engine/infantry.yaml" data-orig="40"><td class="display-name">Grenadier</td><td class="actor-id">E2</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="40" oninput="onValueChange(this)"><span class="original-val hidden">40</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="RMBO" data-file="engine/infantry.yaml" data-orig="50"><td class="display-name">Commando</td><td class="actor-id">RMBO</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="50" oninput="onValueChange(this)"><span class="original-val hidden">50</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="PVICE" data-file="engine/infantry.yaml" data-orig="50"><td class="display-name">Vice Admiral</td><td class="actor-id">PVICE</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="50" oninput="onValueChange(this)"><span class="original-val hidden">50</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Building -->
+      <div class="cat-cell" data-cat="building">
+        <div class="cat-header" onclick="toggleCat('building')">
+          <span class="cat-title">Building</span>
+          <span class="queue-tag">Building.GDI</span>
+          <span class="queue-tag">FACT</span>
+          <button class="toggle-btn" data-cat="building">+</button>
+        </div>
+        <div class="cat-body" id="cat-gdi-building">
+          <table data-queue="Building.GDI">
+            <thead><tr><th>Display Name</th><th>Actor ID</th><th>Order</th><th>Src</th></tr></thead>
+            <tbody>
+              <tr data-tier="0" data-actor="aot-nuke-age0" data-file="aot-structures.yaml" data-orig="10"><td class="display-name">Power Plant (Age 0)</td><td class="actor-id">aot-nuke-age0</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="10" oninput="onValueChange(this)"><span class="original-val hidden">10</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="1" data-actor="aot-nuke-age1" data-file="aot-structures.yaml" data-orig="10"><td class="display-name">Power Plant (Age 1)</td><td class="actor-id">aot-nuke-age1</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="10" oninput="onValueChange(this)"><span class="original-val hidden">10</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="1" data-actor="aot-nuke-turbine" data-file="aot-structures.yaml" data-orig="10"><td class="display-name">Power Plant (Turbine)</td><td class="actor-id">aot-nuke-turbine</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="10" oninput="onValueChange(this)"><span class="original-val hidden">10</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="1" data-actor="PROC" data-file="engine/structures.yaml" data-orig="80"><td class="display-name">Tiberium Refinery</td><td class="actor-id">PROC</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="80" oninput="onValueChange(this)"><span class="original-val hidden">80</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="aot-pyle-age0" data-file="aot-structures.yaml" data-orig="20"><td class="display-name">Barracks (Age 0)</td><td class="actor-id">aot-pyle-age0</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="20" oninput="onValueChange(this)"><span class="original-val hidden">20</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="1" data-actor="aot-pyle-age1" data-file="aot-structures.yaml" data-orig="20"><td class="display-name">Barracks (Age 1+)</td><td class="actor-id">aot-pyle-age1</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="20" oninput="onValueChange(this)"><span class="original-val hidden">20</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="0" data-actor="LITE" data-file="aot-structures.yaml" data-orig="30"><td class="display-name">Light Factory</td><td class="actor-id">LITE</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="30" oninput="onValueChange(this)"><span class="original-val hidden">30</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="1" data-actor="WEAP" data-file="engine/structures.yaml" data-orig="90"><td class="display-name">War Factory</td><td class="actor-id">WEAP</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="90" oninput="onValueChange(this)"><span class="original-val hidden">90</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="aot-hpad-gdi" data-file="aot-structures.yaml" data-orig="60"><td class="display-name">Helipad (GDI)</td><td class="actor-id">aot-hpad-gdi</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="60" oninput="onValueChange(this)"><span class="original-val hidden">60</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="1" data-actor="AFLT" data-file="aot-structures.yaml" data-orig="70"><td class="display-name">Air Field</td><td class="actor-id">AFLT</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="70" oninput="onValueChange(this)"><span class="original-val hidden">70</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="0" data-actor="aot-fix-age0" data-file="aot-structures.yaml" data-orig="40"><td class="display-name">Repair Bay (Age 0)</td><td class="actor-id">aot-fix-age0</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="40" oninput="onValueChange(this)"><span class="original-val hidden">40</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="1" data-actor="aot-fix-age1" data-file="aot-structures.yaml" data-orig="40"><td class="display-name">Repair Bay (Age 1+)</td><td class="actor-id">aot-fix-age1</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="40" oninput="onValueChange(this)"><span class="original-val hidden">40</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="0" data-actor="aot-hq-base" data-file="aot-structures.yaml" data-orig="50"><td class="display-name">Comm Centre</td><td class="actor-id">aot-hq-base</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="50" oninput="onValueChange(this)"><span class="original-val hidden">50</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="3" data-actor="aot-hq-ion" data-file="aot-structures.yaml" data-orig="50"><td class="display-name">Comm Centre (Ion Cannon)</td><td class="actor-id">aot-hq-ion</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="50" oninput="onValueChange(this)"><span class="original-val hidden">50</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="2" data-actor="ATEC" data-file="aot-structures.yaml" data-orig="100"><td class="display-name">Allied Tech Centre</td><td class="actor-id">ATEC</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="100" oninput="onValueChange(this)"><span class="original-val hidden">100</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Aircraft (Helipad) -->
+      <!-- Aircraft -->
+      <div class="cat-cell" data-cat="aircraft">
+        <div class="cat-header" onclick="toggleCat('aircraft')">
+          <span class="cat-title">Aircraft</span>
+          <span class="queue-tag">Aircraft.GDI</span>
+          <span class="queue-tag">HPAD · AFLT</span>
+          <button class="toggle-btn" data-cat="aircraft">+</button>
+        </div>
+        <div class="cat-body" id="cat-gdi-aircraft">
+          <table data-queue="Aircraft.GDI">
+            <thead><tr><th>Display Name</th><th>Actor ID</th><th>Order</th><th>Src</th></tr></thead>
+            <tbody>
+              <tr data-tier="0" data-actor="aot-apache-base" data-file="aot-units.yaml" data-orig="20"><td class="display-name">Apache Helicopter</td><td class="actor-id">aot-apache-base</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="20" oninput="onValueChange(this)"><span class="original-val hidden">20</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="0" data-actor="aot-orca-upgraded" data-file="aot-units.yaml" data-orig="20"><td class="display-name">ORCA (Upgraded)</td><td class="actor-id">aot-orca-upgraded</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="20" oninput="onValueChange(this)"><span class="original-val hidden">20</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="1" data-actor="AJET" data-file="aot-units.yaml" data-orig="20"><td class="display-name">Fighter Jet</td><td class="actor-id">AJET</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="20" oninput="onValueChange(this)"><span class="original-val hidden">20</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Defense -->
+      <div class="cat-cell" data-cat="defense">
+        <div class="cat-header" onclick="toggleCat('defense')">
+          <span class="cat-title">Defense</span>
+          <span class="queue-tag">Support.GDI</span>
+          <span class="queue-tag">FACT</span>
+          <button class="toggle-btn" data-cat="defense">+</button>
+        </div>
+        <div class="cat-body" id="cat-gdi-defense">
+          <table data-queue="Support.GDI">
+            <thead><tr><th>Display Name</th><th>Actor ID</th><th>Order</th><th>Src</th></tr></thead>
+            <tbody>
+              <tr data-tier="0" data-actor="SBAG" data-file="engine/structures.yaml" data-orig="20"><td class="display-name">Sandbag</td><td class="actor-id">SBAG</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="20" oninput="onValueChange(this)"><span class="original-val hidden">20</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="BRIK" data-file="engine/structures.yaml" data-orig="30"><td class="display-name">Concrete Wall</td><td class="actor-id">BRIK</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="30" oninput="onValueChange(this)"><span class="original-val hidden">30</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="SILO" data-file="engine/structures.yaml" data-orig="35"><td class="display-name">Tiberium Silo</td><td class="actor-id">SILO</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="35" oninput="onValueChange(this)"><span class="original-val hidden">35</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="GTWR" data-file="engine/structures.yaml" data-orig="40"><td class="display-name">Guard Tower</td><td class="actor-id">GTWR</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="40" oninput="onValueChange(this)"><span class="original-val hidden">40</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="GUN" data-file="engine/structures.yaml" data-orig="45"><td class="display-name">Turret</td><td class="actor-id">GUN</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="45" oninput="onValueChange(this)"><span class="original-val hidden">45</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="ATWR" data-file="engine/structures.yaml" data-orig="60"><td class="display-name">Advanced Guard Tower</td><td class="actor-id">ATWR</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="60" oninput="onValueChange(this)"><span class="original-val hidden">60</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /board-gdi -->
+
+
+    <!-- ── NOD column (right) ── -->
+    <div class="board-nod">
+
+      <!-- Light Vehicle -->
+      <div class="cat-cell" data-cat="lightvehicle">
+        <div class="cat-header" onclick="toggleCat('lightvehicle')">
+          <span class="cat-title">Light Vehicle</span>
+          <span class="queue-tag">LightVehicle.Nod</span>
+          <span class="queue-tag">LITE</span>
+          <button class="toggle-btn" data-cat="lightvehicle">+</button>
+        </div>
+        <div class="cat-body" id="cat-nod-lightvehicle">
+          <table data-queue="LightVehicle.Nod">
+            <thead><tr><th>Display Name</th><th>Actor ID</th><th>Order</th><th>Src</th></tr></thead>
+            <tbody>
+              <tr data-tier="0" data-actor="aot-oret-lite" data-file="aot-units.yaml" data-orig="1"><td class="display-name">Ore Transporter</td><td class="actor-id">aot-oret-lite</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="1" oninput="onValueChange(this)"><span class="original-val hidden">1</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="0" data-actor="TRUCK" data-file="aot-units.yaml" data-orig="2"><td class="display-name">Supply Truck</td><td class="actor-id">TRUCK</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="2" oninput="onValueChange(this)"><span class="original-val hidden">2</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="0" data-actor="aot-mcv-age0" data-file="aot-units.yaml" data-orig="6"><td class="display-name">MCV (Age 0)</td><td class="actor-id">aot-mcv-age0</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="6" oninput="onValueChange(this)"><span class="original-val hidden">6</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="1" data-actor="aot-mcv-age1" data-file="aot-units.yaml" data-orig="6"><td class="display-name">MCV (Age 1+)</td><td class="actor-id">aot-mcv-age1</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="6" oninput="onValueChange(this)"><span class="original-val hidden">6</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Vehicle -->
+      <div class="cat-cell" data-cat="vehicle">
+        <div class="cat-header" onclick="toggleCat('vehicle')">
+          <span class="cat-title">Vehicle</span>
+          <span class="queue-tag">Vehicle.Nod</span>
+          <span class="queue-tag">AFLD</span>
+          <button class="toggle-btn" data-cat="vehicle">+</button>
+        </div>
+        <div class="cat-body" id="cat-nod-vehicle">
+          <table data-queue="Vehicle.Nod">
+            <thead><tr><th>Display Name</th><th>Actor ID</th><th>Order</th><th>Src</th></tr></thead>
+            <tbody>
+              <tr data-tier="1" data-actor="aot-harv" data-file="aot-units.yaml" data-orig="2"><td class="display-name">Harvester (AoT)</td><td class="actor-id">aot-harv</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="2" oninput="onValueChange(this)"><span class="original-val hidden">2</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="0" data-actor="HARV" data-file="engine/vehicles.yaml" data-orig="10"><td class="display-name">Harvester</td><td class="actor-id">HARV</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="10" oninput="onValueChange(this)"><span class="original-val hidden">10</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="BGGY" data-file="engine/vehicles.yaml" data-orig="20"><td class="display-name">Buggy</td><td class="actor-id">BGGY</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="20" oninput="onValueChange(this)"><span class="original-val hidden">20</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="BIKE" data-file="engine/vehicles.yaml" data-orig="30"><td class="display-name">Recon Bike</td><td class="actor-id">BIKE</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="30" oninput="onValueChange(this)"><span class="original-val hidden">30</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="LTNK" data-file="engine/vehicles.yaml" data-orig="40"><td class="display-name">Light Tank</td><td class="actor-id">LTNK</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="40" oninput="onValueChange(this)"><span class="original-val hidden">40</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="FTNK" data-file="engine/vehicles.yaml" data-orig="50"><td class="display-name">Flame Tank</td><td class="actor-id">FTNK</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="50" oninput="onValueChange(this)"><span class="original-val hidden">50</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="ARTY" data-file="engine/vehicles.yaml" data-orig="60"><td class="display-name">Artillery</td><td class="actor-id">ARTY</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="60" oninput="onValueChange(this)"><span class="original-val hidden">60</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="MLRS" data-file="engine/vehicles.yaml" data-orig="70"><td class="display-name">MLRS</td><td class="actor-id">MLRS</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="70" oninput="onValueChange(this)"><span class="original-val hidden">70</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="STNK" data-file="engine/vehicles.yaml" data-orig="90"><td class="display-name">Stealth Tank</td><td class="actor-id">STNK</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="90" oninput="onValueChange(this)"><span class="original-val hidden">90</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Infantry -->
+      <div class="cat-cell" data-cat="infantry">
+        <div class="cat-header" onclick="toggleCat('infantry')">
+          <span class="cat-title">Infantry</span>
+          <span class="queue-tag">Infantry.Nod</span>
+          <span class="queue-tag">HAND</span>
+          <button class="toggle-btn" data-cat="infantry">+</button>
+        </div>
+        <div class="cat-body" id="cat-nod-infantry">
+          <table data-queue="Infantry.Nod">
+            <thead><tr><th>Display Name</th><th>Actor ID</th><th>Order</th><th>Src</th></tr></thead>
+            <tbody>
+              <tr data-tier="0" data-actor="E1" data-file="engine/infantry.yaml" data-orig="10"><td class="display-name">Minigunner</td><td class="actor-id">E1</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="10" oninput="onValueChange(this)"><span class="original-val hidden">10</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="E3" data-file="engine/infantry.yaml" data-orig="20"><td class="display-name">Bazooka</td><td class="actor-id">E3</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="20" oninput="onValueChange(this)"><span class="original-val hidden">20</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="E6" data-file="engine/infantry.yaml" data-orig="30"><td class="display-name">Engineer</td><td class="actor-id">E6</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="30" oninput="onValueChange(this)"><span class="original-val hidden">30</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="E4" data-file="engine/infantry.yaml" data-orig="40"><td class="display-name">Flamethrower</td><td class="actor-id">E4</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="40" oninput="onValueChange(this)"><span class="original-val hidden">40</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="E5" data-file="engine/infantry.yaml" data-orig="50"><td class="display-name">Chem Warrior</td><td class="actor-id">E5</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="50" oninput="onValueChange(this)"><span class="original-val hidden">50</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="PVICE" data-file="engine/infantry.yaml" data-orig="50"><td class="display-name">Vice Admiral</td><td class="actor-id">PVICE</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="50" oninput="onValueChange(this)"><span class="original-val hidden">50</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Building -->
+      <div class="cat-cell" data-cat="building">
+        <div class="cat-header" onclick="toggleCat('building')">
+          <span class="cat-title">Building</span>
+          <span class="queue-tag">Building.Nod</span>
+          <span class="queue-tag">FACT</span>
+          <button class="toggle-btn" data-cat="building">+</button>
+        </div>
+        <div class="cat-body" id="cat-nod-building">
+          <table data-queue="Building.Nod">
+            <thead><tr><th>Display Name</th><th>Actor ID</th><th>Order</th><th>Src</th></tr></thead>
+            <tbody>
+              <tr data-tier="0" data-actor="aot-nuke-age0" data-file="aot-structures.yaml" data-orig="10"><td class="display-name">Power Plant (Age 0)</td><td class="actor-id">aot-nuke-age0</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="10" oninput="onValueChange(this)"><span class="original-val hidden">10</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="1" data-actor="aot-nuke-age1" data-file="aot-structures.yaml" data-orig="10"><td class="display-name">Power Plant (Age 1)</td><td class="actor-id">aot-nuke-age1</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="10" oninput="onValueChange(this)"><span class="original-val hidden">10</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="0" data-actor="aot-nuk2-age0" data-file="aot-structures.yaml" data-orig="70"><td class="display-name">Adv. Power Plant (Age 0)</td><td class="actor-id">aot-nuk2-age0</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="70" oninput="onValueChange(this)"><span class="original-val hidden">70</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="1" data-actor="aot-nuk2-age1" data-file="aot-structures.yaml" data-orig="70"><td class="display-name">Adv. Power Plant (Age 1)</td><td class="actor-id">aot-nuk2-age1</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="70" oninput="onValueChange(this)"><span class="original-val hidden">70</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="1" data-actor="PROC" data-file="engine/structures.yaml" data-orig="80"><td class="display-name">Tiberium Refinery</td><td class="actor-id">PROC</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="80" oninput="onValueChange(this)"><span class="original-val hidden">80</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="aot-hand-age0" data-file="aot-structures.yaml" data-orig="20"><td class="display-name">Hand of Nod (Age 0)</td><td class="actor-id">aot-hand-age0</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="20" oninput="onValueChange(this)"><span class="original-val hidden">20</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="1" data-actor="aot-hand-age1" data-file="aot-structures.yaml" data-orig="20"><td class="display-name">Hand of Nod (Age 1+)</td><td class="actor-id">aot-hand-age1</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="20" oninput="onValueChange(this)"><span class="original-val hidden">20</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="0" data-actor="LITE" data-file="aot-structures.yaml" data-orig="30"><td class="display-name">Light Factory</td><td class="actor-id">LITE</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="30" oninput="onValueChange(this)"><span class="original-val hidden">30</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="1" data-actor="AFLD" data-file="engine/structures.yaml" data-orig="90"><td class="display-name">Airfield</td><td class="actor-id">AFLD</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="90" oninput="onValueChange(this)"><span class="original-val hidden">90</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="aot-hpad-nod" data-file="aot-structures.yaml" data-orig="60"><td class="display-name">Helipad (NOD)</td><td class="actor-id">aot-hpad-nod</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="60" oninput="onValueChange(this)"><span class="original-val hidden">60</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="0" data-actor="aot-fix-age0" data-file="aot-structures.yaml" data-orig="40"><td class="display-name">Repair Bay (Age 0)</td><td class="actor-id">aot-fix-age0</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="40" oninput="onValueChange(this)"><span class="original-val hidden">40</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="1" data-actor="aot-fix-age1" data-file="aot-structures.yaml" data-orig="40"><td class="display-name">Repair Bay (Age 1+)</td><td class="actor-id">aot-fix-age1</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="40" oninput="onValueChange(this)"><span class="original-val hidden">40</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="0" data-actor="aot-nod-radar" data-file="aot-structures.yaml" data-orig="50"><td class="display-name">Nod Radar</td><td class="actor-id">aot-nod-radar</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="50" oninput="onValueChange(this)"><span class="original-val hidden">50</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="1" data-actor="TMPL" data-file="engine/structures.yaml" data-orig="110"><td class="display-name">Temple of Nod</td><td class="actor-id">TMPL</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="110" oninput="onValueChange(this)"><span class="original-val hidden">110</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Aircraft -->
+      <div class="cat-cell" data-cat="aircraft">
+        <div class="cat-header" onclick="toggleCat('aircraft')">
+          <span class="cat-title">Aircraft</span>
+          <span class="queue-tag">Aircraft.Nod</span>
+          <span class="queue-tag">—</span>
+          <button class="toggle-btn" data-cat="aircraft">+</button>
+        </div>
+        <div class="cat-body" id="cat-nod-aircraft">
+          <table data-queue="Aircraft.Nod">
+            <thead><tr><th>Display Name</th><th>Actor ID</th><th>Order</th><th>Src</th></tr></thead>
+            <tbody>
+              <tr data-tier="0" data-actor="aot-hind-base" data-file="aot-units.yaml" data-orig="20"><td class="display-name">HIND</td><td class="actor-id">aot-hind-base</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="20" oninput="onValueChange(this)"><span class="original-val hidden">20</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+              <tr data-tier="1" data-actor="aot-harpy-upgraded" data-file="aot-units.yaml" data-orig="20"><td class="display-name">Harpy</td><td class="actor-id">aot-harpy-upgraded</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="20" oninput="onValueChange(this)"><span class="original-val hidden">20</span></div></td><td><span class="source-chip mod">mod</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Defense -->
+      <div class="cat-cell" data-cat="defense">
+        <div class="cat-header" onclick="toggleCat('defense')">
+          <span class="cat-title">Defense</span>
+          <span class="queue-tag">Support.Nod</span>
+          <span class="queue-tag">FACT</span>
+          <button class="toggle-btn" data-cat="defense">+</button>
+        </div>
+        <div class="cat-body" id="cat-nod-defense">
+          <table data-queue="Support.Nod">
+            <thead><tr><th>Display Name</th><th>Actor ID</th><th>Order</th><th>Src</th></tr></thead>
+            <tbody>
+              <tr data-tier="0" data-actor="CYCL" data-file="engine/structures.yaml" data-orig="20"><td class="display-name">Cyclone Fence</td><td class="actor-id">CYCL</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="20" oninput="onValueChange(this)"><span class="original-val hidden">20</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="BRIK" data-file="engine/structures.yaml" data-orig="30"><td class="display-name">Concrete Wall</td><td class="actor-id">BRIK</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="30" oninput="onValueChange(this)"><span class="original-val hidden">30</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="SILO" data-file="engine/structures.yaml" data-orig="35"><td class="display-name">Tiberium Silo</td><td class="actor-id">SILO</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="35" oninput="onValueChange(this)"><span class="original-val hidden">35</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="SAM" data-file="engine/structures.yaml" data-orig="50"><td class="display-name">SAM Site</td><td class="actor-id">SAM</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="50" oninput="onValueChange(this)"><span class="original-val hidden">50</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+              <tr data-tier="0" data-actor="OBLI" data-file="engine/structures.yaml" data-orig="60"><td class="display-name">Obelisk of Light</td><td class="actor-id">OBLI</td><td class="order-cell"><div class="order-wrap"><input class="order-input" type="number" value="60" oninput="onValueChange(this)"><span class="original-val hidden">60</span></div></td><td><span class="source-chip engine">engine</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /board-nod -->
+
+  </div><!-- /board -->
+
+  <!-- ── Output ── -->
+  <div id="output-section">
+    <div class="output-header">
+      <h3>Changes for Claude</h3>
+      <button class="btn copy-btn" id="copy-btn" onclick="copyOutput()">Copy</button>
+    </div>
+    <textarea id="output-box" readonly></textarea>
+  </div>
+
+</main>
+
+<script>
+  // Toggle all cells with the same data-cat (syncs GDI + NOD side)
+  function toggleCat(cat) {
+    const bodies = document.querySelectorAll(`[data-cat="${cat}"] .cat-body`);
+    const btns   = document.querySelectorAll(`[data-cat="${cat}"] .toggle-btn`);
+    const isOpen = bodies[0].classList.contains('open');
+    bodies.forEach(b => b.classList.toggle('open', !isOpen));
+    btns.forEach(b => b.textContent = isOpen ? '+' : '−');
+  }
+
+  function expandAll() {
+    document.querySelectorAll('.cat-body').forEach(b => b.classList.add('open'));
+    document.querySelectorAll('.toggle-btn').forEach(b => b.textContent = '−');
+  }
+
+  function collapseAll() {
+    document.querySelectorAll('.cat-body').forEach(b => b.classList.remove('open'));
+    document.querySelectorAll('.toggle-btn').forEach(b => b.textContent = '+');
+  }
+
+  function sortTable(table, colIndex, asc) {
+    const tbody = table.querySelector('tbody');
+    const rows = [...tbody.querySelectorAll('tr')];
+    rows.sort((a, b) => {
+      const aCell = a.cells[colIndex];
+      const bCell = b.cells[colIndex];
+      const aVal = aCell?.querySelector('input') ? parseInt(aCell.querySelector('input').value, 10) : aCell?.textContent.trim() ?? '';
+      const bVal = bCell?.querySelector('input') ? parseInt(bCell.querySelector('input').value, 10) : bCell?.textContent.trim() ?? '';
+      if (typeof aVal === 'number' && typeof bVal === 'number') return asc ? aVal - bVal : bVal - aVal;
+      return asc ? String(aVal).localeCompare(String(bVal)) : String(bVal).localeCompare(String(aVal));
+    });
+    rows.forEach(r => tbody.appendChild(r));
+    // Update header indicators
+    [...table.querySelectorAll('thead th')].forEach((th, i) => {
+      th.classList.remove('sort-asc', 'sort-desc');
+      if (i === colIndex) th.classList.add(asc ? 'sort-asc' : 'sort-desc');
+    });
+    table._sortCol = colIndex;
+    table._sortAsc = asc;
+  }
+
+  function initSortHeaders() {
+    document.querySelectorAll('table').forEach(table => {
+      [...table.querySelectorAll('thead th')].forEach((th, colIndex) => {
+        th.addEventListener('click', () => {
+          const asc = table._sortCol === colIndex ? !table._sortAsc : true;
+          sortTable(table, colIndex, asc);
+        });
+      });
+      // Default sort by Order column (index 2 for upgrade tables with Faction col, else index 2)
+      // Find the "Order" header index
+      const ths = [...table.querySelectorAll('thead th')];
+      const orderIdx = ths.findIndex(th => th.textContent.trim() === 'Order');
+      sortTable(table, orderIdx >= 0 ? orderIdx : 2, true);
+    });
+  }
+
+  // On load: set every input's value from data-orig (single source of truth)
+  document.querySelectorAll('tbody tr[data-orig]').forEach(row => {
+    const input = row.querySelector('input.order-input');
+    if (input) input.value = row.dataset.orig;
+  });
+
+  initSortHeaders();
+
+  // Inject dup-warn spans into every order-wrap on load
+  document.querySelectorAll('.order-wrap').forEach(wrap => {
+    const span = document.createElement('span');
+    span.className = 'dup-warn';
+    span.title = 'Value already used in this category';
+    span.textContent = '!';
+    wrap.appendChild(span);
+  });
+
+  function checkDuplicates(table) {
+    const rows = [...table.querySelectorAll('tbody tr')];
+    const valMap = {};
+    rows.forEach(row => {
+      const input = row.querySelector('input.order-input');
+      if (!input) return;
+      const v = parseInt(input.value, 10);
+      if (isNaN(v)) return;
+      if (!valMap[v]) valMap[v] = [];
+      valMap[v].push(input);
+    });
+    rows.forEach(row => {
+      const input = row.querySelector('input.order-input');
+      if (!input) return;
+      const v = parseInt(input.value, 10);
+      const isDup = !isNaN(v) && valMap[v] && valMap[v].length > 1;
+      input.classList.toggle('duplicate', isDup);
+      const warn = row.querySelector('.dup-warn');
+      if (warn) warn.classList.toggle('visible', isDup);
+    });
+  }
+
+  function checkAllDuplicates() {
+    document.querySelectorAll('table').forEach(checkDuplicates);
+  }
+
+  function applyChange(input, val) {
+    const row  = input.closest('tr');
+    const orig = parseInt(row.dataset.orig, 10);
+    const changed = !isNaN(val) && val !== orig;
+    const span = input.nextElementSibling;
+    input.classList.toggle('changed', changed);
+    row.classList.toggle('row-changed', changed);
+    if (changed) { span.textContent = '← ' + orig; span.classList.remove('hidden'); }
+    else         { span.classList.add('hidden'); }
+  }
+
+  function onValueChange(input) {
+    const val = parseInt(input.value, 10);
+    applyChange(input, val);
+
+    // Sync all other inputs with the same actor+file
+    const actor = input.closest('tr').dataset.actor;
+    const file  = input.closest('tr').dataset.file;
+    document.querySelectorAll(`tbody tr[data-actor="${actor}"][data-file="${file}"] input.order-input`).forEach(other => {
+      if (other === input) return;
+      other.value = isNaN(val) ? input.value : val;
+      applyChange(other, parseInt(other.value, 10));
+    });
+
+    checkAllDuplicates();
+    updateBadge();
+  }
+
+  function updateBadge() {
+    document.getElementById('changed-badge').classList.toggle(
+      'visible', document.querySelectorAll('input.order-input.changed').length > 0
+    );
+  }
+
+  function resetAll() {
+    document.querySelectorAll('tbody tr').forEach(row => {
+      const input = row.querySelector('input.order-input');
+      if (!input) return;
+      input.value = row.dataset.orig;
+      input.classList.remove('changed');
+      row.classList.remove('row-changed');
+      row.querySelector('.original-val').classList.add('hidden');
+    });
+    checkAllDuplicates();
+    updateBadge();
+    document.getElementById('output-section').classList.remove('visible');
+  }
+
+  function generateOutput() {
+    const changes = [];
+    const seen = new Set();
+
+    document.querySelectorAll('tbody tr').forEach(row => {
+      const input = row.querySelector('input.order-input');
+      if (!input || !input.classList.contains('changed')) return;
+
+      const actor = row.dataset.actor;
+      const file  = row.dataset.file;
+      const orig  = parseInt(row.dataset.orig, 10);
+      const val   = parseInt(input.value, 10);
+      const queue = row.closest('table').dataset.queue;
+      const name  = row.querySelector('.display-name').textContent;
+      const key   = actor + '|' + file;
+
+      if (seen.has(key)) {
+        const ex = changes.find(c => c.actor === actor && c.file === file);
+        if (ex && !ex.queues.includes(queue)) ex.queues.push(queue);
+        return;
+      }
+      seen.add(key);
+      changes.push({ actor, name, file, queues: [queue], from: orig, to: val });
+    });
+
+    const section = document.getElementById('output-section');
+    const box = document.getElementById('output-box');
+
+    if (changes.length === 0) { box.value = '(No changes.)'; section.classList.add('visible'); return; }
+
+    const byFile = {};
+    changes.forEach(c => { if (!byFile[c.file]) byFile[c.file] = []; byFile[c.file].push(c); });
+
+    let out = 'BuildPaletteOrder Changes:\n' + '='.repeat(44) + '\n\n';
+    for (const [file, items] of Object.entries(byFile)) {
+      out += `File: ${file}\n` + '-'.repeat(36) + '\n';
+      items.forEach(c => {
+        out += `  ${c.actor} (${c.name})\n`;
+        out += `    Queue: ${c.queues.join(', ')}\n`;
+        out += `    BuildPaletteOrder: ${c.from} → ${c.to}\n`;
+      });
+      out += '\n';
+    }
+    out += '='.repeat(44) + '\n' + `${changes.length} change(s) total.`;
+
+    // Sync section
+    out += '\n\n' + '='.repeat(44) + '\n';
+    out += 'Sync buildorder.html — update data-orig values:\n';
+    out += '-'.repeat(36) + '\n';
+    changes.forEach(c => {
+      out += `  actor="${c.actor}" file="${c.file}" → data-orig="${c.to}"\n`;
+    });
+
+    box.value = out;
+    section.classList.add('visible');
+    document.getElementById('copy-btn').classList.remove('copied');
+    document.getElementById('copy-btn').textContent = 'Copy';
+    navigator.clipboard.writeText(out).then(() => showToast('✓ Copied to clipboard'));
+  }
+
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  function copyOutput() {
+    navigator.clipboard.writeText(document.getElementById('output-box').value).then(() => {
+      const btn = document.getElementById('copy-btn');
+      btn.textContent = '✓ Copied'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  // ── Tier filter ──────────────────────────────────────────────────────────────
+  const activeTiers = new Set([0, 1, 2, 3]);
+
+  function toggleTierFilter(tier) {
+    if (activeTiers.has(tier)) {
+      activeTiers.delete(tier);
+    } else {
+      activeTiers.add(tier);
+    }
+    applyTierFilter();
+  }
+
+  function applyTierFilter() {
+    const showAll = activeTiers.size === 0 || activeTiers.size === 4;
+    document.querySelectorAll('tr[data-tier]').forEach(row => {
+      const tier = parseInt(row.dataset.tier);
+      row.classList.toggle('tier-hidden', !showAll && !activeTiers.has(tier));
+    });
+    [0, 1, 2, 3].forEach(t => {
+      const btn = document.querySelector(`.tier-btn[data-tier="${t}"]`);
+      if (btn) btn.classList.toggle('active', activeTiers.has(t));
+    });
+  }
+</script>
+
+</body>
+</html>
