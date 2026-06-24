@@ -5,6 +5,16 @@
 ^BaseWorld:
 	-TerrainRenderer:
 	RemasterTerrainRenderer:
+	# === Age of Tiberium (aotmod) - TS-Infanterie-Palette ===
+	# unittem.pal (TS Unit-Palette) als Basis + Player-Color-Remap auf House-Color-Indizes 16-31.
+	# Für direkt referenzierte TS-Infanterie-SHPs (z.B. cyborg.shp). Wiederverwendbar.
+	PaletteFromFile@aot-unittem:
+		Name: aot-unittem
+		Filename: unittem.pal
+	PlayerColorPalette@aot-ts:
+		BaseName: aot-ts-player
+		BasePalette: aot-unittem
+		RemapIndex: 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
 
 STNK:
 	Cloak:
@@ -20,7 +30,7 @@ C17:
 HQ:
 	Buildable:
 		Queue: Building.GDI
-		Prerequisites: vehicleproduction, barracks, ~techlevel.medium
+		Prerequisites: vehicleproduction, barracks, ~techlevel.medium, ~aot-hq-never
 	-AirstrikePower:
 	-SupportPowerChargeBar:
 	ProvidesPrerequisite@gdihq:
@@ -30,15 +40,18 @@ HQ:
 	GrantConditionOnPrerequisite@ionupgrade:
 		Condition: aot-ion-cannon-active
 		Prerequisites: aot-ion-cannon-upgrade
+	GrantConditionOnPrerequisite@age1sprite:
+		Condition: aot-hq-advanced
+		Prerequisites: aot-age1
 	-WithSpriteBody:
 	WithSpriteBody@hq:
 		Sequence: idle
 		Name: body
-		RequiresCondition: !aot-ion-cannon-active
+		RequiresCondition: !aot-hq-advanced
 	WithSpriteBody@eye:
 		Sequence: aot-eye-idle
 		Name: body-eye
-		RequiresCondition: aot-ion-cannon-active
+		RequiresCondition: aot-hq-advanced
 	-WithMakeAnimation:
 	WithMakeAnimation@aot:
 		BodyNames: body, body-eye
@@ -133,7 +146,7 @@ FACT:
 		ChargeInterval: 250
 		Icon: aot-age1
 		Name: 1st Tiberium Age
-		Description: Requires: 1st Tiberium Age Upgrade. The Tiberium era is emerging. New units and buildings are becoming available.
+		Description: The Tiberium era is emerging. New units and buildings are becoming available. (1st Tiberium Age Upgrade in Tech Centre)
 		SupportPowerPaletteOrder: 50
 	AotAge2SuperPower:
 		Actor: aot-age2-marker
@@ -144,7 +157,7 @@ FACT:
 		ChargeInterval: 250
 		Icon: aot-age2
 		Name: 2nd Tiberium Age
-		Description: Requires: 2nd Tiberium Age Upgrade. Advanced Tiberium technologies are emerging. New upgrades and equipment becoming available.
+		Description: Advanced Tiberium technologies with new upgrades and equipment becoming available. (2nd Tiberium Age Upgrade in Tech Centre)
 		SupportPowerPaletteOrder: 51
 	AotAge3SuperPower:
 		Actor: aot-age3-marker
@@ -155,7 +168,7 @@ FACT:
 		ChargeInterval: 250
 		Icon: aot-age3
 		Name: 3rd Tiberium Age
-		Description: Requires: 3rd Tiberium Age Upgrade. Peak Tiberium technology is emerging. The most advanced units and buildings are becoming available.
+		Description: Peak Tiberium technology is emerging. The most advanced units and buildings are becoming available. (3rd Tiberium Age Upgrade)
 		SupportPowerPaletteOrder: 52
 # === Ende aotmod ===
 
@@ -165,7 +178,7 @@ FACT:
 # ProvidesPrerequisite@buildingname: → stellt "weap" bereit (für Tooltip-Lookup in age2-upgrade-gdi).
 WEAP:
 	Buildable:
-		Prerequisites: lite
+		Prerequisites: ~aot-age1, aot-age1, lite
 		Queue: Building.GDI
 	ProvidesPrerequisite@aot:
 		Prerequisite: aot-weap
@@ -176,7 +189,7 @@ WEAP:
 # ProvidesPrerequisite@buildingname: → stellt "afld" bereit (für Tooltip-Lookup in age2-upgrade-nod).
 AFLD:
 	Buildable:
-		Prerequisites: lite
+		Prerequisites: ~aot-age1, aot-age1, lite
 		Queue: Building.Nod
 	ProvidesPrerequisite@buildingname:
 # === Ende aotmod ===
@@ -195,7 +208,7 @@ APC:
 		Prerequisites: lite, ~aot-apc-upgrade, ~!aot-humvee-upgrade
 		Queue: LightVehicle.GDI
 		Description: Armored Personnel Carrier. Can carry 5 soldiers.
-		BuildPaletteOrder: 3
+		BuildPaletteOrder: 4
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - MTNK Tier-0: reduzierte HP ===
@@ -208,11 +221,135 @@ MTNK:
 
 
 HTNK:
-	-Buildable:
 
 MSAM:
 	Buildable:
 		Prerequisites: anyhq, ~techlevel.medium, ~aot-age1, aot-age1, weap
 		Queue: Vehicle.GDI
 		BuildPaletteOrder: 4
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - HPAD: kein direktes Buildable, Proxy-Aktoren übernehmen ===
+HPAD:
+	-Buildable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - ORCA/HELI: RA-Nachladeroutine (manuell zum Helipad) ===
+# ReloadAmmoPool entfernt → kein automatisches Nachladen in der Luft.
+# Rearmable → Einheit fliegt selbstständig zu HPAD zurück wenn Ammo = 0.
+ORCA:
+	-Buildable:
+	-ReloadAmmoPool:
+	RenderSprites:
+		Image: aot-heli
+	Aircraft:
+		IdleBehavior: None
+		TakeOffOnResupply: true
+		TakeOffOnCreation: true
+	Rearmable:
+		RearmActors: aot-hpad-gdi
+	AotReturnWhenEmpty:
+	GrantConditionOnPrerequisite@orcaupgrade:
+		Condition: aot-orca-upgraded
+		Prerequisites: aot-orca-upgrade
+	-WithFacingSpriteBody:
+	WithFacingSpriteBody@apache:
+		Sequence: aot-apache-idle
+		Name: body
+		RequiresCondition: !aot-orca-upgraded
+	WithFacingSpriteBody@orca:
+		Sequence: idle
+		Name: body-orca
+		RequiresCondition: aot-orca-upgraded
+	-WithMoveAnimation:
+	WithIdleOverlay@ROTORAIR:
+		Offset: 0,0,85
+		Sequence: aot-apache-rotor
+		RequiresCondition: airborne && !aot-orca-upgraded
+	WithIdleOverlay@ROTORGROUND:
+		Offset: 0,0,85
+		Sequence: aot-apache-slow-rotor
+		RequiresCondition: !airborne && !aot-orca-upgraded
+	-Armament@PRIMARY:
+	Armament@PRIMARY:
+		Weapon: aot-ApacheAGMissiles
+		LocalOffset: 427,-171,-213, 427,171,-213
+		PauseOnCondition: !ammo || aot-orca-upgraded
+	Armament@PRIMARY_orca:
+		Weapon: OrcaAGMissiles
+		LocalOffset: 427,-171,-213, 427,171,-213
+		PauseOnCondition: !ammo || !aot-orca-upgraded
+	Armament@SECONDARY:
+		PauseOnCondition: !ammo || !aot-orca-upgraded
+
+HELI:
+	-Buildable:
+	-WithMuzzleOverlay:
+	RenderSprites:
+		Image: aot-hind
+	Aircraft:
+		IdleBehavior: None
+		TakeOffOnResupply: true
+		TakeOffOnCreation: true
+	GrantConditionOnPrerequisite@harpyupgrade:
+		Condition: aot-harpy-upgraded
+		Prerequisites: aot-harpy-upgrade
+	-WithFacingSpriteBody:
+	WithFacingSpriteBody@hind:
+		Sequence: aot-hind-idle
+		Name: body
+		RequiresCondition: !aot-harpy-upgraded
+	WithFacingSpriteBody@harpy:
+		Sequence: aot-harpy-test-idle
+		Name: body-harpy
+		RequiresCondition: aot-harpy-upgraded
+	# Player-Color-Overlay-Layer für den Harpy-Voxel-Body (Indizes 176-191 → player-Palette).
+	WithFacingSpriteBody@harpyremap:
+		Sequence: aot-harpy-test-remap
+		Name: body-harpy-remap
+		RequiresCondition: aot-harpy-upgraded
+	WithIdleOverlay@ROTORAIR:
+		Offset: 0,0,85
+		Sequence: aot-hind-rotor
+		RequiresCondition: airborne && !aot-harpy-upgraded
+	WithIdleOverlay@ROTORGROUND:
+		Offset: 0,0,85
+		Sequence: aot-hind-slow-rotor
+		RequiresCondition: !airborne && !aot-harpy-upgraded
+	WithIdleOverlay@ROTORAIR_harpy:
+		Offset: 0,0,85
+		Sequence: rotor
+		RequiresCondition: airborne && aot-harpy-upgraded
+	WithIdleOverlay@ROTORGROUND_harpy:
+		Offset: 0,0,85
+		Sequence: slow-rotor
+		RequiresCondition: !airborne && aot-harpy-upgraded
+	-Armament@PRIMARY:
+	Armament@PRIMARY:
+		Weapon: aot-HindAGGun
+		LocalOffset: 128,-213,-85, 128,213,-85
+		PauseOnCondition: !ammo || aot-harpy-upgraded
+	Armament@PRIMARY_harpy:
+		Weapon: aot-HarpyAGGun
+		LocalOffset: 128,-213,-85, 128,213,-85
+		PauseOnCondition: !ammo || !aot-harpy-upgraded
+	Armament@SECONDARY:
+		PauseOnCondition: true
+	Cloak:
+		InitialDelay: 150
+		CloakDelay: 150
+		CloakSound: trans1.aud
+		UncloakSound: trans1.aud
+		CloakStyle: Alpha
+		CloakedAlpha: 0.35
+		UncloakOn: Attack, Unload, Dock, Damage, Heal
+		PauseOnCondition: !aot-harpy-upgraded || harpy-cloak-disabled
+	GrantConditionOnDamageState@HARPYCLOAK:
+		Condition: harpy-cloak-disabled
+		ValidDamageStates: Critical
+
+# === Age of Tiberium (aotmod) - HELI: immer aot-harpy-husk spawnen (behandelt HIND + Harpy) ===
+HELI:
+	SpawnActorOnDeath:
+		Actor: aot-harpy-husk
 # === Ende aotmod ===

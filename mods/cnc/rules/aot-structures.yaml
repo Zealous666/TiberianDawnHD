@@ -1,4 +1,4 @@
-# === Age of Tiberium (aotmod) - Light Factory (LITE) ===
+# === Age of Tiberium (aotmod) - Vehicle Factory (LITE) ===
 # Günstigere Fahrzeugfabrik für GDI & NOD. Nur Powerplant nötig (kein Refinery).
 # Sprite: RA War Factory (WEAP.ZIP). Stats wie Barracks (500 Credits, 60000 HP).
 # Factions: gdi/nod auf ProductionQueue trennt die Fahrzeug-Tabs sauber (wie FACT).
@@ -12,10 +12,10 @@ LITE:
 	Health:
 		HP: 60000
 	Buildable:
-		BuildPaletteOrder: 38
+		BuildPaletteOrder: 30
 		Prerequisites: anypower
 		Queue: Building.GDI, Building.Nod
-		Description: actor-lite.description
+		Description: Basic vehicle production facility. Requires only a Power Plant.
 	Building:
 		Footprint: xxx xxx ===
 		Dimensions: 3,3
@@ -136,8 +136,8 @@ FACT:
 		Type: OreDeliver
 		DockAngle: 0
 		DockOffset: -1c0,1c512,0
-	FreeActor:
-		Actor: ORET
+	OretSpawnStateCarrier:
+		SpawnActor: ORET
 		SpawnOffset: 0,1
 		Facing: 384
 # === Ende aotmod ===
@@ -165,9 +165,14 @@ FACT:
 		Name: body-td
 		RequiresCondition: aot-age1-active
 	-WithMakeAnimation:
-	WithMakeAnimation@aot:
-		BodyNames: body, body-td
+	WithMakeAnimation@ra:
+		BodyNames: body
 		Condition: build-incomplete
+		Sequence: aot-ra-make
+	WithMakeAnimation@td:
+		BodyNames: body-td
+		Condition: build-incomplete
+		Sequence: make
 	-WithBuildingPlacedAnimation:
 	WithBuildingPlacedAnimation@ra:
 		Body: body
@@ -176,6 +181,154 @@ FACT:
 	WithBuildingPlacedAnimation@td:
 		Body: body-td
 		RequiresCondition: aot-age1-active
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - PYLE: RA Allied Barracks Sprites in Age 0, TD ab Age 1 ===
+# Doppel-Aktor-Pattern für Icon-Wechsel in der Build-Queue (analog MCV).
+# aot-pyle-age0: RA-Icon, sichtbar solange aot-age1 fehlt.
+# aot-pyle-age1: TD-Icon, sichtbar ab aot-age1.
+PYLE:
+	-Buildable:
+	GrantConditionOnPrerequisite@aotage1:
+		Condition: aot-age1-active
+		Prerequisites: aot-age1
+	-WithSpriteBody:
+	WithSpriteBody@ra:
+		Sequence: aot-ra-idle
+		Name: body
+		RequiresCondition: !aot-age1-active
+	WithSpriteBody@td:
+		Sequence: idle
+		Name: body-td
+		RequiresCondition: aot-age1-active
+	-WithMakeAnimation:
+	WithMakeAnimation@ra:
+		BodyNames: body
+		Condition: build-incomplete
+		Sequence: aot-ra-make
+	WithMakeAnimation@td:
+		BodyNames: body-td
+		Condition: build-incomplete
+		Sequence: make
+	WithBuildingPlacedAnimation@ra:
+		Body: body
+		Sequence: aot-ra-build
+		RequiresCondition: !aot-age1-active
+	WithBuildingPlacedAnimation@td:
+		Body: body-td
+		Sequence: make
+		RequiresCondition: aot-age1-active
+
+aot-pyle-age0:
+	Inherits: PYLE
+	RenderSprites:
+		Image: pyle
+	ProvidesPrerequisite@pylename:
+		Prerequisite: pyle
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: aot-ra-idle
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.GDI
+		BuildPaletteOrder: 20
+		Prerequisites: ~!aot-age1, anypower
+		Icon: aot-ra-icon
+		Description: Trains infantry.
+	Tooltip:
+		Name: actor-pyle.name
+
+aot-pyle-age1:
+	Inherits: PYLE
+	RenderSprites:
+		Image: pyle
+	ProvidesPrerequisite@pylename:
+		Prerequisite: pyle
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: idle
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.GDI
+		BuildPaletteOrder: 20
+		Prerequisites: ~aot-age1, anypower
+		Icon: aot-td-icon
+		Description: Trains infantry.
+	Tooltip:
+		Name: actor-pyle.name
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - HAND: RA Soviet Barracks Sprites in Age 0, TD ab Age 1 ===
+# Analog zu PYLE. Doppel-Aktor-Pattern für Queue-Icon-Wechsel.
+HAND:
+	-Buildable:
+	GrantConditionOnPrerequisite@aotage1:
+		Condition: aot-age1-active
+		Prerequisites: aot-age1
+	-WithSpriteBody:
+	WithSpriteBody@ra:
+		Sequence: aot-ra-idle
+		Name: body
+		RequiresCondition: !aot-age1-active
+	WithSpriteBody@td:
+		Sequence: idle
+		Name: body-td
+		RequiresCondition: aot-age1-active
+	-WithMakeAnimation:
+	WithMakeAnimation@ra:
+		BodyNames: body
+		Condition: build-incomplete
+		Sequence: aot-ra-make
+	WithMakeAnimation@td:
+		BodyNames: body-td
+		Condition: build-incomplete
+		Sequence: make
+	WithBuildingPlacedAnimation@ra:
+		Body: body
+		Sequence: aot-ra-build
+		RequiresCondition: !aot-age1-active
+	WithBuildingPlacedAnimation@td:
+		Body: body-td
+		Sequence: make
+		RequiresCondition: aot-age1-active
+
+aot-hand-age0:
+	Inherits: HAND
+	RenderSprites:
+		Image: hand
+	ProvidesPrerequisite@handname:
+		Prerequisite: hand
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: aot-ra-idle
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.Nod
+		BuildPaletteOrder: 20
+		Prerequisites: ~!aot-age1, anypower
+		Icon: aot-ra-icon
+		Description: Trains infantry.
+	Tooltip:
+		Name: actor-hand.name
+
+aot-hand-age1:
+	Inherits: HAND
+	RenderSprites:
+		Image: hand
+	ProvidesPrerequisite@handname:
+		Prerequisite: hand
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: idle
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.Nod
+		BuildPaletteOrder: 20
+		Prerequisites: ~aot-age1, anypower
+		Icon: aot-td-icon
+		Description: Trains infantry.
+	Tooltip:
+		Name: actor-hand.name
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Age-1-Marker ===
@@ -188,6 +341,10 @@ aot-age1-marker:
 
 	Selectable:
 		Priority: 0
+
+aot-age1:
+	Tooltip:
+		Name: Age 1
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Age-2-Marker ===
@@ -199,6 +356,10 @@ aot-age2-marker:
 
 	Selectable:
 		Priority: 0
+
+aot-age2:
+	Tooltip:
+		Name: Age 2
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Age-3-Marker ===
@@ -210,6 +371,10 @@ aot-age3-marker:
 
 	Selectable:
 		Priority: 0
+
+aot-age3:
+	Tooltip:
+		Name: Age 3
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Recon Jeep: HUMVEE Upgrade ===
@@ -221,7 +386,7 @@ aot-upgrade-humvee:
 
 	Buildable:
 		BuildPaletteOrder: 30
-		Prerequisites: lite, ~pyle, ~aot-age1, aot-age1, fix, ~!aot-apc-upgrade
+		Prerequisites: ~atec, lite, ~pyle, ~aot-age1, aot-age1, fix, ~!aot-apc-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -247,7 +412,7 @@ aot-upgrade-apc:
 
 	Buildable:
 		BuildPaletteOrder: 31
-		Prerequisites: lite, ~pyle, ~aot-age1, aot-age1, fix, ~!aot-humvee-upgrade
+		Prerequisites: ~atec, lite, ~pyle, ~aot-age1, aot-age1, fix, ~!aot-humvee-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -265,38 +430,110 @@ aot-upgrade-apc:
 	Interactable:
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - LTNK Upgrade ===
-aot-upgrade-ltnk:
+# === Age of Tiberium (aotmod) - TTNK Flame Tank Upgrade ===
+aot-upgrade-ttnk:
 	Tooltip:
-		Name: TickTank Enhancement
+		Name: Flame Tank Upgrade
 
 	Buildable:
 		BuildPaletteOrder: 10
-		Prerequisites: vehicleproduction, anyhq, aot-age1, ~afld
+		Prerequisites: ~stec, ~aot-age1, aot-age1, stec
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
-		Description: Light Tank upgrade with TickTank-enhancements to dig in.
+		Description: Upgrades the Heavy Tank with two powerful flamethrowers. Unlocks the Toxin and Stealth upgrades.
 
 	Valued:
-		Cost: 100
+		Cost: 500
 
 	RenderSprites:
-		Image: aot-upgrade-ltnk
+		Image: aot-upgrade-ttnk
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-ttnk-flame-upgrade
+
+	Interactable:
+
+# === Age of Tiberium (aotmod) - TTNK Toxin Tank Upgrade ===
+aot-upgrade-ttnk-toxin:
+	Tooltip:
+		Name: Toxin Tank Upgrade
+
+	Buildable:
+		BuildPaletteOrder: 11
+		Prerequisites: ~stec, ~aot-age2, aot-age2, stec, aot-ttnk-flame-upgrade, ~!aot-ttnk-cloak-upgrade
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Upgrades the Flame Tank with dual toxic sprayers. Mutually exclusive with the Stealth Upgrade.
+
+	Valued:
+		Cost: 600
+
+	RenderSprites:
+		Image: aot-upgrade-ttnk-toxin
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-ttnk-toxin-upgrade
+
+	Interactable:
+
+# === Age of Tiberium (aotmod) - TTNK Stealth Flame Tank Upgrade ===
+aot-upgrade-ttnk-cloak:
+	Tooltip:
+		Name: Stealth Upgrade
+
+	Buildable:
+		BuildPaletteOrder: 12
+		Prerequisites: ~stec, ~aot-age2, aot-age2, stec, aot-ttnk-flame-upgrade, ~!aot-ttnk-toxin-upgrade
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Equips the Flame Tank with a stealth field. Cloaks when not engaged. Mutually exclusive with the Toxin Upgrade.
+
+	Valued:
+		Cost: 500
+
+	RenderSprites:
+		Image: aot-upgrade-ttnk-cloak
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-ttnk-cloak-upgrade
+
+	Interactable:
+
+# === Age of Tiberium (aotmod) - LTNK Tick Tank Chassis Upgrade ===
+aot-upgrade-ltnk-tick:
+	Tooltip:
+		Name: Tick Tank Chassis
+
+	Buildable:
+		BuildPaletteOrder: 10
+		Prerequisites: ~stec, ~aot-age2, aot-age2, ~afld, fix
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Replaces the Light Tank chassis with a Tick Tank hull. Enables dig-in mode.
+
+	Valued:
+		Cost: 300
+
+	RenderSprites:
+		Image: aot-upgrade-ltnk-tick
 
 	ProvidesPrerequisite:
 		Prerequisite: aot-ltnk-upgrade
 
 	Interactable:
 
-# === Age of Tiberium (aotmod) - LTNK Upgrade 2 ===
-aot-upgrade-ltnk2:
+# === Age of Tiberium (aotmod) - LTNK Laser Upgrade ===
+aot-upgrade-ltnk:
 	Tooltip:
-		Name: Scorpio Laser
+		Name: Light Tank Laser Upgrade
 
 	Buildable:
 		BuildPaletteOrder: 11
-		Prerequisites: aot-ltnk-upgrade, aot-age2, ~afld
+		Prerequisites: ~stec, ~aot-age3, aot-age3, ~afld
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -306,7 +543,7 @@ aot-upgrade-ltnk2:
 		Cost: 200
 
 	RenderSprites:
-		Image: aot-upgrade-ltnk2
+		Image: aot-upgrade-ltnk
 
 	ProvidesPrerequisite:
 		Prerequisite: aot-ltnk-upgrade2
@@ -323,7 +560,7 @@ aot-upgrade-ion-cannon:
 
 	Buildable:
 		BuildPaletteOrder: 5
-		Prerequisites: ~gdi-hq, ~aot-atec, ~aot-age3, aot-age3
+		Prerequisites: ~atec, ~gdi-hq, ~aot-age3, aot-age3
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		Icon: ioncannon
@@ -350,37 +587,31 @@ ATEC:
 	Inherits: ^BaseBuilding
 	Inherits@IDISABLE: ^DisabledOverlay
 	Tooltip:
-		Name: Allied Tech Centre
+		Name: Tech Center
 	Valued:
 		Cost: 1500
 	Health:
 		HP: 60000
-	Buildable:
-		BuildPaletteOrder: 75
-		Prerequisites: anypower, anyhq, ~aot-age2
-		Queue: Building.GDI
-		BuildLimit: 1
-		Description: Advanced GDI research facility. Enables high-tier upgrades and satellite surveillance.
 	Building:
-		Footprint: xx xx ==
-		Dimensions: 2,3
+		Footprint: xxx xxx ===
+		Dimensions: 3,3
 		LocalCenterOffset: 0,-512,0
 	ProvidesPrerequisite:
 		Prerequisite: aot-atec
+	ProvidesPrerequisite@techname:
+		Prerequisite: atec
 	ProvidesRadar:
 		RequiresCondition: !lowpower
 	RevealsShroud:
 		Range: 5c0
 	WithBuildingBib:
-	WithMakeAnimation:
-		Condition: build-incomplete
 	SpawnActorsOnSell:
 		ActorTypes: e1, e1, c2
 	Power:
 		Amount: -200
 	SupportPowerChargeBar:
 	AotSatellitePower:
-		Prerequisites: aot-atec
+		Prerequisites: atec
 		ChargeInterval: 250
 		RequiresCondition: !satellite-used
 		PauseOnCondition: lowpower
@@ -388,11 +619,170 @@ ATEC:
 		Name: Satellite Surveillance
 		Description: Reveals the entire map.
 		SupportPowerPaletteOrder: 55
+	GrantConditionOnPrerequisite@aotage1:
+		Condition: aot-age1-active
+		Prerequisites: aot-age1
 	RenderSprites:
 		Image: atec
-	WithSpriteBody:
+	-WithSpriteBody:
+	WithSpriteBody@ra:
 		Sequence: idle
 		Name: body
+		RequiresCondition: !aot-age1-active
+	WithSpriteBody@td:
+		Sequence: aot-td-idle
+		Name: body-td
+		RequiresCondition: aot-age1-active
+	-WithMakeAnimation:
+	WithMakeAnimation@ra:
+		BodyNames: body
+		Condition: build-incomplete
+		Sequence: make
+	WithMakeAnimation@td:
+		BodyNames: body-td
+		Condition: build-incomplete
+		Sequence: aot-td-make
+# === Ende aotmod ===
+
+
+aot-atec-age0:
+	Inherits: ATEC
+	RenderSprites:
+		Image: atec
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: place
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.GDI
+		BuildPaletteOrder: 100
+		Prerequisites: anypower, gdi-hq, ~!aot-age1
+		BuildLimit: 1
+		Icon: icon
+		Description: Advanced GDI research facility. Enables high-tier upgrades and satellite surveillance.
+
+aot-atec-age1:
+	Inherits: ATEC
+	RenderSprites:
+		Image: atec
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: aot-td-place
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.GDI
+		BuildPaletteOrder: 100
+		Prerequisites: anypower, gdi-hq, ~aot-age1, !aot-atec
+		BuildLimit: 1
+		Icon: aot-age1-icon
+		Description: Advanced GDI research facility. Enables high-tier upgrades and satellite surveillance.
+# === Age of Tiberium (aotmod) - STEC (Soviet Tech Centre, NOD) ===
+# NOD-exklusives Tech-Gebäude. Sprite: RA Soviet Tech Centre (STEKMAKE-Frames).
+# Schaltet NOD-Tier-2-Upgrades frei (aot-stec Prerequisite).
+STEC:
+	Inherits: ^BaseBuilding
+	Inherits@IDISABLE: ^DisabledOverlay
+	Tooltip:
+		Name: Tech Center
+	Valued:
+		Cost: 1500
+	Health:
+		HP: 60000
+	Building:
+		Footprint: xxx xxx ===
+		Dimensions: 3,3
+		LocalCenterOffset: 0,-512,0
+	ProvidesPrerequisite:
+		Prerequisite: aot-stec
+	ProvidesPrerequisite@techname:
+		Prerequisite: stec
+	RevealsShroud:
+		Range: 5c0
+	WithBuildingBib:
+	SpawnActorsOnSell:
+		ActorTypes: e1, e1, e1
+	Power:
+		Amount: -200
+	GrantConditionOnPrerequisite@aotage1:
+		Condition: aot-age1-active
+		Prerequisites: aot-age1
+	RenderSprites:
+		Image: stec
+	-WithSpriteBody:
+	WithSpriteBody@ra:
+		Sequence: idle
+		Name: body
+		RequiresCondition: !aot-age1-active
+	WithSpriteBody@td:
+		Sequence: aot-td-idle
+		Name: body-td
+		RequiresCondition: aot-age1-active
+	-WithMakeAnimation:
+	WithMakeAnimation@ra:
+		BodyNames: body
+		Condition: build-incomplete
+		Sequence: make
+	WithMakeAnimation@td:
+		BodyNames: body-td
+		Condition: build-incomplete
+		Sequence: aot-td-make
+# === Ende aotmod ===
+
+
+aot-stec-age0:
+	Inherits: STEC
+	RenderSprites:
+		Image: stec
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: place
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.Nod
+		BuildPaletteOrder: 101
+		Prerequisites: anypower, anyhq, ~!aot-age1
+		BuildLimit: 1
+		Icon: icon
+		Description: Advanced NOD research facility. Enables high-tier NOD upgrades.
+
+aot-stec-age1:
+	Inherits: STEC
+	RenderSprites:
+		Image: stec
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: aot-td-place
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.Nod
+		BuildPaletteOrder: 101
+		Prerequisites: anypower, anyhq, ~aot-age1, !aot-stec
+		BuildLimit: 1
+		Icon: aot-age1-icon
+		Description: Advanced NOD research facility. Enables high-tier NOD upgrades.
+# === Age of Tiberium (aotmod) - HQ Build-Menu Icons (Proxy-Aktoren) ===
+# Zwei Proxy-Aktoren steuern das Icon im Baumenü:
+# aot-hq-base: sichtbar solange Ion Cannon Uplink NICHT gekauft wurde.
+# aot-hq-ion:  sichtbar sobald Ion Cannon Uplink aktiv ist.
+aot-hq-base:
+	Inherits: HQ
+	RenderSprites:
+		Image: hq
+	Buildable:
+		Queue: Building.GDI
+		BuildPaletteOrder: 50
+		Prerequisites: vehicleproduction, ~techlevel.medium, ~!aot-ion-cannon-upgrade
+		Icon: aot-base-icon
+
+aot-hq-ion:
+	Inherits: HQ
+	RenderSprites:
+		Image: hq
+	Buildable:
+		Queue: Building.GDI
+		BuildPaletteOrder: 50
+		Prerequisites: vehicleproduction, ~techlevel.medium, ~aot-ion-cannon-upgrade
+		Icon: aot-ion-icon
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - NOD Radar (aot-nod-radar) ===
@@ -411,19 +801,65 @@ aot-nod-radar:
 	ProvidesPrerequisite:
 		Prerequisite: anyhq
 	ProvidesPrerequisite@buildingname:
-	Buildable:
-		BuildPaletteOrder: 70
-		Prerequisites: vehicleproduction, ~techlevel.medium
-		Queue: Building.Nod
-		Description: actor-aot-nod-radar.description
+	# Nicht direkt baubar — zwei Proxy-Aktoren (Doppel-Aktor-Pattern) für Icon-Wechsel ab Age 2.
 	Building:
 		Footprint: xx xx ==
 		Dimensions: 2,3
 		LocalCenterOffset: 0,-512,0
 	Selectable:
 		Bounds: 2048, 2048
-	WithSpriteBody:
+	# Sprite-Switch: RA DOME (Age 0) → TS DOME+Dish composite (Age 1) → TS NOD Radar (Age 2).
+	GrantConditionOnPrerequisite@aotage1:
+		Condition: aot-age1-active
+		Prerequisites: aot-age1
+	GrantConditionOnPrerequisite@aotage2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
+	-WithSpriteBody:
+	WithSpriteBody@dome:
+		Sequence: idle
+		Name: body
 		PauseOnCondition: lowpower
+		RequiresCondition: !aot-age1-active
+	WithSpriteBody@age1:
+		Sequence: aot-age1-idle
+		Name: body-age1
+		PauseOnCondition: lowpower
+		RequiresCondition: aot-age1-active && !aot-age2-active
+	WithSpriteBody@age2:
+		Sequence: aot-age2-idle
+		Name: body-age2
+		PauseOnCondition: lowpower
+		RequiresCondition: aot-age2-active
+	# Player-Color-Overlay (Body, Indizes 176-191 → player-Palette).
+	WithSpriteBody@age2remap:
+		Sequence: aot-age2-remap
+		Name: body-age2-remap
+		RequiresCondition: aot-age2-active && !build-incomplete
+	# Rotierende Radarschüssel (animiert) — Body + Player-Color-Overlay.
+	WithIdleOverlay@dish:
+		Sequence: aot-age2-dish
+		PauseOnCondition: lowpower
+		RequiresCondition: aot-age2-active && !build-incomplete
+	WithIdleOverlay@dishremap:
+		Sequence: aot-age2-dish-remap
+		Palette: player
+		IsPlayerPalette: True
+		PauseOnCondition: lowpower
+		RequiresCondition: aot-age2-active && !build-incomplete
+	-WithMakeAnimation:
+	WithMakeAnimation@dome:
+		BodyNames: body
+		Condition: build-incomplete
+		Sequence: make
+	WithMakeAnimation@age1:
+		BodyNames: body-age1
+		Condition: build-incomplete
+		Sequence: make
+	WithMakeAnimation@age2:
+		BodyNames: body-age2
+		Condition: build-incomplete
+		Sequence: aot-age2-make
 	Health:
 		HP: 80000
 	RevealsShroud:
@@ -439,6 +875,35 @@ aot-nod-radar:
 		Amount: -50
 	RenderSprites:
 		Image: aot-nod-radar
+
+# NOD Radar Queue-Proxies (Doppel-Aktor-Pattern für Icon-Wechsel):
+# aot-nod-radar-age0: DOME-Icon vor Age 2; aot-nod-radar-age2: TS-Radar-Icon ab Age 2.
+# Beide erben das Sprite-Switch-Verhalten von aot-nod-radar.
+aot-nod-radar-age0:
+	Inherits: aot-nod-radar
+	RenderSprites:
+		Image: aot-nod-radar
+	Buildable:
+		BuildPaletteOrder: 50
+		Prerequisites: vehicleproduction, ~techlevel.medium, ~!aot-age2
+		Queue: Building.Nod
+		Icon: icon
+		Description: Provides radar and cloaked unit detection for NOD.
+	Tooltip:
+		Name: actor-aot-nod-radar.name
+
+aot-nod-radar-age2:
+	Inherits: aot-nod-radar
+	RenderSprites:
+		Image: aot-nod-radar
+	Buildable:
+		BuildPaletteOrder: 50
+		Prerequisites: vehicleproduction, ~techlevel.medium, ~aot-age2
+		Queue: Building.Nod
+		Icon: aot-age2-icon
+		Description: Provides radar and cloaked unit detection for NOD.
+	Tooltip:
+		Name: actor-aot-nod-radar.name
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Age Upgrades (GDI/NOD Split) ===
@@ -455,7 +920,7 @@ aot-age1-upgrade-gdi:
 		Cost: 1000
 	Buildable:
 		BuildPaletteOrder: 5
-		Prerequisites: anyhq, ~!aot-age1-purchased
+		Prerequisites: ~atec, ~!aot-age1-purchased
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -473,7 +938,7 @@ aot-age1-upgrade-nod:
 		Cost: 1000
 	Buildable:
 		BuildPaletteOrder: 5
-		Prerequisites: anyhq, ~!aot-age1-purchased
+		Prerequisites: ~stec, ~!aot-age1-purchased
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -491,7 +956,7 @@ aot-age2-upgrade-gdi:
 		Cost: 1000
 	Buildable:
 		BuildPaletteOrder: 6
-		Prerequisites: ~aot-age1-purchased, ~!aot-age2-purchased, aot-age1-purchased, proc, fix, weap
+		Prerequisites: ~atec, ~aot-age1-purchased, ~!aot-age2-purchased, aot-age1-purchased, proc, weap
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -509,7 +974,7 @@ aot-age2-upgrade-nod:
 		Cost: 1000
 	Buildable:
 		BuildPaletteOrder: 6
-		Prerequisites: ~aot-age1-purchased, ~!aot-age2-purchased, aot-age1-purchased, proc, fix, afld
+		Prerequisites: ~stec, ~aot-age1-purchased, ~!aot-age2-purchased, aot-age1-purchased, proc, afld
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -527,7 +992,7 @@ aot-age3-upgrade-gdi:
 		Cost: 1000
 	Buildable:
 		BuildPaletteOrder: 7
-		Prerequisites: ~aot-age2-purchased, ~!aot-age3-purchased, aot-age2-purchased, aot-atec
+		Prerequisites: ~atec, ~aot-age2-purchased, ~!aot-age3-purchased, aot-age2-purchased
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -545,7 +1010,7 @@ aot-age3-upgrade-nod:
 		Cost: 1000
 	Buildable:
 		BuildPaletteOrder: 7
-		Prerequisites: ~aot-age2-purchased, ~!aot-age3-purchased, aot-age2-purchased, aot-atec
+		Prerequisites: ~stec, ~aot-age2-purchased, ~!aot-age3-purchased, aot-age2-purchased, tmpl
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -556,6 +1021,11 @@ aot-age3-upgrade-nod:
 		Image: aot-age3-upgrade
 # === Ende aotmod ===
 
+# Prerequisite display name shim — damit der MTNK-Tooltip "Communications Centre" zeigt.
+gdi-hq:
+	Tooltip:
+		Name: Communications Centre
+
 # === Age of Tiberium (aotmod) - MTNK Predator Upgrade ===
 aot-upgrade-mtnk-predator:
 	Tooltip:
@@ -563,7 +1033,7 @@ aot-upgrade-mtnk-predator:
 
 	Buildable:
 		BuildPaletteOrder: 20
-		Prerequisites: ~aot-weap, anyhq, ~techlevel.medium, ~aot-age2, aot-age2
+		Prerequisites: ~atec, ~lite, ~techlevel.medium, ~aot-age2, aot-age2
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -587,7 +1057,7 @@ aot-upgrade-mtnk-railgun:
 
 	Buildable:
 		BuildPaletteOrder: 21
-		Prerequisites: ~aot-weap, anyhq, ~techlevel.medium, ~aot-mtnk-predator-upgrade, ~aot-age3, aot-mtnk-predator-upgrade, aot-age3
+		Prerequisites: ~atec, ~lite, ~techlevel.medium, ~aot-mtnk-predator-upgrade, ~aot-age3, aot-mtnk-predator-upgrade, aot-age3
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -605,6 +1075,30 @@ aot-upgrade-mtnk-railgun:
 	Interactable:
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - HTNK Rocket Upgrade ===
+aot-upgrade-htnk-rocket:
+	Tooltip:
+		Name: Rocket Upgrade
+
+	Buildable:
+		BuildPaletteOrder: 7
+		Prerequisites: ~aot-weap, ~aot-age2, aot-age2, atec
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Equips the Mammoth Tank with dual rocket launchers for additional anti-air and ground firepower.
+
+	Valued:
+		Cost: 750
+
+	RenderSprites:
+		Image: aot-upgrade-htnk-rocket
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-htnk-rocket-upgrade
+
+	Interactable:
+
 # === Age of Tiberium (aotmod) - HTNK Dual-Railgun Upgrade ===
 # Erfordert Age 3 + ATEC + GDI War Factory. Schaltet aot-htnk-railgun-upgrade frei →
 # HTNK wechselt von Standard-Railguns zu Dual-Railguns (aot-HtnkLaser Waffe).
@@ -614,7 +1108,7 @@ aot-upgrade-htnk-railgun:
 
 	Buildable:
 		BuildPaletteOrder: 25
-		Prerequisites: ~aot-weap, ~aot-age3, aot-age3, aot-atec
+		Prerequisites: ~aot-weap, ~aot-age3, aot-age3, atec
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -630,4 +1124,440 @@ aot-upgrade-htnk-railgun:
 		Prerequisite: aot-htnk-railgun-upgrade
 
 	Interactable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - HPAD: Proxy-Aktoren für GDI/NOD-Icons ===
+aot-hpad-gdi:
+	Inherits: HPAD
+	RenderSprites:
+		Image: hpad
+	Buildable:
+		BuildPaletteOrder: 60
+		Prerequisites: anyhq
+		Queue: Building.GDI
+		Icon: hpad-blue-icon
+		Description: Landing pad for helicopters. Required for air unit production.
+	ProvidesPrerequisite@buildingname:
+		Prerequisite: hpad
+
+aot-hpad-nod:
+	Inherits: HPAD
+	RenderSprites:
+		Image: hpad
+	Buildable:
+		BuildPaletteOrder: 60
+		Prerequisites: anyhq
+		Queue: Building.Nod
+		Icon: hpad-red-icon
+		Description: Landing pad for helicopters. Required for air unit production.
+	ProvidesPrerequisite@buildingname:
+		Prerequisite: hpad
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Harpy Upgrade ===
+# Tier 1 / sichtbar ab Age 1. Wandelt alle HINDs zu Harpies um.
+# Harpy hat unendliche Mun — kein Reload am HPAD nötig.
+aot-upgrade-harpy:
+	Tooltip:
+		Name: Harpy Upgrade
+
+	Buildable:
+		BuildPaletteOrder: 40
+		Prerequisites: ~stec, anyhq, ~hpad, hpad, ~aot-age2, aot-age2
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Upgrades all HINDs to Harpy attack helicopters. Increases damage output and fire rate. Reloads ammunition automatically while airborne. Grants stealth capability when not engaged.
+
+	Valued:
+		Cost: 300
+
+	RenderSprites:
+		Image: aot-upgrade-harpy
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-harpy-upgrade
+
+	Interactable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - ORCA Upgrade ===
+# Tier 1 / sichtbar ab Age 1. Wandelt alle Apaches zu ORCAs um.
+aot-upgrade-orca:
+	Tooltip:
+		Name: ORCA Upgrade
+
+	Buildable:
+		BuildPaletteOrder: 40
+		Prerequisites: ~atec, anyhq, ~hpad, hpad, ~aot-age1, aot-age1
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Upgrades all Apaches to ORCA gunships. Adds anti-air missile capability.
+
+	Valued:
+		Cost: 300
+
+	RenderSprites:
+		Image: aot-upgrade-orca
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-orca-upgrade
+
+	Interactable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - AFLT: Air Field (GDI, sichtbar ab Age 1) ===
+# Neues Gebäude analog zu HPAD, aber GDI-only und nur für das neue AJET-Flugzeug.
+# Nutzt vorerst HPAD-Sprites als Platzhalter.
+AFLT:
+	Inherits: ^BaseBuilding
+	Inherits@shape: ^2x2Shape
+	Selectable:
+		Bounds: 3072, 2048
+	HitShape:
+		UseTargetableCellsOffsets: false
+		TargetableOffsets: 0,0,0, 768,-512,0, 768,512,0, -281,-512,0, -630,512,0
+	Valued:
+		Cost: 1500
+	Tooltip:
+		Name: Air Field
+	Buildable:
+		BuildPaletteOrder: 70
+		Prerequisites: ~aot-age1, anyhq
+		Queue: Building.GDI
+		Icon: aflt-gdi-icon
+		Description: Advanced air production facility. Produces GDI fighter jets.
+	Building:
+		Footprint: xxx xxx
+		Dimensions: 3,2
+	Health:
+		HP: 60000
+	RevealsShroud:
+		Range: 5c0
+	Exit@1:
+		SpawnOffset: 0,-256,0
+		Facing: 768
+	Production:
+		Produces: Aircraft.GDI.AFLT
+	Reservable:
+	RepairsUnits:
+		HpPerStep: 1000
+		PlayerExperience: 5
+		StartRepairingNotification: Repairing
+		StartRepairingTextNotification: notification-repairing
+	WithResupplyAnimation:
+		RequiresCondition: !build-incomplete
+	RallyPoint:
+	CommandBarBlacklist:
+		DisableStop: false
+	ProductionQueue@AFLT:
+		Type: Aircraft.GDI.AFLT
+		DisplayOrder: 4
+		Factions: gdi
+		Group: Aircraft
+		LowPowerModifier: 150
+		ReadyAudio: UnitReady
+		ReadyTextNotification: notification-unit-ready
+		BlockedAudio: NoBuild
+		BlockedTextNotification: notification-unable-to-build-more
+		LimitedAudio: BuildingInProgress
+		LimitedTextNotification: notification-unable-to-comply-building-in-progress
+		QueuedAudio: Training
+		OnHoldAudio: OnHold
+		CancelledAudio: Cancelled
+	ProductionBar@AFLT:
+		ProductionType: Aircraft.GDI.AFLT
+	Power:
+		Amount: -20
+	ProvidesPrerequisite@buildingname:
+	RenderSprites:
+		Image: aflt
+
+# === Age of Tiberium (aotmod) - FIX: RA Repair Facility Sprites in Age 0, TD ab Age 1 ===
+# Doppel-Aktor-Pattern analog PYLE. FIX muss das Prerequisite "fix" explizit bereitstellen.
+FIX:
+	-Buildable:
+	GrantConditionOnPrerequisite@aotage1:
+		Condition: aot-age1-active
+		Prerequisites: aot-age1
+	-WithSpriteBody:
+	WithSpriteBody@ra:
+		Sequence: aot-ra-idle
+		Name: body
+		RequiresCondition: !aot-age1-active
+	WithSpriteBody@td:
+		Sequence: idle
+		Name: body-td
+		RequiresCondition: aot-age1-active
+	-WithMakeAnimation:
+	WithMakeAnimation@ra:
+		BodyNames: body
+		Condition: build-incomplete
+		Sequence: aot-ra-make
+	WithMakeAnimation@td:
+		BodyNames: body-td
+		Condition: build-incomplete
+		Sequence: make
+	WithBuildingPlacedAnimation@ra:
+		Body: body
+		Sequence: aot-ra-build
+		RequiresCondition: !aot-age1-active
+	WithBuildingPlacedAnimation@td:
+		Body: body-td
+		Sequence: make
+		RequiresCondition: aot-age1-active
+
+aot-fix-age0:
+	Inherits: FIX
+	RenderSprites:
+		Image: fix
+	ProvidesPrerequisite@fixname:
+		Prerequisite: fix
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: aot-ra-idle
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.GDI, Building.Nod
+		BuildPaletteOrder: 40
+		Prerequisites: ~!aot-age1, vehicleproduction
+		Icon: aot-ra-icon
+		Description: Repairs vehicles.
+	Tooltip:
+		Name: actor-fix.name
+
+aot-fix-age1:
+	Inherits: FIX
+	RenderSprites:
+		Image: fix
+	ProvidesPrerequisite@fixname:
+		Prerequisite: fix
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: idle
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.GDI, Building.Nod
+		BuildPaletteOrder: 40
+		Prerequisites: ~aot-age1, vehicleproduction
+		Icon: aot-td-icon
+		Description: Repairs vehicles.
+	Tooltip:
+		Name: actor-fix.name
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - NUKE: RA POWR vor Age 1, TD danach, GDI-only ===
+# Sprite-Switch: Age 0 → RA POWR.ZIP, Age 1+ → TD NUKE.ZIP, Turbine → RA POWR.ZIP (Platzhalter)
+# Turbine Technology Upgrade (Age 2, GDI): erhöht Energieproduktion 100 → 200.
+# Turbine-Sprite ist RA POWR als optischer Platzhalter bis dedizierter Sprite vorliegt.
+NUKE:
+	-Buildable:
+	ProvidesPrerequisite@nukename:
+		Prerequisite: nuke
+	GrantConditionOnPrerequisite@aotage1:
+		Condition: aot-age1-active
+		Prerequisites: aot-age1
+	GrantConditionOnPrerequisite@turbine:
+		Condition: aot-turbine-active
+		Prerequisites: aot-nuke-turbine-upgrade
+	-WithSpriteBody:
+	WithSpriteBody@ra:
+		Sequence: aot-ra-idle
+		Name: body
+		RequiresCondition: !aot-age1-active
+	WithSpriteBody@td:
+		Sequence: idle
+		Name: body-td
+		RequiresCondition: aot-age1-active && !aot-turbine-active
+	WithSpriteBody@turbine:
+		Sequence: aot-turbine-idle
+		Name: body-turbine
+		RequiresCondition: aot-turbine-active
+	# Player-Color-Overlay-Layer (indizierte Maske 176-191 → player-Palette, dynamisch).
+	WithSpriteBody@turbineremap:
+		Sequence: aot-turbine-remap
+		Name: body-turbine-remap
+		RequiresCondition: aot-turbine-active && !build-incomplete
+	-WithMakeAnimation:
+	WithMakeAnimation@ra:
+		BodyNames: body
+		Condition: build-incomplete
+		Sequence: aot-ra-make
+	WithMakeAnimation@td:
+		BodyNames: body-td
+		Condition: build-incomplete
+		Sequence: make
+	WithMakeAnimation@turbine:
+		BodyNames: body-turbine
+		Condition: build-incomplete
+		Sequence: aot-turbine-make
+	-Power:
+	Power@base:
+		Amount: 100
+		RequiresCondition: !aot-turbine-active
+	Power@turbine:
+		Amount: 200
+		RequiresCondition: aot-turbine-active
+	ScalePowerWithHealth:
+
+aot-nuke-age0:
+	Inherits: NUKE
+	RenderSprites:
+		Image: nuke
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: aot-ra-idle
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.GDI, Building.Nod
+		BuildPaletteOrder: 10
+		Prerequisites: ~!aot-age1, fact
+		Icon: aot-ra-icon
+		Description: Generates power.
+	Tooltip:
+		Name: actor-nuke.name
+
+aot-nuke-age1:
+	Inherits: NUKE
+	RenderSprites:
+		Image: nuke
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: idle
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.GDI, Building.Nod
+		BuildPaletteOrder: 10
+		Prerequisites: ~aot-age1, ~!aot-nuke-turbine-upgrade, fact
+		Icon: aot-td-icon
+		Description: Generates power.
+	Tooltip:
+		Name: actor-nuke.name
+
+aot-nuke-turbine:
+	Inherits: NUKE
+	RenderSprites:
+		Image: nuke
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: aot-turbine-idle
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.GDI
+		BuildPaletteOrder: 10
+		Prerequisites: ~aot-age1, ~aot-nuke-turbine-upgrade, fact
+		Icon: aot-turbine-icon
+		Description: Generates power.
+	Tooltip:
+		Name: actor-nuke.name
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - NUK2: RA APWR vor Age 1, TD danach, NOD-only ===
+# Sprite-Switch: Age 0 → RA Soviet Advanced Power Plant (APWR.ZIP), Age 1+ → TD NUK2.ZIP
+# NOD-Spieler benötigen ab Age 1 zusätzlich den NOD Radar Dome (anyhq).
+NUK2:
+	Building:
+		Footprint: xxx xxx ===
+		Dimensions: 3,3
+		LocalCenterOffset: 0,-512,0
+	Selectable:
+		Bounds: 3072, 2048
+	HitShape:
+		UseTargetableCellsOffsets: true
+		Type: Rectangle
+			TopLeft: -1536, -1024
+			BottomRight: 1536, 1024
+	-Buildable:
+	GrantConditionOnPrerequisite@aotage1:
+		Condition: aot-age1-active
+		Prerequisites: aot-age1
+	-WithSpriteBody:
+	WithSpriteBody@ra:
+		Sequence: aot-ra-idle
+		Name: body
+		RequiresCondition: !aot-age1-active
+	WithSpriteBody@td:
+		Sequence: idle
+		Name: body-td
+		RequiresCondition: aot-age1-active
+	-WithMakeAnimation:
+	WithMakeAnimation@ra:
+		BodyNames: body
+		Condition: build-incomplete
+		Sequence: aot-ra-make
+	WithMakeAnimation@td:
+		BodyNames: body-td
+		Condition: build-incomplete
+		Sequence: make
+
+aot-nuk2-age0:
+	Inherits: NUK2
+	RenderSprites:
+		Image: nuk2
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: aot-ra-idle
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.Nod
+		BuildPaletteOrder: 70
+		Prerequisites: ~!aot-age1, nuke
+		Icon: aot-ra-icon
+		Description: Generates more power than the standard Power Plant.
+	Tooltip:
+		Name: actor-nuk2.name
+
+aot-nuk2-age1:
+	Inherits: NUK2
+	RenderSprites:
+		Image: nuk2
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: idle
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.Nod
+		BuildPaletteOrder: 70
+		Prerequisites: ~aot-age1, nuke, anyhq
+		Icon: aot-td-icon
+		Description: Generates more power than the standard Power Plant.
+	Tooltip:
+		Name: actor-nuk2.name
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Turbine Technology Upgrade (GDI, Age 2) ===
+# Erfordert Age 2 + mindestens ein NUKE-Kraftwerk. Schaltet aot-nuke-turbine-upgrade frei →
+# NUKE erhöht Energieproduktion von 100 auf 200 (alle platzierten + zukünftigen NUKEs).
+aot-upgrade-nuke-turbine:
+	Tooltip:
+		Name: Turbine Technology Upgrade
+
+	Buildable:
+		BuildPaletteOrder: 15
+		Prerequisites: ~atec, ~anypower, ~aot-age2, anypower, aot-age2
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Upgrades all GDI Power Plants with Turbine Technology, doubling energy output.
+
+	Valued:
+		Cost: 600
+
+	RenderSprites:
+		Image: aot-upgrade-nuke-turbine
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-nuke-turbine-upgrade
+
+	Interactable:
+
+# === Age of Tiberium (aotmod) - GUN/GTWR GDI-exklusiv (NOD-Defense nur CYCL/SAM/OBLI) ===
+GUN:
+	Buildable:
+		Queue: Support.GDI
+
+GTWR:
+	Buildable:
+		Queue: Support.GDI
 # === Ende aotmod ===

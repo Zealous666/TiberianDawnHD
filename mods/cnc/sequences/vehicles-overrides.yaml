@@ -54,10 +54,19 @@ mtnk:
 		RemasteredFilename: mtnk_2_pred.png
 	aot-mtnk-rail-icon:
 		RemasteredFilename: mtnk_3_rail.png
+	aot-mtnk-turret-predator:
+		RemasteredFilename: aot-mtnk-turret-predator.zip
+		Facings: 32
+		UseClassicFacings: True
+	aot-mtnk-turret-railgun:
+		RemasteredFilename: aot-mtnk-turret-railgun.zip
+		Facings: 32
+		UseClassicFacings: True
 
 mtnk.destroyed:
 	Defaults:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\MTNK.ZIP
+
 
 ltnk:
 	Defaults:
@@ -75,21 +84,66 @@ ltnk:
 		RemasteredFilename: aot-ltnk-turret.zip
 		Facings: 32
 		UseClassicFacings: True
-	aot-icon-upgrade:
-		RemasteredFilename: aot-ltnk-upgrade-icon.png
+	aot-turret-dark:
+		RemasteredFilename: aot-ltnk-dark-turret.zip
+		Start: 32
+		Facings: 32
+		UseClassicFacings: True
+	aot-turret-laser:
+		RemasteredFilename: aot-ltnk-laser-turret.zip
+		Start: 32
+		Facings: 32
+		UseClassicFacings: True
+	aot-tick-idle:
+		RemasteredFilename: aot-ttnk-tick-test.zip
+		Facings: 32
+		UseClassicFacings: True
+	aot-tick-remap:
+		RemasteredFilename: aot-ttnk-tick-test-remap.png
+		RemasteredPremultiplied: False
+		Facings: 32
+		UseClassicFacings: True
+	aot-tick-deploy:
+		Filename: gatickmk.shp
+		Length: 24
+		Palette: aot-ts-player
+	aot-tick-buried:
+		Filename: gatickmk.shp
+		Start: 24
+		Length: 1
+		Palette: aot-ts-player
 	muzzle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\GUNFIRE.ZIP
 	icon:
-		RemasteredFilename: ltnk_1_base.png
+		RemasteredFilename: ltnk_base.png
+	ltnk-tick-icon:
+		RemasteredFilename: ltnk_tick.png
+	ltnk-laser-icon:
+		RemasteredFilename: ltnk_laser.png
 
+
+aot-upgrade-ttnk:
+	icon:
+		Filename: ttnk_flame.png
+		RemasteredFilename:
+
+aot-upgrade-ttnk-toxin:
+	icon:
+		Filename: ttnk_gas.png
+		RemasteredFilename:
+
+aot-upgrade-ttnk-cloak:
+	icon:
+		Filename: ttnk_cloak.png
+		RemasteredFilename:
+
+aot-upgrade-ltnk-tick:
+	icon:
+		RemasteredFilename: ltnk_tick.png
 
 aot-upgrade-ltnk:
 	icon:
-		RemasteredFilename: ltnk_2_ttnk.png
-
-aot-upgrade-ltnk2:
-	icon:
-		RemasteredFilename: ltnk_3_lsr.png
+		RemasteredFilename: ltnk_laser.png
 
 # === Age of Tiberium (aotmod) - Recon Jeep / HUMVEE / APC Icons ===
 jeep:
@@ -125,10 +179,25 @@ aot-upgrade-mtnk-railgun:
 	icon:
 		RemasteredFilename: aot-upgrade-mtnk-railgun.png
 
-# === Age of Tiberium (aotmod) - HTNK Laser Upgrade Icons (Platzhalter) ===
 htnk:
+	aot-htnk-rocket-icon:
+		RemasteredFilename: htnk_rocket.png
 	aot-htnk-laser-icon:
 		RemasteredFilename: htnk_rail.png
+	aot-htnk-norocket-turret:
+		RemasteredFilename: aot-htnk-norocket.zip
+		Start: 32
+		Facings: 32
+		UseClassicFacings: True
+	aot-htnk-railgun-turret:
+		RemasteredFilename: aot-htnk-railgun-turret.zip
+		Start: 32
+		Facings: 32
+		UseClassicFacings: True
+
+aot-upgrade-htnk-rocket:
+	icon:
+		RemasteredFilename: htnk_rocket.png
 
 aot-upgrade-htnk-railgun:
 	icon:
@@ -284,3 +353,19 @@ truck:
 truck.destroyed:
 	idle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\TRUK.ZIP
+
+aot-gatick:
+	idle:
+		Filename: gatickmk.shp
+		Start: 24
+		Length: 1
+		Palette: aot-ts-player
+	buried:
+		Filename: gatickmk.shp
+		Start: 24
+		Length: 1
+		Palette: aot-ts-player
+	deploy:
+		Filename: gatickmk.shp
+		Length: 24
+		Palette: aot-ts-player

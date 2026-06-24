@@ -2,9 +2,13 @@
 # Gleiche Logik wie FACT: GrantConditionOnPrerequisite → zwei WithFacingSpriteBody.
 # Kein WithMakeAnimation auf Fahrzeugen nötig.
 MCV:
+	OretSpawnStateCarrier:
 	GrantConditionOnPrerequisite@aotage1:
 		Condition: aot-age1-active
 		Prerequisites: aot-age1
+	GrantConditionOnPrerequisite@aotage2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
 	-WithFacingSpriteBody:
 	WithFacingSpriteBody@ra:
 		Sequence: aot-ra-idle
@@ -13,7 +17,18 @@ MCV:
 	WithFacingSpriteBody@td:
 		Sequence: idle
 		Name: body-td
-		RequiresCondition: aot-age1-active
+		RequiresCondition: aot-age1-active && !aot-age2-active
+	# Testrender: gebackene TS-Voxel-Sprites ab Age 2 (aot-mcv-test.zip).
+	WithFacingSpriteBody@age2:
+		Sequence: aot-age2-idle
+		Name: body-age2
+		RequiresCondition: aot-age2-active
+	# Player-Color-Overlay-Layer: indizierte Remap-Region (176-191) → player-Palette (dynamisch).
+	# Liegt über @age2; RGBA-Body ignoriert die player-Palette, indiziertes Overlay nutzt sie.
+	WithFacingSpriteBody@age2remap:
+		Sequence: aot-age2-remap
+		Name: body-age2-remap
+		RequiresCondition: aot-age2-active
 	-Buildable:
 # === Ende aotmod ===
 
@@ -26,9 +41,9 @@ aot-mcv-age0:
 	RenderSprites:
 		Image: mcv
 	Buildable:
-		Queue: Vehicle.GDI, Vehicle.Nod
-		BuildPaletteOrder: 1
-		Prerequisites: ~!aot-age1, fix
+		Queue: LightVehicle.GDI, LightVehicle.Nod
+		BuildPaletteOrder: 6
+		Prerequisites: ~!aot-age1, lite, fix
 		Icon: aot-ra-icon
 		Description: Mobile Construction Vehicle. Deploy to establish a base.
 	Tooltip:
@@ -39,9 +54,9 @@ aot-mcv-age1:
 	RenderSprites:
 		Image: mcv
 	Buildable:
-		Queue: Vehicle.GDI, Vehicle.Nod
-		BuildPaletteOrder: 1
-		Prerequisites: ~aot-age1, fix
+		Queue: LightVehicle.GDI, LightVehicle.Nod
+		BuildPaletteOrder: 6
+		Prerequisites: ~aot-age1, lite, fix
 		Icon: aot-ages-icon
 		Description: Mobile Construction Vehicle. Deploy to establish a base.
 	Tooltip:
@@ -115,7 +130,7 @@ JEEP:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - MTNK Queue-Proxies (Doppel-Aktor-Pattern) ===
-# aot-mtnk-base: sichtbar sobald WEAP steht, verschwindet wenn Predator-Upgrade aktiv.
+# aot-mtnk-base: sichtbar sobald LITE steht, verschwindet wenn Predator-Upgrade aktiv.
 # aot-mtnk-pred: sichtbar wenn Predator aktiv, verschwindet wenn Railgun aktiv.
 # aot-mtnk-rail: sichtbar wenn Railgun aktiv.
 aot-mtnk-base:
@@ -123,10 +138,10 @@ aot-mtnk-base:
 	RenderSprites:
 		Image: mtnk
 	Buildable:
-		Queue: Vehicle.GDI
-		BuildPaletteOrder: 3
-		Prerequisites: ~aot-weap, ~!aot-mtnk-predator-upgrade
-		Description: actor-mtnk.description
+		Queue: LightVehicle.GDI
+		BuildPaletteOrder: 5
+		Prerequisites: ~lite, gdi-hq, ~!aot-mtnk-predator-upgrade
+		Description: GDI medium battle tank.
 	Tooltip:
 		Name: Medium Tank
 
@@ -135,11 +150,11 @@ aot-mtnk-pred:
 	RenderSprites:
 		Image: mtnk
 	Buildable:
-		Queue: Vehicle.GDI
-		BuildPaletteOrder: 3
-		Prerequisites: ~aot-mtnk-predator-upgrade, ~!aot-mtnk-railgun-upgrade
+		Queue: LightVehicle.GDI
+		BuildPaletteOrder: 5
+		Prerequisites: ~lite, gdi-hq, ~aot-mtnk-predator-upgrade, ~!aot-mtnk-railgun-upgrade
 		Icon: aot-mtnk-pred-icon
-		Description: actor-mtnk.description
+		Description: GDI medium battle tank.
 	Tooltip:
 		Name: Medium Tank (Predator)
 
@@ -148,11 +163,11 @@ aot-mtnk-rail:
 	RenderSprites:
 		Image: mtnk
 	Buildable:
-		Queue: Vehicle.GDI
-		BuildPaletteOrder: 3
-		Prerequisites: ~aot-mtnk-railgun-upgrade
+		Queue: LightVehicle.GDI
+		BuildPaletteOrder: 5
+		Prerequisites: ~lite, gdi-hq, ~aot-mtnk-railgun-upgrade
 		Icon: aot-mtnk-rail-icon
-		Description: actor-mtnk.description
+		Description: GDI medium battle tank.
 	Tooltip:
 		Name: Medium Tank (Railgun)
 # === Ende aotmod ===
@@ -201,10 +216,26 @@ MTNK:
 		Weapon: aot-MtnkRailgun
 		RequiresCondition: aot-mtnk-railgun
 		LocalOffset: 768,0,90
+
+	-WithSpriteTurret:
+
+	WithSpriteTurret@base:
+		Sequence: turret
+		RequiresCondition: !aot-mtnk-predator
+
+	WithSpriteTurret@predator:
+		Sequence: aot-mtnk-turret-predator
+		RequiresCondition: aot-mtnk-predator && !aot-mtnk-railgun
+
+	WithSpriteTurret@railgun:
+		Sequence: aot-mtnk-turret-railgun
+		RequiresCondition: aot-mtnk-railgun
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - HTNK Laser Upgrade ===
-# Queue-Proxies: htnk-base verschwindet wenn Laser-Upgrade aktiv, htnk-laser erscheint.
+# === Age of Tiberium (aotmod) - HTNK Upgrades ===
+# aot-htnk-base:   Age 1, keine Raketen, kein Railgun
+# aot-htnk-rocket: Age 2 Rocket-Upgrade aktiv, noch kein Railgun
+# aot-htnk-laser:  Age 3 Railgun-Upgrade aktiv
 aot-htnk-base:
 	Inherits: HTNK
 	RenderSprites:
@@ -212,10 +243,23 @@ aot-htnk-base:
 	Buildable:
 		Queue: Vehicle.GDI
 		BuildPaletteOrder: 60
-		Prerequisites: ~aot-weap, ~aot-age2, aot-age2, aot-atec, ~!aot-htnk-railgun-upgrade
-		Description: actor-htnk.description
+		Prerequisites: ~aot-weap, ~aot-age1, aot-age1, weap, atec, ~!aot-htnk-rocket-upgrade, ~!aot-htnk-railgun-upgrade
+		Description: Heavily armored GDI battle tank with dual 120mm cannons.
 	Tooltip:
 		Name: Mammoth Tank
+
+aot-htnk-rocket:
+	Inherits: HTNK
+	RenderSprites:
+		Image: htnk
+	Buildable:
+		Queue: Vehicle.GDI
+		BuildPaletteOrder: 60
+		Prerequisites: ~aot-age1, aot-age1, ~aot-htnk-rocket-upgrade, ~!aot-htnk-railgun-upgrade
+		Icon: aot-htnk-rocket-icon
+		Description: Mammoth Tank equipped with dual rocket launchers for additional anti-air and ground firepower.
+	Tooltip:
+		Name: Mammoth Tank (Rocket)
 
 aot-htnk-laser:
 	Inherits: HTNK
@@ -224,19 +268,27 @@ aot-htnk-laser:
 	Buildable:
 		Queue: Vehicle.GDI
 		BuildPaletteOrder: 60
-		Prerequisites: ~aot-age2, aot-age2, aot-atec, ~aot-htnk-railgun-upgrade
+		Prerequisites: ~aot-age1, aot-age1, ~aot-htnk-railgun-upgrade
 		Icon: aot-htnk-laser-icon
-		Description: actor-htnk.description
+		Description: Mammoth Tank with dual high-powered railguns replacing the 120mm cannons. Devastating against all targets.
 	Tooltip:
-		Name: Mammoth Tank (Laser)
+		Name: Mammoth Tank (Railgun)
 
 HTNK:
+	GrantConditionOnPrerequisite@ROCKET:
+		Condition: aot-htnk-rocket
+		Prerequisites: aot-htnk-rocket-upgrade
+
 	GrantConditionOnPrerequisite@LASER:
 		Condition: aot-htnk-laser
 		Prerequisites: aot-htnk-railgun-upgrade
 
+	Tooltip@rocket:
+		Name: Mammoth Tank
+		RequiresCondition: aot-htnk-rocket && !aot-htnk-laser
+
 	Tooltip@laser:
-		Name: Mammoth Tank (Laser)
+		Name: Mammoth Tank
 		RequiresCondition: aot-htnk-laser
 
 	-Armament@PRIMARY:
@@ -249,9 +301,32 @@ HTNK:
 		MuzzleSequence: muzzle
 		RequiresCondition: !aot-htnk-laser
 
+	Armament@SECONDARY:
+		Name: secondary
+		Weapon: MammothMissiles
+		LocalOffset: -85,384,340, -85,-384,340
+		LocalYaw: -100, 100
+		Recoil: 10
+		MuzzleSequence: muzzle
+		RequiresCondition: aot-htnk-rocket
+
 	Armament@laser:
 		Weapon: aot-HtnkLaser
 		LocalOffset: 900,180,340, 900,-180,340
+		RequiresCondition: aot-htnk-laser
+
+	-WithSpriteTurret:
+
+	WithSpriteTurret@base:
+		Sequence: aot-htnk-norocket-turret
+		RequiresCondition: !aot-htnk-rocket && !aot-htnk-laser
+
+	WithSpriteTurret@rocket:
+		Sequence: turret
+		RequiresCondition: aot-htnk-rocket && !aot-htnk-laser
+
+	WithSpriteTurret@laser:
+		Sequence: aot-htnk-railgun-turret
 		RequiresCondition: aot-htnk-laser
 # === Ende aotmod ===
 
@@ -349,23 +424,65 @@ aot-oret-lite:
 		BuildPaletteOrder: 1
 		Prerequisites: lite
 		Queue: LightVehicle.GDI, LightVehicle.Nod
-		Description: actor-oret.description
+		Description: Collects ore from mines and delivers it to the refinery.
 	Tooltip:
 		Name: actor-oret.name
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - LTNK Queue-Proxies (Doppel-Aktor-Pattern) ===
+aot-ltnk-base:
+	Inherits: LTNK
+	RenderSprites:
+		Image: ltnk
+	Buildable:
+		Queue: Vehicle.Nod
+		BuildPaletteOrder: 40
+		Prerequisites: ~aot-age1, aot-age1, afld, ~!aot-ltnk-upgrade
+		Description: Fast and agile NOD light tank. Available from Age 1.
+	Tooltip:
+		Name: Light Tank
+
+aot-ltnk-tick:
+	Inherits: LTNK
+	RenderSprites:
+		Image: ltnk
+	Buildable:
+		Queue: Vehicle.Nod
+		BuildPaletteOrder: 40
+		Prerequisites: ~aot-age1, aot-age1, afld, ~aot-ltnk-upgrade, ~!aot-ltnk-upgrade2
+		Icon: ltnk-tick-icon
+		Description: Light Tank upgraded with Tick Tank chassis. Enables dig-in siege mode. Requires FIX facility.
+	Tooltip:
+		Name: Light Tank (Tick Chassis)
+
+aot-ltnk-laser:
+	Inherits: LTNK
+	RenderSprites:
+		Image: ltnk
+	Buildable:
+		Queue: Vehicle.Nod
+		BuildPaletteOrder: 40
+		Prerequisites: ~aot-age1, aot-age1, afld, ~aot-ltnk-upgrade2
+		Icon: ltnk-laser-icon
+		Description: Light Tank (Tick Chassis) with experimental laser turret. Remains deployed after upgrade.
+	Tooltip:
+		Name: Light Tank (Laser)
+# === Ende aotmod ===
+
 LTNK:
+	-Buildable:
+
 	-Tooltip:
 
 	Tooltip@normal:
 		Name: Light Tank
 		RequiresCondition: !aot-ltnk-upgraded
 
-	Tooltip@upgrade1:
-		Name: Light Tank (Enhanced)
+	Tooltip@ttnk:
+		Name: Light Tank (Tick Chassis)
 		RequiresCondition: aot-ltnk-upgraded && !aot-ltnk-upgraded2
 
-	Tooltip@upgrade2:
+	Tooltip@laser:
 		Name: Light Tank (Laser)
 		RequiresCondition: aot-ltnk-upgraded2
 
@@ -377,14 +494,32 @@ LTNK:
 		Condition: aot-ltnk-upgraded2
 		Prerequisites: aot-ltnk-upgrade2
 
+	-WithFacingSpriteBody:
+
+	WithFacingSpriteBody@normal:
+		Sequence: idle
+		RequiresCondition: !aot-ltnk-upgraded
+
+	WithFacingSpriteBody@ttnk:
+		Sequence: aot-tick-idle
+		RequiresCondition: aot-ltnk-upgraded
+
+	WithFacingSpriteBody@ttnk-remap:
+		Sequence: aot-tick-remap
+		RequiresCondition: aot-ltnk-upgraded
+
 	-WithSpriteTurret:
 
 	WithSpriteTurret@normal:
 		Sequence: turret
-		RequiresCondition: !aot-ltnk-upgraded2
+		RequiresCondition: !aot-ltnk-upgraded
 
-	WithSpriteTurret@upgraded2:
-		Sequence: aot-turret-upgraded
+	WithSpriteTurret@dark:
+		Sequence: aot-turret-dark
+		RequiresCondition: aot-ltnk-upgraded && !aot-ltnk-upgraded2
+
+	WithSpriteTurret@laser:
+		Sequence: aot-turret-laser
 		RequiresCondition: aot-ltnk-upgraded2
 
 	Armament:
@@ -400,32 +535,79 @@ LTNK:
 		RequiresCondition: aot-ltnk-upgraded2
 		LocalOffset: 768,0,90
 
-	-WithFacingSpriteBody:
-
-	WithFacingSpriteBody@normal:
-		Sequence: idle
-		RequiresCondition: !aot-ltnk-upgraded
-
-	WithFacingSpriteBody@upgraded:
-		Sequence: aot-chassis-upgraded
-		RequiresCondition: aot-ltnk-upgraded && !aot-ltnk-siegemode
-
-	WithFacingSpriteBody@siegemode:
-		Sequence: aot-chassis-siegemode
-		RequiresCondition: aot-ltnk-siegemode
-
-	GrantConditionOnDeploy:
-		DeployedCondition: aot-ltnk-siegemode
+	Transforms:
+		IntoActor: aot-ltnk-deployed
 		RequiresCondition: aot-ltnk-upgraded
-		DeploySounds: cashturn.aud
-		UndeploySounds: text2.aud
+		TransformSounds: cashturn.aud
 
-	Mobile:
-		PauseOnCondition: aot-ltnk-siegemode
+# aot-ltnk-deployed: Deployed / burrowed state of the Tick Tank upgrade
+# Created via Transforms from LTNK, transforms back to LTNK on undeploy.
+# Gebäude-Pattern: WithMakeAnimation spielt deploy-Sequence (gatickmk frames 0-23),
+# danach zeigt WithSpriteBody den buried-Frame (24) als idle.
+aot-ltnk-deployed:
+	Inherits: ^Building
 
-	DamageMultiplier:
-		Modifier: 50
-		RequiresCondition: aot-ltnk-siegemode
+	Building:
+		Footprint: x
+		Dimensions: 1,1
+		RequiresBaseProvider: false
+		TerrainTypes: Clear,Road,Rough,Dirt,Rock,Water
+
+	-ActorPreviewPlaceBuildingPreview:
+	-Demolishable:
+	-FrozenUnderFog:
+	-CommandBarBlacklist:
+	-AcceptsDeliveredCash:
+	-Guardable:
+
+	RenderSprites:
+		Image: aot-gatick
+		PlayerPalette: aot-ts-player
+
+	-WithSpriteBody:
+	WithSpriteBody:
+		Sequence: idle
+		Name: body
+
+	WithMakeAnimation:
+		Sequence: deploy
+		BodyNames: body
+		Condition: build-incomplete
+
+	Selectable:
+		Bounds: 1024, 1024
+		Priority: 10
+
+	Targetable:
+		TargetTypes: Ground, Vehicle
+
+	Health:
+		HP: 48000
+
+	Armor:
+		Type: Concrete
+
+	Transforms:
+		IntoActor: ltnk
+		TransformSounds: text2.aud
+		RequiresCondition: !build-incomplete
+
+	TransformsIntoTransforms:
+
+	Tooltip:
+		Name: Tick Tank (Burrowed)
+		GenericName: meta-tank-generic-name
+
+	Valued:
+		Cost: 750
+
+	MustBeDestroyed:
+
+	Voiced:
+		VoiceSet: VehicleVoice
+
+	ActorLostNotification:
+		TextNotification: notification-unit-lost
 
 # TRUCK: aus Vehicle-Queue heraus, jetzt in LITE (LightVehicle-Queue), nur lite als Prerequisite
 TRUCK:
@@ -434,7 +616,7 @@ TRUCK:
 		BuildPaletteOrder: 2
 		Prerequisites: lite
 		Queue: LightVehicle.GDI, LightVehicle.Nod
-		Description: actor-truck.description
+		Description: Transports supplies to friendly structures.
 
 # HARV: ab Age 1 sichtbar (ausgegraut bis PROC gebaut), baubar erst mit PROC
 # Proxy-Aktor-Pattern wie MCV/JEEP/MTNK: -Buildable: im Basis-Aktor, Buildable im Proxy.
@@ -449,4 +631,435 @@ aot-harv:
 		BuildPaletteOrder: 2
 		Prerequisites: ~aot-age1, proc
 		Queue: Vehicle.GDI, Vehicle.Nod
-		Description: actor-harv.description
+		Description: Harvests Tiberium and returns it to the refinery.
+
+# === Age of Tiberium (aotmod) - Apache / ORCA Upgrade-System ===
+# Doppel-Aktor-Pattern analog zu Jeep/HUMVEE.
+# Apache (Tier 0): sofort nach HPAD baubar, RA Longbow Sprites, reduzierter Schaden, nur AG.
+# ORCA (Tier 1): sichtbar nach ORCA-Upgrade, volle Stats, ORCA Sprites.
+
+aot-apache-base:
+	Inherits: ORCA
+	AmmoPool:
+		Ammo: 5
+	Buildable:
+		Queue: Aircraft.GDI
+		BuildPaletteOrder: 20
+		Prerequisites: anyhq, ~!aot-orca-upgrade
+		Description: Light attack helicopter. Armed with anti-ground-rockets.
+	Tooltip:
+		Name: Apache
+
+aot-orca-upgraded:
+	Inherits: ORCA
+	AmmoPool:
+		Ammo: 5
+	Buildable:
+		Queue: Aircraft.GDI
+		BuildPaletteOrder: 20
+		Prerequisites: anyhq, ~aot-orca-upgrade
+		Icon: aot-orca-icon
+		Description: Advanced gunship. Carries anti-ground and anti-air missiles. Returns to base when ammo is depleted.
+	Tooltip:
+		Name: ORCA
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - HIND / Harpy Upgrade-System ===
+# Doppel-Aktor-Pattern analog zu Apache/ORCA.
+# HIND (Tier 0): sofort nach NOD HPAD baubar, RA Soviet HIND Sprites, begrenzte Mun.
+# Harpy (Tier 1, nach Harpy Upgrade): Original CnC NOD Helikopter Sprites, unendliche Mun.
+
+aot-hind-base:
+	Inherits: HELI
+	AmmoPool:
+		Ammo: 6
+	ReloadAmmoPool:
+		Delay: 100
+		Count: 2
+	Buildable:
+		Queue: Aircraft.Nod
+		BuildPaletteOrder: 20
+		Prerequisites: anyhq, ~!aot-harpy-upgrade
+		Description: Soviet attack helicopter. Armed with chain guns. Reloads ammunition automatically while airborne.
+	Tooltip:
+		Name: HIND
+
+aot-harpy-husk:
+	Inherits: ^HelicopterHusk
+	Tooltip:
+		Name: actor-heli-husk-name
+	Aircraft:
+		TurnSpeed: 16
+		Speed: 186
+	RevealsShroud:
+		Range: 10c0
+		Type: GroundPosition
+	RenderSprites:
+		Image: aot-hind
+	GrantConditionOnPrerequisite@harpyupgrade:
+		Condition: aot-harpy-upgraded
+		Prerequisites: aot-harpy-upgrade
+	-WithFacingSpriteBody:
+	WithFacingSpriteBody@hind:
+		Sequence: aot-hind-idle
+		Name: body
+		RequiresCondition: !aot-harpy-upgraded
+	WithFacingSpriteBody@harpy:
+		Sequence: aot-harpy-test-idle
+		Name: body-harpy
+		RequiresCondition: aot-harpy-upgraded
+	WithFacingSpriteBody@harpyremap:
+		Sequence: aot-harpy-test-remap
+		Name: body-harpy-remap
+		RequiresCondition: aot-harpy-upgraded
+	WithIdleOverlay@hind:
+		Offset: 0,0,85
+		Sequence: aot-hind-rotor
+		RequiresCondition: !aot-harpy-upgraded
+	WithIdleOverlay@harpy:
+		Offset: 0,0,85
+		Sequence: rotor
+		RequiresCondition: aot-harpy-upgraded
+
+aot-harpy-upgraded:
+	Inherits: HELI
+	AmmoPool:
+		Ammo: 6
+	ReloadAmmoPool:
+		Delay: 30
+		Count: 2
+	Buildable:
+		Queue: Aircraft.Nod
+		BuildPaletteOrder: 20
+		Prerequisites: anyhq, ~aot-harpy-upgrade
+		Icon: aot-harpy-icon
+		Description: Upgraded attack helicopter. Deals increased damage with a higher fire rate. Reloads ammunition automatically while airborne. Cloaks when not engaged.
+	Tooltip:
+		Name: Harpy
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - AJET: GDI Fighter Jet (Air Field, ab Age 1) ===
+# Basiert auf A10-Traits (Sprites, Waffen) — A10-Aktor selbst bleibt unverändert.
+# Landet NUR am AFLT (RearmActors/RepairActors: aflt).
+AJET:
+	Inherits: ^Plane
+	Inherits@selection: ^SelectableCombatUnit
+	Inherits@EXPERIENCE: ^GainsExperience
+	Inherits@AUTOTARGET: ^AutoTargetAllAssaultMove
+	Valued:
+		Cost: 1200
+	Tooltip:
+		Name: GDI Fighter
+	UpdatesPlayerStatistics:
+		AddToArmyValue: true
+	Buildable:
+		BuildPaletteOrder: 20
+		Prerequisites: ~aot-age1, aflt
+		Queue: Aircraft.GDI.AFLT
+		Description: Ground attack jet. Armed with Vulcan cannons and napalm bombs.
+	-RejectsOrders:
+	Aircraft:
+		TurnSpeed: 16
+		Speed: 250
+		Repulsable: false
+		IdleBehavior: None
+		TakeOffOnResupply: false
+		TakeOffOnCreation: true
+	Health:
+		HP: 10000
+	Armor:
+		Type: Light
+	RevealsShroud:
+		Range: 10c0
+		Type: GroundPosition
+	AttackAircraft:
+		FacingTolerance: 40
+		AttackType: Strafe
+		Voice: Attack
+	Armament@PRIMARY:
+		Weapon: aot-AjetVulcan
+		LocalOffset: 1024,0,-85
+		PauseOnCondition: !vulcan-ammo
+	WithMuzzleOverlay:
+	Armament@SECONDARY:
+		Weapon: aot-AjetNapalm
+		LocalOffset: 0,-256,-43, 0,256,-43
+		PauseOnCondition: !napalm-ammo
+	Contrail@1:
+		Offset: -640,171,0
+		TrailLength: 15
+		StartColorAlpha: 128
+	Contrail@2:
+		Offset: -640,-171,0
+		TrailLength: 15
+		StartColorAlpha: 128
+	AmmoPool@VULCAN:
+		Name: vulcan
+		Ammo: 10
+		AmmoCondition: vulcan-ammo
+		ReloadDelay: 8
+	AmmoPool@NAPALM:
+		Name: napalm
+		Ammo: 20
+		AmmoCondition: napalm-ammo
+		ReloadDelay: 8
+	Rearmable:
+		RearmActors: aflt
+		AmmoPools: vulcan, napalm
+	AotReturnWhenEmpty:
+	Repairable:
+		RepairActors: aflt
+	FireWarheadsOnDeath:
+		Weapon: HeliExplode
+		EmptyWeapon: HeliExplode
+	HitShape:
+	Huntable:
+	Voiced:
+		VoiceSet: VehicleVoice
+	Guard:
+	Guardable:
+	Selectable:
+		DecorationBounds: 1280, 1024
+	Targetable@GROUND:
+		TargetTypes: Ground, Vehicle
+	Targetable@AIRBORNE:
+		TargetTypes: Air
+	RenderSprites:
+		Image: aot-ajet
+	Encyclopedia:
+		Description: GDI ground attack fighter jet.
+		Order: 260
+		Scale: 3
+		Category: Aircraft
+		PreviewOwner: GDI
+	WithAmmoPipsDecoration:
+		AmmoPools: vulcan
+		Position: BottomLeft
+		Margin: 4, 3
+		RequiresSelection: true
+
+# === Age of Tiberium (aotmod) - TTNK Heavy Tank (NOD, Tier 0) ===
+# Age-0: RA Remastered 3TNK Sprites, Dual-Kanone (aot-TtnkDual).
+# Age-1 Upgrade: Flame Tank (FTNK Sprites, BigFlamer × 2, AttackFrontal).
+# Age-3 Upgrade: Toxin Tank (Chemspray × 2, Sprite-Wechsel später).
+TTNK:
+	Inherits: ^Tank
+	Inherits@EXPERIENCE: ^GainsExperience
+	Inherits@AUTOTARGET: ^AutoTargetGroundAssaultMove
+	Valued:
+		Cost: 600
+	-Tooltip:
+	Tooltip@normal:
+		Name: actor-ttnk.name
+		RequiresCondition: !aot-ttnk-flame
+	Tooltip@flame:
+		Name: actor-ttnk-flame.name
+		RequiresCondition: aot-ttnk-flame && !aot-ttnk-toxin && !aot-ttnk-cloak
+	Tooltip@toxin:
+		Name: actor-ttnk-toxin.name
+		RequiresCondition: aot-ttnk-toxin
+	Tooltip@cloak:
+		Name: actor-ttnk-cloak.name
+		RequiresCondition: aot-ttnk-cloak
+	UpdatesPlayerStatistics:
+		AddToArmyValue: true
+	Mobile:
+		Speed: 80
+		TurnSpeed: 24
+	Health:
+		HP: 28000
+	Repairable:
+		HpPerStep: 1400
+	Armor:
+		Type: Heavy
+	RevealsShroud:
+		Range: 5c0
+	Turreted:
+		TurnSpeed: 24
+	Armament@PRIMARY:
+		Weapon: aot-TtnkDual
+		LocalOffset: 768,0,90
+		Recoil: 85
+		RecoilRecovery: 17
+		MuzzleSequence: muzzle
+		RequiresCondition: !aot-ttnk-flame
+	Armament@flame:
+		Weapon: BigFlamer
+		LocalOffset: 512,128,42, 512,-128,42
+		MuzzleSequence: aot-flame-muzzle
+		RequiresCondition: aot-ttnk-flame && !aot-ttnk-toxin
+	Armament@toxin:
+		Weapon: aot-TtnkChemspray
+		LocalOffset: 512,128,42, 512,-128,42
+		MuzzleSequence: aot-toxin-muzzle
+		RequiresCondition: aot-ttnk-toxin
+	Encyclopedia:
+		Description: actor-ttnk.encyclopedia
+		Order: 155
+		Category: Vehicles
+		Scale: 3
+		PreviewOwner: Nod
+	AttackMove:
+		Voice: Attack
+	AttackTurreted:
+		Voice: Attack
+		RequiresCondition: !aot-ttnk-flame
+	AttackFrontal:
+		Voice: Attack
+		FacingTolerance: 0
+		RequiresCondition: aot-ttnk-flame
+	WithMuzzleOverlay:
+	GrantConditionOnPrerequisite@flame-upgrade:
+		Condition: aot-ttnk-flame
+		Prerequisites: aot-ttnk-flame-upgrade
+	GrantConditionOnPrerequisite@toxin-upgrade:
+		Condition: aot-ttnk-toxin
+		Prerequisites: aot-ttnk-toxin-upgrade
+	GrantConditionOnPrerequisite@cloak-upgrade:
+		Condition: aot-ttnk-cloak
+		Prerequisites: aot-ttnk-cloak-upgrade
+	Cloak:
+		InitialDelay: 85
+		CloakDelay: 85
+		CloakSound: trans1.aud
+		UncloakSound: trans1.aud
+		CloakStyle: Alpha
+		CloakedAlpha: 0.4
+		UncloakOn: Attack, Unload, Dock, Damage, Heal
+		RequiresCondition: aot-ttnk-cloak
+	WithSpriteTurret@normal:
+		Sequence: turret
+		RequiresCondition: !aot-ttnk-flame
+	-WithFacingSpriteBody:
+	WithFacingSpriteBody@normal:
+		Sequence: idle
+		Name: body
+		RequiresCondition: !aot-ttnk-flame
+	WithFacingSpriteBody@flame:
+		Sequence: aot-flame-idle
+		Name: body-flame
+		RequiresCondition: aot-ttnk-flame && !aot-ttnk-toxin
+	WithFacingSpriteBody@toxin:
+		Sequence: aot-toxin-idle
+		Name: body-toxin
+		RequiresCondition: aot-ttnk-toxin
+	FireWarheadsOnDeath:
+		Weapon: FlametankExplode
+		EmptyWeapon: FlametankExplode
+		RequiresCondition: aot-ttnk-flame
+	SpawnActorOnDeath:
+		Actor: LTNK.Husk
+		OwnerType: InternalName
+		EffectiveOwnerFromOwner: true
+	Selectable:
+		DecorationBounds: 1194, 1194
+
+aot-ttnk-base:
+	Inherits: TTNK
+	RenderSprites:
+		Image: ttnk
+	Buildable:
+		BuildPaletteOrder: 2
+		Prerequisites: lite, ~!aot-ttnk-flame-upgrade
+		Queue: LightVehicle.Nod
+		Description: NOD main battle tank with a dual-fire cannon.
+
+aot-ttnk-flame:
+	Inherits: TTNK
+	RenderSprites:
+		Image: ttnk
+	Buildable:
+		BuildPaletteOrder: 2
+		Prerequisites: lite, ~aot-ttnk-flame-upgrade, ~!aot-ttnk-toxin-upgrade, ~!aot-ttnk-cloak-upgrade
+		Queue: LightVehicle.Nod
+		Icon: aot-flame-icon
+		Description: Upgraded Heavy Tank armed with dual flamethrowers.
+	Tooltip@normal:
+		Name: actor-ttnk-flame.name
+
+aot-ttnk-toxin:
+	Inherits: TTNK
+	RenderSprites:
+		Image: ttnk
+	Buildable:
+		BuildPaletteOrder: 2
+		Prerequisites: lite, ~aot-ttnk-toxin-upgrade
+		Queue: LightVehicle.Nod
+		Icon: aot-toxin-icon
+		Description: Flame Tank upgraded with dual toxic tiberian-sprayers.
+	Tooltip@normal:
+		Name: actor-ttnk-toxin.name
+
+aot-ttnk-cloak:
+	Inherits: TTNK
+	RenderSprites:
+		Image: ttnk
+	Buildable:
+		BuildPaletteOrder: 2
+		Prerequisites: lite, ~aot-ttnk-cloak-upgrade
+		Queue: LightVehicle.Nod
+		Icon: aot-cloak-icon
+		Description: Flame Tank equipped with a stealth field. Cloaks when not engaged.
+	Tooltip@normal:
+		Name: actor-ttnk-cloak.name
+
+# FTNK aus NOD Buildlist entfernen (Heavy Tank übernimmt diese Rolle)
+FTNK:
+	-Buildable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - NOD Cyborg (TS-Infanterie-Import) ===
+# Direkt-SHP-Workflow: cyborg.shp + aot-ts-player-Palette (House-Color 16-31 → Spielerfarbe).
+# Crippled-Mechanik: ab Critical-HP → Condition "critical" → TakeCover ProneSequencePrefix "crippled-"
+aot-cyborg:
+	Inherits: E1
+	RenderSprites:
+		Image: cyborg
+		PlayerPalette: aot-ts-player
+	WithInfantryBody:
+		StandSequences: stand
+		IdleSequences: idle1, idle2
+		DefaultAttackSequence: attack
+		Palette: aot-ts-player
+		IsPlayerPalette: true
+	TakeCover:
+		RequiresCondition: critical
+		Duration: -1
+		DamageTriggers:
+		ProneOffset: 300,0,0
+		ProneSequencePrefix: crippled-
+	GrantConditionOnDamageState@CRITICAL:
+		Condition: critical
+		ValidDamageStates: Critical
+		GrantPermanently: true
+	ExplosionOnDamageTransition:
+		Weapon: aot-CyborgCrippleEffect
+		DamageState: Critical
+		TriggerOnlyOnce: true
+	WithDeathAnimation:
+		DeathSequence: die
+		UseDeathTypeSuffix: false
+		DeathSequencePalette: aot-ts-player
+		DeathPaletteIsPlayerPalette: true
+		CrushedSequence: die-crushed
+		CrushedSequencePalette: aot-ts-player
+		CrushedPaletteIsPlayerPalette: true
+	Voiced:
+		VoiceSet: CyborgVoice
+	Tooltip:
+		Name: NOD Cyborg
+	Health:
+		HP: 30000
+	Mobile:
+		Speed: 56
+	Valued:
+		Cost: 300
+	Armament:
+		Weapon: aot-CyborgChainGun
+	Buildable:
+		Queue: Infantry.Nod
+		BuildPaletteOrder: 70
+		Prerequisites: ~hand, ~aot-age2
+		Icon: icon
+		Description: Cybernetic NOD soldier. Enters crippled mode at critical HP.
+# === Ende aotmod ===
