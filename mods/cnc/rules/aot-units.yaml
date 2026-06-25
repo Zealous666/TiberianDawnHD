@@ -1115,8 +1115,6 @@ aot-cyborg:
 	# Uses aot-gunboat-upgrade condition to switch between variants.
 	aot-gunboat:
 		Inherits: BOAT
-		RenderSprites:
-			Image: boat
 		Buildable:
 			Queue: Naval.GDI
 			BuildPaletteOrder: 10

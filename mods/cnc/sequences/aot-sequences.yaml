@@ -1063,34 +1063,11 @@ ttnk.destroyed:
 		UseClassicFacings: True
 		ZOffset: -512
 
-# === Age of Tiberium (aotmod) - Gunboat: Age-switchable Naval Unit ===
-# Age 0: RA PT Patrol Boat sprites (@ra)
-# Age 1+: TD BOAT sprites (@td)
-aot-gunboat:
-	aot-gunboat-ra:
-		Filename: pt.shp
-		Facings: 2
-		UseClassicFacings: True
-	aot-gunboat-td:
-		Filename: boat.vxl
-		Facings: 32
-		UseClassicFacings: True
-
 aot-gunboat-base-icon:
 	icon:
 		Filename: aot-gunboat-base.png
 		Length: 1
 # === Ende aotmod ===
-
-# === Age of Tiberium (aotmod) - Shipyard (aot-shipyard): Water Building ===
-aot-shipyard:
-	idle:
-		Filename: syrd.shp
-	make:
-		Filename: syrdmake.shp
-	dock:
-		Filename: syrd.shp
-		Length: 1
 
 aot-shipyard-icon:
 	icon:
