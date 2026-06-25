@@ -1579,7 +1579,6 @@ aot-shipyard:
 	Building:
 		Footprint: xxx xxx
 		Dimensions: 3,2
-		TerrainTypes: Water
 	ProvidesPrerequisite:
 		Prerequisite: aot-shipyard
 	RallyPoint:
