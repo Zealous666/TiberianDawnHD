@@ -1590,6 +1590,7 @@ aot-shipyard:
 		AreaTypes: building
 		Adjacent: 8
 	-GivesBuildableArea:
+	-SpawnActorsOnSell:
 	RevealsShroud:
 		Range: 4c0
 	RenderSprites:
