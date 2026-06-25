@@ -1562,9 +1562,12 @@ GTWR:
 		Queue: Support.GDI
 
 # === Age of Tiberium (aotmod) - Shipyard (aot-shipyard) ===
-# Based on RA SYRD pattern for water buildings
+# Wasser-Gebäude (TerrainTypes: Water). Basis ^BaseBuilding (CnC-Standard),
+# überschrieben für Wasserplatzierung: AreaTypes building bleibt, Adjacent 8
+# damit das nahe Wasser von Land-Buildable-Area aus erreicht wird.
+# GivesBuildableArea entfernt → erweitert die Bauzone nicht aufs Wasser.
 aot-shipyard:
-	Inherits: ^Building
+	Inherits: ^BaseBuilding
 	Tooltip:
 		Name: Shipyard
 	Valued:
@@ -1584,7 +1587,9 @@ aot-shipyard:
 		Dimensions: 3,3
 		TerrainTypes: Water
 	RequiresBuildableArea:
+		AreaTypes: building
 		Adjacent: 8
+	-GivesBuildableArea:
 	RevealsShroud:
 		Range: 4c0
 	RenderSprites:
