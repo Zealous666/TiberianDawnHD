@@ -1585,7 +1585,6 @@ aot-shipyard:
 		TerrainTypes: Water
 	RequiresBuildableArea:
 		Adjacent: 8
-	-GivesBuildableArea:
 	RevealsShroud:
 		Range: 4c0
 	RenderSprites:
