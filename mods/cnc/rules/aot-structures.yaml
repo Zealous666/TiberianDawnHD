@@ -1565,7 +1565,6 @@ GTWR:
 # Based on RA SYRD pattern for water buildings
 aot-shipyard:
 	Inherits: ^Building
-	Inherits@PRIMARY: ^PrimaryBuilding
 	Tooltip:
 		Name: Shipyard
 	Valued:
