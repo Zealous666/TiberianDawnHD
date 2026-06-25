@@ -282,10 +282,6 @@ lite:
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.17
-	aot-shipyard-icon:
-		Filename: aot-shipyard.png
-		RemasteredFilename:
-		Length: 1
 	bib:
 		TilesetFilenames:
 			DESERT: bib2.des
@@ -304,6 +300,35 @@ lite:
 		RemasteredPremultiplied: false
 	icon:
 		Filename: lite_base.png
+		RemasteredFilename:
+		Length: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Shipyard (aot-shipyard): RA SYRD Remaster (umgepackt flach) ===
+# SYRD.ZIP im MEG ist verschachtelt (syrd-0000-*/syrd-0001-*) → vom ShpRemasteredLoader
+# nicht direkt ladbar. Umgepackt zu flachem aot-shipyard.zip: Frames 0-7 = gesund,
+# 8-15 = beschädigt. SYRDMAKE.ZIP ist flach → direkt aus dem MEG referenziert.
+# Repack-Script: mods/management/asset wip/yard/ (Originale unter ra/).
+aot-shipyard:
+	idle:
+		RemasteredFilename: aot-shipyard.zip
+		RemasteredLength: 1
+		Scale: 0.85
+	damaged-idle:
+		RemasteredFilename: aot-shipyard.zip
+		RemasteredStart: 8
+		RemasteredLength: 1
+		Scale: 0.85
+	make:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\SYRDMAKE.ZIP
+		RemasteredLength: *
+		Scale: 0.85
+	place:
+		RemasteredFilename: aot-shipyard.zip
+		RemasteredLength: 1
+		Scale: 0.85
+	aot-shipyard-icon:
+		Filename: aot-shipyard.png
 		RemasteredFilename:
 		Length: 1
 # === Ende aotmod ===

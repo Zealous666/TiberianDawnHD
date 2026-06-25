@@ -1593,10 +1593,12 @@ aot-shipyard:
 	RevealsShroud:
 		Range: 4c0
 	RenderSprites:
-		Image: lite
+		Image: aot-shipyard
 	WithSpriteBody:
 		Sequence: idle
 		Name: body
+	WithMakeAnimation:
+		Condition: build-incomplete
 	-ActorPreviewPlaceBuildingPreview:
 	SequencePlaceBuildingPreview:
 		Sequence: place
