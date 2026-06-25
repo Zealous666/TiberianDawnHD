@@ -1596,10 +1596,9 @@ aot-shipyard:
 		Icon: aot-shipyard-icon
 		Description: Naval production facility. Can only be built on water.
 	Building:
-		Footprint: XXX xxx XXX
+		Footprint: xxx xxx ===
 		Dimensions: 3,3
 		TerrainTypes: Water
-		Adjacent: 8
 	ProvidesPrerequisite:
 		Prerequisite: aot-shipyard
 	RallyPoint:
