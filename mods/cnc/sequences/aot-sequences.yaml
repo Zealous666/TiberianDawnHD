@@ -1077,7 +1077,7 @@ aot-gunboat:
 		UseClassicFacings: True
 
 aot-gunboat-base-icon:
-	aot-gunboat-base-icon:
+	icon:
 		Filename: aot-gunboat-base.png
 		Length: 1
 # === Ende aotmod ===
@@ -1093,7 +1093,7 @@ aot-shipyard:
 		Length: 1
 
 aot-shipyard-icon:
-	aot-shipyard-icon:
+	icon:
 		Filename: aot-shipyard.png
 		Length: 1
 # === Ende aotmod ===
@@ -1105,7 +1105,7 @@ aot-upgrade-gunboat-rockets:
 		Length: 1
 
 aot-gunboat-rockets-icon:
-	aot-gunboat-rockets-icon:
+	icon:
 		Filename: aot-gunboat-upgrade.png
 		Length: 1
 # === Ende aotmod ===
