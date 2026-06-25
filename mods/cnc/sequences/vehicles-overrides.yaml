@@ -90,7 +90,7 @@ ltnk:
 		Facings: 32
 		UseClassicFacings: True
 	aot-turret-laser:
-		RemasteredFilename: aot-ltnk-laser-turret.zip
+		RemasteredFilename: aot-ltnk-laser-turret-v2.zip
 		Start: 32
 		Facings: 32
 		UseClassicFacings: True
@@ -364,6 +364,12 @@ aot-gatick:
 		Length: 24
 	turret:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\LTNK.ZIP
+		Start: 32
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 1.0
+	turret-laser:
+		RemasteredFilename: aot-ltnk-laser-turret-v2.zip
 		Start: 32
 		Facings: 32
 		UseClassicFacings: True

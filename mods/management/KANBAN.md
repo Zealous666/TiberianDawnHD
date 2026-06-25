@@ -5,25 +5,35 @@
 - [ ] To-Do
   - [ ] V2 & LARS
   - [ ] buggy & laser
-  - [ ] bike & laser
+  - [ ] bike icon
   - [ ] stealthtank & cargo
   - [x] hind & harpy sprites & upgrades
   - [x] apache sprite & upgrade
   - [ ] chinook & carryall
   - [ ] a10, firehawk
-  - [ ] mig & vertigo
+  - [ ] mig & banshee
   - [ ] mobile gap genererator
   - [ ] mobile stealth generator
   - [ ] sensor array
   - [x] helipad icon
   - [x] repair facility stages
-  - [ ] ttnk & tick upgrade
+  - [x] ttnk & tick upgrade
   - [x] refinery icon
   - [x] atech centre icon
   - [x] stech centre icon & stech centre
   - [x] light factory icon
   - [x] Tibsun voxel-Implementation
   - [x] weap & afld icons
+  - [ ] MLRS & amphibisch
+  - [ ] naval warfare
+  - [ ] cyborg commando
+  - [ ] thief
+  - [ ] spy
+  - [ ] gdi commando railgun
+  - [ ] nuke silo
+  - [ ] uplink centre
+  - [ ] silo upgrade (nuke silo)
+  - [ ] jumpjet upgrade
 - [ ] Fixes
   - [x] ATEC satelli fixen & strom
   - [x] EYE als selbst bau entfernen
@@ -31,7 +41,7 @@
   - [x] GDI helipad coraussetzung: comm centre & orca / hind ammo
   - [x] mammoth upgrade asset
   - [x] mtnk upgrade assets
-  - [ ] LTNK icon & upgrade assets
+  - [x] LTNK icon & upgrade assets
   - [x] HQ & MCV selling nicht möglich
   - [x] MCV redeploy nicht möglich
   - [ ] einheiten auf repair facility verkaufen
@@ -39,12 +49,16 @@
   - [ ] age power requirement
   - [ ] upgrades wenn tec center selektiert
   - [ ] LITE eigene queue
+  - [ ] barracks / hand zu groß
+  - [ ] infantry icons
+  - [ ] temple icon
 
 ## Design / Konzept
 
 - [ ] Techtree & Buildorder
   file:///Users/moritzgiuliani/Documents/openRA%20Projekte/TiberianDawnHD/mods/management/kanban-board.html
   - [x] chrome webinterface
+  - [ ] techtree web tool
 - [ ] Mod-Konzept festlegen (Setting, Fraktionen, USP)
 - [ ] Zielplattformen / Engine-Version festlegen
 - [ ] Referenz-Mods / Inspiration sichten
@@ -84,6 +98,7 @@
 - [ ] Naval Warfare & Amphibisch
 - [ ] Carryall Pickup
 - [ ] Build- und Test-Workflow einrichten
+- [ ] coop unit-sharing
 
 ## Testing / Bugs
 

@@ -498,17 +498,17 @@ LTNK:
 
 	WithFacingSpriteBody@normal:
 		Sequence: idle
-		RequiresCondition: !aot-ltnk-upgraded
+		RequiresCondition: !aot-ltnk-upgraded && !aot-ltnk-upgraded2
 
 	WithFacingSpriteBody@ttnk:
 		Sequence: aot-tick-idle
-		RequiresCondition: aot-ltnk-upgraded
+		RequiresCondition: aot-ltnk-upgraded || aot-ltnk-upgraded2
 
 	-WithSpriteTurret:
 
 	WithSpriteTurret@normal:
 		Sequence: turret
-		RequiresCondition: !aot-ltnk-upgraded
+		RequiresCondition: !aot-ltnk-upgraded && !aot-ltnk-upgraded2
 
 	WithSpriteTurret@dark:
 		Sequence: aot-turret-dark
@@ -567,6 +567,10 @@ aot-ltnk-deployed:
 		Weapon: UnitExplodeSmall
 		EmptyWeapon: UnitExplodeSmall
 
+	GrantConditionOnPrerequisite@laser:
+		Condition: aot-ltnk-upgraded2
+		Prerequisites: aot-ltnk-upgrade2
+
 	RenderSprites:
 		Image: aot-gatick
 		PlayerPalette: player
@@ -606,11 +610,23 @@ aot-ltnk-deployed:
 		MuzzleSequence: muzzle
 		Recoil: 85
 		RecoilRecovery: 17
+		RequiresCondition: !aot-ltnk-upgraded2
+
+	Armament@LASER:
+		Weapon: aot-LtnkLaser
+		Turret: primary
+		LocalOffset: 720,0,90
+		RequiresCondition: aot-ltnk-upgraded2
 
 	AttackTurreted:
 
-	WithSpriteTurret:
+	WithSpriteTurret@tick:
 		Sequence: turret
+		RequiresCondition: !aot-ltnk-upgraded2
+
+	WithSpriteTurret@laser:
+		Sequence: turret-laser
+		RequiresCondition: aot-ltnk-upgraded2
 
 	WithMuzzleOverlay:
 
@@ -630,6 +646,9 @@ aot-ltnk-deployed:
 		Cost: 750
 
 	MustBeDestroyed:
+
+	RevealsShroud:
+		Range: 6c0
 
 	Voiced:
 		VoiceSet: VehicleVoice
@@ -1090,4 +1109,18 @@ aot-cyborg:
 		Prerequisites: ~hand, ~aot-age2
 		Icon: icon
 		Description: Cybernetic NOD soldier. Enters crippled mode at critical HP.
-# === Ende aotmod ===
+
+	# === Age of Tiberium (aotmod) - Gunboat: Naval Combat Unit (Age-switchable) ===
+	# Single unit with conditional sprites/weapons: Age 0 (RA PT) → Age 1 (TD BOAT + Rockets).
+	# Uses aot-gunboat-upgrade condition to switch between variants.
+	aot-gunboat:
+		Inherits: BOAT
+		RenderSprites:
+			Image: boat
+		Buildable:
+			Queue: Naval.GDI
+			BuildPaletteOrder: 10
+			Prerequisites: lite, aot-shipyard
+			Icon: aot-gunboat-base.png
+			Description: Naval combat vessel armed with missiles. Upgradeable to fire rockets.
+	# === Ende aotmod ===

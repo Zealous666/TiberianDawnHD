@@ -353,3 +353,36 @@ HELI:
 	SpawnActorOnDeath:
 		Actor: aot-harpy-husk
 # === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - BOAT: Age-switchable Naval Unit ===
+# Condition aot-gunboat-upgrade triggers sprite/weapon swap (Age 0 RA PT → Age 1 TD BOAT).
+BOAT:
+	GrantConditionOnPrerequisite@gunboatupgrade:
+		Condition: aot-gunboat-upgrade
+		Prerequisites: aot-gunboat-upgrade
+	-Tooltip:
+	Tooltip@age0:
+		Name: Gunboat
+		RequiresCondition: !aot-gunboat-upgrade
+	Tooltip@upgraded:
+		Name: Gunboat (Gunship Rockets)
+		RequiresCondition: aot-gunboat-upgrade
+	-WithGunboatBody:
+	WithGunboatBody@ra:
+		Sequence: left
+		Name: body-ra
+		RequiresCondition: !aot-gunboat-upgrade
+	WithGunboatBody@td:
+		Sequence: left
+		Name: body-td
+		RequiresCondition: aot-gunboat-upgrade
+	-Armament:
+	Armament@age0:
+		Weapon: BoatMissile
+		LocalOffset: 85,-85,0, 85,85,0
+		RequiresCondition: !aot-gunboat-upgrade
+	Armament@upgraded:
+		Weapon: aot-GunboatRockets
+		LocalOffset: 85,-85,0, 85,85,0
+		RequiresCondition: aot-gunboat-upgrade
+# === Ende aotmod ===

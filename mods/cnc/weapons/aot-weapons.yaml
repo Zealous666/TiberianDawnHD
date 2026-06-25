@@ -206,4 +206,14 @@ aot-CyborgCrippleEffect:
 		Size: 0,0
 	Warhead@2Eff: CreateEffect
 		Explosions: chemball
+
+# === Age of Tiberium (aotmod) - Gunboat Gunship Rockets ===
+# Upgraded gunboat weapon: rockets instead of missiles, higher damage (2000 vs 1200).
+aot-GunboatRockets:
+	Inherits: BoatMissile
+	Warhead@1Dam: SpreadDamage
+		Damage: 2000
+		Versus:
+			Light: 80
+			Heavy: 100
 # === Ende aotmod ===

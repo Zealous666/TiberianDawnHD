@@ -75,6 +75,25 @@ LITE:
 		ProductionType: LightVehicle.GDI
 	ProductionBar@NOD:
 		ProductionType: LightVehicle.Nod
+	Production@NAVAL:
+		Produces: Naval.GDI
+	ProductionQueue@NAVAL:
+		Type: Naval.GDI
+		DisplayOrder: 4
+		Factions: gdi
+		Group: Naval
+		LowPowerModifier: 150
+		ReadyAudio: UnitReady
+		ReadyTextNotification: notification-unit-ready
+		BlockedAudio: NoBuild
+		BlockedTextNotification: notification-unable-to-build-more
+		LimitedAudio: BuildingInProgress
+		LimitedTextNotification: notification-unable-to-comply-building-in-progress
+		QueuedAudio: Training
+		OnHoldAudio: OnHold
+		CancelledAudio: Cancelled
+	ProductionBar@NAVAL:
+		ProductionType: Naval.GDI
 	Power:
 		Amount: -20
 	RenderSprites:
@@ -1560,4 +1579,85 @@ GUN:
 GTWR:
 	Buildable:
 		Queue: Support.GDI
+
+# === Age of Tiberium (aotmod) - Shipyard (aot-shipyard): Water-only Naval Production ===
+aot-shipyard:
+	Inherits: ^BaseBuilding
+	Tooltip:
+		Name: Shipyard
+	Valued:
+		Cost: 1000
+	Health:
+		HP: 80000
+	Buildable:
+		BuildPaletteOrder: 35
+		Prerequisites: lite
+		Queue: Building.GDI
+		Description: Naval production facility. Can only be built on water.
+	Building:
+		Footprint: XXX xxx XXX
+		Dimensions: 3,3
+		TerrainTypes: Water
+		Adjacent: 8
+	ProvidesPrerequisite:
+		Prerequisite: aot-shipyard
+	RallyPoint:
+	CommandBarBlacklist:
+		DisableStop: false
+	WithBuildingBib:
+	WithMakeAnimation:
+		Condition: build-incomplete
+	RevealsShroud:
+		Range: 4c0
+	Exit@1:
+		SpawnOffset: -1024,1024,0
+		ExitCell: 0,2
+		ExitDelay: 5
+		ProductionTypes: Naval
+	Exit@2:
+		SpawnOffset: 1024,1024,0
+		ExitCell: 2,2
+		ExitDelay: 5
+		ProductionTypes: Naval
+	Exit@3:
+		SpawnOffset: 0,2560,0
+		ExitCell: 1,2
+		ExitDelay: 5
+		ProductionTypes: Naval
+	Production@NAVAL:
+		Produces: Naval.GDI
+	ProductionBar@NAVAL:
+		ProductionType: Naval.GDI
+	RenderSprites:
+		Image: aot-shipyard
+	WithSpriteBody:
+		Sequence: idle
+		Name: body
+	WithIdleOverlay@DOCK:
+		Sequence: dock
+		RequiresCondition: !build-incomplete
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: place
+		SequenceAlpha: 0.65
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Gunship Rockets Upgrade (aot-upgrade-gunboat-rockets) ===
+aot-upgrade-gunboat-rockets:
+	Tooltip:
+		Name: Gunship Rockets
+	Valued:
+		Cost: 1500
+	Buildable:
+		BuildPaletteOrder: 20
+		Prerequisites: ~atec, lite, aot-shipyard, ~!aot-gunboat-upgrade
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Upgrade Gunboat with advanced rocket weaponry.
+	RenderSprites:
+		Image: aot-upgrade-gunboat-rockets
+	ProvidesPrerequisite:
+		Prerequisite: aot-gunboat-upgrade
+	Interactable:
 # === Ende aotmod ===
