@@ -1562,9 +1562,9 @@ GTWR:
 		Queue: Support.GDI
 
 # === Age of Tiberium (aotmod) - Shipyard (aot-shipyard) ===
+# Based on RA SYRD pattern for water buildings
 aot-shipyard:
-	Inherits: ^BaseBuilding
-	Inherits@shape: ^3x2Shape
+	Inherits: ^Building
 	Tooltip:
 		Name: Shipyard
 	Valued:
@@ -1577,10 +1577,15 @@ aot-shipyard:
 		Queue: Building.GDI
 		Icon: aot-shipyard-icon
 		Description: Naval production facility.
-	RallyPoint:
-	CommandBarBlacklist:
-		DisableStop: false
-	WithBuildingBib:
+	Targetable:
+		TargetTypes: WaterActor, Structure
+	Building:
+		Footprint: XXX xxx XXX
+		Dimensions: 3,3
+		TerrainTypes: Water
+	RequiresBuildableArea:
+		Adjacent: 8
+	-GivesBuildableArea:
 	RevealsShroud:
 		Range: 4c0
 	RenderSprites:
