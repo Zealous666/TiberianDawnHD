@@ -1075,6 +1075,11 @@ aot-gunboat:
 		Filename: boat.vxl
 		Facings: 32
 		UseClassicFacings: True
+
+aot-gunboat-base-icon:
+	aot-gunboat-base-icon:
+		Filename: aot-gunboat-base.png
+		Length: 1
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Shipyard (aot-shipyard): Water Building ===
@@ -1086,10 +1091,21 @@ aot-shipyard:
 	dock:
 		Filename: syrd.shp
 		Length: 1
+
+aot-shipyard-icon:
+	aot-shipyard-icon:
+		Filename: aot-shipyard.png
+		Length: 1
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - Gunship Rockets Upgrade Icon ===
+# === Age of Tiberium (aotmod) - Gunship Rockets Upgrade ===
 aot-upgrade-gunboat-rockets:
 	icon:
 		Filename: aot-gunboat-upgrade.png
+		Length: 1
+
+aot-gunboat-rockets-icon:
+	aot-gunboat-rockets-icon:
+		Filename: aot-gunboat-upgrade.png
+		Length: 1
 # === Ende aotmod ===

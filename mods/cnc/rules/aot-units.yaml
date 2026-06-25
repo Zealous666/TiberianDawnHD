@@ -1121,6 +1121,6 @@ aot-cyborg:
 			Queue: Naval.GDI
 			BuildPaletteOrder: 10
 			Prerequisites: lite, aot-shipyard
-			Icon: aot-gunboat-base.png
+			Icon: aot-gunboat-base-icon
 			Description: Naval combat vessel armed with missiles. Upgradeable to fire rockets.
 	# === Ende aotmod ===

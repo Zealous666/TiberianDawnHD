@@ -1593,6 +1593,7 @@ aot-shipyard:
 		BuildPaletteOrder: 35
 		Prerequisites: lite
 		Queue: Building.GDI
+		Icon: aot-shipyard-icon
 		Description: Naval production facility. Can only be built on water.
 	Building:
 		Footprint: XXX xxx XXX
@@ -1652,6 +1653,7 @@ aot-upgrade-gunboat-rockets:
 		BuildPaletteOrder: 20
 		Prerequisites: ~atec, lite, aot-shipyard, ~!aot-gunboat-upgrade
 		Queue: Upgrade.GDI
+		Icon: aot-gunboat-rockets-icon
 		BuildLimit: 1
 		MoveIntoWorld: false
 		Description: Upgrade Gunboat with advanced rocket weaponry.
