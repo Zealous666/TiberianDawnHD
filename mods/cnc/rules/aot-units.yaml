@@ -1109,16 +1109,4 @@ aot-cyborg:
 		Prerequisites: ~hand, ~aot-age2
 		Icon: icon
 		Description: Cybernetic NOD soldier. Enters crippled mode at critical HP.
-
-	# === Age of Tiberium (aotmod) - Gunboat: Naval Combat Unit (Age-switchable) ===
-	# Single unit with conditional sprites/weapons: Age 0 (RA PT) → Age 1 (TD BOAT + Rockets).
-	# Uses aot-gunboat-upgrade condition to switch between variants.
-	aot-gunboat:
-		Inherits: BOAT
-		Buildable:
-			Queue: Naval.GDI
-			BuildPaletteOrder: 10
-			Prerequisites: lite, aot-shipyard
-			Icon: aot-gunboat-base-icon
-			Description: Naval combat vessel armed with missiles. Upgradeable to fire rockets.
-	# === Ende aotmod ===
+# === Ende aotmod ===
