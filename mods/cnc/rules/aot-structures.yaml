@@ -1560,4 +1560,36 @@ GUN:
 GTWR:
 	Buildable:
 		Queue: Support.GDI
+
+# === Age of Tiberium (aotmod) - Shipyard (aot-shipyard) ===
+aot-shipyard:
+	Inherits: ^BaseBuilding
+	Inherits@shape: ^3x2Shape
+	Tooltip:
+		Name: Shipyard
+	Valued:
+		Cost: 1000
+	Health:
+		HP: 80000
+	Buildable:
+		BuildPaletteOrder: 35
+		Prerequisites: lite
+		Queue: Building.GDI
+		Icon: aot-shipyard-icon
+		Description: Naval production facility.
+	RallyPoint:
+	CommandBarBlacklist:
+		DisableStop: false
+	WithBuildingBib:
+	RevealsShroud:
+		Range: 4c0
+	RenderSprites:
+		Image: lite
+	WithSpriteBody:
+		Sequence: idle
+		Name: body
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: place
+		SequenceAlpha: 0.65
 # === Ende aotmod ===
