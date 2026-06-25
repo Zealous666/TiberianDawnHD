@@ -1552,6 +1552,33 @@ aot-upgrade-nuke-turbine:
 
 	Interactable:
 
+# === Age of Tiberium (aotmod) - Destroyer Enhancement (Gunboat -> Destroyer) ===
+# Upgrade: tauscht alle Gunboats (RA PT) zu Destroyern (RA DD) + Raketenwaffe.
+# Gewährt aot-gunboat-upgrade (konsumiert von aot-gunboat WithFacingSpriteBody/
+# WithSpriteTurret/Armament). Prereq ~atec = GDI-Gate, ~!aot-gunboat-upgrade = nach Kauf weg.
+aot-upgrade-gunboat-destroyer:
+	Tooltip:
+		Name: Destroyer Enhancement
+
+	Buildable:
+		BuildPaletteOrder: 32
+		Prerequisites: ~atec, lite, aot-shipyard, ~!aot-gunboat-upgrade
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Upgrades all Gunboats into rocket-armed Destroyers.
+
+	Valued:
+		Cost: 1500
+
+	RenderSprites:
+		Image: aot-upgrade-gunboat-destroyer
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-gunboat-upgrade
+
+	Interactable:
+
 # === Age of Tiberium (aotmod) - GUN/GTWR GDI-exklusiv (NOD-Defense nur CYCL/SAM/OBLI) ===
 GUN:
 	Buildable:
@@ -1593,6 +1620,35 @@ aot-shipyard:
 	-SpawnActorsOnSell:
 	RevealsShroud:
 		Range: 4c0
+	ProvidesPrerequisite@buildingname:
+	RallyPoint:
+	CommandBarBlacklist:
+		DisableStop: false
+	Exit@1:
+		SpawnOffset: 0,512,0
+		ExitCell: 1,3
+	Exit@2:
+		SpawnOffset: 1024,0,0
+		ExitCell: 3,1
+	Exit@3:
+		SpawnOffset: -1024,0,0
+		ExitCell: -1,1
+	Production:
+		Produces: Naval.GDI
+	ProductionQueue:
+		Type: Naval.GDI
+		Group: Naval
+		DisplayOrder: 5
+		LowPowerModifier: 150
+		ReadyAudio: UnitReady
+		ReadyTextNotification: notification-unit-ready
+		BlockedAudio: NoBuild
+		BlockedTextNotification: notification-unable-to-build-more
+		QueuedAudio: Training
+		OnHoldAudio: OnHold
+		CancelledAudio: Cancelled
+	ProductionBar:
+		ProductionType: Naval.GDI
 	RenderSprites:
 		Image: aot-shipyard
 	WithSpriteBody:

@@ -1110,3 +1110,77 @@ aot-cyborg:
 		Icon: icon
 		Description: Cybernetic NOD soldier. Enters crippled mode at critical HP.
 # === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Gunboat (GDI Naval, PT base -> Destroyer upgrade) ===
+# Steuerbares Schiff (Mobile + naval Locomotor). EIN Aktor, konditionaler Sprite/Waffen-
+# Tausch via aot-gunboat-upgrade (gewährt von aot-upgrade-gunboat-destroyer) - Muster
+# JEEP->HUMVEE. Age 0 = RA PT (Rumpf idle + MG-Turm turret). Upgrade = RA DD (idle-dd +
+# Raketen-Turm turret-dd). Beide Boote teilen dieselbe ^Ship-Mechanik (16 Facings + Turm).
+aot-gunboat:
+	Inherits: ^Ship
+	Inherits@SELECTABLE: ^SelectableCombatUnit
+	Inherits@EXPERIENCE: ^GainsExperience
+	Inherits@AUTOTARGET: ^AutoTargetAll
+	RenderSprites:
+		Image: aot-gunboat
+	Valued:
+		Cost: 500
+	UpdatesPlayerStatistics:
+		AddToArmyValue: true
+	Buildable:
+		Queue: Naval.GDI
+		BuildPaletteOrder: 10
+		Prerequisites: lite, aot-shipyard
+		Icon: icon
+		Description: Naval combat vessel. Upgradeable to a rocket Destroyer.
+	Health:
+		HP: 30000
+	Armor:
+		Type: Heavy
+	Mobile:
+		Locomotor: naval
+		TurnSpeed: 28
+		Speed: 92
+	RevealsShroud:
+		Range: 7c0
+		Type: CenterPosition
+	Turreted@pt:
+		TurnSpeed: 28
+		Offset: 512,0,0
+		RequiresCondition: !aot-gunboat-upgrade
+	Turreted@dd:
+		TurnSpeed: 28
+		Offset: 0,384,144
+		RequiresCondition: aot-gunboat-upgrade
+	AttackTurreted:
+	GrantConditionOnPrerequisite@destroyer:
+		Condition: aot-gunboat-upgrade
+		Prerequisites: aot-gunboat-upgrade
+	-Tooltip:
+	Tooltip@base:
+		Name: Gunboat
+		RequiresCondition: !aot-gunboat-upgrade
+	Tooltip@dd:
+		Name: Destroyer
+		RequiresCondition: aot-gunboat-upgrade
+	WithFacingSpriteBody@pt:
+		Sequence: idle
+		RequiresCondition: !aot-gunboat-upgrade
+	WithFacingSpriteBody@dd:
+		Sequence: idle-dd
+		RequiresCondition: aot-gunboat-upgrade
+	WithSpriteTurret@pt:
+		Sequence: turret
+		RequiresCondition: !aot-gunboat-upgrade
+	WithSpriteTurret@dd:
+		Sequence: turret-dd
+		RequiresCondition: aot-gunboat-upgrade
+	Armament@pt:
+		Weapon: aot-GunboatGun
+		LocalOffset: 208,0,48
+		RequiresCondition: !aot-gunboat-upgrade
+	Armament@dd:
+		Weapon: aot-DestroyerRockets
+		LocalOffset: 0,-100,0, 0,100,0
+		RequiresCondition: aot-gunboat-upgrade
+# === Ende aotmod ===

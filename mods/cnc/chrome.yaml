@@ -562,6 +562,10 @@ production-icons:
 		upgrade: 853, 68, 16, 16
 		upgrade-disabled: 853, 85, 16, 16
 		upgrade-alert: 853, 102, 16, 16
+		# === Age of Tiberium (aotmod) navy button (vorhandenes Anker-Icon auf dem Sheet) ===
+		naval: 955, 68, 16, 16
+		naval-disabled: 955, 85, 16, 16
+		naval-alert: 955, 102, 16, 16
 		# === Ende aotmod ===
     
 order-icons:

@@ -1120,20 +1120,40 @@ ttnk.destroyed:
 		UseClassicFacings: True
 		ZOffset: -512
 
-aot-gunboat-base-icon:
+# === Age of Tiberium (aotmod) - Gunboat (GDI Naval) ===
+# Steuerbare ^Ship-Einheit. Age 0 = RA PT (Rumpf pt + MG-Turm mgun),
+# Upgrade "Destroyer Enhancement" = RA DD (Rumpf dd + Raketen-Turm ssam).
+# RA-Rumpf-ZIPs (PT/DD) im MEG sind verschachtelt (pt-GGGG-SSSS) -> ShpRemasteredLoader
+# crasht (Prefix-Mismatch). Daher flach umgepackt nach bits/ (Subframe s0 = 16 Facings).
+# Türme (MGUN/SSAM) sind flach im MEG -> direkt referenziert.
+# Icon-Sequenzen MÜSSEN unter dem RenderSprites.Image (aot-gunboat) liegen.
+aot-gunboat:
+	idle:
+		RemasteredFilename: aot-gunboat-pt.zip
+		Facings: 16
+	turret:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\MGUN.ZIP
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 2.0
+	idle-dd:
+		RemasteredFilename: aot-gunboat-dd.zip
+		Facings: 16
+	turret-dd:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\SSAM.ZIP
+		Facings: 32
+		UseClassicFacings: True
 	icon:
-		Filename: aot-gunboat-base.png
+		Filename: gun_base.png
+		Length: 1
+	icon-dd:
+		Filename: gun_destroyer.png
 		Length: 1
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - Gunship Rockets Upgrade ===
-aot-upgrade-gunboat-rockets:
+# === Age of Tiberium (aotmod) - Destroyer Enhancement Upgrade ===
+aot-upgrade-gunboat-destroyer:
 	icon:
-		Filename: aot-gunboat-upgrade.png
-		Length: 1
-
-aot-gunboat-rockets-icon:
-	icon:
-		Filename: aot-gunboat-upgrade.png
+		Filename: gun_destroyer.png
 		Length: 1
 # === Ende aotmod ===

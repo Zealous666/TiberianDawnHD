@@ -33,7 +33,9 @@
   - [ ] nuke silo
   - [ ] uplink centre
   - [ ] silo upgrade (nuke silo)
-  - [ ] jumpjet upgrade
+  - [ ] droppod upgrade
+  - [ ] summer terrain (ra)
+  - [ ] winter terrain (td)
 - [ ] Fixes
   - [x] ATEC satelli fixen & strom
   - [x] EYE als selbst bau entfernen
@@ -52,6 +54,7 @@
   - [ ] barracks / hand zu groß
   - [ ] infantry icons
   - [ ] temple icon
+  - [ ] navy & air queue mixen
 
 ## Design / Konzept
 

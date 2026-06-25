@@ -1755,7 +1755,7 @@ Container@PLAYER_WIDGETS:
 						ProductionTypeButton@BUILDING:
 							Logic: AddFactionSuffixLogic
 							X: 0
-							Width: 32
+							Width: 26
 							Height: 26
 							Background: chrome-button-background
 							TooltipText: button-production-types-building-tooltip
@@ -1765,19 +1765,19 @@ Container@PLAYER_WIDGETS:
 							Key: ProductionTypeBuilding
 							Children:
 								Image@ICON:
-									X: 8
+									X: 5
 									Y: 5
 									ImageCollection: production-icons
 								Image@SEPARATOR:
 									Logic: AddFactionSuffixLogic
-									X: 32
+									X: 26
 									Y: 2
 									ImageCollection: chrome-button
 									ImageName: separator
 						ProductionTypeButton@SUPPORT:
 							Logic: AddFactionSuffixLogic
-							X: 33
-							Width: 32
+							X: 28
+							Width: 26
 							Height: 26
 							Background: chrome-button-background
 							TooltipText: button-production-types-support-tooltip
@@ -1787,19 +1787,19 @@ Container@PLAYER_WIDGETS:
 							Key: ProductionTypeDefense
 							Children:
 								Image@ICON:
-									X: 8
+									X: 5
 									Y: 5
 									ImageCollection: production-icons
 								Image@SEPARATOR:
 									Logic: AddFactionSuffixLogic
-									X: 32
+									X: 26
 									Y: 2
 									ImageCollection: chrome-button
 									ImageName: separator
 						ProductionTypeButton@INFANTRY:
 							Logic: AddFactionSuffixLogic
-							X: 66
-							Width: 32
+							X: 56
+							Width: 26
 							Height: 26
 							Background: chrome-button-background
 							TooltipText: button-production-types-infantry-tooltip
@@ -1809,19 +1809,19 @@ Container@PLAYER_WIDGETS:
 							Key: ProductionTypeInfantry
 							Children:
 								Image@ICON:
-									X: 8
+									X: 5
 									Y: 5
 									ImageCollection: production-icons
 								Image@SEPARATOR:
 									Logic: AddFactionSuffixLogic
-									X: 32
+									X: 26
 									Y: 2
 									ImageCollection: chrome-button
 									ImageName: separator
 						ProductionTypeButton@VEHICLE:
 							Logic: AddFactionSuffixLogic
-							X: 99
-							Width: 32
+							X: 84
+							Width: 26
 							Height: 26
 							Background: chrome-button-background
 							TooltipText: button-production-types-vehicle-tooltip
@@ -1831,19 +1831,19 @@ Container@PLAYER_WIDGETS:
 							Key: ProductionTypeVehicle
 							Children:
 								Image@ICON:
-									X: 8
+									X: 5
 									Y: 5
 									ImageCollection: production-icons
 								Image@SEPARATOR:
 									Logic: AddFactionSuffixLogic
-									X: 32
+									X: 26
 									Y: 2
 									ImageCollection: chrome-button
 									ImageName: separator
 						ProductionTypeButton@AIRCRAFT:
 							Logic: AddFactionSuffixLogic
-							X: 132
-							Width: 32
+							X: 112
+							Width: 26
 							Height: 26
 							Background: chrome-button-background
 							TooltipText: button-production-types-aircraft-tooltip
@@ -1853,19 +1853,40 @@ Container@PLAYER_WIDGETS:
 							Key: ProductionTypeAircraft
 							Children:
 								Image@ICON:
-									X: 8
+									X: 5
 									Y: 5
 									ImageCollection: production-icons
 								Image@SEPARATOR:
 									Logic: AddFactionSuffixLogic
-									X: 32
+									X: 26
+									Y: 2
+									ImageCollection: chrome-button
+									ImageName: separator
+						ProductionTypeButton@NAVY:
+							Logic: AddFactionSuffixLogic
+							X: 140
+							Width: 26
+							Height: 26
+							Background: chrome-button-background
+							TooltipText: button-production-types-navy-tooltip
+							TooltipContainer: TOOLTIP_CONTAINER
+							TooltipTemplate: BUTTON_TOOLTIP_FACTIONSUFFIX
+							ProductionGroup: Naval
+							Children:
+								Image@ICON:
+									X: 5
+									Y: 5
+									ImageCollection: production-icons
+								Image@SEPARATOR:
+									Logic: AddFactionSuffixLogic
+									X: 26
 									Y: 2
 									ImageCollection: chrome-button
 									ImageName: separator
 						ProductionTypeButton@UPGRADE:
 							Logic: AddFactionSuffixLogic
-							X: 165
-							Width: 32
+							X: 168
+							Width: 26
 							Height: 26
 							Background: chrome-button-background
 							TooltipText: button-production-types-upgrade-tooltip
@@ -1875,7 +1896,7 @@ Container@PLAYER_WIDGETS:
 							Key: ProductionTypeUpgrade
 							Children:
 								Image@ICON:
-									X: 8
+									X: 5
 									Y: 5
 									ImageCollection: production-icons
 # === Ende aotmod ===        

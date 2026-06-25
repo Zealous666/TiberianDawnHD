@@ -90,7 +90,7 @@ ltnk:
 		Facings: 32
 		UseClassicFacings: True
 	aot-turret-laser:
-		RemasteredFilename: aot-ltnk-laser-turret-v2.zip
+		RemasteredFilename: aot-ltnk-laser-turret-v3.zip
 		Start: 32
 		Facings: 32
 		UseClassicFacings: True
@@ -369,7 +369,7 @@ aot-gatick:
 		UseClassicFacings: True
 		Scale: 1.0
 	turret-laser:
-		RemasteredFilename: aot-ltnk-laser-turret-v2.zip
+		RemasteredFilename: aot-ltnk-laser-turret-v3.zip
 		Start: 32
 		Facings: 32
 		UseClassicFacings: True

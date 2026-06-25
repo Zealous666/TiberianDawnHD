@@ -207,3 +207,33 @@ aot-CyborgCrippleEffect:
 	Warhead@2Eff: CreateEffect
 		Explosions: chemball
 # === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Gunboat / Destroyer Waffen ===
+# Basis BoatMissile (Engine-CnC Naval-Waffe). PT-Gunboat: leichter Einzelschuss.
+# Destroyer (nach "Destroyer Enhancement"): stärkere Doppel-Raketensalve.
+# PT-Gunboat: originalgetreuer Nachbau der RA-PT-Waffe "2Inch" (Schiffskanone).
+# RA: Inherits ^Cannon (= CnC ^BallisticWeapon, Bullet/120MM), ReloadDelay 60,
+# Range 5c512, Damage 2500, Report cannon2. Sound aus SFX3D.MEG (RAC_SFX_CANNON2.WAV)
+# extrahiert nach bits/aot-cannon2.wav (MS-ADPCM, von OpenRA unterstützt).
+aot-GunboatGun:
+	Inherits: ^BallisticWeapon
+	ReloadDelay: 60
+	Range: 5c512
+	Report: aot-cannon2.wav
+	Warhead@1Dam: SpreadDamage
+		Spread: 256
+		Damage: 2500
+		Versus:
+			None: 28
+			Wood: 72
+			Light: 72
+			Concrete: 48
+aot-DestroyerRockets:
+	Inherits: BoatMissile
+	ReloadDelay: 30
+	Range: 9c0
+	Burst: 2
+	BurstDelays: 8
+	Warhead@1Dam: SpreadDamage
+		Damage: 9000
+# === Ende aotmod ===
