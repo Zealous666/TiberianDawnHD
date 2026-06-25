@@ -1605,3 +1605,48 @@ aot-shipyard:
 		Sequence: place
 		SequenceAlpha: 0.65
 # === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Submarine Pen (aot-subpen) — NOD-Pendant zur Werft ===
+# Spiegelung von aot-shipyard für NOD. RA SPEN-Sprites (flach umgepackt: aot-subpen.zip).
+# Wasser-Gebäude, ab LITE, Queue Building.Nod. Stellt aot-subpen bereit.
+aot-subpen:
+	Inherits: ^BaseBuilding
+	Tooltip:
+		Name: Submarine Pen
+	Valued:
+		Cost: 1000
+	Health:
+		HP: 80000
+	Buildable:
+		BuildPaletteOrder: 35
+		Prerequisites: lite
+		Queue: Building.Nod
+		Icon: aot-subpen-icon
+		Description: Naval production facility.
+	Targetable:
+		TargetTypes: WaterActor, Structure
+	Building:
+		Footprint: XXX xxx XXX
+		Dimensions: 3,3
+		TerrainTypes: Water
+	RequiresBuildableArea:
+		AreaTypes: building
+		Adjacent: 8
+	-GivesBuildableArea:
+	-SpawnActorsOnSell:
+	ProvidesPrerequisite:
+		Prerequisite: aot-subpen
+	RevealsShroud:
+		Range: 4c0
+	RenderSprites:
+		Image: aot-subpen
+	WithSpriteBody:
+		Sequence: idle
+		Name: body
+	WithMakeAnimation:
+		Condition: build-incomplete
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: place
+		SequenceAlpha: 0.65
+# === Ende aotmod ===
