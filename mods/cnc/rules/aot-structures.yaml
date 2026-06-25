@@ -1562,7 +1562,7 @@ aot-upgrade-gunboat-destroyer:
 
 	Buildable:
 		BuildPaletteOrder: 32
-		Prerequisites: ~atec, lite, aot-shipyard, ~!aot-gunboat-upgrade
+		Prerequisites: ~aot-age1, aot-age1, aot-shipyard, fix, ~!aot-gunboat-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
