@@ -282,6 +282,10 @@ lite:
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.17
+	aot-shipyard-icon:
+		Filename: aot-shipyard.png
+		RemasteredFilename:
+		Length: 1
 	bib:
 		TilesetFilenames:
 			DESERT: bib2.des
@@ -300,33 +304,6 @@ lite:
 		RemasteredPremultiplied: false
 	icon:
 		Filename: lite_base.png
-		RemasteredFilename:
-		Length: 1
-# === Ende aotmod ===
-
-# === Age of Tiberium (aotmod) - Shipyard (aot-shipyard): RA Remaster SYRD-Sprites ===
-# RA SYRD.ZIP: idle=0, damaged-idle=1. Make-Animation separat in SYRDMAKE.ZIP.
-# Scale wie FACT (0.85). Icon: Custom aot-shipyard.png.
-aot-shipyard:
-	idle:
-		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\SYRD.ZIP
-		RemasteredLength: 1
-		Scale: 0.85
-	damaged-idle:
-		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\SYRD.ZIP
-		RemasteredStart: 1
-		RemasteredLength: 1
-		Scale: 0.85
-	make:
-		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\SYRDMAKE.ZIP
-		RemasteredLength: *
-		Scale: 0.85
-	place:
-		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\SYRD.ZIP
-		RemasteredLength: 1
-		Scale: 0.85
-	aot-shipyard-icon:
-		Filename: aot-shipyard.png
 		RemasteredFilename:
 		Length: 1
 # === Ende aotmod ===
