@@ -1608,7 +1608,7 @@ aot-shipyard:
 		Icon: aot-shipyard-icon
 		Description: Naval production facility.
 	Targetable:
-		TargetTypes: WaterActor, Structure
+		TargetTypes: Ground, Water, C4, Structure
 	Building:
 		Footprint: XXX xxx XXX
 		Dimensions: 3,3
@@ -1633,6 +1633,12 @@ aot-shipyard:
 	Exit@3:
 		SpawnOffset: -1024,0,0
 		ExitCell: -1,1
+	RepairsUnits:
+		HpPerStep: 1000
+		Interval: 15
+		PlayerExperience: 5
+		StartRepairingNotification: Repairing
+		StartRepairingTextNotification: notification-repairing
 	Production:
 		Produces: Naval.GDI
 	ProductionQueue:
@@ -1680,7 +1686,7 @@ aot-subpen:
 		Icon: aot-subpen-icon
 		Description: Naval production facility.
 	Targetable:
-		TargetTypes: WaterActor, Structure
+		TargetTypes: Ground, Water, C4, Structure
 	Building:
 		Footprint: XXX xxx XXX
 		Dimensions: 3,3
@@ -1694,6 +1700,12 @@ aot-subpen:
 		Prerequisite: aot-subpen
 	RevealsShroud:
 		Range: 4c0
+	RepairsUnits:
+		HpPerStep: 1000
+		Interval: 15
+		PlayerExperience: 5
+		StartRepairingNotification: Repairing
+		StartRepairingTextNotification: notification-repairing
 	RenderSprites:
 		Image: aot-subpen
 	WithSpriteBody:

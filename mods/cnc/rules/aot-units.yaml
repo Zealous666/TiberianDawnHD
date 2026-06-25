@@ -1141,20 +1141,25 @@ aot-gunboat:
 		Locomotor: naval
 		TurnSpeed: 28
 		Speed: 92
+	RepairableNear:
+		RepairActors: aot-shipyard, aot-subpen
 	RevealsShroud:
 		Range: 7c0
 		Type: CenterPosition
 	Turreted@pt:
+		Turret: pt
 		TurnSpeed: 28
 		Offset: 512,0,0
 		RequiresCondition: !aot-gunboat-upgrade
 	# Destroyer: EIN Turm hinten = Raketenwerfer (ssam-Sprite + Raketen am selben Heck-Turm).
 	# Keine Kanone. Offset -X = hinten.
 	Turreted@dd:
+		Turret: dd
 		TurnSpeed: 28
-		Offset: -512,0,48
+		Offset: 512,0,0
 		RequiresCondition: aot-gunboat-upgrade
 	AttackTurreted:
+		Turrets: pt, dd
 	GrantConditionOnPrerequisite@destroyer:
 		Condition: aot-gunboat-upgrade
 		Prerequisites: aot-gunboat-upgrade
@@ -1172,18 +1177,22 @@ aot-gunboat:
 		Sequence: idle-dd
 		RequiresCondition: aot-gunboat-upgrade
 	WithSpriteTurret@pt:
+		Turret: pt
 		Sequence: turret
 		RequiresCondition: !aot-gunboat-upgrade
 	WithSpriteTurret@dd:
+		Turret: dd
 		Sequence: turret-dd
 		RequiresCondition: aot-gunboat-upgrade
 	Armament@pt:
 		Weapon: aot-GunboatGun
+		Turret: pt
 		LocalOffset: 208,0,48
 		RequiresCondition: !aot-gunboat-upgrade
 	# Destroyer-Waffe: nur Raketenwerfer (ssam-Heck-Turm).
 	Armament@dd:
 		Weapon: aot-DestroyerRockets
+		Turret: dd
 		LocalOffset: 0,0,48
 		RequiresCondition: aot-gunboat-upgrade
 # === Ende aotmod ===
