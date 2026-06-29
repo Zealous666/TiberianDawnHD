@@ -81,21 +81,6 @@ JEEP:
 
 	-Buildable:
 
-	Cargo:
-		Types: Infantry
-		MaxWeight: 1
-		UnloadVoice: Unload
-		LoadingCondition: notmobile
-
-	WithCargoPipsDecoration:
-		Position: BottomLeft
-		Margin: 4, 3
-		RequiresSelection: true
-		CustomPipSequences:
-			gray: pip-gray
-			yellow: pip-yellow
-			red: pip-red
-
 	-WithFacingSpriteBody:
 
 	WithFacingSpriteBody@base:
@@ -346,6 +331,27 @@ APC:
 		Weapon: aot-JeepHumvee
 		LocalOffset: 255,0,189
 		MuzzleSequence: muzzle
+		RequiresCondition: !aot-amphibious-upgrade
+
+	Armament@SECONDARY:
+		RequiresCondition: !aot-amphibious-upgrade
+
+	GrantConditionOnPrerequisite@AMPHIBIOUS:
+		Condition: aot-amphibious-upgrade
+		Prerequisites: aot-amphibious-upgrade
+
+	-WithFacingSpriteBody:
+	WithFacingSpriteBody@base:
+		Sequence: idle
+		RequiresCondition: !aot-amphibious-upgrade
+	WithFacingSpriteBody@amphibious:
+		Sequence: aot-amphibious-idle
+		Name: body-amphibious
+		RequiresCondition: aot-amphibious-upgrade
+	AotTransformsOnTerrain@WATER:
+		IntoActor: aot-apc-amphibious
+		TerrainTypes: Clear, Rough, Road, Bridge, Tiberium, BlueTiberium, Beach, Water, Rock
+		RequiresCondition: aot-amphibious-upgrade
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Jeep Queue-Proxies (Doppel-Aktor-Pattern) ===
@@ -373,9 +379,59 @@ aot-jeep-humvee:
 		BuildPaletteOrder: 3
 		Prerequisites: lite, pyle, ~aot-humvee-upgrade, ~!aot-apc-upgrade
 		Icon: aot-humvee-icon
-		Description: Fast reconnaissance vehicle with HUMVEE armor. Can carry 1 soldier.
+		Description: Fast reconnaissance vehicle with HUMVEE armor and stronger machine gun.
 	Tooltip:
 		Name: GDI HUMVEE
+aot-apc-amphibious:
+	Inherits: APC
+	RenderSprites:
+		Image: apc
+	Mobile:
+		Locomotor: aot-amphibious
+	-Armament@PRIMARY:
+	-Armament@SECONDARY:
+	-WithMuzzleOverlay:
+	-GrantConditionOnAttack:
+	-AotTransformsOnTerrain@WATER:
+	AotGrantConditionOnTerrain:
+		Condition: aot-in-water
+		TerrainTypes: Water
+	-WithFacingSpriteBody@amphibious:
+	WithFacingSpriteBody@amphibious:
+		Sequence: aot-amphibious-idle
+		Name: body-amphibious
+		RequiresCondition: !aot-in-water
+	WithFacingSpriteBody@amphibious-remap:
+		Sequence: aot-amphibious-remap
+		Name: body-amphibious-remap
+		Palette: aot-vxl-player
+		IsPlayerPalette: true
+		RequiresCondition: !aot-in-water
+	WithFacingSpriteBody@amphibious-water:
+		Sequence: aot-amphibious-idle-water
+		Name: body-amphibious-water
+		RequiresCondition: aot-in-water
+	Buildable:
+		Queue: LightVehicle.GDI
+		BuildPaletteOrder: 4
+		Prerequisites: lite, ~aot-apc-upgrade, ~aot-amphibious-upgrade, ~!aot-humvee-upgrade
+		Icon: aot-amphibious-icon
+		Description: Amphibious APC. Drives on land and through water. Can carry 5 soldiers. Unarmed.
+	Tooltip:
+		Name: Amphibious APC
+	Cargo:
+		Types: Infantry
+		MaxWeight: 5
+		UnloadVoice: Unload
+		LoadingCondition: notmobile
+	WithCargoPipsDecoration:
+		Position: BottomLeft
+		Margin: 4, 3
+		RequiresSelection: true
+		CustomPipSequences:
+			gray: pip-gray
+			yellow: pip-yellow
+			red: pip-red
 # === Ende aotmod ===
 
 
@@ -684,6 +740,21 @@ aot-harv:
 # Doppel-Aktor-Pattern analog zu Jeep/HUMVEE.
 # Apache (Tier 0): sofort nach HPAD baubar, RA Longbow Sprites, reduzierter Schaden, nur AG.
 # ORCA (Tier 1): sichtbar nach ORCA-Upgrade, volle Stats, ORCA Sprites.
+
+aot-apache-husk:
+	Inherits: ^HelicopterHusk
+	Tooltip:
+		Name: Apache
+	Aircraft:
+		TurnSpeed: 16
+		Speed: 186
+	RevealsShroud:
+		Range: 10c0
+		Type: GroundPosition
+	RenderSprites:
+		Image: aot-heli
+	WithFacingSpriteBody:
+		Sequence: aot-apache-idle
 
 aot-apache-base:
 	Inherits: ORCA
@@ -1127,12 +1198,6 @@ aot-gunboat:
 		Cost: 500
 	UpdatesPlayerStatistics:
 		AddToArmyValue: true
-	Buildable:
-		Queue: Naval.GDI
-		BuildPaletteOrder: 10
-		Prerequisites: lite, aot-shipyard
-		Icon: icon
-		Description: Naval combat vessel. Upgradeable to a rocket Destroyer.
 	Health:
 		HP: 30000
 	Armor:
@@ -1156,43 +1221,892 @@ aot-gunboat:
 	Turreted@dd:
 		Turret: dd
 		TurnSpeed: 28
-		Offset: 512,0,0
+		Offset: 469,0,128
 		RequiresCondition: aot-gunboat-upgrade
 	AttackTurreted:
 		Turrets: pt, dd
+	GrantConditionOnPrerequisite@frigate:
+		Condition: aot-gunboat-frigate-upgrade
+		Prerequisites: aot-gunboat-frigate-upgrade
 	GrantConditionOnPrerequisite@destroyer:
 		Condition: aot-gunboat-upgrade
 		Prerequisites: aot-gunboat-upgrade
 	-Tooltip:
 	Tooltip@base:
 		Name: Gunboat
-		RequiresCondition: !aot-gunboat-upgrade
+		RequiresCondition: !aot-gunboat-frigate-upgrade
+	Tooltip@frigate:
+		Name: Frigate
+		RequiresCondition: aot-gunboat-frigate-upgrade && !aot-gunboat-upgrade
 	Tooltip@dd:
 		Name: Destroyer
 		RequiresCondition: aot-gunboat-upgrade
 	WithFacingSpriteBody@pt:
 		Sequence: idle
-		RequiresCondition: !aot-gunboat-upgrade
+		RequiresCondition: !aot-gunboat-frigate-upgrade
+	WithFacingSpriteBody@frigate:
+		Sequence: idle-frigate
+		RequiresCondition: aot-gunboat-frigate-upgrade && !aot-gunboat-upgrade
 	WithFacingSpriteBody@dd:
 		Sequence: idle-dd
 		RequiresCondition: aot-gunboat-upgrade
 	WithSpriteTurret@pt:
 		Turret: pt
 		Sequence: turret
-		RequiresCondition: !aot-gunboat-upgrade
+		RequiresCondition: !aot-gunboat-frigate-upgrade
 	WithSpriteTurret@dd:
 		Turret: dd
 		Sequence: turret-dd
 		RequiresCondition: aot-gunboat-upgrade
+	# Turreted@pt bleibt für PT und Frigate aktiv (unsichtbar bei Frigate, aber Armament braucht es).
 	Armament@pt:
 		Weapon: aot-GunboatGun
 		Turret: pt
 		LocalOffset: 208,0,48
-		RequiresCondition: !aot-gunboat-upgrade
-	# Destroyer-Waffe: nur Raketenwerfer (ssam-Heck-Turm).
+		RequiresCondition: !aot-gunboat-frigate-upgrade
+	# Frigate: 3 Raketen (Land+Wasser), kein Turm-Sprite, Turret pt unsichtbar aktiv.
+	Armament@frigate:
+		Weapon: aot-FrigateMissiles
+		Turret: pt
+		LocalOffset: 208,0,48
+		RequiresCondition: aot-gunboat-frigate-upgrade && !aot-gunboat-upgrade
+	# Destroyer-Waffe: Raketenwerfer (ssam-Heck-Turm), Luft + Land.
 	Armament@dd:
 		Weapon: aot-DestroyerRockets
 		Turret: dd
 		LocalOffset: 0,0,48
 		RequiresCondition: aot-gunboat-upgrade
+	# DepthCharge DD: nur Destroyer hat Wasserbomben.
+	Armament@depthdd:
+		Weapon: aot-DepthCharge
+		Turret: dd
+		LocalOffset: -512,-100,0, -512,100,0
+		LocalYaw: 80, -80
+		RequiresCondition: aot-gunboat-upgrade
+
+# aot-gunboat-base: Gunboat-Icon vor Frigate-Upgrade.
+# aot-gunboat-frigate: Frigate-Icon zwischen Frigate- und Destroyer-Upgrade.
+# aot-gunboat-destroyer: Destroyer-Icon nach Destroyer-Upgrade.
+aot-gunboat-base:
+	Inherits: aot-gunboat
+	Buildable:
+		Queue: Naval.GDI
+		BuildPaletteOrder: 10
+		Prerequisites: lite, aot-shipyard, ~!aot-gunboat-frigate-upgrade
+		Icon: icon
+		Description: Naval combat vessel. Upgradeable to a Frigate.
+
+aot-gunboat-frigate:
+	Inherits: aot-gunboat
+	Buildable:
+		Queue: Naval.GDI
+		BuildPaletteOrder: 10
+		Prerequisites: lite, aot-shipyard, ~aot-gunboat-frigate-upgrade, ~!aot-gunboat-upgrade
+		Icon: icon-frigate
+		Description: Upgraded naval vessel. Attacks land and sea targets. Upgradeable to a Destroyer.
+
+aot-gunboat-destroyer:
+	Inherits: aot-gunboat
+	Tooltip@base:
+		Name: Destroyer
+		RequiresCondition: !aot-gunboat-upgrade
+	Buildable:
+		Queue: Naval.GDI
+		BuildPaletteOrder: 10
+		Prerequisites: lite, aot-shipyard, ~aot-gunboat-upgrade
+		Icon: icon-dd
+		Description: Naval combat vessel with rockets and depth charges. Can attack air.
+
+# === Age of Tiberium (aotmod) - See-Mine (aot-seamine) ===
+# Wird vom Missile Sub nach Mine Layer Upgrade gelegt (Minelayer-Trait).
+# CloakStyle: None = für Feind unsichtbar (DetectionTypes: Mine), für Eigner sichtbar.
+# Mine: CrushClasses: mine → Schiffe (Crushes: mine) lösen sie aus.
+# BlockFriendly: true = eigene Schiffe können die Zelle nicht betreten → umfahren automatisch.
+aot-seamine:
+	RenderSprites:
+		Image: aot-seamine
+	WithSpriteBody:
+	Tooltip:
+		Name: actor-aot-seamine.name
+	Interactable:
+		Bounds: 1024, 1024
+	HiddenUnderFog:
+	Cloak:
+		CloakStyle: Alpha
+		CloakedAlpha: 0.3
+		DetectionTypes: Mine
+		InitialDelay: 25
+		CloakSound: subshow1.wav
+		UncloakSound: subshow1.wav
+		PauseOnCondition: mine-triggered
+	Mine:
+		CrushClasses: mine
+		DetonateClasses: mine
+		AvoidFriendly: false
+		BlockFriendly: true
+		DetonateDelay: 25
+		TriggeredCondition: mine-triggered
+	Health:
+		HP: 1500
+		NotifyAppliedDamage: false
+	BodyOrientation:
+		QuantizedFacings: 1
+	HitShape:
+	Armor:
+		Type: Light
+	FireWarheadsOnDeath:
+		Weapon: aot-SeaMineExplosion
+		DamageSource: Parent
+	AppearsOnRadar:
+	Immobile:
+		OccupiesSpace: true
+	Targetable:
+		TargetTypes: Water, Mine
+
+# === Age of Tiberium (aotmod) - NOD Submarine (aot-sub) ===
+# Auto-Tauch-Mechanik analog STNK: Cloak mit CloakedCondition → TargetType-Switch.
+# CloakedCondition: aot-sub-cloaked → Targetable@sub (Underwater, Submarine) aktiv.
+# Kritisch beschädigt (DamageState.Critical): PauseOnCondition → Cloak pausiert,
+# Sub bleibt sichtbar bis HP wieder steigt. UncloakOn: Damage (kein Attack → feuert getarnt).
+aot-sub:
+	Inherits: ^Ship
+	Inherits@SELECTABLE: ^SelectableCombatUnit
+	Inherits@EXPERIENCE: ^GainsExperience
+	Inherits@AUTOTARGET: ^AutoTargetAll
+	RenderSprites:
+		Image: aot-sub
+	Valued:
+		Cost: 800
+	UpdatesPlayerStatistics:
+		AddToArmyValue: true
+	Tooltip:
+		Name: actor-aot-sub.name
+	GrantConditionOnPrerequisite@cargo:
+		Condition: aot-sub-cargo-upgrade
+		Prerequisites: aot-sub-cargo-upgrade
+	Cargo:
+		Types: Infantry
+		MaxWeight: 5
+		UnloadVoice: Unload
+		LoadingCondition: aot-sub-loading
+		RequiresCondition: aot-sub-cargo-upgrade
+	WithCargoPipsDecoration@cargo:
+		Position: BottomLeft
+		Margin: 4, 3
+		RequiresSelection: true
+		RequiresCondition: aot-sub-cargo-upgrade
+	Health:
+		HP: 20000
+	Armor:
+		Type: Heavy
+	Mobile:
+		Locomotor: naval
+		TurnSpeed: 20
+		Speed: 70
+	RepairableNear:
+		RepairActors: aot-shipyard, aot-subpen
+	RevealsShroud:
+		Range: 6c0
+		Type: CenterPosition
+	AttackFrontal:
+		FacingTolerance: 15
+	# Auto-Tauch-Mechanik: kein UncloakOn: Attack → Sub feuert Torpedos getarnt.
+	Cloak:
+		InitialDelay: 85
+		CloakDelay: 85
+		CloakStyle: Alpha
+		CloakedAlpha: 0.35
+		CloakSound: subshow1.wav
+		UncloakSound: subshow1.wav
+		UncloakOn: Damage, Attack, Unload, Load
+		CloakedCondition: aot-sub-cloaked
+		PauseOnCondition: aot-sub-critical || aot-sub-loading
+	# Bei kritischen HP (≈20% verbleibend): Cloak pausiert → Sub bleibt sichtbar.
+	GrantConditionOnDamageState@critical:
+		Condition: aot-sub-critical
+		ValidDamageStates: Critical
+	# TargetType: getaucht → nur Fassbomben treffen (Underwater, Submarine).
+	-Targetable:
+	Targetable@surface:
+		TargetTypes: Ground, Water
+		RequiresCondition: !aot-sub-cloaked
+	Targetable@sub:
+		TargetTypes: Underwater, Submarine
+		RequiresCondition: aot-sub-cloaked
+	WithFacingSpriteBody:
+		Sequence: idle
+	# Torpedo: feuert von Bug, keine Turret (kein sichtbarer Turm auf RA-Sub).
+	Armament@torpedo:
+		Weapon: aot-SubTorpedo
+		LocalOffset: 512,0,0
+
+# Proxy: Standard Sub — verschwindet wenn Passenger Upgrade aktiv
+aot-sub-base:
+	Inherits: aot-sub
+	RenderSprites:
+		Image: aot-sub
+	Buildable:
+		Queue: Naval.Nod
+		BuildPaletteOrder: 10
+		Prerequisites: aot-subpen, ~!aot-sub-cargo-upgrade
+		Icon: icon
+		Description: actor-aot-sub.description
+	Tooltip:
+		Name: actor-aot-sub.name
+
+# Proxy: Passenger Sub — sichtbar ab Age 1 wenn Upgrade aktiv
+aot-sub-cargo-proxy:
+	Inherits: aot-sub
+	RenderSprites:
+		Image: aot-sub
+	Buildable:
+		Queue: Naval.Nod
+		BuildPaletteOrder: 10
+		Prerequisites: aot-subpen, ~aot-age2, ~aot-sub-cargo-upgrade
+		Icon: cargo-icon
+		Description: actor-aot-sub.description
+	Tooltip:
+		Name: actor-aot-sub-cargo.name
+
+# === Age of Tiberium (aotmod) - NOD Missile Sub (aot-msub) ===
+# RA Wolf-Class Missile Submarine. Ballistische Raketen, langsam + schwer zu drehen.
+# Taucht wie aot-sub. Feuert NUR aufgetaucht (UncloakOn: Attack bereits gesetzt).
+# Voraussetzung: aot-subpen + aot-stec (NOD Tech Centre).
+aot-msub:
+	Inherits: ^Ship
+	Inherits@SELECTABLE: ^SelectableCombatUnit
+	Inherits@EXPERIENCE: ^GainsExperience
+	Inherits@AUTOTARGET: ^AutoTargetAll
+	RenderSprites:
+		Image: aot-msub
+	Valued:
+		Cost: 2000
+	UpdatesPlayerStatistics:
+		AddToArmyValue: true
+	Tooltip:
+		Name: actor-aot-msub.name
+	Health:
+		HP: 40000
+	Armor:
+		Type: Light
+	Mobile:
+		Locomotor: naval
+		TurnSpeed: 12
+		Speed: 44
+	RepairableNear:
+		RepairActors: aot-shipyard, aot-subpen
+		CloseEnough: 1c512
+	Rearmable:
+		RearmActors: aot-subpen
+		AmmoPools: primary, drones
+	RevealsShroud:
+		Range: 8c0
+		Type: CenterPosition
+	AttackFrontal:
+		FacingTolerance: 0
+	Cloak:
+		InitialDelay: 85
+		CloakDelay: 85
+		CloakStyle: Alpha
+		CloakedAlpha: 0.35
+		CloakSound: subshow1.wav
+		UncloakSound: subshow1.wav
+		UncloakOn: Damage, Attack
+		CloakedCondition: aot-msub-cloaked
+		PauseOnCondition: aot-msub-critical || aot-drones-active
+	GrantConditionOnDamageState@critical:
+		Condition: aot-msub-critical
+		ValidDamageStates: Critical
+	GrantConditionOnPrerequisite@mine:
+		Condition: aot-msub-mine-upgrade
+		Prerequisites: aot-msub-mine-upgrade
+	GrantConditionOnPrerequisite@drone:
+		Condition: aot-msub-drone-upgrade
+		Prerequisites: aot-msub-drone-upgrade
+	MineImmune:
+	AmmoPool:
+		Armaments: minelayer
+		Ammo: 1
+		AmmoCondition: mine-ammo
+		ReloadCount: 1
+	WithAmmoPipsDecoration:
+		Position: BottomLeft
+		Margin: 4, 3
+		RequiresSelection: true
+		PipCount: 1
+		AmmoPools: primary
+		RequiresCondition: aot-msub-mine-upgrade && !aot-msub-drone-upgrade
+	Minelayer:
+		Mine: aot-seamine
+		TerrainTypes: Water
+		AmmoCondition: mine-ammo
+		RequiresCondition: aot-msub-mine-upgrade
+	AmmoPool@drones:
+		Name: drones
+		Ammo: 3
+		AmmoCondition: drone-ammo
+	WithAmmoPipsDecoration@drones:
+		Position: BottomLeft
+		Margin: 4, 3
+		RequiresSelection: true
+		PipCount: 3
+		AmmoPools: drones
+		RequiresCondition: aot-msub-drone-upgrade
+	AotDroneAttack:
+		DroneActor: aot-msub-drone-unit
+		AmmoPoolName: drones
+		DronesActiveCondition: aot-drones-active
+		RequiresCondition: aot-msub-drone-upgrade
+	-Targetable:
+	Targetable@surface:
+		TargetTypes: Ground, Water
+		RequiresCondition: !aot-msub-cloaked
+	Targetable@sub:
+		TargetTypes: Underwater, Submarine
+		RequiresCondition: aot-msub-cloaked
+	WithFacingSpriteBody:
+		Sequence: idle
+	Armament@missile:
+		Weapon: aot-SubMissile
+		LocalOffset: 0,-171,0, 0,171,0
+		FireDelay: 2
+		PauseOnCondition: aot-msub-mine-upgrade || aot-msub-drone-upgrade
+	Armament@missile-mine:
+		Weapon: aot-SubMissileSingle
+		LocalOffset: 0,-171,0, 0,171,0
+		FireDelay: 2
+		PauseOnCondition: !aot-msub-mine-upgrade || aot-msub-drone-upgrade
+
+# Proxy: Standard Missile Sub — sichtbar ab Age 1, verschwindet wenn ein Upgrade aktiv
+aot-msub-base:
+	Inherits: aot-msub
+	RenderSprites:
+		Image: aot-msub
+	Buildable:
+		Queue: Naval.Nod
+		BuildPaletteOrder: 20
+		Prerequisites: aot-subpen, stec, ~aot-age1, ~!aot-msub-mine-upgrade, ~!aot-msub-drone-upgrade
+		Icon: icon
+		Description: actor-aot-msub.description
+	Tooltip:
+		Name: actor-aot-msub.name
+
+# Proxy: Mine Layer Missile Sub — sichtbar ab Age 3, nur wenn Mine Upgrade aktiv, verschwindet bei Drone Upgrade
+aot-msub-mine-proxy:
+	Inherits: aot-msub
+	RenderSprites:
+		Image: aot-msub
+	Buildable:
+		Queue: Naval.Nod
+		BuildPaletteOrder: 20
+		Prerequisites: aot-subpen, stec, fix, anyhq, ~aot-age3, ~aot-msub-mine-upgrade, ~!aot-msub-drone-upgrade
+		Icon: mine-icon
+		Description: actor-aot-msub.description
+	Tooltip:
+		Name: actor-aot-msub-mine.name
+
+# Proxy: Drone Attack Sub — sichtbar ab Age 3, nur wenn Drone Upgrade aktiv, verschwindet bei Mine Upgrade
+aot-msub-drone-proxy:
+	Inherits: aot-msub
+	RenderSprites:
+		Image: aot-msub
+	Buildable:
+		Queue: Naval.Nod
+		BuildPaletteOrder: 20
+		Prerequisites: aot-subpen, stec, fix, anyhq, ~aot-age3, ~aot-msub-drone-upgrade, ~!aot-msub-mine-upgrade
+		Icon: drone-icon
+		Description: actor-aot-msub-drone.description
+	Tooltip:
+		Name: actor-aot-msub-drone.name
+
+# Drone unit spawned by Drone Attack Sub. Not player-controllable.
+aot-msub-drone-unit:
+	Inherits: ^Helicopter
+	-Selectable:
+	Interactable:
+	-Repairable:
+	RenderSprites:
+		Image: gghunt
+		PlayerPalette: aot-ts-player
+	Tooltip:
+		Name: actor-aot-msub-drone-unit.name
+	Health:
+		HP: 6000
+	Armor:
+		Type: Heavy
+	Aircraft:
+		AirborneCondition: airborne
+		CruisingCondition: cruising
+		CanHover: True
+		TakeOffOnResupply: true
+		VTOL: true
+		Speed: 260
+		TurnSpeed: 20
+		TakeoffSounds: orcaup1.aud
+		LandingSounds: orcadwn1.aud
+		LandableTerrainTypes: Clear, Rough, Road, Beach, Tiberium, BlueTiberium
+		Crushes: crate, infantry
+		CanSlide: True
+	AttackAircraft:
+		FacingTolerance: 80
+		OpportunityFire: true
+		PersistentTargeting: false
+		AttackType: Hover
+	AutoTarget:
+		ScanRadius: 8
+	Armament@drone:
+		Weapon: aot-DroneLaser
+	AotDroneLogic:
+		IdleReturnDelay: 150
+		TakeoffSound: orcaup1.aud
+		LandingSound: orcadwn1.aud
+		RogueCondition: aot-drone-rogue
+	FireWarheadsOnDeath:
+		Weapon: aot-DroneExplode
+		EmptyWeapon: aot-DroneExplode
+	-SpawnActorOnDeath:
+	-AttackMove:
+	-Guard:
+	-Guardable:
+	-MustBeDestroyed:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Transport Vessel (aot-transport) ===
+# Amphibisches Landungsboot — NOD exklusiv (Shipyard/SubPen).
+# Trägt 5 Infanteristen, kann auf Strand landen.
+# Sprites: RA Remastered LST.ZIP, Facings: 1 (keine Rotation).
+aot-transport-base:
+	Inherits: aot-transport
+	RenderSprites:
+		Image: aot-transport
+	Buildable:
+		Queue: Naval.Nod
+		BuildPaletteOrder: 20
+		Prerequisites: ~!aot-transport-gun-upgrade
+		Icon: icon
+		Description: actor-aot-transport.description
+	Tooltip:
+		Name: actor-aot-transport.name
+
+aot-transport-gun-proxy:
+	Inherits: aot-transport
+	RenderSprites:
+		Image: aot-transport
+	Buildable:
+		Queue: Naval.Nod
+		BuildPaletteOrder: 20
+		Prerequisites: ~aot-transport-gun-upgrade
+		Icon: icon-gun
+		Description: actor-aot-transport-gun.description
+	Tooltip:
+		Name: actor-aot-transport-gun.name
+
+# Hovercraft — GDI Standalone-Unit. Kein Upgrade nötig.
+aot-transport-hover-proxy:
+	Inherits: aot-transport-hover
+	RenderSprites:
+		Image: aot-transport-hover
+	Buildable:
+		Queue: Naval.GDI
+		BuildPaletteOrder: 20
+		Prerequisites: aot-shipyard, fix, ~aot-shipyard
+		Icon: icon
+		Description: actor-aot-transport-hover.description
+	Tooltip:
+		Name: actor-aot-transport-hover.name
+
+# Hovercraft Transport — GDI Only. TD-LST-Sprite (Platzhalter: aot-transport.zip).
+# Hover-Locomotor: Wasser volle Geschwindigkeit, Land 1/3.
+# Cargo: 1 Fahrzeug (GroundVehicle, MaxWeight 5). Keine Infanterie.
+aot-transport-hover:
+	Inherits: ^Ship
+	Inherits@SELECTABLE: ^SelectableCombatUnit
+	RenderSprites:
+		Image: aot-transport-hover
+	BodyOrientation:
+		QuantizedFacings: 8
+	Valued:
+		Cost: 1200
+	Tooltip:
+		Name: actor-aot-transport-hover.name
+	UpdatesPlayerStatistics:
+		AddToArmyValue: true
+	Health:
+		HP: 40000
+	Armor:
+		Type: Heavy
+	Mobile:
+		Locomotor: hover
+		Speed: 115
+		TurnSpeed: 20
+		PauseOnCondition: notmobile
+	RevealsShroud:
+		Range: 6c0
+	WithFacingSpriteBody:
+		Sequence: idle
+		Name: body
+	WithShadow:
+		Offset: 20, 40, 0
+		ZOffset: -64
+	WithLandingCraftAnimation:
+		OpenTerrainTypes: Clear, Rough, Road, Beach, Tiberium, BlueTiberium
+		Body: body
+	Cargo:
+		Types: GroundVehicle
+		MaxWeight: 5
+		PassengerFacing: 0
+		LoadingCondition: notmobile
+	WithCargo:
+		DisplayTypes: GroundVehicle
+		LocalOffset: 0,0,0
+	WithCargoPipsDecoration:
+		Position: BottomLeft
+		Margin: 4, 3
+		RequiresSelection: true
+		CustomPipSequences:
+			gray: pip-gray
+			green: pip-green
+	RepairableNear:
+		RepairActors: aot-shipyard
+	-AttackMove:
+	-Guard:
+	-Guardable:
+
+aot-transport:
+	Inherits: ^Ship
+	Inherits@SELECTABLE: ^SelectableCombatUnit
+	RenderSprites:
+		Image: aot-transport
+	Valued:
+		Cost: 900
+	GrantConditionOnPrerequisite@gun:
+		Condition: aot-transport-armed
+		Prerequisites: aot-transport-gun-upgrade
+	Tooltip:
+		Name: actor-aot-transport.name
+		RequiresCondition: !aot-transport-armed
+	Tooltip@armed:
+		Name: actor-aot-transport-gun.name
+		RequiresCondition: aot-transport-armed
+	UpdatesPlayerStatistics:
+		AddToArmyValue: true
+	Health:
+		HP: 40000
+	Armor:
+		Type: Heavy
+	Mobile:
+		Locomotor: lcraft
+		Speed: 115
+		TurnSpeed: 20
+		PauseOnCondition: notmobile
+	RevealsShroud:
+		Range: 6c0
+	WithSpriteBody:
+		Sequence: idle
+		Name: body
+	WithLandingCraftAnimation:
+		OpenTerrainTypes: Clear, Rough, Road, Beach, Tiberium, BlueTiberium
+		Body: body
+	Cargo:
+		Types: Infantry
+		MaxWeight: 5
+		PassengerFacing: 0
+		LoadingCondition: notmobile
+	WithCargoPipsDecoration:
+		Position: BottomLeft
+		Margin: 4, 3
+		RequiresSelection: true
+	RepairableNear:
+		RepairActors: aot-shipyard, aot-subpen
+	Turreted@gun:
+		Turret: gun
+		TurnSpeed: 20
+		Offset: 0,0,256
+		RequiresCondition: aot-transport-armed
+	WithSpriteTurret@gun:
+		Turret: gun
+		Sequence: turret
+		RequiresCondition: aot-transport-armed
+	AttackTurreted:
+		Turrets: gun
+	Armament@gun:
+		Weapon: aot-GunboatGun
+		Turret: gun
+		RequiresCondition: aot-transport-armed
+	AutoTarget:
+		RequiresCondition: aot-transport-armed
+	-AttackMove:
+	-Guard:
+	-Guardable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - GDI Battle Cruiser (aot-cruiser) ===
+# RA Allied Cruiser (CA) Nachbau für GDI. Zwei 8-Inch-Türme (hinten + vorne).
+# Sichtbar ab aot-age-2. Baubar ab: aot-age2 + aot-shipyard + atec.
+# Upgrade 1: Railguns (aot-cruiser-railgun-upgrade) — tauscht 8-Inch gegen 4× LaserZap.
+# Upgrade 2: Heli Carrier (aot-cruiser-carrier-upgrade) — Helibays, Deploy zum Landen.
+aot-cruiser:
+	Inherits: ^Ship
+	Inherits@SELECTABLE: ^SelectableCombatUnit
+	Inherits@EXPERIENCE: ^GainsExperience
+	Inherits@AUTOTARGET: ^AutoTargetGroundAssaultMove
+	RenderSprites:
+		Image: aot-cruiser
+	Valued:
+		Cost: 2400
+	UpdatesPlayerStatistics:
+		AddToArmyValue: true
+	Buildable:
+		Queue: Naval.GDI
+		BuildPaletteOrder: 20
+		Prerequisites: ~aot-age2, aot-age2, aot-shipyard, atec, ~!aot-cruiser-railgun-upgrade, ~!aot-cruiser-carrier-upgrade
+		Icon: icon
+		Description: Heavy naval fire support. Two 8-inch gun turrets.
+	Health:
+		HP: 80000
+	Armor:
+		Type: Heavy
+	Mobile:
+		Locomotor: naval
+		TurnSpeed: 12
+		Speed: 44
+		PauseOnCondition: aot-cruiser-carrier-deployed
+	RepairableNear:
+		RepairActors: aot-shipyard, aot-subpen
+	RevealsShroud:
+		MinRange: 5c0
+		Range: 7c0
+		RevealGeneratedShroud: False
+	-Tooltip:
+	Tooltip:
+		Name: Battle Cruiser
+	WithFacingSpriteBody:
+		Sequence: idle
+	Turreted@primary:
+		Turret: primary
+		Offset: -896,0,128
+		TurnSpeed: 12
+	Turreted@secondary:
+		Turret: secondary
+		Offset: 768,0,128
+		TurnSpeed: 12
+	AttackTurreted:
+		Turrets: primary, secondary
+		TargetFrozenActors: True
+		ForceFireIgnoresActors: True
+		RequiresCondition: !aot-cruiser-carrier-upgrade
+	GrantConditionOnPrerequisite@railgun:
+		Condition: aot-cruiser-railgun-upgrade
+		Prerequisites: aot-cruiser-railgun-upgrade
+	GrantConditionOnPrerequisite@carrier:
+		Condition: aot-cruiser-carrier-upgrade
+		Prerequisites: aot-cruiser-carrier-upgrade
+	GrantConditionOnDeploy@carrier:
+		DeployedCondition: aot-cruiser-carrier-deployed
+		RequiresCondition: aot-cruiser-carrier-upgrade
+		PauseOnCondition: aot-carrier-front-reserved || aot-carrier-rear-reserved
+		DeploySounds: cashturn.aud
+		UndeploySounds: text2.aud
+	Reservable@front:
+		LandingOffset: 0,-768,512
+		LandingFacing: 0
+		ReservedCondition: aot-carrier-front-reserved
+		RequiresCondition: aot-cruiser-carrier-deployed
+	Reservable@rear:
+		LandingOffset: 0,896,512
+		LandingFacing: 512
+		ReservedCondition: aot-carrier-rear-reserved
+		RequiresCondition: aot-cruiser-carrier-deployed
+	RepairsUnits:
+		HpPerStep: 500
+		PlayerExperience: 0
+		RequiresCondition: aot-cruiser-carrier-deployed
+	Armament@primary:
+		Turret: primary
+		Weapon: aot-8Inch
+		LocalOffset: 480,-100,40, 480,100,40
+		Recoil: 171
+		RecoilRecovery: 34
+		MuzzleSequence: muzzle
+		RequiresCondition: !aot-cruiser-railgun-upgrade && !aot-cruiser-carrier-upgrade
+	Armament@secondary:
+		Name: secondary
+		Turret: secondary
+		Weapon: aot-8Inch
+		LocalOffset: 480,-100,40, 480,100,40
+		Recoil: 171
+		RecoilRecovery: 34
+		MuzzleSequence: muzzle
+		RequiresCondition: !aot-cruiser-railgun-upgrade && !aot-cruiser-carrier-upgrade
+	Armament@railgun-primary:
+		Turret: primary
+		Weapon: aot-CruiserRailgun
+		LocalOffset: 480,-100,40, 480,100,40
+		RequiresCondition: aot-cruiser-railgun-upgrade && !aot-cruiser-carrier-upgrade
+	Armament@railgun-secondary:
+		Name: secondary
+		Turret: secondary
+		Weapon: aot-CruiserRailgun
+		LocalOffset: 480,-100,40, 480,100,40
+		RequiresCondition: aot-cruiser-railgun-upgrade && !aot-cruiser-carrier-upgrade
+	WithMuzzleOverlay:
+	WithSpriteTurret@primary:
+		Turret: primary
+		Sequence: turret
+		RequiresCondition: !aot-cruiser-railgun-upgrade && !aot-cruiser-carrier-upgrade
+	WithSpriteTurret@secondary:
+		Turret: secondary
+		Sequence: turret
+		RequiresCondition: !aot-cruiser-railgun-upgrade && !aot-cruiser-carrier-upgrade
+	WithSpriteTurret@railgun-primary:
+		Turret: primary
+		Sequence: turret-railgun
+		RequiresCondition: aot-cruiser-railgun-upgrade && !aot-cruiser-carrier-upgrade
+	WithSpriteTurret@railgun-secondary:
+		Turret: secondary
+		Sequence: turret-railgun
+		RequiresCondition: aot-cruiser-railgun-upgrade && !aot-cruiser-carrier-upgrade
+	WithSpriteTurret@carr-primary:
+		Turret: primary
+		Sequence: carr-pad
+		RequiresCondition: aot-cruiser-carrier-upgrade && aot-cruiser-carrier-deployed
+	WithSpriteTurret@carr-primary-off:
+		Turret: primary
+		Sequence: carr-pad-inactive
+		RequiresCondition: aot-cruiser-carrier-upgrade && !aot-cruiser-carrier-deployed
+	WithSpriteTurret@carr-secondary:
+		Turret: secondary
+		Sequence: carr-pad
+		RequiresCondition: aot-cruiser-carrier-upgrade && aot-cruiser-carrier-deployed
+	WithSpriteTurret@carr-secondary-off:
+		Turret: secondary
+		Sequence: carr-pad-inactive
+		RequiresCondition: aot-cruiser-carrier-upgrade && !aot-cruiser-carrier-deployed
+	Selectable:
+		DecorationBounds: 1877, 1877
+
+# Proxy: erscheint im Naval-Tab nach Railgun-Upgrade (ersetzt Base-Icon).
+aot-cruiser-railgun-proxy:
+	Inherits: aot-cruiser
+	RenderSprites:
+		Image: aot-cruiser-railgun
+	Buildable:
+		Queue: Naval.GDI
+		BuildPaletteOrder: 20
+		Prerequisites: ~aot-age2, aot-age2, aot-shipyard, atec, ~aot-cruiser-railgun-upgrade, ~!aot-cruiser-carrier-upgrade
+		Icon: railgun-icon
+		Description: Battle Cruiser with Railgun turrets. Shorter range but highly precise with no minimum distance.
+	Tooltip:
+		Name: Battle Cruiser (Railgun)
+
+# Proxy: erscheint im Naval-Tab nach Carrier-Upgrade (ersetzt Base-Icon).
+aot-cruiser-carrier-proxy:
+	Inherits: aot-cruiser
+	RenderSprites:
+		Image: aot-cruiser
+	Buildable:
+		Queue: Naval.GDI
+		BuildPaletteOrder: 20
+		Prerequisites: ~aot-age2, aot-age2, aot-shipyard, atec, ~aot-cruiser-carrier-upgrade
+		Icon: carrier-icon
+		Description: Battle Cruiser converted to Heli Carrier. Deploy to activate landing bays for aircraft resupply.
+	Tooltip:
+		Name: Battle Cruiser (Carrier)
+
+# === Age of Tiberium (aotmod) - MSAM: Hover MLRS ===
+aot-msam-hover-mlrs:
+	Inherits: MSAM
+	RenderSprites:
+		Image: aot-hvr
+	Mobile:
+		Locomotor: aot-hvr
+	-GrantConditionOnPrerequisite@HOVER_MLRS:
+	-GrantConditionOnPrerequisite@HOVER_AA:
+	-AotTransformsOnTerrain@HOVER_MLRS:
+	-AotTransformsOnTerrain@HOVER_AA:
+	-WithFacingSpriteBody:
+	WithFacingSpriteBody@body:
+		Sequence: idle
+	Armament:
+		Weapon: aot-DestroyerRockets
+	-Armament@SECONDARY:
+	Turreted:
+		TurnSpeed: 512
+		Offset: -256, 0, 200
+	-AttackFrontal:
+	-WithTurretAimAnimation:
+	AttackTurreted:
+	-WithSpriteTurret:
+	WithSpriteTurret@hvr:
+		Sequence: turret
+	WithShadow:
+		Offset: 40, 80, 0
+		ZOffset: -129
+	AutoTargetPriority@Air:
+		ValidTargets: Air
+		Priority: 2
+	Buildable:
+		BuildPaletteOrder: 4
+		Prerequisites: anyhq, ~aot-hover-mlrs-upgrade, ~!aot-hover-aa-upgrade
+		Queue: Vehicle.GDI
+		Icon: aot-hvr-mlrs-icon
+		Description: Hover Rocket Launcher. Amphibious rocket artillery. Strong vs all ground units.
+	Tooltip:
+		Name: Hover MLRS
+
+# === Age of Tiberium (aotmod) - MSAM: Hover AA ===
+aot-msam-hover-aa:
+	Inherits: MSAM
+	RenderSprites:
+		Image: aot-hvr
+	Mobile:
+		Locomotor: aot-hvr
+	-GrantConditionOnPrerequisite@HOVER_MLRS:
+	-GrantConditionOnPrerequisite@HOVER_AA:
+	-AotTransformsOnTerrain@HOVER_MLRS:
+	-AotTransformsOnTerrain@HOVER_AA:
+	-WithFacingSpriteBody:
+	WithFacingSpriteBody@body:
+		Sequence: idle
+	-Armament:
+	-Armament@SECONDARY:
+	-WithTurretAimAnimation:
+	Armament@PRIMARY:
+		Weapon: APCGun
+		Recoil: 48
+		RecoilRecovery: 18
+		LocalOffset: 255,100,189, 255,-100,189
+		MuzzleSequence: aot-apc-muzzle
+		PauseOnCondition: reload-air
+		ReloadingCondition: reload-ground
+	Armament@SECONDARY:
+		Name: secondary
+		Weapon: APCGun.AA
+		Recoil: 48
+		RecoilRecovery: 18
+		LocalOffset: 175,100,299, 175,-100,299
+		MuzzleSequence: aot-apc-muzzle-air
+		PauseOnCondition: reload-ground
+		ReloadingCondition: reload-air
+	GrantConditionOnAttack:
+		Condition: attack-air
+		ArmamentNames: secondary
+	WithSpriteTurret:
+		Sequence: aot-apc-turret
+	WithShadow:
+		Offset: 40, 80, 0
+		ZOffset: -129
+	AutoTargetPriority@Air:
+		ValidTargets: Air
+		Priority: 2
+	AutoTarget:
+		InitialStanceAI: AttackAnything
+	Buildable:
+		BuildPaletteOrder: 4
+		Prerequisites: anyhq, ~aot-hover-aa-upgrade, ~!aot-hover-mlrs-upgrade
+		Queue: Vehicle.GDI
+		Icon: aot-hvr-aa-icon
+		Description: Hover AA. Amphibious anti-air platform. Devastating vs aircraft.
+	Tooltip:
+		Name: Hover AA
 # === Ende aotmod ===

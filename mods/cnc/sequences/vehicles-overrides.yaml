@@ -151,6 +151,24 @@ jeep:
 apc:
 	icon:
 		RemasteredFilename: jeep_3_apc.png
+	aot-amphibious-idle:
+		RemasteredFilename: aot-apc2-test.zip
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 0.504
+	aot-amphibious-remap:
+		RemasteredFilename: aot-apc2-test-remap.png
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 0.504
+	aot-amphibious-idle-water:
+		RemasteredFilename: aot-apc2-water.zip
+		Facings: 32
+		UseClassicFacings: True
+	aot-amphibious-icon:
+		RemasteredFilename: jeep_4_apc2.png
+		Length: 1
+		Facings: 1
 
 aot-upgrade-humvee:
 	icon:
@@ -159,6 +177,16 @@ aot-upgrade-humvee:
 aot-upgrade-apc:
 	icon:
 		RemasteredFilename: jeep_3_apc.png
+
+aot-upgrade-apc2:
+	icon:
+		RemasteredFilename: jeep_4_apc2.png
+
+aot-apc2:
+	aot-apc2-icon:
+		RemasteredFilename: jeep_4_apc2.png
+		Length: 1
+		Facings: 1
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Ion Cannon Upgrade Icon (Platzhalter: LTNK-Icon) ===

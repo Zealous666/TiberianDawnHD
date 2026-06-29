@@ -40,6 +40,9 @@ cd "${TMP_DIR}"
 ENGINE_DIR="${ENGINE_DIR}" MOD_SEARCH_PATHS="${ENGINE_DIR}/mods" \
     dotnet "${ENGINE_DIR}/bin/OpenRA.Utility.dll" ts \
     --extract "${VXL}.vxl" "${VXL}.hva" "unittem.pal" 2>/dev/null
+# Remap floor: maps [floor, 1.0] brightness → full ramp. Formula: ambient - 0.05.
+# Default ambient=0.6 → floor=0.55. Override via env: REMAP_FLOOR=0.45 ./bake-vxl-test.sh ...
+REMAP_FLOOR="${REMAP_FLOOR:-0.55}"
 
 # 2. 32 Facings rendern (Body + Player-Color-Overlay-Sheet)
 RENDER_DIR="${TMP_DIR}/render"
@@ -51,7 +54,7 @@ MOD_SEARCH_PATHS="${SCRIPT_DIR}/mods" ENGINE_DIR=".." \
     --facings 32 --scale "${SCALE}" --pitch 30 --yaw 225 \
     --light-yaw 240 --light-pitch 50 --ambient 0.6 --diffuse 0.4 \
     --supersample 8 --facing-offset 45 --facing-flip --brightness "${BRIGHTNESS}" \
-    --remap-sheet "${TMP_DIR}/aot-${OUT}-test-remap.png" \
+    --remap-sheet "${TMP_DIR}/aot-${OUT}-test-remap.png" --remap-floor "${REMAP_FLOOR}" \
     --output-dir "${RENDER_DIR}" 2>&1 | grep -E "Voxels|Saved|overlay"
 
 # 3. PNG → unkomprimiertes 32-bit TGA + meta

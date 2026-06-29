@@ -5,6 +5,33 @@
 ^BaseWorld:
 	-TerrainRenderer:
 	RemasterTerrainRenderer:
+	# === Age of Tiberium (aotmod) - HVR Locomotor (schnell Land + Wasser) ===
+	Locomotor@AOT_HVR:
+		Name: aot-hvr
+		Crushes: crate
+		TerrainSpeeds:
+			Clear: 100
+			Rough: 88
+			Road: 125
+			Bridge: 125
+			Tiberium: 88
+			BlueTiberium: 88
+			Beach: 100
+			Water: 100
+			River: 100
+	# === Age of Tiberium (aotmod) - Amphibious APC Locomotor ===
+	Locomotor@AOT_AMPHIBIOUS:
+		Name: aot-amphibious
+		Crushes: crate
+		TerrainSpeeds:
+			Clear: 100
+			Rough: 88
+			Road: 125
+			Bridge: 125
+			Tiberium: 88
+			BlueTiberium: 88
+			Beach: 100
+			Water: 80
 	# === Age of Tiberium (aotmod) - TS-Infanterie-Palette ===
 	# unittem.pal (TS Unit-Palette) als Basis + Player-Color-Remap auf House-Color-Indizes 16-31.
 	# Für direkt referenzierte TS-Infanterie-SHPs (z.B. cyborg.shp). Wiederverwendbar.
@@ -15,6 +42,14 @@
 		BaseName: aot-ts-player
 		BasePalette: aot-unittem
 		RemapIndex: 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
+	# TS-Voxel-Remap-Palette: eigene Graustufen-Rampe 255→0 an Indizes 176-191 (VxlToPng RemapRampStart=176, Count=16).
+	PaletteFromFile@aot-vxl-ramp:
+		Name: aot-vxl-ramp
+		Filename: aot-vxl-ramp.pal
+	PlayerColorPalette@aot-vxl:
+		BaseName: aot-vxl-player
+		BasePalette: aot-vxl-ramp
+		RemapIndex: 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191
 
 STNK:
 	Cloak:
@@ -205,7 +240,7 @@ PROC:
 # Verhindert APC-Produktion bis der Spieler das APC Upgrade (Entweder/Oder) kauft.
 APC:
 	Buildable:
-		Prerequisites: lite, ~aot-apc-upgrade, ~!aot-humvee-upgrade
+		Prerequisites: lite, ~aot-apc-upgrade, ~!aot-humvee-upgrade, ~!aot-amphibious-upgrade
 		Queue: LightVehicle.GDI
 		Description: Armored Personnel Carrier. Can carry 5 soldiers.
 		BuildPaletteOrder: 4
@@ -224,9 +259,23 @@ HTNK:
 
 MSAM:
 	Buildable:
-		Prerequisites: anyhq, ~techlevel.medium, ~aot-age1, aot-age1, weap
+		Prerequisites: anyhq, ~techlevel.medium, ~aot-age1, aot-age1, weap, ~!aot-hover-mlrs-upgrade, ~!aot-hover-aa-upgrade
 		Queue: Vehicle.GDI
 		BuildPaletteOrder: 4
+	GrantConditionOnPrerequisite@HOVER_MLRS:
+		Condition: aot-hover-mlrs-upgrade
+		Prerequisites: aot-hover-mlrs-upgrade
+	GrantConditionOnPrerequisite@HOVER_AA:
+		Condition: aot-hover-aa-upgrade
+		Prerequisites: aot-hover-aa-upgrade
+	AotTransformsOnTerrain@HOVER_MLRS:
+		IntoActor: aot-msam-hover-mlrs
+		TerrainTypes: Clear, Rough, Road, Bridge, Tiberium, BlueTiberium, Beach, Water, Rock
+		RequiresCondition: aot-hover-mlrs-upgrade
+	AotTransformsOnTerrain@HOVER_AA:
+		IntoActor: aot-msam-hover-aa
+		TerrainTypes: Clear, Rough, Road, Bridge, Tiberium, BlueTiberium, Beach, Water, Rock
+		RequiresCondition: aot-hover-aa-upgrade
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - HPAD: kein direktes Buildable, Proxy-Aktoren übernehmen ===
@@ -240,6 +289,13 @@ HPAD:
 ORCA:
 	-Buildable:
 	-ReloadAmmoPool:
+	-SpawnActorOnDeath:
+	SpawnActorOnDeath@apache:
+		Actor: aot-apache-husk
+		RequiresCondition: !aot-orca-upgraded
+	SpawnActorOnDeath@orca:
+		Actor: ORCA.Husk
+		RequiresCondition: aot-orca-upgraded
 	RenderSprites:
 		Image: aot-heli
 	Aircraft:
@@ -247,7 +303,9 @@ ORCA:
 		TakeOffOnResupply: true
 		TakeOffOnCreation: true
 	Rearmable:
-		RearmActors: aot-hpad-gdi
+		RearmActors: aot-hpad-gdi, aot-cruiser
+	Repairable:
+		RepairActors: aot-hpad-gdi, aot-cruiser
 	AotReturnWhenEmpty:
 	GrantConditionOnPrerequisite@orcaupgrade:
 		Condition: aot-orca-upgraded
@@ -285,6 +343,8 @@ ORCA:
 HELI:
 	-Buildable:
 	-WithMuzzleOverlay:
+	Repairable:
+		RepairActors: aot-hpad-nod
 	RenderSprites:
 		Image: aot-hind
 	Aircraft:
@@ -352,4 +412,54 @@ HELI:
 HELI:
 	SpawnActorOnDeath:
 		Actor: aot-harpy-husk
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Hovercraft Cargo: Fahrzeuge als Passagiere ===
+# Leichte Fahrzeuge können in den Hovercraft Transport (aot-transport-hover) geladen werden.
+# CargoType: GroundVehicle, Weight: 5 füllt MaxWeight: 5 komplett (= 1 Fahrzeug statt 5 Inf).
+JEEP:
+	Passenger:
+		CargoType: GroundVehicle
+		Weight: 5
+		CustomPipType: green
+BGGY:
+	Passenger:
+		CargoType: GroundVehicle
+		Weight: 5
+		CustomPipType: green
+BIKE:
+	Passenger:
+		CargoType: GroundVehicle
+		Weight: 5
+		CustomPipType: green
+MSAM:
+	Passenger:
+		CargoType: GroundVehicle
+		Weight: 5
+		CustomPipType: green
+TRUCK:
+	Passenger:
+		CargoType: GroundVehicle
+		Weight: 5
+		CustomPipType: green
+LTNK:
+	Passenger:
+		CargoType: GroundVehicle
+		Weight: 5
+		CustomPipType: green
+TTNK:
+	Passenger:
+		CargoType: GroundVehicle
+		Weight: 5
+		CustomPipType: green
+MTNK:
+	Passenger:
+		CargoType: GroundVehicle
+		Weight: 5
+		CustomPipType: green
+HTNK:
+	Passenger:
+		CargoType: GroundVehicle
+		Weight: 5
+		CustomPipType: green
 # === Ende aotmod ===
