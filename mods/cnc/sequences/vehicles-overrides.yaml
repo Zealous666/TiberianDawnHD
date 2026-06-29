@@ -165,6 +165,12 @@ apc:
 		RemasteredFilename: aot-apc2-water.zip
 		Facings: 32
 		UseClassicFacings: True
+		Scale: 0.504
+	aot-amphibious-water-remap:
+		RemasteredFilename: aot-apc2-water-remap.png
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 0.504
 	aot-amphibious-icon:
 		RemasteredFilename: jeep_4_apc2.png
 		Length: 1
