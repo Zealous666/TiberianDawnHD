@@ -384,6 +384,51 @@ truck.destroyed:
 	idle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\TRUK.ZIP
 
+msam:
+	aot-hvr-idle:
+		RemasteredFilename: aot-hvr-test.zip
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 0.9
+	aot-hvr-remap:
+		RemasteredFilename: aot-hvr-test-remap.png
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 0.9
+	aot-hvr-turret:
+		RemasteredFilename: aot-hvrtur-test.zip
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 0.9
+	aot-hvr-mlrs-icon:
+		Filename: msam_hover.png
+		RemasteredFilename:
+		Length: 1
+	aot-hvr-aa-icon:
+		Filename: msam_aa.png
+		RemasteredFilename:
+		Length: 1
+	aot-apc-turret:
+		Filename: apctur.shp
+		RemasteredFilename: apctur.png
+		Facings: 32
+	aot-apc-turret-air:
+		Filename: apctur.shp
+		RemasteredFilename: apctur.png
+		Start: 32
+		Facings: 32
+	aot-apc-muzzle:
+		Filename: minigun.shp
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\COMMON\VFX\MINIGUN.ZIP
+		Length: 6
+		Facings: 8
+	aot-apc-muzzle-air:
+		Filename: apcmuz.shp
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\COMMON\VFX\MINIGUN.ZIP
+		Length: 3
+		Stride: 6
+		Facings: 8
+
 aot-gatick:
 	Defaults:
 		RemasteredFilename: aot-gatick-body.zip
