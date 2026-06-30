@@ -417,15 +417,53 @@ function buildProvidesMap() {
   return m;
 }
 
-// For actor A, return all actor IDs that A directly depends on (hard prereqs → provides_map)
-function getParentIds(actor, providesMap) {
+// Build a map: condition → [actorId] for non-upgrade actors that DISAPPEAR when condition is met (~!condition)
+// Used to find "base forms" that transform into upgraded variants
+function buildNegProvidesMap() {
+  const m = {};
+  for (const a of DATA.actors) {
+    if (a.category === 'upgrades') continue;
+    for (const vp of (a.visibilityPrereqs || [])) {
+      if (vp.startsWith('~!')) {
+        const cond = vp.slice(2);
+        if (!m[cond]) m[cond] = [];
+        m[cond].push(a.id);
+      }
+    }
+  }
+  return m;
+}
+
+// For actor A, return all actor IDs that A directly depends on:
+//   Type 1 — hard prereqs (must be built first)
+//   Type 2 — positive vis-prereqs (~aot-X → the upgrade/building that unlocks X)
+//   Type 3 — base-form connection: actor has ~aot-X, find non-upgrade actors with ~!aot-X (they transform INTO this actor)
+function getParentIds(actor, providesMap, negProvidesMap) {
   const parents = new Set();
+
+  // Type 1: hard prereqs
   for (const req of actor.prereqs) {
-    const providers = providesMap[req] || [];
-    for (const pid of providers) {
+    for (const pid of (providesMap[req] || [])) {
       if (pid !== actor.id) parents.add(pid);
     }
   }
+
+  // Type 2 + 3: visibility prereqs — only for upgrade/progression conditions, not generic queue gates
+  for (const vp of (actor.visibilityPrereqs || [])) {
+    if (vp.startsWith('~') && !vp.startsWith('~!')) {
+      const cond = vp.slice(1);
+      if (!cond.endsWith('-upgrade') && !cond.endsWith('-purchased')) continue;
+      // Type 2: the upgrade card that provides this condition
+      for (const pid of (providesMap[cond] || [])) {
+        if (pid !== actor.id) parents.add(pid);
+      }
+      // Type 3: non-upgrade base units that disappear when this condition is met
+      for (const pid of (negProvidesMap[cond] || [])) {
+        if (pid !== actor.id) parents.add(pid);
+      }
+    }
+  }
+
   return [...parents];
 }
 
@@ -497,87 +535,90 @@ function render() {
 
 function clearLines() {
   const svg = document.getElementById('treeSvg');
-  if (svg) svg.remove();
+  if (svg) while (svg.firstChild) svg.removeChild(svg.firstChild);
 }
 
 function drawConnections(svg) {
   const providesMap = buildProvidesMap();
+  const negProvidesMap = buildNegProvidesMap();
   const wrap = document.getElementById('treeWrap');
   const wrapRect = wrap.getBoundingClientRect();
-  const mainEl = wrap.closest('.main');
-  const scrollTop = mainEl.scrollTop;
-  const scrollLeft = mainEl.scrollLeft;
 
   const visibleActors = DATA.actors.filter(a => a.category === category);
 
-  // Find the card element strictly within a faction column (gdi or nod)
-  function findCardInFaction(actorId, fac) {
-    for (const col of wrap.querySelectorAll(`.faction-col.${fac}`)) {
-      const el = col.querySelector(`.card[data-id="${actorId}"]`);
-      if (el && !el.classList.contains('hidden')) return el;
-    }
-    return null;
+  // Find a card anywhere in the current view (not faction-restricted)
+  function findCard(actorId) {
+    const el = wrap.querySelector(`.card[data-id="${actorId}"]`);
+    return (el && !el.classList.contains('hidden') && !el.classList.contains('disabled')) ? el : null;
   }
 
-  function toWrap(el) {
+  // Both card and wrap scroll together inside .main, so their difference
+  // is already scroll-correct — no scroll offset needed.
+  function toPos(el) {
     const r = el.getBoundingClientRect();
-    return {
-      x: r.left - wrapRect.left + scrollLeft,
-      y: r.top  - wrapRect.top  + scrollTop,
-      w: r.width, h: r.height
-    };
+    return { x: r.left - wrapRect.left, y: r.top - wrapRect.top, w: r.width, h: r.height };
   }
 
-  function drawArrow(x1, y1, x2, y2, stroke, fill) {
+  function drawArrow(x1, y1, x2, y2, color) {
     const dy = y2 - y1;
-    const cp = Math.max(30, dy * 0.45);
+    const cp = Math.max(40, Math.abs(dy) * 0.5);
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('d', `M${x1},${y1} C${x1},${y1+cp} ${x2},${y2-cp} ${x2},${y2}`);
     path.setAttribute('fill', 'none');
-    path.setAttribute('stroke', stroke);
+    path.setAttribute('stroke', color);
     path.setAttribute('stroke-width', '1.5');
     svg.appendChild(path);
     const tip = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
     tip.setAttribute('points', `${x2-4},${y2-7} ${x2+4},${y2-7} ${x2},${y2}`);
-    tip.setAttribute('fill', fill);
+    tip.setAttribute('fill', color);
     svg.appendChild(tip);
   }
 
-  // Draw per faction so lines stay strictly within their column
-  for (const fac of ['gdi', 'nod']) {
-    const stroke = fac === 'gdi' ? 'rgba(91,141,239,0.4)' : 'rgba(224,85,85,0.4)';
-    const fill   = fac === 'gdi' ? 'rgba(91,141,239,0.6)' : 'rgba(224,85,85,0.6)';
+  // Precompute parent→children map for this category
+  const childrenMap = {};
+  for (const actor of visibleActors) {
+    for (const pid of getParentIds(actor, providesMap, negProvidesMap)) {
+      if (!childrenMap[pid]) childrenMap[pid] = [];
+      childrenMap[pid].push(actor.id);
+    }
+  }
 
-    for (const actor of visibleActors) {
-      // Skip actors not shown in this faction column
-      if (fac === 'gdi' && actor.faction === 'nod') continue;
-      if (fac === 'nod' && actor.faction === 'gdi') continue;
+  const drawn = new Set(); // deduplicate lines
 
-      // Only draw lines if this actor or a parent has lines enabled
-      if (!globalLinesOn && !lineEnabled.has(actor.id)) continue;
+  for (const actor of visibleActors) {
+    if (!globalLinesOn && !lineEnabled.has(actor.id)) continue;
 
-      const childEl = findCardInFaction(actor.id, fac);
+    const actorEl = findCard(actor.id);
+    if (!actorEl) continue;
+    const ar = toPos(actorEl);
+
+    const color = actor.faction === 'nod' ? 'rgba(224,85,85,0.55)' : 'rgba(91,141,239,0.55)';
+
+    // Draw lines to parents (things this actor requires/depends on)
+    for (const pid of getParentIds(actor, providesMap, negProvidesMap)) {
+      const pa = DATA.actors.find(x => x.id === pid);
+      if (!pa || pa.category !== category) continue;
+      const parentEl = findCard(pid);
+      if (!parentEl) continue;
+      const key = pid + '→' + actor.id;
+      if (drawn.has(key)) continue;
+      drawn.add(key);
+      const pr = toPos(parentEl);
+      drawArrow(pr.x + pr.w/2, pr.y + pr.h, ar.x + ar.w/2, ar.y, color);
+    }
+
+    // Draw lines to children (things that depend on this actor)
+    for (const cid of (childrenMap[actor.id] || [])) {
+      const child = DATA.actors.find(x => x.id === cid);
+      if (!child || child.category !== category) continue;
+      const childEl = findCard(cid);
       if (!childEl) continue;
-
-      for (const pid of getParentIds(actor, providesMap)) {
-        const pa = DATA.actors.find(x => x.id === pid);
-        if (!pa || pa.category !== category) continue;
-        if (pa.tier >= actor.tier) continue;
-        // Parent must also appear in this faction column
-        if (fac === 'gdi' && pa.faction === 'nod') continue;
-        if (fac === 'nod' && pa.faction === 'gdi') continue;
-
-        const parentEl = findCardInFaction(pid, fac);
-        if (!parentEl) continue;
-
-        const pr = toWrap(parentEl);
-        const cr = toWrap(childEl);
-        drawArrow(
-          pr.x + pr.w / 2, pr.y + pr.h,
-          cr.x + cr.w / 2, cr.y,
-          stroke, fill
-        );
-      }
+      const key = actor.id + '→' + cid;
+      if (drawn.has(key)) continue;
+      drawn.add(key);
+      const cr = toPos(childEl);
+      const childColor = child.faction === 'nod' ? 'rgba(224,85,85,0.55)' : 'rgba(91,141,239,0.55)';
+      drawArrow(ar.x + ar.w/2, ar.y + ar.h, cr.x + cr.w/2, cr.y, childColor);
     }
   }
 }
@@ -1107,6 +1148,30 @@ function setCategory(cat) {
 }
 
 init();
+
+// Redraw connection lines on scroll so they stay aligned with cards
+(function() {
+  let scrollRaf = null;
+  function onScroll() {
+    if (scrollRaf) return;
+    scrollRaf = requestAnimationFrame(() => {
+      scrollRaf = null;
+      if (!globalLinesOn && lineEnabled.size === 0) return;
+      const svg = document.getElementById('treeSvg');
+      if (!svg) return;
+      clearLines();
+      drawConnections(svg);
+    });
+  }
+  // Attach after DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    const main = document.querySelector('.main');
+    if (main) main.addEventListener('scroll', onScroll, { passive: true });
+  });
+  // Also attach immediately in case DOMContentLoaded already fired
+  const main = document.querySelector('.main');
+  if (main) main.addEventListener('scroll', onScroll, { passive: true });
+})();
 </script>
 </body>
 </html>
