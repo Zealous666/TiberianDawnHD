@@ -160,6 +160,14 @@ jeep:
 		Start: 32
 		Facings: 32
 		UseClassicFacings: True
+
+aot-apc2:
+	idle:
+		RemasteredFilename: aot-apc2.zip
+		RemapFilename: aot-apc2-remap.png
+		Facings: 32
+		Length: 1
+		Scale: 0.35
 # === Ende aotmod ===
 
 # === Construction Yard (FACT): RA sprites für Age 0 ===
@@ -211,19 +219,7 @@ mcv:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\MCV.ZIP
 		Facings: 32
 		UseClassicFacings: True
-	# Testrender (VXL→PNG Sprite-Baker): TS-MCV-Voxel als gebackene Sprites, ab Age 2.
-	aot-age2-idle:
-		RemasteredFilename: aot-mcv-test.zip
-		Facings: 32
-		UseClassicFacings: True
-	# Player-Color-Overlay (indizierte Sheet, Indizes 176-191 → player-Palette).
-	# MUSS RemasteredFilename sein (nicht Filename): sonst skaliert GetScale() um den
-	# classicUpscaleFactor hoch → Overlay viel größer als der Body.
-	aot-age2-remap:
-		RemasteredFilename: aot-mcv-test-remap.png
-		RemasteredPremultiplied: False
-		Facings: 32
-		UseClassicFacings: True
+	# aot-age2-idle + aot-age2-remap: in vehicles-overrides.yaml unter mcv: (TDHDSpriteSequence erhält mode-P)
 # === Ende aotmod ===
 
 # === Ore Mine (aot-ore-mine): RA OREMINE Terrain-Tile als Gebäude-Sprite ===
@@ -700,30 +696,48 @@ hand:
 	aot-ra-icon:
 		Filename: hand_base.png
 		RemasteredFilename:
+		Offset: 0,0
 		Length: 1
 	aot-td-icon:
 		Filename: hand_ages.png
 		RemasteredFilename:
+		Offset: 0,0
 		Length: 1
 	aot-ra-idle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\BARR.ZIP
 		RemasteredLength: 1
+		RemasteredScale: 0.9
 	damaged-aot-ra-idle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\BARR.ZIP
 		RemasteredStart: 10
 		RemasteredLength: 1
+		RemasteredScale: 0.9
 	aot-ra-make:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\BARRMAKE.ZIP
 		RemasteredLength: 13
+		RemasteredScale: 0.9
 	damaged-aot-ra-make:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\BARRMAKE.ZIP
 		RemasteredLength: 13
+		RemasteredScale: 0.9
 	aot-ra-build:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\BARRMAKE.ZIP
 		RemasteredLength: 13
+		RemasteredScale: 0.9
 	damaged-aot-ra-build:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\BARRMAKE.ZIP
 		RemasteredLength: 13
+		RemasteredScale: 0.9
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\HAND.ZIP
+		RemasteredScale: 0.9
+	damaged-idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\HAND.ZIP
+		RemasteredStart: 1
+		RemasteredScale: 0.9
+	make:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\HANDMAKE.ZIP
+		RemasteredScale: 0.9
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - FIX: RA Repair Facility Sprites für Age 0 ===
@@ -774,22 +788,28 @@ pyle:
 	aot-ra-idle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\TENT.ZIP
 		RemasteredLength: 1
+		RemasteredScale: 0.9
 	damaged-aot-ra-idle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\TENT.ZIP
 		RemasteredStart: 10
 		RemasteredLength: 1
+		RemasteredScale: 0.9
 	aot-ra-make:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\TENTMAKE.ZIP
 		RemasteredLength: 13
+		RemasteredScale: 0.9
 	damaged-aot-ra-make:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\TENTMAKE.ZIP
 		RemasteredLength: 13
+		RemasteredScale: 0.9
 	aot-ra-build:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\TENTMAKE.ZIP
 		RemasteredLength: 13
+		RemasteredScale: 0.9
 	damaged-aot-ra-build:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\TENTMAKE.ZIP
 		RemasteredLength: 13
+		RemasteredScale: 0.9
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - NUKE Power Plant: RA POWR vor Age 1, TD danach ===
@@ -1135,7 +1155,12 @@ aot-gunboat:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\MGUN.ZIP
 		Facings: 32
 		UseClassicFacings: True
-		Scale: 2.0
+		Scale: 1.8
+	idle-frigate:
+		RemasteredFilename: aot-gunboat-frigate.zip
+		Facings: 8
+		Start: 0
+		Length: 1
 	idle-dd:
 		RemasteredFilename: aot-gunboat-dd.zip
 		Facings: 16
@@ -1146,8 +1171,192 @@ aot-gunboat:
 	icon:
 		Filename: gun_base.png
 		Length: 1
+	icon-frigate:
+		Filename: gun_frigate.png
+		Length: 1
 	icon-dd:
 		Filename: gun_destroyer.png
+		Length: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Transport Vessel (aot-transport) ===
+# Sprites: RA Remastered LST.ZIP (5 Frames: idle + Türanimation, keine Rotation).
+# Facings: 1 — Schiff dreht sich nicht (wie klassischer RA-LST, 3D-Rotation im Remastered).
+# Frames: 0=geschlossen, 1-4=Türöffnung, 4=offen/entladen.
+aot-transport:
+	idle:
+		RemasteredFilename: aot-transport.zip
+		Facings: 1
+		Length: 1
+	open:
+		RemasteredFilename: aot-transport.zip
+		Facings: 1
+		Start: 1
+		Length: 4
+		Tick: 3
+	close:
+		RemasteredFilename: aot-transport.zip
+		Facings: 1
+		Frames: 4, 3, 2, 1
+		Length: 4
+		Tick: 3
+	unload:
+		RemasteredFilename: aot-transport.zip
+		Facings: 1
+		Start: 4
+		Length: 1
+	turret:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\MGUN.ZIP
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 1.8
+	icon:
+		Filename: aot-transport-icon.png
+		Length: 1
+		Facings: 1
+	icon-gun:
+		Filename: vesl_gun.png
+		Length: 1
+		Facings: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Vessel Gun Upgrade (aot-upgrade-transport-gun) ===
+aot-upgrade-transport-gun:
+	icon:
+		Filename: vesl_gun.png
+		Length: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Hovercraft Transport (aot-transport-hover) ===
+# Sprite: TD Remastered LST.ZIP (TIBERIAN_DAWN\UNITS\), Fallback: lst.shp.
+# 1 Frame, Facings: 1, keine Türanimation (alle Sequences = Frame 0).
+aot-transport-hover:
+	idle:
+		RemasteredFilename: aot-transport-hover.zip
+		Facings: 8
+		Start: 0
+		Length: 1
+		Scale: 0.9
+	open:
+		RemasteredFilename: aot-transport-hover.zip
+		Facings: 8
+		Start: 0
+		Length: 1
+		Scale: 0.9
+	close:
+		RemasteredFilename: aot-transport-hover.zip
+		Facings: 8
+		Start: 0
+		Length: 1
+		Scale: 0.9
+	unload:
+		RemasteredFilename: aot-transport-hover.zip
+		Facings: 8
+		Start: 0
+		Length: 1
+		Scale: 0.9
+	icon:
+		Filename: vesl_hover.png
+		Length: 1
+		Facings: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Hovercraft Upgrade (aot-upgrade-transport-hover) ===
+aot-upgrade-transport-hover:
+	icon:
+		Filename: vesl_hover.png
+		Length: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - NOD Submarine (aot-sub) ===
+# Sprite: RA SS.ZIP aus TEXTURES_RA_SRGB.MEG → flach umgepackt zu aot-sub.zip.
+# 16 Facings (ss-0000 bis ss-0015), Subframe 0 = idle. Originale: asset wip/sub/ra/.
+# Icon: sub_base.png (User liefert — Platzhalter: gun_base.png).
+aot-sub:
+	idle:
+		RemasteredFilename: aot-sub.zip
+		Facings: 16
+	icon:
+		Filename: sub_base.png
+		Length: 1
+	cargo-icon:
+		Filename: sub_cargo.png
+		Length: 1
+
+aot-msub:
+	idle:
+		RemasteredFilename: aot-msub.zip
+		Facings: 16
+	icon:
+		Filename: sub_missile.png
+		Length: 1
+	mine-icon:
+		Filename: sub_mine.png
+		Length: 1
+	drone-icon:
+		Filename: sub_drone.png
+		Length: 1
+
+# See-Mine: RA VFX MINE.ZIP (4 Frames, 128×128 TGA, aus TEXTURES_RA_SRGB.MEG/VFX)
+aot-seamine:
+	idle:
+		RemasteredFilename: MINE.ZIP
+		Facings: 1
+		Length: 1
+		Scale: 0.75
+
+# Mine Layer Upgrade Icon
+aot-upgrade-sub-cargo:
+	icon:
+		Filename: sub_cargo.png
+		Length: 1
+
+aot-upgrade-msub-mine:
+	icon:
+		Filename: sub_mine.png
+		Length: 1
+
+# Drone Attack Upgrade Icon
+aot-upgrade-msub-drone:
+	icon:
+		Filename: sub_drone.png
+		Length: 1
+
+# Hunter Seeker Drohne (gghunt.shp aus TS vehicles.mix).
+# Facings: 1 = omnidirektional (dreht sich nicht), 8 Animationsframes.
+# ShadowStart: 8 → frames 8-15 sind Schatten-Overlay.
+gghunt:
+	idle:
+		Filename: gghunt.shp
+		Facings: 1
+		Length: 8
+		ShadowStart: 8
+		Palette: aot-unittem
+		Scale: 0.5
+
+# Torpedo-Projektil: NUR classic missile.shp — KEIN RemasteredFilename.
+# Palette: cloak im Weapon (semi-transparentes Schwarz A:140) → wirkt wie unter Wasser.
+# TGA-Sprites würden die Palette ignorieren und voll opak rendern.
+# Identisch mit RA-Original: torpedo-Sequence dort hat auch kein RemasteredFilename.
+torpedo:
+	idle:
+		Filename: missile.shp
+		Facings: 32
+		UseClassicFacings: True
+		ZOffset: -1023
+
+# Blasen-Schweif des Torpedos (RA-Original bubbles.shp, aus RA-Mod extrahiert).
+bubbles:
+	idle:
+		Filename: bubbles.shp
+		Length: *
+		Tick: 220
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Frigate Upgrade ===
+aot-upgrade-gunboat-frigate:
+	icon:
+		Filename: gun_frigate.png
 		Length: 1
 # === Ende aotmod ===
 
@@ -1155,5 +1364,109 @@ aot-gunboat:
 aot-upgrade-gunboat-destroyer:
 	icon:
 		Filename: gun_destroyer.png
+		Length: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - GDI Battle Cruiser (aot-cruiser) ===
+# Sprites: RA CA.ZIP → flach umgepackt zu aot-cruiser-hull.zip (16 Facings, Subframe 0).
+# Turm: TURR.ZIP (32 Facings, direkt aus TEXTURES_RA_SRGB.MEG, UseClassicFacings).
+# Muzzle-Flash: GUNFIRE.ZIP (10 TGA-Frames, RA VFX). Icon: crus_base.png.
+aot-cruiser:
+	idle:
+		RemasteredFilename: aot-cruiser-hull.zip
+		Facings: 16
+	turret:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\TURR.ZIP
+		Facings: 32
+		UseClassicFacings: True
+	turret-railgun:
+		RemasteredFilename: aot-cruiser-turret.zip
+		Facings: 32
+		UseClassicFacings: True
+	carr-pad:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\CARR.ZIP
+		Facings: 1
+		Length: 1
+		Scale: 0.75
+	carr-pad-inactive:
+		RemasteredFilename: carr-inactive.zip
+		Facings: 1
+		Length: 1
+		Scale: 0.75
+	muzzle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\VFX\GUNFIRE.ZIP
+		Length: 10
+	icon:
+		Filename: crus_base.png
+		Length: 1
+	railgun-icon:
+		Filename: crus_railgun.png
+		Length: 1
+	carrier-icon:
+		Filename: crus_carrier.png
+		Length: 1
+
+aot-cruiser-railgun:
+	Inherits: aot-cruiser
+	turret:
+		RemasteredFilename: aot-cruiser-turret.zip
+		Facings: 32
+		UseClassicFacings: True
+
+aot-upgrade-cruiser-railgun:
+	icon:
+		Filename: crus_railgun.png
+		Length: 1
+
+aot-upgrade-cruiser-carrier:
+	icon:
+		Filename: crus_carrier.png
+		Length: 1
+
+# === Age of Tiberium (aotmod) - HVR Hover MLRS / Hover AA ===
+aot-hvr:
+	icon:
+		Filename: msam_base.png
+		RemasteredFilename:
+		Length: 1
+	aot-hvr-mlrs-icon:
+		Filename: msam_hover.png
+		RemasteredFilename:
+		Length: 1
+	aot-hvr-aa-icon:
+		Filename: msam_aa.png
+		RemasteredFilename:
+		Length: 1
+	aot-apc-turret:
+		Filename: apctur.shp
+		RemasteredFilename: apctur.png
+		Facings: 32
+	aot-apc-turret-air:
+		Filename: apctur.shp
+		RemasteredFilename: apctur.png
+		Start: 32
+		Facings: 32
+	aot-apc-muzzle:
+		Filename: minigun.shp
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\COMMON\VFX\MINIGUN.ZIP
+		Length: 6
+		Facings: 8
+	aot-apc-muzzle-air:
+		Filename: apcmuz.shp
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\COMMON\VFX\MINIGUN.ZIP
+		Length: 3
+		Stride: 6
+		Facings: 8
+
+aot-upgrade-hover-mlrs:
+	icon:
+		Filename: msam_hover.png
+		RemasteredFilename:
+		Length: 1
+
+aot-upgrade-hover-aa:
+	icon:
+		Filename: msam_aa.png
+		RemasteredFilename:
 		Length: 1
 # === Ende aotmod ===

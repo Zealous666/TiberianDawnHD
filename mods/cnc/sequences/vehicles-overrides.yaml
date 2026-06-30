@@ -3,6 +3,14 @@ mcv:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\MCV.ZIP
 	icon:
 		RemasteredFilename:
+	aot-age2-idle:
+		RemasteredFilename: aot-mcv-test.zip
+		Facings: 32
+		UseClassicFacings: True
+	aot-age2-remap:
+		RemasteredFilename: aot-mcv-test-remap.png
+		Facings: 32
+		UseClassicFacings: True
 
 mcv.destroyed:
 	Defaults:

@@ -28,6 +28,8 @@ MCV:
 	WithFacingSpriteBody@age2remap:
 		Sequence: aot-age2-remap
 		Name: body-age2-remap
+		Palette: aot-vxl-player
+		IsPlayerPalette: true
 		RequiresCondition: aot-age2-active
 	-Buildable:
 # === Ende aotmod ===
@@ -2023,7 +2025,7 @@ aot-cruiser-carrier-proxy:
 aot-msam-hover-mlrs:
 	Inherits: MSAM
 	RenderSprites:
-		Image: aot-hvr
+		Image: msam
 	Mobile:
 		Locomotor: aot-hvr
 	-GrantConditionOnPrerequisite@HOVER_MLRS:
@@ -2032,7 +2034,13 @@ aot-msam-hover-mlrs:
 	-AotTransformsOnTerrain@HOVER_AA:
 	-WithFacingSpriteBody:
 	WithFacingSpriteBody@body:
-		Sequence: idle
+		Sequence: aot-hvr-idle
+		Name: body-hvr
+	WithFacingSpriteBody@body-remap:
+		Sequence: aot-hvr-remap
+		Name: body-hvr-remap
+		Palette: aot-vxl-player
+		IsPlayerPalette: true
 	Armament:
 		Weapon: aot-DestroyerRockets
 	-Armament@SECONDARY:
@@ -2044,7 +2052,7 @@ aot-msam-hover-mlrs:
 	AttackTurreted:
 	-WithSpriteTurret:
 	WithSpriteTurret@hvr:
-		Sequence: turret
+		Sequence: aot-hvr-turret
 	WithShadow:
 		Offset: 40, 80, 0
 		ZOffset: -129
@@ -2064,7 +2072,7 @@ aot-msam-hover-mlrs:
 aot-msam-hover-aa:
 	Inherits: MSAM
 	RenderSprites:
-		Image: aot-hvr
+		Image: msam
 	Mobile:
 		Locomotor: aot-hvr
 	-GrantConditionOnPrerequisite@HOVER_MLRS:
@@ -2073,24 +2081,35 @@ aot-msam-hover-aa:
 	-AotTransformsOnTerrain@HOVER_AA:
 	-WithFacingSpriteBody:
 	WithFacingSpriteBody@body:
-		Sequence: idle
+		Sequence: aot-hvr-idle
+		Name: body-hvr
+	WithFacingSpriteBody@body-remap:
+		Sequence: aot-hvr-remap
+		Name: body-hvr-remap
+		Palette: aot-vxl-player
+		IsPlayerPalette: true
 	-Armament:
 	-Armament@SECONDARY:
+	-AttackFrontal:
 	-WithTurretAimAnimation:
+	AttackTurreted:
+	Turreted:
+		TurnSpeed: 128
+		Offset: -256, 0, 64
 	Armament@PRIMARY:
-		Weapon: APCGun
-		Recoil: 48
-		RecoilRecovery: 18
-		LocalOffset: 255,100,189, 255,-100,189
+		Weapon: aot-HoverAAGun
+		Recoil: 24
+		RecoilRecovery: 8
+		LocalOffset: 255,100,64, 255,-100,64
 		MuzzleSequence: aot-apc-muzzle
 		PauseOnCondition: reload-air
 		ReloadingCondition: reload-ground
 	Armament@SECONDARY:
 		Name: secondary
-		Weapon: APCGun.AA
-		Recoil: 48
-		RecoilRecovery: 18
-		LocalOffset: 175,100,299, 175,-100,299
+		Weapon: aot-HoverAAGun.AA
+		Recoil: 24
+		RecoilRecovery: 8
+		LocalOffset: 175,100,64, 175,-100,64
 		MuzzleSequence: aot-apc-muzzle-air
 		PauseOnCondition: reload-ground
 		ReloadingCondition: reload-air
