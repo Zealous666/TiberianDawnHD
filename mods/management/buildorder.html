@@ -24,10 +24,24 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; min-height: 100vh; padding-top: 42px; }
-    .top-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; gap: 2px; padding: 6px 16px; background: rgba(15,17,23,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
+    .top-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; align-items: center; gap: 2px; padding: 6px 16px; background: rgba(15,17,23,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
     .top-nav a { padding: 5px 14px; border-radius: 5px; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; color: var(--text-dim); text-decoration: none; transition: color .15s, background .15s; }
     .top-nav a:hover { color: var(--text); background: var(--card-bg); }
     .top-nav a.active { color: var(--text); background: var(--card-bg); }
+    .top-nav-spacer { flex: 1; }
+    .top-nav-primary-btn {
+      background: #f5c518;
+      border: 1px solid #f5c518;
+      color: #1a1500;
+      font-weight: 700;
+      padding: 6px 16px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: filter .15s;
+    }
+    .top-nav-primary-btn:hover { filter: brightness(1.08); }
+    .top-nav-primary-btn:disabled { opacity: .4; cursor: not-allowed; filter: none; }
 
     header { padding: 22px 28px 14px; border-bottom: 1px solid var(--border); }
     header h1 { font-size: 17px; font-weight: 700; letter-spacing: 0.02em; }
@@ -224,6 +238,8 @@
   <a href="buildorder.html" class="active">Build Order</a>
   <a href="techtree.html">Techtree</a>
   <a href="tilesets.html">Tilesets</a>
+  <div class="top-nav-spacer"></div>
+  <button class="top-nav-primary-btn" onclick="generateOutput()">Generate Changes</button>
 </nav>
 
 <header>
@@ -232,7 +248,6 @@
 </header>
 
 <div class="toolbar">
-  <button class="btn primary" onclick="generateOutput()">Generate Changes</button>
   <button class="btn" onclick="expandAll()">Expand All</button>
   <button class="btn" onclick="collapseAll()">Collapse All</button>
   <button class="btn" onclick="resetAll()">Reset</button>

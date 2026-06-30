@@ -337,10 +337,24 @@
     flex-shrink: 0;
   }
   .link-status.linked .dot { background: #4caf6a; }
-  .top-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; gap: 2px; padding: 6px 16px; background: rgba(15,17,23,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
+  .top-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; align-items: center; gap: 2px; padding: 6px 16px; background: rgba(15,17,23,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
   .top-nav a { padding: 5px 14px; border-radius: 5px; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; color: var(--text-dim); text-decoration: none; transition: color .15s, background .15s; }
   .top-nav a:hover { color: var(--text); background: var(--card-bg); }
   .top-nav a.active { color: var(--text); background: var(--card-bg); }
+  .top-nav-spacer { flex: 1; }
+  .top-nav-primary-btn {
+    background: #f5c518;
+    border: 1px solid #f5c518;
+    color: #1a1500;
+    font-weight: 700;
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: filter .15s;
+  }
+  .top-nav-primary-btn:hover { filter: brightness(1.08); }
+  .top-nav-primary-btn:disabled { opacity: .4; cursor: not-allowed; filter: none; }
 </style>
 </head>
 <body style="padding-top:42px">
@@ -350,6 +364,8 @@
   <a href="buildorder.html">Build Order</a>
   <a href="techtree.html">Techtree</a>
   <a href="tilesets.html">Tilesets</a>
+  <div class="top-nav-spacer"></div>
+  <button onclick="manualSave()" id="saveBtn" class="top-nav-primary-btn">Jetzt speichern</button>
 </nav>
 
 <div class="browser-banner" id="browserBanner">
@@ -361,8 +377,7 @@
   <span>Kanban-Board · nur in Chrome/Edge mit automatischem Speichern nach KANBAN.md</span>
 </header>
 <div class="toolbar">
-  <button onclick="linkFile()" id="linkBtn" class="primary">Mit KANBAN.md verknüpfen…</button>
-  <button onclick="manualSave()" id="saveBtn">Jetzt speichern</button>
+  <button onclick="linkFile()" id="linkBtn">Mit KANBAN.md verknüpfen…</button>
   <button onclick="resetBoard()">Zurücksetzen auf Standardstruktur</button>
   <span class="link-status" id="linkStatus"><span class="dot"></span><span id="linkStatusText">wird geprüft…</span></span>
 </div>
