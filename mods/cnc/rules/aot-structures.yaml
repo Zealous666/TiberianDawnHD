@@ -958,7 +958,20 @@ aot-nod-radar-age0:
 		Image: aot-nod-radar
 	Buildable:
 		BuildPaletteOrder: 50
-		Prerequisites: vehicleproduction, ~techlevel.medium, ~!aot-age2
+		Prerequisites: vehicleproduction, ~techlevel.medium, ~!aot-age1
+		Queue: Building.Nod
+		Icon: icon
+		Description: Provides radar and cloaked unit detection for NOD.
+	Tooltip:
+		Name: actor-aot-nod-radar.name
+
+aot-nod-radar-age1:
+	Inherits: aot-nod-radar
+	RenderSprites:
+		Image: aot-nod-radar-age1
+	Buildable:
+		BuildPaletteOrder: 50
+		Prerequisites: vehicleproduction, ~techlevel.medium, ~aot-age1, ~!aot-age2
 		Queue: Building.Nod
 		Icon: icon
 		Description: Provides radar and cloaked unit detection for NOD.

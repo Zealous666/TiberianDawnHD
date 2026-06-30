@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-30T09:51:24.706158+00:00",
+  "generated": "2026-06-30T12:02:27.344919+00:00",
   "actors": [
     {
       "id": "AFLD",
@@ -17,6 +17,9 @@
       "visibilityPrereqs": [
         "~aot-age1"
       ],
+      "provides": [
+        "vehicleproduction"
+      ],
       "stats": {
         "cost": 2000,
         "hp": 110000,
@@ -26,6 +29,7 @@
       "customIcon": true,
       "iconFile": "afld_icon.png",
       "idleFile": null,
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -36,7 +40,7 @@
       "queue": "Building.GDI",
       "faction": "gdi",
       "category": "main-buildings",
-      "tier": 0,
+      "tier": 1,
       "bpo": 70,
       "prereqs": [
         "anyhq"
@@ -44,6 +48,7 @@
       "visibilityPrereqs": [
         "~aot-age1"
       ],
+      "provides": [],
       "stats": {
         "cost": 1500,
         "hp": 60000,
@@ -52,7 +57,8 @@
       "sprite": "ra",
       "customIcon": true,
       "iconFile": "aflt_blue.png",
-      "idleFile": null,
+      "idleFile": "aflt_blue.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -63,7 +69,7 @@
       "queue": "Aircraft.GDI.AFLT",
       "faction": "gdi",
       "category": "aircraft",
-      "tier": 0,
+      "tier": 1,
       "bpo": 20,
       "prereqs": [
         "aflt"
@@ -71,6 +77,7 @@
       "visibilityPrereqs": [
         "~aot-age1"
       ],
+      "provides": [],
       "stats": {
         "cost": 1200,
         "hp": 10000,
@@ -79,7 +86,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "ajet_icon.png",
-      "idleFile": null,
+      "idleFile": "ajet_icon.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -90,7 +98,7 @@
       "queue": "LightVehicle.GDI",
       "faction": "gdi",
       "category": "vehicles",
-      "tier": 0,
+      "tier": 1,
       "bpo": 4,
       "prereqs": [
         "lite"
@@ -100,6 +108,7 @@
         "~!aot-humvee-upgrade",
         "~!aot-amphibious-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 600,
         "hp": 19000,
@@ -109,60 +118,7 @@
       "customIcon": false,
       "iconFile": null,
       "idleFile": null,
-      "notBuildable": false,
-      "isProxy": false
-    },
-    {
-      "id": "ARTY",
-      "displayName": "Artillery",
-      "file": "engine/vehicles.yaml",
-      "queue": "Vehicle.Nod",
-      "faction": "nod",
-      "category": "vehicles",
-      "tier": 0,
-      "bpo": 60,
-      "prereqs": [
-        "anyhq"
-      ],
-      "visibilityPrereqs": [
-        "~techlevel.medium"
-      ],
-      "stats": {
-        "cost": 600,
-        "hp": 7500,
-        "power": 0
-      },
-      "sprite": "td",
-      "customIcon": false,
-      "iconFile": null,
-      "idleFile": null,
-      "notBuildable": false,
-      "isProxy": false
-    },
-    {
-      "id": "ATWR",
-      "displayName": "Advanced Guard Tower",
-      "file": "engine/structures.yaml",
-      "queue": "Support.GDI",
-      "faction": "gdi",
-      "category": "defense",
-      "tier": 0,
-      "bpo": 60,
-      "prereqs": [
-        "anyhq"
-      ],
-      "visibilityPrereqs": [
-        "~techlevel.medium"
-      ],
-      "stats": {
-        "cost": 1000,
-        "hp": 55000,
-        "power": -50
-      },
-      "sprite": "td",
-      "customIcon": false,
-      "iconFile": null,
-      "idleFile": null,
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -179,6 +135,7 @@
         "afld"
       ],
       "visibilityPrereqs": [],
+      "provides": [],
       "stats": {
         "cost": 300,
         "hp": 12000,
@@ -188,6 +145,7 @@
       "customIcon": false,
       "iconFile": null,
       "idleFile": null,
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -204,6 +162,7 @@
         "afld"
       ],
       "visibilityPrereqs": [],
+      "provides": [],
       "stats": {
         "cost": 500,
         "hp": 11000,
@@ -213,239 +172,7 @@
       "customIcon": false,
       "iconFile": null,
       "idleFile": null,
-      "notBuildable": false,
-      "isProxy": false
-    },
-    {
-      "id": "BRIK",
-      "displayName": "Concrete Barrier",
-      "file": "engine/structures.yaml",
-      "queue": "Support.GDI, Support.Nod",
-      "faction": "both",
-      "category": "defense",
-      "tier": 0,
-      "bpo": 30,
-      "prereqs": [
-        "vehicleproduction"
-      ],
-      "visibilityPrereqs": [],
-      "stats": {
-        "cost": 150,
-        "hp": 20000,
-        "power": 0
-      },
-      "sprite": "td",
-      "customIcon": false,
-      "iconFile": null,
-      "idleFile": null,
-      "notBuildable": false,
-      "isProxy": false
-    },
-    {
-      "id": "CYCL",
-      "displayName": "Chain Link Barrier",
-      "file": "engine/structures.yaml",
-      "queue": "Support.Nod",
-      "faction": "nod",
-      "category": "defense",
-      "tier": 0,
-      "bpo": 20,
-      "prereqs": [
-        "fact"
-      ],
-      "visibilityPrereqs": [],
-      "stats": {
-        "cost": 25,
-        "hp": null,
-        "power": 0
-      },
-      "sprite": "td",
-      "customIcon": false,
-      "iconFile": null,
-      "idleFile": null,
-      "notBuildable": false,
-      "isProxy": false
-    },
-    {
-      "id": "E1",
-      "displayName": "Minigunner",
-      "file": "engine/infantry.yaml",
-      "queue": "Infantry.GDI, Infantry.Nod",
-      "faction": "both",
-      "category": "infantry",
-      "tier": 0,
-      "bpo": 10,
-      "prereqs": [
-        "barracks"
-      ],
-      "visibilityPrereqs": [],
-      "stats": {
-        "cost": 100,
-        "hp": 5000,
-        "power": 0
-      },
-      "sprite": "td",
-      "customIcon": false,
-      "iconFile": null,
-      "idleFile": null,
-      "notBuildable": false,
-      "isProxy": false
-    },
-    {
-      "id": "E2",
-      "displayName": "Grenadier",
-      "file": "engine/infantry.yaml",
-      "queue": "Infantry.GDI",
-      "faction": "gdi",
-      "category": "infantry",
-      "tier": 0,
-      "bpo": 40,
-      "prereqs": [
-        "anyhq"
-      ],
-      "visibilityPrereqs": [
-        "~techlevel.medium"
-      ],
-      "stats": {
-        "cost": 160,
-        "hp": 5000,
-        "power": 0
-      },
-      "sprite": "td",
-      "customIcon": false,
-      "iconFile": null,
-      "idleFile": null,
-      "notBuildable": false,
-      "isProxy": false
-    },
-    {
-      "id": "E3",
-      "displayName": "Rocket Soldier",
-      "file": "engine/infantry.yaml",
-      "queue": "Infantry.GDI, Infantry.Nod",
-      "faction": "both",
-      "category": "infantry",
-      "tier": 0,
-      "bpo": 20,
-      "prereqs": [
-        "barracks"
-      ],
-      "visibilityPrereqs": [],
-      "stats": {
-        "cost": 300,
-        "hp": 4500,
-        "power": 0
-      },
-      "sprite": "td",
-      "customIcon": false,
-      "iconFile": null,
-      "idleFile": null,
-      "notBuildable": false,
-      "isProxy": false
-    },
-    {
-      "id": "E4",
-      "displayName": "Flamethrower",
-      "file": "engine/infantry.yaml",
-      "queue": "Infantry.Nod",
-      "faction": "nod",
-      "category": "infantry",
-      "tier": 0,
-      "bpo": 40,
-      "prereqs": [
-        "anyhq"
-      ],
-      "visibilityPrereqs": [
-        "~techlevel.medium"
-      ],
-      "stats": {
-        "cost": 200,
-        "hp": 9000,
-        "power": 0
-      },
-      "sprite": "td",
-      "customIcon": false,
-      "iconFile": null,
-      "idleFile": null,
-      "notBuildable": false,
-      "isProxy": false
-    },
-    {
-      "id": "E5",
-      "displayName": "Chemical Warrior",
-      "file": "engine/infantry.yaml",
-      "queue": "Infantry.Nod",
-      "faction": "nod",
-      "category": "infantry",
-      "tier": 0,
-      "bpo": 50,
-      "prereqs": [
-        "tmpl"
-      ],
-      "visibilityPrereqs": [
-        "~techlevel.high"
-      ],
-      "stats": {
-        "cost": 300,
-        "hp": 9000,
-        "power": 0
-      },
-      "sprite": "td",
-      "customIcon": false,
-      "iconFile": null,
-      "idleFile": null,
-      "notBuildable": false,
-      "isProxy": false
-    },
-    {
-      "id": "E6",
-      "displayName": "Engineer",
-      "file": "engine/infantry.yaml",
-      "queue": "Infantry.GDI, Infantry.Nod",
-      "faction": "both",
-      "category": "infantry",
-      "tier": 0,
-      "bpo": 30,
-      "prereqs": [
-        "barracks"
-      ],
-      "visibilityPrereqs": [],
-      "stats": {
-        "cost": 500,
-        "hp": 3000,
-        "power": 0
-      },
-      "sprite": "td",
-      "customIcon": false,
-      "iconFile": null,
-      "idleFile": null,
-      "notBuildable": false,
-      "isProxy": false
-    },
-    {
-      "id": "EYE",
-      "displayName": "Advanced Communications Center",
-      "file": "overrides.yaml",
-      "queue": "Building.GDI",
-      "faction": "gdi",
-      "category": "main-buildings",
-      "tier": 0,
-      "bpo": 100,
-      "prereqs": [
-        "anyhq"
-      ],
-      "visibilityPrereqs": [
-        "~techlevel.high"
-      ],
-      "stats": {
-        "cost": 1800,
-        "hp": 130000,
-        "power": -200
-      },
-      "sprite": "td",
-      "customIcon": false,
-      "iconFile": null,
-      "idleFile": null,
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -462,6 +189,7 @@
       "visibilityPrereqs": [
         "~disabled"
       ],
+      "provides": [],
       "stats": {
         "cost": 3000,
         "hp": 210000,
@@ -471,33 +199,7 @@
       "customIcon": false,
       "iconFile": null,
       "idleFile": null,
-      "notBuildable": false,
-      "isProxy": false
-    },
-    {
-      "id": "FTNK",
-      "displayName": "Flame Tank",
-      "file": "aot-units.yaml",
-      "queue": "Vehicle.Nod",
-      "faction": "nod",
-      "category": "vehicles",
-      "tier": 0,
-      "bpo": 50,
-      "prereqs": [
-        "anyhq"
-      ],
-      "visibilityPrereqs": [
-        "~techlevel.medium"
-      ],
-      "stats": {
-        "cost": 600,
-        "hp": 27000,
-        "power": 0
-      },
-      "sprite": "td",
-      "customIcon": false,
-      "iconFile": null,
-      "idleFile": null,
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -514,6 +216,7 @@
         "barracks"
       ],
       "visibilityPrereqs": [],
+      "provides": [],
       "stats": {
         "cost": 600,
         "hp": 40000,
@@ -523,6 +226,7 @@
       "customIcon": false,
       "iconFile": null,
       "idleFile": null,
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -539,6 +243,7 @@
         "barracks"
       ],
       "visibilityPrereqs": [],
+      "provides": [],
       "stats": {
         "cost": 600,
         "hp": 41000,
@@ -548,6 +253,7 @@
       "customIcon": true,
       "iconFile": "gun_base.png",
       "idleFile": null,
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -568,6 +274,11 @@
         "~techlevel.medium",
         "~aot-hq-never"
       ],
+      "provides": [
+        "gdi-hq",
+        "anyhq",
+        "anyhq"
+      ],
       "stats": {
         "cost": 1000,
         "hp": 80000,
@@ -577,6 +288,7 @@
       "customIcon": true,
       "iconFile": "hq_base.png",
       "idleFile": null,
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -593,6 +305,10 @@
         "anypower"
       ],
       "visibilityPrereqs": [],
+      "provides": [
+        "vehicleproduction",
+        "lite"
+      ],
       "stats": {
         "cost": 500,
         "hp": 60000,
@@ -601,34 +317,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "lite_base.png",
-      "idleFile": "lite-body.png",
-      "notBuildable": false,
-      "isProxy": false
-    },
-    {
-      "id": "MLRS",
-      "displayName": "Mobile SAM",
-      "file": "engine/vehicles.yaml",
-      "queue": "Vehicle.Nod",
-      "faction": "nod",
-      "category": "vehicles",
-      "tier": 0,
-      "bpo": 70,
-      "prereqs": [
-        "anyhq"
-      ],
-      "visibilityPrereqs": [
-        "~techlevel.medium"
-      ],
-      "stats": {
-        "cost": 600,
-        "hp": 18000,
-        "power": 0
-      },
-      "sprite": "td",
-      "customIcon": false,
-      "iconFile": null,
-      "idleFile": null,
+      "idleFile": "lite-idle.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -652,6 +342,7 @@
         "~!aot-hover-mlrs-upgrade",
         "~!aot-hover-aa-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 900,
         "hp": 12000,
@@ -661,33 +352,7 @@
       "customIcon": true,
       "iconFile": "msam_base.png",
       "idleFile": null,
-      "notBuildable": false,
-      "isProxy": false
-    },
-    {
-      "id": "OBLI",
-      "displayName": "Obelisk of Light",
-      "file": "engine/structures.yaml",
-      "queue": "Support.Nod",
-      "faction": "nod",
-      "category": "defense",
-      "tier": 0,
-      "bpo": 60,
-      "prereqs": [
-        "tmpl"
-      ],
-      "visibilityPrereqs": [
-        "~techlevel.high"
-      ],
-      "stats": {
-        "cost": 1500,
-        "hp": 75000,
-        "power": -90
-      },
-      "sprite": "td",
-      "customIcon": false,
-      "iconFile": null,
-      "idleFile": null,
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -698,12 +363,13 @@
       "queue": "Building.GDI, Building.Nod",
       "faction": "both",
       "category": "main-buildings",
-      "tier": 0,
+      "tier": 1,
       "bpo": 80,
       "prereqs": [],
       "visibilityPrereqs": [
         "~aot-age1"
       ],
+      "provides": [],
       "stats": {
         "cost": 1500,
         "hp": 100000,
@@ -713,133 +379,7 @@
       "customIcon": true,
       "iconFile": "proc_base.png",
       "idleFile": null,
-      "notBuildable": false,
-      "isProxy": false
-    },
-    {
-      "id": "PVICE",
-      "displayName": "Pvice",
-      "file": "engine/infantry.yaml",
-      "queue": "Infantry.GDI, Infantry.Nod",
-      "faction": "both",
-      "category": "infantry",
-      "tier": 0,
-      "bpo": 50,
-      "prereqs": [],
-      "visibilityPrereqs": [
-        "~disabled"
-      ],
-      "stats": {
-        "cost": null,
-        "hp": null,
-        "power": 0
-      },
-      "sprite": "td",
-      "customIcon": false,
-      "iconFile": null,
-      "idleFile": null,
-      "notBuildable": true,
-      "isProxy": false
-    },
-    {
-      "id": "RMBO",
-      "displayName": "Commando",
-      "file": "engine/infantry.yaml",
-      "queue": "Infantry.GDI",
-      "faction": "gdi",
-      "category": "infantry",
-      "tier": 0,
-      "bpo": 50,
-      "prereqs": [
-        "eye"
-      ],
-      "visibilityPrereqs": [
-        "~techlevel.high"
-      ],
-      "stats": {
-        "cost": 1500,
-        "hp": 15000,
-        "power": 0
-      },
-      "sprite": "td",
-      "customIcon": false,
-      "iconFile": null,
-      "idleFile": null,
-      "notBuildable": false,
-      "isProxy": false
-    },
-    {
-      "id": "SAM",
-      "displayName": "SAM Site",
-      "file": "engine/structures.yaml",
-      "queue": "Support.Nod",
-      "faction": "nod",
-      "category": "defense",
-      "tier": 0,
-      "bpo": 50,
-      "prereqs": [
-        "hand"
-      ],
-      "visibilityPrereqs": [],
-      "stats": {
-        "cost": 650,
-        "hp": 40000,
-        "power": -20
-      },
-      "sprite": "td",
-      "customIcon": false,
-      "iconFile": null,
-      "idleFile": null,
-      "notBuildable": false,
-      "isProxy": false
-    },
-    {
-      "id": "SBAG",
-      "displayName": "Sandbag Barrier",
-      "file": "engine/structures.yaml",
-      "queue": "Support.GDI",
-      "faction": "gdi",
-      "category": "defense",
-      "tier": 0,
-      "bpo": 20,
-      "prereqs": [
-        "fact"
-      ],
-      "visibilityPrereqs": [],
-      "stats": {
-        "cost": 25,
-        "hp": null,
-        "power": 0
-      },
-      "sprite": "td",
-      "customIcon": false,
-      "iconFile": null,
-      "idleFile": null,
-      "notBuildable": false,
-      "isProxy": false
-    },
-    {
-      "id": "SILO",
-      "displayName": "Tiberium Silo",
-      "file": "engine/structures.yaml",
-      "queue": "Support.GDI, Support.Nod",
-      "faction": "both",
-      "category": "defense",
-      "tier": 0,
-      "bpo": 35,
-      "prereqs": [
-        "proc"
-      ],
-      "visibilityPrereqs": [],
-      "stats": {
-        "cost": 100,
-        "hp": 50000,
-        "power": -10
-      },
-      "sprite": "td",
-      "customIcon": false,
-      "iconFile": null,
-      "idleFile": null,
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -858,6 +398,7 @@
       "visibilityPrereqs": [
         "~techlevel.high"
       ],
+      "provides": [],
       "stats": {
         "cost": 900,
         "hp": 15000,
@@ -867,6 +408,7 @@
       "customIcon": false,
       "iconFile": null,
       "idleFile": null,
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -877,7 +419,7 @@
       "queue": "Building.Nod",
       "faction": "nod",
       "category": "main-buildings",
-      "tier": 0,
+      "tier": 1,
       "bpo": 110,
       "prereqs": [
         "anyhq"
@@ -885,6 +427,9 @@
       "visibilityPrereqs": [
         "~techlevel.high",
         "~aot-age1"
+      ],
+      "provides": [
+        "anyhq"
       ],
       "stats": {
         "cost": 2000,
@@ -895,31 +440,7 @@
       "customIcon": false,
       "iconFile": null,
       "idleFile": null,
-      "notBuildable": false,
-      "isProxy": false
-    },
-    {
-      "id": "TRUCK",
-      "displayName": "Supply Truck",
-      "file": "overrides.yaml",
-      "queue": "LightVehicle.GDI, LightVehicle.Nod",
-      "faction": "both",
-      "category": "vehicles",
-      "tier": 0,
-      "bpo": 2,
-      "prereqs": [
-        "lite"
-      ],
-      "visibilityPrereqs": [],
-      "stats": {
-        "cost": 1000,
-        "hp": 11000,
-        "power": 0
-      },
-      "sprite": "td",
-      "customIcon": true,
-      "iconFile": "truk_base.png",
-      "idleFile": null,
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -939,6 +460,10 @@
       "visibilityPrereqs": [
         "~aot-age1"
       ],
+      "provides": [
+        "aot-weap",
+        "vehicleproduction"
+      ],
       "stats": {
         "cost": 2000,
         "hp": 110000,
@@ -948,6 +473,7 @@
       "customIcon": true,
       "iconFile": "weap_base.png",
       "idleFile": null,
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -965,6 +491,9 @@
         "~atec",
         "~!aot-age1-purchased"
       ],
+      "provides": [
+        "aot-age1-purchased"
+      ],
       "stats": {
         "cost": 1000,
         "hp": null,
@@ -973,7 +502,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "aot-age1-icon.png",
-      "idleFile": null,
+      "idleFile": "aot-age1-icon.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -991,6 +521,9 @@
         "~stec",
         "~!aot-age1-purchased"
       ],
+      "provides": [
+        "aot-age1-purchased"
+      ],
       "stats": {
         "cost": 1000,
         "hp": null,
@@ -999,7 +532,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "aot-age1-icon.png",
-      "idleFile": null,
+      "idleFile": "aot-age1-icon.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -1022,6 +556,9 @@
         "~aot-age1-purchased",
         "~!aot-age2-purchased"
       ],
+      "provides": [
+        "aot-age2-purchased"
+      ],
       "stats": {
         "cost": 1000,
         "hp": null,
@@ -1030,7 +567,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "aot-age2-icon.png",
-      "idleFile": null,
+      "idleFile": "aot-age2-icon.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -1053,6 +591,9 @@
         "~aot-age1-purchased",
         "~!aot-age2-purchased"
       ],
+      "provides": [
+        "aot-age2-purchased"
+      ],
       "stats": {
         "cost": 1000,
         "hp": null,
@@ -1061,7 +602,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "aot-age2-icon.png",
-      "idleFile": null,
+      "idleFile": "aot-age2-icon.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -1082,6 +624,9 @@
         "~aot-age2-purchased",
         "~!aot-age3-purchased"
       ],
+      "provides": [
+        "aot-age3-purchased"
+      ],
       "stats": {
         "cost": 1000,
         "hp": null,
@@ -1090,7 +635,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "aot-age3-icon.png",
-      "idleFile": null,
+      "idleFile": "aot-age3-icon.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -1112,6 +658,9 @@
         "~aot-age2-purchased",
         "~!aot-age3-purchased"
       ],
+      "provides": [
+        "aot-age3-purchased"
+      ],
       "stats": {
         "cost": 1000,
         "hp": null,
@@ -1120,7 +669,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "aot-age3-icon.png",
-      "idleFile": null,
+      "idleFile": "aot-age3-icon.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -1139,16 +689,18 @@
       "visibilityPrereqs": [
         "~!aot-orca-upgrade"
       ],
+      "provides": [],
       "stats": {
-        "cost": null,
-        "hp": null,
+        "cost": 1200,
+        "hp": 10000,
         "power": 0
       },
       "sprite": "ra",
       "customIcon": true,
       "iconFile": "helo_base.png",
-      "idleFile": null,
-      "notBuildable": true,
+      "idleFile": "helo_base.png",
+      "idleLength": 1,
+      "notBuildable": false,
       "isProxy": true
     },
     {
@@ -1158,7 +710,7 @@
       "queue": "LightVehicle.GDI",
       "faction": "gdi",
       "category": "vehicles",
-      "tier": 0,
+      "tier": 2,
       "bpo": 4,
       "prereqs": [
         "lite"
@@ -1168,15 +720,17 @@
         "~aot-amphibious-upgrade",
         "~!aot-humvee-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 600,
         "hp": 19000,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": false,
       "iconFile": null,
       "idleFile": null,
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -1196,6 +750,7 @@
       "visibilityPrereqs": [
         "~!aot-age1"
       ],
+      "provides": [],
       "stats": {
         "cost": 1500,
         "hp": 60000,
@@ -1205,6 +760,7 @@
       "customIcon": true,
       "iconFile": "atec_base.png",
       "idleFile": "atec-idle.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -1215,7 +771,7 @@
       "queue": "Building.GDI",
       "faction": "gdi",
       "category": "main-buildings",
-      "tier": 0,
+      "tier": 1,
       "bpo": 100,
       "prereqs": [
         "anypower",
@@ -1225,6 +781,7 @@
       "visibilityPrereqs": [
         "~aot-age1"
       ],
+      "provides": [],
       "stats": {
         "cost": 1500,
         "hp": 60000,
@@ -1233,7 +790,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "atec_age_1.png",
-      "idleFile": "atec-idle.png",
+      "idleFile": "atec-td-idle.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -1256,15 +814,17 @@
         "~!aot-cruiser-railgun-upgrade",
         "~!aot-cruiser-carrier-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 2400,
         "hp": 80000,
         "power": 0
       },
-      "sprite": "ra",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "crus_base.png",
-      "idleFile": null,
+      "idleFile": "crus_base.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -1275,7 +835,7 @@
       "queue": "Naval.GDI",
       "faction": "gdi",
       "category": "navy",
-      "tier": 2,
+      "tier": 3,
       "bpo": 20,
       "prereqs": [
         "aot-age2",
@@ -1286,15 +846,17 @@
         "~aot-age2",
         "~aot-cruiser-carrier-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 2400,
         "hp": 80000,
         "power": 0
       },
-      "sprite": "ra",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "crus_carrier.png",
-      "idleFile": null,
+      "idleFile": "crus_carrier.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -1305,7 +867,7 @@
       "queue": "Naval.GDI",
       "faction": "gdi",
       "category": "navy",
-      "tier": 2,
+      "tier": 3,
       "bpo": 20,
       "prereqs": [
         "aot-age2",
@@ -1317,15 +879,17 @@
         "~aot-cruiser-railgun-upgrade",
         "~!aot-cruiser-carrier-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 2400,
         "hp": 80000,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": false,
       "iconFile": null,
       "idleFile": null,
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -1336,13 +900,14 @@
       "queue": "Infantry.Nod",
       "faction": "nod",
       "category": "infantry",
-      "tier": 0,
+      "tier": 2,
       "bpo": 70,
       "prereqs": [],
       "visibilityPrereqs": [
         "~hand",
         "~aot-age2"
       ],
+      "provides": [],
       "stats": {
         "cost": 300,
         "hp": 30000,
@@ -1351,7 +916,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "inf_cyborg.png",
-      "idleFile": null,
+      "idleFile": "inf_cyborg.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -1370,15 +936,19 @@
       "visibilityPrereqs": [
         "~!aot-age1"
       ],
+      "provides": [
+        "fix"
+      ],
       "stats": {
         "cost": 500,
         "hp": 80000,
         "power": -20
       },
-      "sprite": "ra",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "fix_base.png",
-      "idleFile": null,
+      "idleFile": "fix_base.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -1389,7 +959,7 @@
       "queue": "Building.GDI, Building.Nod",
       "faction": "both",
       "category": "main-buildings",
-      "tier": 0,
+      "tier": 1,
       "bpo": 40,
       "prereqs": [
         "vehicleproduction"
@@ -1397,15 +967,19 @@
       "visibilityPrereqs": [
         "~aot-age1"
       ],
+      "provides": [
+        "fix"
+      ],
       "stats": {
         "cost": 500,
         "hp": 80000,
         "power": -20
       },
-      "sprite": "ra",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "fix_ages.png",
-      "idleFile": null,
+      "idleFile": "fix_ages.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -1425,15 +999,17 @@
       "visibilityPrereqs": [
         "~!aot-gunboat-frigate-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 500,
         "hp": 30000,
         "power": 0
       },
-      "sprite": "ra",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "gun_base.png",
-      "idleFile": null,
+      "idleFile": "gun_base.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -1444,7 +1020,7 @@
       "queue": "Naval.GDI",
       "faction": "gdi",
       "category": "navy",
-      "tier": 0,
+      "tier": 2,
       "bpo": 10,
       "prereqs": [
         "lite",
@@ -1453,15 +1029,17 @@
       "visibilityPrereqs": [
         "~aot-gunboat-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 500,
         "hp": 30000,
         "power": 0
       },
-      "sprite": "ra",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "gun_destroyer.png",
-      "idleFile": null,
+      "idleFile": "gun_destroyer.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -1472,7 +1050,7 @@
       "queue": "Naval.GDI",
       "faction": "gdi",
       "category": "navy",
-      "tier": 0,
+      "tier": 1,
       "bpo": 10,
       "prereqs": [
         "lite",
@@ -1482,15 +1060,17 @@
         "~aot-gunboat-frigate-upgrade",
         "~!aot-gunboat-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 500,
         "hp": 30000,
         "power": 0
       },
-      "sprite": "ra",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "gun_frigate.png",
-      "idleFile": null,
+      "idleFile": "gun_frigate.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -1509,6 +1089,9 @@
       "visibilityPrereqs": [
         "~!aot-age1"
       ],
+      "provides": [
+        "hand"
+      ],
       "stats": {
         "cost": 500,
         "hp": 60000,
@@ -1517,7 +1100,8 @@
       "sprite": "ra",
       "customIcon": true,
       "iconFile": "hand_base.png",
-      "idleFile": null,
+      "idleFile": "hand_base.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -1528,13 +1112,16 @@
       "queue": "Building.Nod",
       "faction": "nod",
       "category": "main-buildings",
-      "tier": 0,
+      "tier": 1,
       "bpo": 20,
       "prereqs": [
         "anypower"
       ],
       "visibilityPrereqs": [
         "~aot-age1"
+      ],
+      "provides": [
+        "hand"
       ],
       "stats": {
         "cost": 500,
@@ -1544,7 +1131,8 @@
       "sprite": "ra",
       "customIcon": true,
       "iconFile": "hand_ages.png",
-      "idleFile": null,
+      "idleFile": "hand_ages.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -1555,7 +1143,7 @@
       "queue": "Aircraft.Nod",
       "faction": "nod",
       "category": "aircraft",
-      "tier": 0,
+      "tier": 2,
       "bpo": 20,
       "prereqs": [
         "anyhq"
@@ -1563,16 +1151,18 @@
       "visibilityPrereqs": [
         "~aot-harpy-upgrade"
       ],
+      "provides": [],
       "stats": {
-        "cost": null,
-        "hp": null,
+        "cost": 1200,
+        "hp": 12500,
         "power": 0
       },
-      "sprite": "ra",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "hind_hrpy.png",
-      "idleFile": null,
-      "notBuildable": true,
+      "idleFile": "hind_hrpy.png",
+      "idleLength": 1,
+      "notBuildable": false,
       "isProxy": true
     },
     {
@@ -1582,7 +1172,7 @@
       "queue": "Vehicle.GDI, Vehicle.Nod",
       "faction": "both",
       "category": "vehicles",
-      "tier": 0,
+      "tier": 1,
       "bpo": 2,
       "prereqs": [
         "proc"
@@ -1590,6 +1180,7 @@
       "visibilityPrereqs": [
         "~aot-age1"
       ],
+      "provides": [],
       "stats": {
         "cost": 1100,
         "hp": 62500,
@@ -1598,7 +1189,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "harv_base.png",
-      "idleFile": null,
+      "idleFile": "harv_base.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -1617,16 +1209,18 @@
       "visibilityPrereqs": [
         "~!aot-harpy-upgrade"
       ],
+      "provides": [],
       "stats": {
-        "cost": null,
-        "hp": null,
+        "cost": 1200,
+        "hp": 12500,
         "power": 0
       },
-      "sprite": "ra",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "hind_base.png",
-      "idleFile": null,
-      "notBuildable": true,
+      "idleFile": "hind_base.png",
+      "idleLength": 1,
+      "notBuildable": false,
       "isProxy": true
     },
     {
@@ -1642,6 +1236,9 @@
         "anyhq"
       ],
       "visibilityPrereqs": [],
+      "provides": [
+        "hpad"
+      ],
       "stats": {
         "cost": 1000,
         "hp": 60000,
@@ -1650,7 +1247,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "hpad_blue.png",
-      "idleFile": null,
+      "idleFile": "hpad_blue.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -1667,6 +1265,9 @@
         "anyhq"
       ],
       "visibilityPrereqs": [],
+      "provides": [
+        "hpad"
+      ],
       "stats": {
         "cost": 1000,
         "hp": 60000,
@@ -1675,7 +1276,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "hpad_red.png",
-      "idleFile": null,
+      "idleFile": "hpad_red.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -1695,6 +1297,7 @@
         "~techlevel.medium",
         "~!aot-ion-cannon-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 1000,
         "hp": 80000,
@@ -1703,7 +1306,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "hq_base.png",
-      "idleFile": null,
+      "idleFile": "hq_base.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -1714,7 +1318,7 @@
       "queue": "Building.GDI",
       "faction": "gdi",
       "category": "main-buildings",
-      "tier": 0,
+      "tier": 3,
       "bpo": 50,
       "prereqs": [
         "vehicleproduction"
@@ -1723,6 +1327,7 @@
         "~techlevel.medium",
         "~aot-ion-cannon-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 1000,
         "hp": 80000,
@@ -1731,7 +1336,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "hq_ion.png",
-      "idleFile": null,
+      "idleFile": "hq_ion.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -1755,15 +1361,17 @@
         "~!aot-htnk-rocket-upgrade",
         "~!aot-htnk-railgun-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 1800,
         "hp": 87000,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "htnk_base.png",
-      "idleFile": null,
+      "idleFile": "htnk_base.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -1774,7 +1382,7 @@
       "queue": "Vehicle.GDI",
       "faction": "gdi",
       "category": "vehicles",
-      "tier": 1,
+      "tier": 3,
       "bpo": 60,
       "prereqs": [
         "aot-age1"
@@ -1783,15 +1391,17 @@
         "~aot-age1",
         "~aot-htnk-railgun-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 1800,
         "hp": 87000,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "htnk_base.png",
-      "idleFile": null,
+      "idleFile": "htnk_base.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -1802,7 +1412,7 @@
       "queue": "Vehicle.GDI",
       "faction": "gdi",
       "category": "vehicles",
-      "tier": 1,
+      "tier": 2,
       "bpo": 60,
       "prereqs": [
         "aot-age1"
@@ -1812,15 +1422,17 @@
         "~aot-htnk-rocket-upgrade",
         "~!aot-htnk-railgun-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 1800,
         "hp": 87000,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "htnk_base.png",
-      "idleFile": null,
+      "idleFile": "htnk_base.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -1841,15 +1453,17 @@
         "~!aot-humvee-upgrade",
         "~!aot-apc-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 400,
         "hp": 16000,
         "power": 0
       },
-      "sprite": "ra",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "jeep_1_base.png",
-      "idleFile": null,
+      "idleFile": "jeep_1_base.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -1860,7 +1474,7 @@
       "queue": "LightVehicle.GDI",
       "faction": "gdi",
       "category": "vehicles",
-      "tier": 0,
+      "tier": 1,
       "bpo": 3,
       "prereqs": [
         "lite",
@@ -1870,15 +1484,17 @@
         "~aot-humvee-upgrade",
         "~!aot-apc-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 400,
         "hp": 16000,
         "power": 0
       },
-      "sprite": "ra",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "jeep_1_base.png",
-      "idleFile": null,
+      "idleFile": "jeep_1_base.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -1899,15 +1515,17 @@
         "~aot-age1",
         "~!aot-ltnk-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 750,
         "hp": 32000,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "ltnk_base.png",
-      "idleFile": null,
+      "idleFile": "ltnk_base.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -1918,7 +1536,7 @@
       "queue": "Vehicle.Nod",
       "faction": "nod",
       "category": "vehicles",
-      "tier": 1,
+      "tier": 3,
       "bpo": 40,
       "prereqs": [
         "aot-age1",
@@ -1928,15 +1546,17 @@
         "~aot-age1",
         "~aot-ltnk-upgrade2"
       ],
+      "provides": [],
       "stats": {
         "cost": 750,
         "hp": 32000,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "ltnk_1_base.png",
-      "idleFile": null,
+      "idleFile": "ltnk_1_base.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -1947,7 +1567,7 @@
       "queue": "Vehicle.Nod",
       "faction": "nod",
       "category": "vehicles",
-      "tier": 1,
+      "tier": 2,
       "bpo": 40,
       "prereqs": [
         "aot-age1",
@@ -1958,15 +1578,17 @@
         "~aot-ltnk-upgrade",
         "~!aot-ltnk-upgrade2"
       ],
+      "provides": [],
       "stats": {
         "cost": 750,
         "hp": 32000,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "ltnk_base.png",
-      "idleFile": null,
+      "idleFile": "ltnk_base.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -1986,15 +1608,17 @@
       "visibilityPrereqs": [
         "~!aot-age1"
       ],
+      "provides": [],
       "stats": {
         "cost": 3000,
         "hp": 120000,
         "power": 0
       },
-      "sprite": "ra",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "mcv_base.png",
-      "idleFile": null,
+      "idleFile": "mcv_base.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2005,7 +1629,7 @@
       "queue": "LightVehicle.GDI, LightVehicle.Nod",
       "faction": "both",
       "category": "vehicles",
-      "tier": 0,
+      "tier": 1,
       "bpo": 6,
       "prereqs": [
         "lite",
@@ -2014,15 +1638,17 @@
       "visibilityPrereqs": [
         "~aot-age1"
       ],
+      "provides": [],
       "stats": {
         "cost": 3000,
         "hp": 120000,
         "power": 0
       },
-      "sprite": "ra",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "mcv_ages.png",
-      "idleFile": null,
+      "idleFile": "mcv_ages.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2033,7 +1659,7 @@
       "queue": "Vehicle.GDI",
       "faction": "gdi",
       "category": "vehicles",
-      "tier": 0,
+      "tier": 2,
       "bpo": 4,
       "prereqs": [
         "anyhq"
@@ -2042,15 +1668,17 @@
         "~aot-hover-aa-upgrade",
         "~!aot-hover-mlrs-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 900,
         "hp": 12000,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "msam_aa.png",
-      "idleFile": null,
+      "idleFile": "msam_aa.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2061,7 +1689,7 @@
       "queue": "Vehicle.GDI",
       "faction": "gdi",
       "category": "vehicles",
-      "tier": 0,
+      "tier": 2,
       "bpo": 4,
       "prereqs": [
         "anyhq"
@@ -2070,15 +1698,17 @@
         "~aot-hover-mlrs-upgrade",
         "~!aot-hover-aa-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 900,
         "hp": 12000,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "msam_hover.png",
-      "idleFile": null,
+      "idleFile": "msam_hover.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2089,7 +1719,7 @@
       "queue": "Naval.Nod",
       "faction": "nod",
       "category": "navy",
-      "tier": 0,
+      "tier": 1,
       "bpo": 20,
       "prereqs": [
         "aot-subpen",
@@ -2100,15 +1730,17 @@
         "~!aot-msub-mine-upgrade",
         "~!aot-msub-drone-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 2000,
         "hp": 40000,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "sub_missile.png",
-      "idleFile": null,
+      "idleFile": "sub_missile.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2119,7 +1751,7 @@
       "queue": "Naval.Nod",
       "faction": "nod",
       "category": "navy",
-      "tier": 0,
+      "tier": 3,
       "bpo": 20,
       "prereqs": [
         "aot-subpen",
@@ -2132,15 +1764,17 @@
         "~aot-msub-drone-upgrade",
         "~!aot-msub-mine-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 2000,
         "hp": 40000,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "sub_drone.png",
-      "idleFile": null,
+      "idleFile": "sub_drone.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2151,7 +1785,7 @@
       "queue": "Naval.Nod",
       "faction": "nod",
       "category": "navy",
-      "tier": 0,
+      "tier": 3,
       "bpo": 20,
       "prereqs": [
         "aot-subpen",
@@ -2164,15 +1798,17 @@
         "~aot-msub-mine-upgrade",
         "~!aot-msub-drone-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 2000,
         "hp": 40000,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "sub_mine.png",
-      "idleFile": null,
+      "idleFile": "sub_mine.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2192,15 +1828,17 @@
         "~lite",
         "~!aot-mtnk-predator-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 900,
         "hp": 33750,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "mtnk_1_base.png",
-      "idleFile": null,
+      "idleFile": "mtnk_1_base.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2211,7 +1849,7 @@
       "queue": "LightVehicle.GDI",
       "faction": "gdi",
       "category": "vehicles",
-      "tier": 0,
+      "tier": 2,
       "bpo": 5,
       "prereqs": [
         "gdi-hq"
@@ -2221,15 +1859,17 @@
         "~aot-mtnk-predator-upgrade",
         "~!aot-mtnk-railgun-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 900,
         "hp": 33750,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "mtnk_1_base.png",
-      "idleFile": null,
+      "idleFile": "mtnk_1_base.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2240,7 +1880,7 @@
       "queue": "LightVehicle.GDI",
       "faction": "gdi",
       "category": "vehicles",
-      "tier": 0,
+      "tier": 3,
       "bpo": 5,
       "prereqs": [
         "gdi-hq"
@@ -2249,15 +1889,17 @@
         "~lite",
         "~aot-mtnk-railgun-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 900,
         "hp": 33750,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "mtnk_1_base.png",
-      "idleFile": null,
+      "idleFile": "mtnk_1_base.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2275,8 +1917,9 @@
       ],
       "visibilityPrereqs": [
         "~techlevel.medium",
-        "~!aot-age2"
+        "~!aot-age1"
       ],
+      "provides": [],
       "stats": {
         "cost": 1000,
         "hp": 80000,
@@ -2286,6 +1929,38 @@
       "customIcon": true,
       "iconFile": "aot-nod-radar-icon.png",
       "idleFile": "aot-nod-radar-age0-idle.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true
+    },
+    {
+      "id": "aot-nod-radar-age1",
+      "displayName": "Radar Dome",
+      "file": "aot-structures.yaml",
+      "queue": "Building.Nod",
+      "faction": "nod",
+      "category": "main-buildings",
+      "tier": 1,
+      "bpo": 50,
+      "prereqs": [
+        "vehicleproduction"
+      ],
+      "visibilityPrereqs": [
+        "~techlevel.medium",
+        "~aot-age1",
+        "~!aot-age2"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 1000,
+        "hp": 80000,
+        "power": -50
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "aot-nod-radar-icon.png",
+      "idleFile": "aot-nod-radar-age1-idle.png",
+      "idleLength": 12,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2296,7 +1971,7 @@
       "queue": "Building.Nod",
       "faction": "nod",
       "category": "main-buildings",
-      "tier": 0,
+      "tier": 2,
       "bpo": 50,
       "prereqs": [
         "vehicleproduction"
@@ -2305,6 +1980,7 @@
         "~techlevel.medium",
         "~aot-age2"
       ],
+      "provides": [],
       "stats": {
         "cost": 1000,
         "hp": 80000,
@@ -2314,6 +1990,7 @@
       "customIcon": true,
       "iconFile": "aot-nod-radar-age2-icon.png",
       "idleFile": "aot-nod-radar-age0-idle.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2332,6 +2009,7 @@
       "visibilityPrereqs": [
         "~!aot-age1"
       ],
+      "provides": [],
       "stats": {
         "cost": 800,
         "hp": 70000,
@@ -2340,7 +2018,8 @@
       "sprite": "ra",
       "customIcon": true,
       "iconFile": "nuk2_base.png",
-      "idleFile": null,
+      "idleFile": "nuk2-ra-idle.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2351,7 +2030,7 @@
       "queue": "Building.Nod",
       "faction": "nod",
       "category": "main-buildings",
-      "tier": 0,
+      "tier": 1,
       "bpo": 70,
       "prereqs": [
         "nuke",
@@ -2360,6 +2039,7 @@
       "visibilityPrereqs": [
         "~aot-age1"
       ],
+      "provides": [],
       "stats": {
         "cost": 800,
         "hp": 70000,
@@ -2368,7 +2048,8 @@
       "sprite": "ra",
       "customIcon": true,
       "iconFile": "nuk2_ages.png",
-      "idleFile": null,
+      "idleFile": "nuk2-ra-idle.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2387,6 +2068,7 @@
       "visibilityPrereqs": [
         "~!aot-age1"
       ],
+      "provides": [],
       "stats": {
         "cost": 500,
         "hp": 55000,
@@ -2395,7 +2077,8 @@
       "sprite": "ra",
       "customIcon": true,
       "iconFile": "nuke_base.png",
-      "idleFile": null,
+      "idleFile": "nuke-ra-idle.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2406,7 +2089,7 @@
       "queue": "Building.GDI, Building.Nod",
       "faction": "both",
       "category": "main-buildings",
-      "tier": 0,
+      "tier": 1,
       "bpo": 10,
       "prereqs": [
         "fact"
@@ -2415,6 +2098,7 @@
         "~aot-age1",
         "~!aot-nuke-turbine-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 500,
         "hp": 55000,
@@ -2423,7 +2107,8 @@
       "sprite": "ra",
       "customIcon": true,
       "iconFile": "nuke_ages.png",
-      "idleFile": null,
+      "idleFile": "nuke-ra-idle.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2434,7 +2119,7 @@
       "queue": "Building.GDI",
       "faction": "gdi",
       "category": "main-buildings",
-      "tier": 0,
+      "tier": 2,
       "bpo": 10,
       "prereqs": [
         "fact"
@@ -2443,6 +2128,7 @@
         "~aot-age1",
         "~aot-nuke-turbine-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 500,
         "hp": 55000,
@@ -2451,7 +2137,8 @@
       "sprite": "ra",
       "customIcon": true,
       "iconFile": "nuke_turbine.png",
-      "idleFile": null,
+      "idleFile": "nuke-turbine-idle.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2462,7 +2149,7 @@
       "queue": "Aircraft.GDI",
       "faction": "gdi",
       "category": "aircraft",
-      "tier": 0,
+      "tier": 1,
       "bpo": 20,
       "prereqs": [
         "anyhq"
@@ -2470,16 +2157,18 @@
       "visibilityPrereqs": [
         "~aot-orca-upgrade"
       ],
+      "provides": [],
       "stats": {
-        "cost": null,
-        "hp": null,
+        "cost": 1200,
+        "hp": 10000,
         "power": 0
       },
       "sprite": "ra",
       "customIcon": true,
       "iconFile": "helo_orca.png",
-      "idleFile": null,
-      "notBuildable": true,
+      "idleFile": "helo_orca.png",
+      "idleLength": 1,
+      "notBuildable": false,
       "isProxy": true
     },
     {
@@ -2495,6 +2184,7 @@
         "lite"
       ],
       "visibilityPrereqs": [],
+      "provides": [],
       "stats": {
         "cost": 500,
         "hp": 50000,
@@ -2503,7 +2193,8 @@
       "sprite": "ra",
       "customIcon": true,
       "iconFile": "oret_base.png",
-      "idleFile": null,
+      "idleFile": "oret_base.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2522,6 +2213,9 @@
       "visibilityPrereqs": [
         "~!aot-age1"
       ],
+      "provides": [
+        "pyle"
+      ],
       "stats": {
         "cost": 500,
         "hp": 60000,
@@ -2530,7 +2224,8 @@
       "sprite": "ra",
       "customIcon": true,
       "iconFile": "pyle_base.png",
-      "idleFile": null,
+      "idleFile": "pyle_base.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2541,13 +2236,16 @@
       "queue": "Building.GDI",
       "faction": "gdi",
       "category": "main-buildings",
-      "tier": 0,
+      "tier": 1,
       "bpo": 20,
       "prereqs": [
         "anypower"
       ],
       "visibilityPrereqs": [
         "~aot-age1"
+      ],
+      "provides": [
+        "pyle"
       ],
       "stats": {
         "cost": 500,
@@ -2557,7 +2255,8 @@
       "sprite": "ra",
       "customIcon": true,
       "iconFile": "pyle_ages.png",
-      "idleFile": null,
+      "idleFile": "pyle_ages.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2574,15 +2273,17 @@
         "lite"
       ],
       "visibilityPrereqs": [],
+      "provides": [],
       "stats": {
         "cost": 1000,
         "hp": 80000,
         "power": 0
       },
-      "sprite": "ra",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "aot-shipyard.png",
-      "idleFile": null,
+      "idleFile": "aot-shipyard.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2602,6 +2303,7 @@
       "visibilityPrereqs": [
         "~!aot-age1"
       ],
+      "provides": [],
       "stats": {
         "cost": 1500,
         "hp": 60000,
@@ -2611,6 +2313,7 @@
       "customIcon": true,
       "iconFile": "stec_base.png",
       "idleFile": "stec-idle.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2621,7 +2324,7 @@
       "queue": "Building.Nod",
       "faction": "nod",
       "category": "main-buildings",
-      "tier": 0,
+      "tier": 1,
       "bpo": 101,
       "prereqs": [
         "anypower",
@@ -2631,6 +2334,7 @@
       "visibilityPrereqs": [
         "~aot-age1"
       ],
+      "provides": [],
       "stats": {
         "cost": 1500,
         "hp": 60000,
@@ -2639,7 +2343,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "stec_age_1.png",
-      "idleFile": "stec-idle.png",
+      "idleFile": "stec-td-idle.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2658,15 +2363,17 @@
       "visibilityPrereqs": [
         "~!aot-sub-cargo-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 800,
         "hp": 20000,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "sub_base.png",
-      "idleFile": null,
+      "idleFile": "sub_base.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2677,7 +2384,7 @@
       "queue": "Naval.Nod",
       "faction": "nod",
       "category": "navy",
-      "tier": 0,
+      "tier": 2,
       "bpo": 10,
       "prereqs": [
         "aot-subpen"
@@ -2686,15 +2393,17 @@
         "~aot-age2",
         "~aot-sub-cargo-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 800,
         "hp": 20000,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "sub_cargo.png",
-      "idleFile": null,
+      "idleFile": "sub_cargo.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2711,15 +2420,19 @@
         "lite"
       ],
       "visibilityPrereqs": [],
+      "provides": [
+        "aot-subpen"
+      ],
       "stats": {
         "cost": 1000,
         "hp": 80000,
         "power": 0
       },
-      "sprite": "ra",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "aot-subpen.png",
-      "idleFile": null,
+      "idleFile": "aot-subpen.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2736,15 +2449,17 @@
       "visibilityPrereqs": [
         "~!aot-transport-gun-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 900,
         "hp": 40000,
         "power": 0
       },
-      "sprite": "ra",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "aot-transport-icon.png",
-      "idleFile": null,
+      "idleFile": "aot-transport-icon.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2755,21 +2470,23 @@
       "queue": "Naval.Nod",
       "faction": "nod",
       "category": "navy",
-      "tier": 0,
+      "tier": 1,
       "bpo": 20,
       "prereqs": [],
       "visibilityPrereqs": [
         "~aot-transport-gun-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 900,
         "hp": 40000,
         "power": 0
       },
-      "sprite": "ra",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "vesl_gun.png",
-      "idleFile": null,
+      "idleFile": "vesl_gun.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2789,15 +2506,17 @@
       "visibilityPrereqs": [
         "~aot-shipyard"
       ],
+      "provides": [],
       "stats": {
         "cost": 1200,
         "hp": 40000,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "vesl_hover.png",
-      "idleFile": null,
+      "idleFile": "vesl_hover.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2816,15 +2535,17 @@
       "visibilityPrereqs": [
         "~!aot-ttnk-flame-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 600,
         "hp": 28000,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "ttnk_base.png",
-      "idleFile": null,
+      "idleFile": "ttnk_base.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2835,7 +2556,7 @@
       "queue": "LightVehicle.Nod",
       "faction": "nod",
       "category": "vehicles",
-      "tier": 0,
+      "tier": 2,
       "bpo": 2,
       "prereqs": [
         "lite"
@@ -2843,15 +2564,17 @@
       "visibilityPrereqs": [
         "~aot-ttnk-cloak-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 600,
         "hp": 28000,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "ttnk_cloak.png",
-      "idleFile": null,
+      "idleFile": "ttnk_cloak.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2862,7 +2585,7 @@
       "queue": "LightVehicle.Nod",
       "faction": "nod",
       "category": "vehicles",
-      "tier": 0,
+      "tier": 1,
       "bpo": 2,
       "prereqs": [
         "lite"
@@ -2872,15 +2595,17 @@
         "~!aot-ttnk-toxin-upgrade",
         "~!aot-ttnk-cloak-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 600,
         "hp": 28000,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "ttnk_flame.png",
-      "idleFile": null,
+      "idleFile": "ttnk_flame.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2891,7 +2616,7 @@
       "queue": "LightVehicle.Nod",
       "faction": "nod",
       "category": "vehicles",
-      "tier": 0,
+      "tier": 2,
       "bpo": 2,
       "prereqs": [
         "lite"
@@ -2899,15 +2624,17 @@
       "visibilityPrereqs": [
         "~aot-ttnk-toxin-upgrade"
       ],
+      "provides": [],
       "stats": {
         "cost": 600,
         "hp": 28000,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": true,
       "iconFile": "ttnk_gas.png",
-      "idleFile": null,
+      "idleFile": "ttnk_gas.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
     },
@@ -2931,15 +2658,19 @@
         "~aot-age1",
         "~!aot-humvee-upgrade"
       ],
+      "provides": [
+        "aot-apc-upgrade"
+      ],
       "stats": {
         "cost": 200,
         "hp": null,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": false,
       "iconFile": null,
       "idleFile": null,
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -2963,15 +2694,19 @@
         "~aot-age2",
         "~!aot-humvee-upgrade"
       ],
+      "provides": [
+        "aot-amphibious-upgrade"
+      ],
       "stats": {
         "cost": 300,
         "hp": null,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": false,
       "iconFile": null,
       "idleFile": null,
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -2993,6 +2728,9 @@
         "~aot-age3",
         "~!aot-cruiser-railgun-upgrade"
       ],
+      "provides": [
+        "aot-cruiser-carrier-upgrade"
+      ],
       "stats": {
         "cost": 2000,
         "hp": null,
@@ -3001,7 +2739,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "crus_carrier.png",
-      "idleFile": null,
+      "idleFile": "crus_carrier.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -3023,6 +2762,9 @@
         "~aot-age3",
         "~!aot-cruiser-carrier-upgrade"
       ],
+      "provides": [
+        "aot-cruiser-railgun-upgrade"
+      ],
       "stats": {
         "cost": 2000,
         "hp": null,
@@ -3031,7 +2773,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "crus_railgun.png",
-      "idleFile": null,
+      "idleFile": "crus_railgun.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -3054,6 +2797,9 @@
         "~aot-age2",
         "~!aot-gunboat-upgrade"
       ],
+      "provides": [
+        "aot-gunboat-upgrade"
+      ],
       "stats": {
         "cost": 1500,
         "hp": null,
@@ -3062,7 +2808,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "gun_destroyer.png",
-      "idleFile": null,
+      "idleFile": "gun_destroyer.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -3084,6 +2831,9 @@
         "~aot-age1",
         "~!aot-gunboat-frigate-upgrade"
       ],
+      "provides": [
+        "aot-gunboat-frigate-upgrade"
+      ],
       "stats": {
         "cost": 800,
         "hp": null,
@@ -3092,7 +2842,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "gun_frigate.png",
-      "idleFile": null,
+      "idleFile": "gun_frigate.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -3115,6 +2866,9 @@
         "~hpad",
         "~aot-age2"
       ],
+      "provides": [
+        "aot-harpy-upgrade"
+      ],
       "stats": {
         "cost": 300,
         "hp": null,
@@ -3123,7 +2877,8 @@
       "sprite": "ra",
       "customIcon": true,
       "iconFile": "hind_hrpy.png",
-      "idleFile": null,
+      "idleFile": "hind_hrpy.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -3144,6 +2899,9 @@
         "~aot-age2",
         "~!aot-hover-mlrs-upgrade"
       ],
+      "provides": [
+        "aot-hover-aa-upgrade"
+      ],
       "stats": {
         "cost": 400,
         "hp": null,
@@ -3152,7 +2910,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "msam_aa.png",
-      "idleFile": null,
+      "idleFile": "msam_aa.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -3173,6 +2932,9 @@
         "~aot-age2",
         "~!aot-hover-aa-upgrade"
       ],
+      "provides": [
+        "aot-hover-mlrs-upgrade"
+      ],
       "stats": {
         "cost": 400,
         "hp": null,
@@ -3181,7 +2943,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "msam_hover.png",
-      "idleFile": null,
+      "idleFile": "msam_hover.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -3202,15 +2965,19 @@
         "~aot-weap",
         "~aot-age3"
       ],
+      "provides": [
+        "aot-htnk-railgun-upgrade"
+      ],
       "stats": {
         "cost": 1500,
         "hp": null,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": false,
       "iconFile": null,
       "idleFile": null,
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -3231,15 +2998,19 @@
         "~aot-weap",
         "~aot-age2"
       ],
+      "provides": [
+        "aot-htnk-rocket-upgrade"
+      ],
       "stats": {
         "cost": 750,
         "hp": null,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": false,
       "iconFile": null,
       "idleFile": null,
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -3263,15 +3034,19 @@
         "~aot-age1",
         "~!aot-apc-upgrade"
       ],
+      "provides": [
+        "aot-humvee-upgrade"
+      ],
       "stats": {
         "cost": 100,
         "hp": null,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": false,
       "iconFile": null,
       "idleFile": null,
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -3292,15 +3067,19 @@
         "~gdi-hq",
         "~aot-age3"
       ],
+      "provides": [
+        "aot-ion-cannon-upgrade"
+      ],
       "stats": {
         "cost": 1500,
         "hp": null,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": false,
       "iconFile": null,
       "idleFile": null,
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -3321,15 +3100,19 @@
         "~aot-age3",
         "~afld"
       ],
+      "provides": [
+        "aot-ltnk-upgrade2"
+      ],
       "stats": {
         "cost": 200,
         "hp": null,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": false,
       "iconFile": null,
       "idleFile": null,
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -3351,15 +3134,19 @@
         "~aot-age2",
         "~afld"
       ],
+      "provides": [
+        "aot-ltnk-upgrade"
+      ],
       "stats": {
         "cost": 300,
         "hp": null,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": false,
       "iconFile": null,
       "idleFile": null,
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -3370,7 +3157,7 @@
       "queue": "Upgrade.Nod",
       "faction": "nod",
       "category": "upgrades",
-      "tier": 0,
+      "tier": 3,
       "bpo": 55,
       "prereqs": [
         "aot-subpen",
@@ -3382,6 +3169,9 @@
         "~aot-age3",
         "~!aot-msub-mine-upgrade"
       ],
+      "provides": [
+        "aot-msub-drone-upgrade"
+      ],
       "stats": {
         "cost": 700,
         "hp": null,
@@ -3390,7 +3180,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "sub_drone.png",
-      "idleFile": null,
+      "idleFile": "sub_drone.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -3401,7 +3192,7 @@
       "queue": "Upgrade.Nod",
       "faction": "nod",
       "category": "upgrades",
-      "tier": 0,
+      "tier": 3,
       "bpo": 50,
       "prereqs": [
         "aot-subpen",
@@ -3413,6 +3204,9 @@
         "~aot-age3",
         "~!aot-msub-drone-upgrade"
       ],
+      "provides": [
+        "aot-msub-mine-upgrade"
+      ],
       "stats": {
         "cost": 500,
         "hp": null,
@@ -3421,7 +3215,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "sub_mine.png",
-      "idleFile": null,
+      "idleFile": "sub_mine.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -3443,15 +3238,19 @@
         "~techlevel.medium",
         "~aot-age2"
       ],
+      "provides": [
+        "aot-mtnk-predator-upgrade"
+      ],
       "stats": {
         "cost": 500,
         "hp": null,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": false,
       "iconFile": null,
       "idleFile": null,
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -3475,15 +3274,19 @@
         "~aot-mtnk-predator-upgrade",
         "~aot-age3"
       ],
+      "provides": [
+        "aot-mtnk-railgun-upgrade"
+      ],
       "stats": {
         "cost": 1000,
         "hp": null,
         "power": 0
       },
-      "sprite": "td",
+      "sprite": "ts",
       "customIcon": false,
       "iconFile": null,
       "idleFile": null,
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -3505,6 +3308,9 @@
         "~anypower",
         "~aot-age2"
       ],
+      "provides": [
+        "aot-nuke-turbine-upgrade"
+      ],
       "stats": {
         "cost": 600,
         "hp": null,
@@ -3513,7 +3319,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "nuke_turbine.png",
-      "idleFile": null,
+      "idleFile": "nuke_turbine.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -3536,6 +3343,9 @@
         "~hpad",
         "~aot-age1"
       ],
+      "provides": [
+        "aot-orca-upgrade"
+      ],
       "stats": {
         "cost": 300,
         "hp": null,
@@ -3544,7 +3354,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "helo_orca.png",
-      "idleFile": null,
+      "idleFile": "helo_orca.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -3555,7 +3366,7 @@
       "queue": "Upgrade.Nod",
       "faction": "nod",
       "category": "upgrades",
-      "tier": 0,
+      "tier": 2,
       "bpo": 45,
       "prereqs": [
         "aot-subpen",
@@ -3565,6 +3376,9 @@
         "~aot-age2",
         "~!aot-sub-cargo-upgrade"
       ],
+      "provides": [
+        "aot-sub-cargo-upgrade"
+      ],
       "stats": {
         "cost": 400,
         "hp": null,
@@ -3573,7 +3387,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "sub_cargo.png",
-      "idleFile": null,
+      "idleFile": "sub_cargo.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -3596,6 +3411,9 @@
         "~aot-subpen",
         "~!aot-transport-gun-upgrade"
       ],
+      "provides": [
+        "aot-transport-gun-upgrade"
+      ],
       "stats": {
         "cost": 600,
         "hp": null,
@@ -3604,7 +3422,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "vesl_gun.png",
-      "idleFile": null,
+      "idleFile": "vesl_gun.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -3625,6 +3444,9 @@
         "~stec",
         "~aot-age1"
       ],
+      "provides": [
+        "aot-ttnk-flame-upgrade"
+      ],
       "stats": {
         "cost": 500,
         "hp": null,
@@ -3633,7 +3455,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "ttnk_flame.png",
-      "idleFile": null,
+      "idleFile": "ttnk_flame.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -3656,6 +3479,9 @@
         "~aot-age2",
         "~!aot-ttnk-toxin-upgrade"
       ],
+      "provides": [
+        "aot-ttnk-cloak-upgrade"
+      ],
       "stats": {
         "cost": 500,
         "hp": null,
@@ -3664,7 +3490,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "ttnk_cloak.png",
-      "idleFile": null,
+      "idleFile": "ttnk_cloak.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     },
@@ -3687,6 +3514,9 @@
         "~aot-age2",
         "~!aot-ttnk-cloak-upgrade"
       ],
+      "provides": [
+        "aot-ttnk-toxin-upgrade"
+      ],
       "stats": {
         "cost": 600,
         "hp": null,
@@ -3695,7 +3525,8 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "ttnk_gas.png",
-      "idleFile": null,
+      "idleFile": "ttnk_gas.png",
+      "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
     }

@@ -21,48 +21,82 @@
   --upgrade: #b06bdb;
   --green: #4caf6a;
   --orange: #e09240;
-  --panel-w: 360px;
   --accent: var(--blue);
   --accent-bg: var(--blue-bg);
-}
-.nod-mode {
-  --accent: var(--red);
-  --accent-bg: var(--red-bg);
+  --nav-h: 38px;
+  --cat-h: 40px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; padding-top: 42px; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px;
+  height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+  padding-top: calc(var(--nav-h) + var(--cat-h));
+}
 
-/* NAV */
-.top-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; gap: 2px; padding: 6px 16px; background: rgba(15,17,23,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); align-items: center; }
-.top-nav a { padding: 5px 14px; border-radius: 5px; font-size: 12px; font-weight: 600; letter-spacing: .04em; color: var(--text-dim); text-decoration: none; transition: color .15s, background .15s; }
+/* ── TOP NAV (row 1) ────────────────────────────────────────────────────── */
+.top-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  height: var(--nav-h);
+  display: flex; gap: 2px; padding: 0 16px;
+  background: rgba(15,17,23,0.97); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border); align-items: center;
+}
+.top-nav a {
+  padding: 5px 14px; border-radius: 5px; font-size: 12px; font-weight: 600;
+  letter-spacing: .04em; color: var(--text-dim); text-decoration: none;
+  transition: color .15s, background .15s;
+}
 .top-nav a:hover { color: var(--text); background: var(--card-bg); }
 .top-nav a.active { color: var(--text); background: var(--card-bg); }
 .nav-spacer { flex: 1; }
-.changes-badge { font-size: 11px; color: var(--orange); margin-right: 8px; display: none; }
+.changes-badge { font-size: 11px; color: var(--orange); display: none; margin-right: 6px; }
 .changes-badge.visible { display: inline; }
+.nav-btn { padding: 4px 12px; border-radius: 5px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text); font-size: 11px; font-weight: 600; cursor: pointer; transition: all .13s; margin-left: 4px; }
+.nav-btn:hover { border-color: color-mix(in srgb, var(--accent) 60%, var(--border)); }
 
-/* LAYOUT */
-.app { display: flex; flex: 1; overflow: hidden; }
-
-/* SIDEBAR */
-.sidebar { width: 170px; background: var(--col-bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; }
-.search-wrap { padding: 10px 10px 6px; }
-.search-wrap input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 5px; color: var(--text); padding: 5px 8px; font-size: 12px; outline: none; }
-.search-wrap input:focus { border-color: var(--accent); }
-.sidebar-sep { border: none; border-top: 1px solid var(--border); margin: 4px 0; }
-.cat-btn { display: flex; align-items: center; gap: 8px; padding: 8px 14px; cursor: pointer; color: var(--text-dim); border-left: 2px solid transparent; transition: all .13s; font-size: 12px; font-weight: 600; }
+/* ── CAT NAV (row 2) ────────────────────────────────────────────────────── */
+.cat-nav {
+  position: fixed; top: var(--nav-h); left: 0; right: 0; z-index: 190;
+  height: var(--cat-h);
+  display: flex; align-items: center; gap: 2px; padding: 0 12px;
+  background: rgba(26,29,39,0.97); backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--border);
+}
+.cat-btn {
+  padding: 5px 11px; border-radius: 5px; cursor: pointer;
+  color: var(--text-dim); font-size: 11px; font-weight: 600; letter-spacing: .02em;
+  border-bottom: 2px solid transparent; transition: all .13s; white-space: nowrap;
+  display: flex; align-items: center; gap: 5px;
+}
 .cat-btn:hover { color: var(--text); background: var(--card-bg); }
-.cat-btn.active { color: var(--text); border-left-color: var(--accent); background: var(--card-bg); }
-.cat-btn .cnt { margin-left: auto; font-size: 10px; color: var(--text-dim); font-weight: 400; }
-.sidebar-action { display: flex; align-items: center; gap: 8px; padding: 7px 14px; cursor: pointer; color: var(--text-dim); font-size: 11px; border-radius: 0; transition: all .13s; }
-.sidebar-action:hover { color: var(--text); background: var(--card-bg); }
+.cat-btn.active { color: var(--text); border-bottom-color: var(--accent); background: var(--card-bg); }
+.cat-btn .cnt {
+  font-size: 9px; color: var(--text-dim); font-weight: 400;
+  background: var(--bg); border: 1px solid var(--border);
+  padding: 0 4px; border-radius: 3px;
+}
+.cat-sep { width: 1px; height: 22px; background: var(--border); margin: 0 4px; flex-shrink: 0; }
+.cat-nav-end { flex: 1; }
+.search-wrap { display: flex; align-items: center; }
+.search-wrap input {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 5px;
+  color: var(--text); padding: 4px 10px; font-size: 12px; outline: none; width: 160px;
+}
+.search-wrap input:focus { border-color: var(--accent); }
+.cat-action {
+  padding: 4px 10px; border-radius: 5px; cursor: pointer;
+  color: var(--text-dim); font-size: 11px; font-weight: 500; transition: all .13s;
+  background: none; border: none; white-space: nowrap;
+}
+.cat-action:hover { color: var(--text); background: var(--card-bg); }
 
-/* MAIN */
+/* ── MAIN CONTENT ───────────────────────────────────────────────────────── */
 .main { flex: 1; overflow: auto; }
-.tree-wrap { padding: 20px 24px 60px; min-width: 700px; }
+.tree-wrap { padding: 20px 24px 60px; }
 
-/* TIER ROW */
-.tier-row { margin-bottom: 28px; }
+/* ── TIER ROW ───────────────────────────────────────────────────────────── */
+.tier-row { margin-bottom: 80px; }
 .tier-label {
   font-size: 10px; text-transform: uppercase; letter-spacing: .12em;
   color: var(--text-dim); margin-bottom: 10px;
@@ -70,30 +104,32 @@ body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', syste
   display: flex; align-items: center; gap: 8px;
 }
 .tier-pill {
-  font-size: 9px; padding: 1px 7px; border-radius: 3px; font-weight: 700;
-  border: 1px solid;
+  font-size: 9px; padding: 1px 7px; border-radius: 3px; font-weight: 700; border: 1px solid;
 }
 .tier-pill-0 { border-color: var(--text-dim); color: var(--text-dim); }
 .tier-pill-1 { border-color: var(--green); color: var(--green); background: rgba(76,175,106,.07); }
 .tier-pill-2 { border-color: var(--orange); color: var(--orange); background: rgba(224,146,64,.07); }
 .tier-pill-3 { border-color: var(--red); color: var(--red); background: rgba(224,85,85,.07); }
+
 /* GDI/NOD split */
-.faction-split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.faction-col-header { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 4px 8px; border-radius: 4px 4px 0 0; margin-bottom: 6px; border: 1px solid; border-bottom: none; }
+.faction-split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.faction-col-header {
+  font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 4px 4px 0 0; margin-bottom: 0;
+  border: 1px solid; border-bottom: none;
+}
 .faction-col-header.gdi { color: var(--blue); border-color: color-mix(in srgb, var(--blue) 40%, var(--border)); background: color-mix(in srgb, var(--blue-bg) 60%, var(--bg)); }
 .faction-col-header.nod { color: var(--red); border-color: color-mix(in srgb, var(--red) 40%, var(--border)); background: color-mix(in srgb, var(--red-bg) 60%, var(--bg)); }
-.faction-col { border: 1px solid var(--border); border-radius: 0 0 5px 5px; padding: 8px; min-height: 60px; }
+.faction-col { border: 1px solid var(--border); border-radius: 0 0 5px 5px; padding: 14px 14px 40px; min-height: 90px; }
 .faction-col.gdi { border-color: color-mix(in srgb, var(--blue) 25%, var(--border)); }
 .faction-col.nod { border-color: color-mix(in srgb, var(--red) 25%, var(--border)); }
-.cards-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.cards-row { display: flex; flex-wrap: wrap; gap: 16px; }
 
-/* not-buildable (WIP/placeholder) */
+/* ── CARD ───────────────────────────────────────────────────────────────── */
 .card.not-buildable { opacity: 0.38; filter: grayscale(0.7); }
 .card.not-buildable:hover { opacity: 0.55; }
-
-/* CARD */
 .card {
-  width: 106px; background: var(--col-bg); border: 1px solid var(--border);
+  width: 112px; background: var(--col-bg); border: 1px solid var(--border);
   border-radius: 6px; cursor: pointer; transition: border-color .13s, box-shadow .13s, transform .1s;
   position: relative; overflow: hidden; flex-shrink: 0;
 }
@@ -108,6 +144,9 @@ body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', syste
 .badge-ra { background: #0f1020; color: #5d7dba; border: 1px solid #1e2d50; }
 .badge-ts { background: #1a0f1a; color: #a05dba; border: 1px solid #3a1a3a; }
 .changed-dot { position: absolute; top: 3px; left: 3px; width: 6px; height: 6px; border-radius: 50%; background: var(--orange); border: 1px solid var(--bg); }
+.card-line-btn { position: absolute; bottom: 3px; right: 3px; width: 16px; height: 16px; border-radius: 3px; border: 1px solid var(--border); background: var(--bg); color: var(--text-dim); font-size: 9px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .15s, background .15s, color .15s; line-height: 1; padding: 0; z-index: 2; }
+.card:hover .card-line-btn { opacity: 1; }
+.card-line-btn.active { opacity: 1; background: var(--accent); color: #fff; border-color: var(--accent); }
 .card-info { padding: 5px 7px 7px; }
 .card-name { font-size: 10px; font-weight: 600; color: var(--text); line-height: 1.3; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .card-id { font-size: 8px; color: var(--text-dim); font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -117,8 +156,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', syste
 .stat-chip.hp { color: var(--green); }
 .stat-chip.pow { color: var(--red); }
 
-/* WEAPONS GRID */
-.weapons-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 7px; }
+/* ── WEAPONS GRID ───────────────────────────────────────────────────────── */
+.weapons-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 7px; }
 .weapon-card { background: var(--col-bg); border: 1px solid var(--border); border-radius: 6px; padding: 9px 11px; cursor: pointer; transition: border-color .13s; }
 .weapon-card:hover { border-color: color-mix(in srgb, var(--accent) 60%, var(--border)); }
 .weapon-card.selected { border-color: var(--accent); }
@@ -132,24 +171,36 @@ body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', syste
 .dot-nod { background: var(--red); }
 .dot-both { background: var(--upgrade); }
 
-/* EDIT PANEL */
-.panel {
-  width: var(--panel-w); background: var(--col-bg); border-left: 1px solid var(--border);
-  display: flex; flex-direction: column; flex-shrink: 0;
-  transform: translateX(var(--panel-w)); transition: transform .22s ease;
+/* ── EDIT MODAL ─────────────────────────────────────────────────────────── */
+.edit-bg {
+  position: fixed; inset: 0; background: rgba(0,0,0,.65); z-index: 400;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity .18s;
 }
-.panel.open { transform: translateX(0); }
-.panel-header { padding: 12px 14px 10px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 8px; }
-.ph-text { flex: 1; min-width: 0; }
-.p-name { font-size: 14px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.p-id { font-size: 9px; color: var(--text-dim); font-family: monospace; margin-top: 2px; }
-.p-close { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 16px; padding: 2px 5px; border-radius: 3px; line-height: 1; flex-shrink: 0; }
-.p-close:hover { color: var(--text); background: var(--card-bg); }
-.panel-body { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 14px; }
+.edit-bg.open { opacity: 1; pointer-events: all; }
+.edit-modal {
+  background: var(--col-bg); border: 1px solid var(--border); border-radius: 10px;
+  width: min(820px, 94vw); max-height: 88vh; display: flex; flex-direction: column;
+  box-shadow: 0 20px 60px #000c;
+}
+.edit-header {
+  padding: 14px 18px 12px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; gap: 10px; flex-shrink: 0;
+}
+.edit-header-text { flex: 1; min-width: 0; }
+.edit-h-name { font-size: 16px; font-weight: 700; color: var(--text); }
+.edit-h-id { font-size: 10px; color: var(--text-dim); font-family: monospace; margin-top: 2px; }
+.edit-close { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 18px; padding: 2px 6px; border-radius: 4px; line-height: 1; flex-shrink: 0; }
+.edit-close:hover { color: var(--text); background: var(--card-bg); }
+.edit-body {
+  flex: 1; overflow-y: auto; padding: 18px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+}
+.edit-body.single-col { grid-template-columns: 1fr; }
 .p-section { display: flex; flex-direction: column; gap: 7px; }
 .p-section-title { font-size: 9px; text-transform: uppercase; letter-spacing: .12em; color: var(--text-dim); border-bottom: 1px solid var(--border); padding-bottom: 4px; }
 .f-row { display: flex; align-items: center; gap: 8px; }
-.f-label { font-size: 11px; color: var(--text-dim); width: 68px; flex-shrink: 0; }
+.f-label { font-size: 11px; color: var(--text-dim); width: 72px; flex-shrink: 0; }
 .f-input { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text); padding: 5px 8px; font-size: 12px; outline: none; }
 .f-input:focus { border-color: var(--accent); }
 .f-input[readonly] { color: var(--text-dim); cursor: default; }
@@ -159,48 +210,45 @@ body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', syste
 .sprite-opt.sel-td { border-color: #4fa84f; background: #0f2010; color: #4fa84f; cursor: pointer; }
 .sprite-opt.sel-ra { border-color: var(--blue); background: var(--blue-bg); color: var(--blue); cursor: pointer; }
 .sprite-opt.sel-ts { border-color: #a05dba; background: #1a0f1a; color: #a05dba; cursor: pointer; }
-.sprite-opt.sel-td:hover { filter: brightness(1.3); }
-.sprite-opt.sel-ra:hover { filter: brightness(1.3); }
-.sprite-opt.sel-ts:hover { filter: brightness(1.3); }
+.sprite-opt.sel-td:hover, .sprite-opt.sel-ra:hover, .sprite-opt.sel-ts:hover { filter: brightness(1.3); }
+.prereq-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.ptag { font-size: 9px; padding: 2px 6px; border-radius: 3px; background: var(--bg); border: 1px solid var(--border); font-family: monospace; color: var(--text-dim); }
+.ptag.vis { color: color-mix(in srgb, var(--text-dim) 60%, transparent); border-style: dashed; }
+.edit-footer { padding: 12px 18px; border-top: 1px solid var(--border); display: flex; gap: 7px; justify-content: flex-end; flex-shrink: 0; }
+.btn { padding: 6px 14px; border-radius: 5px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text); font-size: 12px; font-weight: 600; cursor: pointer; transition: all .13s; }
+.btn:hover { border-color: color-mix(in srgb, var(--accent) 60%, var(--border)); color: var(--text); }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-primary:hover { filter: brightness(1.12); }
 
-/* Sprite preview popup */
-.sprite-popup { position: fixed; z-index: 500; background: var(--col-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; box-shadow: 0 8px 32px #000a; display: none; flex-direction: column; gap: 8px; min-width: 160px; }
-.sprite-popup.open { display: flex; }
-.sprite-popup-title { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: var(--text-dim); }
-.sprite-popup img { image-rendering: pixelated; max-width: 256px; max-height: 256px; background: #000; border: 1px solid var(--border); border-radius: 3px; object-fit: contain; display: block; }
-.sprite-popup-label { font-size: 9px; color: var(--text-dim); font-family: monospace; }
-.sprite-popup-close { align-self: flex-end; background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 13px; padding: 0; line-height: 1; margin-top: -4px; }
+/* ── SPRITE INLINE PREVIEW ──────────────────────────────────────────────── */
+.sprite-inline-preview { display: none; flex-direction: column; gap: 4px; }
+.sprite-inline-preview.visible { display: flex; }
+.sprite-inline-preview img { image-rendering: pixelated; display: block; }
+.sprite-frame-wrap { width: 128px; height: 96px; background: #000; border: 1px solid var(--border); border-radius: 3px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.sprite-inline-label { font-size: 9px; color: var(--text-dim); font-family: monospace; }
 .icon-preview-wrap { display: flex; gap: 10px; align-items: flex-start; }
 .icon-preview { width: 64px; height: 48px; background: var(--bg); border: 1px solid var(--border); border-radius: 3px; image-rendering: pixelated; object-fit: contain; display: block; }
 .no-icon-box { width: 64px; height: 48px; background: var(--bg); border: 1px solid var(--border); border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 9px; color: var(--text-dim); }
 .icon-info { font-size: 10px; color: var(--text-dim); line-height: 1.6; }
 .icon-info b { color: var(--text); }
-.prereq-tags { display: flex; flex-wrap: wrap; gap: 4px; }
-.ptag { font-size: 9px; padding: 2px 6px; border-radius: 3px; background: var(--bg); border: 1px solid var(--border); font-family: monospace; color: var(--text-dim); }
-.ptag.vis { color: color-mix(in srgb, var(--text-dim) 60%, transparent); border-style: dashed; }
-.panel-footer { padding: 11px 14px; border-top: 1px solid var(--border); display: flex; gap: 7px; }
-.btn { padding: 6px 13px; border-radius: 5px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text); font-size: 12px; font-weight: 600; cursor: pointer; transition: all .13s; }
-.btn:hover { border-color: color-mix(in srgb, var(--accent) 60%, var(--border)); color: var(--text); }
-.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-.btn-primary:hover { filter: brightness(1.12); }
-.btn-full { flex: 1; }
 
-/* MODAL */
-.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.7); display: flex; align-items: center; justify-content: center; z-index: 300; opacity: 0; pointer-events: none; transition: opacity .18s; }
+/* ── PROMPT MODAL ───────────────────────────────────────────────────────── */
+.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.7); display: flex; align-items: center; justify-content: center; z-index: 600; opacity: 0; pointer-events: none; transition: opacity .18s; }
 .modal-bg.open { opacity: 1; pointer-events: all; }
-.modal { background: var(--col-bg); border: 1px solid var(--border); border-radius: 8px; width: 600px; max-height: 78vh; display: flex; flex-direction: column; }
+.modal { background: var(--col-bg); border: 1px solid var(--border); border-radius: 8px; width: 620px; max-height: 78vh; display: flex; flex-direction: column; }
 .modal-header { padding: 12px 14px 10px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
 .modal-title { flex: 1; font-weight: 700; font-size: 13px; }
 .modal-body { flex: 1; overflow-y: auto; padding: 14px; }
 .modal-body pre { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 12px; font-family: 'Consolas', monospace; font-size: 11px; color: #c0cce8; white-space: pre-wrap; line-height: 1.65; }
 .modal-footer { padding: 10px 14px; border-top: 1px solid var(--border); display: flex; gap: 7px; justify-content: flex-end; }
 
-/* EMPTY */
+/* ── MISC ───────────────────────────────────────────────────────────────── */
 .empty { text-align: center; color: var(--text-dim); padding: 50px 24px; font-size: 13px; }
 </style>
 </head>
 <body>
 
+<!-- Row 1: Main nav -->
 <nav class="top-nav">
   <a href="kanban-board.html">Planning</a>
   <a href="buildorder.html">Build Order</a>
@@ -208,80 +256,60 @@ body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', syste
   <a href="tilesets.html">Tilesets</a>
   <div class="nav-spacer"></div>
   <span class="changes-badge" id="changesBadge">● Unsaved changes</span>
+  <button class="nav-btn" id="genAllBtn" onclick="generateAllPrompt()" style="display:none">Generate Prompt</button>
 </nav>
 
-<div class="sprite-popup" id="spritePopup">
-  <div style="display:flex;align-items:center;justify-content:space-between">
-    <span class="sprite-popup-title" id="spritePopupTitle">Sprite Preview</span>
-    <button class="sprite-popup-close" onclick="closeSpritePopup()">✕</button>
+<!-- Row 2: Category nav -->
+<nav class="cat-nav">
+  <div class="cat-btn active" data-cat="main-buildings" onclick="setCategory('main-buildings')">🏗 Main <span class="cnt" id="cnt-main-buildings"></span></div>
+  <div class="cat-btn" data-cat="defense" onclick="setCategory('defense')">🛡 Defense <span class="cnt" id="cnt-defense"></span></div>
+  <div class="cat-btn" data-cat="infantry" onclick="setCategory('infantry')">🪖 Infantry <span class="cnt" id="cnt-infantry"></span></div>
+  <div class="cat-btn" data-cat="vehicles" onclick="setCategory('vehicles')">🚗 Vehicles <span class="cnt" id="cnt-vehicles"></span></div>
+  <div class="cat-btn" data-cat="aircraft" onclick="setCategory('aircraft')">✈ Aircraft <span class="cnt" id="cnt-aircraft"></span></div>
+  <div class="cat-btn" data-cat="navy" onclick="setCategory('navy')">⚓ Navy <span class="cnt" id="cnt-navy"></span></div>
+  <div class="cat-btn" data-cat="upgrades" onclick="setCategory('upgrades')">⬆ Upgrades <span class="cnt" id="cnt-upgrades"></span></div>
+  <div class="cat-btn" data-cat="weapons" onclick="setCategory('weapons')">💥 Weapons <span class="cnt" id="cnt-weapons"></span></div>
+  <div class="cat-sep"></div>
+  <button class="cat-action" id="toggleAllLinesBtn" onclick="toggleAllLines()">⋯ Lines: OFF</button>
+  <button class="cat-action" onclick="showAllChanges()">📋 Changes</button>
+  <button class="cat-action" onclick="resetChanges()">↩ Reset</button>
+  <div class="cat-nav-end"></div>
+  <div class="search-wrap">
+    <input id="searchInput" type="text" placeholder="Search…" oninput="render()">
   </div>
-  <img id="spritePopupImg" src="" alt="">
-  <span class="sprite-popup-label" id="spritePopupLabel"></span>
+</nav>
+
+
+<!-- Main content -->
+<div class="main">
+  <div class="tree-wrap" id="treeWrap"></div>
 </div>
 
-<div class="app">
-
-  <div class="sidebar">
-    <div class="search-wrap">
-      <input id="searchInput" type="text" placeholder="Search…" oninput="render()">
-    </div>
-    <hr class="sidebar-sep">
-    <div class="cat-btn active" data-cat="main-buildings" onclick="setCategory('main-buildings')">
-      🏗 Main Buildings <span class="cnt" id="cnt-main-buildings"></span>
-    </div>
-    <div class="cat-btn" data-cat="defense" onclick="setCategory('defense')">
-      🛡 Defense <span class="cnt" id="cnt-defense"></span>
-    </div>
-    <div class="cat-btn" data-cat="infantry" onclick="setCategory('infantry')">
-      🪖 Infantry <span class="cnt" id="cnt-infantry"></span>
-    </div>
-    <div class="cat-btn" data-cat="vehicles" onclick="setCategory('vehicles')">
-      🚗 Vehicles <span class="cnt" id="cnt-vehicles"></span>
-    </div>
-    <div class="cat-btn" data-cat="aircraft" onclick="setCategory('aircraft')">
-      ✈ Aircraft <span class="cnt" id="cnt-aircraft"></span>
-    </div>
-    <div class="cat-btn" data-cat="navy" onclick="setCategory('navy')">
-      ⚓ Navy <span class="cnt" id="cnt-navy"></span>
-    </div>
-    <div class="cat-btn" data-cat="upgrades" onclick="setCategory('upgrades')">
-      ⬆ Upgrades <span class="cnt" id="cnt-upgrades"></span>
-    </div>
-    <div class="cat-btn" data-cat="weapons" onclick="setCategory('weapons')">
-      💥 Weapons <span class="cnt" id="cnt-weapons"></span>
-    </div>
-    <hr class="sidebar-sep">
-    <div class="sidebar-action" onclick="showAllChanges()">📋 All Changes</div>
-    <div class="sidebar-action" onclick="resetChanges()">↩ Reset All</div>
-  </div>
-
-  <div class="main">
-    <div class="tree-wrap" id="treeWrap"></div>
-  </div>
-
-  <div class="panel" id="editPanel">
-    <div class="panel-header">
-      <div class="ph-text">
-        <div class="p-name" id="pName">—</div>
-        <div class="p-id" id="pId">—</div>
+<!-- Edit modal (floating centered) -->
+<div class="edit-bg" id="editBg" onclick="closeEditOutside(event)">
+  <div class="edit-modal" id="editModal">
+    <div class="edit-header">
+      <div class="edit-header-text">
+        <div class="edit-h-name" id="pName">—</div>
+        <div class="edit-h-id" id="pId">—</div>
       </div>
-      <button class="p-close" onclick="closePanel()">✕</button>
+      <button class="edit-close" onclick="closePanel()">✕</button>
     </div>
-    <div class="panel-body" id="panelBody"></div>
-    <div class="panel-footer">
+    <div class="edit-body" id="editBody"></div>
+    <div class="edit-footer">
       <button class="btn" onclick="closePanel()">Close</button>
-      <button class="btn btn-primary btn-full" onclick="generatePrompt()">Generate Prompt</button>
+      <button class="btn btn-primary" onclick="generatePrompt()">Generate Prompt</button>
     </div>
   </div>
-
 </div>
 
+<!-- Prompt output modal -->
 <div class="modal-bg" id="modalBg" onclick="closeModalOutside(event)">
   <div class="modal">
     <div class="modal-header">
       <span class="modal-title" id="modalTitle">Generated Prompt</span>
       <button class="btn" onclick="copyPrompt()" style="padding:4px 10px;font-size:11px">Copy</button>
-      <button class="p-close" onclick="closeModal()">✕</button>
+      <button class="edit-close" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body"><pre id="modalPre"></pre></div>
     <div class="modal-footer">
@@ -291,18 +319,19 @@ body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', syste
 </div>
 
 <script>
-// ── Config ───────────────────────────────────────────────────────────────────
+// ── Config ────────────────────────────────────────────────────────────────
 const BITS = 'bits/';
 const ALL_CATS = ['main-buildings','defense','infantry','vehicles','aircraft','navy','upgrades','weapons'];
 
-// ── State ────────────────────────────────────────────────────────────────────
+// ── State ─────────────────────────────────────────────────────────────────
 let DATA = { actors: [], weapons: [] };
 let category = 'main-buildings';
 let selectedId = null;
 let changes = {};
-let _spritePopupActor = null;
+let lineEnabled = new Set();  // actor IDs with lines enabled
+let globalLinesOn = false;
 
-// ── Boot ─────────────────────────────────────────────────────────────────────
+// ── Boot ──────────────────────────────────────────────────────────────────
 async function init() {
   try {
     const r = await fetch('techtree-data.json?' + Date.now());
@@ -314,11 +343,15 @@ async function init() {
     return;
   }
   try { const s = localStorage.getItem('aot-techtree-changes'); if (s) changes = JSON.parse(s); } catch(_) {}
+  if (Object.keys(changes).length > 0) {
+    document.getElementById('changesBadge').classList.add('visible');
+    document.getElementById('genAllBtn').style.display = 'inline';
+  }
   updateCounts();
   render();
 }
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────
 function getActors(factionFilter) {
   return DATA.actors.filter(a => {
     if (a.category !== category) return false;
@@ -328,18 +361,17 @@ function getActors(factionFilter) {
   });
 }
 function getWeapons() { return DATA.weapons; }
-function chgVal(id, field) {
-  return changes[id]?.[field];
-}
+function chgVal(id, field) { return changes[id]?.[field]; }
 function setChange(id, field, value) {
   if (!changes[id]) changes[id] = {};
   changes[id][field] = value;
   localStorage.setItem('aot-techtree-changes', JSON.stringify(changes));
   document.getElementById('changesBadge').classList.add('visible');
+  document.getElementById('genAllBtn').style.display = 'inline';
 }
 function hasChange(id) { return !!changes[id] && Object.keys(changes[id]).length > 0; }
 
-// ── Counts ───────────────────────────────────────────────────────────────────
+// ── Counts ────────────────────────────────────────────────────────────────
 function updateCounts() {
   ALL_CATS.filter(c => c !== 'weapons').forEach(cat => {
     const el = document.getElementById('cnt-' + cat);
@@ -349,17 +381,43 @@ function updateCounts() {
   if (wEl) wEl.textContent = DATA.weapons.length;
 }
 
-// ── Render ───────────────────────────────────────────────────────────────────
+// ── Connection helpers ────────────────────────────────────────────────────
+// Build a map: condition → [actorId] for all actors that provide that condition
+function buildProvidesMap() {
+  const m = {};
+  for (const a of DATA.actors) {
+    for (const cond of (a.provides || [])) {
+      if (!m[cond]) m[cond] = [];
+      m[cond].push(a.id);
+    }
+  }
+  return m;
+}
+
+// For actor A, return all actor IDs that A directly depends on (hard prereqs → provides_map)
+function getParentIds(actor, providesMap) {
+  const parents = new Set();
+  for (const req of actor.prereqs) {
+    const providers = providesMap[req] || [];
+    for (const pid of providers) {
+      if (pid !== actor.id) parents.add(pid);
+    }
+  }
+  return [...parents];
+}
+
+// ── Render ────────────────────────────────────────────────────────────────
 function render() {
-  if (category === 'weapons') { renderWeapons(); return; }
+  if (category === 'weapons') { renderWeapons(); clearLines(); return; }
   const q = document.getElementById('searchInput').value.toLowerCase();
   const gdiActors = getActors('gdi');
   const nodActors = getActors('nod');
 
-  // group each by tier
   function byTier(actors) {
     const t = {};
     for (const a of actors) (t[a.tier] = t[a.tier] || []).push(a);
+    // Sort each tier by BPO
+    for (const k of Object.keys(t)) t[k].sort((a, b) => a.bpo - b.bpo);
     return t;
   }
   const gdiTiers = byTier(gdiActors);
@@ -368,6 +426,13 @@ function render() {
 
   const wrap = document.getElementById('treeWrap');
   wrap.innerHTML = '';
+
+  // SVG overlay for connection lines
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.id = 'treeSvg';
+  svg.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:5';
+  wrap.style.position = 'relative';
+  wrap.appendChild(svg);
 
   const tierNames = ['Age 0 — Base', 'Age 1 — Tiberium Era', 'Age 2 — Advanced', 'Age 3 — Peak'];
 
@@ -402,6 +467,160 @@ function render() {
       }
     }
   }
+
+  // Draw lines after layout is stable
+  requestAnimationFrame(() => requestAnimationFrame(() => drawConnections(svg)));
+}
+
+function clearLines() {
+  const svg = document.getElementById('treeSvg');
+  if (svg) svg.remove();
+}
+
+function drawConnections(svg) {
+  const providesMap = buildProvidesMap();
+  const wrap = document.getElementById('treeWrap');
+  const wrapRect = wrap.getBoundingClientRect();
+  const mainEl = wrap.closest('.main');
+  const scrollTop = mainEl.scrollTop;
+  const scrollLeft = mainEl.scrollLeft;
+
+  const visibleActors = DATA.actors.filter(a => a.category === category);
+
+  // Find the card element strictly within a faction column (gdi or nod)
+  function findCardInFaction(actorId, fac) {
+    for (const col of wrap.querySelectorAll(`.faction-col.${fac}`)) {
+      const el = col.querySelector(`.card[data-id="${actorId}"]`);
+      if (el && !el.classList.contains('hidden')) return el;
+    }
+    return null;
+  }
+
+  function toWrap(el) {
+    const r = el.getBoundingClientRect();
+    return {
+      x: r.left - wrapRect.left + scrollLeft,
+      y: r.top  - wrapRect.top  + scrollTop,
+      w: r.width, h: r.height
+    };
+  }
+
+  function drawArrow(x1, y1, x2, y2, stroke, fill) {
+    const dy = y2 - y1;
+    const cp = Math.max(30, dy * 0.45);
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', `M${x1},${y1} C${x1},${y1+cp} ${x2},${y2-cp} ${x2},${y2}`);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', stroke);
+    path.setAttribute('stroke-width', '1.5');
+    svg.appendChild(path);
+    const tip = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    tip.setAttribute('points', `${x2-4},${y2-7} ${x2+4},${y2-7} ${x2},${y2}`);
+    tip.setAttribute('fill', fill);
+    svg.appendChild(tip);
+  }
+
+  // Draw per faction so lines stay strictly within their column
+  for (const fac of ['gdi', 'nod']) {
+    const stroke = fac === 'gdi' ? 'rgba(91,141,239,0.4)' : 'rgba(224,85,85,0.4)';
+    const fill   = fac === 'gdi' ? 'rgba(91,141,239,0.6)' : 'rgba(224,85,85,0.6)';
+
+    for (const actor of visibleActors) {
+      // Skip actors not shown in this faction column
+      if (fac === 'gdi' && actor.faction === 'nod') continue;
+      if (fac === 'nod' && actor.faction === 'gdi') continue;
+
+      // Only draw lines if this actor or a parent has lines enabled
+      if (!globalLinesOn && !lineEnabled.has(actor.id)) continue;
+
+      const childEl = findCardInFaction(actor.id, fac);
+      if (!childEl) continue;
+
+      for (const pid of getParentIds(actor, providesMap)) {
+        const pa = DATA.actors.find(x => x.id === pid);
+        if (!pa || pa.category !== category) continue;
+        if (pa.tier >= actor.tier) continue;
+        // Parent must also appear in this faction column
+        if (fac === 'gdi' && pa.faction === 'nod') continue;
+        if (fac === 'nod' && pa.faction === 'gdi') continue;
+
+        const parentEl = findCardInFaction(pid, fac);
+        if (!parentEl) continue;
+
+        const pr = toWrap(parentEl);
+        const cr = toWrap(childEl);
+        drawArrow(
+          pr.x + pr.w / 2, pr.y + pr.h,
+          cr.x + cr.w / 2, cr.y,
+          stroke, fill
+        );
+      }
+    }
+  }
+}
+
+function cropSpriteFrame(img) {
+  const wrap = img.closest('.sprite-frame-wrap');
+  if (!wrap) return;
+  const frames = parseInt(wrap.dataset.frames) || 1;
+  const nw = img.naturalWidth;
+  const nh = img.naturalHeight;
+  if (!nw || !nh) return;
+  if (frames <= 1) {
+    // Single frame: fit into 128×96
+    img.style.width = '128px';
+    img.style.height = '96px';
+    img.style.objectFit = 'contain';
+    return;
+  }
+  // Spritesheet: frames laid out horizontally, show frame 0 only
+  const frameW = nw / frames;
+  const frameH = nh;
+  // Scale frame to fit 128×96
+  const scale = Math.min(128 / frameW, 96 / frameH);
+  img.style.width = (nw * scale) + 'px';
+  img.style.height = (frameH * scale) + 'px';
+  img.style.imageRendering = 'pixelated';
+  img.style.marginLeft = '0';
+  // Clip to first frame by wrapping overflow:hidden (already on parent)
+}
+
+function toggleCardLines(e, id) {
+  e.stopPropagation();
+  if (lineEnabled.has(id)) lineEnabled.delete(id);
+  else lineEnabled.add(id);
+  // Update button appearance on all cards with this id
+  document.querySelectorAll(`.card[data-id="${id}"] .card-line-btn`).forEach(btn => {
+    btn.classList.toggle('active', lineEnabled.has(id));
+  });
+  clearLines();
+  const svg = ensureSvg();
+  requestAnimationFrame(() => requestAnimationFrame(() => drawConnections(svg)));
+}
+
+function toggleAllLines() {
+  globalLinesOn = !globalLinesOn;
+  const btn = document.getElementById('toggleAllLinesBtn');
+  btn.textContent = globalLinesOn ? '⋯ Lines: ON' : '⋯ Lines: OFF';
+  btn.style.color = globalLinesOn ? 'var(--accent)' : '';
+  // Update all card buttons
+  document.querySelectorAll('.card-line-btn').forEach(b => b.classList.toggle('active', globalLinesOn));
+  clearLines();
+  const svg = ensureSvg();
+  requestAnimationFrame(() => requestAnimationFrame(() => drawConnections(svg)));
+}
+
+function ensureSvg() {
+  let svg = document.getElementById('treeSvg');
+  if (!svg) {
+    const wrap = document.getElementById('treeWrap');
+    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.id = 'treeSvg';
+    svg.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:10';
+    wrap.style.position = 'relative';
+    wrap.appendChild(svg);
+  }
+  return svg;
 }
 
 function renderWeapons() {
@@ -455,18 +674,16 @@ function makeCard(a, hidden) {
   div.dataset.id = a.id;
   div.onclick = () => selectActor(a.id);
 
-  const sprite  = chgVal(a.id, 'sprite') || a.sprite;
-  const cost    = chgVal(a.id, 'cost')  ?? a.stats.cost;
-  const hp      = chgVal(a.id, 'hp')    ?? a.stats.hp;
-  const power   = chgVal(a.id, 'power') ?? a.stats.power;
+  const sprite = chgVal(a.id, 'sprite') || a.sprite;
+  const cost   = chgVal(a.id, 'cost')  ?? a.stats.cost;
+  const hp     = chgVal(a.id, 'hp')    ?? a.stats.hp;
+  const power  = chgVal(a.id, 'power') ?? a.stats.power;
 
-  let iconHtml = '';
-  if (a.iconFile) {
-    iconHtml = `<img src="${BITS}${a.iconFile}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'no-img',textContent:'${a.id}'}))">`;
-  } else {
-    iconHtml = `<div class="no-img">${a.id}</div>`;
-  }
+  const iconHtml = a.iconFile
+    ? `<img src="${BITS}${a.iconFile}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'no-img',textContent:'${a.id}'}))">`
+    : `<div class="no-img">${a.id}</div>`;
 
+  const lineActive = lineEnabled.has(a.id);
   div.innerHTML = `
     <div class="card-icon">
       ${iconHtml}
@@ -481,11 +698,12 @@ function makeCard(a, hidden) {
         ${hp    != null ? `<span class="stat-chip hp">${hp >= 1000 ? (hp/1000).toFixed(0)+'k' : hp} HP</span>` : ''}
         ${power ? `<span class="stat-chip pow">${power > 0 ? '+' : ''}${power}⚡</span>` : ''}
       </div>
-    </div>`;
+    </div>
+    <button class="card-line-btn${lineActive ? ' active' : ''}" title="Toggle connection lines" onclick="toggleCardLines(event,'${a.id}')">⋯</button>`;
   return div;
 }
 
-// ── Selection ─────────────────────────────────────────────────────────────────
+// ── Selection ──────────────────────────────────────────────────────────────
 function selectActor(id) {
   selectedId = id;
   document.querySelectorAll('.card.selected').forEach(el => el.classList.remove('selected'));
@@ -503,11 +721,15 @@ function selectWeapon(id) {
 
 function closePanel() {
   selectedId = null;
-  document.getElementById('editPanel').classList.remove('open');
+  document.getElementById('editBg').classList.remove('open');
   document.querySelectorAll('.card.selected,.weapon-card.selected').forEach(el => el.classList.remove('selected'));
 }
 
-// ── Actor panel ───────────────────────────────────────────────────────────────
+function closeEditOutside(e) {
+  if (e.target === document.getElementById('editBg')) closePanel();
+}
+
+// ── Actor panel ────────────────────────────────────────────────────────────
 function openActorPanel(a) {
   document.getElementById('pName').textContent = a.displayName;
   document.getElementById('pId').textContent = a.id + ' · ' + a.faction + ' · ' + a.category;
@@ -520,156 +742,185 @@ function openActorPanel(a) {
   const weapon= chg.weapon || '';
   const prereqsRaw = chg.prereqsRaw ?? [...a.visibilityPrereqs, ...a.prereqs].join(', ');
 
-  const visTagsHtml = a.visibilityPrereqs.map(p => `<span class="ptag vis">${p}</span>`).join('');
+  const visTagsHtml   = a.visibilityPrereqs.map(p => `<span class="ptag vis">${p}</span>`).join('');
   const buildTagsHtml = a.prereqs.map(p => `<span class="ptag">${p}</span>`).join('');
 
   const iconHtml = a.iconFile
     ? `<img class="icon-preview" src="${BITS}${a.iconFile}" alt="">`
     : `<div class="no-icon-box">no icon</div>`;
 
-  document.getElementById('panelBody').innerHTML = `
-    <div class="p-section">
-      <div class="p-section-title">Icon</div>
-      <div class="icon-preview-wrap">
-        ${iconHtml}
-        <div class="icon-info">
-          <b>${a.iconFile || '—'}</b><br>
-          ${a.customIcon ? 'Custom (bits/)' : 'Standard icon'}<br>
-          <span style="color:var(--text-dim)">Edit via bits/ folder</span>
+  const spritePreviewHtml = a.idleFile
+    ? `<div class="sprite-inline-preview visible">
+        <div class="sprite-frame-wrap" data-frames="${a.idleLength||1}">
+          <img src="${BITS}${a.idleFile}" alt="" onload="cropSpriteFrame(this)">
+        </div>
+        <span class="sprite-inline-label">${a.idleFile}${(a.idleLength||1)>1?' [frame 0/'+a.idleLength+']':''}</span>
+      </div>`
+    : `<div class="sprite-inline-preview visible" style="justify-content:center;align-items:center;width:128px;height:96px;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text-dim);font-size:9px;text-align:center;line-height:1.4">
+        no world<br>sprite PNG
+      </div>`;
+
+  document.getElementById('editBody').className = 'edit-body';
+  document.getElementById('editBody').innerHTML = `
+    <!-- Left column -->
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="p-section">
+        <div class="p-section-title">Icon &amp; Sprite</div>
+        <div class="icon-preview-wrap">
+          ${iconHtml}
+          <div class="icon-info">
+            <b>${a.iconFile || '—'}</b><br>
+            ${a.customIcon ? 'Custom (bits/)' : 'Standard icon'}<br>
+            <span style="color:var(--text-dim)">Edit via bits/ folder</span>
+          </div>
+          ${spritePreviewHtml}
         </div>
       </div>
+
+      <div class="p-section">
+        <div class="p-section-title">Sprite Source</div>
+        <div class="sprite-row">
+          <div class="sprite-opt ${sprite==='td'?'sel-td':''}">TD</div>
+          <div class="sprite-opt ${sprite==='ra'?'sel-ra':''}">RA</div>
+          <div class="sprite-opt ${sprite==='ts'?'sel-ts':''}">TS</div>
+        </div>
+      </div>
+
+      <div class="p-section">
+        <div class="p-section-title">Stats</div>
+        <div class="f-row">
+          <span class="f-label">Cost ($)</span>
+          <input class="f-input" type="number" value="${cost ?? ''}" placeholder="–"
+            oninput="fieldChange('${a.id}','cost',this.value)">
+        </div>
+        <div class="f-row">
+          <span class="f-label">HP</span>
+          <input class="f-input" type="number" value="${hp ?? ''}" placeholder="–"
+            oninput="fieldChange('${a.id}','hp',this.value)">
+        </div>
+        <div class="f-row">
+          <span class="f-label">Power</span>
+          <input class="f-input" type="number" value="${power ?? 0}"
+            oninput="fieldChange('${a.id}','power',this.value)">
+        </div>
+      </div>
+
+      <div class="p-section">
+        <div class="p-section-title">Weapon</div>
+        <div class="f-row">
+          <span class="f-label">Weapon ID</span>
+          <input class="f-input mono" list="wlist" value="${weapon}" placeholder="(not yet parsed per-actor)"
+            oninput="fieldChange('${a.id}','weapon',this.value)">
+        </div>
+        <datalist id="wlist">${DATA.weapons.map(w=>`<option value="${w.id}">`).join('')}</datalist>
+      </div>
     </div>
 
-    <div class="p-section">
-      <div class="p-section-title">Sprite Source <span style="color:var(--text-dim);font-size:9px;font-weight:400;text-transform:none;letter-spacing:0">(click active to preview)</span></div>
-      <div class="sprite-row">
-        <div class="sprite-opt ${sprite==='td'?'sel-td':''}" ${sprite==='td'?`onclick="openSpritePopup('${a.id}',this)"`:''}>TD</div>
-        <div class="sprite-opt ${sprite==='ra'?'sel-ra':''}" ${sprite==='ra'?`onclick="openSpritePopup('${a.id}',this)"`:''}>RA</div>
-        <div class="sprite-opt ${sprite==='ts'?'sel-ts':''}" ${sprite==='ts'?`onclick="openSpritePopup('${a.id}',this)"`:''}>TS</div>
+    <!-- Right column -->
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="p-section">
+        <div class="p-section-title">Visibility Gates <span style="font-size:9px;font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-dim)">(~ prefix — hides until condition met)</span></div>
+        <div class="prereq-tags">${visTagsHtml || '<span style="font-size:10px;color:var(--text-dim)">none</span>'}</div>
       </div>
-    </div>
 
-    <div class="p-section">
-      <div class="p-section-title">Stats</div>
-      <div class="f-row">
-        <span class="f-label">Cost ($)</span>
-        <input class="f-input" type="number" value="${cost ?? ''}" placeholder="–"
-          oninput="fieldChange('${a.id}','cost',this.value)">
+      <div class="p-section">
+        <div class="p-section-title">Build Requirements <span style="font-size:9px;font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-dim)">(must be present to build)</span></div>
+        <div class="prereq-tags">${buildTagsHtml || '<span style="font-size:10px;color:var(--text-dim)">none</span>'}</div>
+        <div class="f-row" style="margin-top:8px">
+          <span class="f-label" style="color:var(--text-dim);font-size:10px">Edit all</span>
+          <input class="f-input mono" id="f-prereqs" value="${prereqsRaw}"
+            oninput="fieldChange('${a.id}','prereqsRaw',this.value)"
+            placeholder="~vis-gate, hard-req, ...">
+        </div>
+        <div style="font-size:9px;color:var(--text-dim);margin-left:80px">Comma-separated. ~ = visibility only.</div>
       </div>
-      <div class="f-row">
-        <span class="f-label">HP</span>
-        <input class="f-input" type="number" value="${hp ?? ''}" placeholder="–"
-          oninput="fieldChange('${a.id}','hp',this.value)">
-      </div>
-      <div class="f-row">
-        <span class="f-label">Power</span>
-        <input class="f-input" type="number" value="${power ?? 0}"
-          oninput="fieldChange('${a.id}','power',this.value)">
-      </div>
-    </div>
 
-    <div class="p-section">
-      <div class="p-section-title">Weapon</div>
-      <div class="f-row">
-        <span class="f-label">Weapon ID</span>
-        <input class="f-input mono" list="wlist" value="${weapon}" placeholder="(not yet parsed per-actor)"
-          oninput="fieldChange('${a.id}','weapon',this.value)">
+      <div class="p-section">
+        <div class="p-section-title">Info</div>
+        <div class="f-row"><span class="f-label">Category</span><input class="f-input" value="${a.category}" readonly></div>
+        <div class="f-row"><span class="f-label">Faction</span><input class="f-input" value="${a.faction}" readonly></div>
+        <div class="f-row"><span class="f-label">Queue</span><input class="f-input mono" value="${a.queue}" readonly></div>
+        <div class="f-row"><span class="f-label">File</span><input class="f-input mono" value="${a.file}" readonly style="font-size:10px"></div>
+        <div class="f-row"><span class="f-label">BPO</span><input class="f-input" value="${a.bpo || '—'}" readonly></div>
+        <div class="f-row"><span class="f-label">Is Proxy</span><input class="f-input" value="${a.isProxy}" readonly></div>
       </div>
-      <datalist id="wlist">${DATA.weapons.map(w=>`<option value="${w.id}">`).join('')}</datalist>
-    </div>
-
-    <div class="p-section">
-      <div class="p-section-title">Prerequisites</div>
-      ${visTagsHtml ? `<div style="font-size:9px;color:var(--text-dim);margin-bottom:3px">Visibility (~)</div>
-      <div class="prereq-tags">${visTagsHtml}</div>` : ''}
-      ${buildTagsHtml ? `<div style="font-size:9px;color:var(--text-dim);margin:5px 0 3px">Build requirements</div>
-      <div class="prereq-tags">${buildTagsHtml}</div>` : ''}
-      <div class="f-row" style="margin-top:8px">
-        <span class="f-label">Edit</span>
-        <input class="f-input mono" id="f-prereqs" value="${prereqsRaw}"
-          oninput="fieldChange('${a.id}','prereqsRaw',this.value)">
-      </div>
-      <div style="font-size:9px;color:var(--text-dim);margin-left:76px">Comma-separated. ~ = visibility gate.</div>
-    </div>
-
-    <div class="p-section">
-      <div class="p-section-title">Info</div>
-      <div class="f-row"><span class="f-label">Category</span><input class="f-input" value="${a.category}" readonly></div>
-      <div class="f-row"><span class="f-label">Faction</span><input class="f-input" value="${a.faction}" readonly></div>
-      <div class="f-row"><span class="f-label">Queue</span><input class="f-input mono" value="${a.queue}" readonly></div>
-      <div class="f-row"><span class="f-label">File</span><input class="f-input mono" value="${a.file}" readonly style="font-size:10px"></div>
-      <div class="f-row"><span class="f-label">BPO</span><input class="f-input" value="${a.bpo || '—'}" readonly></div>
-      <div class="f-row"><span class="f-label">Is Proxy</span><input class="f-input" value="${a.isProxy}" readonly></div>
     </div>
   `;
-  document.getElementById('editPanel').classList.add('open');
+  document.getElementById('editBg').classList.add('open');
 }
 
-// ── Weapon panel ───────────────────────────────────────────────────────────────
+// ── Weapon panel ───────────────────────────────────────────────────────────
 function openWeaponPanel(w) {
   document.getElementById('pName').textContent = w.id;
   document.getElementById('pId').textContent = 'weapon · ' + w.faction;
   const s = w.stats;
   const chg = changes[w.id] || {};
 
-  document.getElementById('panelBody').innerHTML = `
-    <div class="p-section">
-      <div class="p-section-title">Stats</div>
-      <div class="f-row">
-        <span class="f-label">Damage</span>
-        <input class="f-input" type="number" value="${chg.damage ?? s.damage ?? ''}" placeholder="–"
-          oninput="fieldChange('${w.id}','damage',this.value)">
+  document.getElementById('editBody').className = 'edit-body';
+  document.getElementById('editBody').innerHTML = `
+    <!-- Left: Stats + Info -->
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="p-section">
+        <div class="p-section-title">Stats</div>
+        <div class="f-row">
+          <span class="f-label">Damage</span>
+          <input class="f-input" type="number" value="${chg.damage ?? s.damage ?? ''}" placeholder="–"
+            oninput="fieldChange('${w.id}','damage',this.value)">
+        </div>
+        <div class="f-row">
+          <span class="f-label">Range (c)</span>
+          <input class="f-input" type="number" step="0.5" value="${chg.range ?? s.range ?? ''}" placeholder="–"
+            oninput="fieldChange('${w.id}','range',this.value)">
+        </div>
+        <div class="f-row">
+          <span class="f-label">Burst</span>
+          <input class="f-input" type="number" value="${chg.burst ?? s.burst ?? 1}"
+            oninput="fieldChange('${w.id}','burst',this.value)">
+        </div>
+        <div class="f-row">
+          <span class="f-label">Burst Delays</span>
+          <input class="f-input mono" value="${chg.burstDelays ?? s.burstDelays ?? ''}"
+            oninput="fieldChange('${w.id}','burstDelays',this.value)">
+        </div>
+        <div class="f-row">
+          <span class="f-label">Reload</span>
+          <input class="f-input" type="number" value="${chg.reloadDelay ?? s.reloadDelay ?? ''}" placeholder="ticks"
+            oninput="fieldChange('${w.id}','reloadDelay',this.value)">
+        </div>
       </div>
-      <div class="f-row">
-        <span class="f-label">Range (c)</span>
-        <input class="f-input" type="number" step="0.5" value="${chg.range ?? s.range ?? ''}" placeholder="–"
-          oninput="fieldChange('${w.id}','range',this.value)">
-      </div>
-      <div class="f-row">
-        <span class="f-label">Burst</span>
-        <input class="f-input" type="number" value="${chg.burst ?? s.burst ?? 1}"
-          oninput="fieldChange('${w.id}','burst',this.value)">
-      </div>
-      <div class="f-row">
-        <span class="f-label">Burst Delays</span>
-        <input class="f-input mono" value="${chg.burstDelays ?? s.burstDelays ?? ''}"
-          oninput="fieldChange('${w.id}','burstDelays',this.value)">
-      </div>
-      <div class="f-row">
-        <span class="f-label">Reload</span>
-        <input class="f-input" type="number" value="${chg.reloadDelay ?? s.reloadDelay ?? ''}" placeholder="ticks"
-          oninput="fieldChange('${w.id}','reloadDelay',this.value)">
+      <div class="p-section">
+        <div class="p-section-title">Info</div>
+        <div class="f-row"><span class="f-label">Inherits</span><input class="f-input mono" value="${w.inherits || '—'}" readonly></div>
+        <div class="f-row"><span class="f-label">Faction</span><input class="f-input" value="${w.faction}" readonly></div>
       </div>
     </div>
-    <div class="p-section">
-      <div class="p-section-title">Info</div>
-      <div class="f-row"><span class="f-label">Inherits</span><input class="f-input mono" value="${w.inherits || '—'}" readonly></div>
-      <div class="f-row"><span class="f-label">Faction</span><input class="f-input" value="${w.faction}" readonly></div>
-    </div>
-    <div class="p-section">
-      <div class="p-section-title">Used By</div>
-      ${w.usedBy && w.usedBy.length > 0
-        ? w.usedBy.map(uid => {
-            const a = DATA.actors.find(x => x.id === uid);
-            return `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border)">
-              ${a?.iconFile ? `<img src="${BITS}${a.iconFile}" style="width:32px;height:24px;object-fit:contain;image-rendering:pixelated;background:var(--bg);border:1px solid var(--border);border-radius:2px">` : '<div style="width:32px;height:24px;background:var(--bg);border:1px solid var(--border);border-radius:2px"></div>'}
-              <div>
-                <div style="font-size:11px;font-weight:600;color:var(--text)">${a?.displayName || uid}</div>
-                <div style="font-size:9px;color:var(--text-dim);font-family:monospace">${uid}</div>
-              </div>
-              <div style="margin-left:auto;cursor:pointer;font-size:10px;color:var(--accent)" onclick="selectActor('${uid}');setCategory('${a?.category||'vehicles'}')">→</div>
-            </div>`;
-          }).join('')
-        : '<div style="font-size:11px;color:var(--text-dim)">Not used by any buildable unit</div>'}
+
+    <!-- Right: Used By -->
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="p-section">
+        <div class="p-section-title">Used By</div>
+        ${w.usedBy && w.usedBy.length > 0
+          ? w.usedBy.map(uid => {
+              const a = DATA.actors.find(x => x.id === uid);
+              return `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border)">
+                ${a?.iconFile ? `<img src="${BITS}${a.iconFile}" style="width:32px;height:24px;object-fit:contain;image-rendering:pixelated;background:var(--bg);border:1px solid var(--border);border-radius:2px">` : '<div style="width:32px;height:24px;background:var(--bg);border:1px solid var(--border);border-radius:2px"></div>'}
+                <div>
+                  <div style="font-size:11px;font-weight:600;color:var(--text)">${a?.displayName || uid}</div>
+                  <div style="font-size:9px;color:var(--text-dim);font-family:monospace">${uid}</div>
+                </div>
+                <div style="margin-left:auto;cursor:pointer;font-size:10px;color:var(--accent)" onclick="selectActor('${uid}');setCategory('${a?.category||'vehicles'}')">→</div>
+              </div>`;
+            }).join('')
+          : '<div style="font-size:11px;color:var(--text-dim)">Not used by any buildable unit</div>'}
+      </div>
     </div>
   `;
-  document.getElementById('editPanel').classList.add('open');
+  document.getElementById('editBg').classList.add('open');
 }
 
-// ── Field changes ─────────────────────────────────────────────────────────────
+// ── Field changes ──────────────────────────────────────────────────────────
 function fieldChange(id, field, value) {
   setChange(id, field, value);
-  // Live-update card
   const card = document.querySelector(`.card[data-id="${id}"]`);
   if (card) {
     const a = DATA.actors.find(x => x.id === id);
@@ -677,8 +928,7 @@ function fieldChange(id, field, value) {
   }
 }
 
-
-// ── Prompt ────────────────────────────────────────────────────────────────────
+// ── Prompt ────────────────────────────────────────────────────────────────
 function generatePrompt() {
   if (!selectedId) return;
   const chg = changes[selectedId];
@@ -686,7 +936,6 @@ function generatePrompt() {
   if (!a) return;
 
   let text = `Update actor/weapon in YAML:\n\nID: ${selectedId}\nDisplay: ${a.displayName || selectedId}\n`;
-
   if (!chg || Object.keys(chg).length === 0) {
     text += '\n(No changes recorded yet.)';
   } else {
@@ -694,7 +943,6 @@ function generatePrompt() {
     for (const [k, v] of Object.entries(chg)) text += `  ${k}: ${v}\n`;
     text += '\nSuggested YAML:\n' + buildYaml(selectedId, chg);
   }
-
   showModal('Generated Prompt — ' + selectedId, text);
 }
 
@@ -739,58 +987,41 @@ function resetChanges() {
   changes = {};
   localStorage.removeItem('aot-techtree-changes');
   document.getElementById('changesBadge').classList.remove('visible');
+  document.getElementById('genAllBtn').style.display = 'none';
   render(); closePanel();
 }
 
-// ── Sprite popup ──────────────────────────────────────────────────────────────
-function openSpritePopup(actorId, triggerEl) {
-  const a = DATA.actors.find(x => x.id === actorId);
-  if (!a) return;
-  const popup = document.getElementById('spritePopup');
-  const img   = document.getElementById('spritePopupImg');
-  const label = document.getElementById('spritePopupLabel');
-  const title = document.getElementById('spritePopupTitle');
+function generateAllPrompt() {
+  const ids = Object.keys(changes);
+  if (ids.length === 0) { alert('No changes recorded.'); return; }
 
-  // prefer idle PNG, fall back to icon PNG
-  const previewFile = a.idleFile || a.iconFile;
-  if (!previewFile) { alert('No preview PNG available for ' + actorId); return; }
+  let text = `Please apply the following changes to the Age of Tiberium mod YAML files.\n`;
+  text += `Each entry lists the actor/weapon ID, display name, and the fields to change.\n\n`;
+  text += `${'─'.repeat(60)}\n\n`;
 
-  img.src = BITS + previewFile;
-  label.textContent = previewFile + ' · ' + a.sprite.toUpperCase();
-  title.textContent = a.displayName + ' — Sprite Preview';
-  _spritePopupActor = actorId;
-
-  // position near the trigger element
-  const rect = triggerEl.getBoundingClientRect();
-  popup.style.display = 'flex'; // measure first
-  const pw = popup.offsetWidth || 200;
-  const ph = popup.offsetHeight || 160;
-  let left = rect.left - pw - 8;
-  if (left < 8) left = rect.right + 8;
-  let top  = rect.top;
-  if (top + ph > window.innerHeight - 8) top = window.innerHeight - ph - 8;
-  popup.style.left = left + 'px';
-  popup.style.top  = top  + 'px';
-  popup.classList.add('open');
-}
-
-function closeSpritePopup() {
-  document.getElementById('spritePopup').classList.remove('open');
-  _spritePopupActor = null;
-}
-
-// close popup on outside click
-document.addEventListener('click', e => {
-  const popup = document.getElementById('spritePopup');
-  if (popup && popup.classList.contains('open') && !popup.contains(e.target)) {
-    const isSpriteTrigger = e.target.classList.contains('sprite-opt') && e.target.classList.contains('sel-td') ||
-                            e.target.classList.contains('sel-ra') ||
-                            e.target.classList.contains('sel-ts');
-    if (!isSpriteTrigger) closeSpritePopup();
+  for (const id of ids) {
+    const chg = changes[id];
+    if (!chg || Object.keys(chg).length === 0) continue;
+    const entry = DATA.actors.find(x => x.id === id) || DATA.weapons.find(x => x.id === id);
+    const name = entry?.displayName || id;
+    const file = entry?.file || '?';
+    text += `ID: ${id}\nName: ${name}\nFile: ${file}\n`;
+    text += `Changes:\n`;
+    for (const [k, v] of Object.entries(chg)) text += `  ${k}: ${v}\n`;
+    text += `\nSuggested YAML:\n${buildYaml(id, chg)}\n\n`;
+    text += `${'─'.repeat(60)}\n\n`;
   }
-});
 
-// ── Nav ───────────────────────────────────────────────────────────────────────
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('genAllBtn');
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    btn.style.color = 'var(--green)';
+    setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 2000);
+  }).catch(() => showModal('All Changes — Prompt', text));
+}
+
+// ── Nav ────────────────────────────────────────────────────────────────────
 function setCategory(cat) {
   category = cat;
   document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));

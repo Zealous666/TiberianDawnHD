@@ -44,6 +44,7 @@ UNIT_FILES = {
     "engine/vehicles.yaml":   ROOT / "engine/mods/cnc/rules/vehicles.yaml",
     "engine/infantry.yaml":   ROOT / "engine/mods/cnc/rules/infantry.yaml",
     "engine/structures.yaml": ROOT / "engine/mods/cnc/rules/structures.yaml",
+    "engine/aircraft.yaml":   ROOT / "engine/mods/cnc/rules/aircraft.yaml",
 }
 WEAPONS_FILE   = ROOT / "mods/cnc/weapons/aot-weapons.yaml"
 SEQUENCES_FILE  = ROOT / "mods/cnc/sequences/aot-sequences.yaml"
@@ -93,6 +94,8 @@ def parse_blocks(path):
             in_power     = strip.startswith('Power')
             in_tooltip   = strip == 'Tooltip:'
             in_render    = strip.startswith('RenderSprites:')
+            in_provides  = strip.startswith('ProvidesPrerequisite')
+            in_preview   = strip.startswith('SequencePlaceBuildingPreview:')
             if strip == '-Buildable:':
                 current_data['_removed'] = True
             if strip.startswith('Inherits'):
@@ -113,6 +116,10 @@ def parse_blocks(path):
                 current_data['Tooltip'] = strip.split(':',1)[1].strip()
             if in_render and strip.startswith('Image:'):
                 current_data.setdefault('RenderImage', strip.split(':',1)[1].strip())
+            if in_provides and strip.startswith('Prerequisite:'):
+                current_data.setdefault('_provides', []).append(strip.split(':',1)[1].strip())
+            if in_preview and strip.startswith('Sequence:'):
+                current_data['PreviewSequence'] = strip.split(':',1)[1].strip()
     if current_id:
         actors.append((current_id, current_data))
     return actors
@@ -122,18 +129,24 @@ def load_all_actors():
     for file_key, path in UNIT_FILES.items():
         if not path.exists():
             continue
+        is_mod = file_key in MOD_KEYS
         for actor_id, data in parse_blocks(path):
             data['_filekey'] = file_key
             if actor_id not in merged:
                 merged[actor_id] = dict(data)
+                if is_mod:
+                    merged[actor_id]['_in_mod'] = True
             else:
                 ex = merged[actor_id]
-                is_mod = file_key in MOD_KEYS
+                if is_mod:
+                    ex['_in_mod'] = True
                 for k, v in data.items():
                     if k == '_removed':
                         ex[k] = True
                     elif k == '_inherits':
                         ex.setdefault('_inherits', []).extend(v)
+                    elif k == '_provides':
+                        ex.setdefault('_provides', []).extend(v)
                     elif k not in ex or is_mod:
                         ex[k] = v
                 if is_mod and 'Queue' in data:
@@ -160,17 +173,15 @@ def resolve_inheritance(all_actors):
                         changed = True
 
 def filter_buildable(all_actors):
-    has_proxy = set()
-    for aid, data in all_actors.items():
-        for parent in data.get('_inherits', []):
-            p = parent.lstrip('^')
-            if p in all_actors and all_actors[p].get('_removed'):
-                has_proxy.add(p)
     result = {}
     for aid, data in all_actors.items():
         if 'Queue' not in data:
             continue
-        if data.get('_removed') and aid in has_proxy:
+        # Only include actors defined or overridden in mod files
+        if not data.get('_in_mod'):
+            continue
+        # Skip actors where Buildable was explicitly removed (-Buildable:)
+        if data.get('_removed'):
             continue
         result[aid] = data
     return result
@@ -198,6 +209,12 @@ def _parse_seq_file(path, seqs):
                 v = strip.split(':',1)[1].strip()
                 if v:
                     seqs[cur_img][cur_seq]['rfn'] = v
+            if strip.startswith('Length:'):
+                v = strip.split(':',1)[1].strip()
+                try:
+                    seqs[cur_img][cur_seq]['length'] = int(v)
+                except ValueError:
+                    pass
 
 def load_sequences():
     seqs = {}
@@ -210,17 +227,27 @@ def detect_sprite(data, seqs):
     img = data.get('RenderImage','')
     if not img:
         return 'td'
+    has_ra = False
     for seq in seqs.get(img, {}).values():
         fn  = seq.get('fn','').lower()
-        rfn = seq.get('rfn','').upper()
+        rfn = seq.get('rfn','')
+        rfn_up = rfn.upper()
+        # TS: raw VXL/HVA files
         if '.vxl' in fn or '.hva' in fn:
             return 'ts'
-        if 'RED_ALERT' in rfn:
-            return 'ra'
-        for ra in ('hind','lrotorlg','lrotor','siege','dome','stek','v2rl'):
-            if ra in fn:
-                return 'ra'
-    return 'td'
+        # TS: baked local ZIP/PNG (not a DATA\ remaster path = custom VXL render)
+        if rfn and not rfn.startswith('DATA\\') and (rfn.lower().endswith('.zip') or rfn.lower().endswith('.png')):
+            # Exclude known standard RA/TD icon overrides (small single-frame PNGs)
+            if not rfn.lower().endswith('_base.png') and not rfn.lower().endswith('_icon.png'):
+                return 'ts'
+        # RA: remaster path from RA assets
+        if 'RED_ALERT' in rfn_up:
+            has_ra = True
+        # RA: classic SHP names from RA
+        for ra_name in ('hind','lrotorlg','lrotor','siege','dome','stek','v2rl'):
+            if ra_name in fn:
+                has_ra = True
+    return 'ra' if has_ra else 'td'
 
 ICON_MAP = {
     'aot-nuke-age0':'nuke_base.png','aot-nuke-age1':'nuke_ages.png',
@@ -249,16 +276,83 @@ ICON_MAP = {
     'STEC':'stec_base.png','GUN':'gun_base.png',
 }
 
-def detect_idle(data, seqs):
-    """Find idle/body PNG for sprite preview popup."""
+def detect_idle(data, seqs, icon_file=None):
+    """Find world-sprite PNG. Returns (filename, frame_count) or (None, 1)."""
     render_img = data.get('RenderImage', '')
     if not render_img:
-        return None
+        return None, 1
+    img_seqs = seqs.get(render_img, {})
+
+    def valid_png(fn):
+        return fn and fn.lower().endswith('.png') and (BITS / fn).exists()
+
+    def seq_info(sd):
+        return sd.get('fn', ''), sd.get('length', 1)
+
+    # 1. SequencePlaceBuildingPreview — OpenRA's own placement preview sequence
+    preview_seq = data.get('PreviewSequence', '')
+    if preview_seq and preview_seq in img_seqs:
+        fn, length = seq_info(img_seqs[preview_seq])
+        if valid_png(fn):
+            return fn, length
+
+    # 2. Standard idle/body names
     for seq_name in ('idle', 'body', 'damaged-idle'):
-        fn = seqs.get(render_img, {}).get(seq_name, {}).get('fn', '')
-        if fn and fn.lower().endswith('.png') and (BITS / fn).exists():
-            return fn
-    return None
+        sd = img_seqs.get(seq_name, {})
+        fn, length = seq_info(sd)
+        if valid_png(fn):
+            return fn, length
+
+    # 3. Non-icon -idle/-body sequences, single-frame preferred
+    candidates = []
+    for seq_name, sd in img_seqs.items():
+        if 'icon' in seq_name.lower():
+            continue
+        if not (seq_name.endswith('-idle') or seq_name.endswith('-body')):
+            continue
+        fn, length = seq_info(sd)
+        if valid_png(fn):
+            candidates.append((length, seq_name, fn, length))
+    if candidates:
+        candidates.sort()
+        _, _, fn, length = candidates[0]
+        return fn, length
+
+    # 4. Any non-icon non-bib PNG, single-frame preferred
+    candidates2 = []
+    for seq_name, sd in img_seqs.items():
+        if 'icon' in seq_name.lower() or seq_name == 'bib':
+            continue
+        fn, length = seq_info(sd)
+        if valid_png(fn):
+            candidates2.append((length, fn, length))
+    if candidates2:
+        candidates2.sort()
+        _, fn, length = candidates2[0]
+        return fn, length
+
+    # 5. Fallback: icon sequences — actor's own icon first
+    if icon_file and valid_png(icon_file):
+        return icon_file, 1
+
+    seen = set()
+    for sd in img_seqs.values():
+        fn, length = seq_info(sd)
+        if not valid_png(fn) or fn in seen:
+            continue
+        seen.add(fn)
+        if not fn.lower().endswith('_base.png') and not fn.lower().endswith('_ages.png'):
+            return fn, length
+
+    seen2 = set()
+    for sd in img_seqs.values():
+        fn, length = seq_info(sd)
+        if not valid_png(fn) or fn in seen2:
+            continue
+        seen2.add(fn)
+        return fn, length
+
+    return None, 1
 
 def detect_icon(aid, data, seqs):
     """Resolve icon PNG: Sequence lookup → ICON_MAP → stem guessing."""
@@ -290,10 +384,28 @@ def detect_icon(aid, data, seqs):
     return False, None
 
 def detect_tier(prereqs):
+    """Tier = highest aot-ageN referenced (including ~aot-ageN visibility gates).
+    Excludes !aot-ageN (negation = available WITHOUT that age)."""
     tier = 0
-    for m in re.finditer(r'(?<![~!])aot-age(\d)', prereqs):
+    for m in re.finditer(r'(?<!!)aot-age(\d)', prereqs):
         tier = max(tier, int(m.group(1)))
     return tier
+
+def resolve_tiers(actors_list):
+    """Second pass: if an actor's visibility gate points to a condition provided
+    by another actor with a higher tier, upgrade this actor's tier to match."""
+    # Build condition → max_tier map
+    condition_tier = {}
+    for a in actors_list:
+        tier = a['tier']
+        for cond in a.get('_provides_raw', []):
+            condition_tier[cond] = max(condition_tier.get(cond, 0), tier)
+    # Apply
+    for a in actors_list:
+        for vp in a['visibilityPrereqs']:
+            cond = vp.lstrip('~')
+            if cond in condition_tier:
+                a['tier'] = max(a['tier'], condition_tier[cond])
 
 def queue_to_cat(q):
     ql = q.lower()
@@ -342,6 +454,7 @@ def extract_actors(buildable, seqs, ftl_names):
         vis_p  = [p.strip() for p in prereqs.split(',') if p.strip() and p.strip().startswith('~')]
 
         has_icon, icon_file = detect_icon(aid, data, seqs)
+        idle_file, idle_length = detect_idle(data, seqs, icon_file)
         out.append({
             'id':              aid,
             'displayName':     name,
@@ -353,6 +466,8 @@ def extract_actors(buildable, seqs, ftl_names):
             'bpo':             int(data.get('BuildPaletteOrder','0') or 0),
             'prereqs':         real_p,
             'visibilityPrereqs': vis_p,
+            'provides':        data.get('_provides', []),
+            '_provides_raw':   data.get('_provides', []),
             'stats': {
                 'cost':  int(cost)  if cost  and cost.lstrip('-').isdigit()  else None,
                 'hp':    int(hp)    if hp    and hp.lstrip('-').isdigit()    else None,
@@ -361,7 +476,8 @@ def extract_actors(buildable, seqs, ftl_names):
             'sprite':     detect_sprite(data, seqs),
             'customIcon': has_icon,
             'iconFile':   icon_file,
-            'idleFile':   detect_idle(data, seqs),
+            'idleFile':   idle_file,
+            'idleLength': idle_length,
             'notBuildable': not (cost and cost.lstrip('-').isdigit()),
             'isProxy':    aid.startswith('aot-') and bool(data.get('_inherits')),
         })
@@ -454,6 +570,9 @@ if __name__ == '__main__':
     buildable = filter_buildable(all_actors)
     print(f"Baubar (nach Proxy-Filter): {len(buildable)}")
     actors = extract_actors(buildable, seqs, ftl_names)
+    resolve_tiers(actors)
+    for a in actors:
+        a.pop('_provides_raw', None)
     weapons = extract_weapons()
     # Attach usedBy to weapons (filter to only buildable actors)
     buildable_ids = {a['id'] for a in actors}

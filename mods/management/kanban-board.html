@@ -847,17 +847,48 @@ async function restoreHandle() {
   }
 }
 
+function loadMarkdown(text) {
+  const columns = [];
+  let currentCol = null;
+  let currentCard = null;
+  for (const rawLine of text.split('\n')) {
+    const line = rawLine.trimEnd();
+    if (line.startsWith('## ')) {
+      currentCard = null;
+      currentCol = { id: c(), title: line.slice(3).trim(), cards: [] };
+      columns.push(currentCol);
+    } else if (currentCol && /^- \[[ x]\] /.test(line)) {
+      currentCard = { id: c(), text: line.replace(/^- \[[ x]\] /, '').trim(), desc: '', checklist: [] };
+      currentCol.cards.push(currentCard);
+    } else if (currentCard && /^  - \[[ x]\] /.test(line)) {
+      const done = line[5] === 'x';
+      const text2 = line.replace(/^  - \[[ x]\] /, '').trim();
+      currentCard.checklist.push({ id: c(), text: text2, done });
+    } else if (currentCard && line.startsWith('  ') && line.trim()) {
+      currentCard.desc += (currentCard.desc ? '\n' : '') + line.trim();
+    }
+  }
+  if (columns.length > 0) {
+    data = { columns };
+    save();
+    render();
+  }
+}
+
 async function linkFile() {
   if (!FS_SUPPORTED) return;
   try {
-    const handle = await window.showSaveFilePicker({
+    const [handle] = await window.showOpenFilePicker({
       suggestedName: "KANBAN.md",
       types: [{ description: "Markdown", accept: { "text/markdown": [".md"] } }],
+      multiple: false,
     });
     fileHandle = handle;
     await idbSetHandle(handle);
+    const file = await handle.getFile();
+    const text = await file.text();
+    if (text.trim()) loadMarkdown(text);
     setLinkStatus(true, `verknüpft: ${handle.name}`);
-    await writeToFile(buildMarkdown());
   } catch (err) {
     if (err.name !== "AbortError") console.error(err);
   }
