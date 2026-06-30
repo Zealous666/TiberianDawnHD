@@ -651,17 +651,7 @@ aot-hind:
 		Filename: hind_hrpy.png
 		Length: 1
 		RemasteredFilename:
-	# Testrender (VXL→PNG): TS-Harpy-Voxel (apache.vxl) als Harpy-Body ab Upgrade.
-	aot-harpy-test-idle:
-		RemasteredFilename: aot-harpy-test.zip
-		Facings: 32
-		UseClassicFacings: True
-	# Player-Color-Overlay (indizierte Sheet, Indizes 176-191 → player-Palette).
-	aot-harpy-test-remap:
-		RemasteredFilename: aot-harpy-test-remap.png
-		RemasteredPremultiplied: False
-		Facings: 32
-		UseClassicFacings: True
+	# aot-harpy-test-idle + aot-harpy-test-remap: in vehicles-overrides.yaml unter aot-hind: (mode-P erhalten)
 
 aot-upgrade-harpy:
 	icon:

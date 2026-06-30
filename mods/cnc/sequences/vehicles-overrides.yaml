@@ -1,3 +1,15 @@
+aot-hind:
+	aot-harpy-test-idle:
+		RemasteredFilename: aot-harpy-test.zip
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 0.9
+	aot-harpy-test-remap:
+		RemasteredFilename: aot-harpy-test-remap.png
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 0.9
+
 mcv:
 	Defaults:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\MCV.ZIP

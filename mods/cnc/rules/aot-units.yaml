@@ -837,6 +837,8 @@ aot-harpy-husk:
 	WithFacingSpriteBody@harpyremap:
 		Sequence: aot-harpy-test-remap
 		Name: body-harpy-remap
+		Palette: aot-vxl-player
+		IsPlayerPalette: true
 		RequiresCondition: aot-harpy-upgraded
 	WithIdleOverlay@hind:
 		Offset: 0,0,85
