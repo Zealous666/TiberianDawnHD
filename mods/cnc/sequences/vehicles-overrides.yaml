@@ -110,12 +110,17 @@ ltnk:
 		Facings: 32
 		UseClassicFacings: True
 	aot-turret-laser:
-		RemasteredFilename: aot-ltnk-laser-turret-v3.zip
+		RemasteredFilename: aot-ltnk-laser-turret-v9.zip
 		Start: 32
 		Facings: 32
 		UseClassicFacings: True
 	aot-tick-idle:
 		RemasteredFilename: aot-ttnk-tick-test.zip
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 1.0
+	aot-tick-remap:
+		RemasteredFilename: aot-ttnk-tick-test-remap.png
 		Facings: 32
 		UseClassicFacings: True
 		Scale: 1.0
@@ -461,6 +466,24 @@ aot-gatick:
 		Length: 1
 	deploy:
 		Length: 24
+	idle-remap:
+		RemasteredFilename: aot-gatick-body-remap.png
+		Start: 24
+		Length: 1
+		Scale: 3.0
+	buried-remap:
+		RemasteredFilename: aot-gatick-body-remap.png
+		Start: 24
+		Length: 1
+		Scale: 3.0
+	deploy-remap:
+		RemasteredFilename: aot-gatick-body-remap.png
+		Length: 24
+		Scale: 3.0
+	undeploy-remap:
+		RemasteredFilename: aot-gatick-body-undeploy.png
+		Length: 24
+		Scale: 3.0
 	turret:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\LTNK.ZIP
 		Start: 32
@@ -468,7 +491,7 @@ aot-gatick:
 		UseClassicFacings: True
 		Scale: 1.0
 	turret-laser:
-		RemasteredFilename: aot-ltnk-laser-turret-v3.zip
+		RemasteredFilename: aot-ltnk-laser-turret-v9.zip
 		Start: 32
 		Facings: 32
 		UseClassicFacings: True

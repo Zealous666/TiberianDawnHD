@@ -22,8 +22,6 @@
   - [x] light factory icon
   - [x] Tibsun voxel-Implementation
   - [x] weap & afld icons
-  - [ ] MLRS  & AA
-  - [x] gunboat / destroyer
   - [ ] cyborg commando
   - [ ] thief & highjacker
   - [ ] spy
@@ -32,9 +30,6 @@
   - [ ] uplink centre
   - [ ] silo upgrade (nuke silo)
   - [ ] drop-pod upgrade
-  - [ ] summer terrain (ra)
-  - [ ] winter terrain (td)
-  - [x] submarine / wolf / drone carrir
   - [ ] cruiser & railgun & carrier
   - [ ] titan / juggernaut
   - [ ] wolverine
@@ -43,6 +38,7 @@
   - [ ] avatar / laser avatar
   - [ ] APC AA & Amphibious APC
   - [ ] silo & ore transport changes
+  - [ ] 3TNK langsaere kadenz
 - [ ] Fixes
   - [x] ATEC satelli fixen & strom
   - [x] EYE als selbst bau entfernen
