@@ -286,6 +286,8 @@ TileSets:
 	cnchd|tilesets/winter.yaml
 	cnchd|tilesets/snow.yaml
 	cnchd|tilesets/temperat.yaml
+	cnchd|tilesets/aot-temperat.yaml
+	cnchd|tilesets/aot-snow.yaml
 
 Weapons:
 	cnc|weapons/explosions.yaml
