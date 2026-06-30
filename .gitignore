@@ -15,6 +15,14 @@ engine/**
 !engine/OpenRA.Mods.Common/Traits/SupportPowers/AotSatellitePower.cs
 !engine/OpenRA.Mods.Common/Traits/OreTransporter.cs
 !engine/OpenRA.Mods.Common/Traits/OreMineDurability.cs
+!engine/OpenRA.Mods.Common/Traits/Minelayer.cs
+!engine/OpenRA.Mods.Common/Traits/RepairableNear.cs
+!engine/OpenRA.Mods.Common/Traits/Mine.cs
+!engine/OpenRA.Mods.Common/Activities/LayMines.cs
+!engine/OpenRA.Mods.Common/Traits/AmmoPool.cs
+!engine/OpenRA.Mods.Common/Traits/Air/AotDroneAttack.cs
+!engine/OpenRA.Mods.Common/Traits/Air/AotDroneLogic.cs
+!engine/OpenRA.Mods.Common/Widgets/Logic/Ingame/CommandBarLogic.cs
 !engine/OpenRA.Mods.Common/Traits/OretSpawnStateCarrier.cs
 !engine/OpenRA.Mods.Common/Traits/Render/WithMakeAnimation.cs
 !engine/OpenRA.Mods.Common/Activities/Transform.cs

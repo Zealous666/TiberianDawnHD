@@ -228,12 +228,299 @@ aot-GunboatGun:
 			Wood: 72
 			Light: 72
 			Concrete: 48
+# Frigate: 3 Raketen, längere Pause als Destroyer (2 Raketen). Kein Luftangriff.
+aot-FrigateMissiles:
+	Inherits: BoatMissile
+	ReloadDelay: 50
+	Range: 6c512
+	Burst: 3
+	BurstDelays: 12
+	ValidTargets: Ground, Water
+	Warhead@1Dam: SpreadDamage
+		Damage: 4000
 aot-DestroyerRockets:
 	Inherits: BoatMissile
 	ReloadDelay: 30
 	Range: 9c0
 	Burst: 2
 	BurstDelays: 8
+	ValidTargets: Ground, Water, Air
 	Warhead@1Dam: SpreadDamage
 		Damage: 9000
+
+# RA DepthCharge-Nachbau: Bogenprojektil (bomb.shp), feuert seitlich vom Schiff.
+# RA original: ValidTargets Underwater (U-Boote) -- in CnC kein Underwater, daher Water
+# (trifft Schiffe auf Wasser). LaunchAngle 62 + Speed 125 = sichtbarer Bogenflug wie
+# beim RA-Original. Beide Schiffszustände (PT + DD) nutzen dieselbe Waffe.
+aot-DepthCharge:
+	Inherits: ^BallisticWeapon
+	-Report:
+	-Warhead@2Smu:
+	ReloadDelay: 60
+	Range: 5c0
+	ValidTargets: Underwater
+	Projectile: Bullet
+		Image: bomb
+		Speed: 125
+		LaunchAngle: 62
+		Shadow: true
+		Inaccuracy: 128
+	Warhead@1Dam: SpreadDamage
+		Spread: 128
+		Damage: 6000
+		ValidTargets: Submarine
+		Versus:
+			None: 30
+			Wood: 70
+			Light: 80
+			Heavy: 40
+			Concrete: 20
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+	Warhead@3Eff: CreateEffect
+		Explosions: poof
+		ImpactSounds: xplobig4.aud
+		ValidTargets: Submarine
+
+# RA Torpedo-Nachbau: schnelles Unterwasser-Projektil, trifft Schiffe + Küsten-Gebäude.
+# Sub feuert von Bug (LocalOffset +X). UncloakOn: None → Sub bleibt getarnt beim Feuern.
+aot-SubTorpedo:
+	Inherits: ^BallisticWeapon
+	-Warhead@2Smu:
+	ReloadDelay: 100
+	Range: 9c0
+	Report: torpedo1.wav
+	Burst: 2
+	BurstDelays: 15
+	ValidTargets: Water, Underwater
+	Projectile: Missile
+		Image: torpedo
+		Arm: 3
+		Speed: 85
+		TrailImage: bubbles
+		HorizontalRateOfTurn: 4
+		RangeLimit: 10c819
+		BoundToTerrainType: Water
+		Palette: cloak
+		Shadow: false
+		MaximumLaunchAngle: 0
+		CruiseAltitude: 0
+	Warhead@1Dam: SpreadDamage
+		Spread: 426
+		Damage: 12000
+		ValidTargets: Water, Underwater
+		Versus:
+			None: 50
+			Light: 75
+			Heavy: 100
+			Concrete: 50
+		DamageTypes: TriggerProne, ExplosionDeath
+	Warhead@2Eff: CreateEffect
+		Explosions: poof
+		ImpactSounds: kaboom15.wav
+		ValidTargets: Water, Underwater
+	Warhead@3EffSplash: CreateEffect
+		Explosions: poof
+		ImpactSounds: splash9.wav
+		ValidTargets: Water
+
+# Missile Sub Rakete: ballistische Bahn (Bullet LaunchAngle 120 = steil), Rauch-Schweif.
+# ValidTargets: Ground + Water. Analog RA SubMissile.
+aot-SubMissile:
+	Inherits: ^BallisticWeapon
+	-Warhead@2Smu:
+	ReloadDelay: 300
+	Range: 20c0
+	Report: missile6.wav
+	Burst: 2
+	BurstDelays: 15
+	ValidTargets: Ground, Water
+	Projectile: Bullet
+		Speed: 215
+		Blockable: false
+		LaunchAngle: 120
+		Inaccuracy: 614
+		Image: missile
+		Shadow: True
+		TrailImage: smokey
+		ContrailLength: 30
+	Warhead@1Dam: SpreadDamage
+		Spread: 426
+		Damage: 2500
+		Falloff: 1000, 368, 135, 50, 18, 7, 0
+		ValidTargets: Ground, Water
+		Versus:
+			None: 80
+			Wood: 50
+			Light: 48
+			Heavy: 30
+			Concrete: 100
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+	Warhead@2Eff: CreateEffect
+		Explosions: poof
+		ImpactSounds: xplosml2.wav
+		ValidTargets: Ground, Water
+
+# === Age of Tiberium (aotmod) - Mine Layer Upgrade: Rakete + See-Mine ===
+# Nach Mine Layer Upgrade: Missile Sub feuert nur noch 1 Rakete (statt 2).
+aot-SubMissileSingle:
+	Inherits: aot-SubMissile
+	Burst: 1
+
+# See-Mine Explosion: hoher Schaden, kurzer Radius, nur Wasser/Submarine.
+aot-SeaMineExplosion:
+	Inherits: ^BallisticWeapon
+	-Warhead@2Smu:
+	Range: 1c0
+	Warhead@1Dam: SpreadDamage
+		Spread: 512
+		Damage: 60000
+		ValidTargets: Water, Underwater
+		Versus:
+			None: 80
+			Light: 100
+			Heavy: 80
+			Concrete: 50
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+	Warhead@2Eff: CreateEffect
+		Explosions: poof
+		ImpactSounds: xplosml2.wav
+		ValidTargets: Water, Underwater
+
+# === Age of Tiberium (aotmod) - Battle Cruiser: Railgun Upgrade ===
+# 4 Railguns gesamt (2 pro Turm). LaserZap A0C8FF wie HTNK/MTNK.
+# Range 15c0, sehr präzise (hitscan), Damage 1500 pro Schuss.
+# Burst 2 + 2 LocalOffsets = beide Läufe feuern abwechselnd pro Turm.
+aot-CruiserRailgun:
+	ReloadDelay: 80
+	Range: 15c0
+	Burst: 2
+	BurstDelays: 8
+	Report: bigggun1.aud
+	Projectile: LaserZap
+		Width: 50
+		Color: A0C8FF
+		HitAnim: laserfire
+		ZOffset: 2047
+	Warhead@1Dam: SpreadDamage
+		Spread: 42
+		Damage: 4000
+		Versus:
+			None: 25
+			Wood: 100
+			Light: 100
+			Heavy: 100
+			Concrete: 100
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+	Warhead@2Smu: LeaveSmudge
+		SmudgeType: Scorch
+		InvalidTargets: Vehicle, Structure, Wall, Husk, Trees, Creep
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Battle Cruiser: 8-Inch Naval Gun ===
+# RA 8Inch-Nachbau: Bogenflug (Speed 204, LaunchAngle 62), ContrailLength 30.
+# Burst 2 = zwei Kanonen feuern pro Salve (Primär + Sekundär-Turm).
+# ReloadDelay 250 = ~7 Sekunden zwischen Salven (RA-Original).
+aot-8Inch:
+	Inherits: ^BallisticWeapon
+	-Warhead@2Smu:
+	MinRange: 3c0
+	ReloadDelay: 250
+	Range: 20c0
+	Burst: 2
+	BurstDelays: 5
+	Report: aot-turret1.wav
+	TargetActorCenter: true
+	Projectile: Bullet
+		Speed: 204
+		Blockable: false
+		LaunchAngle: 62
+		Inaccuracy: 4c0
+		ContrailLength: 30
+	Warhead@1Dam: SpreadDamage
+		Spread: 213
+		Damage: 2500
+		Falloff: 1000, 368, 135, 50, 18, 7, 0
+		Versus:
+			None: 60
+			Wood: 35
+			Light: 60
+			Heavy: 25
+			Concrete: 100
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+	Warhead@3Eff: CreateEffect
+		Explosions: poof
+		ImpactSounds: xplobig4.aud
+# === Ende aotmod ===
+
+# Drone laser — schwächere Version des HTNK-Lasers für Drohnen des Drone Attack Sub.
+aot-DroneLaser:
+	ReloadDelay: 35
+	Range: 3c0
+	Report: obelray1.aud
+	Projectile: LaserZap
+		Width: 30
+		Color: FF6040
+		HitAnim: laserfire
+		ZOffset: 2047
+	Warhead@1Dam: SpreadDamage
+		Spread: 42
+		Damage: 4000
+		Versus:
+			None: 25
+			Wood: 80
+			Light: 80
+			Heavy: 60
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+
+# === Age of Tiberium (aotmod) - Hover AA (MSAM Upgrade) ===
+aot-MsamHoverAA:
+	Inherits: Patriot
+	ReloadDelay: 15
+	Range: 10c0
+	ValidTargets: Ground, Air
+	Warhead@1Dam:
+		Spread: 682
+		Damage: 10500
+		ValidTargets: Air
+		Versus:
+			Light: 100
+	Warhead@Ground: SpreadDamage
+		Spread: 682
+		Damage: 7000
+		ValidTargets: Ground
+		Versus:
+			None: 100
+			Wood: 70
+			Light: 30
+			Heavy: 15
+			Concrete: 5
+
+# === Age of Tiberium (aotmod) - Hover AA Guns ===
+# Burst: 2 kurze Doppelschüsse, dann Pause → "dak-dak ... dak-dak"-Rhythmus
+aot-HoverAAGun:
+	Inherits: APCGun
+	Burst: 2
+	BurstDelay: 4
+	ReloadDelay: 13
+	Warhead@1Dam: SpreadDamage
+		Spread: 128
+		Damage: 2800
+		Versus:
+			None: 100
+			Wood: 100
+			Light: 50
+			Heavy: 35
+			Concrete: 30
+		DamageTypes: Prone50Percent, TriggerProne, DefaultDeath
+
+aot-HoverAAGun.AA:
+	Inherits: APCGun.AA
+	Burst: 2
+	BurstDelay: 4
+	ReloadDelay: 13
+	Warhead@1Dam: SpreadDamage
+		ValidTargets: Air
+		Damage: 1600
+		Versus:
+			Light: 100
 # === Ende aotmod ===

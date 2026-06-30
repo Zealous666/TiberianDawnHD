@@ -428,6 +428,79 @@ aot-upgrade-apc:
 		Prerequisite: aot-apc-upgrade
 
 	Interactable:
+
+aot-upgrade-apc2:
+	Tooltip:
+		Name: Amphibious APC Upgrade
+
+	Buildable:
+		BuildPaletteOrder: 32
+		Prerequisites: ~atec, lite, ~pyle, ~aot-age2, aot-age2, aot-apc-upgrade, ~!aot-humvee-upgrade
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Upgrades the APC with a hover drive. Can move on land and water. Unarmed.
+
+	Valued:
+		Cost: 300
+
+	RenderSprites:
+		Image: aot-upgrade-apc2
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-amphibious-upgrade
+
+	Interactable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - MSAM: Hover MLRS Upgrade ===
+aot-upgrade-hover-mlrs:
+	Tooltip:
+		Name: Hover MLRS Upgrade
+
+	Buildable:
+		BuildPaletteOrder: 51
+		Prerequisites: anyhq, ~aot-age2, aot-age2, ~!aot-hover-aa-upgrade
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Upgrades the Rocket Launcher with a hover drive. Can move on land and water. Keeps rocket armament.
+
+	Valued:
+		Cost: 400
+
+	RenderSprites:
+		Image: aot-upgrade-hover-mlrs
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-hover-mlrs-upgrade
+
+	Interactable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - MSAM: Hover AA Upgrade ===
+aot-upgrade-hover-aa:
+	Tooltip:
+		Name: Hover AA Upgrade
+
+	Buildable:
+		BuildPaletteOrder: 52
+		Prerequisites: anyhq, ~aot-age2, aot-age2, ~!aot-hover-mlrs-upgrade
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Replaces the Rocket Launcher turret with an AA cannon. Devastating vs aircraft. Hover drive included.
+
+	Valued:
+		Cost: 400
+
+	RenderSprites:
+		Image: aot-upgrade-hover-aa
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-hover-aa-upgrade
+
+	Interactable:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - TTNK Flame Tank Upgrade ===
@@ -1179,8 +1252,6 @@ aot-upgrade-harpy:
 		Prerequisite: aot-harpy-upgrade
 
 	Interactable:
-# === Ende aotmod ===
-
 # === Age of Tiberium (aotmod) - ORCA Upgrade ===
 # Tier 1 / sichtbar ab Age 1. Wandelt alle Apaches zu ORCAs um.
 aot-upgrade-orca:
@@ -1556,17 +1627,92 @@ aot-upgrade-nuke-turbine:
 # Upgrade: tauscht alle Gunboats (RA PT) zu Destroyern (RA DD) + Raketenwaffe.
 # Gewährt aot-gunboat-upgrade (konsumiert von aot-gunboat WithFacingSpriteBody/
 # WithSpriteTurret/Armament). Prereq ~atec = GDI-Gate, ~!aot-gunboat-upgrade = nach Kauf weg.
+# === Age of Tiberium (aotmod) - Cruiser Railgun Upgrade ===
+# Tauscht 8-Inch-Geschütze gegen 4× Railgun (2 pro Turm). Kürzere Reichweite,
+# aber präzise und kein Mindestabstand. Prereq: aot-age3 + aot-shipyard + atec.
+aot-upgrade-cruiser-railgun:
+	Tooltip:
+		Name: Cruiser Railguns
+
+	Buildable:
+		BuildPaletteOrder: 21
+		Prerequisites: ~aot-age3, aot-age3, aot-shipyard, atec, ~!aot-cruiser-carrier-upgrade
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Replaces both Battle Cruiser turrets with 4 high-powered Railguns. Shorter range, no minimum distance, very precise.
+
+	Valued:
+		Cost: 2000
+
+	RenderSprites:
+		Image: aot-upgrade-cruiser-railgun
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-cruiser-railgun-upgrade
+
+	Interactable:
+
+# === Age of Tiberium (aotmod) - Battle Cruiser Upgrade 2: Heli Carrier ===
+# Ersetzt beide Geschütztürme durch Helibays. Deploy zum Aktivieren der Landepads.
+# Prereq: aot-age3 + aot-shipyard + atec. Mutual exclusiv mit Railgun Upgrade.
+aot-upgrade-cruiser-carrier:
+	Tooltip:
+		Name: Heli Carrier
+
+	Buildable:
+		BuildPaletteOrder: 22
+		Prerequisites: ~aot-age3, aot-age3, aot-shipyard, atec, ~!aot-cruiser-railgun-upgrade
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Replaces both Battle Cruiser turrets with two Helibays. Deploy the carrier to allow nearby aircraft to land and resupply.
+
+	Valued:
+		Cost: 2000
+
+	RenderSprites:
+		Image: aot-upgrade-cruiser-carrier
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-cruiser-carrier-upgrade
+
+	Interactable:
+
+aot-upgrade-gunboat-frigate:
+	Tooltip:
+		Name: Frigate Enhancement
+
+	Buildable:
+		BuildPaletteOrder: 31
+		Prerequisites: ~aot-age1, aot-age1, aot-shipyard, fix, ~!aot-gunboat-frigate-upgrade
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Upgrades all Gunboats into Frigates capable of attacking land targets.
+
+	Valued:
+		Cost: 800
+
+	RenderSprites:
+		Image: aot-upgrade-gunboat-frigate
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-gunboat-frigate-upgrade
+
+	Interactable:
+
 aot-upgrade-gunboat-destroyer:
 	Tooltip:
 		Name: Destroyer Enhancement
 
 	Buildable:
 		BuildPaletteOrder: 32
-		Prerequisites: ~aot-age1, aot-age1, aot-shipyard, fix, ~!aot-gunboat-upgrade
+		Prerequisites: ~aot-age2, aot-age2, aot-shipyard, fix, aot-gunboat-frigate-upgrade, ~!aot-gunboat-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
-		Description: Upgrades all Gunboats into rocket-armed Destroyers.
+		Description: Upgrades all Frigates into Destroyers with rockets, depth charges, and anti-air.
 
 	Valued:
 		Cost: 1500
@@ -1625,14 +1771,21 @@ aot-shipyard:
 	CommandBarBlacklist:
 		DisableStop: false
 	Exit@1:
-		SpawnOffset: 0,512,0
-		ExitCell: 1,3
+		SpawnOffset: 0,-213,0
+		Facing: 384
+		ExitCell: -1,2
 	Exit@2:
-		SpawnOffset: 1024,0,0
-		ExitCell: 3,1
+		SpawnOffset: 0,-213,0
+		Facing: 640
+		ExitCell: 3,2
 	Exit@3:
-		SpawnOffset: -1024,0,0
-		ExitCell: -1,1
+		SpawnOffset: 0,0,0
+		Facing: 128
+		ExitCell: 0,0
+	Exit@4:
+		SpawnOffset: 0,0,0
+		Facing: 896
+		ExitCell: 2,0
 	RepairsUnits:
 		HpPerStep: 1000
 		Interval: 15
@@ -1700,12 +1853,47 @@ aot-subpen:
 		Prerequisite: aot-subpen
 	RevealsShroud:
 		Range: 4c0
+	RallyPoint:
+	CommandBarBlacklist:
+		DisableStop: false
+	Exit@1:
+		SpawnOffset: 0,-213,0
+		Facing: 384
+		ExitCell: -1,2
+	Exit@2:
+		SpawnOffset: 0,-213,0
+		Facing: 640
+		ExitCell: 3,2
+	Exit@3:
+		SpawnOffset: 0,0,0
+		Facing: 128
+		ExitCell: 0,0
+	Exit@4:
+		SpawnOffset: 0,0,0
+		Facing: 896
+		ExitCell: 2,0
 	RepairsUnits:
 		HpPerStep: 1000
 		Interval: 15
 		PlayerExperience: 5
 		StartRepairingNotification: Repairing
 		StartRepairingTextNotification: notification-repairing
+	Production:
+		Produces: Naval.Nod
+	ProductionQueue:
+		Type: Naval.Nod
+		Group: Naval
+		DisplayOrder: 5
+		LowPowerModifier: 150
+		ReadyAudio: UnitReady
+		ReadyTextNotification: notification-unit-ready
+		BlockedAudio: NoBuild
+		BlockedTextNotification: notification-unable-to-build-more
+		QueuedAudio: Training
+		OnHoldAudio: OnHold
+		CancelledAudio: Cancelled
+	ProductionBar:
+		ProductionType: Naval.Nod
 	RenderSprites:
 		Image: aot-subpen
 	WithSpriteBody:
@@ -1717,4 +1905,115 @@ aot-subpen:
 	SequencePlaceBuildingPreview:
 		Sequence: place
 		SequenceAlpha: 0.65
+
+
+# === Age of Tiberium (aotmod) - Sub Passenger Upgrade ===
+# Normale U-Boot erhält 5 Infanterie-Passagier-Slots.
+# Voraussetzung: Sub Pen + Hand of NOD. Sichtbar ab Age 1.
+aot-upgrade-sub-cargo:
+	Tooltip:
+		Name: actor-aot-upgrade-sub-cargo.name
+
+	Buildable:
+		BuildPaletteOrder: 45
+		Prerequisites: aot-subpen, hand, ~aot-age2, ~!aot-sub-cargo-upgrade
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Icon: icon
+		Description: actor-aot-upgrade-sub-cargo.description
+
+	Valued:
+		Cost: 400
+
+	RenderSprites:
+		Image: aot-upgrade-sub-cargo
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-sub-cargo-upgrade
+
+	Interactable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Vessel Gun Upgrade (NOD-exklusiv) ===
+# Transport Vessel erhält Gunboat-MG-Turret (MGUN). Ab Age 1 + FIX + SubPen.
+# Ändert Unit-Name in "Armed Transport Vessel".
+aot-upgrade-transport-gun:
+	Tooltip:
+		Name: actor-aot-upgrade-transport-gun.name
+
+	Buildable:
+		BuildPaletteOrder: 46
+		Prerequisites: aot-age1, fix, aot-subpen, ~aot-age1, ~aot-subpen, ~!aot-transport-gun-upgrade
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Icon: icon
+		Description: actor-aot-upgrade-transport-gun.description
+
+	Valued:
+		Cost: 600
+
+	RenderSprites:
+		Image: aot-upgrade-transport-gun
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-transport-gun-upgrade
+
+	Interactable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Mine Layer Upgrade ===
+# Missile Sub erhält Minenlegerfähigkeit (5 See-Minen, Nachrüsten am Sub Pen).
+# Nach Upgrade: Sub feuert nur noch 1 Rakete statt 2. Icon: sub_mine.png.
+aot-upgrade-msub-mine:
+	Tooltip:
+		Name: actor-aot-upgrade-msub-mine.name
+
+	Buildable:
+		BuildPaletteOrder: 50
+		Prerequisites: aot-subpen, stec, fix, anyhq, ~aot-age3, ~!aot-msub-drone-upgrade
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Icon: icon
+		Description: actor-aot-upgrade-msub-mine.description
+
+	Valued:
+		Cost: 500
+
+	RenderSprites:
+		Image: aot-upgrade-msub-mine
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-msub-mine-upgrade
+
+	Interactable:
+
+# === Age of Tiberium (aotmod) - Drone Attack Upgrade ===
+# Missile Sub verliert Raketen, erhält Attack Drones.
+# Icon: sub_drone.png.
+aot-upgrade-msub-drone:
+	Tooltip:
+		Name: actor-aot-upgrade-msub-drone.name
+
+	Buildable:
+		BuildPaletteOrder: 55
+		Prerequisites: aot-subpen, stec, fix, anyhq, ~aot-age3, ~!aot-msub-mine-upgrade
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Icon: icon
+		Description: actor-aot-upgrade-msub-drone.description
+
+	Valued:
+		Cost: 700
+
+	RenderSprites:
+		Image: aot-upgrade-msub-drone
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-msub-drone-upgrade
+
+	Interactable:
 # === Ende aotmod ===
