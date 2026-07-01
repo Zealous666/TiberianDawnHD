@@ -183,6 +183,9 @@ body.show-disabled .card.disabled .card-disable-btn { opacity: 1; }
 .weapon-card:hover { border-color: color-mix(in srgb, var(--accent) 60%, var(--border)); }
 .weapon-card.selected { border-color: var(--accent); }
 .weapon-card.hidden { display: none; }
+.weapon-card.unused { opacity: 0.35; filter: grayscale(0.6); }
+.weapon-card.unused:hover { opacity: 0.55; }
+body.hide-unused-weapons .weapon-card.unused { display: none; }
 .w-name { font-size: 11px; font-weight: 600; color: var(--text); font-family: monospace; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
 .w-stats { display: flex; gap: 8px; flex-wrap: wrap; }
 .w-stat { font-size: 10px; color: var(--text-dim); }
@@ -293,6 +296,7 @@ body.show-disabled .card.disabled .card-disable-btn { opacity: 1; }
   <div class="cat-sep"></div>
   <button class="cat-action" id="toggleAllLinesBtn" onclick="toggleAllLines()">⋯ Lines: OFF</button>
   <button class="cat-action" id="toggleDisabledBtn" onclick="toggleShowDisabled()">⊘ Show disabled</button>
+  <button class="cat-action" id="toggleUnusedWeaponsBtn" onclick="toggleHideUnusedWeapons()" style="display:none">◌ Hide unused</button>
   <button class="cat-action" onclick="showAllChanges()">📋 Changes</button>
   <button class="cat-action" onclick="resetChanges()">↩ Reset</button>
   <div class="cat-nav-end"></div>
@@ -353,6 +357,7 @@ let changes = {};
 let lineEnabled = new Set();  // actor IDs with lines enabled
 let globalLinesOn = false;
 let showDisabled = false;
+let hideUnusedWeapons = false;
 
 // ── Boot ──────────────────────────────────────────────────────────────────
 async function init() {
@@ -703,8 +708,12 @@ function renderWeapons() {
   grid.className = 'weapons-grid';
   wrap.appendChild(grid);
 
+  const unusedCount = weapons.filter(w => !w.usedBy || w.usedBy.length === 0).length;
+  hdr.innerHTML = `<span class="tier-pill tier-pill-0">W</span> Weapons (${weapons.length})${unusedCount ? `<span style="font-size:9px;color:var(--text-dim);font-weight:400;margin-left:6px">${unusedCount} unused</span>` : ''}`;
+
   for (const w of weapons) {
     const vis = !q || w.id.toLowerCase().includes(q);
+    const isUnused = !w.usedBy || w.usedBy.length === 0;
     const s = w.stats;
     const chg = changes[w.id] || {};
     const dmg = chg.damage ?? s.damage;
@@ -713,7 +722,7 @@ function renderWeapons() {
     const rl  = chg.reloadDelay ?? s.reloadDelay;
     const dotCls = w.faction === 'gdi' ? 'dot-gdi' : w.faction === 'nod' ? 'dot-nod' : 'dot-both';
     const el = document.createElement('div');
-    el.className = 'weapon-card' + (selectedId === w.id ? ' selected' : '') + (vis ? '' : ' hidden');
+    el.className = 'weapon-card' + (selectedId === w.id ? ' selected' : '') + (vis ? '' : ' hidden') + (isUnused ? ' unused' : '');
     el.onclick = () => selectWeapon(w.id);
     el.innerHTML = `<div class="w-name">
       <span class="faction-dot-inline ${dotCls}"></span>
@@ -872,13 +881,21 @@ function openActorPanel(a) {
       </div>
 
       <div class="p-section">
-        <div class="p-section-title">Weapon</div>
-        <div class="f-row">
-          <span class="f-label">Weapon ID</span>
-          <input class="f-input mono" list="wlist" value="${weapon}" placeholder="(not yet parsed per-actor)"
-            oninput="fieldChange('${a.id}','weapon',this.value)">
-        </div>
-        <datalist id="wlist">${DATA.weapons.map(w=>`<option value="${w.id}">`).join('')}</datalist>
+        <div class="p-section-title">Weapons</div>
+        ${(a.weapons && a.weapons.length > 0)
+          ? a.weapons.map(wid => {
+              const w = DATA.weapons.find(x => x.id === wid);
+              const dmg = w?.stats?.damage != null ? `DMG ${w.stats.damage}` : '';
+              const rng = w?.stats?.range  != null ? `RNG ${w.stats.range}c` : '';
+              const stats = [dmg, rng].filter(Boolean).join('  ');
+              return `<div style="display:flex;align-items:center;gap:8px;padding:3px 0;border-bottom:1px solid var(--border)">
+                <span style="font-family:monospace;font-size:11px;color:var(--text);flex:1">${wid}</span>
+                ${stats ? `<span style="font-size:9px;color:var(--text-dim)">${stats}</span>` : ''}
+                <span style="cursor:pointer;font-size:10px;color:var(--accent);padding:2px 6px;border-radius:3px;border:1px solid var(--border);background:var(--bg)"
+                  onclick="closePanel();setCategory('weapons');requestAnimationFrame(()=>selectWeapon('${wid}'))">→ open</span>
+              </div>`;
+            }).join('')
+          : '<span style="font-size:10px;color:var(--text-dim)">—</span>'}
       </div>
     </div>
 
@@ -978,13 +995,16 @@ function openWeaponPanel(w) {
         ${w.usedBy && w.usedBy.length > 0
           ? w.usedBy.map(uid => {
               const a = DATA.actors.find(x => x.id === uid);
-              return `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border)">
+              const cat = a?.category || 'vehicles';
+              return `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border);cursor:pointer;border-radius:3px;transition:background .13s"
+                onmouseover="this.style.background='var(--card-bg)'" onmouseout="this.style.background=''"
+                onclick="navigateToActor('${uid}','${cat}')">
                 ${a?.iconFile ? `<img src="${BITS}${a.iconFile}" style="width:32px;height:24px;object-fit:contain;image-rendering:pixelated;background:var(--bg);border:1px solid var(--border);border-radius:2px">` : '<div style="width:32px;height:24px;background:var(--bg);border:1px solid var(--border);border-radius:2px"></div>'}
-                <div>
+                <div style="flex:1;min-width:0">
                   <div style="font-size:11px;font-weight:600;color:var(--text)">${a?.displayName || uid}</div>
                   <div style="font-size:9px;color:var(--text-dim);font-family:monospace">${uid}</div>
                 </div>
-                <div style="margin-left:auto;cursor:pointer;font-size:10px;color:var(--accent)" onclick="selectActor('${uid}');setCategory('${a?.category||'vehicles'}')">→</div>
+                <div style="font-size:10px;color:var(--accent)">→</div>
               </div>`;
             }).join('')
           : '<div style="font-size:11px;color:var(--text-dim)">Not used by any buildable unit</div>'}
@@ -1139,11 +1159,26 @@ function generateAllPrompt() {
 }
 
 // ── Nav ────────────────────────────────────────────────────────────────────
+function navigateToActor(id, cat) {
+  setCategory(cat);
+  requestAnimationFrame(() => selectActor(id));
+}
+
+function toggleHideUnusedWeapons() {
+  hideUnusedWeapons = !hideUnusedWeapons;
+  document.body.classList.toggle('hide-unused-weapons', hideUnusedWeapons);
+  const btn = document.getElementById('toggleUnusedWeaponsBtn');
+  btn.textContent = hideUnusedWeapons ? '◌ Show unused' : '◌ Hide unused';
+  btn.style.color = hideUnusedWeapons ? 'var(--orange)' : '';
+}
+
 function setCategory(cat) {
   category = cat;
   document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
   const btn = document.querySelector(`.cat-btn[data-cat="${cat}"]`);
   if (btn) btn.classList.add('active');
+  const unusedBtn = document.getElementById('toggleUnusedWeaponsBtn');
+  if (unusedBtn) unusedBtn.style.display = cat === 'weapons' ? '' : 'none';
   closePanel(); render();
 }
 

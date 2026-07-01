@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-30T21:27:04.842220+00:00",
+  "generated": "2026-07-01T08:18:23.640286+00:00",
   "actors": [
     {
       "id": "AFLD",
@@ -31,7 +31,8 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "AFLT",
@@ -60,7 +61,8 @@
       "idleFile": "aflt_blue.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "AJET",
@@ -89,7 +91,12 @@
       "idleFile": "ajet_icon.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": [
+        "HeliExplode",
+        "aot-AjetNapalm",
+        "aot-AjetVulcan"
+      ]
     },
     {
       "id": "APC",
@@ -120,7 +127,13 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": [
+        "APCGun",
+        "APCGun.AA",
+        "UnitExplodeBig",
+        "aot-JeepHumvee"
+      ]
     },
     {
       "id": "BGGY",
@@ -147,7 +160,10 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": [
+        "MachineGun"
+      ]
     },
     {
       "id": "BIKE",
@@ -174,7 +190,10 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": [
+        "BikeRockets"
+      ]
     },
     {
       "id": "E1",
@@ -201,7 +220,10 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": [
+        "M16"
+      ]
     },
     {
       "id": "E2",
@@ -228,7 +250,11 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": [
+        "Grenade",
+        "GrenadierExplode"
+      ]
     },
     {
       "id": "E3",
@@ -255,7 +281,10 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": [
+        "Rockets"
+      ]
     },
     {
       "id": "E4",
@@ -282,7 +311,10 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": [
+        "Flamethrower"
+      ]
     },
     {
       "id": "E5",
@@ -309,7 +341,10 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": [
+        "Chemspray"
+      ]
     },
     {
       "id": "E6",
@@ -336,7 +371,8 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "FACT",
@@ -363,7 +399,8 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "GTWR",
@@ -390,7 +427,10 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": [
+        "HighV"
+      ]
     },
     {
       "id": "GUN",
@@ -417,7 +457,10 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": [
+        "TurretGun"
+      ]
     },
     {
       "id": "HQ",
@@ -452,7 +495,8 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "LITE",
@@ -482,7 +526,8 @@
       "idleFile": "lite-idle.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "MSAM",
@@ -516,7 +561,11 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": [
+        "227mm",
+        "UnitExplodeMech"
+      ]
     },
     {
       "id": "PROC",
@@ -543,7 +592,8 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "RMBO",
@@ -570,7 +620,10 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": [
+        "Sniper"
+      ]
     },
     {
       "id": "STNK",
@@ -599,7 +652,12 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": [
+        "227mm.stnk",
+        "227mm.stnkAA",
+        "UnitExplodeStealthTank"
+      ]
     },
     {
       "id": "TMPL",
@@ -631,7 +689,8 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "WEAP",
@@ -664,7 +723,8 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-age1-upgrade-gdi",
@@ -694,7 +754,8 @@
       "idleFile": "aot-age1-icon.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-age1-upgrade-nod",
@@ -724,7 +785,8 @@
       "idleFile": "aot-age1-icon.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-age2-upgrade-gdi",
@@ -759,7 +821,8 @@
       "idleFile": "aot-age2-icon.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-age2-upgrade-nod",
@@ -794,7 +857,8 @@
       "idleFile": "aot-age2-icon.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-age3-upgrade-gdi",
@@ -827,7 +891,8 @@
       "idleFile": "aot-age3-icon.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-age3-upgrade-nod",
@@ -861,7 +926,8 @@
       "idleFile": "aot-age3-icon.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-apache-base",
@@ -890,7 +956,12 @@
       "idleFile": "helo_base.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "OrcaAAMissiles",
+        "OrcaAGMissiles",
+        "aot-ApacheAGMissiles"
+      ]
     },
     {
       "id": "aot-apc-amphibious",
@@ -921,7 +992,13 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "APCGun",
+        "APCGun.AA",
+        "UnitExplodeBig",
+        "aot-JeepHumvee"
+      ]
     },
     {
       "id": "aot-atec-age0",
@@ -951,7 +1028,8 @@
       "idleFile": "atec-idle.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-atec-age1",
@@ -982,7 +1060,8 @@
       "idleFile": "atec-td-idle.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-cruiser",
@@ -1015,7 +1094,11 @@
       "idleFile": "crus_base.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "aot-8Inch",
+        "aot-CruiserRailgun"
+      ]
     },
     {
       "id": "aot-cruiser-carrier-proxy",
@@ -1047,7 +1130,11 @@
       "idleFile": "crus_carrier.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "aot-8Inch",
+        "aot-CruiserRailgun"
+      ]
     },
     {
       "id": "aot-cruiser-railgun-proxy",
@@ -1080,7 +1167,11 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "aot-8Inch",
+        "aot-CruiserRailgun"
+      ]
     },
     {
       "id": "aot-cyborg",
@@ -1108,7 +1199,11 @@
       "idleFile": "inf_cyborg.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "aot-CyborgChainGun",
+        "aot-CyborgCrippleEffect"
+      ]
     },
     {
       "id": "aot-cyc2",
@@ -1136,7 +1231,40 @@
       "idleFile": "nod_commando.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "aot-CyCannon"
+      ]
+    },
+    {
+      "id": "aot-dog-nod",
+      "displayName": "Dog",
+      "file": "aot-units.yaml",
+      "queue": "Infantry.Nod",
+      "faction": "nod",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 60,
+      "prereqs": [
+        "barracks"
+      ],
+      "visibilityPrereqs": [],
+      "provides": [],
+      "stats": {
+        "cost": 200,
+        "hp": 1800,
+        "power": 0
+      },
+      "sprite": "ra",
+      "customIcon": true,
+      "iconFile": "nod_dog.png",
+      "idleFile": "nod_dog.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "aot-DogJaw"
+      ]
     },
     {
       "id": "aot-e1-gdi",
@@ -1163,7 +1291,10 @@
       "idleFile": "gdi_inf.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "M16"
+      ]
     },
     {
       "id": "aot-e1-nod",
@@ -1190,7 +1321,10 @@
       "idleFile": "nod_inf.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "M16"
+      ]
     },
     {
       "id": "aot-e2-gdi",
@@ -1219,7 +1353,11 @@
       "idleFile": "gdi_gren.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "Grenade",
+        "GrenadierExplode"
+      ]
     },
     {
       "id": "aot-e3-nod",
@@ -1246,7 +1384,10 @@
       "idleFile": "nod_bazooka.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "Rockets"
+      ]
     },
     {
       "id": "aot-e4-nod-flame",
@@ -1276,7 +1417,11 @@
       "idleFile": "nod_flame.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "Chemspray",
+        "Flamethrower"
+      ]
     },
     {
       "id": "aot-e4-nod-toxic",
@@ -1306,7 +1451,11 @@
       "idleFile": "nod_toxic.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "Chemspray",
+        "Flamethrower"
+      ]
     },
     {
       "id": "aot-e6-gdi",
@@ -1333,7 +1482,8 @@
       "idleFile": "gdi_engineer.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-e6-nod",
@@ -1360,7 +1510,8 @@
       "idleFile": "nod_sabot.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-fix-age0",
@@ -1391,7 +1542,8 @@
       "idleFile": "fix_base.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-fix-age1",
@@ -1422,7 +1574,8 @@
       "idleFile": "fix_ages.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-gunboat-base",
@@ -1452,7 +1605,13 @@
       "idleFile": "gun_base.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "aot-DepthCharge",
+        "aot-DestroyerRockets",
+        "aot-FrigateMissiles",
+        "aot-GunboatGun"
+      ]
     },
     {
       "id": "aot-gunboat-destroyer",
@@ -1482,7 +1641,13 @@
       "idleFile": "gun_destroyer.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "aot-DepthCharge",
+        "aot-DestroyerRockets",
+        "aot-FrigateMissiles",
+        "aot-GunboatGun"
+      ]
     },
     {
       "id": "aot-gunboat-frigate",
@@ -1513,7 +1678,13 @@
       "idleFile": "gun_frigate.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "aot-DepthCharge",
+        "aot-DestroyerRockets",
+        "aot-FrigateMissiles",
+        "aot-GunboatGun"
+      ]
     },
     {
       "id": "aot-hand-age0",
@@ -1544,7 +1715,8 @@
       "idleFile": "hand_base.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-hand-age1",
@@ -1575,7 +1747,8 @@
       "idleFile": "hand_ages.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-harpy-upgraded",
@@ -1604,7 +1777,13 @@
       "idleFile": "hind_hrpy.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "HeliAAGun",
+        "HeliAGGun",
+        "aot-HarpyAGGun",
+        "aot-HindAGGun"
+      ]
     },
     {
       "id": "aot-harv",
@@ -1633,7 +1812,11 @@
       "idleFile": "harv_base.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "TiberiumExplosion",
+        "UnitExplodeHarvEmpty"
+      ]
     },
     {
       "id": "aot-hind-base",
@@ -1662,7 +1845,13 @@
       "idleFile": "hind_base.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "HeliAAGun",
+        "HeliAGGun",
+        "aot-HarpyAGGun",
+        "aot-HindAGGun"
+      ]
     },
     {
       "id": "aot-hpad-gdi",
@@ -1691,7 +1880,8 @@
       "idleFile": "hpad_blue.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-hpad-nod",
@@ -1720,7 +1910,8 @@
       "idleFile": "hpad_red.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-hq-base",
@@ -1750,7 +1941,8 @@
       "idleFile": "hq_base.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-hq-ion",
@@ -1780,7 +1972,8 @@
       "idleFile": "hq_ion.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-htnk-base",
@@ -1814,7 +2007,13 @@
       "idleFile": "htnk_base.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "120mmDual",
+        "MammothMissiles",
+        "UnitExplodeMech",
+        "aot-HtnkLaser"
+      ]
     },
     {
       "id": "aot-htnk-laser",
@@ -1844,7 +2043,13 @@
       "idleFile": "htnk_base.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "120mmDual",
+        "MammothMissiles",
+        "UnitExplodeMech",
+        "aot-HtnkLaser"
+      ]
     },
     {
       "id": "aot-htnk-rocket",
@@ -1875,7 +2080,13 @@
       "idleFile": "htnk_base.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "120mmDual",
+        "MammothMissiles",
+        "UnitExplodeMech",
+        "aot-HtnkLaser"
+      ]
     },
     {
       "id": "aot-jeep-base",
@@ -1906,7 +2117,11 @@
       "idleFile": "jeep_1_base.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "MachineGunH",
+        "aot-JeepHumvee"
+      ]
     },
     {
       "id": "aot-jeep-humvee",
@@ -1937,7 +2152,11 @@
       "idleFile": "jeep_1_base.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "MachineGunH",
+        "aot-JeepHumvee"
+      ]
     },
     {
       "id": "aot-ltnk-base",
@@ -1968,7 +2187,11 @@
       "idleFile": "ltnk_base.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "70mm",
+        "aot-LtnkLaser"
+      ]
     },
     {
       "id": "aot-ltnk-laser",
@@ -1999,7 +2222,11 @@
       "idleFile": "ltnk_1_base.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "70mm",
+        "aot-LtnkLaser"
+      ]
     },
     {
       "id": "aot-ltnk-tick",
@@ -2031,7 +2258,11 @@
       "idleFile": "ltnk_base.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "70mm",
+        "aot-LtnkLaser"
+      ]
     },
     {
       "id": "aot-mcv-age0",
@@ -2061,7 +2292,8 @@
       "idleFile": "mcv_base.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-mcv-age1",
@@ -2091,7 +2323,8 @@
       "idleFile": "mcv_ages.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-msam-hover-aa",
@@ -2121,7 +2354,11 @@
       "idleFile": "msam_aa.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "aot-HoverAAGun",
+        "aot-HoverAAGun.AA"
+      ]
     },
     {
       "id": "aot-msam-hover-mlrs",
@@ -2151,7 +2388,10 @@
       "idleFile": "msam_hover.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "aot-DestroyerRockets"
+      ]
     },
     {
       "id": "aot-msub-base",
@@ -2183,7 +2423,11 @@
       "idleFile": "sub_missile.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "aot-SubMissile",
+        "aot-SubMissileSingle"
+      ]
     },
     {
       "id": "aot-msub-drone-proxy",
@@ -2217,7 +2461,11 @@
       "idleFile": "sub_drone.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "aot-SubMissile",
+        "aot-SubMissileSingle"
+      ]
     },
     {
       "id": "aot-msub-mine-proxy",
@@ -2251,7 +2499,11 @@
       "idleFile": "sub_mine.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "aot-SubMissile",
+        "aot-SubMissileSingle"
+      ]
     },
     {
       "id": "aot-mtnk-base",
@@ -2281,7 +2533,13 @@
       "idleFile": "mtnk_1_base.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "120mm",
+        "UnitExplodeBig",
+        "aot-MtnkPredator",
+        "aot-MtnkRailgun"
+      ]
     },
     {
       "id": "aot-mtnk-pred",
@@ -2312,7 +2570,13 @@
       "idleFile": "mtnk_1_base.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "120mm",
+        "UnitExplodeBig",
+        "aot-MtnkPredator",
+        "aot-MtnkRailgun"
+      ]
     },
     {
       "id": "aot-mtnk-rail",
@@ -2342,7 +2606,13 @@
       "idleFile": "mtnk_1_base.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "120mm",
+        "UnitExplodeBig",
+        "aot-MtnkPredator",
+        "aot-MtnkRailgun"
+      ]
     },
     {
       "id": "aot-nod-radar-age0",
@@ -2372,7 +2642,8 @@
       "idleFile": "aot-nod-radar-age0-idle.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-nod-radar-age1",
@@ -2403,7 +2674,8 @@
       "idleFile": "aot-nod-radar-age1-idle.png",
       "idleLength": 12,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-nod-radar-age2",
@@ -2433,7 +2705,8 @@
       "idleFile": "aot-nod-radar-age0-idle.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-nuk2-age0",
@@ -2462,7 +2735,8 @@
       "idleFile": "nuk2-ra-idle.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-nuk2-age1",
@@ -2492,7 +2766,8 @@
       "idleFile": "nuk2-ra-idle.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-nuke-age0",
@@ -2521,7 +2796,8 @@
       "idleFile": "nuke-ra-idle.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-nuke-age1",
@@ -2551,7 +2827,8 @@
       "idleFile": "nuke-ra-idle.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-nuke-turbine",
@@ -2581,7 +2858,8 @@
       "idleFile": "nuke-turbine-idle.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-orca-upgraded",
@@ -2610,7 +2888,12 @@
       "idleFile": "helo_orca.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "OrcaAAMissiles",
+        "OrcaAGMissiles",
+        "aot-ApacheAGMissiles"
+      ]
     },
     {
       "id": "aot-oret-lite",
@@ -2637,7 +2920,8 @@
       "idleFile": "oret_base.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-pyle-age0",
@@ -2668,7 +2952,8 @@
       "idleFile": "pyle_base.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-pyle-age1",
@@ -2699,7 +2984,8 @@
       "idleFile": "pyle_ages.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-rmbo-gdi",
@@ -2728,7 +3014,10 @@
       "idleFile": "gdi_commando.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "Sniper"
+      ]
     },
     {
       "id": "aot-shipyard",
@@ -2755,7 +3044,68 @@
       "idleFile": "aot-shipyard.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-spy-gdi",
+      "displayName": "Undercover Spy",
+      "file": "aot-units.yaml",
+      "queue": "Infantry.GDI",
+      "faction": "gdi",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 55,
+      "prereqs": [
+        "barracks",
+        "anyhq"
+      ],
+      "visibilityPrereqs": [],
+      "provides": [],
+      "stats": {
+        "cost": 500,
+        "hp": 3000,
+        "power": 0
+      },
+      "sprite": "ra",
+      "customIcon": true,
+      "iconFile": "gdi_spy.png",
+      "idleFile": "gdi_spy.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-spy-nod",
+      "displayName": "Chameleon Spy",
+      "file": "aot-units.yaml",
+      "queue": "Infantry.Nod",
+      "faction": "nod",
+      "category": "infantry",
+      "tier": 1,
+      "bpo": 55,
+      "prereqs": [
+        "hand",
+        "anyhq"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age1"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 700,
+        "hp": 3000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "nod_spy.png",
+      "idleFile": "nod_spy.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-stec-age0",
@@ -2785,7 +3135,8 @@
       "idleFile": "stec-idle.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-stec-age1",
@@ -2816,7 +3167,8 @@
       "idleFile": "stec-td-idle.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-sub-base",
@@ -2845,7 +3197,10 @@
       "idleFile": "sub_base.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "aot-SubTorpedo"
+      ]
     },
     {
       "id": "aot-sub-cargo-proxy",
@@ -2875,7 +3230,10 @@
       "idleFile": "sub_cargo.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "aot-SubTorpedo"
+      ]
     },
     {
       "id": "aot-subpen",
@@ -2904,7 +3262,8 @@
       "idleFile": "aot-subpen.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-transport-base",
@@ -2931,7 +3290,10 @@
       "idleFile": "aot-transport-icon.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "aot-GunboatGun"
+      ]
     },
     {
       "id": "aot-transport-gun-proxy",
@@ -2958,7 +3320,10 @@
       "idleFile": "vesl_gun.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "aot-GunboatGun"
+      ]
     },
     {
       "id": "aot-transport-hover-proxy",
@@ -2988,7 +3353,8 @@
       "idleFile": "vesl_hover.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": []
     },
     {
       "id": "aot-ttnk-base",
@@ -3017,7 +3383,13 @@
       "idleFile": "ttnk_base.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "BigFlamer",
+        "FlametankExplode",
+        "aot-TtnkChemspray",
+        "aot-TtnkDual"
+      ]
     },
     {
       "id": "aot-ttnk-cloak",
@@ -3046,7 +3418,13 @@
       "idleFile": "ttnk_cloak.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "BigFlamer",
+        "FlametankExplode",
+        "aot-TtnkChemspray",
+        "aot-TtnkDual"
+      ]
     },
     {
       "id": "aot-ttnk-flame",
@@ -3077,7 +3455,13 @@
       "idleFile": "ttnk_flame.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "BigFlamer",
+        "FlametankExplode",
+        "aot-TtnkChemspray",
+        "aot-TtnkDual"
+      ]
     },
     {
       "id": "aot-ttnk-toxin",
@@ -3106,7 +3490,13 @@
       "idleFile": "ttnk_gas.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": true
+      "isProxy": true,
+      "weapons": [
+        "BigFlamer",
+        "FlametankExplode",
+        "aot-TtnkChemspray",
+        "aot-TtnkDual"
+      ]
     },
     {
       "id": "aot-upgrade-apc",
@@ -3142,7 +3532,8 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-upgrade-apc2",
@@ -3178,7 +3569,8 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-upgrade-cruiser-carrier",
@@ -3212,7 +3604,8 @@
       "idleFile": "crus_carrier.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-upgrade-cruiser-railgun",
@@ -3246,7 +3639,8 @@
       "idleFile": "crus_railgun.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-upgrade-e4-toxic",
@@ -3278,7 +3672,8 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-upgrade-gunboat-destroyer",
@@ -3313,7 +3708,8 @@
       "idleFile": "gun_destroyer.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-upgrade-gunboat-frigate",
@@ -3347,7 +3743,8 @@
       "idleFile": "gun_frigate.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-upgrade-harpy",
@@ -3382,7 +3779,8 @@
       "idleFile": "hind_hrpy.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-upgrade-hover-aa",
@@ -3415,7 +3813,8 @@
       "idleFile": "msam_aa.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-upgrade-hover-mlrs",
@@ -3448,7 +3847,8 @@
       "idleFile": "msam_hover.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-upgrade-htnk-railgun",
@@ -3481,7 +3881,8 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-upgrade-htnk-rocket",
@@ -3514,7 +3915,8 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-upgrade-humvee",
@@ -3550,7 +3952,8 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-upgrade-ion-cannon",
@@ -3583,7 +3986,8 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-upgrade-ltnk",
@@ -3616,7 +4020,8 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-upgrade-ltnk-tick",
@@ -3650,7 +4055,8 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-upgrade-msub-drone",
@@ -3685,7 +4091,8 @@
       "idleFile": "sub_drone.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-upgrade-msub-mine",
@@ -3720,7 +4127,8 @@
       "idleFile": "sub_mine.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-upgrade-mtnk-predator",
@@ -3754,7 +4162,8 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-upgrade-mtnk-railgun",
@@ -3790,7 +4199,8 @@
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-upgrade-nuke-turbine",
@@ -3824,7 +4234,8 @@
       "idleFile": "nuke_turbine.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-upgrade-orca",
@@ -3859,7 +4270,8 @@
       "idleFile": "helo_orca.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-upgrade-sub-cargo",
@@ -3892,7 +4304,8 @@
       "idleFile": "sub_cargo.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-upgrade-transport-gun",
@@ -3927,7 +4340,8 @@
       "idleFile": "vesl_gun.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-upgrade-ttnk",
@@ -3960,7 +4374,8 @@
       "idleFile": "ttnk_flame.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-upgrade-ttnk-cloak",
@@ -3995,7 +4410,8 @@
       "idleFile": "ttnk_cloak.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     },
     {
       "id": "aot-upgrade-ttnk-toxin",
@@ -4030,7 +4446,8 @@
       "idleFile": "ttnk_gas.png",
       "idleLength": 1,
       "notBuildable": false,
-      "isProxy": false
+      "isProxy": false,
+      "weapons": []
     }
   ],
   "weapons": [
@@ -4056,7 +4473,10 @@
       "faction": "gdi",
       "inherits": "MachineGunH",
       "usedBy": [
-        "APC"
+        "APC",
+        "aot-apc-amphibious",
+        "aot-jeep-base",
+        "aot-jeep-humvee"
       ],
       "stats": {
         "damage": 1500,
@@ -4072,7 +4492,11 @@
       "category": "weapons",
       "faction": "gdi",
       "inherits": "^BallisticWeapon",
-      "usedBy": [],
+      "usedBy": [
+        "aot-mtnk-base",
+        "aot-mtnk-pred",
+        "aot-mtnk-rail"
+      ],
       "stats": {
         "damage": null,
         "range": null,
@@ -4087,7 +4511,11 @@
       "category": "weapons",
       "faction": "gdi",
       "inherits": "",
-      "usedBy": [],
+      "usedBy": [
+        "aot-mtnk-base",
+        "aot-mtnk-pred",
+        "aot-mtnk-rail"
+      ],
       "stats": {
         "damage": 6000,
         "range": 6.0,
@@ -4102,7 +4530,11 @@
       "category": "weapons",
       "faction": "gdi",
       "inherits": "",
-      "usedBy": [],
+      "usedBy": [
+        "aot-htnk-base",
+        "aot-htnk-laser",
+        "aot-htnk-rocket"
+      ],
       "stats": {
         "damage": 8000,
         "range": 6.0,
@@ -4117,7 +4549,11 @@
       "category": "weapons",
       "faction": "nod",
       "inherits": "",
-      "usedBy": [],
+      "usedBy": [
+        "aot-ltnk-base",
+        "aot-ltnk-laser",
+        "aot-ltnk-tick"
+      ],
       "stats": {
         "damage": 4000,
         "range": 6.0,
@@ -4132,7 +4568,10 @@
       "category": "weapons",
       "faction": "gdi",
       "inherits": "",
-      "usedBy": [],
+      "usedBy": [
+        "aot-apache-base",
+        "aot-orca-upgraded"
+      ],
       "stats": {
         "damage": 2000,
         "range": null,
@@ -4147,7 +4586,10 @@
       "category": "weapons",
       "faction": "both",
       "inherits": "OrcaAGMissiles",
-      "usedBy": [],
+      "usedBy": [
+        "aot-apache-base",
+        "aot-orca-upgraded"
+      ],
       "stats": {
         "damage": 2000,
         "range": null,
@@ -4162,7 +4604,10 @@
       "category": "weapons",
       "faction": "nod",
       "inherits": "HeliAGGun",
-      "usedBy": [],
+      "usedBy": [
+        "aot-harpy-upgraded",
+        "aot-hind-base"
+      ],
       "stats": {
         "damage": 1500,
         "range": null,
@@ -4177,7 +4622,10 @@
       "category": "weapons",
       "faction": "nod",
       "inherits": "HeliAGGun",
-      "usedBy": [],
+      "usedBy": [
+        "aot-harpy-upgraded",
+        "aot-hind-base"
+      ],
       "stats": {
         "damage": 2000,
         "range": null,
@@ -4226,7 +4674,12 @@
       "category": "weapons",
       "faction": "nod",
       "inherits": "^BallisticWeapon",
-      "usedBy": [],
+      "usedBy": [
+        "aot-ttnk-base",
+        "aot-ttnk-cloak",
+        "aot-ttnk-flame",
+        "aot-ttnk-toxin"
+      ],
       "stats": {
         "damage": 2000,
         "range": null,
@@ -4241,7 +4694,12 @@
       "category": "weapons",
       "faction": "nod",
       "inherits": "Chemspray",
-      "usedBy": [],
+      "usedBy": [
+        "aot-ttnk-base",
+        "aot-ttnk-cloak",
+        "aot-ttnk-flame",
+        "aot-ttnk-toxin"
+      ],
       "stats": {
         "damage": null,
         "range": null,
@@ -4322,7 +4780,13 @@
       "category": "weapons",
       "faction": "gdi",
       "inherits": "^BallisticWeapon",
-      "usedBy": [],
+      "usedBy": [
+        "aot-gunboat-base",
+        "aot-gunboat-destroyer",
+        "aot-gunboat-frigate",
+        "aot-transport-base",
+        "aot-transport-gun-proxy"
+      ],
       "stats": {
         "damage": 2500,
         "range": 7.0,
@@ -4337,7 +4801,11 @@
       "category": "weapons",
       "faction": "both",
       "inherits": "BoatMissile",
-      "usedBy": [],
+      "usedBy": [
+        "aot-gunboat-base",
+        "aot-gunboat-destroyer",
+        "aot-gunboat-frigate"
+      ],
       "stats": {
         "damage": 4000,
         "range": 8.0,
@@ -4353,6 +4821,9 @@
       "faction": "both",
       "inherits": "BoatMissile",
       "usedBy": [
+        "aot-gunboat-base",
+        "aot-gunboat-destroyer",
+        "aot-gunboat-frigate",
         "aot-msam-hover-mlrs"
       ],
       "stats": {
@@ -4369,7 +4840,11 @@
       "category": "weapons",
       "faction": "both",
       "inherits": "^BallisticWeapon",
-      "usedBy": [],
+      "usedBy": [
+        "aot-gunboat-base",
+        "aot-gunboat-destroyer",
+        "aot-gunboat-frigate"
+      ],
       "stats": {
         "damage": 6000,
         "range": 5.0,
@@ -4384,7 +4859,10 @@
       "category": "weapons",
       "faction": "nod",
       "inherits": "^BallisticWeapon",
-      "usedBy": [],
+      "usedBy": [
+        "aot-sub-base",
+        "aot-sub-cargo-proxy"
+      ],
       "stats": {
         "damage": 12000,
         "range": 9.0,
@@ -4399,7 +4877,11 @@
       "category": "weapons",
       "faction": "nod",
       "inherits": "^BallisticWeapon",
-      "usedBy": [],
+      "usedBy": [
+        "aot-msub-base",
+        "aot-msub-drone-proxy",
+        "aot-msub-mine-proxy"
+      ],
       "stats": {
         "damage": 2500,
         "range": 20.0,
@@ -4414,7 +4896,11 @@
       "category": "weapons",
       "faction": "nod",
       "inherits": "aot-SubMissile",
-      "usedBy": [],
+      "usedBy": [
+        "aot-msub-base",
+        "aot-msub-drone-proxy",
+        "aot-msub-mine-proxy"
+      ],
       "stats": {
         "damage": null,
         "range": null,
@@ -4445,7 +4931,9 @@
       "faction": "gdi",
       "inherits": "",
       "usedBy": [
-        "aot-cruiser"
+        "aot-cruiser",
+        "aot-cruiser-carrier-proxy",
+        "aot-cruiser-railgun-proxy"
       ],
       "stats": {
         "damage": 4000,
@@ -4462,7 +4950,9 @@
       "faction": "both",
       "inherits": "^BallisticWeapon",
       "usedBy": [
-        "aot-cruiser"
+        "aot-cruiser",
+        "aot-cruiser-carrier-proxy",
+        "aot-cruiser-railgun-proxy"
       ],
       "stats": {
         "damage": 2500,
@@ -4534,6 +5024,38 @@
         "burst": 2,
         "burstDelays": "",
         "reloadDelay": 13
+      }
+    },
+    {
+      "id": "aot-SilencedPPK",
+      "displayName": "aot-SilencedPPK",
+      "category": "weapons",
+      "faction": "both",
+      "inherits": "",
+      "usedBy": [],
+      "stats": {
+        "damage": 15000,
+        "range": 4.0,
+        "burst": 1,
+        "burstDelays": "",
+        "reloadDelay": 80
+      }
+    },
+    {
+      "id": "aot-DogJaw",
+      "displayName": "aot-DogJaw",
+      "category": "weapons",
+      "faction": "both",
+      "inherits": "",
+      "usedBy": [
+        "aot-dog-nod"
+      ],
+      "stats": {
+        "damage": 100000,
+        "range": 3.0,
+        "burst": 1,
+        "burstDelays": "",
+        "reloadDelay": 10
       }
     }
   ]

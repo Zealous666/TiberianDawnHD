@@ -484,9 +484,10 @@ def extract_actors(buildable, seqs, ftl_names):
     return out
 
 def build_weapon_usage(all_actors):
-    """Parse all unit YAMLs for Weapon: entries and build weapon→[actorId] map."""
-    usage = {}  # weapon_id → set of actor ids
-    # We need to re-parse files because our actor data doesn't store weapons
+    """Parse all unit YAMLs for Weapon: entries.
+    Returns (weapon→[actorIds], actor→[weaponIds])."""
+    usage = {}   # weapon_id → set of actor ids
+    actor_weps = {}  # actor_id → set of weapon ids
     files = list(UNIT_FILES.values())
     for path in files:
         if not path.exists():
@@ -503,7 +504,11 @@ def build_weapon_usage(all_actors):
                 wid = strip.split(':', 1)[1].strip()
                 if wid:
                     usage.setdefault(wid, set()).add(cur_actor)
-    return {k: sorted(v) for k, v in usage.items()}
+                    actor_weps.setdefault(cur_actor, set()).add(wid)
+    return (
+        {k: sorted(v) for k, v in usage.items()},
+        {k: sorted(v) for k, v in actor_weps.items()},
+    )
 
 def extract_weapons():
     weapons = []
@@ -574,13 +579,32 @@ if __name__ == '__main__':
     for a in actors:
         a.pop('_provides_raw', None)
     weapons = extract_weapons()
-    # Attach usedBy to weapons (filter to only buildable actors)
+    # Attach usedBy to weapons and weapons list to actors
     buildable_ids = {a['id'] for a in actors}
-    weapon_usage = build_weapon_usage(all_actors)
+    weapon_usage, actor_weapons = build_weapon_usage(all_actors)
+
+    # Propagate weapons through inheritance chains (e.g. aot-htnk-base → HTNK)
+    changed = True
+    while changed:
+        changed = False
+        for aid, data in all_actors.items():
+            if aid in actor_weapons:
+                continue
+            for parent_ref in data.get('_inherits', []):
+                parent_id = parent_ref.lstrip('^')
+                if parent_id in actor_weapons:
+                    actor_weapons[aid] = list(actor_weapons[parent_id])
+                    changed = True
+                    break
+
     for w in weapons:
         raw_users = weapon_usage.get(w['id'], [])
-        # resolve to display names for buildable actors
-        w['usedBy'] = [uid for uid in raw_users if uid in buildable_ids]
+        # Also include actors that inherit weapons (resolved above)
+        inherited_users = [aid for aid, weps in actor_weapons.items() if w['id'] in weps]
+        all_users = sorted(set(raw_users) | set(inherited_users))
+        w['usedBy'] = [uid for uid in all_users if uid in buildable_ids]
+    for a in actors:
+        a['weapons'] = actor_weapons.get(a['id'], [])
     from collections import Counter
     print(f"Kategorien: {dict(Counter(a['category'] for a in actors))}")
     print(f"Fraktionen: {dict(Counter(a['faction'] for a in actors))}")
