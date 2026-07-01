@@ -239,7 +239,7 @@
   <a href="buildorder.html" class="active">Build Order</a>
   <a href="tilesets.html">Tilesets</a>
   <div class="top-nav-spacer"></div>
-  <button class="top-nav-primary-btn" onclick="generateOutput()">Generate Changes</button>
+  <button class="top-nav-primary-btn" id="genChangesBtn" onclick="generateOutput()" disabled>Generate Changes</button>
 </nav>
 
 <header>
@@ -838,9 +838,9 @@
   }
 
   function updateBadge() {
-    document.getElementById('changed-badge').classList.toggle(
-      'visible', document.querySelectorAll('input.order-input.changed').length > 0
-    );
+    const hasChanges = document.querySelectorAll('input.order-input.changed').length > 0;
+    document.getElementById('changed-badge').classList.toggle('visible', hasChanges);
+    document.getElementById('genChangesBtn').disabled = !hasChanges;
   }
 
   function resetAll() {

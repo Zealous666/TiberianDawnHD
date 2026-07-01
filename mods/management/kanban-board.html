@@ -342,6 +342,37 @@
   .top-nav a:hover { color: var(--text); background: var(--card-bg); }
   .top-nav a.active { color: var(--text); background: var(--card-bg); }
   .top-nav-spacer { flex: 1; }
+  .top-nav-link-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: color .15s, border-color .15s;
+    white-space: nowrap;
+  }
+  .top-nav-link-btn:hover { color: var(--text); border-color: var(--text-dim); }
+  .top-nav-link-btn:disabled { opacity: .4; cursor: not-allowed; }
+  .top-nav-link-status {
+    font-size: 11px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    margin: 0 4px;
+  }
+  .top-nav-link-status .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #555;
+    flex-shrink: 0;
+  }
+  .top-nav-link-status.linked .dot { background: #4caf6a; }
   .top-nav-primary-btn {
     background: #f5c518;
     border: 1px solid #f5c518;
@@ -365,7 +396,9 @@
   <a href="buildorder.html">Build Order</a>
   <a href="tilesets.html">Tilesets</a>
   <div class="top-nav-spacer"></div>
-  <button onclick="manualSave()" id="saveBtn" class="top-nav-primary-btn">Jetzt speichern</button>
+  <span class="top-nav-link-status" id="linkStatus"><span class="dot"></span><span id="linkStatusText">nicht verknüpft</span></span>
+  <button onclick="linkFile()" id="linkBtn" class="top-nav-link-btn">Mit KANBAN.md verknüpfen…</button>
+  <button onclick="manualSave()" id="saveBtn" class="top-nav-primary-btn" disabled>Jetzt speichern</button>
 </nav>
 
 <div class="browser-banner" id="browserBanner">
@@ -377,9 +410,7 @@
   <span>Kanban-Board · nur in Chrome/Edge mit automatischem Speichern nach KANBAN.md</span>
 </header>
 <div class="toolbar">
-  <button onclick="linkFile()" id="linkBtn">Mit KANBAN.md verknüpfen…</button>
   <button onclick="resetBoard()">Zurücksetzen auf Standardstruktur</button>
-  <span class="link-status" id="linkStatus"><span class="dot"></span><span id="linkStatusText">wird geprüft…</span></span>
 </div>
 <div id="board"></div>
 
@@ -830,16 +861,17 @@ function setLinkStatus(ok, message) {
   const text = document.getElementById("linkStatusText");
   wrap.classList.toggle("linked", ok);
   text.textContent = message;
+  const saveBtn = document.getElementById("saveBtn");
+  if (saveBtn && FS_SUPPORTED) saveBtn.disabled = !ok;
+  const linkBtn = document.getElementById("linkBtn");
+  if (linkBtn) linkBtn.textContent = ok ? "Verknüpfung ändern…" : "Mit KANBAN.md verknüpfen…";
 }
 
 function applyBrowserSupport() {
-  const banner = document.getElementById("browserBanner");
-  const linkBtn = document.getElementById("linkBtn");
-  const saveBtn = document.getElementById("saveBtn");
   if (!FS_SUPPORTED) {
-    banner.classList.add("show");
-    linkBtn.disabled = true;
-    saveBtn.disabled = true;
+    document.getElementById("browserBanner").classList.add("show");
+    document.getElementById("linkBtn").disabled = true;
+    document.getElementById("saveBtn").disabled = true;
     setLinkStatus(false, "Browser nicht unterstützt – in Chrome/Edge öffnen");
   }
 }

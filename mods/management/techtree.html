@@ -277,7 +277,7 @@ body.show-disabled .card.disabled .card-disable-btn { opacity: 1; }
   <a href="tilesets.html">Tilesets</a>
   <div class="nav-spacer"></div>
   <span class="changes-badge" id="changesBadge">● Unsaved changes</span>
-  <button class="top-nav-primary-btn" id="genAllBtn" onclick="generateAllPrompt()" style="display:none">Generate Prompt</button>
+  <button class="top-nav-primary-btn" id="genAllBtn" onclick="generateAllPrompt()" disabled>Generate Prompt</button>
 </nav>
 
 <!-- Row 2: Category nav -->
@@ -368,7 +368,7 @@ async function init() {
   try { const s = localStorage.getItem('aot-techtree-changes'); if (s) changes = JSON.parse(s); } catch(_) {}
   if (Object.keys(changes).length > 0) {
     document.getElementById('changesBadge').classList.add('visible');
-    document.getElementById('genAllBtn').style.display = 'inline';
+    document.getElementById('genAllBtn').disabled = false;
   }
   updateCounts();
   render();
@@ -390,7 +390,7 @@ function setChange(id, field, value) {
   changes[id][field] = value;
   localStorage.setItem('aot-techtree-changes', JSON.stringify(changes));
   document.getElementById('changesBadge').classList.add('visible');
-  document.getElementById('genAllBtn').style.display = 'inline';
+  document.getElementById('genAllBtn').disabled = false;
 }
 function hasChange(id) { return !!changes[id] && Object.keys(changes[id]).length > 0; }
 
@@ -1104,7 +1104,7 @@ function resetChanges() {
   changes = {};
   localStorage.removeItem('aot-techtree-changes');
   document.getElementById('changesBadge').classList.remove('visible');
-  document.getElementById('genAllBtn').style.display = 'none';
+  document.getElementById('genAllBtn').disabled = true;
   render(); closePanel();
 }
 
