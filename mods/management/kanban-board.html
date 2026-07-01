@@ -468,6 +468,7 @@ let data = load();
 
 function save() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  markDirty();
   autoSaveToFile(); // schreibt automatisch nach KANBAN.md, falls verknüpft (nur Chrome/Edge)
 }
 
@@ -856,15 +857,32 @@ async function idbSetHandle(handle) {
   });
 }
 
+let fileDirty = false;
+
+function setSaveBtnState() {
+  const saveBtn = document.getElementById("saveBtn");
+  if (!saveBtn) return;
+  saveBtn.disabled = !FS_SUPPORTED || !fileHandle || !fileDirty;
+}
+
+function markDirty() {
+  fileDirty = true;
+  setSaveBtnState();
+}
+
+function markClean() {
+  fileDirty = false;
+  setSaveBtnState();
+}
+
 function setLinkStatus(ok, message) {
   const wrap = document.getElementById("linkStatus");
   const text = document.getElementById("linkStatusText");
   wrap.classList.toggle("linked", ok);
   text.textContent = message;
-  const saveBtn = document.getElementById("saveBtn");
-  if (saveBtn && FS_SUPPORTED) saveBtn.disabled = !ok;
   const linkBtn = document.getElementById("linkBtn");
   if (linkBtn) linkBtn.textContent = ok ? "Verknüpfung ändern…" : "Mit KANBAN.md verknüpfen…";
+  setSaveBtnState();
 }
 
 function applyBrowserSupport() {
@@ -950,6 +968,7 @@ async function writeToFile(md) {
     await writable.write(md);
     await writable.close();
     setLinkStatus(true, `verknüpft: ${fileHandle.name} · gespeichert ` + new Date().toLocaleTimeString());
+    markClean();
     return true;
   } catch (err) {
     console.error(err);
