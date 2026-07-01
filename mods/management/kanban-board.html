@@ -468,7 +468,6 @@ let data = load();
 
 function save() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  markDirty();
   autoSaveToFile(); // schreibt automatisch nach KANBAN.md, falls verknüpft (nur Chrome/Edge)
 }
 
@@ -981,8 +980,9 @@ async function writeToFile(md) {
 // Berechtigung noch nicht in dieser Sitzung bestätigt wurde), bleibt die Änderung
 // trotzdem lokal gespeichert - ein Klick auf "Jetzt speichern" holt das nach.
 async function autoSaveToFile() {
-  if (!FS_SUPPORTED || !fileHandle) return;
-  await writeToFile(buildMarkdown());
+  if (!FS_SUPPORTED || !fileHandle) { markDirty(); return; }
+  const ok = await writeToFile(buildMarkdown());
+  if (!ok) markDirty();
 }
 
 async function manualSave() {
