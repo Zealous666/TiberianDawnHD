@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-30T12:02:27.344919+00:00",
+  "generated": "2026-06-30T21:27:04.842220+00:00",
   "actors": [
     {
       "id": "AFLD",
@@ -166,6 +166,168 @@
       "stats": {
         "cost": 500,
         "hp": 11000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false
+    },
+    {
+      "id": "E1",
+      "displayName": "Minigunner",
+      "file": "overrides.yaml",
+      "queue": "Infantry.GDI, Infantry.Nod",
+      "faction": "both",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 10,
+      "prereqs": [],
+      "visibilityPrereqs": [
+        "~disabled"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 100,
+        "hp": 5000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false
+    },
+    {
+      "id": "E2",
+      "displayName": "Grenadier",
+      "file": "overrides.yaml",
+      "queue": "Infantry.GDI",
+      "faction": "gdi",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 40,
+      "prereqs": [],
+      "visibilityPrereqs": [
+        "~disabled"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 160,
+        "hp": 5000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false
+    },
+    {
+      "id": "E3",
+      "displayName": "Rocket Soldier",
+      "file": "overrides.yaml",
+      "queue": "Infantry.GDI, Infantry.Nod",
+      "faction": "both",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 20,
+      "prereqs": [],
+      "visibilityPrereqs": [
+        "~disabled"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 300,
+        "hp": 4500,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false
+    },
+    {
+      "id": "E4",
+      "displayName": "Flamethrower",
+      "file": "overrides.yaml",
+      "queue": "Infantry.Nod",
+      "faction": "nod",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 40,
+      "prereqs": [],
+      "visibilityPrereqs": [
+        "~disabled"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 200,
+        "hp": 9000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false
+    },
+    {
+      "id": "E5",
+      "displayName": "Chemical Warrior",
+      "file": "overrides.yaml",
+      "queue": "Infantry.Nod",
+      "faction": "nod",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 50,
+      "prereqs": [],
+      "visibilityPrereqs": [
+        "~disabled"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 300,
+        "hp": 9000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false
+    },
+    {
+      "id": "E6",
+      "displayName": "Engineer",
+      "file": "overrides.yaml",
+      "queue": "Infantry.GDI, Infantry.Nod",
+      "faction": "both",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 30,
+      "prereqs": [],
+      "visibilityPrereqs": [
+        "~disabled"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 500,
+        "hp": 3000,
         "power": 0
       },
       "sprite": "td",
@@ -378,6 +540,33 @@
       "sprite": "td",
       "customIcon": true,
       "iconFile": "proc_base.png",
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false
+    },
+    {
+      "id": "RMBO",
+      "displayName": "Commando",
+      "file": "overrides.yaml",
+      "queue": "Infantry.GDI",
+      "faction": "gdi",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 50,
+      "prereqs": [],
+      "visibilityPrereqs": [
+        "~disabled"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 1500,
+        "hp": 15000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": false,
+      "iconFile": null,
       "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
@@ -917,6 +1106,258 @@
       "customIcon": true,
       "iconFile": "inf_cyborg.png",
       "idleFile": "inf_cyborg.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true
+    },
+    {
+      "id": "aot-cyc2",
+      "displayName": "Cyborg Commando",
+      "file": "aot-units.yaml",
+      "queue": "Infantry.Nod",
+      "faction": "nod",
+      "category": "infantry",
+      "tier": 3,
+      "bpo": 71,
+      "prereqs": [],
+      "visibilityPrereqs": [
+        "~hand",
+        "~aot-age3"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 2000,
+        "hp": 50000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "nod_commando.png",
+      "idleFile": "nod_commando.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true
+    },
+    {
+      "id": "aot-e1-gdi",
+      "displayName": "Minigunner",
+      "file": "aot-units.yaml",
+      "queue": "Infantry.GDI",
+      "faction": "gdi",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 10,
+      "prereqs": [
+        "barracks"
+      ],
+      "visibilityPrereqs": [],
+      "provides": [],
+      "stats": {
+        "cost": 100,
+        "hp": 5000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "gdi_inf.png",
+      "idleFile": "gdi_inf.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true
+    },
+    {
+      "id": "aot-e1-nod",
+      "displayName": "Minigunner",
+      "file": "aot-units.yaml",
+      "queue": "Infantry.Nod",
+      "faction": "nod",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 10,
+      "prereqs": [
+        "barracks"
+      ],
+      "visibilityPrereqs": [],
+      "provides": [],
+      "stats": {
+        "cost": 100,
+        "hp": 5000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "nod_inf.png",
+      "idleFile": "nod_inf.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true
+    },
+    {
+      "id": "aot-e2-gdi",
+      "displayName": "Grenadier",
+      "file": "aot-units.yaml",
+      "queue": "Infantry.GDI",
+      "faction": "gdi",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 40,
+      "prereqs": [
+        "anyhq"
+      ],
+      "visibilityPrereqs": [
+        "~techlevel.medium"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 160,
+        "hp": 5000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "gdi_gren.png",
+      "idleFile": "gdi_gren.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true
+    },
+    {
+      "id": "aot-e3-nod",
+      "displayName": "Rocket Soldier",
+      "file": "aot-units.yaml",
+      "queue": "Infantry.Nod",
+      "faction": "nod",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 20,
+      "prereqs": [
+        "barracks"
+      ],
+      "visibilityPrereqs": [],
+      "provides": [],
+      "stats": {
+        "cost": 300,
+        "hp": 4500,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "nod_bazooka.png",
+      "idleFile": "nod_bazooka.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true
+    },
+    {
+      "id": "aot-e4-nod-flame",
+      "displayName": "Flamethrower",
+      "file": "aot-units.yaml",
+      "queue": "Infantry.Nod",
+      "faction": "nod",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 40,
+      "prereqs": [
+        "anyhq"
+      ],
+      "visibilityPrereqs": [
+        "~techlevel.medium",
+        "~!aot-age3"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 200,
+        "hp": 9000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "nod_flame.png",
+      "idleFile": "nod_flame.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true
+    },
+    {
+      "id": "aot-e4-nod-toxic",
+      "displayName": "Toxic Trooper",
+      "file": "aot-units.yaml",
+      "queue": "Infantry.Nod",
+      "faction": "nod",
+      "category": "infantry",
+      "tier": 3,
+      "bpo": 40,
+      "prereqs": [
+        "anyhq"
+      ],
+      "visibilityPrereqs": [
+        "~techlevel.medium",
+        "~aot-age3"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 200,
+        "hp": 9000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "nod_toxic.png",
+      "idleFile": "nod_toxic.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true
+    },
+    {
+      "id": "aot-e6-gdi",
+      "displayName": "Engineer",
+      "file": "aot-units.yaml",
+      "queue": "Infantry.GDI",
+      "faction": "gdi",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 30,
+      "prereqs": [
+        "barracks"
+      ],
+      "visibilityPrereqs": [],
+      "provides": [],
+      "stats": {
+        "cost": 500,
+        "hp": 3000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "gdi_engineer.png",
+      "idleFile": "gdi_engineer.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true
+    },
+    {
+      "id": "aot-e6-nod",
+      "displayName": "Saboteur",
+      "file": "aot-units.yaml",
+      "queue": "Infantry.Nod",
+      "faction": "nod",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 30,
+      "prereqs": [
+        "barracks"
+      ],
+      "visibilityPrereqs": [],
+      "provides": [],
+      "stats": {
+        "cost": 500,
+        "hp": 3000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "nod_sabot.png",
+      "idleFile": "nod_sabot.png",
       "idleLength": 1,
       "notBuildable": false,
       "isProxy": true
@@ -2261,6 +2702,35 @@
       "isProxy": true
     },
     {
+      "id": "aot-rmbo-gdi",
+      "displayName": "Commando",
+      "file": "aot-units.yaml",
+      "queue": "Infantry.GDI",
+      "faction": "gdi",
+      "category": "infantry",
+      "tier": 3,
+      "bpo": 50,
+      "prereqs": [
+        "barracks"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age3"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 1500,
+        "hp": 15000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "gdi_commando.png",
+      "idleFile": "gdi_commando.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true
+    },
+    {
       "id": "aot-shipyard",
       "displayName": "Shipyard",
       "file": "aot-structures.yaml",
@@ -2774,6 +3244,38 @@
       "customIcon": true,
       "iconFile": "crus_railgun.png",
       "idleFile": "crus_railgun.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false
+    },
+    {
+      "id": "aot-upgrade-e4-toxic",
+      "displayName": "Toxic Trooper",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.Nod",
+      "faction": "nod",
+      "category": "upgrades",
+      "tier": 3,
+      "bpo": 12,
+      "prereqs": [
+        "aot-age3"
+      ],
+      "visibilityPrereqs": [
+        "~stec",
+        "~aot-age3"
+      ],
+      "provides": [
+        "aot-e4-toxic-upgrade"
+      ],
+      "stats": {
+        "cost": 400,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
       "idleLength": 1,
       "notBuildable": false,
       "isProxy": false
@@ -3778,6 +4280,23 @@
         "burst": 3,
         "burstDelays": "4",
         "reloadDelay": 30
+      }
+    },
+    {
+      "id": "aot-CyCannon",
+      "displayName": "aot-CyCannon",
+      "category": "weapons",
+      "faction": "both",
+      "inherits": "",
+      "usedBy": [
+        "aot-cyc2"
+      ],
+      "stats": {
+        "damage": 6000,
+        "range": 7.0,
+        "burst": 1,
+        "burstDelays": "",
+        "reloadDelay": 50
       }
     },
     {
