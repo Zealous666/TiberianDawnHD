@@ -649,21 +649,21 @@ aot-upgrade-e4-toxic:
 	Interactable:
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - Ion Cannon Upgrade (GDI HQ → EYE-Sprites) ===
-# Erfordert Age 2 + HQ. Schaltet aot-ion-cannon-upgrade frei →
-# HQ wechselt Sprite von hq.shp zu eye.shp (kein Ion Cannon Power vorerst).
+# === Age of Tiberium (aotmod) - Ion Cannon Upgrade (Uplink Command, Age 2) ===
+# Erfordert Age 2 + Uplink Command. Schaltet aot-ion-cannon-upgrade frei →
+# UPLK bekommt die Ion Cannon Strike Support Power (siehe UPLK.IonCannonPower).
 aot-upgrade-ion-cannon:
 	Tooltip:
-		Name: Ion Cannon Uplink
+		Name: Ion Cannon Strike Upgrade
 
 	Buildable:
 		BuildPaletteOrder: 5
-		Prerequisites: ~atec, ~gdi-hq, ~aot-age3, aot-age3
+		Prerequisites: ~atec, ~aot-uplk, ~aot-age2, aot-age2
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		Icon: ioncannon
 		MoveIntoWorld: false
-		Description: Upgrades the Comm Centre with an Uplink to call Ion Cannon Strikes.
+		Description: Upgrades Uplink Command with an Uplink to call Ion Cannon Strikes.
 
 	Valued:
 		Cost: 1500
@@ -707,19 +707,6 @@ ATEC:
 		ActorTypes: e1, e1, c2
 	Power:
 		Amount: -200
-	SupportPowerChargeBar:
-	AotSatellitePower:
-		Prerequisites: atec
-		ChargeInterval: 250
-		RequiresCondition: !satellite-used
-		PauseOnCondition: lowpower
-		Icon: aot-satellite
-		Name: Satellite Surveillance
-		Description: Reveals the entire map.
-		SupportPowerPaletteOrder: 55
-	InfiltrateForSupportPowerReset:
-		Types: SpyInfiltrate
-		PlayerExperience: 10
 	GrantConditionOnPrerequisite@aotage1:
 		Condition: aot-age1-active
 		Prerequisites: aot-age1
@@ -842,6 +829,9 @@ STEC:
 	GrantConditionOnPrerequisite@aotage1:
 		Condition: aot-age1-active
 		Prerequisites: aot-age1
+	GrantConditionOnPrerequisite@aotage2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
 	RenderSprites:
 		Image: stec
 	-WithSpriteBody:
@@ -852,7 +842,19 @@ STEC:
 	WithSpriteBody@td:
 		Sequence: aot-td-idle
 		Name: body-td
-		RequiresCondition: aot-age1-active
+		RequiresCondition: aot-age1-active && !aot-age2-active
+	WithSpriteBody@ts:
+		Sequence: stec-ts-idle
+		Name: body-ts
+		RequiresCondition: aot-age2-active
+	WithIdleOverlay@tsremap:
+		Sequence: stec-ts-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-age2-active
+	WithIdleOverlay@lights:
+		Sequence: stec-ts-lights
+		RequiresCondition: aot-age2-active
 	-WithMakeAnimation:
 	WithMakeAnimation@ra:
 		BodyNames: body
@@ -862,6 +864,12 @@ STEC:
 		BodyNames: body-td
 		Condition: build-incomplete
 		Sequence: aot-td-make
+		RequiresCondition: aot-age1-active && !aot-age2-active
+	WithMakeAnimation@ts:
+		BodyNames: body-ts
+		Condition: build-incomplete
+		Sequence: stec-ts-make
+		RequiresCondition: aot-age2-active
 # === Ende aotmod ===
 
 
@@ -892,9 +900,25 @@ aot-stec-age1:
 	Buildable:
 		Queue: Building.Nod
 		BuildPaletteOrder: 101
-		Prerequisites: anypower, anyhq, ~aot-age1, !aot-stec
+		Prerequisites: anypower, anyhq, ~aot-age1, ~!aot-age2, !aot-stec
 		BuildLimit: 1
 		Icon: aot-age1-icon
+		Description: Advanced NOD research facility. Enables high-tier NOD upgrades.
+
+aot-stec-age2:
+	Inherits: STEC
+	RenderSprites:
+		Image: stec
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: stec-ts-place
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.Nod
+		BuildPaletteOrder: 101
+		Prerequisites: anypower, anyhq, ~aot-age2, !aot-stec
+		BuildLimit: 1
+		Icon: aot-age2-icon
 		Description: Advanced NOD research facility. Enables high-tier NOD upgrades.
 # === Age of Tiberium (aotmod) - MSLO (Nuke Silo, NOD) ===
 # NOD-exklusives Superweapon-Gebäude (RA Nuclear Missile Silo, RA MSLO-Sprites).
@@ -2473,4 +2497,238 @@ SILO:
 		Types: SpyInfiltrate
 		InfiltratedNotification: BuildingInfiltrated
 		InfiltratedTextNotification: notification-building-infiltrated
+
+# === Age of Tiberium (aotmod) - UPLK: Uplink Command (GDI, ab Age 2) ===
+# TS GDI Upgrade Center (GAPLUG) Sprites. Nur Age 2 — keine RA-Vorstufe mehr
+# (Chronosphere/PDOX-Sprites werden anderweitig verwendet, siehe [[firestorm-system]]).
+# Kein Proxy-Pattern noetig - nur ein Erscheinungsbild, kein Age-abhaengiger Icon-/Sprite-Wechsel (wie aot-shrine).
+# Support-Powers: Satellite Surveillance (sofort verfuegbar), Ion Cannon Strike (Age-2-Upgrade),
+# Zone Trooper Drop (Age-3-Upgrade, noch nicht implementiert).
+UPLK:
+	Inherits: ^BaseBuilding
+	Inherits@shape: ^3x2Shape
+	Inherits@IDISABLE: ^DisabledOverlay
+	Tooltip:
+		Name: Uplink Command
+	Valued:
+		Cost: 1500
+	Health:
+		HP: 60000
+	Selectable:
+		Bounds: 3072, 2048
+	Building:
+		Footprint: xxx xxx ===
+		Dimensions: 3,3
+		LocalCenterOffset: 0,-512,0
+	ProvidesPrerequisite:
+		Prerequisite: aot-uplk
+	RevealsShroud:
+		Range: 5c0
+	Power:
+		Amount: -150
+	WithBuildingBib:
+	RenderSprites:
+		Image: uplk
+	GrantConditionOnPrerequisite@ioncannon:
+		Condition: aot-ion-cannon-active
+		Prerequisites: aot-ion-cannon-upgrade
+	IonCannonPower:
+		RequiresCondition: aot-ion-cannon-active
+		PauseOnCondition: lowpower
+		Prerequisites: ~techlevel.superweapons
+		IconImage: icon
+		Icon: aot-ion-strike
+		Cursor: ioncannon
+		ChargeInterval: 9000
+		Name: Ion Cannon Strike
+		Description: Calls in a devastating ion cannon strike on the target location.
+		BeginChargeSpeechNotification: IonCannonCharging
+		EndChargeSpeechNotification: IonCannonReady
+		SelectTargetSpeechNotification: SelectTarget
+		InsufficientPowerSpeechNotification: InsufficientPower
+		BeginChargeTextNotification: notification-ion-cannon-charging
+		EndChargeTextNotification: notification-ion-cannon-ready
+		SelectTargetTextNotification: notification-select-target
+		InsufficientPowerTextNotification: notification-insufficient-power
+		OnFireSound: ion1.aud
+		DisplayRadarPing: True
+		CameraActor: camera.small
+		SupportPowerPaletteOrder: 20
+	SupportPowerChargeBar@ion:
+		RequiresCondition: aot-ion-cannon-active
+	WithSpriteBody:
+		Sequence: idle
+	WithIdleOverlay@remap:
+		Sequence: idle-remap
+		Palette: player
+		IsPlayerPalette: True
+	WithIdleOverlay@active:
+		Sequence: active
+		RequiresCondition: !build-incomplete
+	WithIdleOverlay@ioncannon:
+		Sequence: ioncannon-addon
+		RequiresCondition: aot-ion-cannon-active && !build-incomplete
+	WithMakeAnimation:
+		Sequence: make
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: place
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.GDI
+		BuildPaletteOrder: 102
+		Prerequisites: ~aot-age2, atec, gdi-hq
+		BuildLimit: 1
+		Icon: icon
+		Description: GDI uplink facility. Unlocks advanced support powers as your tech level increases.
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - SLAB: Science Lab (GDI, ab Age 1) ===
+# Age 1: RA Chronosphere (PDOX) Sprite. Age 2: TS Firestorm Generator (gtfire) Sprite, automatischer Wechsel bei aot-age2.
+# Reine Prerequisite-Gate-Funktion (kein Support Power) - liefert aot-slab fuer kuenftige GDI-Techs/Upgrades.
+SLAB:
+	Inherits: ^BaseBuilding
+	Inherits@shape: ^3x2Shape
+	Inherits@IDISABLE: ^DisabledOverlay
+	Tooltip:
+		Name: Science Lab
+	Valued:
+		Cost: 1500
+	Health:
+		HP: 100000
+	Selectable:
+		Bounds: 3072, 2048
+	Building:
+		Footprint: xxx xxx ===
+		Dimensions: 3,3
+		LocalCenterOffset: 0,-512,0
+	ProvidesPrerequisite:
+		Prerequisite: aot-slab
+	RevealsShroud:
+		Range: 5c0
+	Power:
+		Amount: -100
+	WithBuildingBib:
+	RenderSprites:
+		Image: slab
+	GrantConditionOnPrerequisite@aotage2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
+	-WithSpriteBody:
+	WithSpriteBody@ra:
+		Sequence: idle
+		Name: body
+		RequiresCondition: !aot-age2-active
+	WithSpriteBody@ts:
+		Sequence: aot-ts-idle
+		Name: body-ts
+		RequiresCondition: aot-age2-active
+	WithSpriteBody@tsremap:
+		Sequence: aot-ts-idle-remap
+		Name: body-tsremap
+		RequiresCondition: aot-age2-active && !build-incomplete
+	-WithMakeAnimation:
+	WithMakeAnimation@ra:
+		BodyNames: body
+		Condition: build-incomplete
+		Sequence: make
+	WithMakeAnimation@ts:
+		BodyNames: body-ts
+		Condition: build-incomplete
+		Sequence: aot-ts-make
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - SLAB Build-Menu Icons (Proxy-Aktoren) ===
+# Zwei Proxy-Aktoren steuern das Icon im Baumenue, analog ATEC/STEC/MSLO/NOD-Radar:
+# aot-slab-age1: sichtbar Age 1 bis vor Age 2 (RA-Icon). aot-slab-age2: sichtbar ab Age 2 (TS-Icon).
+aot-slab-age1:
+	Inherits: SLAB
+	RenderSprites:
+		Image: slab
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: place
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.GDI
+		BuildPaletteOrder: 101
+		Prerequisites: ~aot-age1, gdi-hq, ~!aot-age2
+		BuildLimit: 1
+		Icon: icon
+		Description: GDI research facility. Provides a prerequisite for future GDI technologies.
+
+aot-slab-age2:
+	Inherits: SLAB
+	RenderSprites:
+		Image: slab
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: aot-ts-place
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.GDI
+		BuildPaletteOrder: 101
+		Prerequisites: ~aot-age1, gdi-hq, ~aot-age2, !aot-slab
+		BuildLimit: 1
+		Icon: aot-age2-icon
+		Description: GDI research facility. Provides a prerequisite for future GDI technologies.
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Nod Shrine (aot-shrine) ===
+# NOD-exklusives Prestige-Gebaeude, sichtbar erst ab Age 2 (~aot-age2), baubar sobald STEC + TMPL stehen.
+# TS NTPYRA ("NOD Pyramid") Sprite-Import, Zwei-Layer-Compositing wie STEC/MSLO/UPLK (siehe [[ts-assets]]).
+# Kein Proxy-Pattern noetig - nur ein Erscheinungsbild, kein Age-abhaengiger Icon-/Sprite-Wechsel.
+# Tooltip verweist auf NODs maechtigste Kampfsysteme und Superwaffen.
+aot-shrine:
+	Inherits: ^BaseBuilding
+	Inherits@IDISABLE: ^DisabledOverlay
+	Tooltip:
+		Name: Nod Shrine
+	Valued:
+		Cost: 3000
+	Health:
+		HP: 80000
+	Selectable:
+		Bounds: 4096, 2048
+	HitShape:
+		UseTargetableCellsOffsets: true
+		Type: Rectangle
+			TopLeft: -2048, -1024
+			BottomRight: 2048, 1024
+	Building:
+		Footprint: xxxx xxxx ====
+		Dimensions: 4,3
+		LocalCenterOffset: 0,-512,0
+	ProvidesPrerequisite:
+		Prerequisite: aot-shrine
+	RevealsShroud:
+		Range: 5c0
+	Power:
+		Amount: -250
+	WithBuildingBib:
+	RenderSprites:
+		Image: aot-shrine
+	WithSpriteBody:
+		Sequence: idle
+		Name: body
+	WithIdleOverlay@remap:
+		Sequence: idle-remap
+		Palette: player
+		IsPlayerPalette: True
+	WithIdleOverlay@active:
+		Sequence: active
+		RequiresCondition: !build-incomplete
+	WithMakeAnimation:
+		Sequence: make
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: place
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.Nod
+		BuildPaletteOrder: 110
+		Prerequisites: ~aot-age2, stec, tmpl
+		BuildLimit: 1
+		Icon: icon
+		Description: Ancient Nod relic. Unlocks NOD's most powerful combat systems and superweapons.
 # === Ende aotmod ===

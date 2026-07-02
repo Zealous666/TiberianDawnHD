@@ -1,3 +1,517 @@
+# === Age of Tiberium (aotmod) - NOD Dog ===
+aot-dog-nod:
+	Inherits: ^Soldier
+	Inherits@AUTOTARGET: ^AutoTargetGroundAssaultMove
+	RenderSprites:
+		Image: aot-dog-nod
+	Selectable:
+		Bounds: 512, 725, -42, -170
+		DecorationBounds: 512, 725, -42, -170
+	Valued:
+		Cost: 200
+	Tooltip:
+		Name: Dog
+	UpdatesPlayerStatistics:
+		AddToArmyValue: true
+	Buildable:
+		BuildPaletteOrder: 60
+		Prerequisites: barracks
+		Queue: Infantry.Nod
+		Description: Fast anti-infantry unit. Instantly kills enemy soldiers.
+	Health:
+		HP: 1800
+	Armor:
+		Type: None
+	Mobile:
+		Speed: 100
+		Voice: Move
+		PauseOnCondition: attack-cooldown || eating
+	Voiced:
+		VoiceSet: DogVoice
+	RevealsShroud:
+		Range: 5c512
+	Armament:
+		Weapon: aot-DogJaw
+		ReloadingCondition: attack-cooldown
+		ForceTargetRelationships: Enemy, Ally, Neutral
+	-AttackFrontal:
+	AttackLeap:
+		Voice: Attack
+		PauseOnCondition: attacking || attack-cooldown
+	AttackMove:
+		Voice: Move
+	GrantConditionOnAttack:
+		Condition: eating
+		RevokeDelay: 20
+	GrantConditionWhileAiming:
+		Condition: run
+	AutoTarget:
+		InitialStance: AttackAnything
+	AutoTargetPriority@DEFAULT:
+		ValidTargets: Infantry
+	Targetable:
+		TargetTypes: GroundActor, Infantry
+	WithInfantryBody:
+		MoveSequence: walk
+		StandSequences: stand
+		DefaultAttackSequence: eat
+		RequiresCondition: !run
+	WithInfantryBody@RUN:
+		MoveSequence: run
+		RequiresCondition: run
+	IgnoresDisguise:
+	DetectCloaked:
+	WithDeathAnimation:
+		DeathSequences: die1, die2, die3, die4, die5
+		UseDeathTypeSuffix: false
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - NOD Chameleon Spy (ab Age 1) ===
+aot-spy-nod:
+	Inherits: ^Soldier
+	Inherits@AUTOTARGET: ^AutoTargetGroundAssaultMove
+	WithShadow:
+		Offset: 0, 48, 0
+		ZOffset: -129
+	RenderSprites:
+		Image: aot-spy-nod
+		PlayerPalette: aot-ts-player
+	Selectable:
+		Bounds: 512, 725, -42, -170
+		DecorationBounds: 512, 725, -42, -170
+	Valued:
+		Cost: 700
+	Tooltip:
+		Name: Chameleon Spy
+	UpdatesPlayerStatistics:
+		AddToArmyValue: true
+	-Guard:
+	Mobile:
+		Speed: 85
+		Voice: Move
+	RevealsShroud:
+		Range: 5c0
+	Passenger:
+		CustomPipType: blue
+		Voice: Move
+	Buildable:
+		BuildPaletteOrder: 55
+		Prerequisites: ~aot-age1, hand, anyhq
+		Queue: Infantry.Nod
+		Description: Cloaked infiltrator. Infiltrates enemy structures to steal credits, reveal their vision, reset support powers, or cut power.
+	Health:
+		HP: 3000
+	Armor:
+		Type: None
+	Cloak:
+		CloakStyle: Alpha
+		InitialDelay: 25
+		CloakDelay: 25
+		UncloakOn: Attack, Unload, Infiltrate, Demolish, Damage
+		CloakSound: cloak5.aud
+		UncloakSound: cloak5.aud
+	Infiltrates:
+		Types: SpyInfiltrate
+		Notification: BuildingInfiltrated
+		TextNotification: notification-building-infiltrated
+	AutoTarget:
+		InitialStance: HoldFire
+		InitialStanceAI: HoldFire
+		ScanRadius: 5
+	WithInfantryBody:
+		IdleSequences: idle1, idle2
+		StandSequences: stand
+		RequiresCondition: !parachute
+	Voiced:
+		VoiceSet: ChameleonSpyVoice
+	WithDeathAnimation:
+		DeathSequences: die1, die2
+		UseDeathTypeSuffix: false
+		DeathSequencePalette: aot-ts-player
+		DeathPaletteIsPlayerPalette: true
+		CrushedSequence: die-crushed
+		CrushedSequencePalette: aot-ts-player
+		CrushedPaletteIsPlayerPalette: true
+
+# === Age of Tiberium (aotmod) - GDI Undercover Spy (exklusiv GDI, ab Age 2) ===
+aot-spy-gdi:
+	Inherits: ^Soldier
+	Inherits@AUTOTARGET: ^AutoTargetGroundAssaultMove
+	RenderSprites:
+		Image: aot-spy-gdi
+	Selectable:
+		Bounds: 512, 725, -42, -170
+		DecorationBounds: 512, 725, -42, -170
+	Valued:
+		Cost: 500
+	Tooltip:
+		Name: Undercover Spy
+	UpdatesPlayerStatistics:
+		AddToArmyValue: true
+	-Guard:
+	Mobile:
+		Speed: 54
+		Voice: Move
+	RevealsShroud:
+		Range: 5c0
+	Passenger:
+		CustomPipType: blue
+		Voice: Move
+	Buildable:
+		BuildPaletteOrder: 55
+		Prerequisites: barracks, anyhq
+		Queue: Infantry.GDI
+		Description: Disguised agent. Infiltrates enemy buildings to steal credits, reveal the map, or reset support powers.
+	Health:
+		HP: 3000
+	Armor:
+		Type: None
+	Disguise:
+		DisguisedCondition: disguise
+	AutoDisguiseOnSpawn:
+		Actor: e1
+	Infiltrates:
+		Types: SpyInfiltrate
+		Notification: BuildingInfiltrated
+		TextNotification: notification-building-infiltrated
+	AutoTarget:
+		InitialStance: HoldFire
+		InitialStanceAI: HoldFire
+		ScanRadius: 5
+	WithInfantryBody:
+		IdleSequences: idle1, idle2
+		StandSequences: stand, stand2
+		RequiresCondition: !parachute
+	AotSpyRenderer:
+	IgnoresDisguise:
+	Voiced:
+		VoiceSet: SpyVoice
+	WithDeathAnimation:
+		DeathSequences: die1, die2, die3, die4, die5
+		UseDeathTypeSuffix: false
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - GDI Commando (RMBO, exklusiv GDI, ab Age 3) ===
+aot-rmbo-gdi:
+	Inherits: RMBO
+	RenderSprites:
+		Image: aot-rmbo-gdi
+	Buildable:
+		BuildPaletteOrder: 50
+		Prerequisites: barracks, ~aot-age3
+		Queue: Infantry.GDI
+		Description: actor-rmbo.description
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - GDI + NOD Rifleman (E1-Split, eigene Icons) ===
+aot-e1-gdi:
+	Inherits: E1
+	RenderSprites:
+		Image: aot-e1-gdi
+	Buildable:
+		BuildPaletteOrder: 10
+		Prerequisites: barracks
+		Queue: Infantry.GDI
+		Description: actor-e1.description
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - NOD Rifleman ===
+aot-e1-nod:
+	Inherits: E1
+	RenderSprites:
+		Image: aot-e1-nod
+	Buildable:
+		BuildPaletteOrder: 10
+		Prerequisites: barracks
+		Queue: Infantry.Nod
+		Description: actor-e1.description
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - GDI + NOD Engineer (E6-Split, eigene Icons) ===
+aot-e6-gdi:
+	Inherits: E6
+	RenderSprites:
+		Image: aot-e6-gdi
+	Tooltip:
+		Name: actor-e6.name
+	Voiced:
+		VoiceSet: EngineerVoice
+	Buildable:
+		BuildPaletteOrder: 30
+		Prerequisites: barracks
+		Queue: Infantry.GDI
+		Description: actor-e6.description
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - GDI Combat Medic ===
+aot-medi-gdi:
+	Inherits: ^Soldier
+	RenderSprites:
+		Image: aot-medi-gdi
+	Valued:
+		Cost: 200
+	Tooltip:
+		Name: Combat Medic
+	UpdatesPlayerStatistics:
+		AddToArmyValue: true
+	Health:
+		HP: 6000
+	Mobile:
+		Speed: 49
+	RevealsShroud:
+		Range: 3c0
+	Passenger:
+		CustomPipType: blue
+	Armament:
+		Weapon: aot-Heal
+		Cursor: repair
+		OutsideRangeCursor: repair
+		TargetRelationships: Ally
+		ForceTargetRelationships: None
+	WithInfantryBody:
+		IdleSequences: idle
+		StandSequences: stand
+		DefaultAttackSequence: heal
+	Voiced:
+		VoiceSet: MedicVoice
+	AutoTarget:
+	AutoTargetPriority@DEFAULT:
+		ValidTargets: Heal
+	Buildable:
+		BuildPaletteOrder: 45
+		Prerequisites: barracks
+		Queue: Infantry.GDI
+		Description: Unarmed medic. Heals friendly infantry in the field.
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - GDI Field Mechanic ===
+aot-mech-gdi:
+	Inherits: ^Soldier
+	RenderSprites:
+		Image: aot-mech-gdi
+	Valued:
+		Cost: 500
+	Tooltip:
+		Name: Field Mechanic
+	UpdatesPlayerStatistics:
+		AddToArmyValue: true
+	Health:
+		HP: 8000
+	Mobile:
+		Speed: 49
+		Voice: Move
+	RevealsShroud:
+		Range: 3c0
+	Passenger:
+		CustomPipType: blue
+		Voice: Move
+	Armament:
+		Weapon: aot-Repair
+		Cursor: goldwrench
+		OutsideRangeCursor: goldwrench
+		TargetRelationships: Ally
+		ForceTargetRelationships: None
+	AttackFrontal:
+		Voice: Action
+		FacingTolerance: 0
+	WithInfantryBody:
+		IdleSequences: idle
+		StandSequences: stand
+		DefaultAttackSequence: repair
+	Voiced:
+		VoiceSet: MechanicVoice
+	AutoTarget:
+	AutoTargetPriority@DEFAULT:
+		ValidTargets: Repair
+	Buildable:
+		BuildPaletteOrder: 46
+		Prerequisites: barracks, ~aot-age2, fix
+		Queue: Infantry.GDI
+		Description: Unarmed mechanic. Repairs friendly vehicles in the field.
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - NOD Saboteur ===
+aot-e6-nod:
+	Inherits: E6
+	WithShadow:
+		Offset: 0, 48, 0
+		ZOffset: -129
+	RenderSprites:
+		Image: aot-e6-nod
+		PlayerPalette: aot-saboteur-player
+	WithInfantryBody:
+		StandSequences: stand
+		IdleSequences: idle1, idle2
+	WithDeathAnimation:
+		DeathSequences: die1, die2
+		UseDeathTypeSuffix: false
+		DeathSequencePalette: aot-saboteur-player
+		DeathPaletteIsPlayerPalette: true
+		CrushedSequence: die-crushed
+		CrushedSequencePalette: aot-saboteur-player
+		CrushedPaletteIsPlayerPalette: true
+	Tooltip:
+		Name: Saboteur
+	Voiced:
+		VoiceSet: NodRiflemanVoice
+	Buildable:
+		BuildPaletteOrder: 30
+		Prerequisites: barracks
+		Queue: Infantry.Nod
+		Description: actor-e6.description
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - NOD Carjacker (aot-cark-nod) ===
+# Firestorm Mutant Hijacker. Capturt feindliche Fahrzeuge per Nahkampf.
+# Tarnung: wirkt für Feinde wie ein Zivilist (C1), Hund kann ihn dennoch entdecken.
+aot-cark-nod:
+	Inherits: ^Soldier
+	Inherits@AUTOTARGET: ^AutoTargetGroundAssaultMove
+	WithShadow:
+		Offset: 0, 48, 0
+		ZOffset: -129
+	RenderSprites:
+		Image: aot-cark-nod
+		PlayerPalette: aot-ts-player
+	Selectable:
+		Bounds: 512, 725, -42, -170
+		DecorationBounds: 512, 725, -42, -170
+	Valued:
+		Cost: 800
+	Tooltip:
+		Name: Carjacker
+	UpdatesPlayerStatistics:
+		AddToArmyValue: true
+	-Guard:
+	Mobile:
+		Speed: 70
+		Voice: Move
+	RevealsShroud:
+		Range: 5c0
+	Passenger:
+		CustomPipType: blue
+		Voice: Move
+	Buildable:
+		BuildPaletteOrder: 60
+		Prerequisites: ~aot-age2, hand, stec
+		Queue: Infantry.Nod
+		Icon: icon
+		Description: Disguised infiltrator. Captures enemy vehicles on contact. Appears as an enemy soldier; detectable by dogs.
+	Health:
+		HP: 3000
+	Armor:
+		Type: None
+	CaptureManager:
+	Captures@VEHICLE:
+		CaptureTypes: vehicle
+		CaptureDelay: 25
+		ConsumedByCapture: true
+		PlayerExperience: 5
+		ValidRelationships: Enemy, Neutral
+	AutoTarget:
+		InitialStance: HoldFire
+		InitialStanceAI: HoldFire
+		ScanRadius: 5
+	Disguise:
+		DisguisedCondition: disguise
+	AutoDisguiseOnSpawn:
+		Actor: c1
+	AotSpyRenderer:
+		DisguiseImage: c1
+		StandSequence: stand
+		WalkSequence: run
+	IgnoresDisguise:
+	WithInfantryBody:
+		IdleSequences: idle1, idle2
+		StandSequences: stand
+		RequiresCondition: !parachute
+	Voiced:
+		VoiceSet: CarjackerVoice
+	WithDeathAnimation:
+		DeathSequences: die1, die2
+		UseDeathTypeSuffix: false
+		DeathSequencePalette: aot-ts-player
+		DeathPaletteIsPlayerPalette: true
+		CrushedSequence: die-crushed
+		CrushedSequencePalette: aot-ts-player
+		CrushedPaletteIsPlayerPalette: true
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - GDI Grenadier (eigenes Icon, nur noch GDI) ===
+aot-e2-gdi:
+	Inherits: E2
+	RenderSprites:
+		Image: aot-e2-gdi
+	Buildable:
+		BuildPaletteOrder: 40
+		Prerequisites: anyhq, ~techlevel.medium
+		Queue: Infantry.GDI
+		Description: actor-e2.description
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - NOD Bazooka / Rocket Soldier (eigenes Icon, nur noch NOD) ===
+aot-e3-nod:
+	Inherits: E3
+	RenderSprites:
+		Image: aot-e3-nod
+	Buildable:
+		BuildPaletteOrder: 20
+		Prerequisites: barracks
+		Queue: Infantry.Nod
+		Description: actor-e3.description
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - NOD Flamethrower → Toxic Trooper Upgrade (Age 3) ===
+# Gleiches Sprite (E4), nur Waffe wechselt auf Chemspray bei Age 3.
+# Proxy-Aktoren aot-e4-nod-flame/toxic steuern Sidebar-Icon je nach Age.
+aot-e4-nod:
+	Inherits: E4
+	RenderSprites:
+		Image: aot-e4-nod
+	GrantConditionOnPrerequisite@TOXIC:
+		Condition: aot-e4-toxic
+		Prerequisites: aot-e4-toxic-upgrade
+	Armament:
+		Weapon: Flamethrower
+		LocalOffset: 341,0,256
+		FireDelay: 3
+		MuzzleSequence: muzzle
+		RequiresCondition: !aot-e4-toxic
+	Armament@TOXIC:
+		Weapon: Chemspray
+		LocalOffset: 341,0,256
+		FireDelay: 3
+		MuzzleSequence: muzzle-chem
+		RequiresCondition: aot-e4-toxic
+	-Buildable:
+# === Ende aotmod ===
+
+# Sidebar-Proxy: Flamethrower Icon (verschwindet bei Age 3)
+aot-e4-nod-flame:
+	Inherits: aot-e4-nod
+	Tooltip:
+		Name: Flamethrower
+	Buildable:
+		BuildPaletteOrder: 40
+		Prerequisites: anyhq, ~techlevel.medium, ~!aot-age3
+		Queue: Infantry.Nod
+		Icon: icon-flame
+		Description: actor-e4.description
+# === Ende aotmod ===
+
+# Sidebar-Proxy: Toxic Trooper Icon (erscheint bei Age 3)
+aot-e4-nod-toxic:
+	Inherits: aot-e4-nod
+	Tooltip:
+		Name: Toxic Trooper
+	Buildable:
+		BuildPaletteOrder: 40
+		Prerequisites: anyhq, ~techlevel.medium, ~aot-age3
+		Queue: Infantry.Nod
+		Icon: icon-toxic
+		Description: actor-e5.description
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - MCV: RA sprites in Age 0, TD ab Age 1 ===
 # Gleiche Logik wie FACT: GrantConditionOnPrerequisite → zwei WithFacingSpriteBody.
 # Kein WithMakeAnimation auf Fahrzeugen nötig.
@@ -455,6 +969,8 @@ ORET:
 		GenericName: actor-oret.generic-name
 	Selectable:
 		DecorationBounds: 1536, 1536
+		Priority: 6
+		PriorityModifiers: Ctrl, Alt
 	Mobile:
 		Speed: 50
 	Health:
@@ -1167,6 +1683,9 @@ FTNK:
 # Crippled-Mechanik: ab Critical-HP → Condition "critical" → TakeCover ProneSequencePrefix "crippled-"
 aot-cyborg:
 	Inherits: E1
+	WithShadow:
+		Offset: 0, 48, 0
+		ZOffset: -129
 	RenderSprites:
 		Image: cyborg
 		PlayerPalette: aot-ts-player
@@ -1216,6 +1735,49 @@ aot-cyborg:
 		Prerequisites: ~hand, ~aot-age2
 		Icon: icon
 		Description: Cybernetic NOD soldier. Enters crippled mode at critical HP.
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - NOD Cyborg Commando (TS CYC2) ===
+# TS: CYC2 — BuildLimit 1, Plasma-Kanone (ProtonBlast), Range 7, 23-Serie Voice
+aot-cyc2:
+	Inherits: E1
+	WithShadow:
+		Offset: 0, 48, 0
+		ZOffset: -129
+	RenderSprites:
+		Image: aot-cyc2
+		PlayerPalette: aot-ts-player
+	WithInfantryBody:
+		StandSequences: stand
+		DefaultAttackSequence: attack
+		Palette: aot-ts-player
+		IsPlayerPalette: true
+	WithDeathAnimation:
+		DeathSequence: die
+		UseDeathTypeSuffix: false
+		DeathSequencePalette: aot-ts-player
+		DeathPaletteIsPlayerPalette: true
+		CrushedSequence: die-crushed
+		CrushedSequencePalette: aot-ts-player
+		CrushedPaletteIsPlayerPalette: true
+	Voiced:
+		VoiceSet: CyborgCommandoVoice
+	Tooltip:
+		Name: Cyborg Commando
+	Health:
+		HP: 50000
+	Mobile:
+		Speed: 48
+	Valued:
+		Cost: 2000
+	Armament:
+		Weapon: aot-CyCannon
+	Buildable:
+		Queue: Infantry.Nod
+		BuildPaletteOrder: 71
+		Prerequisites: ~hand, ~aot-age3
+		Icon: icon
+		Description: Elite NOD cyborg with plasma cannon. Devastating vs. all targets. Limit: 1.
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Gunboat (GDI Naval, PT base -> Destroyer upgrade) ===
@@ -2162,4 +2724,227 @@ aot-msam-hover-aa:
 		Description: Hover AA. Amphibious anti-air platform. Devastating vs aircraft.
 	Tooltip:
 		Name: Hover AA
+
+# === TS Civilian Vehicles (Editor-only, nicht baubar) ===
+aot-civ-pick:
+	Inherits: ^Vehicle
+	WithCargoPipsDecoration:
+		Position: BottomLeft
+		Margin: 4, 3
+		RequiresSelection: true
+		CustomPipSequences:
+			gray: pip-gray
+			yellow: pip-yellow
+			red: pip-red
+	RenderSprites:
+		Image: aot-civ-pick
+	WithFacingSpriteBody@BODY:
+		Sequence: idle
+	WithFacingSpriteBody@REMAP:
+		Sequence: idle-remap
+		Palette: player
+		IsPlayerPalette: True
+	WithShadow:
+		Offset: 0, 32, 0
+		ZOffset: -129
+		ShadowColor: 50000000
+	Tooltip:
+		Name: Pickup Truck
+	Health:
+		HP: 10000
+	Armor:
+		Type: Light
+	Mobile:
+		Speed: 113
+		TurnSpeed: 20
+	RevealsShroud:
+		Range: 5c0
+		MaxHeightDelta: 3
+	Cargo:
+		Types: Infantry
+		MaxWeight: 2
+		EjectOnDeath: true
+	Valued:
+		Cost: 0
+
+aot-civ-wini:
+	Inherits: ^Vehicle
+	WithCargoPipsDecoration:
+		Position: BottomLeft
+		Margin: 4, 3
+		RequiresSelection: true
+		CustomPipSequences:
+			gray: pip-gray
+			yellow: pip-yellow
+			red: pip-red
+	RenderSprites:
+		Image: aot-civ-wini
+	WithFacingSpriteBody@BODY:
+		Sequence: idle
+	WithFacingSpriteBody@REMAP:
+		Sequence: idle-remap
+		Palette: player
+		IsPlayerPalette: True
+	WithShadow:
+		Offset: 0, 32, 0
+		ZOffset: -129
+		ShadowColor: 50000000
+	Tooltip:
+		Name: Winnebago
+	Health:
+		HP: 20000
+	Armor:
+		Type: Light
+	Mobile:
+		Speed: 113
+		TurnSpeed: 20
+	RevealsShroud:
+		Range: 5c0
+		MaxHeightDelta: 3
+	Cargo:
+		Types: Infantry
+		MaxWeight: 5
+		EjectOnDeath: true
+	Valued:
+		Cost: 0
+
+aot-civ-bus:
+	Inherits: ^Vehicle
+	WithCargoPipsDecoration:
+		Position: BottomLeft
+		Margin: 4, 3
+		RequiresSelection: true
+		CustomPipSequences:
+			gray: pip-gray
+			yellow: pip-yellow
+			red: pip-red
+	RenderSprites:
+		Image: aot-civ-bus
+	WithFacingSpriteBody@BODY:
+		Sequence: idle
+	WithFacingSpriteBody@REMAP:
+		Sequence: idle-remap
+		Palette: player
+		IsPlayerPalette: True
+	WithShadow:
+		Offset: 0, 32, 0
+		ZOffset: -129
+		ShadowColor: 50000000
+	Tooltip:
+		Name: School Bus
+	Health:
+		HP: 10000
+	Armor:
+		Type: Light
+	Mobile:
+		Speed: 113
+		TurnSpeed: 20
+	RevealsShroud:
+		Range: 5c0
+		MaxHeightDelta: 3
+	Cargo:
+		Types: Infantry
+		MaxWeight: 20
+		EjectOnDeath: true
+	Valued:
+		Cost: 0
+
+aot-civ-trucka:
+	Inherits: ^Vehicle
+	RenderSprites:
+		Image: aot-civ-trucka
+	WithFacingSpriteBody@BODY:
+		Sequence: idle
+	WithFacingSpriteBody@REMAP:
+		Sequence: idle-remap
+		Palette: player
+		IsPlayerPalette: True
+	WithShadow:
+		Offset: 0, 32, 0
+		ZOffset: -129
+		ShadowColor: 50000000
+	Tooltip:
+		Name: Civilian Truck
+	Health:
+		HP: 20000
+	Armor:
+		Type: Light
+	Mobile:
+		Speed: 56
+		TurnSpeed: 20
+	RevealsShroud:
+		Range: 5c0
+		MaxHeightDelta: 3
+	Valued:
+		Cost: 0
+
+aot-civ-truckb:
+	Inherits: ^Vehicle
+	RenderSprites:
+		Image: aot-civ-truckb
+	WithFacingSpriteBody@BODY:
+		Sequence: idle
+	WithFacingSpriteBody@REMAP:
+		Sequence: idle-remap
+		Palette: player
+		IsPlayerPalette: True
+	WithShadow:
+		Offset: 0, 32, 0
+		ZOffset: -129
+		ShadowColor: 50000000
+	Tooltip:
+		Name: Civilian Truck B
+	Health:
+		HP: 20000
+	Armor:
+		Type: Light
+	Mobile:
+		Speed: 56
+		TurnSpeed: 20
+	RevealsShroud:
+		Range: 5c0
+		MaxHeightDelta: 3
+	Valued:
+		Cost: 0
+
+aot-civ-car:
+	Inherits: ^Vehicle
+	WithCargoPipsDecoration:
+		Position: BottomLeft
+		Margin: 4, 3
+		RequiresSelection: true
+		CustomPipSequences:
+			gray: pip-gray
+			yellow: pip-yellow
+			red: pip-red
+	RenderSprites:
+		Image: aot-civ-car
+	WithFacingSpriteBody@BODY:
+		Sequence: idle
+	WithFacingSpriteBody@REMAP:
+		Sequence: idle-remap
+		Palette: player
+		IsPlayerPalette: True
+	WithShadow:
+		Offset: 0, 32, 0
+		ZOffset: -129
+		ShadowColor: 50000000
+	Tooltip:
+		Name: Civilian Car
+	Health:
+		HP: 10000
+	Armor:
+		Type: Light
+	Mobile:
+		Speed: 113
+		TurnSpeed: 20
+	RevealsShroud:
+		Range: 5c0
+		MaxHeightDelta: 3
+	Cargo:
+		Types: Infantry
+		MaxWeight: 4
+		EjectOnDeath: true
+	Valued:
+		Cost: 0
 # === Ende aotmod ===
