@@ -2,6 +2,104 @@
 # Diese Datei überschreibt Basis-Aktoren des cnc-Hauptspiels.
 # Alle Age-of-Tiberium-Ergänzungen sind mit # === Age of Tiberium (aotmod) === markiert.
 
+# === Age of Tiberium (aotmod) - EdibleByLeap + Heal-TargetType für alle Infanterie ===
+^Infantry:
+	EdibleByLeap:
+	GrantConditionOnDamageState@AOTHEAL:
+		Condition: aot-infantry-damaged
+		ValidDamageStates: Light, Medium, Heavy, Critical
+	Targetable@AOTHEAL:
+		RequiresCondition: aot-infantry-damaged
+		TargetTypes: Heal
+	ExternalCondition@AOTGAS:
+		Condition: aot-tiberium-gassed
+	AotDamagedByCondition:
+		RequiresCondition: aot-tiberium-gassed
+		Damage: 600
+		DamageInterval: 25
+		DamageTypes: Prone50Percent, TiberiumDeath
+
+# === Age of Tiberium (aotmod) - SpyInfiltrate TargetType auf allen Gebäuden ===
+^Building:
+	Targetable:
+		TargetTypes: Ground, C4, Structure, SpyInfiltrate
+	ExternalCondition@AOTGAS:
+		Condition: aot-tiberium-gassed
+	AotDamagedByCondition:
+		RequiresCondition: aot-tiberium-gassed
+		Damage: 40
+		DamageInterval: 25
+		DamageTypes: TiberiumDeath
+
+# NUKE + NUK2: Spy sabotiert Kraftwerk → Stromausfall beim Gegner
+NUKE:
+	InfiltrateForPowerOutage:
+		Types: SpyInfiltrate
+		Duration: 1500
+		PlayerExperience: 5
+		InfiltratedNotification: BuildingInfiltrated
+		InfiltratedTextNotification: notification-building-infiltrated
+
+NUK2:
+	InfiltrateForPowerOutage:
+		Types: SpyInfiltrate
+		Duration: 1500
+		PlayerExperience: 5
+		InfiltratedNotification: BuildingInfiltrated
+		InfiltratedTextNotification: notification-building-infiltrated
+
+# HQ + EYE: Spy enthüllt die gesamte Karte (NOD Radar = aot-nod-radar, separat in aot-structures.yaml)
+HQ:
+	AotInfiltrateForScan:
+		Types: SpyInfiltrate
+		Duration: 250
+		PlayerExperience: 10
+		InfiltratedNotification: BuildingInfiltrated
+		InfiltratedTextNotification: notification-building-infiltrated
+
+EYE:
+	AotInfiltrateForScan:
+		Types: SpyInfiltrate
+		Duration: 250
+		PlayerExperience: 10
+		InfiltratedNotification: BuildingInfiltrated
+		InfiltratedTextNotification: notification-building-infiltrated
+
+# === Age of Tiberium (aotmod) - E1 Split: GDI + NOD erhalten eigene Aktoren mit eigenen Icons ===
+E1:
+	Buildable:
+		Prerequisites: ~disabled
+
+# === Age of Tiberium (aotmod) - E6 Split: GDI Engineer + NOD Saboteur erhalten eigene Aktoren mit eigenen Icons ===
+E6:
+	Buildable:
+		Prerequisites: ~disabled
+
+# === Age of Tiberium (aotmod) - E2 Grenadier: nur noch GDI, eigenes Icon ===
+E2:
+	Buildable:
+		Prerequisites: ~disabled
+
+# === Age of Tiberium (aotmod) - E3 Rocket Soldier (Bazooka): nur noch NOD, eigenes Icon ===
+E3:
+	Buildable:
+		Prerequisites: ~disabled
+
+# === Age of Tiberium (aotmod) - E4 Flamethrower → Toxic Trooper Upgrade (NOD only, Age 3) ===
+E4:
+	Buildable:
+		Prerequisites: ~disabled
+
+# === Age of Tiberium (aotmod) - E5 Chemical Warrior: via E4-Upgrade ersetzt, nicht mehr direkt baubar ===
+E5:
+	Buildable:
+		Prerequisites: ~disabled
+
+# === Age of Tiberium (aotmod) - RMBO Commando: GDI-exklusiv ab Age 3 ===
+RMBO:
+	Buildable:
+		Prerequisites: ~disabled
+
 ^BaseWorld:
 	-TerrainRenderer:
 	RemasterTerrainRenderer:
@@ -41,6 +139,14 @@
 	PlayerColorPalette@aot-ts:
 		BaseName: aot-ts-player
 		BasePalette: aot-unittem
+		RemapIndex: 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
+	# Saboteur-Palette: unittem mit dunkelgrauen Indizes 176-191 (statt gelb)
+	PaletteFromFile@aot-saboteur-unittem:
+		Name: aot-saboteur-unittem
+		Filename: unittem-saboteur.pal
+	PlayerColorPalette@aot-saboteur:
+		BaseName: aot-saboteur-player
+		BasePalette: aot-saboteur-unittem
 		RemapIndex: 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
 	# TS-Voxel-Remap-Palette: eigene Graustufen-Rampe 255→0 an Indizes 176-191 (VxlToPng RemapRampStart=176, Count=16).
 	PaletteFromFile@aot-vxl-ramp:
@@ -407,12 +513,8 @@ HELI:
 	GrantConditionOnDamageState@HARPYCLOAK:
 		Condition: harpy-cloak-disabled
 		ValidDamageStates: Critical
-
-# === Age of Tiberium (aotmod) - HELI: immer aot-harpy-husk spawnen (behandelt HIND + Harpy) ===
-HELI:
 	SpawnActorOnDeath:
 		Actor: aot-harpy-husk
-# === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Hovercraft Cargo: Fahrzeuge als Passagiere ===
 # Leichte Fahrzeuge können in den Hovercraft Transport (aot-transport-hover) geladen werden.
@@ -462,3 +564,26 @@ HTNK:
 		CargoType: GroundVehicle
 		Weight: 5
 		CustomPipType: green
+
+# === Age of Tiberium (aotmod) - Fahrzeuge capturable für Carjacker ===
+^Vehicle:
+	GrantConditionOnDamageState@AOTREPAIR:
+		Condition: aot-vehicle-damaged
+		ValidDamageStates: Light, Medium, Heavy, Critical
+	Targetable@AOTREPAIR:
+		RequiresCondition: aot-vehicle-damaged
+		TargetTypes: Repair
+	CaptureManager:
+	Capturable@CARJACK:
+		Types: vehicle
+		ValidRelationships: Enemy, Neutral
+	AotSpawnCarjackerOnCaptureDeath:
+		Actor: aot-cark-nod
+		CaptureTypes: vehicle
+	ExternalCondition@AOTGAS:
+		Condition: aot-tiberium-gassed
+	AotDamagedByCondition:
+		RequiresCondition: aot-tiberium-gassed
+		Damage: 50
+		DamageInterval: 25
+		DamageTypes: TiberiumDeath

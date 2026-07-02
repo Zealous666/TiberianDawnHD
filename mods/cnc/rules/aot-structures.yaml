@@ -624,6 +624,31 @@ aot-upgrade-ltnk:
 	Interactable:
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - Toxic Trooper Upgrade (E4 Flamethrower → Chemspray) ===
+aot-upgrade-e4-toxic:
+	Tooltip:
+		Name: Toxic Trooper
+
+	Buildable:
+		BuildPaletteOrder: 12
+		Prerequisites: ~stec, ~aot-age3, aot-age3
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Upgrades all Flamethrowers with chemical sprayers for improved damage vs. all ground targets.
+
+	Valued:
+		Cost: 400
+
+	RenderSprites:
+		Image: aot-upgrade-e4-toxic
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-e4-toxic-upgrade
+
+	Interactable:
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - Ion Cannon Upgrade (GDI HQ → EYE-Sprites) ===
 # Erfordert Age 2 + HQ. Schaltet aot-ion-cannon-upgrade frei →
 # HQ wechselt Sprite von hq.shp zu eye.shp (kein Ion Cannon Power vorerst).
@@ -692,9 +717,15 @@ ATEC:
 		Name: Satellite Surveillance
 		Description: Reveals the entire map.
 		SupportPowerPaletteOrder: 55
+	InfiltrateForSupportPowerReset:
+		Types: SpyInfiltrate
+		PlayerExperience: 10
 	GrantConditionOnPrerequisite@aotage1:
 		Condition: aot-age1-active
 		Prerequisites: aot-age1
+	GrantConditionOnPrerequisite@aotage2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
 	RenderSprites:
 		Image: atec
 	-WithSpriteBody:
@@ -705,7 +736,14 @@ ATEC:
 	WithSpriteBody@td:
 		Sequence: aot-td-idle
 		Name: body-td
-		RequiresCondition: aot-age1-active
+		RequiresCondition: aot-age1-active && !aot-age2-active
+	WithSpriteBody@ts:
+		Sequence: atec-ts-idle
+		Name: body-ts
+		RequiresCondition: aot-age2-active
+	WithIdleOverlay@lights:
+		Sequence: atec-ts-lights
+		RequiresCondition: aot-age2-active
 	-WithMakeAnimation:
 	WithMakeAnimation@ra:
 		BodyNames: body
@@ -715,6 +753,12 @@ ATEC:
 		BodyNames: body-td
 		Condition: build-incomplete
 		Sequence: aot-td-make
+		RequiresCondition: aot-age1-active && !aot-age2-active
+	WithMakeAnimation@ts:
+		BodyNames: body-ts
+		Condition: build-incomplete
+		Sequence: atec-ts-make
+		RequiresCondition: aot-age2-active
 # === Ende aotmod ===
 
 
@@ -776,6 +820,9 @@ STEC:
 		ActorTypes: e1, e1, e1
 	Power:
 		Amount: -200
+	InfiltrateForSupportPowerReset:
+		Types: SpyInfiltrate
+		PlayerExperience: 10
 	GrantConditionOnPrerequisite@aotage1:
 		Condition: aot-age1-active
 		Prerequisites: aot-age1
@@ -833,6 +880,194 @@ aot-stec-age1:
 		BuildLimit: 1
 		Icon: aot-age1-icon
 		Description: Advanced NOD research facility. Enables high-tier NOD upgrades.
+# === Age of Tiberium (aotmod) - MSLO (Nuke Silo, NOD) ===
+# NOD-exklusives Superweapon-Gebäude (RA Nuclear Missile Silo, RA MSLO-Sprites).
+# Sichtbar ab Age 1, baubar sobald STEC + Radar Dome (anyhq) stehen.
+# Sprite-Wechsel ab Age 2 zu TS NAMISL (Nod Missile Silo) — siehe [[nuke-silo-system]], gleiches
+# Zwei-Layer-Schema (Body silbergrau + House-Color-Overlay 176-191) wie beim NUKE-Turbinen-Upgrade.
+# Superpower "Tiberium Strike" = Duplikat von TMPLs NukePower (structures.yaml), Warhead ersetzt
+# durch aot-TiberiumStrike (toxisch statt nuklear, siehe aot-weapons.yaml). ChargeInterval 250 = 10s TESTWERT.
+MSLO:
+	Inherits: ^BaseBuilding
+	Inherits@shape: ^2x2Shape
+	Inherits@IDISABLE: ^DisabledOverlay
+	Tooltip:
+		Name: Nuclear Missile Silo
+	Valued:
+		Cost: 2500
+	Health:
+		HP: 100000
+	Selectable:
+		Bounds: 2048, 2048
+	Building:
+		Footprint: xx xx ==
+		Dimensions: 2,3
+		LocalCenterOffset: 0,-512,0
+	ProvidesPrerequisite:
+		Prerequisite: aot-mslo
+	RevealsShroud:
+		Range: 5c0
+	Power:
+		Amount: -150
+	WithBuildingBib:
+	RenderSprites:
+		Image: mslo
+	GrantConditionOnPrerequisite@aotage2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
+	-WithSpriteBody:
+	WithSpriteBody@ra:
+		Sequence: idle
+		Name: body
+		RequiresCondition: !aot-age2-active
+	WithSpriteBody@ts:
+		Sequence: aot-ts-idle
+		Name: body-ts
+		RequiresCondition: aot-age2-active
+	WithSpriteBody@tsremap:
+		Sequence: aot-ts-idle-remap
+		Name: body-tsremap
+		RequiresCondition: aot-age2-active && !build-incomplete
+	WithSpriteBody@tsdoor:
+		Sequence: aot-blank
+		Name: body-tsdoor
+		RequiresCondition: aot-age2-active && !build-incomplete
+	WithSpriteBody@tsdoorremap:
+		Sequence: aot-blank
+		Name: body-tsdoorremap
+		RequiresCondition: aot-age2-active && !build-incomplete
+	-WithMakeAnimation:
+	WithMakeAnimation@ra:
+		BodyNames: body
+		Condition: build-incomplete
+		Sequence: make
+	WithMakeAnimation@ts:
+		BodyNames: body-ts
+		Condition: build-incomplete
+		Sequence: aot-ts-make
+	WithIdleOverlay@tsblink:
+		Sequence: aot-ts-blink
+		RequiresCondition: aot-age2-active && !build-incomplete
+	SupportPowerChargeBar:
+	NukePower:
+		PauseOnCondition: lowpower
+		Prerequisites: ~techlevel.superweapons
+		Icon: abomb
+		Cursor: nuke
+		ChargeInterval: 250
+		Name: Tiberium Strike
+		Description: Launches a toxic Tiberium warhead. Devastating against infantry, far less effective against structures.
+		SelectTargetSpeechNotification: SelectTarget
+		InsufficientPowerSpeechNotification: InsufficientPower
+		SelectTargetTextNotification: notification-select-target
+		InsufficientPowerTextNotification: notification-insufficient-power
+		MissileWeapon: aot-TiberiumStrike
+		MissileImage: atomic
+		MissileDelay: 11
+		SpawnOffset: 3c0,0,-1c512
+		DisplayBeacon: True
+		DisplayRadarPing: True
+		CameraRange: 8c0
+		ArrowSequence: arrow
+		ClockSequence: clock
+		CircleSequence: circles
+		SupportPowerPaletteOrder: 35
+	WithSupportPowerActivationAnimation@ra:
+		Sequence: active
+		Body: body
+		RequiresCondition: !aot-age2-active
+	WithSupportPowerActivationAnimation@ts:
+		Sequence: aot-ts-active
+		Body: body-tsdoor
+		RequiresCondition: aot-age2-active
+	WithSupportPowerActivationAnimation@tsremap:
+		Sequence: aot-ts-active-remap
+		Body: body-tsdoorremap
+		RequiresCondition: aot-age2-active && !build-incomplete
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - MSLO Build-Menu Icons (Proxy-Aktoren) ===
+# Zwei Proxy-Aktoren steuern das Icon im Baumenü, analog ATEC/STEC/NUKE/NOD-Radar:
+# aot-mslo-age1: sichtbar Age 1 bis vor Age 2 (RA-Icon). aot-mslo-age2: sichtbar ab Age 2 (TS-Icon).
+aot-mslo-age1:
+	Inherits: MSLO
+	RenderSprites:
+		Image: mslo
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: place
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.Nod
+		BuildPaletteOrder: 105
+		Prerequisites: ~aot-age1, stec, anyhq, ~!aot-age2
+		BuildLimit: 1
+		Icon: icon
+		Description: NOD superweapon facility housing an experimental nuclear missile.
+
+aot-mslo-age2:
+	Inherits: MSLO
+	RenderSprites:
+		Image: mslo
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: aot-ts-place
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.Nod
+		BuildPaletteOrder: 105
+		Prerequisites: ~aot-age1, stec, anyhq, ~aot-age2, !aot-mslo
+		BuildLimit: 1
+		Icon: aot-age2-icon
+		Description: NOD superweapon facility housing an experimental nuclear missile.
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Tiberium Gas Cloud (Hazard-Actor) ===
+# Gespawnt von aot-TiberiumGasBurst/aot-TiberiumGasBurst2 (aot-weapons.yaml) an den Sekundär-Explosionsstellen.
+# TS CLOUD1.SHP/CLOUD2.SHP (Chemical Missile Gaswolke, Firestorm), isotem.pal. 60s Lebensdauer + Dissipations-Fadeout.
+# Schadenswirkung siehe ^Infantry/^Vehicle/^Building in overrides.yaml (AotDamagedByCondition + ExternalCondition@GAS).
+# Health/WithDeathAnimation NUR fürs Fadeout nötig — kein Targetable-Trait, daher von Waffen nicht angreifbar/zerstörbar.
+aot-gascloud:
+	Inherits: ^SpriteActor
+	Inherits@shape: ^1x1Shape
+	Immobile:
+	Health:
+		HP: 5000
+	RenderSprites:
+		Image: aot-gascloud
+	WithSpriteBody:
+		Sequence: idle
+	KillsSelf:
+		RemoveInstead: false
+		Delay: 1500
+	WithDeathAnimation:
+		FallbackSequence: dissipate
+	ProximityExternalCondition@GAS:
+		Range: 1c256
+		Condition: aot-tiberium-gassed
+		ValidRelationships: Ally, Neutral, Enemy
+
+aot-gascloud2:
+	Inherits: ^SpriteActor
+	Inherits@shape: ^1x1Shape
+	Immobile:
+	Health:
+		HP: 5000
+	RenderSprites:
+		Image: aot-gascloud2
+	WithSpriteBody:
+		Sequence: idle
+	KillsSelf:
+		RemoveInstead: false
+		Delay: 1500
+	WithDeathAnimation:
+		FallbackSequence: dissipate
+	ProximityExternalCondition@GAS:
+		Range: 1c256
+		Condition: aot-tiberium-gassed
+		ValidRelationships: Ally, Neutral, Enemy
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - HQ Build-Menu Icons (Proxy-Aktoren) ===
 # Zwei Proxy-Aktoren steuern das Icon im Baumenü:
 # aot-hq-base: sichtbar solange Ion Cannon Uplink NICHT gekauft wurde.
@@ -944,6 +1179,12 @@ aot-nod-radar:
 	DetectCloaked:
 		Range: 5c0
 		RequiresCondition: !lowpower
+	AotInfiltrateForScan:
+		Types: SpyInfiltrate
+		Duration: 250
+		PlayerExperience: 10
+		InfiltratedNotification: BuildingInfiltrated
+		InfiltratedTextNotification: notification-building-infiltrated
 	Power:
 		Amount: -50
 	RenderSprites:
@@ -982,6 +1223,9 @@ aot-nod-radar-age2:
 	Inherits: aot-nod-radar
 	RenderSprites:
 		Image: aot-nod-radar
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: aot-age2-idle
 	Buildable:
 		BuildPaletteOrder: 50
 		Prerequisites: vehicleproduction, ~techlevel.medium, ~aot-age2
@@ -2029,4 +2273,22 @@ aot-upgrade-msub-drone:
 		Prerequisite: aot-msub-drone-upgrade
 
 	Interactable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - PROC + SILO: Geldstehlen per Spy ===
+PROC:
+	InfiltrateForCash:
+		Percentage: 50
+		PlayerExperience: 10
+		Types: SpyInfiltrate
+		InfiltratedNotification: BuildingInfiltrated
+		InfiltratedTextNotification: notification-building-infiltrated
+
+SILO:
+	InfiltrateForCash:
+		Percentage: 50
+		PlayerExperience: 10
+		Types: SpyInfiltrate
+		InfiltratedNotification: BuildingInfiltrated
+		InfiltratedTextNotification: notification-building-infiltrated
 # === Ende aotmod ===

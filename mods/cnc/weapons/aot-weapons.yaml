@@ -109,6 +109,7 @@ aot-HindAGGun:
 	Burst: 2
 	BurstDelays: 0
 	ReloadDelay: 40
+	Report: aot-hind-mg.aud
 	Warhead@1Dam: SpreadDamage
 		Damage: 1500
 
@@ -160,7 +161,8 @@ aot-AjetNapalm:
 aot-TtnkDual:
 	Inherits: ^BallisticWeapon
 	Burst: 2
-	BurstDelays: 8
+	BurstDelays: 12
+	ReloadDelay: 75
 	Report: tnkfire4.aud
 	Warhead@1Dam: SpreadDamage
 		Damage: 2000
@@ -197,6 +199,30 @@ aot-CyborgChainGun:
 			Concrete: 10
 		DamageTypes: Prone70Percent, TriggerProne, BulletDeath
 
+# === Age of Tiberium (aotmod) - NOD Cyborg Commando: CyCannon (Plasma-Projektil) ===
+# TS: CyCannon — Damage 120 × PlasmaWH (350%/260%/205%/150%/80%), Range 7, ProtonBlast Projektil
+aot-CyCannon:
+	Range: 7c0
+	ReloadDelay: 50
+	Report: scrin5b.aud
+	Projectile: Bullet
+		Image: aot-plasma-green
+		Speed: 300
+		Shadow: false
+	Warhead@1Dam: SpreadDamage
+		Spread: 512
+		Damage: 6000
+		Versus:
+			None: 200
+			Wood: 150
+			Light: 150
+			Heavy: 120
+			Concrete: 50
+		DamageTypes: BulletDeath
+	Warhead@2Eff: CreateEffect
+		Explosions: chemball
+		ImpactSounds: xplobig4.aud
+
 # === Age of Tiberium (aotmod) - NOD Cyborg: Cripple-Effekt ===
 # Feuert auf sich selbst wenn Critical-HP erreicht (ExplosionOnDamageTransition).
 # Size: 1,0 = nur die unmittelbare Zelle + 1er-Ring = 2-3 Tiberium-Blüten.
@@ -206,6 +232,83 @@ aot-CyborgCrippleEffect:
 		Size: 0,0
 	Warhead@2Eff: CreateEffect
 		Explosions: chemball
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Tiberium Strike: MSLO-Superpower-Warhead (TESTWERT) ===
+# Kein Nuke-Warhead — verheerende toxische Explosion. Stark gegen Infanterie (None),
+# schwach gegen Gebäude/Panzerung (Wood/Concrete) — umgekehrte Balance zur Atomic-Waffe.
+# Platzhalter: MissileImage/-Sound bleiben vorerst die Nuke-Assets (kein eigenes Toxin-Sprite importiert).
+aot-TiberiumStrike:
+	ValidTargets: Ground, Water, Air, Trees
+	Report: nukemisl.aud
+	Warhead@1Dam: SpreadDamage
+		Spread: 1c512
+		Damage: 6000
+		Falloff: 1000, 700, 400, 200, 80, 30, 0
+		ValidTargets: Ground, Air, Trees
+		AffectsParent: True
+		Versus:
+			None: 200
+			Wood: 25
+			Light: 50
+			Heavy: 35
+			Concrete: 15
+		DamageTypes: Prone50Percent, TriggerProne, TiberiumDeath
+	Warhead@2Eff: CreateEffect
+		Explosions: chemball
+		ImpactSounds: xplos.aud
+		ImpactActors: false
+	Warhead@3Shake: ShakeScreen
+		Duration: 20
+		Intensity: 5
+		Multiplier: 1,1
+	Warhead@4FlashEffect: FlashEffect
+		Duration: 20
+	Warhead@5Cluster: FireCluster
+		Weapon: aot-TiberiumGasBurst
+		RandomClusterCount: 3
+		Dimensions: 11,11
+		Footprint: _____x_____ __xxxxxxx__ _xxxxxxxxx_ _xxxxxxxxx_ _xxxxXxxxx_ xxxxXxXxxxx _xxxxXxxxx_ _xxxxxxxxx_ _xxxxxxxxx_ __xxxxxxx__ _____x_____
+	Warhead@6Cluster2: FireCluster
+		Weapon: aot-TiberiumGasBurst2
+		RandomClusterCount: 3
+		Dimensions: 11,11
+		Footprint: _____x_____ __xxxxxxx__ _xxxxxxxxx_ _xxxxxxxxx_ _xxxxxxxxx_ xxxxxxxxxxx _xxxxxxxxx_ _xxxxxxxxx_ _xxxxxxxxx_ __xxxxxxx__ _____x_____
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Tiberium Gas Burst: Sekundär-Explosion + Gaswolken-Spawn ===
+# Von aot-TiberiumStrikes FireCluster ausgelöst: 4 garantiert nah am Zentrum (aot-TiberiumGasBurst) + 3 zufällig
+# (aot-TiberiumGasBurst) + 3 zufällig (aot-TiberiumGasBurst2) im 5-Zellen-Radius, macht 10 Sekundär-Explosionen
+# insgesamt (wie TS' ChemMissile Cluster=8) — aufgeteilt auf zwei Sub-Waffen für Wolken-Optik-Varianz (cloud1/cloud2).
+# Deutlich schwächer als der Haupteinschlag. Hinterlässt eine Gaswolke (60s DoT + Fadeout, aot-structures.yaml/overrides.yaml).
+aot-TiberiumGasBurst:
+	ValidTargets: Ground, Water, Air, Trees
+	Projectile: Bullet
+		Speed: 800
+	Warhead@1Dam: SpreadDamage
+		Spread: 512
+		Damage: 500
+		ValidTargets: Ground, Air, Trees
+		Versus:
+			None: 150
+			Wood: 15
+			Light: 35
+			Heavy: 25
+			Concrete: 8
+		DamageTypes: Prone50Percent, TriggerProne, TiberiumDeath
+	Warhead@2Eff: CreateEffect
+		Image: aot-gascloud-formation
+		Explosions: idle
+		ImpactSounds: xplos.aud
+		ImpactActors: false
+	Warhead@3Spawn: AotSpawnActor
+		Actor: aot-gascloud
+
+# === Age of Tiberium (aotmod) - Tiberium Gas Burst 2: wie aot-TiberiumGasBurst, spawnt cloud2-Variante ===
+aot-TiberiumGasBurst2:
+	Inherits: aot-TiberiumGasBurst
+	Warhead@3Spawn: AotSpawnActor
+		Actor: aot-gascloud2
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Gunboat / Destroyer Waffen ===
@@ -523,4 +626,69 @@ aot-HoverAAGun.AA:
 		Damage: 1600
 		Versus:
 			Light: 100
+
+# === Age of Tiberium (aotmod) - NOD Dog Bite ===
+aot-SilencedPPK:
+	ReloadDelay: 80
+	Range: 2c512
+	Report: silppk.aud
+	ValidTargets: Ground, Infantry, Barrel
+	Projectile: InstantHit
+		Blockable: true
+	Warhead@1Dam: SpreadDamage
+		Spread: 42
+		Damage: 15000
+		ValidTargets: Barrel, Infantry
+		DamageTypes: Prone50Percent, TriggerProne, DefaultDeath
+	Warhead@2Eff: CreateEffect
+		Explosions: piff
+		ValidTargets: Ground, GroundActor, Air, AirborneActor, WaterActor, Trees
+
+aot-DogJaw:
+	ValidTargets: Infantry
+	ReloadDelay: 10
+	Range: 3c0
+	Report: dogg5p.aud
+	TargetActorCenter: true
+	Projectile: InstantHit
+	Warhead@1Dam: TargetDamage
+		Damage: 100000
+		ValidTargets: Infantry
+		DamageTypes: DefaultDeath
+
+# === Medic Heal Weapon ===
+aot-Heal:
+	ReloadDelay: 80
+	Range: 4c0
+	Report: heal2.aud
+	ValidTargets: Heal
+	Projectile: Bullet
+		Speed: 1c682
+	Warhead@1Eff: FlashTargetsInRadius
+		Radius: 1065
+		ValidRelationships: Ally
+		ValidTargets: Heal
+	Warhead@2Dam: SpreadDamage
+		Spread: 213
+		Damage: -5000
+		ValidRelationships: Ally
+		ValidTargets: Heal
+
+# === Mechanic Repair Weapon ===
+aot-Repair:
+	ReloadDelay: 80
+	Range: 4c0
+	Report: fixit1.aud
+	ValidTargets: Repair
+	Projectile: Bullet
+		Speed: 1c682
+	Warhead@1Eff: FlashTargetsInRadius
+		Radius: 1065
+		ValidRelationships: Ally
+		ValidTargets: Repair
+	Warhead@2Dam: SpreadDamage
+		Spread: 213
+		Damage: -2000
+		ValidRelationships: Ally
+		ValidTargets: Repair
 # === Ende aotmod ===

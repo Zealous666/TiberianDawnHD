@@ -27,6 +27,9 @@ engine/**
 !engine/OpenRA.Mods.Common/Traits/Render/WithMakeAnimation.cs
 !engine/OpenRA.Mods.Common/Activities/Transform.cs
 !engine/OpenRA.Mods.Common/Traits/Sellable.cs
+!engine/OpenRA.Mods.Common/Traits/AotDamagedByCondition.cs
+!engine/OpenRA.Mods.Common/Warheads/
+!engine/OpenRA.Mods.Common/Warheads/AotSpawnActorWarhead.cs
 !engine/OpenRA.Mods.Common/Graphics/
 !engine/OpenRA.Mods.Common/Graphics/SelectionBarsAnnotationRenderable.cs
 

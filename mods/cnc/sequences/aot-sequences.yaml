@@ -1,5 +1,329 @@
 # === Age of Tiberium (aotmod) sequences ===
 
+# === NOD Dog ===
+aot-dog-nod:
+	Defaults:
+		Filename: dog.shp
+		Scale: 0.55
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\DOG.ZIP
+	stand:
+		Facings: 8
+	walk:
+		Start: 8
+		Length: 6
+		Facings: 8
+		Tick: 80
+	run:
+		Start: 56
+		Length: 6
+		Facings: 8
+		Tick: 80
+	eat:
+		Start: 104
+		Length: 14
+		Facings: 8
+		Tick: 120
+	idle1:
+		Start: 216
+		Length: 7
+		Tick: 120
+	idle2:
+		Start: 224
+		Length: 11
+		Tick: 120
+	die1:
+		Start: 236
+		Length: 6
+		Tick: 80
+	die2:
+		Start: 242
+		Length: 9
+		Tick: 80
+	die3:
+		Start: 236
+		Length: 6
+		Tick: 80
+	die4:
+		Start: 242
+		Length: 9
+		Tick: 80
+	die5:
+		Start: 251
+		Length: 14
+		Tick: 80
+	die-crushed:
+		Filename: corpse1.tem
+		RemasteredFilename:
+		Length: 6
+		Tick: 1600
+		ZOffset: -511
+	jump:
+		Filename: dogbullt.shp
+		RemasteredFilename:
+		Length: 4
+		Facings: 8
+	icon:
+		Filename: nod_dog.png
+		Length: 1
+		RemasteredFilename:
+
+# === GDI Undercover Spy — RA Allied Spy Sprites + Remastered ===
+aot-spy-gdi:
+	Defaults:
+		Filename: spy.shp
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\SPY.ZIP
+	stand:
+		Facings: 8
+	stand2:
+		Start: 8
+		Facings: 8
+	run:
+		Start: 16
+		Length: 6
+		Facings: 8
+		Tick: 100
+	shoot:
+		Start: 64
+		Length: 8
+		Facings: 8
+	idle1:
+		Start: 256
+		Length: 14
+		Tick: 120
+	idle2:
+		Start: 271
+		Length: 16
+		Tick: 120
+	die:
+		Start: 288
+		Length: 8
+		Tick: 80
+	die1:
+		Start: 288
+		Length: 8
+		Tick: 80
+	die2:
+		Start: 296
+		Length: 8
+		Tick: 80
+	die3:
+		Start: 304
+		Length: 8
+		Tick: 80
+	die4:
+		Start: 312
+		Length: 12
+		Tick: 80
+	die5:
+		Start: 324
+		Length: 18
+		Tick: 80
+	die6:
+		Filename: electro.tem
+		RemasteredFilename:
+		Frames: 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13
+		Length: *
+		Tick: 80
+	die-crushed:
+		Filename: corpse1.tem
+		RemasteredFilename:
+		Length: 6
+		Tick: 1600
+		ZOffset: -511
+	icon:
+		Filename: gdi_spy.png
+		Length: 1
+		RemasteredFilename:
+
+# === NOD Chameleon Spy — chamspy.shp (Firestorm / TS-Infantry-Workflow) ===
+aot-spy-nod:
+	Defaults:
+		Filename: chamspy.shp
+		Palette: aot-ts-player
+		IsPlayerPalette: true
+		Scale: 0.5
+		Tick: 80
+	stand:
+		Facings: 8
+	run:
+		Start: 8
+		Length: 6
+		Facings: 8
+	idle1:
+		Start: 56
+		Length: 15
+	idle2:
+		Start: 71
+		Length: 15
+	die1:
+		Start: 134
+		Length: 15
+	die2:
+		Start: 149
+		Length: 15
+	die:
+		Start: 134
+		Length: 15
+	die-crushed:
+		Start: 159
+		Length: 5
+		ZOffset: -511
+	icon:
+		Filename: nod_spy.png
+		Length: 1
+		Palette:
+		IsPlayerPalette: false
+
+# === GDI Commando (RMBO) — eigenes Icon ===
+aot-rmbo-gdi:
+	Inherits: rmbo
+	icon:
+		Filename: gdi_commando.png
+		Length: 1
+		RemasteredFilename:
+
+# === GDI + NOD Rifleman (E1-Split) — eigene Icons, gleiche Sprites wie e1 ===
+aot-e1-gdi:
+	Inherits: e1
+	icon:
+		Filename: gdi_inf.png
+		Length: 1
+		RemasteredFilename:
+
+aot-e1-nod:
+	Inherits: e1
+	icon:
+		Filename: nod_inf.png
+		Length: 1
+		RemasteredFilename:
+
+# === GDI Engineer + NOD Saboteur (E6-Split) — eigene Icons, gleiche Sprites wie e6 ===
+aot-e6-gdi:
+	Inherits: e6
+	icon:
+		Filename: gdi_engineer.png
+		Length: 1
+		RemasteredFilename:
+
+aot-e6-nod:
+	Defaults:
+		Filename: engineer.shp
+		Palette: aot-saboteur-player
+		IsPlayerPalette: true
+		Scale: 0.5
+		Tick: 80
+	stand:
+		Facings: 8
+	run:
+		Start: 8
+		Length: 6
+		Facings: 8
+	idle1:
+		Start: 56
+		Length: 15
+	idle2:
+		Start: 71
+		Length: 15
+	die1:
+		Start: 134
+		Length: 15
+	die2:
+		Start: 149
+		Length: 15
+	die:
+		Start: 134
+		Length: 15
+	die-crushed:
+		Start: 159
+		Length: 5
+		ZOffset: -511
+	icon:
+		Filename: nod_sabot.png
+		Length: 1
+		Palette:
+		IsPlayerPalette: false
+
+# === GDI Grenadier (eigenes Icon) ===
+aot-e2-gdi:
+	Inherits: e2
+	icon:
+		Filename: gdi_gren.png
+		Length: 1
+		RemasteredFilename:
+
+# === NOD Bazooka / Rocket Soldier (eigenes Icon) ===
+aot-e3-nod:
+	Inherits: e3
+	icon:
+		Filename: nod_bazooka.png
+		Length: 1
+		RemasteredFilename:
+
+# === NOD Flamethrower → Toxic Trooper Upgrade ===
+aot-e4-nod:
+	Inherits: e4
+	muzzle-chem:
+		Filename:
+		Combine:
+			0:
+				Filename: chem-n.shp
+				Length: *
+				Offset: 1,2
+				RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\CHEM-N.ZIP
+				RemasteredOffset: 5, 11
+			1:
+				Filename: chem-nw.shp
+				Length: *
+				Offset: 8,2
+				RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\CHEM-NW.ZIP
+				RemasteredOffset: 43, 11
+			2:
+				Filename: chem-w.shp
+				Length: *
+				Offset: 8,-3
+				RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\CHEM-W.ZIP
+				RemasteredOffset: 43, -16
+			3:
+				Filename: chem-sw.shp
+				Length: *
+				Offset: 7,-6
+				RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\CHEM-SW.ZIP
+				RemasteredOffset: 37, -32
+			4:
+				Filename: chem-s.shp
+				Length: *
+				Offset: 1,-6
+				RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\CHEM-S.ZIP
+				RemasteredOffset: 27, -32
+			5:
+				Filename: chem-se.shp
+				Length: *
+				Offset: -5,-6
+				RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\CHEM-SE.ZIP
+				RemasteredOffset: -27, -32
+			6:
+				Filename: chem-e.shp
+				Length: *
+				Offset: -7,-3
+				RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\CHEM-E.ZIP
+				RemasteredOffset: -37, -16
+			7:
+				Filename: chem-ne.shp
+				Length: *
+				Offset: -3,2
+				RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\CHEM-NE.ZIP
+				RemasteredOffset: -16, 11
+		Facings: 8
+		Length: 13
+	icon-flame:
+		Filename: nod_flame.png
+		Length: 1
+		RemasteredFilename:
+	icon-toxic:
+		Filename: nod_toxic.png
+		Length: 1
+		RemasteredFilename:
+
 # === HTNK Basis-Sprite ohne Raketenwerfer ===
 # Turret-Frames (32-63) mit grün gefärbten Raketen-Boxen; wird von aot-htnk-base genutzt.
 aot-htnk-norocket:
@@ -58,20 +382,20 @@ aot-nod-radar:
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.37
-		Offset: 0,-5
+		Offset: 0,-20
 	damaged-idle:
 		Filename: aot-nod-radar-age0-idle.png
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.37
-		Offset: 0,-5
+		Offset: 0,-20
 	aot-age1-idle:
 		Filename: aot-nod-radar-age1-idle.png
 		RemasteredFilename:
 		Length: 12
 		Tick: 120
 		Scale: 0.57
-		Offset: 0,-30
+		Offset: 0,-48
 	make:
 		Filename: weapmake.shp
 		RemasteredFilename:
@@ -106,57 +430,132 @@ aot-nod-radar:
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.5
-		Offset: 0,10
+		Offset: 0,3
 	damaged-aot-age2-idle:
 		Filename: radar-base-idle.png
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.5
-		Offset: 0,10
+		Offset: 0,3
 	aot-age2-remap:
 		Filename: radar-base-remap.png
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.5
-		Offset: 0,10
+		Offset: 0,3
 	damaged-aot-age2-remap:
 		Filename: radar-base-remap.png
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.5
-		Offset: 0,10
+		Offset: 0,3
 	aot-age2-dish:
 		Filename: radar-dish.png
 		RemasteredFilename:
 		Length: 24
 		Tick: 120
 		Scale: 0.5
-		Offset: 0,10
+		Offset: 0,3
 	aot-age2-dish-remap:
 		Filename: radar-dish-remap.png
 		RemasteredFilename:
 		Length: 24
 		Tick: 120
 		Scale: 0.5
-		Offset: 0,10
+		Offset: 0,3
 	aot-age2-make:
 		Filename: radar-make.png
 		RemasteredFilename:
 		Length: 20
 		Scale: 0.5
-		Offset: 0,10
+		Offset: 0,3
 
 aot-nod-radar-age1:
 	idle:
 		Filename: aot-nod-radar-age1-idle.png
 		RemasteredFilename:
 		Length: 12
+		Tick: 120
 		Scale: 0.57
 		Offset: 0,-30
+	aot-age1-idle:
+		Filename: aot-nod-radar-age1-idle.png
+		RemasteredFilename:
+		Length: 12
+		Tick: 120
+		Scale: 0.57
+		Offset: 0,-30
+	aot-age2-idle:
+		Filename: radar-base-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.5
+		Offset: 0,3
+	damaged-aot-age2-idle:
+		Filename: radar-base-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.5
+		Offset: 0,3
+	aot-age2-remap:
+		Filename: radar-base-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.5
+		Offset: 0,3
+	damaged-aot-age2-remap:
+		Filename: radar-base-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.5
+		Offset: 0,3
+	aot-age2-dish:
+		Filename: radar-dish.png
+		RemasteredFilename:
+		Length: 24
+		Tick: 120
+		Scale: 0.5
+		Offset: 0,3
+	aot-age2-dish-remap:
+		Filename: radar-dish-remap.png
+		RemasteredFilename:
+		Length: 24
+		Tick: 120
+		Scale: 0.5
+		Offset: 0,3
+	aot-age2-make:
+		Filename: radar-make.png
+		RemasteredFilename:
+		Length: 20
+		Scale: 0.5
+		Offset: 0,3
+	aot-age2-icon:
+		Filename: aot-nod-radar-icon.png
+		RemasteredFilename:
+		Length: 1
 	icon:
 		Filename: aot-nod-radar-icon.png
 		RemasteredFilename:
 		Length: 1
+	bib:
+		TilesetFilenames:
+			DESERT: bib3.des
+			WINTER: bib3.win
+			SNOW: bib3.sno
+			TEMPERAT: bib3.tem
+		Length: *
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\TEMPERATE\BIB3\BIB3.TEM-{0:D4}.DDS
+			Count: 4
+		RemasteredTilesetFilenamesPattern:
+			WINTER: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\BIB3.WIN\BIB3.WIN-{0:D4}.DDS
+				Count: 4
+			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\BIB3.DES\BIB3.DES-{0:D4}.DDS
+				Count: 4
+		RemasteredPremultiplied: false
+	make:
+		Filename: weapmake.shp
+		RemasteredFilename:
+		Tick: 80
 # === Ende aotmod ===
 
 # === Recon Jeep: RA Allied Jeep Sprites ===
@@ -386,7 +785,7 @@ weap:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - ATEC (Allied Tech Centre) ===
-# Age 0: RA ATEK Sprite (atec-idle.png). Age 1+: TD MISS (Technology Center, MISS.ZIP).
+# Age 0: RA ATEK. Age 1: TD MISS. Age 2+: TS GATECH (GDI Tech Centre).
 atec:
 	idle:
 		Filename: atec-idle.png
@@ -410,6 +809,25 @@ atec:
 		RemasteredStart: 1
 		RemasteredLength: 1
 		Scale: 0.85
+	atec-ts-idle:
+		Filename: atec-ts-body.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+		Offset: -20, 0
+	atec-ts-damaged-idle:
+		Filename: atec-ts-damaged.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+		Offset: -20, 0
+	atec-ts-lights:
+		Filename: atec-ts-lights.png
+		RemasteredFilename:
+		Length: 8
+		Tick: 200
+		Scale: 0.55
+		Offset: -20, 0
 	make:
 		Filename: weapmake.shp
 		RemasteredFilename:
@@ -419,6 +837,13 @@ atec:
 		RemasteredStart: 0
 		RemasteredLength: 1
 		Scale: 0.85
+	atec-ts-make:
+		Filename: atec-ts-make.png
+		RemasteredFilename:
+		Length: 20
+		Tick: 80
+		Scale: 0.55
+		Offset: -20, 0
 	place:
 		Filename: atec-idle.png
 		RemasteredFilename:
@@ -523,6 +948,173 @@ stec:
 		Filename: stec_age_1.png
 		RemasteredFilename:
 		Length: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - MSLO (Nuke Silo) Sprites ===
+# KEIN STRUCTURES\MSLO.ZIP in TEXTURES_RA_SRGB.MEG (anders als FIX/BARR/TENT/SILO)!
+# MSLO liegt stattdessen als einzeln durchnummerierte DDS-Frames unter TERRAIN\{TEMPERATE,SNOW}\MSLO.TEM|SNO
+# (Verifiziert per MEG-Filename-Scan). Frame 0 = idle, Frame 8 = damaged-idle (Layout aus
+# engine/mods/ra/sequences/structures.yaml). Kein DESERT/WINTER-Variante im MEG vorhanden.
+mslo:
+	idle:
+		Length: 1
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\TEMPERATE\MSLO.TEM\MSLO.TEM-{0:D4}.DDS
+			Count: 1
+		RemasteredTilesetFilenamesPattern:
+			SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\MSLO.SNO\MSLO.SNO-{0:D4}.DDS
+				Count: 1
+		RemasteredPremultiplied: false
+		RemasteredOffset: 0,100
+	damaged-idle:
+		Length: 1
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\TEMPERATE\MSLO.TEM\MSLO.TEM-{0:D4}.DDS
+			Start: 8
+			Count: 1
+		RemasteredTilesetFilenamesPattern:
+			SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\MSLO.SNO\MSLO.SNO-{0:D4}.DDS
+				Start: 8
+				Count: 1
+		RemasteredPremultiplied: false
+		RemasteredOffset: 0,100
+	active:
+		Length: *
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\TEMPERATE\MSLO.TEM\MSLO.TEM-{0:D4}.DDS
+			Start: 1
+			Count: 7
+		RemasteredTilesetFilenamesPattern:
+			SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\MSLO.SNO\MSLO.SNO-{0:D4}.DDS
+				Start: 1
+				Count: 7
+		RemasteredPremultiplied: false
+		RemasteredOffset: 0,100
+		Tick: 240
+	damaged-active:
+		Length: *
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\TEMPERATE\MSLO.TEM\MSLO.TEM-{0:D4}.DDS
+			Start: 9
+			Count: 7
+		RemasteredTilesetFilenamesPattern:
+			SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\MSLO.SNO\MSLO.SNO-{0:D4}.DDS
+				Start: 9
+				Count: 7
+		RemasteredPremultiplied: false
+		RemasteredOffset: 0,100
+		Tick: 240
+	make:
+		Length: *
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\TEMPERATE\MSLOMAKE.TEM\MSLOMAKE.TEM-{0:D4}.DDS
+			Count: 15
+		RemasteredTilesetFilenamesPattern:
+			SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\MSLOMAKE.SNO\MSLOMAKE.SNO-{0:D4}.DDS
+				Count: 15
+		RemasteredPremultiplied: false
+		RemasteredOffset: 0,100
+	bib:
+		TilesetFilenames:
+			DESERT: bib3.des
+			WINTER: bib3.win
+			SNOW: bib3.sno
+			TEMPERAT: bib3.tem
+		Length: *
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\TEMPERATE\BIB3\BIB3.TEM-{0:D4}.DDS
+			Count: 4
+		RemasteredTilesetFilenamesPattern:
+			WINTER: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\BIB3.WIN\BIB3.WIN-{0:D4}.DDS
+				Count: 4
+			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\BIB3.DES\BIB3.DES-{0:D4}.DDS
+				Count: 4
+		RemasteredPremultiplied: false
+	icon:
+		Filename: mslo_base.png
+		RemasteredFilename:
+		Length: 1
+	aot-age2-icon:
+		Filename: mslo_adv.png
+		RemasteredFilename:
+		Length: 1
+	aot-blank:
+		Filename: aot-blank.png
+		Length: 1
+	aot-ts-idle:
+		Filename: aot-namisl-idle.png
+		Length: 1
+		Scale: 0.5
+		Offset: -4,9
+	aot-ts-idle-remap:
+		Filename: aot-namisl-idle-remap.png
+		Length: 1
+		Scale: 0.5
+		Offset: -4,9
+	damaged-aot-ts-idle:
+		Filename: aot-namisl-damaged-idle.png
+		Length: 1
+		Scale: 0.5
+		Offset: -4,9
+	damaged-aot-ts-idle-remap:
+		Filename: aot-namisl-damaged-idle-remap.png
+		Length: 1
+		Scale: 0.5
+		Offset: -4,9
+	aot-ts-active:
+		Filename: aot-namisl-active.png
+		Length: 11
+		Tick: 100
+		Scale: 0.5
+		Offset: -4,9
+	aot-ts-active-remap:
+		Filename: aot-namisl-active-remap.png
+		Length: 11
+		Tick: 100
+		Scale: 0.5
+		Offset: -4,9
+	damaged-aot-ts-active:
+		Filename: aot-namisl-damaged-active.png
+		Length: 11
+		Tick: 100
+		Scale: 0.5
+		Offset: -4,9
+	damaged-aot-ts-active-remap:
+		Filename: aot-namisl-damaged-active-remap.png
+		Length: 11
+		Tick: 100
+		Scale: 0.5
+		Offset: -4,9
+	aot-ts-blink:
+		Filename: aot-namisl-blink.png
+		Length: 10
+		Tick: 100
+		Scale: 0.5
+		Offset: -4,9
+	damaged-aot-ts-blink:
+		Filename: aot-namisl-damaged-blink.png
+		Length: 10
+		Tick: 100
+		Scale: 0.5
+		Offset: -4,9
+	aot-ts-make:
+		Filename: aot-namisl-make.png
+		Length: 20
+		Scale: 0.5
+		Offset: -4,9
+	aot-ts-make-remap:
+		Filename: aot-namisl-make-remap.png
+		Length: 20
+		Scale: 0.5
+		Offset: -4,9
+	place:
+		Length: 1
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\TEMPERATE\MSLO.TEM\MSLO.TEM-{0:D4}.DDS
+			Count: 1
+		RemasteredTilesetFilenamesPattern:
+			SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\MSLO.SNO\MSLO.SNO-{0:D4}.DDS
+				Count: 1
+		RemasteredPremultiplied: false
+		RemasteredOffset: 0,100
+	aot-ts-place:
+		Filename: aot-namisl-idle.png
+		Length: 1
+		Scale: 0.5
+		Offset: -4,9
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Age Upgrade Sprites ===
@@ -978,6 +1570,52 @@ cyborg:
 		Filename: inf_cyborg.png
 		Length: 1
 		RemasteredFilename:
+
+# === Age of Tiberium (aotmod) - NOD Cyborg Commando (TS CYC2) ===
+aot-cyc2:
+	Defaults:
+		Filename: cyc2.shp
+		Scale: 0.5
+		Tick: 80
+	stand:
+		Facings: 8
+	idle1:
+		Facings: 8
+	idle2:
+		Facings: 8
+	idle3:
+		Facings: 8
+	idle4:
+		Facings: 8
+	run:
+		Start: 8
+		Length: 9
+		Facings: 8
+	attack:
+		Start: 80
+		Length: 6
+		Facings: 8
+	die:
+		Start: 128
+		Facings: 8
+		Length: 1
+	die-crushed:
+		Start: 128
+		Length: 1
+	icon:
+		Filename: nod_commando.png
+		Length: 1
+		RemasteredFilename:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - CYC2 Plasma-Projektil (grüne Kugel) ===
+aot-plasma-green:
+	idle:
+		Filename: aot-plasma-green.png
+		Length: 1
+		ZOffset: 512
+		RemasteredFilename:
+# === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - TTNK Heavy Tank ===
 # Basis: ltnk.shp (liefert Facing-Count 32), HD: aot-ttnk-3tnk.zip (3TNK-Sprites).
@@ -1471,4 +2109,260 @@ aot-upgrade-hover-aa:
 		Filename: msam_aa.png
 		RemasteredFilename:
 		Length: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - NOD Carjacker (aot-cark-nod) ===
+# Sprite: mhijack.shp aus TS Firestorm, ^BasicInfantry Frame-Layout
+aot-cark-nod:
+	Defaults:
+		Filename: mhijack.shp
+		Palette: aot-ts-player
+		IsPlayerPalette: true
+		Scale: 0.5
+		Tick: 80
+	stand:
+		Facings: 8
+	run:
+		Start: 8
+		Length: 6
+		Facings: 8
+	idle1:
+		Start: 56
+		Length: 15
+	idle2:
+		Start: 71
+		Length: 15
+	die1:
+		Start: 134
+		Length: 15
+	die2:
+		Start: 149
+		Length: 15
+	die:
+		Start: 134
+		Length: 15
+	die-crushed:
+		Start: 159
+		Length: 5
+		ZOffset: -511
+	icon:
+		Filename: nod_carjacker.png
+		RemasteredFilename:
+		Length: 1
+		Palette:
+		IsPlayerPalette: false
+# === Ende aotmod ===
+
+# === TS Civilian Vehicles (Editor-only) ===
+aot-civ-car:
+	idle:
+		RemasteredFilename: aot-car-test.zip
+		RemapFilename: aot-car-test-remap.png
+		Facings: 32
+		Length: 1
+		Scale: 1.0
+	idle-remap:
+		RemasteredFilename: aot-car-test-remap.png
+		RemasteredPremultiplied: False
+		Facings: 32
+		Length: 1
+		Scale: 1.0
+
+aot-civ-pick:
+	idle:
+		RemasteredFilename: aot-pick-test.zip
+		RemapFilename: aot-pick-test-remap.png
+		Facings: 32
+		Length: 1
+		Scale: 1.0
+	idle-remap:
+		RemasteredFilename: aot-pick-test-remap.png
+		RemasteredPremultiplied: False
+		Facings: 32
+		Length: 1
+		Scale: 1.0
+
+aot-civ-wini:
+	idle:
+		RemasteredFilename: aot-wini-test.zip
+		RemapFilename: aot-wini-test-remap.png
+		Facings: 32
+		Length: 1
+		Scale: 1.0
+	idle-remap:
+		RemasteredFilename: aot-wini-test-remap.png
+		RemasteredPremultiplied: False
+		Facings: 32
+		Length: 1
+		Scale: 1.0
+
+aot-civ-bus:
+	idle:
+		RemasteredFilename: aot-bus-test.zip
+		RemapFilename: aot-bus-test-remap.png
+		Facings: 32
+		Length: 1
+		Scale: 1.1
+	idle-remap:
+		RemasteredFilename: aot-bus-test-remap.png
+		RemasteredPremultiplied: False
+		Facings: 32
+		Length: 1
+		Scale: 1.1
+
+aot-civ-trucka:
+	idle:
+		RemasteredFilename: aot-trucka-test.zip
+		RemapFilename: aot-trucka-test-remap.png
+		Facings: 32
+		Length: 1
+		Scale: 1.0
+	idle-remap:
+		RemasteredFilename: aot-trucka-test-remap.png
+		RemasteredPremultiplied: False
+		Facings: 32
+		Length: 1
+		Scale: 1.0
+
+aot-civ-truckb:
+	idle:
+		RemasteredFilename: aot-truckb-test.zip
+		RemapFilename: aot-truckb-test-remap.png
+		Facings: 32
+		Length: 1
+		Scale: 1.0
+	idle-remap:
+		RemasteredFilename: aot-truckb-test-remap.png
+		RemasteredPremultiplied: False
+		Facings: 32
+		Length: 1
+		Scale: 1.0
+
+# === GDI Combat Medic ===
+aot-medi-gdi:
+	Defaults:
+		Filename: medi.shp
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\MEDI.ZIP
+	stand:
+		Facings: 8
+	run:
+		Start: 8
+		Length: 6
+		Facings: 8
+		Tick: 100
+	heal:
+		Start: 56
+		Length: 58
+		Tick: 120
+	standup:
+		Start: 114
+		Length: 2
+		Facings: 8
+	idle:
+		Start: 178
+		Length: 14
+		Tick: 120
+	die1:
+		Start: 193
+		Length: 8
+		Tick: 80
+	die2:
+		Start: 201
+		Length: 8
+		Tick: 80
+	die3:
+		Start: 209
+		Length: 8
+		Tick: 80
+	die4:
+		Start: 217
+		Length: 12
+		Tick: 80
+	die5:
+		Start: 229
+		Length: 18
+		Tick: 80
+	icon:
+		Filename: gdi_medic.png
+		Length: 1
+		RemasteredFilename:
+
+# === GDI Field Mechanic ===
+aot-mech-gdi:
+	Defaults:
+		Filename: mech.shp
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\MECH.ZIP
+	stand:
+		Facings: 8
+	run:
+		Start: 8
+		Length: 6
+		Facings: 8
+		Tick: 100
+	repair:
+		Start: 56
+		Length: 58
+		Tick: 120
+	standup:
+		Start: 114
+		Length: 2
+		Facings: 8
+	idle:
+		Start: 178
+		Length: 14
+		Tick: 120
+	die1:
+		Start: 193
+		Length: 8
+		Tick: 80
+	die2:
+		Start: 201
+		Length: 8
+		Tick: 80
+	die3:
+		Start: 209
+		Length: 8
+		Tick: 80
+	die4:
+		Start: 217
+		Length: 12
+		Tick: 80
+	die5:
+		Start: 229
+		Length: 18
+		Tick: 80
+	icon:
+		Filename: gdi_mechanic.png
+		Length: 1
+		RemasteredFilename:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Tiberium Gas Cloud (TS Chemical Missile CLOUD1.SHP + GASLRGMK.SHP) ===
+# Quelle: rules.ini [GasCloud1]/[GasCloudM1] (Firestorm Chemical Missile). isotem.pal (NICHT unittem.pal — sonst braun statt grün).
+# Als PNG-Sheet gebacken (PIL, FrameSize/FrameAmount via PngInfo tEXt, wie nuke-turbine-make.png). Scale/Offset noch nicht in-game geprüft.
+aot-gascloud-formation:
+	idle:
+		Filename: aot-gascloud-formation.png
+		Length: 11
+		Tick: 80
+
+aot-gascloud:
+	idle:
+		Filename: aot-gascloud-idle.png
+		Length: 28
+		Tick: 100
+	dissipate:
+		Filename: aot-gascloud-dissipate.png
+		Length: 12
+		Tick: 100
+
+aot-gascloud2:
+	idle:
+		Filename: aot-gascloud2-idle.png
+		Length: 28
+		Tick: 100
+	dissipate:
+		Filename: aot-gascloud2-dissipate.png
+		Length: 12
+		Tick: 100
 # === Ende aotmod ===
