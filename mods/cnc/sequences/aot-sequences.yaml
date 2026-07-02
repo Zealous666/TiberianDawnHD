@@ -855,6 +855,12 @@ atec:
 		RemasteredStart: 0
 		RemasteredLength: 1
 		Scale: 0.85
+	atec-ts-place:
+		Filename: atec-ts-body.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+		Offset: -20, 0
 	bib:
 		TilesetFilenames:
 			DESERT: bib2.des
@@ -876,6 +882,10 @@ atec:
 		Length: 1
 	aot-age1-icon:
 		Filename: atec_age_1.png
+		RemasteredFilename:
+		Length: 1
+	aot-age2-icon:
+		Filename: atec_age_2.png
 		RemasteredFilename:
 		Length: 1
 # === Ende aotmod ===
@@ -1030,6 +1040,10 @@ mslo:
 		Length: 1
 	aot-age2-icon:
 		Filename: mslo_adv.png
+		RemasteredFilename:
+		Length: 1
+	aot-minecluster-icon:
+		Filename: aot-minecluster-icon.png
 		RemasteredFilename:
 		Length: 1
 	aot-blank:
@@ -2365,4 +2379,17 @@ aot-gascloud2:
 		Filename: aot-gascloud2-dissipate.png
 		Length: 12
 		Tick: 100
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Mine Cluster Missile: RA MINV/MINP Minen ===
+# RA Remastered STRUCTURES\MINV.ZIP / MINP.ZIP, direkt referenzierbar (wie FIX/BARR/TENT/SILO).
+aot-minv:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\MINV.ZIP
+		RemasteredLength: 1
+
+aot-minp:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\MINP.ZIP
+		RemasteredLength: 1
 # === Ende aotmod ===

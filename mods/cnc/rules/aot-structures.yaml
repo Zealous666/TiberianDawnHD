@@ -789,9 +789,25 @@ aot-atec-age1:
 	Buildable:
 		Queue: Building.GDI
 		BuildPaletteOrder: 100
-		Prerequisites: anypower, gdi-hq, ~aot-age1, !aot-atec
+		Prerequisites: anypower, gdi-hq, ~aot-age1, ~!aot-age2, !aot-atec
 		BuildLimit: 1
 		Icon: aot-age1-icon
+		Description: Advanced GDI research facility. Enables high-tier upgrades and satellite surveillance.
+
+aot-atec-age2:
+	Inherits: ATEC
+	RenderSprites:
+		Image: atec
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: atec-ts-place
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.GDI
+		BuildPaletteOrder: 100
+		Prerequisites: anypower, gdi-hq, ~aot-age2, !aot-atec
+		BuildLimit: 1
+		Icon: aot-age2-icon
 		Description: Advanced GDI research facility. Enables high-tier upgrades and satellite surveillance.
 # === Age of Tiberium (aotmod) - STEC (Soviet Tech Centre, NOD) ===
 # NOD-exklusives Tech-Gebäude. Sprite: RA Soviet Tech Centre (STEKMAKE-Frames).
@@ -915,6 +931,12 @@ MSLO:
 	GrantConditionOnPrerequisite@aotage2:
 		Condition: aot-age2-active
 		Prerequisites: aot-age2
+	GrantConditionOnPrerequisite@tiberiummissile:
+		Condition: aot-tiberium-missile-active
+		Prerequisites: aot-tiberium-missile-upgrade
+	GrantConditionOnPrerequisite@atombomb:
+		Condition: aot-atom-bomb-active
+		Prerequisites: aot-atom-bomb-upgrade
 	-WithSpriteBody:
 	WithSpriteBody@ra:
 		Sequence: idle
@@ -948,14 +970,48 @@ MSLO:
 	WithIdleOverlay@tsblink:
 		Sequence: aot-ts-blink
 		RequiresCondition: aot-age2-active && !build-incomplete
-	SupportPowerChargeBar:
-	NukePower:
+	# --- Superpower-Struktur (Stand 2026-07-02) ---
+	# Age 1 Basis (kein Upgrade): Mine Cluster Missile — automatisch verfügbar sobald MSLO steht.
+	# 10 aot-minp Anti-Personen-Minen im selben Streukreis wie Tiberium Missile, kein Sofortschaden.
+	# Age 2 Upgrade (aot-upgrade-tiberium-missile): schaltet Tiberium Missile frei.
+	# Age 3 Upgrade (aot-upgrade-atom-bomb): schaltet ZUSÄTZLICH Atom Bomb frei (vormals TMPL).
+	SupportPowerChargeBar@minecluster:
+	SupportPowerChargeBar@tiberium:
+		RequiresCondition: aot-tiberium-missile-active
+	SupportPowerChargeBar@atombomb:
+		RequiresCondition: aot-atom-bomb-active
+	NukePower@minecluster:
+		PauseOnCondition: lowpower
+		Prerequisites: ~techlevel.superweapons
+		IconImage: mslo
+		Icon: aot-minecluster-icon
+		Cursor: nuke
+		ChargeInterval: 250
+		Name: Mine Cluster Missile
+		Description: Scatters anti-personnel mines across the target area.
+		SelectTargetSpeechNotification: SelectTarget
+		InsufficientPowerSpeechNotification: InsufficientPower
+		SelectTargetTextNotification: notification-select-target
+		InsufficientPowerTextNotification: notification-insufficient-power
+		MissileWeapon: aot-MineClusterMissile
+		MissileImage: atomic
+		MissileDelay: 11
+		SpawnOffset: 3c0,0,-1c512
+		DisplayBeacon: True
+		DisplayRadarPing: True
+		CameraRange: 8c0
+		ArrowSequence: arrow
+		ClockSequence: clock
+		CircleSequence: circles
+		SupportPowerPaletteOrder: 25
+	NukePower@tiberium:
+		RequiresCondition: aot-tiberium-missile-active
 		PauseOnCondition: lowpower
 		Prerequisites: ~techlevel.superweapons
 		Icon: abomb
 		Cursor: nuke
 		ChargeInterval: 250
-		Name: Tiberium Strike
+		Name: Tiberium Missile
 		Description: Launches a toxic Tiberium warhead. Devastating against infantry, far less effective against structures.
 		SelectTargetSpeechNotification: SelectTarget
 		InsufficientPowerSpeechNotification: InsufficientPower
@@ -972,6 +1028,38 @@ MSLO:
 		ClockSequence: clock
 		CircleSequence: circles
 		SupportPowerPaletteOrder: 35
+	NukePower@atombomb:
+		RequiresCondition: aot-atom-bomb-active
+		PauseOnCondition: lowpower
+		Prerequisites: ~techlevel.superweapons
+		Icon: abomb
+		Cursor: nuke
+		ChargeInterval: 11250
+		Name: Atom Bomb
+		Description: Launches a nuclear missile at the target location. Devastating against everything.
+		EndChargeSpeechNotification: NuclearWeaponAvailable
+		SelectTargetSpeechNotification: SelectTarget
+		InsufficientPowerSpeechNotification: InsufficientPower
+		LaunchSpeechNotification: NuclearWeaponLaunched
+		IncomingSpeechNotification: NuclearWarheadApproaching
+		SelectTargetTextNotification: notification-select-target
+		EndChargeTextNotification: notification-nuclear-weapon-available
+		InsufficientPowerTextNotification: notification-insufficient-power
+		LaunchTextNotification: notification-nuclear-weapon-launched
+		IncomingTextNotification: notification-nuclear-warhead-approaching
+		MissileWeapon: Atomic
+		MissileImage: atomic
+		MissileDelay: 11
+		SpawnOffset: 3c0,0,-1c512
+		DisplayBeacon: True
+		BeaconPoster: atomic
+		BeaconPosterPalette: beaconposter
+		DisplayRadarPing: True
+		CameraRange: 10c0
+		ArrowSequence: arrow
+		ClockSequence: clock
+		CircleSequence: circles
+		SupportPowerPaletteOrder: 30
 	WithSupportPowerActivationAnimation@ra:
 		Sequence: active
 		Body: body
@@ -1020,6 +1108,91 @@ aot-mslo-age2:
 		BuildLimit: 1
 		Icon: aot-age2-icon
 		Description: NOD superweapon facility housing an experimental nuclear missile.
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - MSLO Upgrades: Tiberium Missile (Age 2) + Atom Bomb (Age 3) ===
+# Mine Cluster Missile braucht KEIN Upgrade — automatisch verfügbar sobald MSLO gebaut ist (siehe NukePower@minecluster).
+# Tiberium-Missile/Atom-Bomb-Icons sind noch PLATZHALTER (mslo_adv.png) — echte Icons folgen noch, siehe [[nuke-silo-system]].
+aot-upgrade-tiberium-missile:
+	Valued:
+		Cost: 1000
+	Buildable:
+		Queue: Upgrade.Nod
+		BuildPaletteOrder: 40
+		Prerequisites: ~stec, ~aot-mslo, ~aot-age2, aot-age2
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Icon: aot-age2-icon
+	ProvidesPrerequisite:
+		Prerequisite: aot-tiberium-missile-upgrade
+	RenderSprites:
+		Image: mslo
+
+aot-upgrade-atom-bomb:
+	Valued:
+		Cost: 2000
+	Buildable:
+		Queue: Upgrade.Nod
+		BuildPaletteOrder: 41
+		Prerequisites: ~stec, ~aot-mslo, ~aot-age3, aot-age3, aot-tiberium-missile-upgrade
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Icon: aot-age2-icon
+	ProvidesPrerequisite:
+		Prerequisite: aot-atom-bomb-upgrade
+	RenderSprites:
+		Image: mslo
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Mine Cluster Missile: Minen-Aktoren (RA MINV/MINP) ===
+# Von aot-MineDeploy (aot-weapons.yaml) via AotSpawnActor gespawnt, Owner = Feuernder (MSLO-Besitzer).
+# ^Mine-Traits 1:1 aus engine/mods/ra/rules/defaults.yaml übernommen, ABER AvoidFriendly/BlockFriendly
+# auf true gesetzt (RA-Original nutzt false für neutrale Karten-Minen — unsere sind spielereigen,
+# sollen den Feuernden/Verbündete verschonen und nur Gegner treffen).
+aot-minv:
+	Inherits: ^SpriteActor
+	Inherits@shape: ^1x1Shape
+	Interactable:
+		Bounds: 1024, 1024
+	WithSpriteBody:
+	HiddenUnderFog:
+	Mine:
+		CrushClasses: mine
+		DetonateClasses: mine
+		AvoidFriendly: true
+		BlockFriendly: true
+	Health:
+		HP: 5000
+		NotifyAppliedDamage: false
+	FireWarheadsOnDeath:
+		Weapon: aot-ATMine
+		DamageSource: Parent
+	Armor:
+		Type: Light
+	Cloak:
+		CloakSound:
+		UncloakSound:
+		CloakStyle: None
+		DetectionTypes: Mine
+		InitialDelay: 0
+	Tooltip:
+		Name: Vehicle Mine
+	Targetable:
+		TargetTypes: GroundActor, Mine
+	Immobile:
+		OccupiesSpace: true
+	RenderSprites:
+		Image: aot-minv
+
+aot-minp:
+	Inherits: aot-minv
+	FireWarheadsOnDeath:
+		Weapon: aot-APMine
+		DamageSource: Parent
+	Tooltip:
+		Name: Anti-Personnel Mine
+	RenderSprites:
+		Image: aot-minp
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Tiberium Gas Cloud (Hazard-Actor) ===

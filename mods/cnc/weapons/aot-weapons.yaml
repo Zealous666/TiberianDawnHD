@@ -692,3 +692,58 @@ aot-Repair:
 		ValidRelationships: Ally
 		ValidTargets: Repair
 # === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Mine Cluster Missile: RA ATMine/APMine Stats importiert ===
+# 1:1 aus engine/mods/ra/weapons/explosions.yaml übernommen (Damage/Spread/DamageTypes unverändert).
+# Explosions/Smudge auf im cnc-Mod bereits vorhandene Sequenzen umgebogen (large_explosion/napalm gibt's hier nicht).
+aot-ATMine:
+	ValidTargets: Ground, Water, GroundActor, WaterActor
+	Warhead@1Dam: SpreadDamage
+		Spread: 256
+		Damage: 40000
+		AffectsParent: true
+		ValidTargets: GroundActor, WaterActor
+		InvalidTargets: Mine
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+	Warhead@2Eff: CreateEffect
+		Explosions: med_frag
+		ImpactSounds: mineblo1.aud
+		ImpactActors: false
+	Warhead@3Smu: LeaveSmudge
+		SmudgeType: Crater
+		ValidTargets: Ground, GroundActor
+		InvalidTargets: Structure, Wall
+
+aot-APMine:
+	Inherits: aot-ATMine
+	Warhead@1Dam: SpreadDamage
+		DamageTypes: Prone50Percent, TriggerProne, SmallExplosionDeath
+	Warhead@2Eff: CreateEffect
+		Explosions: small_frag
+		ImpactSounds: mine1.aud
+	Warhead@3Smu: LeaveSmudge
+		SmudgeType: Scorch
+
+# === Age of Tiberium (aotmod) - Mine Cluster Missile: Waffe der MSLO-Superpower ===
+# Selber Streukreis wie aot-TiberiumStrike (11x11, 4 garantiert + 6 zufällig = 10 Minen).
+# Kein Sofortschaden — reine Minenverteilung, kein NukeWarhead-Duplikat.
+aot-MineClusterMissile:
+	ValidTargets: Ground, Water, Air, Trees
+	Report: nukemisl.aud
+	Warhead@1Eff: CreateEffect
+		Explosions: small_frag
+		ImpactSounds: mine1.aud
+		ImpactActors: false
+	Warhead@2Cluster: FireCluster
+		Weapon: aot-MineDeploy
+		RandomClusterCount: 6
+		Dimensions: 11,11
+		Footprint: _____x_____ __xxxxxxx__ _xxxxxxxxx_ _xxxxxxxxx_ _xxxxXxxxx_ xxxxXxXxxxx _xxxxXxxxx_ _xxxxxxxxx_ _xxxxxxxxx_ __xxxxxxx__ _____x_____
+
+aot-MineDeploy:
+	ValidTargets: Ground, Water, Air, Trees
+	Projectile: Bullet
+		Speed: 800
+	Warhead@1Spawn: AotSpawnActor
+		Actor: aot-minp
+# === Ende aotmod ===

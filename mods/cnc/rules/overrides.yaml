@@ -230,10 +230,15 @@ EYE:
 
 # === Age of Tiberium (aotmod) - TMPL: erfordert Age 1 ===
 # Buildable: erst baubar nach aot-age1.
+# Atombombe (NukePower) ist von TMPL entfernt — hängt jetzt am MSLO Nuke Silo
+# als Age-3-Upgrade ("Atom Bomb"), siehe aot-structures.yaml (MSLO NukePower@atombomb).
 TMPL:
 	Buildable:
 		Prerequisites: anyhq, ~techlevel.high, ~aot-age1
 		Queue: Building.Nod
+	-NukePower:
+	-WithSupportPowerActivationAnimation:
+	-WithSupportPowerActivationOverlay:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Upgrade-Queue + Age Super Powers auf FACT ===
