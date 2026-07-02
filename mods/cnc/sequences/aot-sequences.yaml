@@ -1046,6 +1046,14 @@ mslo:
 		Filename: aot-minecluster-icon.png
 		RemasteredFilename:
 		Length: 1
+	aot-tiberiummissile-icon:
+		Filename: aot-tiberiummissile-icon.png
+		RemasteredFilename:
+		Length: 1
+	aot-atombomb-icon:
+		Filename: aot-atombomb-icon.png
+		RemasteredFilename:
+		Length: 1
 	aot-blank:
 		Filename: aot-blank.png
 		Length: 1

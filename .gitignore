@@ -13,6 +13,7 @@ engine/**
 !engine/OpenRA.Mods.Common/Traits/SupportPowers/
 !engine/OpenRA.Mods.Common/Traits/SupportPowers/AutoActivateSpawnActorPower.cs
 !engine/OpenRA.Mods.Common/Traits/SupportPowers/AotSatellitePower.cs
+!engine/OpenRA.Mods.Common/Traits/SupportPowers/AotNukePowerVariants.cs
 !engine/OpenRA.Mods.Common/Traits/OreTransporter.cs
 !engine/OpenRA.Mods.Common/Traits/OreMineDurability.cs
 !engine/OpenRA.Mods.Common/Traits/Minelayer.cs

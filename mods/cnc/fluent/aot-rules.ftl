@@ -24,6 +24,13 @@ actor-atec =
     .name = Tech Centre
     .description = Advanced research facility. Enables Tier 3 technologies and Satellite Surveillance.
 
+# Nuclear Strike moved off TMPL onto the Missile Silo (Atom Bomb upgrade) — see [[nuke-silo-system]].
+actor-tmpl =
+    .name = Temple of Nod
+    .description =
+    Unlocks Stealth Tank, Chem. Warrior and Obelisk of Light.
+    Requires power to operate.
+
 actor-ttnk =
     .name = Heavy Tank
     .description = NOD main battle tank with a dual-fire cannon.
@@ -98,3 +105,15 @@ actor-aot-transport-hover =
 actor-aot-upgrade-transport-hover =
     .name = Hovercraft Upgrade
     .description = Converts the Transport Vessel into an amphibious hovercraft. Can cross any terrain. Carries infantry or vehicles.
+
+actor-proc =
+    .name = Tiberium Refinery
+    .description =
+    Processes raw Tiberium into usable resources.
+    Spies can infiltrate to steal 50% of stored credits.
+
+actor-silo =
+    .name = Tiberium Silo
+    .description =
+    Stores processed Tiberium.
+    Spies can infiltrate to steal 50% of stored credits.

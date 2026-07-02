@@ -694,16 +694,25 @@ aot-Repair:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Mine Cluster Missile: RA ATMine/APMine Stats importiert ===
-# 1:1 aus engine/mods/ra/weapons/explosions.yaml übernommen (Damage/Spread/DamageTypes unverändert).
-# Explosions/Smudge auf im cnc-Mod bereits vorhandene Sequenzen umgebogen (large_explosion/napalm gibt's hier nicht).
+# 1:1 aus engine/mods/ra/weapons/explosions.yaml übernommen, ABER ValidTargets korrigiert:
+# RA nutzt "GroundActor"/"WaterActor" als TargetType — in diesem TD-basierten Mod heißen Infanterie/
+# Fahrzeuge "Infantry"/"Vehicle" (^Infantry/^Vehicle TargetTypes), "GroundActor" existiert hier gar
+# nicht. Dadurch traf die Mine praktisch niemanden (Bugfix, User-Report "praktisch kein Schaden").
+# Versus neu gesetzt: ATMine (Fahrzeug-Mine) tödlich ggü. Fahrzeugen, schwach ggü. Infanterie.
 aot-ATMine:
-	ValidTargets: Ground, Water, GroundActor, WaterActor
+	ValidTargets: Ground, Water
 	Warhead@1Dam: SpreadDamage
 		Spread: 256
 		Damage: 40000
 		AffectsParent: true
-		ValidTargets: GroundActor, WaterActor
+		ValidTargets: Ground, Water
 		InvalidTargets: Mine
+		Versus:
+			None: 20
+			Wood: 100
+			Light: 100
+			Heavy: 80
+			Concrete: 50
 		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
 	Warhead@2Eff: CreateEffect
 		Explosions: med_frag
@@ -711,12 +720,19 @@ aot-ATMine:
 		ImpactActors: false
 	Warhead@3Smu: LeaveSmudge
 		SmudgeType: Crater
-		ValidTargets: Ground, GroundActor
+		ValidTargets: Ground
 		InvalidTargets: Structure, Wall
 
+# Anti-Personen-Mine: Versus umgedreht — 100% tödlich ggü. Infanterie, fast wirkungslos ggü. Fahrzeugen.
 aot-APMine:
 	Inherits: aot-ATMine
 	Warhead@1Dam: SpreadDamage
+		Versus:
+			None: 100
+			Wood: 20
+			Light: 5
+			Heavy: 2
+			Concrete: 0
 		DamageTypes: Prone50Percent, TriggerProne, SmallExplosionDeath
 	Warhead@2Eff: CreateEffect
 		Explosions: small_frag

@@ -908,7 +908,7 @@ MSLO:
 	Inherits@shape: ^2x2Shape
 	Inherits@IDISABLE: ^DisabledOverlay
 	Tooltip:
-		Name: Nuclear Missile Silo
+		Name: Missile Silo
 	Valued:
 		Cost: 2500
 	Health:
@@ -1004,11 +1004,12 @@ MSLO:
 		ClockSequence: clock
 		CircleSequence: circles
 		SupportPowerPaletteOrder: 25
-	NukePower@tiberium:
+	AotTiberiumMissilePower@tiberium:
 		RequiresCondition: aot-tiberium-missile-active
 		PauseOnCondition: lowpower
 		Prerequisites: ~techlevel.superweapons
-		Icon: abomb
+		IconImage: mslo
+		Icon: aot-tiberiummissile-icon
 		Cursor: nuke
 		ChargeInterval: 250
 		Name: Tiberium Missile
@@ -1028,11 +1029,12 @@ MSLO:
 		ClockSequence: clock
 		CircleSequence: circles
 		SupportPowerPaletteOrder: 35
-	NukePower@atombomb:
+	AotAtomBombPower@atombomb:
 		RequiresCondition: aot-atom-bomb-active
 		PauseOnCondition: lowpower
 		Prerequisites: ~techlevel.superweapons
-		Icon: abomb
+		IconImage: mslo
+		Icon: aot-atombomb-icon
 		Cursor: nuke
 		ChargeInterval: 11250
 		Name: Atom Bomb
@@ -1091,7 +1093,7 @@ aot-mslo-age1:
 		Prerequisites: ~aot-age1, stec, anyhq, ~!aot-age2
 		BuildLimit: 1
 		Icon: icon
-		Description: NOD superweapon facility housing an experimental nuclear missile.
+		Description: NOD superweapon facility. Comes with Mine Cluster Missile; Tiberium Missile and Atom Bomb unlock via separate upgrades.
 
 aot-mslo-age2:
 	Inherits: MSLO
@@ -1107,13 +1109,14 @@ aot-mslo-age2:
 		Prerequisites: ~aot-age1, stec, anyhq, ~aot-age2, !aot-mslo
 		BuildLimit: 1
 		Icon: aot-age2-icon
-		Description: NOD superweapon facility housing an experimental nuclear missile.
+		Description: NOD superweapon facility. Comes with Mine Cluster Missile; Tiberium Missile and Atom Bomb unlock via separate upgrades.
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - MSLO Upgrades: Tiberium Missile (Age 2) + Atom Bomb (Age 3) ===
 # Mine Cluster Missile braucht KEIN Upgrade — automatisch verfügbar sobald MSLO gebaut ist (siehe NukePower@minecluster).
-# Tiberium-Missile/Atom-Bomb-Icons sind noch PLATZHALTER (mslo_adv.png) — echte Icons folgen noch, siehe [[nuke-silo-system]].
 aot-upgrade-tiberium-missile:
+	Tooltip:
+		Name: Tiberium Missile Upgrade
 	Valued:
 		Cost: 1000
 	Buildable:
@@ -1122,13 +1125,17 @@ aot-upgrade-tiberium-missile:
 		Prerequisites: ~stec, ~aot-mslo, ~aot-age2, aot-age2
 		BuildLimit: 1
 		MoveIntoWorld: false
-		Icon: aot-age2-icon
+		Icon: aot-tiberiummissile-icon
+		Description: Unlocks the Tiberium Missile support power on the Missile Silo. Devastating against infantry, far less effective against structures.
 	ProvidesPrerequisite:
 		Prerequisite: aot-tiberium-missile-upgrade
 	RenderSprites:
 		Image: mslo
+	Interactable:
 
 aot-upgrade-atom-bomb:
+	Tooltip:
+		Name: Atom Bomb Upgrade
 	Valued:
 		Cost: 2000
 	Buildable:
@@ -1137,11 +1144,13 @@ aot-upgrade-atom-bomb:
 		Prerequisites: ~stec, ~aot-mslo, ~aot-age3, aot-age3, aot-tiberium-missile-upgrade
 		BuildLimit: 1
 		MoveIntoWorld: false
-		Icon: aot-age2-icon
+		Icon: aot-atombomb-icon
+		Description: Unlocks the Atom Bomb support power on the Missile Silo. Devastating against everything.
 	ProvidesPrerequisite:
 		Prerequisite: aot-atom-bomb-upgrade
 	RenderSprites:
 		Image: mslo
+	Interactable:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Mine Cluster Missile: Minen-Aktoren (RA MINV/MINP) ===

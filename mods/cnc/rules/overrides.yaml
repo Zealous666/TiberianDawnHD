@@ -103,10 +103,26 @@ RMBO:
 ^BaseWorld:
 	-TerrainRenderer:
 	RemasterTerrainRenderer:
+	# === Age of Tiberium (aotmod) - Mine Cluster Missile: "mine" CrushClass für alle Boden-Loko ===
+	# Ohne das kann in diesem (TD-basierten) Mod NIEMAND über eine Mine laufen — die cnc-Loko-Vorlagen
+	# kannten "mine" als CrushClass bisher gar nicht (nur RA's eigene Loko-Vorlagen hatten das).
+	# Folge: Einheiten wichen Minen als unpassierbares Hindernis aus, statt ahnungslos drüberzulaufen.
+	Locomotor@FOOT:
+		Crushes: crate, mine
+	Locomotor@CHEM:
+		Crushes: crate, mine
+	Locomotor@WHEELED:
+		Crushes: crate, mine
+	Locomotor@HEAVYWHEELED:
+		Crushes: crate, infantry, mine
+	Locomotor@TRACKED:
+		Crushes: wall, crate, infantry, mine
+	Locomotor@HEAVYTRACKED:
+		Crushes: wall, heavywall, crate, infantry, mine
 	# === Age of Tiberium (aotmod) - HVR Locomotor (schnell Land + Wasser) ===
 	Locomotor@AOT_HVR:
 		Name: aot-hvr
-		Crushes: crate
+		Crushes: crate, mine
 		TerrainSpeeds:
 			Clear: 100
 			Rough: 88
@@ -120,7 +136,7 @@ RMBO:
 	# === Age of Tiberium (aotmod) - Amphibious APC Locomotor ===
 	Locomotor@AOT_AMPHIBIOUS:
 		Name: aot-amphibious
-		Crushes: crate
+		Crushes: crate, mine
 		TerrainSpeeds:
 			Clear: 100
 			Rough: 88
