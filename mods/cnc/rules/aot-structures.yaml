@@ -5,6 +5,9 @@
 LITE:
 	Inherits: ^BaseBuilding
 	Inherits@shape: ^3x2Shape
+	# Custom TS/RA-Sprite ohne "dead"-Rubble-Frame -> WithDeathAnimation (von ^BaseBuilding
+	# geerbt) würde beim Zerstören crashen ("Image `lite` does not have a sequence named `dead`").
+	-WithDeathAnimation:
 	Tooltip:
 		Name: actor-lite.name
 	Valued:
@@ -121,21 +124,10 @@ aot-ore-mine:
 		Categories: Neutral
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - FACT: DockHost für ORET-Abladepunkt ===
-# ORET fährt zum Construction Yard statt zur Refinery um Credits abzuliefern.
+
+
+# === Age of Tiberium (aotmod) - FACT: ORET Spawn ===
 FACT:
-	StoresPlayerResources:
-		Capacity: 500
-	WithResourceStoragePipsDecoration:
-		Position: BottomLeft
-		Margin: 4, 3
-		RequiresSelection: true
-		PipCount: 10
-		FullSequence: pip-yellow
-	DockHost:
-		Type: OreDeliver
-		DockAngle: 0
-		DockOffset: -1c0,1c512,0
 	OretSpawnStateCarrier:
 		SpawnActor: ORET
 		SpawnOffset: 0,1
@@ -649,21 +641,21 @@ aot-upgrade-e4-toxic:
 	Interactable:
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - Ion Cannon Upgrade (Uplink Command, Age 2) ===
-# Erfordert Age 2 + Uplink Command. Schaltet aot-ion-cannon-upgrade frei →
-# UPLK bekommt die Ion Cannon Strike Support Power (siehe UPLK.IonCannonPower).
+# === Age of Tiberium (aotmod) - Ion Cannon Upgrade (Orbital Command, Age 2) ===
+# Erfordert Age 2 + Orbital Command. Schaltet aot-ion-cannon-upgrade frei →
+# ORBC bekommt die Ion Cannon Strike Support Power (siehe ORBC.IonCannonPower).
 aot-upgrade-ion-cannon:
 	Tooltip:
 		Name: Ion Cannon Strike Upgrade
 
 	Buildable:
 		BuildPaletteOrder: 5
-		Prerequisites: ~atec, ~aot-uplk, ~aot-age2, aot-age2
+		Prerequisites: ~atec, ~aot-orbc, ~aot-age2, aot-age2
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		Icon: ioncannon
 		MoveIntoWorld: false
-		Description: Upgrades Uplink Command with an Uplink to call Ion Cannon Strikes.
+		Description: Upgrades Orbital Command with an Uplink to call Ion Cannon Strikes.
 
 	Valued:
 		Cost: 1500
@@ -677,13 +669,43 @@ aot-upgrade-ion-cannon:
 	Interactable:
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - Zone Trooper Drop Upgrade (Orbital Command, Age 3) ===
+# Erfordert Age 3 + Orbital Command. Schaltet aot-zonetrooper-drop-upgrade frei →
+# ORBC bekommt die Zone Trooper Drop Support Power (siehe ORBC.NukePower@zonetrooperdrop).
+aot-upgrade-zonetrooper-drop:
+	Tooltip:
+		Name: Zone Trooper Drop Upgrade
+
+	Buildable:
+		BuildPaletteOrder: 6
+		Prerequisites: ~atec, ~aot-orbc, ~aot-age3, aot-age3
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		Icon: icon
+		MoveIntoWorld: false
+		Description: Upgrades Orbital Command to deploy Zone Troopers via orbital drop pods.
+
+	Valued:
+		Cost: 2000
+
+	RenderSprites:
+		Image: aot-upgrade-zonetrooper-drop
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-zonetrooper-drop-upgrade
+
+	Interactable:
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - ATEC (Allied Tech Centre) ===
 # GDI Tier-2-Gebäude. Sichtbar + baubar ab Age 2 (~aot-age2).
-# Stellt aot-atec bereit → schaltet Ion Cannon Uplink + HTNK Dual-Railgun Upgrade sichtbar.
-# AotSatellitePower: einmalige Kartenenthüllung nach Aktivierung (OneShot).
+# Stellt aot-atec bereit → schaltet HTNK Dual-Railgun Upgrade sichtbar; stellt atec (Tech-Gate) für ORBC/Ion Cannon Strike bereit.
 ATEC:
 	Inherits: ^BaseBuilding
 	Inherits@IDISABLE: ^DisabledOverlay
+	# Custom TS/RA-Sprite ohne "dead"-Rubble-Frame -> WithDeathAnimation (von ^BaseBuilding
+	# geerbt) würde beim Zerstören crashen ("Image `atec` does not have a sequence named `dead`").
+	-WithDeathAnimation:
 	Tooltip:
 		Name: Tech Center
 	Valued:
@@ -802,6 +824,9 @@ aot-atec-age2:
 STEC:
 	Inherits: ^BaseBuilding
 	Inherits@IDISABLE: ^DisabledOverlay
+	# Custom TS/RA-Sprite ohne "dead"-Rubble-Frame -> WithDeathAnimation (von ^BaseBuilding
+	# geerbt) würde beim Zerstören crashen ("Image `stec` does not have a sequence named `dead`").
+	-WithDeathAnimation:
 	Tooltip:
 		Name: Tech Center
 	Valued:
@@ -931,6 +956,9 @@ MSLO:
 	Inherits: ^BaseBuilding
 	Inherits@shape: ^2x2Shape
 	Inherits@IDISABLE: ^DisabledOverlay
+	# Custom TS/RA-Sprite ohne "dead"-Rubble-Frame -> WithDeathAnimation (von ^BaseBuilding
+	# geerbt) würde beim Zerstören crashen ("Image `mslo` does not have a sequence named `dead`").
+	-WithDeathAnimation:
 	Tooltip:
 		Name: Missile Silo
 	Valued:
@@ -1305,6 +1333,9 @@ aot-hq-ion:
 aot-nod-radar:
 	Inherits: ^BaseBuilding
 	Inherits@IDISABLE: ^DisabledOverlay
+	# Custom TS/RA-Sprite ohne "dead"-Rubble-Frame -> WithDeathAnimation (von ^BaseBuilding
+	# geerbt) würde beim Zerstören crashen.
+	-WithDeathAnimation:
 	HitShape:
 		UseTargetableCellsOffsets: false
 		TargetableOffsets: 0,0,0, 630,-384,0, 630,384,0, -700,-512,0, -700,512,0
@@ -1442,6 +1473,87 @@ aot-nod-radar-age2:
 		Name: actor-aot-nod-radar.name
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - Temple of Nod (TMPL): Age 1 Icon + Age 2+ TS NATMPL Sprite-Switch ===
+# Age 1 (ab ~aot-age1 sichtbar): unveraendertes TD TMPL.ZIP-Sprite, nur neues Build-Icon (tmpl_base.png).
+# Ab Age 2: TS NATMPL ("Temple of NOD", rules.ini Zeile 5377 -- NICHT NTPYRA, siehe [[nod-shrine-system]]
+# Namensverwechslungsgefahr) ersetzt das Sprite, neues Icon (tmpl_ages.png).
+# Zwei-Layer-Compositing (Body silbergrau + House-Color-Overlay 176-191) wie STEC/MSLO/ORBC/Nod-Radar.
+# Echtes TS-Buildup vorhanden (natmplmk.shp, Frames 0-16 = 17 echte Aufbau-Frames, Rest Schatten-Reste
+# verworfen) -> aot-age2-make. Footprint bleibt unveraendert (3x3 + Bib), nur Sprite/Icon wechseln.
+# ProvidesPrerequisite@buildingname: erhaelt den lowercase-Prerequisite-String "tmpl" (von aot-shrine +
+# NOD-Age-3-Gate referenziert), da -Buildable: die implizite Buildable-BuildLimit-Ableitung entfernt.
+TMPL:
+	ProvidesPrerequisite@buildingname:
+		Prerequisite: tmpl
+	ProvidesPrerequisite@aottmpl:
+		Prerequisite: aot-tmpl
+	GrantConditionOnPrerequisite@aotage2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
+	-WithSpriteBody:
+	WithSpriteBody@base:
+		Sequence: idle
+		Name: body
+		PauseOnCondition: lowpower
+		RequiresCondition: !aot-age2-active
+	WithSpriteBody@ts:
+		Sequence: aot-age2-idle
+		Name: body-ts
+		PauseOnCondition: lowpower
+		RequiresCondition: aot-age2-active
+	WithSpriteBody@tsremap:
+		Sequence: aot-age2-remap
+		Name: body-ts-remap
+		RequiresCondition: aot-age2-active && !build-incomplete
+	WithIdleOverlay@tslight:
+		Sequence: aot-age2-light
+		PauseOnCondition: lowpower
+		RequiresCondition: aot-age2-active && !build-incomplete
+	-WithMakeAnimation:
+	WithMakeAnimation@base:
+		BodyNames: body
+		Condition: build-incomplete
+		Sequence: make
+	WithMakeAnimation@ts:
+		BodyNames: body-ts
+		Condition: build-incomplete
+		Sequence: aot-age2-make
+
+# Temple of Nod Queue-Proxies (Doppel-Aktor-Pattern fuer Icon-Wechsel):
+# aot-tmpl-age1: bisheriges TD-Icon vor Age 2; aot-tmpl-age2: TS-Temple-Icon ab Age 2.
+# Beide erben das Sprite-Switch-Verhalten von TMPL.
+aot-tmpl-age1:
+	Inherits: TMPL
+	RenderSprites:
+		Image: tmpl
+	Buildable:
+		BuildPaletteOrder: 100
+		Prerequisites: anyhq, ~techlevel.high, ~aot-age1, ~!aot-age2
+		BuildLimit: 1
+		Queue: Building.Nod
+		Icon: icon
+		Description: actor-tmpl.description
+	Tooltip:
+		Name: actor-tmpl.name
+
+aot-tmpl-age2:
+	Inherits: TMPL
+	RenderSprites:
+		Image: tmpl
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: aot-age2-idle
+	Buildable:
+		BuildPaletteOrder: 100
+		Prerequisites: anyhq, ~techlevel.high, ~aot-age1, ~aot-age2, !aot-tmpl
+		BuildLimit: 1
+		Queue: Building.Nod
+		Icon: aot-age2-icon
+		Description: actor-tmpl.description
+	Tooltip:
+		Name: actor-tmpl.name
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - Age Upgrades (GDI/NOD Split) ===
 # GDI → Upgrade.GDI, NOD → Upgrade.Nod (Factions auf FACT trennt Tabs).
 # ~aot-ageX-purchased = sichtbar sobald vorheriges Upgrade gekauft (Super Power beginnt zu laden).
@@ -1492,7 +1604,7 @@ aot-age2-upgrade-gdi:
 		Cost: 1000
 	Buildable:
 		BuildPaletteOrder: 6
-		Prerequisites: ~atec, ~aot-age1-purchased, ~!aot-age2-purchased, aot-age1-purchased, proc, weap
+		Prerequisites: ~atec, ~aot-age1-purchased, ~!aot-age2-purchased, aot-age1-purchased, aot-proc-gdi, weap
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -1510,7 +1622,7 @@ aot-age2-upgrade-nod:
 		Cost: 1000
 	Buildable:
 		BuildPaletteOrder: 6
-		Prerequisites: ~stec, ~aot-age1-purchased, ~!aot-age2-purchased, aot-age1-purchased, proc, afld
+		Prerequisites: ~stec, ~aot-age1-purchased, ~!aot-age2-purchased, aot-age1-purchased, aot-proc-nod, afld
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -1557,10 +1669,10 @@ aot-age3-upgrade-nod:
 		Image: aot-age3-upgrade
 # === Ende aotmod ===
 
-# Prerequisite display name shim — damit der MTNK-Tooltip "Communications Centre" zeigt.
+# Prerequisite display name shim — damit Tooltips "Radar" zeigen statt "gdi-hq".
 gdi-hq:
 	Tooltip:
-		Name: Communications Centre
+		Name: Radar
 
 # === Age of Tiberium (aotmod) - MTNK Predator Upgrade ===
 aot-upgrade-mtnk-predator:
@@ -1747,6 +1859,9 @@ aot-upgrade-orca:
 AFLT:
 	Inherits: ^BaseBuilding
 	Inherits@shape: ^2x2Shape
+	# Custom TS/RA-Sprite ohne "dead"-Rubble-Frame -> WithDeathAnimation (von ^BaseBuilding
+	# geerbt) würde beim Zerstören crashen ("Image `aflt` does not have a sequence named `dead`").
+	-WithDeathAnimation:
 	Selectable:
 		Bounds: 3072, 2048
 	HitShape:
@@ -2204,6 +2319,9 @@ GTWR:
 # GivesBuildableArea entfernt → erweitert die Bauzone nicht aufs Wasser.
 aot-shipyard:
 	Inherits: ^BaseBuilding
+	# Custom TS/RA-Sprite ohne "dead"-Rubble-Frame -> WithDeathAnimation (von ^BaseBuilding
+	# geerbt) würde beim Zerstören crashen.
+	-WithDeathAnimation:
 	Tooltip:
 		Name: Shipyard
 	Valued:
@@ -2289,6 +2407,9 @@ aot-shipyard:
 # Wasser-Gebäude, ab LITE, Queue Building.Nod. Stellt aot-subpen bereit.
 aot-subpen:
 	Inherits: ^BaseBuilding
+	# Custom TS/RA-Sprite ohne "dead"-Rubble-Frame -> WithDeathAnimation (von ^BaseBuilding
+	# geerbt) würde beim Zerstören crashen.
+	-WithDeathAnimation:
 	Tooltip:
 		Name: Submarine Pen
 	Valued:
@@ -2498,18 +2619,123 @@ SILO:
 		InfiltratedNotification: BuildingInfiltrated
 		InfiltratedTextNotification: notification-building-infiltrated
 
-# === Age of Tiberium (aotmod) - UPLK: Uplink Command (GDI, ab Age 2) ===
+# === Age of Tiberium (aotmod) - SILO: OreDeliver Dock + Age-Sprite-Wechsel (Muster wie PYLE/HAND) ===
+# ORET liefert Erz am Silo ab (Südseite). Silo immer baubar (nur anypower, kein Age-Gate).
+# WithSpriteBody@ra (statisches RA-Doppel-Sprite, links voll/rechts halbvoll) bis Age-1,
+# WithResourceLevelSpriteBody@td (klassische TD-Füllstands-Animation) Age-1 bis Age-2,
+# WithSpriteBody@ts (statisches TS-Doppel-Sprite, links voll/rechts halbvoll) ab Age-2.
+# Einheitliches Image (silo) für alle drei Proxies — Sprite-Wechsel via Condition, nicht via Image-Swap.
+SILO:
+	-Buildable:
+	Building:
+		Footprint: xx xx ==
+		Dimensions: 2,3
+		LocalCenterOffset: 0,100,0
+	DockHost:
+		Type: OreDeliver
+		DockAngle: 0
+		DockOffset: 0,1c512,0
+	-WithBuildingBib:
+	WithBuildingBib:
+	GrantConditionOnPrerequisite@aotage1:
+		Condition: aot-age1-active
+		Prerequisites: aot-age1
+	GrantConditionOnPrerequisite@aotage2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
+	-WithResourceLevelSpriteBody:
+	WithSpriteBody@ra:
+		Sequence: aot-ra-idle
+		Name: body
+		RequiresCondition: !aot-age1-active
+	WithResourceLevelSpriteBody@td:
+		Sequence: stages
+		Name: body-td
+		RequiresCondition: aot-age1-active && !aot-age2-active
+	WithSpriteBody@ts:
+		Sequence: aot-ts-idle
+		Name: body-ts
+		RequiresCondition: aot-age2-active
+	WithIdleOverlay@tsremap:
+		Sequence: aot-ts-idle-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-age2-active
+	-WithMakeAnimation:
+	WithMakeAnimation@ra:
+		BodyNames: body
+		Condition: build-incomplete
+		Sequence: aot-ra-make
+	WithMakeAnimation@td:
+		BodyNames: body-td
+		Condition: build-incomplete
+		Sequence: make
+	WithMakeAnimation@ts:
+		BodyNames: body-ts
+		Condition: build-incomplete
+		Sequence: aot-ts-make
+
+aot-silo-age0:
+	Inherits: SILO
+	RenderSprites:
+		Image: silo
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: aot-ra-idle
+		SequenceAlpha: 0.65
+	Buildable:
+		BuildPaletteOrder: 35
+		Prerequisites: anypower, ~!aot-age1
+		Queue: Building.GDI, Building.Nod
+		Description: actor-silo.description
+		Icon: aot-icon-age0
+
+aot-silo-age1:
+	Inherits: SILO
+	RenderSprites:
+		Image: silo
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: idle
+		SequenceAlpha: 0.65
+	Buildable:
+		BuildPaletteOrder: 35
+		Prerequisites: anypower, ~aot-age1, ~!aot-age2
+		Queue: Building.GDI, Building.Nod
+		Description: actor-silo.description
+		Icon: aot-icon-age1
+
+aot-silo-age2:
+	Inherits: SILO
+	RenderSprites:
+		Image: silo
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: aot-ts-idle
+		SequenceAlpha: 0.65
+	Buildable:
+		BuildPaletteOrder: 35
+		Prerequisites: anypower, ~aot-age2
+		Queue: Building.GDI, Building.Nod
+		Description: actor-silo.description
+		Icon: aot-icon-age2
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - ORBC: Orbital Command (GDI, ab Age 2) ===
 # TS GDI Upgrade Center (GAPLUG) Sprites. Nur Age 2 — keine RA-Vorstufe mehr
 # (Chronosphere/PDOX-Sprites werden anderweitig verwendet, siehe [[firestorm-system]]).
 # Kein Proxy-Pattern noetig - nur ein Erscheinungsbild, kein Age-abhaengiger Icon-/Sprite-Wechsel (wie aot-shrine).
-# Support-Powers: Satellite Surveillance (sofort verfuegbar), Ion Cannon Strike (Age-2-Upgrade),
-# Zone Trooper Drop (Age-3-Upgrade, noch nicht implementiert).
-UPLK:
+# Support-Powers: Ion Cannon Strike (Age-2-Upgrade), Zone Trooper Drop (Age-3-Upgrade).
+# Satellite Surveillance ist entkoppelt, laeuft jetzt auf SLAB (Science Lab, ab Age 1).
+ORBC:
 	Inherits: ^BaseBuilding
 	Inherits@shape: ^3x2Shape
 	Inherits@IDISABLE: ^DisabledOverlay
+	# Custom TS/RA-Sprite ohne "dead"-Rubble-Frame -> WithDeathAnimation (von ^BaseBuilding
+	# geerbt) würde beim Zerstören crashen ("Image `orbc` does not have a sequence named `dead`").
+	-WithDeathAnimation:
 	Tooltip:
-		Name: Uplink Command
+		Name: Orbital Command
 	Valued:
 		Cost: 1500
 	Health:
@@ -2521,14 +2747,37 @@ UPLK:
 		Dimensions: 3,3
 		LocalCenterOffset: 0,-512,0
 	ProvidesPrerequisite:
-		Prerequisite: aot-uplk
+		Prerequisite: aot-orbc
 	RevealsShroud:
 		Range: 5c0
 	Power:
 		Amount: -150
 	WithBuildingBib:
 	RenderSprites:
-		Image: uplk
+		Image: orbc
+	SupportPowerChargeBar:
+	InfiltrateForSupportPowerReset:
+		Types: SpyInfiltrate
+		PlayerExperience: 10
+	AotOrcaTransportPower:
+		Prerequisites: aot-orbc
+		ChargeInterval: 2250
+		IconImage: icon
+		Icon: aot-orcatransport
+		Name: Orca Transport
+		Description: Delivers a squad of vehicles via Orca Transport at the target location.
+		ReinforcementsArrivedSpeechNotification: Reinforce
+		ReinforcementsArrivedTextNotification: notification-reinforcements-have-arrived
+		SelectTargetSpeechNotification: SelectTarget
+		InsufficientPowerSpeechNotification: InsufficientPower
+		SelectTargetTextNotification: notification-select-target
+		InsufficientPowerTextNotification: notification-insufficient-power
+		DisplayBeacon: True
+		DisplayRadarPing: True
+		ArrowSequence: arrow
+		ClockSequence: clock
+		CircleSequence: circles
+		SupportPowerPaletteOrder: 40
 	GrantConditionOnPrerequisite@ioncannon:
 		Condition: aot-ion-cannon-active
 		Prerequisites: aot-ion-cannon-upgrade
@@ -2556,6 +2805,39 @@ UPLK:
 		SupportPowerPaletteOrder: 20
 	SupportPowerChargeBar@ion:
 		RequiresCondition: aot-ion-cannon-active
+	GrantConditionOnPrerequisite@zonetrooperdrop:
+		Condition: aot-zonetrooper-drop-active
+		Prerequisites: aot-zonetrooper-drop-upgrade
+	AotZoneTrooperDropPower@zonetrooperdrop:
+		RequiresCondition: aot-zonetrooper-drop-active
+		PauseOnCondition: lowpower
+		Prerequisites: ~techlevel.superweapons
+		IconImage: icon
+		Icon: aot-zone-drop
+		ChargeInterval: 2250
+		Name: Zone Trooper Drop
+		Description: Deploys a squad of Zone Troopers via dropship at the target location.
+		Dropship: aot-dropship
+		Trooper: aot-zonetrooper
+		Count: 5
+		Radius: 3c0
+		SquadOffset: -1536,1536,0
+		QuantizedFacings: 8
+		Cordon: 5c0
+		ReinforcementsArrivedSpeechNotification: Reinforce
+		ReinforcementsArrivedTextNotification: notification-reinforcements-have-arrived
+		SelectTargetSpeechNotification: SelectTarget
+		InsufficientPowerSpeechNotification: InsufficientPower
+		SelectTargetTextNotification: notification-select-target
+		InsufficientPowerTextNotification: notification-insufficient-power
+		DisplayBeacon: True
+		DisplayRadarPing: True
+		ArrowSequence: arrow
+		ClockSequence: clock
+		CircleSequence: circles
+		SupportPowerPaletteOrder: 30
+	SupportPowerChargeBar@zonetrooperdrop:
+		RequiresCondition: aot-zonetrooper-drop-active
 	WithSpriteBody:
 		Sequence: idle
 	WithIdleOverlay@remap:
@@ -2568,6 +2850,14 @@ UPLK:
 	WithIdleOverlay@ioncannon:
 		Sequence: ioncannon-addon
 		RequiresCondition: aot-ion-cannon-active && !build-incomplete
+	WithIdleOverlay@zonetrooperdrop:
+		Sequence: zonetrooperdrop-addon
+		RequiresCondition: aot-zonetrooper-drop-active && !build-incomplete
+	WithIdleOverlay@zonetrooperdropremap:
+		Sequence: zonetrooperdrop-addon-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-zonetrooper-drop-active && !build-incomplete
 	WithMakeAnimation:
 		Sequence: make
 	-ActorPreviewPlaceBuildingPreview:
@@ -2577,7 +2867,7 @@ UPLK:
 	Buildable:
 		Queue: Building.GDI
 		BuildPaletteOrder: 102
-		Prerequisites: ~aot-age2, atec, gdi-hq
+		Prerequisites: ~aot-age2, atec, aot-slab
 		BuildLimit: 1
 		Icon: icon
 		Description: GDI uplink facility. Unlocks advanced support powers as your tech level increases.
@@ -2590,6 +2880,9 @@ SLAB:
 	Inherits: ^BaseBuilding
 	Inherits@shape: ^3x2Shape
 	Inherits@IDISABLE: ^DisabledOverlay
+	# Custom TS/RA-Sprite ohne "dead"-Rubble-Frame -> WithDeathAnimation (von ^BaseBuilding
+	# geerbt) würde beim Zerstören crashen ("Image `slab` does not have a sequence named `dead`").
+	-WithDeathAnimation:
 	Tooltip:
 		Name: Science Lab
 	Valued:
@@ -2611,6 +2904,19 @@ SLAB:
 	WithBuildingBib:
 	RenderSprites:
 		Image: slab
+	SupportPowerChargeBar:
+	AotSatellitePower:
+		Prerequisites: aot-slab
+		ChargeInterval: 250
+		RequiresCondition: !satellite-used
+		PauseOnCondition: lowpower
+		Icon: aot-satellite
+		Name: Satellite Surveillance
+		Description: Reveals the entire map.
+		SupportPowerPaletteOrder: 55
+	InfiltrateForSupportPowerReset:
+		Types: SpyInfiltrate
+		PlayerExperience: 10
 	GrantConditionOnPrerequisite@aotage2:
 		Condition: aot-age2-active
 		Prerequisites: aot-age2
@@ -2636,6 +2942,12 @@ SLAB:
 		BodyNames: body-ts
 		Condition: build-incomplete
 		Sequence: aot-ts-make
+	WithIdleOverlay@tstower:
+		Sequence: aot-ts-tower
+		RequiresCondition: aot-age2-active && !build-incomplete
+	WithIdleOverlay@tstowerremap:
+		Sequence: aot-ts-tower-remap
+		RequiresCondition: aot-age2-active && !build-incomplete
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - SLAB Build-Menu Icons (Proxy-Aktoren) ===
@@ -2652,7 +2964,7 @@ aot-slab-age1:
 	Buildable:
 		Queue: Building.GDI
 		BuildPaletteOrder: 101
-		Prerequisites: ~aot-age1, gdi-hq, ~!aot-age2
+		Prerequisites: ~aot-age1, atec, aot-proc-gdi, ~!aot-age2
 		BuildLimit: 1
 		Icon: icon
 		Description: GDI research facility. Provides a prerequisite for future GDI technologies.
@@ -2668,7 +2980,7 @@ aot-slab-age2:
 	Buildable:
 		Queue: Building.GDI
 		BuildPaletteOrder: 101
-		Prerequisites: ~aot-age1, gdi-hq, ~aot-age2, !aot-slab
+		Prerequisites: ~aot-age1, atec, aot-proc-gdi, ~aot-age2, !aot-slab
 		BuildLimit: 1
 		Icon: aot-age2-icon
 		Description: GDI research facility. Provides a prerequisite for future GDI technologies.
@@ -2676,12 +2988,15 @@ aot-slab-age2:
 
 # === Age of Tiberium (aotmod) - Nod Shrine (aot-shrine) ===
 # NOD-exklusives Prestige-Gebaeude, sichtbar erst ab Age 2 (~aot-age2), baubar sobald STEC + TMPL stehen.
-# TS NTPYRA ("NOD Pyramid") Sprite-Import, Zwei-Layer-Compositing wie STEC/MSLO/UPLK (siehe [[ts-assets]]).
+# TS NTPYRA ("NOD Pyramid") Sprite-Import, Zwei-Layer-Compositing wie STEC/MSLO/ORBC (siehe [[ts-assets]]).
 # Kein Proxy-Pattern noetig - nur ein Erscheinungsbild, kein Age-abhaengiger Icon-/Sprite-Wechsel.
 # Tooltip verweist auf NODs maechtigste Kampfsysteme und Superwaffen.
 aot-shrine:
 	Inherits: ^BaseBuilding
 	Inherits@IDISABLE: ^DisabledOverlay
+	# Custom TS/RA-Sprite ohne "dead"-Rubble-Frame -> WithDeathAnimation (von ^BaseBuilding
+	# geerbt) würde beim Zerstören crashen.
+	-WithDeathAnimation:
 	Tooltip:
 		Name: Nod Shrine
 	Valued:
@@ -2731,4 +3046,176 @@ aot-shrine:
 		BuildLimit: 1
 		Icon: icon
 		Description: Ancient Nod relic. Unlocks NOD's most powerful combat systems and superweapons.
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - GDI Fortified Wall (Brick+Sandbag-Kombiwall) ===
+# Ersetzt BRIK/SBAG fuer GDI (BRIK ist jetzt NOD-only, SBAG entfernt — siehe overrides.yaml).
+# Eigener LineBuild-Typ "aotwall" (connectet nicht mit BRIK/CYCL/SBAG).
+# Zwei WithWallSpriteBody-Varianten: Basis (Sandsack) und fs (Cyclone-Zaun),
+# umgeschaltet live per Firestorm Defense Upgrade (GrantConditionOnPrerequisite).
+# Der Zaun-Zustand wird spaeter vom Firestorm-Generator-System genutzt.
+aot-wall-gdi:
+	Inherits: ^Wall
+	Valued:
+		Cost: 150
+	CustomSellValue:
+		Value: 0
+	Tooltip:
+		Name: Fortified Wall
+	Buildable:
+		BuildPaletteOrder: 30
+		Prerequisites: anypower, fact, ~!aot-firestorm-defense-upgrade
+		Queue: Building.GDI
+		BuildDuration: 230
+		Description: Concrete Wall reinforced with sandbags - stops infantry and vehicles and blocks most projectiles.
+	Health:
+		HP: 20000
+	Armor:
+		Type: Concrete
+	BlocksProjectiles:
+	Crushable:
+		CrushClasses: heavywall
+		-CrushSound:
+	LineBuild:
+		NodeTypes: aotwall
+	LineBuildNode:
+		Types: aotwall
+	GrantConditionOnPrerequisite@fs:
+		Condition: aot-fs-wall
+		Prerequisites: aot-firestorm-defense-upgrade
+	-WithWallSpriteBody:
+	WithWallSpriteBody@base:
+		Name: body
+		Type: aotwall
+		RequiresCondition: !aot-fs-wall
+	WithWallSpriteBody@fs:
+		Name: body-fs
+		Type: aotwall
+		Sequence: fs-idle
+		RequiresCondition: aot-fs-wall
+
+# Icon-Wechsel nach Firestorm Defense Upgrade (Doppel-Aktor-Pattern wie Radar/Turbine):
+# Basis-Aktor verschwindet aus der Palette (~!upgrade), dieser Proxy erscheint (~upgrade)
+# mit Zaun-Icon. Identisches Verhalten/Sprites, connectet mit Alt-Segmenten (Type aotwall).
+aot-wall-gdi-fs:
+	Inherits: aot-wall-gdi
+	RenderSprites:
+		Image: aot-wall-gdi
+	Buildable:
+		Prerequisites: anypower, fact, ~aot-firestorm-defense-upgrade
+		Icon: icon-fs
+		Description: Reinforced walls with sandbags and Firestorm-powergrid.
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Firestorm Defense Upgrade ===
+# Ruestet alle GDI Fortified Walls live mit Cyclone-Zaun auf (fs-Sprites).
+# Grundlage fuer das spaetere Firestorm-Generator-System (Nuke-Interception,
+# Luft-Kill-Zone) — dessen Traits gaten auf aot-firestorm-defense-upgrade.
+aot-upgrade-firestorm-defense:
+	Tooltip:
+		Name: Firestorm Defense Upgrade
+
+	Buildable:
+		BuildPaletteOrder: 45
+		Prerequisites: ~aot-age2, aot-age2, aot-slab
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Enables the Firestorm Generator in the Science lab and reinforces all GDI walls with Firestorm-powergrids
+
+	Valued:
+		Cost: 800
+
+	RenderSprites:
+		Image: aot-upgrade-firestorm-defense
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-firestorm-defense-upgrade
+
+	Interactable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - NOD Barbwire Fence ===
+# Ersetzt BRIK/CYCL fuer NOD (beide via overrides.yaml deaktiviert).
+# Basis: purer RA-FENC-Stacheldrahtzaun — Fahrzeuge koennen ihn ueberfahren
+# (Crushable wie ^Wall-Default). Nach dem Laser-Fences-Upgrade (aot-laser-fence-
+# Condition): AotWithWallPulseBody mit pulsierender Laser-Optik (Saeulen an
+# Knotenpunkten), uncrushable + blockt Projektile = stoppt alle Bodeneinheiten.
+aot-wall-nod:
+	Inherits: ^Wall
+	Valued:
+		Cost: 50
+	CustomSellValue:
+		Value: 0
+	Tooltip:
+		Name: Barbwire Fence
+	Buildable:
+		BuildPaletteOrder: 30
+		Prerequisites: anypower, fact, ~!aot-laser-fence-upgrade
+		Queue: Building.Nod
+		BuildDuration: 150
+		Description: Barbed wire fence - stops infantry. Vehicles can drive through.
+	Health:
+		HP: 15000
+	Armor:
+		Type: Wood
+	LineBuild:
+		NodeTypes: aotnodwall
+	LineBuildNode:
+		Types: aotnodwall
+	GrantConditionOnPrerequisite@laser:
+		Condition: aot-laser-fence
+		Prerequisites: aot-laser-fence-upgrade
+	BlocksProjectiles@laser:
+		RequiresCondition: aot-laser-fence
+	-WithWallSpriteBody:
+	WithWallSpriteBody@base:
+		Name: body
+		Type: aotnodwall
+		RequiresCondition: !aot-laser-fence
+	AotWithWallPulseBody@laser:
+		Name: body-laser
+		Type: aotnodwall
+		Sequence: laser-idle
+		PulseCount: 4
+		PulseInterval: 4
+		RequiresCondition: aot-laser-fence
+
+# Icon-Wechsel nach Laser-Upgrade (Doppel-Aktor-Pattern wie aot-wall-gdi-fs)
+aot-wall-nod-laser:
+	Inherits: aot-wall-nod
+	RenderSprites:
+		Image: aot-wall-nod
+	Buildable:
+		Prerequisites: anypower, fact, ~aot-laser-fence-upgrade
+		Icon: icon-laser
+		Description: Laser fence - stops all ground units and blocks most projectiles.
+	-Crushable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Laser Fences Upgrade ===
+# NOD-Pendant zum GDI Firestorm Defense Upgrade: schaltet alle Barbwire
+# Fences live auf das Laser-Fencing-System (Saeulen + pulsierende Strahlen).
+aot-upgrade-laser-fence:
+	Tooltip:
+		Name: Laser Fences
+
+	Buildable:
+		BuildPaletteOrder: 45
+		Prerequisites: ~aot-age2, aot-age2, aot-shrine
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Upgrades all Barbwires with Laser-Fencing-System stopping all ground units and blocks most projectiles
+
+	Valued:
+		Cost: 800
+
+	RenderSprites:
+		Image: aot-upgrade-laser-fence
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-laser-fence-upgrade
+
+	Interactable:
 # === Ende aotmod ===

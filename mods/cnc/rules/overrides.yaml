@@ -2,6 +2,13 @@
 # Diese Datei überschreibt Basis-Aktoren des cnc-Hauptspiels.
 # Alle Age-of-Tiberium-Ergänzungen sind mit # === Age of Tiberium (aotmod) === markiert.
 
+# === Age of Tiberium (aotmod) - JumpjetActorLayer: PFLICHT-World-Trait fuer JumpjetLocomotor ===
+# Analog zu AirborneActorLayer/SubterraneanActorLayer. Ohne diesen World-Trait wird der Jumpjet-
+# Movement-Layer nie betreten -> GrantConditionOnJumpjetLayer feuert nie -> Hover-Anim fehlt.
+# NUR auf World (nicht EditorWorld) erlaubt, deshalb eigener Block statt ^BaseWorld.
+World:
+	JumpjetActorLayer:
+
 # === Age of Tiberium (aotmod) - EdibleByLeap + Heal-TargetType für alle Infanterie ===
 ^Infantry:
 	EdibleByLeap:
@@ -146,6 +153,31 @@ RMBO:
 			BlueTiberium: 88
 			Beach: 100
 			Water: 80
+	# === Age of Tiberium (aotmod) - Zone Trooper Jumpjet-Locomotor ===
+	# Kann Rock (unpassierbare Klippen/Berge) und River kurz überspringen (JumpjetTransitionTerrainTypes),
+	# aber NICHT Water (Ozean) — bewusst kein Hovercraft-Ersatz, siehe [[orbc-system]].
+	# Rock/River bleiben WALKABLE in TerrainSpeeds (siehe [[orbc-system]] fuer Pathing-Deadlock-Historie).
+	# Hover-Animation via AotGrantConditionOnTerrain@HOVER auf dem Aktor (aot-units.yaml), unabhängig
+	# vom Jumpjet-Layer. Geschwindigkeit dabei bewusst leicht ÜBER normaler Lauf-Geschwindigkeit
+	# (Clear: 100) — der Jetpack-Hover ist minimal schneller als Laufen.
+	JumpjetLocomotor@AOT_ZONETROOPER:
+		Name: aot-zonetrooper
+		Crushes: crate, mine
+		SharesCell: true
+		JumpjetTransitionCost: 100
+		JumpjetTransitionTerrainTypes: Rock, River
+		TerrainSpeeds:
+			Clear: 100
+			Rough: 89
+			Road: 111
+			Bridge: 111
+			Tiberium: 78
+				PathingCost: 300
+			BlueTiberium: 78
+				PathingCost: 300
+			Beach: 89
+			Rock: 106
+			River: 106
 	# === Age of Tiberium (aotmod) - TS-Infanterie-Palette ===
 	# unittem.pal (TS Unit-Palette) als Basis + Player-Color-Remap auf House-Color-Indizes 16-31.
 	# Für direkt referenzierte TS-Infanterie-SHPs (z.B. cyborg.shp). Wiederverwendbar.
@@ -194,9 +226,6 @@ HQ:
 		Prerequisite: gdi-hq
 	ProvidesPrerequisite@anyhq:
 		Prerequisite: anyhq
-	GrantConditionOnPrerequisite@ionupgrade:
-		Condition: aot-ion-cannon-active
-		Prerequisites: aot-ion-cannon-upgrade
 	GrantConditionOnPrerequisite@age1sprite:
 		Condition: aot-hq-advanced
 		Prerequisites: aot-age1
@@ -213,29 +242,6 @@ HQ:
 	WithMakeAnimation@aot:
 		BodyNames: body, body-eye
 		Condition: build-incomplete
-	IonCannonPower:
-		RequiresCondition: aot-ion-cannon-active
-		PauseOnCondition: lowpower
-		Prerequisites: ~techlevel.superweapons
-		Icon: ioncannon
-		Cursor: ioncannon
-		ChargeInterval: 9000
-		Name: actor-eye.ioncannonpower-name
-		Description: actor-eye.ioncannonpower-description
-		BeginChargeSpeechNotification: IonCannonCharging
-		EndChargeSpeechNotification: IonCannonReady
-		SelectTargetSpeechNotification: SelectTarget
-		InsufficientPowerSpeechNotification: InsufficientPower
-		BeginChargeTextNotification: notification-ion-cannon-charging
-		EndChargeTextNotification: notification-ion-cannon-ready
-		SelectTargetTextNotification: notification-select-target
-		InsufficientPowerTextNotification: notification-insufficient-power
-		OnFireSound: ion1.aud
-		DisplayRadarPing: True
-		CameraActor: camera.small
-		SupportPowerPaletteOrder: 20
-	SupportPowerChargeBar@ion:
-		RequiresCondition: aot-ion-cannon-active
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - EYE: nicht baubar (wird durch HQ+Ion Cannon Upgrade ersetzt) ===
@@ -248,10 +254,10 @@ EYE:
 # Buildable: erst baubar nach aot-age1.
 # Atombombe (NukePower) ist von TMPL entfernt — hängt jetzt am MSLO Nuke Silo
 # als Age-3-Upgrade ("Atom Bomb"), siehe aot-structures.yaml (MSLO NukePower@atombomb).
+# -Buildable: Bau-Queue wandert auf zwei Proxy-Aktoren (Doppel-Aktor-Pattern für Icon-Wechsel
+# Age 1 -> Age 2+), siehe aot-tmpl-age1/aot-tmpl-age2 + Sprite-Switch in aot-structures.yaml.
 TMPL:
-	Buildable:
-		Prerequisites: anyhq, ~techlevel.high, ~aot-age1
-		Queue: Building.Nod
+	-Buildable:
 	-NukePower:
 	-WithSupportPowerActivationAnimation:
 	-WithSupportPowerActivationOverlay:
@@ -356,11 +362,39 @@ AFLD:
 	ProvidesPrerequisite@buildingname:
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - PROC: erst nach Age-1-Upgrade baubar ===
+# === Age of Tiberium (aotmod) - PROC: GDI braucht WEAP, NOD braucht AFLD ===
+# Gemeinsame Queue-Definition funktioniert nicht mit unterschiedlichen Fraktions-Prerequisites.
+# Daher: PROC selbst bekommt keine Queue, zwei Proxy-Aktoren steuern die Sichtbarkeit.
 PROC:
+	-Buildable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - aot-proc-gdi: PROC für GDI (braucht Advanced Factory) ===
+aot-proc-gdi:
+	Inherits: PROC
+	RenderSprites:
+		Image: proc
+	ProvidesPrerequisite@buildingname:
+		Prerequisite: proc
+	ProvidesPrerequisite@aotid:
+		Prerequisite: aot-proc-gdi
 	Buildable:
-		Prerequisites: ~aot-age1
-		Queue: Building.GDI, Building.Nod
+		Prerequisites: ~aot-age1, aot-age1, aot-weap
+		Queue: Building.GDI
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - aot-proc-nod: PROC für NOD (braucht Airfield) ===
+aot-proc-nod:
+	Inherits: PROC
+	RenderSprites:
+		Image: proc
+	ProvidesPrerequisite@buildingname:
+		Prerequisite: proc
+	ProvidesPrerequisite@aotid:
+		Prerequisite: aot-proc-nod
+	Buildable:
+		Prerequisites: ~aot-age1, aot-age1, afld
+		Queue: Building.Nod
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - APC: erst nach APC Upgrade baubar ===
@@ -585,6 +619,11 @@ HTNK:
 		CargoType: GroundVehicle
 		Weight: 5
 		CustomPipType: green
+APC:
+	Passenger:
+		CargoType: GroundVehicle
+		Weight: 5
+		CustomPipType: green
 
 # === Age of Tiberium (aotmod) - Fahrzeuge capturable für Carjacker ===
 ^Vehicle:
@@ -608,3 +647,15 @@ HTNK:
 		Damage: 50
 		DamageInterval: 25
 		DamageTypes: TiberiumDeath
+
+# === Age of Tiberium (aotmod) - Mauern ersetzt durch aot-wall-gdi / aot-wall-nod ===
+# GDI baut die Fortified Wall, NOD die Barbwire Fence (beide aot-structures.yaml).
+# Alle Vanilla-Mauern (BRIK/SBAG/CYCL) sind aus den Bau-Paletten entfernt.
+BRIK:
+	-Buildable:
+
+SBAG:
+	-Buildable:
+
+CYCL:
+	-Buildable:

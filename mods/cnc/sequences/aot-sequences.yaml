@@ -633,6 +633,94 @@ mcv:
 	# aot-age2-idle + aot-age2-remap: in vehicles-overrides.yaml unter mcv: (TDHDSpriteSequence erhält mode-P)
 # === Ende aotmod ===
 
+# === Tiberium Silo (silo): Age-0 RA-Doppel-Sprite + Age-2 TD-Klassik im selben Image ===
+# Statische Composites (kein dynamisches Füllstands-Rendering für Age-0): links immer voll,
+# rechts immer halbvoll — sowohl im Normal- als auch im beschädigten Zustand.
+# aot-silo-idle.png: links=Frame4 (voll, unbeschädigt), rechts=Frame2 (halbvoll, unbeschädigt).
+# aot-silo-damaged.png: links=Frame9 (voll, beschädigt), rechts=Frame7 (halbvoll, beschädigt).
+# Scale 0.1875 = 24/128 (TileSize/RemasteredTileSize) — der Faktor den RemasterSpriteSequence
+# sonst automatisch anwendet; unsere PNGs laufen über den klassischen Filename-Pfad und brauchen
+# ihn daher explizit. Gleicher Image-Name "silo" wie Engine — Sequenzen werden gemergt, nicht
+# ersetzt, damit auch der unveränderte Basis-SILO-Aktor (Image: silo) sie findet (Muster wie PYLE/HAND).
+silo:
+	aot-ra-idle:
+		Filename: aot-silo-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.1875
+		Offset: 0,-1
+	damaged-aot-ra-idle:
+		Filename: aot-silo-damaged.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.1875
+		Offset: 0,-1
+	aot-ra-make:
+		Filename: aot-silomake.png
+		RemasteredFilename:
+		Length: *
+		Scale: 0.1875
+		Offset: 0,-1
+	aot-ts-idle:
+		Filename: aot-silo-ts-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.70
+		Offset: 0,-20
+	damaged-aot-ts-idle:
+		Filename: aot-silo-ts-damaged.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.70
+		Offset: 0,-20
+	aot-ts-idle-remap:
+		Filename: aot-silo-ts-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.70
+		Offset: 0,-20
+	damaged-aot-ts-idle-remap:
+		Filename: aot-silo-ts-damaged-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.70
+		Offset: 0,-20
+	aot-ts-make:
+		Filename: aot-silomake-ts.png
+		RemasteredFilename:
+		Length: *
+		Scale: 0.70
+		Offset: 0,-20
+	bib:
+		Filename: bib3.tem
+		TilesetFilenames:
+			DESERT: bib3.des
+			WINTER: bib3.win
+			SNOW: bib3.sno
+			TEMPERAT: bib3.tem
+		Length: *
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\TEMPERATE\BIB3\BIB3.TEM-{0:D4}.DDS
+			Count: 4
+		RemasteredTilesetFilenamesPattern:
+			WINTER: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\BIB3.WIN\BIB3.WIN-{0:D4}.DDS
+				Count: 4
+			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\BIB3.DES\BIB3.DES-{0:D4}.DDS
+				Count: 4
+		RemasteredPremultiplied: false
+	aot-icon-age0:
+		Filename: silo_icon_age0.png
+		RemasteredFilename:
+		Length: 1
+	aot-icon-age1:
+		Filename: silo_icon_age1.png
+		RemasteredFilename:
+		Length: 1
+	aot-icon-age2:
+		Filename: silo_icon_age2.png
+		RemasteredFilename:
+		Length: 1
+# === Ende aotmod ===
+
 # === Ore Mine (aot-ore-mine): RA OREMINE Terrain-Tile als Gebäude-Sprite ===
 aot-ore-mine:
 	idle:
@@ -891,7 +979,7 @@ atec:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - STEC Sprites ===
-# Age 0: RA STEKMAKE Frame 19 (stec-idle.png). Age 1+: TD BIO (Bio Research Lab, BIO.ZIP).
+# Age 0: RA STEKMAKE Frame 19. Age 1: TD BIO. Age 2+: TS NATECH (NOD Tech Centre).
 stec:
 	idle:
 		Filename: stec-idle.png
@@ -915,6 +1003,31 @@ stec:
 		RemasteredStart: 1
 		RemasteredLength: 1
 		Scale: 0.85
+	stec-ts-idle:
+		Filename: stec-ts-body.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.6
+		Offset: -5, 0
+	stec-ts-damaged-idle:
+		Filename: stec-ts-damaged.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.6
+		Offset: -5, 0
+	stec-ts-remap:
+		Filename: stec-ts-body-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.6
+		Offset: -5, 0
+	stec-ts-lights:
+		Filename: stec-ts-lights.png
+		RemasteredFilename:
+		Length: 10
+		Tick: 120
+		Scale: 0.6
+		Offset: -5, 0
 	make:
 		Filename: weapmake.shp
 		RemasteredFilename:
@@ -924,6 +1037,13 @@ stec:
 		RemasteredStart: 0
 		RemasteredLength: 1
 		Scale: 0.85
+	stec-ts-make:
+		Filename: stec-ts-make.png
+		RemasteredFilename:
+		Length: 18
+		Tick: 80
+		Scale: 0.6
+		Offset: -5, 0
 	place:
 		Filename: stec-idle.png
 		RemasteredFilename:
@@ -935,6 +1055,12 @@ stec:
 		RemasteredStart: 0
 		RemasteredLength: 1
 		Scale: 0.85
+	stec-ts-place:
+		Filename: stec-ts-body.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.6
+		Offset: -5, 0
 	bib:
 		TilesetFilenames:
 			DESERT: bib2.des
@@ -956,6 +1082,10 @@ stec:
 		Length: 1
 	aot-age1-icon:
 		Filename: stec_age_1.png
+		RemasteredFilename:
+		Length: 1
+	aot-age2-icon:
+		Filename: stec_age_2.png
 		RemasteredFilename:
 		Length: 1
 # === Ende aotmod ===
@@ -1139,6 +1269,185 @@ mslo:
 		Offset: -4,9
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - ORBC: Orbital Command (ab Age 2) ===
+# TS GDI Upgrade Center (GAPLUG/GAPLUGMK/GAPLUG_A), Zwei-Layer-Compositing gebacken (ohne Upgrade-Overlays GAPLUG_B/GAPLUG_C).
+# RA Chronosphere (PDOX) Sprites wurden entfernt, siehe [[firestorm-system]].
+orbc:
+	icon:
+		Filename: aot-orbc-icon.png
+		RemasteredFilename:
+		Length: 1
+	bib:
+		TilesetFilenames:
+			DESERT: bib2.des
+			WINTER: bib2.win
+			SNOW: bib2.sno
+			TEMPERAT: bib2.tem
+			JUNGLE: bib2.jun
+		Length: *
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\TEMPERATE\BIB2\BIB2.TEM-{0:D4}.DDS
+			Count: 6
+		RemasteredTilesetFilenamesPattern:
+			WINTER: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\BIB2.WIN\BIB2.WIN-{0:D4}.DDS
+				Count: 6
+			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\BIB2.DES\BIB2.DES-{0:D4}.DDS
+				Count: 6
+		RemasteredPremultiplied: false
+	idle:
+		Filename: aot-orbc-idle.png
+		Length: 1
+		Scale: 0.55
+		Offset: 20,0
+	idle-remap:
+		Filename: aot-orbc-idle-remap.png
+		Length: 1
+		Scale: 0.55
+		Offset: 20,0
+	damaged-idle:
+		Filename: aot-orbc-damaged-idle.png
+		Length: 1
+		Scale: 0.55
+		Offset: 20,0
+	damaged-idle-remap:
+		Filename: aot-orbc-damaged-idle-remap.png
+		Length: 1
+		Scale: 0.55
+		Offset: 20,0
+	make:
+		Filename: aot-orbc-make.png
+		Length: 17
+		Scale: 0.55
+		Offset: 20,0
+	make-remap:
+		Filename: aot-orbc-make-remap.png
+		Length: 17
+		Scale: 0.55
+		Offset: 20,0
+	active:
+		Filename: aot-orbc-active.png
+		Length: 20
+		Tick: 100
+		Scale: 0.55
+		Offset: 20,0
+	ioncannon-addon:
+		Filename: aot-orbc-ioncannon.png
+		Length: 28
+		Tick: 100
+		Scale: 0.55
+		Offset: 20,0
+	zonetrooperdrop-addon:
+		Filename: aot-orbc-zonetrooperdrop.png
+		Length: 28
+		Tick: 100
+		Scale: 0.55
+		Offset: -4,-10
+	zonetrooperdrop-addon-remap:
+		Filename: aot-orbc-zonetrooperdrop-remap.png
+		Length: 28
+		Tick: 100
+		Scale: 0.55
+		Offset: -4,-10
+	place:
+		Filename: aot-orbc-idle.png
+		Length: 1
+		Scale: 0.55
+		Offset: 20,0
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - SLAB: Science Lab (GDI, ab Age 1) ===
+# Age 1: RA Chronosphere (PDOX/PDOXMAKE) direkt aus dem Remaster-ZIP-Atlas (wie FIX/PYLE/FACT).
+# Age 2: TS Firestorm Generator (gtfire/gtfiremk), Zwei-Layer-Compositing gebacken (wie GAPLUG/NTPYRA).
+slab:
+	icon:
+		Filename: aot-slab-icon.png
+		RemasteredFilename:
+		Length: 1
+	aot-age2-icon:
+		Filename: aot-slab-age2-icon.png
+		RemasteredFilename:
+		Length: 1
+	bib:
+		TilesetFilenames:
+			DESERT: bib2.des
+			WINTER: bib2.win
+			SNOW: bib2.sno
+			TEMPERAT: bib2.tem
+			JUNGLE: bib2.jun
+		Length: *
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\TEMPERATE\BIB2\BIB2.TEM-{0:D4}.DDS
+			Count: 6
+		RemasteredTilesetFilenamesPattern:
+			WINTER: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\BIB2.WIN\BIB2.WIN-{0:D4}.DDS
+				Count: 6
+			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\BIB2.DES\BIB2.DES-{0:D4}.DDS
+				Count: 6
+		RemasteredPremultiplied: false
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\PDOX.ZIP
+		RemasteredLength: 1
+	damaged-idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\PDOX.ZIP
+		RemasteredStart: 29
+		RemasteredLength: 1
+	make:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\PDOXMAKE.ZIP
+		RemasteredLength: 17
+	place:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\PDOX.ZIP
+		RemasteredLength: 1
+	aot-ts-idle:
+		Filename: aot-slab-ts-idle.png
+		Length: 1
+		Scale: 0.55
+		Offset: -12,-8
+	aot-ts-idle-remap:
+		Filename: aot-slab-ts-idle-remap.png
+		Length: 1
+		Scale: 0.55
+		Offset: -12,-8
+	damaged-aot-ts-idle:
+		Filename: aot-slab-ts-damaged-idle.png
+		Length: 1
+		Scale: 0.55
+		Offset: -12,-8
+	damaged-aot-ts-idle-remap:
+		Filename: aot-slab-ts-damaged-idle-remap.png
+		Length: 1
+		Scale: 0.55
+		Offset: -12,-8
+	aot-ts-make:
+		Filename: aot-slab-ts-make.png
+		Length: 15
+		Scale: 0.55
+		Offset: -12,-8
+	aot-ts-make-remap:
+		Filename: aot-slab-ts-make-remap.png
+		Length: 15
+		Scale: 0.55
+		Offset: -12,-8
+	aot-ts-place:
+		Filename: aot-slab-ts-idle.png
+		Length: 1
+		Scale: 0.55
+		Offset: -12,-8
+	aot-ts-tower:
+		Filename: aot-slab-ts-tower.png
+		Length: 1
+		Scale: 0.55
+		Offset: -12,-8
+	aot-ts-tower-remap:
+		Filename: aot-slab-ts-tower-remap.png
+		Length: 1
+		Scale: 0.55
+		Offset: -12,-8
+	aot-ts-flame:
+		Filename: aot-slab-ts-flame.png
+		Length: 16
+		Tick: 120
+		Scale: 0.55
+		Offset: -12,-8
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - Age Upgrade Sprites ===
 # Für die Upgrade-Queue: icon-Sequenz zeigt das jeweilige Age-Icon.
 aot-age1-upgrade:
@@ -1159,12 +1468,18 @@ aot-age3-upgrade:
 
 # Support-Power-Icons (IconImage: "icon" in SupportPower.cs)
 # Erweitert die icon-Sequenz aus misc.yaml um aot-spezifische Powers.
-# === Age of Tiberium (aotmod) - Ion Cannon Upgrade: ionicnh.tem (wie EYE IonCannonPower) ===
+# === Age of Tiberium (aotmod) - Ion Cannon Upgrade: eigenes Icon (powr_ion.png) ===
 aot-upgrade-ion-cannon:
 	icon:
-		Filename: ionicnh.tem
+		Filename: aot-ion-strike-icon.png
 	ioncannon:
-		Filename: ionicnh.tem
+		Filename: aot-ion-strike-icon.png
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Zone Trooper Drop Upgrade: eigenes Icon (powr_drop.png) ===
+aot-upgrade-zonetrooper-drop:
+	icon:
+		Filename: aot-zone-drop-icon.png
 # === Ende aotmod ===
 
 icon:
@@ -1178,9 +1493,18 @@ icon:
 	aot-age3:
 		Filename: aot-age3-icon.png
 		Length: 1
-	# === Age of Tiberium (aotmod) - ATEC Support-Power-Icons ===
+	# === Age of Tiberium (aotmod) - ORBC Support-Power-Icons ===
 	aot-satellite:
 		Filename: aot-satellite-icon.png
+		Length: 1
+	aot-ion-strike:
+		Filename: aot-ion-strike-icon.png
+		Length: 1
+	aot-zone-drop:
+		Filename: aot-zone-drop-icon.png
+		Length: 1
+	aot-orcatransport:
+		Filename: aot-orcatransport-icon.png
 		Length: 1
 # === Ende aotmod ===
 
@@ -1626,6 +1950,49 @@ aot-cyc2:
 		Length: 1
 	icon:
 		Filename: nod_commando.png
+		Length: 1
+		RemasteredFilename:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Zone Trooper (TS JUMPJET-Sprites, Age-3 Drop-Pod-Einheit) ===
+# Frame-Layout 1:1 aus engine/mods/ts/sequences/infantry.yaml (jumpjet:) übernommen.
+aot-zonetrooper:
+	Defaults:
+		Filename: jumpjet.shp
+		Scale: 0.5
+		Tick: 80
+	stand:
+		Facings: 8
+	run:
+		Start: 8
+		Length: 6
+		Facings: 8
+	idle1:
+		Start: 56
+		Length: 15
+	idle2:
+		Start: 71
+		Length: 15
+	attack:
+		Start: 164
+		Length: 6
+		Facings: 8
+	flying:
+		Facings: 8
+		Length: 6
+		Start: 292
+	flying-attack:
+		Start: 388
+		Facings: 8
+		Length: 6
+	die:
+		Start: 436
+		Length: 9
+	die-crushed:
+		Start: 450
+		Length: 1
+	icon:
+		Filename: jjeticon.shp
 		Length: 1
 		RemasteredFilename:
 # === Ende aotmod ===
@@ -2400,4 +2767,248 @@ aot-minp:
 	idle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\MINP.ZIP
 		RemasteredLength: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Nod Shrine (aot-shrine) Sprites ===
+# TS NTPYRA ("NOD Pyramid"), Zwei-Layer-Compositing (Body silbergrau + House-Color-Overlay 176-191)
+# wie STEC/MSLO/ORBC. ntpyra_a (Funken-Overlay) hat keine relevanten House-Color-Pixel -> simpler RGBA-Bake.
+# Keine TS-Buildup-Grafik vorhanden (NTPYRA ist in TS ein Map-Deko-Objekt, TechLevel=-1) -> weapmake.shp
+# als Platzhalter-Bauanimation (gleiches Muster wie STEC Age 0/1).
+aot-shrine:
+	idle:
+		Filename: aot-shrine-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.5
+		Offset: 0,10
+	idle-remap:
+		Filename: aot-shrine-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.5
+		Offset: 0,10
+	damaged-idle:
+		Filename: aot-shrine-damaged-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.5
+		Offset: 0,10
+	damaged-idle-remap:
+		Filename: aot-shrine-damaged-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.5
+		Offset: 0,10
+	active:
+		Filename: aot-shrine-active.png
+		RemasteredFilename:
+		Length: 32
+		Tick: 100
+		Scale: 0.5
+		Offset: 0,10
+	make:
+		Filename: weapmake.shp
+		RemasteredFilename:
+		Tick: 80
+	place:
+		Filename: aot-shrine-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.5
+		Offset: 0,10
+	bib:
+		TilesetFilenames:
+			DESERT: bib1.des
+			WINTER: bib1.win
+			SNOW: bib1.sno
+			TEMPERAT: bib1.tem
+		Length: *
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\TEMPERATE\BIB1\BIB1.TEM-{0:D4}.DDS
+			Count: 8
+		RemasteredTilesetFilenamesPattern:
+			WINTER: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\BIB1.WIN\BIB1.WIN-{0:D4}.DDS
+				Count: 8
+			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\BIB1.DES\BIB1.DES-{0:D4}.DDS
+				Count: 8
+		RemasteredPremultiplied: false
+	icon:
+		Filename: shrin_base.png
+		RemasteredFilename:
+		Length: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Temple of Nod (TMPL): Age 1 Icon + Age 2+ TS NATMPL Sprites ===
+# Age 1: eigenes Icon (tmpl_base.png), Sprite unveraendert (klassisches tmpl-Defaults RemasteredFilename
+# TMPL.ZIP aus structures-overrides.yaml bleibt aktiv). Ab Age 2: TS NATMPL, Zwei-Layer-Compositing
+# (Body silbergrau + House-Color-Overlay 176-191), Frame 0=idle/1=damaged-idle aus natmpl.shp.
+# Buildup aus natmplmk.shp (Frames 0-16, Schatten-Reste 17-33 verworfen).
+tmpl:
+	icon:
+		Filename: tmpl_base.png
+		RemasteredFilename:
+		Length: 1
+	aot-age2-icon:
+		Filename: tmpl_ages.png
+		RemasteredFilename:
+		Length: 1
+	aot-age2-idle:
+		Filename: aot-tmpl-ts-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.5
+		Offset: -8,-6
+	damaged-aot-age2-idle:
+		Filename: aot-tmpl-ts-damaged-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.5
+		Offset: -8,-6
+	aot-age2-remap:
+		Filename: aot-tmpl-ts-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.5
+		Offset: -8,-6
+	damaged-aot-age2-remap:
+		Filename: aot-tmpl-ts-damaged-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.5
+		Offset: -8,-6
+	aot-age2-make:
+		Filename: aot-tmpl-ts-make.png
+		RemasteredFilename:
+		Length: 17
+		Tick: 80
+		Scale: 0.5
+		Offset: -8,-6
+	# TS ActiveAnim (NATMPL_A) — winziger dunkler Blink-Punkt an der Turmspitze (24px, kein House-Color).
+	aot-age2-light:
+		Filename: aot-tmpl-ts-light.png
+		RemasteredFilename:
+		Length: 17
+		Tick: 150
+		Scale: 0.5
+		Offset: -8,-6
+
+# === Age of Tiberium (aotmod) - Dropship (Transportflugzeug für Zone Trooper Drop) ===
+aot-dropship-test:
+	idle:
+		RemasteredFilename: aot-dropship-test.zip
+		RemapFilename: aot-dropship-test-remap.png
+		Facings: 32
+		Length: 1
+		Scale: 1.0
+	idle-remap:
+		RemasteredFilename: aot-dropship-test-remap.png
+		RemasteredPremultiplied: False
+		Facings: 32
+		Length: 1
+		Scale: 1.0
+
+# === Age of Tiberium (aotmod) - Orca Transport (TS ORCATRAN, Orca Transport Power) ===
+# Scale 1.0 (wie aot-dropship-test) statt willkürlicher Verkleinerung — der Bake bei
+# Render-Scale 48 ist bereits weltmaßstabsgetreu, TS ORCATRAN ist ein großes Transportschiff
+# und soll spürbar größer wirken als Bodenfahrzeuge/Dropship.
+aot-orcatran-test:
+	idle:
+		RemasteredFilename: aot-orcatran-test.zip
+		RemapFilename: aot-orcatran-test-remap.png
+		Facings: 32
+		Length: 1
+		Scale: 1.0
+	idle-remap:
+		RemasteredFilename: aot-orcatran-test-remap.png
+		RemasteredPremultiplied: False
+		Facings: 32
+		Length: 1
+		Scale: 1.0
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - GDI Fortified Wall (Brick+Sandbag-Kombiwall) ===
+# 48-Frame-Sheets (Layout wie BRIK): 0-15 idle, 16-31 scratched, 32-47 damaged.
+# Frame-Index = Nachbarschafts-Bitmaske (N=1,O=2,S=4,W=8), gebaked aus den
+# Remaster-Frames von BRIK+SBAG(+CYCL) via bake-merged-wall.py (asset wip/walls/merged).
+# fs-* = Firestorm-Defense-Variante mit Cyclone-Zaun (aot-wall-gdi-fs.png).
+# Klassischer Fallback: brik.shp (gleiche Frame-Aufteilung).
+aot-wall-gdi:
+	Defaults:
+		Filename: brik.shp
+		RemasteredFilename: aot-wall-gdi.png
+		RemasteredPremultiplied: False
+	idle:
+		Length: 16
+	scratched-idle:
+		Start: 16
+		Length: 16
+	damaged-idle:
+		Start: 32
+		Length: 16
+	fs-idle:
+		RemasteredFilename: aot-wall-gdi-fs.png
+		Length: 16
+	scratched-fs-idle:
+		RemasteredFilename: aot-wall-gdi-fs.png
+		Start: 16
+		Length: 16
+	damaged-fs-idle:
+		RemasteredFilename: aot-wall-gdi-fs.png
+		Start: 32
+		Length: 16
+	icon:
+		Filename: aot-wall-gdi-icon.png
+		RemasteredFilename:
+		Length: 1
+	icon-fs:
+		Filename: aot-wall-gdi-fs-icon.png
+		RemasteredFilename:
+		Length: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Firestorm Defense Upgrade Icon ===
+aot-upgrade-firestorm-defense:
+	icon:
+		Filename: aot-upgrade-firestorm-icon.png
+		RemasteredFilename:
+		Length: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - NOD Barbwire Fence + Laser Fences ===
+# aot-wall-nod.png: 32 Frames (idle 0-15, damaged 16-31) — purer RA-FENC-Zaun.
+# aot-wall-nod-laser.png: 128 Frames — je Damage-Stufe 4 Pulsphasen x 16
+# Verbindungszustaende; Frame-Index kommt aus AotWithWallPulseBody
+# (Maske + 16*Phase), daher Length: 64 pro Damage-Block.
+# Kein klassischer Fallback (Mod laeuft remaster-only, RA fenc.shp nicht gemountet).
+aot-wall-nod:
+	Defaults:
+		RemasteredFilename: aot-wall-nod.png
+		RemasteredPremultiplied: False
+	idle:
+		Length: 16
+	damaged-idle:
+		Start: 16
+		Length: 16
+	laser-idle:
+		RemasteredFilename: aot-wall-nod-laser.png
+		Length: 64
+	damaged-laser-idle:
+		RemasteredFilename: aot-wall-nod-laser.png
+		Start: 64
+		Length: 64
+	icon:
+		Filename: aot-wall-nod-icon.png
+		RemasteredFilename:
+		Length: 1
+	icon-laser:
+		Filename: aot-wall-nod-laser-icon.png
+		RemasteredFilename:
+		Length: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Laser Fences Upgrade Icon ===
+aot-upgrade-laser-fence:
+	icon:
+		Filename: aot-wall-nod-laser-icon.png
+		RemasteredFilename:
+		Length: 1
 # === Ende aotmod ===
