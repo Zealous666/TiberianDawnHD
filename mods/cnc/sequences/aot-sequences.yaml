@@ -2974,6 +2974,20 @@ aot-wall-gdi:
 		RemasteredFilename: aot-wall-gdi-fs.png
 		Start: 32
 		Length: 16
+	# Zaun-Krone glimmt hellblau/fast-weiss waehrend Firestorm aktiv ist (direkt
+	# in die Textur gebacken, kein Overlay -- siehe AotWithWallPulseBody).
+	# 5 Pulsphasen x 16 Masken je Damage-Stufe (idle/scratched/damaged).
+	fs-idle-pulse:
+		RemasteredFilename: aot-wall-gdi-fs-pulse.png
+		Length: 80
+	scratched-fs-idle-pulse:
+		RemasteredFilename: aot-wall-gdi-fs-pulse.png
+		Start: 80
+		Length: 80
+	damaged-fs-idle-pulse:
+		RemasteredFilename: aot-wall-gdi-fs-pulse.png
+		Start: 160
+		Length: 80
 	icon:
 		Filename: aot-wall-gdi-icon.png
 		RemasteredFilename:
@@ -3112,27 +3126,32 @@ aot-gate-gdi:
 		Length: 1
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - NOD Gate (Skalierungstest Saeulen vs. Fence) ===
+# === Age of Tiberium (aotmod) - NOD Gate (Laser-Barriere statt Fluegel-Tor) ===
 # Baseplate + 2 Laser-Saeulen (exakt aus dem NOD-Barbwire-Laser-Rezept nachgebaut,
-# siehe ts-gates-system.md/nod-wall-system.md) — noch OHNE Gitter-Mesh/Animation,
-# nur zum Testen ob die Saeulen-Groesse zur echten Fence passt. damaged-idle nutzt
-# vorerst dieselbe Grafik (kein eigenes Damaged-Art bisher).
+# siehe ts-gates-system.md/nod-wall-system.md). Kein Fluegel/Gitter-Mesh: die 3
+# Laserlinien SIND die Barriere. idle/damaged-idle je 2 Frames (0=geschlossen/Laser
+# an, 1=offen/Laser aus) - WithGateSpriteBody waehlt per Lerp(Position,OpenPosition)
+# automatisch zwischen den beiden. Flicker bei Heavy/Critical-Schaden kommt aus dem
+# C#-Trait selbst (siehe WithGateSpriteBody.cs FlickerInterval), nicht aus der Sequenz.
 aot-gate-nod:
 	idle:
-		Filename: aot-gate-nod.png
+		Filename: aot-gate-nod-idle.png
 		RemasteredFilename:
-		Length: 1
+		Length: 2
 		Scale: 0.1
+		ZOffset: -2048
 	damaged-idle:
-		Filename: aot-gate-nod.png
+		Filename: aot-gate-nod-damaged-idle.png
 		RemasteredFilename:
-		Length: 1
+		Length: 2
 		Scale: 0.1
+		ZOffset: -2048
 	make:
-		Filename: aot-gate-nod.png
+		Filename: aot-gate-nod-idle.png
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.1
+		ZOffset: -2048
 	icon:
 		Filename: aot-gate-nod-icon.png
 		RemasteredFilename:

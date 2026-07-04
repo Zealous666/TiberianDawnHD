@@ -193,8 +193,13 @@ def build_layers(bits):
     # verbundenen Stuecken. Bits==0 nutzt daher direkt die vollen
     # Nord-/Sued-Streifen wie ein gerader Durchgang (Abschnitt 3).
     if bits == 0:
-        back.append((STRIP_T, (0, 0)))
-        front.append((STRIP_B, (0, SB_Y)))
+        # Isoliert (kein Nachbar auf keiner Seite) -> an BEIDEN Enden ausfaden,
+        # analog zum Stummel-Fall (nur eine Verbindung), der die offene Seite
+        # bereits feathert. Sonst wirken die Sandsack-Kanten hart abgeschnitten.
+        strip_t_faded = feather(feather(STRIP_T, "left"), "right")
+        strip_b_faded = feather(feather(STRIP_B, "left"), "right")
+        back.append((strip_t_faded, (0, 0)))
+        front.append((strip_b_faded, (0, SB_Y)))
     elif not junction and bits not in (N | S, E | W):
         base = sbag(bits)
         base_n = base.crop((0, 0, TILE, HB_Y))
