@@ -9,6 +9,7 @@
 using System.Linq;
 using OpenRA.Mods.Common.Activities;
 using OpenRA.Primitives;
+using OpenRA.Support;
 using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Traits
@@ -26,10 +27,17 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Resource type used to drive the pip display (must match StoresResources).")]
 		public readonly string OreResourceType = "Tiberium";
 
+		[Desc("Interval in ticks between 'Silos Needed' warnings when no delivery dock exists.")]
+		public readonly int NoDockWarningInterval = 1500;
+
+		[NotificationReference("Speech")]
+		[Desc("Speech notification to play when full but no delivery dock is available.")]
+		public readonly string NoDockNotification = "SilosNeeded";
+
 		public override object Create(ActorInitializer init) { return new OreTransporter(init.Self, this); }
 	}
 
-	public class OreTransporter : DockClientBase<OreTransporterInfo>, INotifyAddedToWorld
+	public class OreTransporter : DockClientBase<OreTransporterInfo>, INotifyAddedToWorld, ITick
 	{
 		static readonly BitSet<DockType> OreLoadType = new("OreLoad");
 		static readonly BitSet<DockType> UnloadType = new("OreDeliver");
@@ -37,7 +45,9 @@ namespace OpenRA.Mods.Common.Traits
 		enum TransportState { Empty, Loading, Full }
 		TransportState state = TransportState.Empty;
 		int loadTicks;
+		int noDockWarningTicks;
 		IStoresResources storesResources;
+		DockClientManager dockManager;
 		readonly Actor self;
 
 		public override BitSet<DockType> GetDockType =>
@@ -57,7 +67,35 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			storesResources = self.TraitsImplementing<IStoresResources>()
 				.FirstOrDefault(sr => sr.HasType(Info.OreResourceType));
+			dockManager = self.Trait<DockClientManager>();
 			base.Created(self);
+		}
+
+		void ITick.Tick(Actor self)
+		{
+			if (state != TransportState.Full || IsTraitDisabled)
+				return;
+
+			// If idle and full, check if a delivery dock is now available and start moving.
+			if (self.CurrentActivity == null)
+			{
+				if (dockManager.ClosestDock(null, UnloadType) != null)
+				{
+					self.QueueActivity(new MoveToDock(self));
+					return;
+				}
+			}
+
+			if (--noDockWarningTicks > 0)
+				return;
+
+			noDockWarningTicks = Info.NoDockWarningInterval;
+
+			if (dockManager.ClosestDock(null, UnloadType) == null)
+			{
+				var owner = self.Owner;
+				Game.Sound.PlayNotification(self.World.Map.Rules, owner, "Speech", Info.NoDockNotification, owner.Faction.InternalName);
+			}
 		}
 
 		void INotifyAddedToWorld.AddedToWorld(Actor self)

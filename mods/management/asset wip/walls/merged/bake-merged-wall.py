@@ -316,9 +316,9 @@ def fence_parts(bits):
     elif vbits == S:
         piece = feather(cycl(N | S).crop((0, TURN_S, TILE, TILE)), "top")
         front_part = (piece, (0, TURN_S))
-    elif bits == 0:
-        front_part = (cycl(0), (0, 0))
     else:
+        # Solo-Segment (bits==0, kein Nachbar): kein freischwebender
+        # Zaunpfosten -> nur Mauer+Sandsaecke, identisch zur Non-Fence-Variante
         front_part = None
     return back_part, front_part
 

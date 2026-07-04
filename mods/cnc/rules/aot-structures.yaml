@@ -100,12 +100,14 @@ LITE:
 # Hohe HP = praktisch unzerstörbar (kann später finite Ressourcen erhalten).
 aot-ore-mine:
 	Inherits: ^Building
+	Inherits@shape: ^2x2Shape
 	Tooltip:
 		Name: actor-aot-ore-mine.name
 		GenericName: actor-aot-ore-mine.generic-name
 	Building:
-		Footprint: x
-		Dimensions: 1,1
+		Footprint: xx xx
+		Dimensions: 2,2
+		LocalCenterOffset: 0,0,0
 		TerrainTypes: Clear,Rough,Road,Rock
 	Health:
 		HP: 99999
@@ -119,7 +121,8 @@ aot-ore-mine:
 	DockHost:
 		Type: OreLoad
 		DockAngle: 0
-		DockOffset: -1c0,-1c0,0
+		DockOffset: 0,-1c512,0
+	WithBuildingBib:
 	MapEditorData:
 		Categories: Neutral
 # === Ende aotmod ===
@@ -2627,10 +2630,15 @@ SILO:
 # Einheitliches Image (silo) für alle drei Proxies — Sprite-Wechsel via Condition, nicht via Image-Swap.
 SILO:
 	-Buildable:
+	# 2x2-Footprint: die smudge-freie Nordreihe des alten 2x3 (xx xx ==) entfernt,
+	# analog zum Gate-Fix (siehe ts-gates-system.md). WithBuildingBib deckt nur die
+	# unteren 2 Reihen ab -> alte Nordreihe "xx" war ohnehin ohne Bib. LocalCenterOffset
+	# um -512 (eine Zeilen-Reduktion) nachgezogen, damit Silo+Smudge an derselben
+	# Stelle bleiben wie zuvor (100 -> -412).
 	Building:
-		Footprint: xx xx ==
-		Dimensions: 2,3
-		LocalCenterOffset: 0,100,0
+		Footprint: xx ==
+		Dimensions: 2,2
+		LocalCenterOffset: 0,-412,0
 	DockHost:
 		Type: OreDeliver
 		DockAngle: 0
@@ -2901,6 +2909,12 @@ SLAB:
 		Range: 5c0
 	Power:
 		Amount: -100
+	Power@fspurchased:
+		Amount: -1000
+		RequiresCondition: aot-fs-purchased
+	GrantConditionOnPrerequisite@fspurchased:
+		Condition: aot-fs-purchased
+		Prerequisites: aot-firestorm-defense-upgrade
 	WithBuildingBib:
 	RenderSprites:
 		Image: slab
@@ -2914,6 +2928,26 @@ SLAB:
 		Name: Satellite Surveillance
 		Description: Reveals the entire map.
 		SupportPowerPaletteOrder: 55
+	AotFirestormMatrixPower:
+		OrderName: AotFirestormMatrix
+		Prerequisites: aot-firestorm-defense-upgrade
+		ChargeInterval: 1500
+		ActiveDuration: 750
+		PauseOnCondition: lowpower
+		Icon: aot-fs-matrix
+		Name: Firestorm Defense Matrix
+		Description: Activates the Firestorm barrier on all GDI walls for 30 seconds - destroys all aerial objects crossing the wall, including aircraft, missiles and clusters.
+		SupportPowerPaletteOrder: 56
+	WithIdleOverlay@fsflameready:
+		Sequence: aot-ts-flame
+		RequiresCondition: aot-fs-matrix-ready && !build-incomplete
+	WithIdleOverlay@fsflameactive:
+		Sequence: aot-ts-flame
+		RequiresCondition: aot-fs-matrix-active && !build-incomplete
+	AmbientSound@fsmatrix:
+		SoundFiles: firstrm1.aud
+		Interval: 90
+		RequiresCondition: aot-fs-matrix-active
 	InfiltrateForSupportPowerReset:
 		Types: SpyInfiltrate
 		PlayerExperience: 10
@@ -3083,6 +3117,13 @@ aot-wall-gdi:
 	GrantConditionOnPrerequisite@fs:
 		Condition: aot-fs-wall
 		Prerequisites: aot-firestorm-defense-upgrade
+	ExternalCondition@FSMATRIX:
+		Condition: aot-fs-matrix
+	AotWithWallDirectionalOverlay@fsbeam:
+		Type: aotwall
+		SequenceVertical: fs-beam-v
+		SequenceHorizontal: fs-beam-h
+		RequiresCondition: aot-fs-matrix
 	-WithWallSpriteBody:
 	WithWallSpriteBody@base:
 		Name: body
@@ -3218,4 +3259,71 @@ aot-upgrade-laser-fence:
 		Prerequisite: aot-laser-fence-upgrade
 
 	Interactable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - GDI Gate ===
+# Buendigkeits-Test gegen die Fortified Wall. Bewusst OHNE LineBuildNode:
+# Wall-Nachbarn sollen ihre End-Frames rendern (siehe ts-gates-system.md).
+aot-gate-gdi:
+	Inherits: ^BaseBuilding
+	# Custom-Sprite ohne "dead"-Rubble-Frame -> geerbtes WithDeathAnimation crasht beim Tod.
+	-WithDeathAnimation:
+	# WithMakeAnimation bleibt geerbt (grantet build-incomplete fuer Sellable/
+	# Capturable); make-Sequenz = 1-Frame-Dummy mit derselben PNG.
+	# Nativer Gate-Trait (Engine) uebernimmt Auto-Open/-Close fuer Verbuendete +
+	# TS-Sounds. WithGateSpriteBody ersetzt WithSpriteBody: waehlt automatisch den
+	# passenden Frame aus "idle" (11 Frames) je nach Gate.Position, OpenSequence
+	# "open" fuer den Ruhezustand komplett offen.
+	-WithSpriteBody:
+	WithGateSpriteBody:
+		OpenSequence: open
+	Gate:
+		# LockedCondition (Custom-Erweiterung unseres Engine-Forks, siehe Gate.cs):
+		# erzwingt SOFORT Position 0 (zu) und blockt neue Oeffnungsversuche, solange
+		# eine der drei Bedingungen aktiv ist. Anders als PauseOnCondition (das nur
+		# einfriert, wo immer die Position gerade ist) - siehe ts-gates-system.md.
+		LockedCondition: aot-gate-locked || aot-gate-damage-lockout || aot-gate-lowpower
+		OpeningSound: gateup1.aud
+		ClosingSound: gatedwn1.aud
+		BlocksProjectilesHeight: 768
+		# Schneller wieder zu (Default waere 150 Ticks = 6s) - 2026-07-03 User-Wunsch.
+		CloseDelay: 40
+	# Deploy-Toggle (wie Deploy-Button): verriegelt/entriegelt das Tor manuell.
+	# text2.aud = kurzer UI-Bestaetigungs-Bip (bereits an anderer Stelle im Mod als
+	# Deploy-Sound verwendet, siehe aot-units.yaml Cruiser-Carrier).
+	GrantConditionOnDeploy:
+		DeployedCondition: aot-gate-locked
+		SkipMakeAnimation: true
+		Voice: Action
+		DeploySounds: text2.aud
+		UndeploySounds: text2.aud
+	# >50% Schaden (Heavy/Critical DamageState) sperrt das Tor.
+	GrantConditionOnDamageState:
+		Condition: aot-gate-damage-lockout
+		ValidDamageStates: Heavy, Critical
+	# Low Power sperrt das Tor.
+	GrantConditionOnPowerState:
+		Condition: aot-gate-lowpower
+		ValidPowerStates: Low, Critical
+	Tooltip:
+		Name: GDI Gate
+	Valued:
+		Cost: 500
+	Health:
+		HP: 60000
+	Armor:
+		Type: Concrete
+	Buildable:
+		BuildPaletteOrder: 31
+		Prerequisites: vehicleproduction
+		Queue: Building.GDI
+		Description: Fortified gate. Testbau fuer Wall-Anschluss.
+	# Footprint/Dimensions unangetastet (siehe REVERT-Historie in ts-gates-system.md,
+	# der breitere Smudge steckt direkt in der Sprite-Grafik, kein WithBuildingBib mehr).
+	Building:
+		Footprint: xx ==
+		Dimensions: 2,2
+		LocalCenterOffset: 0,0,0
+	# BlocksProjectiles entfaellt: Gate liefert sein eigenes IBlocksProjectiles
+	# (skaliert mit Oeffnungsgrad ueber BlocksProjectilesHeight).
 # === Ende aotmod ===

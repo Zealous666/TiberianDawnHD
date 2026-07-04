@@ -46,6 +46,7 @@ namespace OpenRA.Mods.Common.Traits
 		[PaletteReference]
 		public readonly string MissilePalette = "effect";
 
+		[GrantedConditionReference]
 		[Desc("Condition granted on the actor after the power fires. Use with RequiresCondition: !<this> to hide the power after use.")]
 		public readonly string FiredCondition = "satellite-used";
 

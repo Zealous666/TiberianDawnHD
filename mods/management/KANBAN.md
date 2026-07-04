@@ -7,71 +7,45 @@
   - [ ] buggy & laser
   - [ ] bike icon
   - [ ] stealthtank & cargo
-  - [x] hind & harpy sprites & upgrades
-  - [x] apache sprite & upgrade
   - [ ] mig & banshee
   - [ ] mobile gap genererator
   - [ ] mobile stealth generator
-  - [ ] sensor array
-  - [x] helipad icon
-  - [x] repair facility stages
-  - [x] ttnk & tick upgrade
-  - [x] refinery icon
-  - [x] atech centre icon
-  - [x] stech centre icon & stech centre
-  - [x] light factory icon
-  - [x] Tibsun voxel-Implementation
-  - [x] weap & afld icons
-  - [ ] cyborg commando
-  - [ ] thief & highjacker
-  - [ ] spy
-  - [ ] gdi commando railgun
-  - [ ] nuke silo & toxic rocket
-  - [ ] uplink centre
-  - [ ] silo upgrade (nuke silo)
-  - [ ] drop-pod upgrade
-  - [ ] cruiser & railgun & carrier
+  - [ ] sensor array (dome hat das!)
+  - [ ] repair facility stage 3
+  - [x] nuke silo & toxic rocket
+  - [x] uplink centre & super power
   - [ ] titan / juggernaut
   - [ ] wolverine
-  - [ ] transport ships
-  - [ ] jungle terrain?
-  - [ ] avatar / laser avatar
-  - [ ] APC AA & Amphibious APC
-  - [ ] silo & ore transport changes
-  - [ ] 3TNK langsaere kadenz
+  - [ ] shrine & avatar / laser avatar
+  - [x] civlian cars
+  - [ ] age power requirements (requires: atec/stec, tmple/slab ,shrine/uplink
+  - [ ] civilian buildings
+  - [ ] starting units
+  - [ ] firestorm-system.md
+  - [ ] GDI mine layer
+  - [x] dropship routine (2 jeeps, 2 mtnk)
+  - [ ] highres ts upscaling
+  - [ ] coop archon system
+  - [ ] 1st coop mission
+  - [ ] NOD GATE
 - [ ] Fixes
-  - [x] ATEC satelli fixen & strom
-  - [x] EYE als selbst bau entfernen
-  - [x] Ion upgrade korrekt implementieren
-  - [x] GDI helipad coraussetzung: comm centre & orca / hind ammo
-  - [x] mammoth upgrade asset
-  - [x] mtnk upgrade assets
-  - [x] LTNK icon & upgrade assets
-  - [x] HQ & MCV selling nicht möglich
-  - [x] MCV redeploy nicht möglich
   - [ ] einheiten auf repair facility verkaufen
-  - [ ] ion cannon strike auf repair facility crash?! // lite factory destroy crash?!
   - [ ] age power requirement
   - [ ] upgrades wenn tec center selektiert
   - [ ] LITE eigene queue (statt defense?)
-  - [ ] barracks / hand zu groß
-  - [ ] infantry icons
-  - [ ] temple icon
   - [ ] upgrades nur wenn power
   - [ ] heli & jet start/lande sounds
-  - [ ] russian voices?
+  - [ ] KI-bau routine
+  - [ ] ore um ore-mine
 
 ## Design / Konzept
 
 - [ ] Techtree & Buildorder
   file:///Users/moritzgiuliani/Documents/openRA%20Projekte/TiberianDawnHD/mods/management/kanban-board.html
   - [x] chrome webinterface
-  - [ ] techtree web tool
-- [ ] Mod-Konzept festlegen (Setting, Fraktionen, USP)
-- [ ] Zielplattformen / Engine-Version festlegen
-- [ ] Referenz-Mods / Inspiration sichten
-- [ ] Wirtschaftssystem festlegen
-- [ ] Fraktionen & ihre Identität definieren
+  - [x] techtree web tool
+  - [x] build order web tool
+  - [x] terrain web status
 
 ## Rules / Balancing
 
@@ -84,13 +58,15 @@
 
 ## Maps
 
-- [ ] ☑️ Zoomap
-  Erste Testmap (klein, 2 Spieler) bauen
+- [ ] ☑️ Testmap
+  Erste Zoomap (klein, 2 Spieler) bauen
   - [x] 2 startpunkte
   - [x] 2 ore mines
   - [x] 2 tiberium felder
   - [x] wasser
-- [ ] Map-Pool für Releases definieren
+- [ ] MP Forest Fires
+  Temperate (RA)
+- [ ] NOD - A0 - 01
 
 ## Programmierung
 
@@ -101,6 +77,42 @@
   - [ ] code-struktur & comments sauber
 - [ ] ☑️ Red Alert Remastered Assets
 - [ ] ☑️ Tiberian Sun Vox-Assets
+- [ ] Aircrafts
+  - [x] Apache / Orca
+  - [x] HIND / Harpy
+  - [ ] Transport Helo / Carryall
+  - [ ] A10 / Firehawk
+  - [ ] MiG? / Banshee
+- [ ] Wall & Gate System
+  Gates, Reinforced Walls, Barbwire, Firestorm, Laser Fences
+  - [x] Reinforce Wall (w. Sandbags)
+  - [x] Barbwire
+  - [ ] Laser-Fences
+  - [ ] Firestorm Matrix
+  - [ ] Gates
+- [ ] Stealth area generator & sensors
+- [ ] Shroud / Gap Generation
+- [ ] Carryall Pickup
+- [ ] Standalone Release
+- [ ] Coop unit-sharing
+- [ ] Infantry & Special Infantry
+  Both Factions
+  - [x] Nod Cyborg
+  - [x] Nod Cyborg Command
+  - [x] Nod Rifle
+  - [x] Nod Bazooka
+  - [x] Nod Saboteur
+  - [x] Nod Carjacker
+  - [x] Nod Dog
+  - [x] Nod Flame Thrower / Toxic
+  - [x] GDI Rifle
+  - [x] GDI Engineer
+  - [x] GDI Grenadier
+  - [x] GDI Undercover Spy
+  - [x] GDI Commando
+  - [x] Nod Chameleon Spy
+  - [x] Gdi Medic
+  - [x] Gdi Mechanic
 - [ ] Naval Warfare & Amphibic
   - [x] Gunboat / Patrol Boat / Destroyer
   - [x] Submarine / Cargo Submarine
@@ -108,28 +120,8 @@
   - [x] Cruiser / Heli Carrier / Advanced Cruiser
   - [x] Transport Vessel -> Hovercraft
   - [x] Transport Vessel -> Armed
-  - [ ] Hover MLRS / Hover AA
-  - [ ] Amphibious APC
-- [ ] Infantry & Special Infantry
-  - [ ] Nod Cyborg / Reaper
-  - [ ] Nod Cyborg Command
-  - [ ] Nod Rifle
-  - [ ] Nod Grenade
-  - [ ] Nod Saboteur
-  - [ ] Nod Highjacker
-  - [ ] Nod Dog
-  - [ ] Nod Flame Thrower / Toxic
-- [ ] Aircrafts
-  - [x] Apache / Orca
-  - [x] HIND / Harpy
-  - [ ] Transport Helo / Carryall
-  - [ ] A10 / Firehawk
-  - [ ] MiG? / Banshee
-- [ ] Stealth area generator & sensors
-- [ ] Shroud / Gap Generation
-- [ ] Carryall Pickup
-- [ ] Coop unit-sharing
-- [ ] Standalone Release
+  - [x] Hover MLRS / Hover AA
+  - [x] Amphibious APC
 
 ## Testing / Bugs
 

@@ -5,6 +5,7 @@ Speech:
 		Building: BLDGING1
 		BuildingCannotPlaceAudio: DEPLOY1
 		BuildingCaptured: CAPT1
+		BuildingInfiltrated: CAPT1
 		BuildingInProgress: BLDG1
 		BuildingLost: STRCLOST
 		Cancelled: CANCEL1

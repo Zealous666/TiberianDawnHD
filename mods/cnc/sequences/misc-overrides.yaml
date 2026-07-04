@@ -493,3 +493,14 @@ waypoint:
 camera:
 	idle:
 		RemasteredFilename: camera.png
+
+# === Age of Tiberium (aotmod) - Spy: piff-Effekt + tag-spy-Pip ===
+piff:
+	Defaults:
+		Filename: piff.shp
+	idle:
+		Length: *
+
+pips:
+	tag-spy:
+		Filename: tag-spy.shp

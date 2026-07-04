@@ -234,6 +234,10 @@ aot-upgrade-mtnk-railgun:
 	icon:
 		RemasteredFilename: aot-upgrade-mtnk-railgun.png
 
+aot-upgrade-e4-toxic:
+	icon:
+		RemasteredFilename: nod_toxic.png
+
 htnk:
 	aot-htnk-rocket-icon:
 		RemasteredFilename: htnk_rocket.png

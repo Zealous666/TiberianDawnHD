@@ -1780,6 +1780,84 @@ aot-cyc2:
 		Description: Elite NOD cyborg with plasma cannon. Devastating vs. all targets. Limit: 1.
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - Zone Trooper (GDI, TS JUMPJET-Sprites, MTNK-Railgun, Ghost-Stalker-Voice) ===
+# NICHT direkt baubar — kein Buildable-Trait, wird ausschließlich über die Zone Trooper Drop
+# Support Power (aot-orbc, Age-3-Upgrade) gespawnt, analog aot-minp/aot-minv (siehe [[nuke-silo-system]]).
+# Jumpjet-Locomotor (aot-zonetrooper, siehe overrides.yaml ^BaseWorld) erlaubt kurzes Überspringen
+# von Rock/River (NICHT Water) — "airborne"-Condition steuert den Sprite-Wechsel während des Hops,
+# via GrantConditionOnJumpjetLayer (Standard-OpenRA-Mechanismus für Jumpjet-Einheiten, kein neuer Trait nötig).
+aot-zonetrooper:
+	Inherits: E1
+	WithShadow:
+		Offset: 0, 48, 0
+		ZOffset: -129
+	RenderSprites:
+		Image: aot-zonetrooper
+		PlayerPalette: aot-ts-player
+	-WithInfantryBody:
+	WithInfantryBody@ground:
+		RequiresCondition: !airborne
+		StandSequences: stand
+		IdleSequences: idle1, idle2
+		DefaultAttackSequence: attack
+		Palette: aot-ts-player
+		IsPlayerPalette: true
+	WithInfantryBody@flying:
+		RequiresCondition: airborne || aot-zonetrooper-descending || aot-zonetrooper-hovering
+		StandSequences: flying
+		MoveSequence: flying
+		DefaultAttackSequence: flying-attack
+		Palette: aot-ts-player
+		IsPlayerPalette: true
+	GrantConditionOnJumpjetLayer:
+		Condition: airborne
+	# Terrain-basierter Hover: unabhängig vom Jumpjet-Movement-Layer (der wird beim aktuellen
+	# Locomotor-Setup praktisch nie betreten, da Rock/River als Boden-Terrain gültig/billiger sind
+	# — Einheiten LAUFEN normal drüber). Diese Condition greift rein visuell beim Überqueren von
+	# Rock/River, ohne Targetable/DamagedByTerrain (weiterhin normale Boden-Einheit) zu beeinflussen.
+	AotGrantConditionOnTerrain@HOVER:
+		Condition: aot-zonetrooper-hovering
+		TerrainTypes: Rock, River
+	Hovers:
+		RequiresCondition: airborne || aot-zonetrooper-descending || aot-zonetrooper-hovering
+	# Kein WithParachute (kein Fallschirm-Sprite) — beim Absprung aus dem Dropship nutzt der
+	# Zone Trooper stattdessen die TS-Jetpack-Hover-Animation (siehe WithInfantryBody@flying).
+	Parachutable:
+		ParachutingCondition: aot-zonetrooper-descending
+	-Crushable:
+	-TakeCover:
+	Targetable:
+		RequiresCondition: !airborne
+	Targetable@AIRBORNE:
+		TargetTypes: Air
+		RequiresCondition: airborne
+	DamagedByTerrain:
+		RequiresCondition: !hazmatsuits && !airborne
+	WithDeathAnimation:
+		DeathSequence: die
+		UseDeathTypeSuffix: false
+		DeathSequencePalette: aot-ts-player
+		DeathPaletteIsPlayerPalette: true
+		CrushedSequence: die-crushed
+		CrushedSequencePalette: aot-ts-player
+		CrushedPaletteIsPlayerPalette: true
+	Voiced:
+		VoiceSet: ZoneTrooperVoice
+	Tooltip:
+		Name: Zone Trooper
+	Health:
+		HP: 15000
+	Armor:
+		Type: Light
+	Mobile:
+		Speed: 60
+		Locomotor: aot-zonetrooper
+	Valued:
+		Cost: 1500
+	Armament:
+		Weapon: aot-MtnkRailgun
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - Gunboat (GDI Naval, PT base -> Destroyer upgrade) ===
 # Steuerbares Schiff (Mobile + naval Locomotor). EIN Aktor, konditionaler Sprite/Waffen-
 # Tausch via aot-gunboat-upgrade (gewährt von aot-upgrade-gunboat-destroyer) - Muster
@@ -2947,4 +3025,115 @@ aot-civ-car:
 		EjectOnDeath: true
 	Valued:
 		Cost: 0
+
+# === Age of Tiberium (aotmod) - Dropship (GDI, spawned only via Zone Trooper Drop) ===
+# Fliegt vom Kartenrand zum Zielpunkt (wie RA's BADR), fliegt dort aber NICHT weiter:
+# in der Luft über dem Ziel wird es sofort per FireWarheadsOnDeath gesprengt (Mid-Air-
+# Explosion statt Abflug). Der Zone Trooper gleitet parallel per Parachutable (kein
+# Fallschirm-Sprite, siehe aot-zonetrooper) von der Explosionshöhe herab.
+aot-dropship:
+	Inherits: ^Plane
+	# Kein Unit-Lost-Notification bei Zerstörung — die Mid-Air-Explosion ist beabsichtigt (kein Verlust).
+	-ActorLostNotification:
+	-WithFacingSpriteBody:
+	RenderSprites:
+		Image: aot-dropship-test
+	WithFacingSpriteBody@BODY:
+		Sequence: idle
+	WithFacingSpriteBody@REMAP:
+		Name: body-remap
+		Sequence: idle-remap
+		Palette: player
+		IsPlayerPalette: True
+	Tooltip:
+		Name: Dropship
+	Health:
+		HP: 5000
+	Armor:
+		Type: Light
+	Interactable:
+	HitShape:
+	Aircraft:
+		CruiseAltitude: 2560
+		Speed: 300
+		TurnSpeed: 20
+		Repulsable: False
+		MaximumPitch: 56
+	FireWarheadsOnDeath:
+		Weapon: aot-DropshipExplode
+	RevealsShroud:
+		Range: 4c0
+		Type: GroundPosition
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Orca Transport (GDI, spawned only via Orca Transport Power) ===
+# TS ORCATRAN: fliegt an, landet echt (VTOL/Hover), setzt 2 Fahrzeuge + 2 Panzer ab, fliegt wieder ab.
+# Bezugsdaten aus engine/mods/ts/rules/aircraft.yaml (Sounds, Cargo-Konvention).
+aot-orcatran:
+	Inherits: ^Helicopter
+	-WithFacingSpriteBody:
+	RenderSprites:
+		Image: aot-orcatran-test
+	WithFacingSpriteBody@BODY:
+		Sequence: idle
+	WithFacingSpriteBody@REMAP:
+		Name: body-remap
+		Sequence: idle-remap
+		Palette: player
+		IsPlayerPalette: True
+	Tooltip:
+		Name: Orca Transport
+	Health:
+		HP: 20000
+	Armor:
+		Type: Light
+	Aircraft:
+		CruiseAltitude: 2560
+		Speed: 180
+		TurnSpeed: 20
+		LandableTerrainTypes: Clear, Road, Rough, Beach, Tiberium, BlueTiberium
+		TakeoffSounds: orcaup1.aud
+		LandingSounds: orcadwn1.aud
+	Cargo:
+		Types: GroundVehicle
+		MaxWeight: 20
+		BeforeUnloadDelay: 15
+		AfterUnloadDelay: 40
+	# Von Flak abschießbar: stürzt dann ab (SpawnActorOnDeath -> Husk mit FallsToEarth,
+	# TS-Stil taumelnd statt gerade runter). EjectOnDeath auf Cargo bewusst NICHT gesetzt
+	# (Default: false) — geladene Fahrzeuge gehen mit unter, kommen nie am Ziel an.
+	SpawnActorOnDeath:
+		Actor: aot-orcatran-husk
+	RevealsShroud:
+		Range: 4c0
+		Type: GroundPosition
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Orca Transport Husk (Absturz-Wrack, TS-Stil taumelnd) ===
+aot-orcatran-husk:
+	Inherits: ^CommonHuskDefaults
+	-WithFacingSpriteBody:
+	RenderSprites:
+		Image: aot-orcatran-test
+	WithFacingSpriteBody@BODY:
+		Sequence: idle
+	WithFacingSpriteBody@REMAP:
+		Name: body-remap
+		Sequence: idle-remap
+		Palette: player
+		IsPlayerPalette: True
+	Tooltip:
+		Name: Orca Transport (Crashing)
+	Aircraft:
+		CanHover: True
+		VTOL: true
+		CanSlide: True
+	# Moves: True + Velocity/MaximumSpinSpeed = TS-typischer taumelnder Absturz statt
+	# geradem Herunterfallen (Unterschied zu ^HelicopterHusk, das nur senkrecht fällt).
+	FallsToEarth:
+		Moves: True
+		Velocity: 112
+		MaximumSpinSpeed: 40
+		Explosion: aot-DropshipExplode
+	-MapEditorData:
 # === Ende aotmod ===

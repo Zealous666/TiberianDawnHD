@@ -763,3 +763,48 @@ aot-MineDeploy:
 	Warhead@1Spawn: AotSpawnActor
 		Actor: aot-minp
 # === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Zone Trooper Drop: Waffe der ORBC-Superpower ===
+# 5x5-Streukreis, 1 garantiert (Zentrum) + 4 zufällig = 5 Zone Trooper pro Einsatz (wie TS DPOD Passengers=5).
+aot-ZoneTrooperDropMissile:
+	ValidTargets: Ground, Water, Air, Trees
+	Report: nukemisl.aud
+	Warhead@1Eff: CreateEffect
+		Explosions: small_frag
+		ImpactSounds: mine1.aud
+		ImpactActors: false
+	Warhead@2Cluster: FireCluster
+		Weapon: aot-ZoneTrooperPodDeploy
+		RandomClusterCount: 4
+		Dimensions: 5,5
+		Footprint: xxxxx xxxxx xxXxx xxxxx xxxxx
+
+aot-ZoneTrooperPodDeploy:
+	ValidTargets: Ground, Water, Air, Trees
+	Projectile: Bullet
+		Speed: 800
+	Warhead@1Spawn: AotSpawnActor
+		Actor: aot-zonetrooper
+
+# === Age of Tiberium (aotmod) - Dropship Machinegun: visueller Effekt während Anflug/Landung ===
+aot-dropship-machinegun:
+	ValidTargets: Ground, Water, Air, Trees
+	ReloadDelay: 40
+	Range: 6c0
+	Report: gunmg1.aud
+	Projectile: Bullet
+		Speed: 800
+	Warhead@1Eff: CreateEffect
+		Explosions: piff
+		ImpactSounds: gunhit.aud
+
+# === Age of Tiberium (aotmod) - Dropship Mid-Air-Explosion: HeliExplode-Kopie mit Air-Target ===
+# HeliExplode hat ValidTargets: Ground, Water (Default) — die Explosion findet aber auf
+# Cruise-Altitude statt (Air-Klassifikation), sonst feuert CreateEffect nicht (siehe
+# CreateEffectWarhead.IsValidAgainstTerrain: dat > AirThreshold -> TargetTypeAir).
+aot-DropshipExplode:
+	ValidTargets: Ground, Water, Air
+	Warhead@1Eff: CreateEffect
+		Explosions: small_building
+		ImpactSounds: xplos.aud
+# === Ende aotmod ===

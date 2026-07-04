@@ -13,7 +13,8 @@ actor-aot-ore-mine =
 
 actor-aot-nod-radar =
     .name = Radar Dome
-    .description = Provides radar and cloaked unit detection for NOD.
+    .description = Provides radar and map overview for NOD.
+    Requires power to operate.
 
 actor-oret =
     .name = Ore Transporter
@@ -106,6 +107,26 @@ actor-aot-upgrade-transport-hover =
     .name = Hovercraft Upgrade
     .description = Converts the Transport Vessel into an amphibious hovercraft. Can cross any terrain. Carries infantry or vehicles.
 
+actor-hq =
+    .name = Radar
+    .description = Provides radar and map overview for GDI.
+    Requires power to operate.
+    .airstrikepower-name = Air Strike
+    .airstrikepower-description = Deploy an aerial napalm strike.
+    Burns buildings and infantry along a line.
+    .encyclopedia =
+    Grants GDI access to the minimap. Requires power to operate.
+
+actor-eye =
+    .name = Radar
+    .description = Provides radar and map overview for GDI.
+    Requires power to operate.
+    .ioncannonpower-name = Ion Cannon
+    .ioncannonpower-description = Initiates an Ion Cannon strike.
+    Applies instant damage to a small area.
+    .encyclopedia =
+    Grants GDI access to the minimap. Requires power to operate.
+
 actor-proc =
     .name = Tiberium Refinery
     .description =
@@ -113,7 +134,6 @@ actor-proc =
     Spies can infiltrate to steal 50% of stored credits.
 
 actor-silo =
-    .name = Tiberium Silo
+    .name = Silo
     .description =
-    Stores processed Tiberium.
-    Spies can infiltrate to steal 50% of stored credits.
+    Resource storage and ore-delivery dock

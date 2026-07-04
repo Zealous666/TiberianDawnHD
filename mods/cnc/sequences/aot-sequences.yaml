@@ -728,6 +728,22 @@ aot-ore-mine:
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.25
+	bib:
+		Filename: bib3.tem
+		TilesetFilenames:
+			DESERT: bib3.des
+			WINTER: bib3.win
+			SNOW: bib3.sno
+			TEMPERAT: bib3.tem
+		Length: *
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\TEMPERATE\BIB3\BIB3.TEM-{0:D4}.DDS
+			Count: 4
+		RemasteredTilesetFilenamesPattern:
+			WINTER: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\BIB3.WIN\BIB3.WIN-{0:D4}.DDS
+				Count: 4
+			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\BIB3.DES\BIB3.DES-{0:D4}.DDS
+				Count: 4
+		RemasteredPremultiplied: false
 # === Ende aotmod ===
 
 # === Ore Transporter (ORET): RA Harvester Sprites ===
@@ -1496,6 +1512,9 @@ icon:
 	# === Age of Tiberium (aotmod) - ORBC Support-Power-Icons ===
 	aot-satellite:
 		Filename: aot-satellite-icon.png
+		Length: 1
+	aot-fs-matrix:
+		Filename: aot-fs-matrix-icon.png
 		Length: 1
 	aot-ion-strike:
 		Filename: aot-ion-strike-icon.png
@@ -2963,6 +2982,20 @@ aot-wall-gdi:
 		Filename: aot-wall-gdi-fs-icon.png
 		RemasteredFilename:
 		Length: 1
+	fs-beam-v:
+		RemasteredFilename: aot-fs-beam.png
+		Length: 20
+		Tick: 60
+		RemasteredOffset: 0, -50
+		BlendMode: Additive
+		ZOffset: 511
+	fs-beam-h:
+		RemasteredFilename: aot-fs-beam.png
+		Length: 20
+		Tick: 60
+		RemasteredOffset: 0, -50
+		BlendMode: Additive
+		ZOffset: 511
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Firestorm Defense Upgrade Icon ===
@@ -3011,4 +3044,78 @@ aot-upgrade-laser-fence:
 		Filename: aot-wall-nod-laser-icon.png
 		RemasteredFilename:
 		Length: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - GDI Gate (Frame-0-Testbau) ===
+# Gemini-Art v4 (freistehend + eigenes Fundament), klassischer PNG-Pfad wie LITE.
+# Rahmenbreite auf 508px kalibriert wie v3 -> Scale 0.1 = weiterhin 271 remastered px
+# = 2 Zellen fuer den Rahmen; Fundament ragt bewusst leicht drueber.
+# v5 (2026-07-03): Dreck-Smudge NICHT ueber WithBuildingBib (zwingt Footprint-
+# Aenderung), sondern DIREKT IN DIE PNG gebacken — echte BIB2-Remastered-DDS-Frames
+# per utility.sh --extract aus TEXTURES_TD_SRGB.MEG gezogen, exakt im 3x2-Raster
+# wie LITE (Frame-Index = Rasterposition, NICHT zufaellig — sonst Kantenversatz-
+# Glitch!) zu einem nahtlosen Fleck zusammengesetzt, Gate+Fundament mittig drauf-
+# komponiert. Canvas dadurch groesser (713x472), Scale bleibt 0.1 (Rahmen selbst
+# unveraendert, nur Leinwand drumherum erweitert). Footprint/Dimensions/Bib-Trait
+# dadurch komplett unangetastet (siehe aot-structures.yaml).
+# KEIN Hole-Fill beim Baken (Ring-Median-Heuristik fraß die Gitterluecken -> weiss statt
+# transparent)! Nur Weiss-Keying (chroma<14 & v>=244), sonst nichts.
+# WICHTIG: Suedverschiebung NICHT ueber Sprite-Offset (das floss nicht in den
+# alten Bib-Z-Sort ein -> Smudge rendete vor dem Gate!). Ueber Building.
+# LocalCenterOffset geloest (aot-structures.yaml) — nach v5-Canvas-Aenderung
+# ggf. erneut zu pruefen/anzupassen.
+# ZOffset -2048 (2026-07-03): Render-Sortierschluessel der Engine ist
+# Pos.Y + Pos.Z + ZOffset (WorldRenderer.cs RenderableZPositionComparisonKey).
+# Unser Gate sitzt durch CenterOffset.y=512 hoeher im Sortwert als die
+# einzeiligen Wall-Nachbarn (Pos.Y~0) -> Gate/Smudge malten sich drueber.
+# Negativer ZOffset zwingt das Gate zuverlaessig unter jeden angrenzenden
+# Wall-Nachbarn (rein visuell, keine Gameplay-Auswirkung).
+aot-gate-gdi:
+	# Nativer WithGateSpriteBody-Trait (engine, siehe aot-structures.yaml) uebernimmt
+	# die Frame-Auswahl SELBST ueber GetGateFrame() = Lerp(0, Length-1, gate.Position,
+	# gate.OpenPosition) -> "idle" braucht ALLE 11 Frames, kein separates "open"/"close"
+	# mit eigenem Tick mehr noetig (siehe ts-gates-system.md).
+	idle:
+		Filename: aot-gate-gdi-open.png
+		RemasteredFilename:
+		Length: 11
+		Scale: 0.1
+		ZOffset: -2048
+	damaged-idle:
+		Filename: aot-gate-gdi-damaged.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.1
+		ZOffset: -2048
+	make:
+		Filename: aot-gate-gdi-open.png
+		RemasteredFilename:
+		Start: 0
+		Length: 1
+		Scale: 0.1
+		ZOffset: -2048
+	# OpenSequence fuer WithGateSpriteBody: Ruhezustand "komplett offen" (Frame 10).
+	open:
+		Filename: aot-gate-gdi-open.png
+		RemasteredFilename:
+		Start: 10
+		Length: 1
+		Scale: 0.1
+		ZOffset: -2048
+	icon:
+		Filename: aot-gate-gdi-icon.png
+		RemasteredFilename:
+		Length: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Firestorm Defense Matrix Kill-Effekt (TS fsair) ===
+# Orangener Energie-Burst wenn ein Flugobjekt die aktive Matrix beruehrt.
+# Wird von AotFirestormMatrixPower/NukeLaunch-Hook als SpriteEffect gespawnt.
+aot-fs-air:
+	idle:
+		Filename: aot-fs-air.png
+		Length: 20
+		Tick: 50
+		Scale: 0.5
+		BlendMode: Additive
 # === Ende aotmod ===

@@ -381,6 +381,7 @@ AllowUnusedFluentMessagesInExternalPackages: false
 
 Voices:
 	cnc|audio/voices.yaml
+	cnchd|audio/voices-base.yaml
 
 Notifications:
 	cnc|audio/notifications.yaml

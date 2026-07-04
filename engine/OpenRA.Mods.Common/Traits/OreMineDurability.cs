@@ -55,7 +55,7 @@ namespace OpenRA.Mods.Common.Traits
 			return (float)stored / store.Capacity;
 		}
 
-		Color ISelectionBar.GetColor() => Color.Red;
+		Color ISelectionBar.GetColor() => Color.Gold;
 		bool ISelectionBar.DisplayWhenEmpty => false;
 	}
 }
