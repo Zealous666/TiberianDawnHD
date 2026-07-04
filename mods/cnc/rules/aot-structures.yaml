@@ -2938,12 +2938,6 @@ SLAB:
 		Name: Firestorm Defense Matrix
 		Description: Activates the Firestorm barrier on all GDI walls for 30 seconds - destroys all aerial objects crossing the wall, including aircraft, missiles and clusters.
 		SupportPowerPaletteOrder: 56
-	WithIdleOverlay@fsflameready:
-		Sequence: aot-ts-flame
-		RequiresCondition: aot-fs-matrix-ready && !build-incomplete
-	WithIdleOverlay@fsflameactive:
-		Sequence: aot-ts-flame
-		RequiresCondition: aot-fs-matrix-active && !build-incomplete
 	AmbientSound@fsmatrix:
 		SoundFiles: firstrm1.aud
 		Interval: 90
@@ -2982,6 +2976,17 @@ SLAB:
 	WithIdleOverlay@tstowerremap:
 		Sequence: aot-ts-tower-remap
 		RequiresCondition: aot-age2-active && !build-incomplete
+	# Flame-Overlay NACH den Tower-Overlays deklariert, damit es ueber ihnen
+	# rendert (Sprite-Add-Reihenfolge = Painter's-Algorithm-Schicht bei
+	# gleichem Z) -- vorher lag es DAVOR und wurde vom Tower-Grafik komplett
+	# verdeckt, sobald Age-2 aktiv wurde (Bug: Flame nur auf Age-1-Sprite
+	# sichtbar). Nur auf dem Age-2-TS-Sprite UND waehrend Ready oder Aktiv.
+	WithIdleOverlay@fsflameready:
+		Sequence: aot-ts-flame
+		RequiresCondition: aot-age2-active && aot-fs-matrix-ready && !build-incomplete
+	WithIdleOverlay@fsflameactive:
+		Sequence: aot-ts-flame
+		RequiresCondition: aot-age2-active && aot-fs-matrix-active && !build-incomplete
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - SLAB Build-Menu Icons (Proxy-Aktoren) ===
@@ -3110,6 +3115,9 @@ aot-wall-gdi:
 	Crushable:
 		CrushClasses: heavywall
 		-CrushSound:
+	# Zone Trooper hovern hier drueber wie ueber Rock/River (kein echtes Crushen,
+	# kein Schaden/Zerstoerung) -- siehe AotHoverPassable.cs.
+	AotHoverPassable:
 	LineBuild:
 		NodeTypes: aotwall
 	LineBuildNode:
@@ -3204,6 +3212,9 @@ aot-wall-nod:
 		NodeTypes: aotnodwall
 	LineBuildNode:
 		Types: aotnodwall
+	# Zone Trooper hovern hier drueber wie ueber Rock/River (kein echtes Crushen,
+	# kein Schaden/Zerstoerung) -- siehe AotHoverPassable.cs.
+	AotHoverPassable:
 	GrantConditionOnPrerequisite@laser:
 		Condition: aot-laser-fence
 		Prerequisites: aot-laser-fence-upgrade
@@ -3268,6 +3279,8 @@ aot-gate-gdi:
 	Inherits: ^BaseBuilding
 	# Custom-Sprite ohne "dead"-Rubble-Frame -> geerbtes WithDeathAnimation crasht beim Tod.
 	-WithDeathAnimation:
+	# Kein Infanterie-Spawn beim Verkaufen (User-Wunsch: niemand soll rauskommen).
+	-SpawnActorsOnSell:
 	# WithMakeAnimation bleibt geerbt (grantet build-incomplete fuer Sellable/
 	# Capturable); make-Sequenz = 1-Frame-Dummy mit derselben PNG.
 	# Nativer Gate-Trait (Engine) uebernimmt Auto-Open/-Close fuer Verbuendete +
@@ -3326,4 +3339,45 @@ aot-gate-gdi:
 		LocalCenterOffset: 0,0,0
 	# BlocksProjectiles entfaellt: Gate liefert sein eigenes IBlocksProjectiles
 	# (skaliert mit Oeffnungsgrad ueber BlocksProjectilesHeight).
+	# Zone Trooper hovern hier drueber wie ueber Rock/River (kein echtes Crushen,
+	# kein Schaden/Zerstoerung) -- siehe AotHoverPassable.cs.
+	AotHoverPassable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - NOD Gate (Skalierungstest Saeulen vs. Fence) ===
+# Nur Baseplate + 2 Laser-Saeulen, noch OHNE Gate/WithGateSpriteBody-Traits (kein
+# Gitter-Mesh/Animation bisher, nur 1 Frame) — rein zum Platzieren neben der
+# echten Laser-Fence, um die Saeulen-Groesse zu vergleichen. Wird spaeter durch
+# die volle aot-gate-gdi-Struktur ersetzt, sobald das Gitter-Design steht.
+aot-gate-nod:
+	Inherits: ^BaseBuilding
+	-WithDeathAnimation:
+	# Kein Infanterie-Spawn beim Verkaufen (User-Wunsch: niemand soll rauskommen).
+	-SpawnActorsOnSell:
+	Tooltip:
+		Name: NOD Gate (Testbau)
+	Valued:
+		Cost: 500
+	Health:
+		HP: 60000
+	Armor:
+		Type: Concrete
+	Buildable:
+		BuildPaletteOrder: 31
+		Prerequisites: vehicleproduction
+		Queue: Building.Nod
+		Description: Fortified gate. Skalierungstest Saeulen vs. Fence.
+	# LocalCenterOffset REVERTED auf 0,0,0 (2026-07-03): User-Korrektur — die
+	# Hoehen-Anpassung darf NICHT den ganzen Aktor (inkl. Smudge) verschieben,
+	# sondern nur Baseplate+Saeulen RELATIV zum Smudge. Geloest in der Bildkomposition
+	# selbst (Baseplate+Saeulen ca. 180px tiefer in den Smudge hinein komponiert,
+	# Smudge-Weltposition unveraendert), siehe ts-gates-system.md.
+	Building:
+		Footprint: xx ==
+		Dimensions: 2,2
+		LocalCenterOffset: 0,0,0
+	BlocksProjectiles:
+	# Zone Trooper hovern hier drueber wie ueber Rock/River (kein echtes Crushen,
+	# kein Schaden/Zerstoerung) -- siehe AotHoverPassable.cs.
+	AotHoverPassable:
 # === Ende aotmod ===

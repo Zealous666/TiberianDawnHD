@@ -14,18 +14,28 @@ engine/**
 !engine/OpenRA.Mods.Common/Traits/SupportPowers/AutoActivateSpawnActorPower.cs
 !engine/OpenRA.Mods.Common/Traits/SupportPowers/AotSatellitePower.cs
 !engine/OpenRA.Mods.Common/Traits/SupportPowers/AotNukePowerVariants.cs
+!engine/OpenRA.Mods.Common/Traits/SupportPowers/AotFirestormMatrixPower.cs
+!engine/OpenRA.Mods.Common/Traits/SupportPowers/AotOrcaTransportPower.cs
+!engine/OpenRA.Mods.Common/Traits/SupportPowers/AotZoneTrooperDropPower.cs
 !engine/OpenRA.Mods.Common/Traits/OreTransporter.cs
 !engine/OpenRA.Mods.Common/Traits/OreMineDurability.cs
 !engine/OpenRA.Mods.Common/Traits/Minelayer.cs
 !engine/OpenRA.Mods.Common/Traits/RepairableNear.cs
 !engine/OpenRA.Mods.Common/Traits/Mine.cs
+!engine/OpenRA.Mods.Common/Activities/
 !engine/OpenRA.Mods.Common/Activities/LayMines.cs
 !engine/OpenRA.Mods.Common/Traits/AmmoPool.cs
+!engine/OpenRA.Mods.Common/Traits/Air/
 !engine/OpenRA.Mods.Common/Traits/Air/AotDroneAttack.cs
 !engine/OpenRA.Mods.Common/Traits/Air/AotDroneLogic.cs
+!engine/OpenRA.Mods.Common/Traits/Air/AotReturnWhenEmpty.cs
 !engine/OpenRA.Mods.Common/Widgets/Logic/Ingame/CommandBarLogic.cs
 !engine/OpenRA.Mods.Common/Traits/OretSpawnStateCarrier.cs
+!engine/OpenRA.Mods.Common/Traits/Render/
 !engine/OpenRA.Mods.Common/Traits/Render/WithMakeAnimation.cs
+!engine/OpenRA.Mods.Common/Traits/Render/AotWithWallPulseBody.cs
+!engine/OpenRA.Mods.Common/Traits/Render/AotWithWallDirectionalOverlay.cs
+!engine/OpenRA.Mods.Common/Traits/AotHoverPassable.cs
 !engine/OpenRA.Mods.Common/Activities/Transform.cs
 !engine/OpenRA.Mods.Common/Traits/Sellable.cs
 !engine/OpenRA.Mods.Common/Traits/AotDamagedByCondition.cs
@@ -33,6 +43,16 @@ engine/**
 !engine/OpenRA.Mods.Common/Warheads/AotSpawnActorWarhead.cs
 !engine/OpenRA.Mods.Common/Graphics/
 !engine/OpenRA.Mods.Common/Graphics/SelectionBarsAnnotationRenderable.cs
+!engine/OpenRA.Mods.Cnc/
+!engine/OpenRA.Mods.Cnc/Traits/
+!engine/OpenRA.Mods.Cnc/Traits/AotDelayedTransforms.cs
+!engine/OpenRA.Mods.Cnc/Traits/AotGrantConditionOnActor.cs
+!engine/OpenRA.Mods.Cnc/Traits/AotGrantConditionOnCapture.cs
+!engine/OpenRA.Mods.Cnc/Traits/AotGrantConditionOnTerrain.cs
+!engine/OpenRA.Mods.Cnc/Traits/AotInfiltrateForScan.cs
+!engine/OpenRA.Mods.Cnc/Traits/AotSinkOnWater.cs
+!engine/OpenRA.Mods.Cnc/Traits/AotSpyRenderer.cs
+!engine/OpenRA.Mods.Cnc/Traits/AotTransformsOnTerrain.cs
 
 # Visual Studio
 Release

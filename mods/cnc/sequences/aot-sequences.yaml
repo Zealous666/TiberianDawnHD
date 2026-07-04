@@ -2983,17 +2983,21 @@ aot-wall-gdi:
 		RemasteredFilename:
 		Length: 1
 	fs-beam-v:
-		RemasteredFilename: aot-fs-beam.png
+		Filename: aot-fs-beam.png
+		RemasteredFilename:
 		Length: 20
 		Tick: 60
-		RemasteredOffset: 0, -50
+		Scale: 0.5
+		Offset: 0, -80
 		BlendMode: Additive
 		ZOffset: 511
 	fs-beam-h:
-		RemasteredFilename: aot-fs-beam.png
+		Filename: aot-fs-beam.png
+		RemasteredFilename:
 		Length: 20
 		Tick: 60
-		RemasteredOffset: 0, -50
+		Scale: 0.5
+		Offset: 0, -80
 		BlendMode: Additive
 		ZOffset: 511
 # === Ende aotmod ===
@@ -3104,6 +3108,33 @@ aot-gate-gdi:
 		ZOffset: -2048
 	icon:
 		Filename: aot-gate-gdi-icon.png
+		RemasteredFilename:
+		Length: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - NOD Gate (Skalierungstest Saeulen vs. Fence) ===
+# Baseplate + 2 Laser-Saeulen (exakt aus dem NOD-Barbwire-Laser-Rezept nachgebaut,
+# siehe ts-gates-system.md/nod-wall-system.md) — noch OHNE Gitter-Mesh/Animation,
+# nur zum Testen ob die Saeulen-Groesse zur echten Fence passt. damaged-idle nutzt
+# vorerst dieselbe Grafik (kein eigenes Damaged-Art bisher).
+aot-gate-nod:
+	idle:
+		Filename: aot-gate-nod.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.1
+	damaged-idle:
+		Filename: aot-gate-nod.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.1
+	make:
+		Filename: aot-gate-nod.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.1
+	icon:
+		Filename: aot-gate-nod-icon.png
 		RemasteredFilename:
 		Length: 1
 # === Ende aotmod ===

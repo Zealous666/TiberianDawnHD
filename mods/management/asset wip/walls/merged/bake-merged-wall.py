@@ -187,8 +187,15 @@ def build_layers(bits):
     junction = bool(vb) and bool(hb)
     corner = junction and bin(bits).count("1") == 2
 
-    # 1. Native Basis nur noch fuer Stummel/Solo (Endkappen)
-    if not junction and bits not in (N | S, E | W):
+    # 1. Native Basis fuer Stummel/Solo (Endkappen) -- AUSSER bits==0:
+    # der native Solo-Frame ist nur EIN Sandsack-Haufen (fast komplett im
+    # Sueden, kaum Nordreihe) -- sieht "einseitig" aus im Vergleich zu
+    # verbundenen Stuecken. Bits==0 nutzt daher direkt die vollen
+    # Nord-/Sued-Streifen wie ein gerader Durchgang (Abschnitt 3).
+    if bits == 0:
+        back.append((STRIP_T, (0, 0)))
+        front.append((STRIP_B, (0, SB_Y)))
+    elif not junction and bits not in (N | S, E | W):
         base = sbag(bits)
         base_n = base.crop((0, 0, TILE, HB_Y))
         base_s = base.crop((0, HB_Y, TILE, TILE))
@@ -291,6 +298,13 @@ def fence_parts(bits):
     Ost-Flanke, mit nativen Endpfosten), horizontaler Anteil =
     cycl(bits&EW) nach oben hinter die Mauer geschoben (zwischen Mauer
     und Nord-Sandsackreihe). Keine Frame-Zerlegung -> keine Fragmente."""
+    if bits == 0:
+        # Solo-Segment: keine Nachbarn, aber optisch soll die gerollte
+        # Stacheldraht-Krone trotzdem zu sehen sein (gleiche Textur/Position
+        # wie bei geraden Ost-West-Stuecken), damit FS/Non-FS unterscheidbar
+        # bleibt UND die Sandsaecke nicht verdeckt werden (der urspr. Bug).
+        back_part = cycl(E | W).crop((0, -FENCE_DY, TILE, TILE))
+        return back_part, None
     vbits = bits & (N | S)
     hbits = bits & (E | W)
     back_part = None
@@ -317,8 +331,6 @@ def fence_parts(bits):
         piece = feather(cycl(N | S).crop((0, TURN_S, TILE, TILE)), "top")
         front_part = (piece, (0, TURN_S))
     else:
-        # Solo-Segment (bits==0, kein Nachbar): kein freischwebender
-        # Zaunpfosten -> nur Mauer+Sandsaecke, identisch zur Non-Fence-Variante
         front_part = None
     return back_part, front_part
 

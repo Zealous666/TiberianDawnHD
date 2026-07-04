@@ -162,7 +162,10 @@ RMBO:
 	# (Clear: 100) — der Jetpack-Hover ist minimal schneller als Laufen.
 	JumpjetLocomotor@AOT_ZONETROOPER:
 		Name: aot-zonetrooper
-		Crushes: crate, mine
+		# "aothover" ist KEIN echtes Crushen (kein Schaden/Zerstoerung/Sound) -- reine
+		# Wiederverwendung des Passierbarkeits-Hooks, damit Zone Trooper ueber Mauern/
+		# Tore hovern kann, genau wie ueber Rock/River. Siehe AotHoverPassable.cs.
+		Crushes: crate, mine, aothover
 		SharesCell: true
 		JumpjetTransitionCost: 100
 		JumpjetTransitionTerrainTypes: Rock, River

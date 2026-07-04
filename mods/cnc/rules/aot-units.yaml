@@ -1818,8 +1818,21 @@ aot-zonetrooper:
 	AotGrantConditionOnTerrain@HOVER:
 		Condition: aot-zonetrooper-hovering
 		TerrainTypes: Rock, River
+	# Mauern/Tore sind Aktoren, keine Terrain-Typen -> eigener Actor-basierter Hover-
+	# Trigger (identische Condition wie oben, daher gleiche Hovers/WithInfantryBody-
+	# Kopplung; siehe AotHoverPassable.cs fuer die Passierbarkeits-Haelfte).
+	AotGrantConditionOnActor@HOVERWALL:
+		Condition: aot-zonetrooper-hovering
+		ActorTypes: aot-wall-gdi, aot-wall-gdi-fs, aot-wall-nod, aot-wall-nod-laser, aot-gate-gdi, aot-gate-nod
 	Hovers:
 		RequiresCondition: airborne || aot-zonetrooper-descending || aot-zonetrooper-hovering
+		# Hoeher als Standard (Default 43) -- muss sichtbar ueber Mauern/Sandsack-Kronen
+		# hinwegschweben (siehe AotGrantConditionOnActor@HOVERWALL), nicht nur ueber
+		# flaches Rock/River-Terrain. Rein visuell, keine Gameplay-Auswirkung.
+		InitialHeight: 250
+		BobDistance: -60
+		RiseTicks: 8
+		FallTicks: 8
 	# Kein WithParachute (kein Fallschirm-Sprite) — beim Absprung aus dem Dropship nutzt der
 	# Zone Trooper stattdessen die TS-Jetpack-Hover-Animation (siehe WithInfantryBody@flying).
 	Parachutable:
