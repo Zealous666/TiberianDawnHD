@@ -509,7 +509,10 @@ aot-upgrade-ttnk:
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
-		Description: Upgrades the Heavy Tank with two powerful flamethrowers. Unlocks the Toxin and Stealth upgrades.
+		# "Unlocks Toxin/Stealth" Verweis entfernt (2026-07-04): separate Toxin-/
+		# Stealth-Tank-Upgrades geloescht, Toxin kommt jetzt ueber das konsolidierte
+		# aot-upgrade-e4-toxic (siehe dort), Stealth komplett entfernt.
+		Description: Upgrades the Heavy Tank with two powerful flamethrowers.
 
 	Valued:
 		Cost: 500
@@ -519,54 +522,6 @@ aot-upgrade-ttnk:
 
 	ProvidesPrerequisite:
 		Prerequisite: aot-ttnk-flame-upgrade
-
-	Interactable:
-
-# === Age of Tiberium (aotmod) - TTNK Toxin Tank Upgrade ===
-aot-upgrade-ttnk-toxin:
-	Tooltip:
-		Name: Toxin Tank Upgrade
-
-	Buildable:
-		BuildPaletteOrder: 11
-		Prerequisites: ~stec, ~aot-age2, aot-age2, stec, aot-ttnk-flame-upgrade, ~!aot-ttnk-cloak-upgrade
-		Queue: Upgrade.Nod
-		BuildLimit: 1
-		MoveIntoWorld: false
-		Description: Upgrades the Flame Tank with dual toxic sprayers. Mutually exclusive with the Stealth Upgrade.
-
-	Valued:
-		Cost: 600
-
-	RenderSprites:
-		Image: aot-upgrade-ttnk-toxin
-
-	ProvidesPrerequisite:
-		Prerequisite: aot-ttnk-toxin-upgrade
-
-	Interactable:
-
-# === Age of Tiberium (aotmod) - TTNK Stealth Flame Tank Upgrade ===
-aot-upgrade-ttnk-cloak:
-	Tooltip:
-		Name: Stealth Upgrade
-
-	Buildable:
-		BuildPaletteOrder: 12
-		Prerequisites: ~stec, ~aot-age2, aot-age2, stec, aot-ttnk-flame-upgrade, ~!aot-ttnk-toxin-upgrade
-		Queue: Upgrade.Nod
-		BuildLimit: 1
-		MoveIntoWorld: false
-		Description: Equips the Flame Tank with a stealth field. Cloaks when not engaged. Mutually exclusive with the Toxin Upgrade.
-
-	Valued:
-		Cost: 500
-
-	RenderSprites:
-		Image: aot-upgrade-ttnk-cloak
-
-	ProvidesPrerequisite:
-		Prerequisite: aot-ttnk-cloak-upgrade
 
 	Interactable:
 
@@ -619,18 +574,26 @@ aot-upgrade-ltnk:
 	Interactable:
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - Toxic Trooper Upgrade (E4 Flamethrower → Chemspray) ===
+# === Age of Tiberium (aotmod) - Toxic Upgrade (konsolidiert, 2026-07-04) ===
+# Ersetzt die vorherigen 3 Einzel-Upgrades (Toxic Trooper / Toxin Tank / Stealth
+# Tank) durch EIN gemeinsames Upgrade, das alle Flammen-Einheiten gleichzeitig auf
+# Toxin umstellt: Flamethrower->Toxic Trooper (E4, bereits bestehend), Flame
+# Tank->Toxic Tank (TTNK, vorher separates aot-upgrade-ttnk-toxin), Flame
+# Tower->Toxic Tower (FTUR, NEU). Separates Stealth-Tank-Upgrade (aot-upgrade-
+# ttnk-cloak) komplett entfernt, nicht migriert. ProvidesPrerequisite umbenannt von
+# aot-e4-toxic-upgrade -> aot-toxic-upgrade (alle 3 Einheiten hoeren jetzt auf
+# dieselbe Condition).
 aot-upgrade-e4-toxic:
 	Tooltip:
-		Name: Toxic Trooper
+		Name: Toxic Weapons Upgrade
 
 	Buildable:
 		BuildPaletteOrder: 12
-		Prerequisites: ~stec, ~aot-age3, aot-age3
+		Prerequisites: ~aot-age3, tmpl, stec, aot-shrine
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
-		Description: Upgrades all Flamethrowers with chemical sprayers for improved damage vs. all ground targets.
+		Description: Upgrades all Flamethrowers, Flame Tanks, and Flame Towers with toxic weaponry for improved damage vs. all ground targets.
 
 	Valued:
 		Cost: 400
@@ -639,7 +602,7 @@ aot-upgrade-e4-toxic:
 		Image: aot-upgrade-e4-toxic
 
 	ProvidesPrerequisite:
-		Prerequisite: aot-e4-toxic-upgrade
+		Prerequisite: aot-toxic-upgrade
 
 	Interactable:
 # === Ende aotmod ===
@@ -1778,16 +1741,50 @@ aot-upgrade-htnk-railgun:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - HPAD: Proxy-Aktoren für GDI/NOD-Icons ===
+# GDI-Helipad ist ein eigenständiger 4x4-Mega-Actor: 4 Landeplätze (HPAD-Composite)
+# quadratisch angeordnet um einen dekorativen Guard Tower (GTWR-Sprite, ohne Funktion)
+# in der durch die runden Pads natürlich entstehenden Mittellücke. Vier unabhängige
+# Reservable-Slots (analog Heli-Carrier-Pattern, siehe heli-system.md) erlauben 4
+# gleichzeitige Landungen/Rearms. NOD-Helipad (aot-hpad-nod) bleibt unverändert 2x2.
 aot-hpad-gdi:
 	Inherits: HPAD
 	RenderSprites:
-		Image: hpad
+		Image: aot-hpad4
+	Building:
+		Footprint: xxxx xxxx xxxx xxxx
+		Dimensions: 4,4
+	Selectable:
+		Bounds: 4096, 4096
+	HitShape:
+		UseTargetableCellsOffsets: true
+		Type: Rectangle
+			TopLeft: -2048, -2048
+			BottomRight: 2048, 2048
+	Exit@1:
+		SpawnOffset: 0,-1536,0
+		Facing: 896
+	-Reservable:
+	# Reihenfolge nw->ne->se->sw = im Uhrzeigersinn. Reservable.TryReserve() nimmt den
+	# ersten freien Slot in Deklarationsreihenfolge, das bestimmt also auch die
+	# Belegungsreihenfolge frisch gebauter/rueckkehrender Aircraft.
+	Reservable@nw:
+		LandingOffset: -1024,-1024,0
+		ReservedCondition: aot-hpad-gdi-nw-reserved
+	Reservable@ne:
+		LandingOffset: 1024,-1024,0
+		ReservedCondition: aot-hpad-gdi-ne-reserved
+	Reservable@se:
+		LandingOffset: 1024,1024,0
+		ReservedCondition: aot-hpad-gdi-se-reserved
+	Reservable@sw:
+		LandingOffset: -1024,1024,0
+		ReservedCondition: aot-hpad-gdi-sw-reserved
 	Buildable:
 		BuildPaletteOrder: 60
 		Prerequisites: anyhq
 		Queue: Building.GDI
 		Icon: hpad-blue-icon
-		Description: Landing pad for helicopters. Required for air unit production.
+		Description: Quad landing pad for helicopters. Four aircraft can land and rearm simultaneously. Required for air unit production.
 	ProvidesPrerequisite@buildingname:
 		Prerequisite: hpad
 
@@ -1893,6 +1890,7 @@ AFLT:
 	Production:
 		Produces: Aircraft.GDI.AFLT
 	Reservable:
+	WithBuildingBib:
 	RepairsUnits:
 		HpPerStep: 1000
 		PlayerExperience: 5
@@ -2306,14 +2304,140 @@ aot-upgrade-gunboat-destroyer:
 
 	Interactable:
 
-# === Age of Tiberium (aotmod) - GUN/GTWR GDI-exklusiv (NOD-Defense nur CYCL/SAM/OBLI) ===
+# === Age of Tiberium (aotmod) - GUN NOD-exklusiv, GTWR bleibt GDI ===
+# GUN umgedreht (2026-07-04, User-Wunsch): war "GDI-exklusiv", jetzt NOD-exklusiv,
+# ab Age 1 (Age 0 uebernimmt stattdessen der importierte RA Flame Tower, siehe
+# ftur-system.md). Original-Waffe (Maschinengewehr) unveraendert.
+# Ab "Laser Defense Systems"-Upgrade (aot-laser-fence-upgrade) wechseln Waffe UND
+# Turm-Sprite auf Laser (rot recolored, siehe gun-turret-system.md fuer die
+# Recolor-Pipeline-Referenz von HTNK-Railgun/LTNK-Laser). Proxy-Pattern
+# (aot-gun-base/aot-gun-laser) fuer Bau-Icon-Wechsel, Condition-Switch direkt auf
+# GUN fuer bereits gebaute Tuerme (1:1 das HTNK/LTNK-Muster).
 GUN:
-	Buildable:
-		Queue: Support.GDI
+	-Buildable:
+
+	GrantConditionOnPrerequisite@LASER:
+		Condition: aot-gun-laser-active
+		Prerequisites: aot-laser-fence-upgrade
+
+	# KRITISCH (Crash-Fix Runde 4, 2026-07-05): braucht eine ZWEITE, physisch
+	# identische Turreted-Instanz "laser" - siehe Begruendung unten bei
+	# WithSpriteTurret@laser. Exakte Werte 1:1 von der geerbten Basis (structures.
+	# yaml) uebernommen, damit beide Tuerme immer synchron rotieren.
+	Turreted@laser:
+		Turret: laser
+		TurnSpeed: 48
+		InitialFacing: 192
+		RealignDelay: -1
+		RequiresCondition: !build-incomplete
+
+	# AttackTurreted muss BEIDE Tuerme kennen, sonst dreht sich der "laser"-Turm
+	# nie zum Ziel (er wuerde sonst dauerhaft auf InitialFacing stehen bleiben,
+	# obwohl seine Sprite-Sequenz gerade aktiv gerendert wird).
+	# KRITISCH (Crash-Fix Runde 5, 2026-07-05, User-Fund "Laser Turret kann nicht
+	# angreifen"): AttackBaseInfo.Armaments (Whitelist der genutzten Armament-
+	# NAMEN) defaultet auf ["primary","secondary"] (AttackBase.cs:28). Da
+	# Armament@laser den Namen "laser" traegt (nicht "primary"/"secondary"),
+	# ignorierte AttackTurreted es KOMPLETT, sobald der Laser aktiv war - das
+	# Geschuetz griff schlicht nie an, ohne Crash/Fehlermeldung (stiller Bug, von
+	# check-yaml nicht erkennbar). Muss explizit in die Armaments-Liste.
+	AttackTurreted:
+		PauseOnCondition: build-incomplete
+		Turrets: primary, laser
+		Armaments: primary, laser
+
+	# Explizite Namen noetig (Crash-Fix 2026-07-04): WithTurretAttackAnimation
+	# (geerbt aus der Engine-Basis, sucht per .Single() nach Armament.Name=="primary")
+	# fand sonst ZWEI Treffer, sobald ein zweites unbenanntes Armament (Default-
+	# Name ebenfalls "primary") dazukam -> InvalidOperationException beim Platzieren.
+	-Armament:
+
+	Armament@base:
+		Name: primary
+		Weapon: TurretGun
+		LocalOffset: 512,0,112
+		MuzzleSequence: muzzle
+		RequiresCondition: !aot-gun-laser-active
+
+	Armament@laser:
+		Name: laser
+		Weapon: aot-GunLaser
+		LocalOffset: 512,0,112
+		RequiresCondition: aot-gun-laser-active
+
+	# Nur fuer die Basis-Waffe aktiv (Original-Verhalten unveraendert). Fuer die
+	# Laser-Variante noch KEINE eigene recolorte "recoil"-Sequenz gebacken -> Trait
+	# dort deaktiviert statt versehentlich auf die alte graue Sequenz umzuschalten.
+	-WithTurretAttackAnimation:
+
+	WithTurretAttackAnimation@base:
+		Armament: primary
+		Turret: primary
+		Sequence: recoil
+		RequiresCondition: !aot-gun-laser-active
+
+	# Zweiter Teil desselben Crash-Fixes (2026-07-04, Runde 2): WithTurretAttackAnimation
+	# macht ZWEI .Single()-Lookups - Armament.Name (siehe oben) UND WithSpriteTurret.Turret
+	# (WithSpriteTurretInfo.Turret defaultet ebenfalls auf "primary"). Mit zwei
+	# unbenannten WithSpriteTurret-Instanzen fand die zweite .Single()-Abfrage
+	# ebenfalls zwei Treffer -> derselbe Crash beim Platzieren, nur an anderer Stelle
+	# im selben Konstruktor. Explizite Turret-Namen jetzt auch hier noetig.
+	-WithSpriteTurret:
+
+	WithSpriteTurret@base:
+		Turret: primary
+		RequiresCondition: !build-incomplete && !aot-gun-laser-active
+		Recoils: false
+
+	# KRITISCH (Crash-Fix Runde 3+4, 2026-07-05): "Turret:" bei WithSpriteTurret
+	# referenziert den NAMEN einer Turreted-Instanz (WithSpriteTurret..ctor macht
+	# .First(tt => tt.Name == info.Turret) - KEIN neuer physischer Turm wird
+	# dadurch erzeugt). Runde 3 setzte hier faelschlich "Turret: primary" (weil
+	# es urspruenglich nur EINE Turreted-Instanz gab) - das behob zwar den
+	# WithSpriteTurret-Crash, verursachte aber SOFORT den naechsten: mit ZWEI
+	# WithSpriteTurret-Instanzen die beide "Turret: primary" melden, findet
+	# WithTurretAttackAnimation..ctor's eigener .Single(st => st.Info.Turret ==
+	# info.Turret)-Lookup ZWEI Treffer statt einem -> derselbe Crash-Typ, nur an
+	# einer dritten Stelle. Echte Loesung (Runde 4): "Turret: laser" beibehalten,
+	# aber dafuer eine ECHTE zweite Turreted-Instanz "laser" anlegen (siehe oben,
+	# physisch identisch zur Basis, damit beide Tuerme synchron rotieren).
+	WithSpriteTurret@laser:
+		Turret: laser
+		Sequence: aot-gun-laser-turret
+		RequiresCondition: !build-incomplete && aot-gun-laser-active
+		Recoils: false
 
 GTWR:
 	Buildable:
 		Queue: Support.GDI
+
+# === Age of Tiberium (aotmod) - GUN Proxy-Aktoren (Bau-Icon-Wechsel) ===
+# Sichtbar/baubar ab Age 1 (User-Wunsch 2026-07-04: Age 0 uebernimmt stattdessen
+# der Flame Tower, siehe ftur-system.md).
+aot-gun-base:
+	Inherits: GUN
+	RenderSprites:
+		Image: gun
+	Buildable:
+		BuildPaletteOrder: 45
+		# Voraussetzung von "barracks" (Infanterie-Produktion) auf "lite"
+		# (Fahrzeug-Produktion) geaendert (User-Wunsch 2026-07-05).
+		Prerequisites: ~aot-age1, lite, ~!aot-laser-fence-upgrade
+		Queue: Building.Nod
+		BuildDuration: 960
+		Description: actor-gun.description
+
+aot-gun-laser:
+	Inherits: GUN
+	RenderSprites:
+		Image: gun
+	Buildable:
+		BuildPaletteOrder: 45
+		Prerequisites: ~aot-age1, lite, ~aot-laser-fence-upgrade
+		Queue: Building.Nod
+		BuildDuration: 960
+		Icon: gun-laser-icon
+		Description: actor-gun.description
 
 # === Age of Tiberium (aotmod) - Shipyard (aot-shipyard) ===
 # Wasser-Gebäude (TerrainTypes: Water). Basis ^BaseBuilding (CnC-Standard),
@@ -3037,7 +3161,7 @@ aot-shrine:
 	# geerbt) würde beim Zerstören crashen.
 	-WithDeathAnimation:
 	Tooltip:
-		Name: Nod Shrine
+		Name: Secret Shrine
 	Valued:
 		Cost: 3000
 	Health:
@@ -3085,6 +3209,18 @@ aot-shrine:
 		BuildLimit: 1
 		Icon: icon
 		Description: Ancient Nod relic. Unlocks NOD's most powerful combat systems and superweapons.
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Obelisk of Light (OBLI) ===
+# User-Wunsch 2026-07-05: sichtbar ab Age 3, baubar erst mit Shrine (aot-shrine)
+# UND Age 3 UND Laser Defense Systems Upgrade (aot-laser-fence-upgrade) -
+# ersetzt das native "tmpl, ~techlevel.high"-Gate. Normale Building.Nod-Queue
+# statt Support.Nod (User-Wunsch, wie GUN/FTUR). Custom-Icon siehe
+# structures-overrides.yaml (aot-obli-icon.png, User-Icon).
+OBLI:
+	Buildable:
+		Prerequisites: ~aot-age3, aot-shrine, aot-laser-fence-upgrade
+		Queue: Building.Nod
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - GDI Fortified Wall (Brick+Sandbag-Kombiwall) ===
@@ -3257,15 +3393,19 @@ aot-wall-nod-laser:
 # Fences live auf das Laser-Fencing-System (Saeulen + pulsierende Strahlen).
 aot-upgrade-laser-fence:
 	Tooltip:
-		Name: Laser Fences
+		# Umbenannt (User-Wunsch 2026-07-04): deckt jetzt auch das NOD-Laser-Gate ab,
+		# nicht mehr nur die Barbwire-Fence.
+		Name: Laser Defense Systems
 
 	Buildable:
 		BuildPaletteOrder: 45
-		Prerequisites: ~aot-age2, aot-age2, aot-shrine
+		# Sichtbar ab Age 1, baubar sobald TMPL steht (User-Wunsch 2026-07-04, ersetzt
+		# die alte Age2+Shrine-Gate).
+		Prerequisites: ~aot-age1, tmpl
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
-		Description: Upgrades all Barbwires with Laser-Fencing-System stopping all ground units and blocks most projectiles
+		Description: Upgrades fences with Laser-barriers and unlocks additional laser defense capabilities
 
 	Valued:
 		Cost: 800
@@ -3297,6 +3437,16 @@ aot-gate-gdi:
 	-WithSpriteBody:
 	WithGateSpriteBody:
 		OpenSequence: open
+		# Kein Remap: WithSpriteBody/WithGateSpriteBody haben EIGENE Palette/
+		# IsPlayerPalette-Felder (NICHT die der Sequenz-YAML - die werden vom
+		# Koerper-Renderer ueberhaupt nicht gelesen, nur vom Icon-Renderer!). Ohne
+		# expliziten Wert faellt RenderSprites.Add() intern auf "player" zurueck ->
+		# der Fragment-Shader (combined.frag ColorShift()) verschiebt dann JEDEN
+		# Pixel, dessen HSV-Farbton in den remapbaren Bereich faellt, Richtung
+		# Spielerfarbe. Betraf hier die Beton/Metall-Toene teils sichtbar unter
+		# bestimmten Spielerfarben - siehe ts-gates-system.md.
+		Palette: effect
+		IsPlayerPalette: false
 	Gate:
 		# LockedCondition (Custom-Erweiterung unseres Engine-Forks, siehe Gate.cs):
 		# erzwingt SOFORT Position 0 (zu) und blockt neue Oeffnungsversuche, solange
@@ -3335,7 +3485,9 @@ aot-gate-gdi:
 		Type: Concrete
 	Buildable:
 		BuildPaletteOrder: 31
-		Prerequisites: vehicleproduction
+		# Sichtbar UND baubar ab Age 1 (User-Wunsch 2026-07-04): kein separates
+		# Ausgrau-Prerequisite noetig, ~ versteckt bis Age 1, danach sofort baubar.
+		Prerequisites: ~aot-age1
 		Queue: Building.GDI
 		Description: Fortified gate. Testbau fuer Wall-Anschluss.
 	# Footprint/Dimensions unangetastet (siehe REVERT-Historie in ts-gates-system.md,
@@ -3369,12 +3521,39 @@ aot-gate-nod:
 		# Irregulares Flackern (5-35 Ticks = 0.2-1.4s zwischen Umschaltungen) waehrend
 		# Heavy/Critical-Schaden. Tor bleibt ueber LockedCondition ohnehin fest zu.
 		FlickerInterval: 5, 35
+		# Ambientes Schimmern im Ruhezustand (geschlossen, unbeschaedigt) - subtiler
+		# Pulse wie bei der echten Laser-Fence (AotWithWallPulseBody), aber eigener
+		# Mechanismus da ein Gate keine Nachbarschafts-Frames hat. FESTES statt
+		# zufaelliges Intervall (User-Feedback 2026-07-04: zufaellige Abstaende
+		# wirkten "ruckartig", die echte Fence pulsiert mit konstantem Takt -
+		# PulseInterval:4 in AotWithWallPulseBody - das hier 1:1 uebernommen).
+		ShimmerSequence: idle-shimmer
+		ShimmerInterval: 4, 5
+		# Kein Remap - der eigentliche Grund fuer den "Laser wird manchmal gruen/
+		# orange"-Bug war NICHT die Sequenz-YAML (die von WithSpriteBody ueberhaupt
+		# nicht gelesen wird), sondern der Fallback auf "player" HIER auf Trait-
+		# Ebene. Siehe ts-gates-system.md fuer die volle Herleitung ueber
+		# combined.frag ColorShift().
+		Palette: effect
+		IsPlayerPalette: false
 	Gate:
 		LockedCondition: aot-gate-locked || aot-gate-damage-lockout || aot-gate-lowpower
-		OpeningSound: gateup1.aud
-		ClosingSound: gatedwn1.aud
+		# Laser-Turret-Schuss (NALASR/lastur1.aud aus TS, siehe ts-audio-extraction.md) -
+		# eigenes NOD-Gebaeude, NICHT der Obelisk. Fuer beide Richtungen genutzt (Laser
+		# "zuendet"/"erlischt"), passt thematisch besser als die GDI-Turmotor-Sounds.
+		OpeningSound: lastur1.aud
+		ClosingSound: lastur1.aud
+		# Praktisch instantaner Wechsel (User-Wunsch 2026-07-04): anders als beim
+		# GDI-Fluegeltor gibt es hier keine mehrstufige Animation, nur den 2-Frame-
+		# Toggle Laser-an/aus - der Default (33 Ticks, aus der langsamen GDI-Tuer
+		# geerbt) liess das Umschalten wie ein "Absenken" wirken. Mit
+		# TransitionDelay:1 wird OpenPosition=1: GetGateFrame()'s Lerp(0,1,Pos,1)
+		# springt in einem einzigen Tick von Frame0 auf Frame1, exakt synchron mit
+		# OpeningSound/ClosingSound (die auf demselben Tick-Uebergang feuern).
+		TransitionDelay: 1
 		BlocksProjectilesHeight: 768
-		CloseDelay: 40
+		# Deutlich schnelleres Wiederschliessen (User-Wunsch 2026-07-04): 40 -> 6 Ticks.
+		CloseDelay: 6
 	GrantConditionOnDeploy:
 		DeployedCondition: aot-gate-locked
 		SkipMakeAnimation: true
@@ -3397,7 +3576,11 @@ aot-gate-nod:
 		Type: Concrete
 	Buildable:
 		BuildPaletteOrder: 31
-		Prerequisites: vehicleproduction
+		# Sichtbar ab Age 1, aber ausgegraut bis das Laser Defense Systems Upgrade
+		# steht (User-Wunsch 2026-07-04) - passt thematisch, da das Tor selbst eine
+		# Laser-Barriere ist. aot-laser-fence-upgrade = ProvidesPrerequisite-String
+		# von aot-upgrade-laser-fence (siehe dort).
+		Prerequisites: ~aot-age1, aot-laser-fence-upgrade
 		Queue: Building.Nod
 		Description: Fortified gate. Laser-Barriere statt Fluegel.
 	Building:
@@ -3407,4 +3590,153 @@ aot-gate-nod:
 	# Zone Trooper hovern hier drueber wie ueber Rock/River (kein echtes Crushen,
 	# kein Schaden/Zerstoerung) -- siehe AotHoverPassable.cs.
 	AotHoverPassable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - FTUR Flame Tower (RA-Import, NOD Age 0) ===
+# User-Wunsch 2026-07-04: NOD-Verteidigung neu gestaffelt - Age 0 = importierter
+# RA Flame Tower (dieser Aktor), Age 1 = Standard-GUN-Turm (siehe oben), ab Laser
+# Defense Systems-Upgrade wechselt GUN zusaetzlich auf Laser. Stats/Weapon 1:1 von
+# RA's FTUR uebernommen (engine/mods/ra/rules/structures.yaml), Sprites aus
+# TEXTURES_RA_SRGB.MEG extrahiert + umgepackt (siehe aot-sequences.yaml). Custom-
+# Sprite ohne verifizierten "dead"-Rubble-Frame -> WithDeathAnimation entfernt
+# (siehe building-dead-sequence-crash.md).
+# Hybrid-Idee (GUN-Fundament + eigenes Turret-Stueck) WIEDER VERWORFEN (2026-07-04)
+# - zurueck zum kompletten Original-RA-Sprite (Turreted bleibt wie im RA-Original:
+# NUR interne Zielausrichtung, KEIN WithSpriteTurret, keine sichtbare Rotation).
+# Toxic Tower Umschaltung (2026-07-04, Toxic-Upgrade-Konsolidierung): ab
+# aot-toxic-upgrade (siehe aot-upgrade-e4-toxic) wechselt die Waffe auf
+# aot-FturToxic (Chemspray-Basis, wie E4/TTNK). Sprite bleibt vorerst unveraendert
+# (kein neues Toxic-Tower-Asset vorhanden) - nur Name+Waffe wechseln.
+aot-ftur:
+	# ^BaseBuilding -> ^Support gewechselt (2026-07-04, User-Fund: "Stop" und
+	# "Waypoint Mode"-Buttons fehlen im Vergleich zu GUN). Ursache:
+	# CommandBarBlacklist (auf ^Building, versteckt per Default GENAU diese beiden
+	# Buttons: DisableStop=true, DisableWaypointMode=true) wird nur durch ^Support
+	# entfernt (-CommandBarBlacklist:), nicht durch das einfachere ^BaseBuilding.
+	# GUN erbt ^Support bereits (engine-nativ) - FTUR jetzt ebenso, bringt als Bonus
+	# auch RenderRangeCircle/RenderDetectionCircle (Angriffsreichweite sichtbar,
+	# wie bei anderen Verteidigungsgebaeuden) und -GivesBuildableArea/
+	# -AcceptsDeliveredCash (korrekt fuer eine reine Verteidigungsstruktur).
+	Inherits: ^Support
+	# Fehlte bisher (User-Fund 2026-07-04: "Weapon hat noch kein STOP command",
+	# Turm feuert nach Force-Attack-Ground unbeendet weiter) - RA-Original UND GUN
+	# haben beide ^AutoTargetGround (GUN via Inherits@AUTOTARGET, siehe engine/mods/
+	# cnc/rules/structures.yaml), das war bei uns schlicht vergessen.
+	Inherits@AUTOTARGET: ^AutoTargetGround
+	-WithDeathAnimation:
+	-Tooltip:
+	Tooltip@normal:
+		Name: Flame Tower
+		RequiresCondition: !aot-ftur-toxic
+	Tooltip@toxic:
+		Name: Toxic Tower
+		RequiresCondition: aot-ftur-toxic
+	Valued:
+		Cost: 600
+	Health:
+		HP: 40000
+	Armor:
+		Type: Heavy
+	# Kein eigenes Buildable mehr (2026-07-04): war nur direkt in dieser Datei
+	# definiert (nicht geerbt) - "-Buildable:" waere hier ein Fehler ("nothing to
+	# remove", derselbe Bug wie zuvor beim Armament, siehe toxic-upgrade-system.md).
+	# Proxy-Pattern fuer Bau-Icon-Wechsel nach dem Toxic-Upgrade (aot-ftur-flame/
+	# aot-ftur-toxic unten, 1:1 das GUN/E4-Muster) liefert das Buildable jetzt.
+	Building:
+		Footprint: x
+		Dimensions: 1,1
+	RevealsShroud:
+		MinRange: 5c0
+		Range: 6c0
+	Turreted:
+		TurnSpeed: 512
+		Offset: 0,0,112
+	GrantConditionOnPrerequisite@TOXIC:
+		Condition: aot-ftur-toxic
+		Prerequisites: aot-toxic-upgrade
+	Armament@flame:
+		Name: primary
+		Weapon: aot-FturFlame
+		LocalOffset: 512,0,0
+		RequiresCondition: !aot-ftur-toxic
+	Armament@toxic:
+		Name: toxic
+		Weapon: aot-FturToxic
+		LocalOffset: 512,0,0
+		RequiresCondition: aot-ftur-toxic
+	# Live-Sprite-Wechsel (2026-07-05, User-Fund: bereits gebaute Flame Tower
+	# aendern nach dem Upgrade nicht ihr Aussehen). "-WithSpriteBody:" entfernt
+	# das von ^Building GEERBTE (nicht lokal definierte, also legitime "-X:") Default
+	# und ersetzt es durch zwei conditional Instanzen - 1:1 TTNKs
+	# WithFacingSpriteBody@flame/@toxin-Pattern (siehe ttnk-system.md), nur ohne
+	# Facing (Gebaeude). "toxic-idle"/"damaged-toxic-idle" liegen im SELBEN Image
+	# "aot-ftur" (siehe aot-sequences.yaml) - der Damage-State-Wechsel passiert
+	# automatisch ueber RenderSprites.NormalizeSequence's "damaged-"-Praefix-
+	# Konvention, solange "damaged-toxic-idle" existiert.
+	-WithSpriteBody:
+	WithSpriteBody@flame:
+		Sequence: idle
+		Name: body
+		RequiresCondition: !aot-ftur-toxic
+	WithSpriteBody@toxic:
+		Sequence: toxic-idle
+		Name: body-toxic
+		RequiresCondition: aot-ftur-toxic
+	AttackTurreted:
+		PauseOnCondition: build-incomplete
+		# KRITISCH (Crash-Fix Runde 5, 2026-07-05, User-Fund "Toxic Turret kann
+		# nicht angreifen"): AttackBaseInfo.Armaments (Whitelist der genutzten
+		# Armament-NAMEN) defaultet auf ["primary","secondary"] (AttackBase.cs:28).
+		# Armament@toxic traegt den Namen "toxic" - nicht in der Default-Liste -
+		# und wurde daher von AttackTurreted komplett ignoriert, sobald die Toxic-
+		# Bedingung aktiv war. Kein Crash, keine Fehlermeldung, das Gebaeude griff
+		# einfach nie an (identischer Bug wie beim GUN-Laser, siehe gun-turret-
+		# system.md Runde 5). Muss explizit in die Armaments-Liste.
+		Armaments: primary, toxic
+		# Versuchsweiser Fix (2026-07-04, User-Report: Stop stoppt Force-Attack-Ground
+		# nicht, auch ohne Feind in der Naehe). PersistentTargeting=true (Engine-
+		# Default) laesst AttackFollow.OnLastRun() das gerade beendete Ziel als
+		# "OpportunityTarget" weiterverfolgen, sobald die Attack-Activity natuerlich
+		# ausklingt - Stop selbst loescht zwar explizit beide Ziel-Felder
+		# (AttackFollow.OnStopOrder), aber die genaue Ursache des gemeldeten
+		# Verhaltens konnte per Code-Lesen nicht zweifelsfrei bestaetigt werden.
+		# Deaktivieren als risikoarme Massnahme, braucht In-Game-Verifikation.
+		PersistentTargeting: false
+	DetectCloaked:
+		Range: 5c0
+	Power:
+		Amount: -20
+	FireWarheadsOnDeath:
+		Weapon: BuildingExplode
+		EmptyWeapon: BuildingExplode
+
+# Proxy-Aktoren fuer den Bau-Icon-Wechsel (User-Icons, 2026-07-04), 1:1 das GUN/E4-
+# Muster: beide bauen denselben "aot-ftur", nur welches Icon/welche Beschreibung im
+# Baumenue erscheint unterscheidet sich je nach Toxic-Upgrade-Stand.
+aot-ftur-flame:
+	Inherits: aot-ftur
+	RenderSprites:
+		Image: aot-ftur
+	Buildable:
+		BuildPaletteOrder: 44
+		Prerequisites: barracks, ~!aot-toxic-upgrade
+		Queue: Building.Nod
+		Description: RA Flame Tower. Short-range anti-infantry/vehicle defense.
+
+aot-ftur-toxic:
+	Inherits: aot-ftur
+	# Gruen recolorierte Gas-Tanks liegen als "toxic-idle"/"damaged-toxic-idle"
+	# im SELBEN Image "aot-ftur" (2026-07-05, Korrektur - siehe aot-structures.yaml
+	# WithSpriteBody@flame/@toxic weiter oben + aot-sequences.yaml). Ein separates
+	# RenderSprites.Image (erster Versuch) haette bereits gebaute Flame Tower nach
+	# dem Upgrade NICHT retroaktiv umgefaerbt, da Image sich zur Laufzeit nicht per
+	# Condition wechseln laesst - der Condition-Switch auf aot-ftur selbst tut das.
+	RenderSprites:
+		Image: aot-ftur
+	Buildable:
+		BuildPaletteOrder: 44
+		Prerequisites: barracks, ~aot-toxic-upgrade
+		Queue: Building.Nod
+		Icon: toxic-icon
+		Description: RA Flame Tower upgraded with toxic weaponry. Short-range anti-infantry/vehicle defense.
 # === Ende aotmod ===

@@ -219,26 +219,35 @@ hpad:
 aflt:
 	Defaults:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\AFLD.ZIP
+	# RemasteredOffset (NICHT Offset!) verwenden - aflt laedt Sprites ueber RemasteredFilename,
+	# RemasterSpriteSequence.cs ignoriert dabei komplett das klassische "Offset:"-Feld und nutzt
+	# stattdessen "RemasteredOffset:" (128px/Zelle-Referenz, ungeskaliert). Eine halbe Zelle
+	# noerdlich = -64px in Y bei dieser Referenzaufloesung.
 	idle:
 		Length: 1
 		ZOffset: -1023
+		RemasteredOffset: 0,-64
 	active:
 		Length: 8
 		Tick: 100
 		ZOffset: -1023
+		RemasteredOffset: 0,-64
 	damaged-idle:
 		Start: 8
 		Length: 1
 		ZOffset: -1023
+		RemasteredOffset: 0,-64
 	damaged-active:
 		Start: 8
 		Length: 8
 		Tick: 100
 		ZOffset: -1023
+		RemasteredOffset: 0,-64
 	make:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\AFLDMAKE.ZIP
 		Length: 11
 		Tick: 80
+		RemasteredOffset: 0,-64
 	icon:
 		Filename: aflt_blue.png
 		Length: 1
@@ -247,6 +256,26 @@ aflt:
 		Filename: aflt_blue.png
 		Length: 1
 		RemasteredFilename:
+	# bib2 = 3-wide x 2-row (6 Frames), passt exakt zum AFLT-Footprint "xxx xxx" (Dimensions 3,2).
+	# Gleiches Prinzip wie bib1 (4-wide) beim GDI-Quad-Helipad (aot-hpad-gdi) — native
+	# MEG-Terrain-Tilesets sind immer für eine bestimmte Footprint-Breite gebacken,
+	# NICHT frei kachelbar. Bib-Breite muss zur Building.Dimensions.X passen (siehe LITE/ATEC).
+	bib:
+		TilesetFilenames:
+			DESERT: bib2.des
+			WINTER: bib2.win
+			SNOW: bib2.sno
+			TEMPERAT: bib2.tem
+			JUNGLE: bib2.jun
+		Length: *
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\TEMPERATE\BIB2\BIB2.TEM-{0:D4}.DDS
+			Count: 6
+		RemasteredTilesetFilenamesPattern:
+			WINTER: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\BIB2.WIN\BIB2.WIN-{0:D4}.DDS
+				Count: 6
+			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\BIB2.DES\BIB2.DES-{0:D4}.DDS
+				Count: 6
+		RemasteredPremultiplied: false
 # === Ende aotmod ===
 
 fix:
@@ -306,8 +335,11 @@ obli:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\OBLIMAKE.ZIP
 	bib:
 		RemasteredFilename: blank.png
+	# Custom Bau-Icon (User-Icon, 2026-07-05), ersetzt den vorherigen leeren
+	# Platzhalter.
 	icon:
-		RemasteredFilename:
+		RemasteredFilename: aot-obli-icon.png
+		Length: 1
 
 brik:
 	Defaults:
@@ -346,8 +378,23 @@ gun:
 		RemasteredFilename: blank.png
 	muzzle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\GUNFIRE.ZIP
+	# Custom-Icons (User-Zeichnung, 2026-07-04): "icon" = Default-Sequenz fuer
+	# aot-gun-base (kein Icon:-Override auf dem Aktor selbst), "gun-laser-icon"
+	# wird von aot-gun-laser ueber Buildable.Icon referenziert (Pattern wie
+	# aot-ltnk-laser -> ltnk-laser-icon).
 	icon:
+		Filename: aot-gun-base-icon.png
 		RemasteredFilename:
+	gun-laser-icon:
+		Filename: aot-gun-laser-icon.png
+		RemasteredFilename:
+	# Laser Defense Systems Upgrade: rot recolorter Turret-Kanonenlauf (32 Facings,
+	# aus dem remasterten GUN.ZIP extrahiert + Barrel-Pixel per Swept-Silhouette-
+	# Maske isoliert, siehe gun-turret-system.md fuer die Recolor-Pipeline).
+	aot-gun-laser-turret:
+		RemasteredFilename: aot-gun-laser-turret.zip
+		Facings: 32
+		UseClassicFacings: True
 
 sam:
 	Defaults:

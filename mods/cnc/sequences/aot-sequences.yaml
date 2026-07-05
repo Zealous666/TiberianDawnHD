@@ -259,6 +259,13 @@ aot-e3-nod:
 		Length: 1
 		RemasteredFilename:
 
+aot-e3-gdi:
+	Inherits: e3
+	icon:
+		Filename: gdi_bazooka.png
+		Length: 1
+		RemasteredFilename:
+
 # === NOD Flamethrower → Toxic Trooper Upgrade ===
 aot-e4-nod:
 	Inherits: e4
@@ -2168,10 +2175,8 @@ ttnk:
 		Filename: ttnk_gas.png
 		RemasteredFilename:
 		Length: 1
-	aot-cloak-icon:
-		Filename: ttnk_cloak.png
-		RemasteredFilename:
-		Length: 1
+	# aot-cloak-icon entfernt (2026-07-04) - aot-ttnk-cloak-Aktor geloescht,
+	# Stealth-Tank-Upgrade komplett entfernt (nicht migriert).
 
 ttnk.destroyed:
 	idle:
@@ -3093,6 +3098,12 @@ aot-gate-gdi:
 	# die Frame-Auswahl SELBST ueber GetGateFrame() = Lerp(0, Length-1, gate.Position,
 	# gate.OpenPosition) -> "idle" braucht ALLE 11 Frames, kein separates "open"/"close"
 	# mit eigenem Tick mehr noetig (siehe ts-gates-system.md).
+	# Kein Remap fuer den Koerper: NICHT hier (Sequenz-Ebene) loesbar - der
+	# Koerper-Renderer (WithSpriteBody/WithGateSpriteBody) liest Palette/
+	# IsPlayerPalette ausschliesslich vom TRAIT in aot-structures.yaml, ignoriert
+	# jeden Sequenz-Wert komplett (nur der Icon-Renderer liest ihn hier). Der
+	# eigentliche Fix sitzt dort (WithGateSpriteBody: Palette: effect), siehe
+	# ts-gates-system.md.
 	idle:
 		Filename: aot-gate-gdi-open.png
 		RemasteredFilename:
@@ -3134,6 +3145,12 @@ aot-gate-gdi:
 # automatisch zwischen den beiden. Flicker bei Heavy/Critical-Schaden kommt aus dem
 # C#-Trait selbst (siehe WithGateSpriteBody.cs FlickerInterval), nicht aus der Sequenz.
 aot-gate-nod:
+	# Kein Remap fuer den Koerper: NICHT hier (Sequenz-Ebene) loesbar - der
+	# Koerper-Renderer (WithSpriteBody/WithGateSpriteBody) liest Palette/
+	# IsPlayerPalette ausschliesslich vom TRAIT in aot-structures.yaml, ignoriert
+	# jeden Sequenz-Wert komplett (nur der Icon-Renderer liest ihn hier). Der
+	# eigentliche Fix ("Laser wird manchmal gruen/orange", User-Report 2026-07-04)
+	# sitzt dort (WithGateSpriteBody: Palette: effect), siehe ts-gates-system.md.
 	idle:
 		Filename: aot-gate-nod-idle.png
 		RemasteredFilename:
@@ -3142,6 +3159,15 @@ aot-gate-nod:
 		ZOffset: -2048
 	damaged-idle:
 		Filename: aot-gate-nod-damaged-idle.png
+		RemasteredFilename:
+		Length: 2
+		Scale: 0.1
+		ZOffset: -2048
+	# Ambientes Schimmern im Ruhezustand (geschlossen, unbeschaedigt) - 2 Frames
+	# (A=Basis, B=Helligkeits/Glow-Boost, 1:1 aus der echten Laser-Fence-Pulsphase
+	# gesampled), zyklisch getoggelt von WithGateSpriteBody.ShimmerInterval.
+	idle-shimmer:
+		Filename: aot-gate-nod-idle-shimmer.png
 		RemasteredFilename:
 		Length: 2
 		Scale: 0.1
@@ -3168,4 +3194,127 @@ aot-fs-air:
 		Tick: 50
 		Scale: 0.5
 		BlendMode: Additive
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - FTUR Flame Tower (RA-Import, NOD Age 0) ===
+# ZURUECKGEROLLT (2026-07-04): Hybrid GUN-Fundament + FTUR-Turret-Stueck wieder
+# verworfen (GUN hat gar kein eigenstaendiges Fundament-Asset - Sockel/Kuppel/Lauf
+# sind in JEDEM "turret"-Frame verschmolzen, siehe gun-turret-system.md - die
+# Maskierung war deshalb nie sauber loesbar). Zurueck zum kompletten Original-RA-
+# FTUR-Sprite (10-Frame-Flacker-Idle) wie urspruenglich importiert.
+aot-ftur:
+	idle:
+		RemasteredFilename: aot-ftur-idle.zip
+		Length: 10
+	damaged-idle:
+		RemasteredFilename: aot-ftur-damaged-idle.zip
+		Length: 10
+	make:
+		RemasteredFilename: aot-ftur-make.zip
+		Length: *
+	icon:
+		RemasteredFilename: aot-ftur-icon.png
+		Length: 1
+	# Toxic Tower Sprite-Wechsel (2026-07-05, User-Fund: bereits gebaute Flame
+	# Tower wechselten nach dem Upgrade nicht ihr Aussehen). Erste Version legte
+	# dafuer ein SEPARATES RenderSprites.Image an - das funktioniert aber nur fuer
+	# NEU gebaute Aktoren (Proxy-Pattern fuers Bau-Icon), nicht fuer bereits
+	# platzierte, da RenderSprites.Image zur Laufzeit nicht per Condition
+	# wechselbar ist. Richtige Loesung (1:1 TTNK-Pattern, siehe ttnk-system.md):
+	# die recolorierten Frames als WEITERE Sequenzen im SELBEN Image, plus zwei
+	# conditional WithSpriteBody-Instanzen in aot-structures.yaml. "damaged-"
+	# Praefix-Konvention (RenderSprites.NormalizeSequence) uebernimmt automatisch
+	# den Damage-State-Wechsel, solange "damaged-toxic-idle" existiert.
+	toxic-idle:
+		RemasteredFilename: aot-ftur-toxic-idle.zip
+		Length: 10
+	damaged-toxic-idle:
+		RemasteredFilename: aot-ftur-toxic-damaged-idle.zip
+		Length: 10
+	toxic-icon:
+		RemasteredFilename: aot-ftur-toxic-icon.png
+		Length: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - FTUR Feuerball-Projektil (RA FB1/FB2-Import) ===
+# Authentisches RA-Projektil fuer aot-FturFlame statt des generischen Bullet-
+# Platzhalters (User-Korrektur 2026-07-04). FB1 = Feuerball selbst (8 Frames),
+# FB2 = Rauchschweif (4 Frames) - 1:1 wie RA's FireballLauncher-Weapon
+# (Projectile:Bullet, Image:FB1, TrailImage:fb2). Einfache Ein-Index-Benennung,
+# kein Repacking noetig (anders als das Turret-Sprite selbst).
+aot-ftur-fb1:
+	idle:
+		RemasteredFilename: aot-ftur-fb1.zip
+		Length: *
+		ZOffset: 1023
+aot-ftur-fb2:
+	idle:
+		RemasteredFilename: aot-ftur-fb2.zip
+		Length: *
+		ZOffset: 1023
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - GDI Quad Helipad (aot-hpad-gdi) ===
+# 4x4-Composite: 4x HPAD-Pad (je 2x2 Zellen, TD-Remastered) quadratisch angeordnet
+# um einen dekorativen GTWR (Guard Tower, ohne Funktion) in der Mittellücke, die durch
+# die runden Pad-Silhouetten natürlich entsteht. Frames aus HPAD.ZIP/GTWR.ZIP/
+# HPADMAKE.ZIP/GTWRMAKE.ZIP (TEXTURES_TD_SRGB.MEG) mit .meta-Crop-Offset auf volle
+# 128px/Zelle-Referenzcanvas zurückgepackt, dann zu 512x512-Sheets zusammengesetzt
+# (siehe silo-system.md für das identische Grundprinzip). Scale 0.1875 = 24/128
+# (TileSize/RemasteredTileSize), da wir über den klassischen Filename-Pfad laufen.
+# Bib (Schmutz-Smudge) deckt die GESAMTE 4x4-Fläche und ist DIREKT in jedes Frame
+# hineingebacken (Hintergrund-Layer vor den Pads/Turm gepaintet), NICHT über die native
+# WithBuildingBib/WithIdleOverlay-Traits:
+# - WithBuildingBib deckt hart nur 2 Reihen (bottom-anchored) - keine Option für 4 Reihen.
+# - Ein zweiter Block per WithIdleOverlay@northbib scheiterte doppelt: kein konfigurierbarer
+#   ZOffset (RenderUtils.ZOffsetFromCenter neutralisiert sich fast zu 0 -> sortierte vor
+#   statt hinter den Pads), UND zwei separate 4x2-bib1-Mosaike (nativ Süd + gebacken Nord)
+#   erzeugten eine sichtbare Nahtstelle in der Mitte, weil beide Patches unabhängig
+#   voneinander zur Kante hin ausfaden.
+# Lösung: das reguläre bib1-Mosaik (8 Tiles, 512x256, exakt das was WithBuildingBib sonst
+# nativ für 2 Reihen rendert) wird auf 512x512 gestreckt -> EIN durchgehender, nahtloser
+# Fleck über die volle Fläche. Dreck-/Schutt-Textur hat keine starke Richtungsstruktur,
+# die 2x-Streckung fällt nicht auf. WithBuildingBib-Trait komplett entfernt.
+aot-hpad4:
+	idle:
+		Filename: aot-hpad4-idle.png
+		Length: 1
+		Scale: 0.1875
+		Offset: 0,-1
+		ZOffset: -1536
+	damaged-idle:
+		Filename: aot-hpad4-damaged.png
+		Length: 1
+		Scale: 0.1875
+		Offset: 0,-1
+		ZOffset: -1536
+	active:
+		Filename: aot-hpad4-active.png
+		Length: *
+		Tick: 100
+		Scale: 0.1875
+		Offset: 0,-1
+		ZOffset: -1536
+	damaged-active:
+		Filename: aot-hpad4-damaged-active.png
+		Length: *
+		Tick: 100
+		Scale: 0.1875
+		Offset: 0,-1
+		ZOffset: -1536
+	dead:
+		Filename: aot-hpad4-dead.png
+		Length: 1
+		Scale: 0.1875
+		Offset: 0,-1
+		ZOffset: -1536
+	make:
+		Filename: aot-hpad4-make.png
+		Length: *
+		Tick: 80
+		Scale: 0.1875
+		Offset: 0,-1
+	hpad-blue-icon:
+		Filename: hpad_blue.png
+		Length: 1
 # === Ende aotmod ===

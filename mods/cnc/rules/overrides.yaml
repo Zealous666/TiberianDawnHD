@@ -464,13 +464,20 @@ ORCA:
 		Image: aot-heli
 	Aircraft:
 		IdleBehavior: None
-		TakeOffOnResupply: true
+		TakeOffOnResupply: false
 		TakeOffOnCreation: true
 	Rearmable:
 		RearmActors: aot-hpad-gdi, aot-cruiser
 	Repairable:
 		RepairActors: aot-hpad-gdi, aot-cruiser
 	AotReturnWhenEmpty:
+	# TakeOffOnCreation:false landet an der Exit-Zelle direkt auf dem Helipad-Footprint -
+	# CanLand() prueft dort aber Terrain+blockierende Aktoren OHNE dockingActor-Ausnahme
+	# und scheitert am eigenen Gebaeude, daher sofortiges Hovern (Bug). Fix: normal
+	# abheben lassen (TakeOffOnCreation:true), dann beim ersten Idle-Werden per
+	# AotLandOnCreation einmalig ein echtes ReturnToBase/Dock erzwingen - das nutzt
+	# dieselbe funktionierende dockingActor-bewusste Landepruefung wie normales Rearmen.
+	AotLandOnCreation:
 	GrantConditionOnPrerequisite@orcaupgrade:
 		Condition: aot-orca-upgraded
 		Prerequisites: aot-orca-upgrade
