@@ -549,29 +549,14 @@ aot-upgrade-ltnk-tick:
 
 	Interactable:
 
-# === Age of Tiberium (aotmod) - LTNK Laser Upgrade ===
-aot-upgrade-ltnk:
-	Tooltip:
-		Name: Light Tank Laser Upgrade
-
-	Buildable:
-		BuildPaletteOrder: 11
-		Prerequisites: ~stec, ~aot-age3, aot-age3, ~afld
-		Queue: Upgrade.Nod
-		BuildLimit: 1
-		MoveIntoWorld: false
-		Description: Light Tank upgrade with Scorpio Lasers for higher firepower.
-
-	Valued:
-		Cost: 200
-
-	RenderSprites:
-		Image: aot-upgrade-ltnk
-
-	ProvidesPrerequisite:
-		Prerequisite: aot-ltnk-upgrade2
-
-	Interactable:
+# LTNK Laser Upgrade (eigener Aktor "aot-upgrade-ltnk") ENTFERNT (2026-07-05,
+# User-Wunsch): der Laser-Switch wird jetzt ueber das konsolidierte "Laser
+# Technologies"-Upgrade (aot-upgrade-laser-fence, ProvidesPrerequisite
+# aot-laser-fence-upgrade) freigeschaltet - 1:1 dasselbe Konsolidierungs-Muster
+# wie beim Toxic Upgrade fuer TTNK/E4/FTUR (siehe toxic-upgrade-system.md).
+# aot-ltnk-upgrade2 als Prerequisite-String komplett entfernt, LTNK/
+# aot-ltnk-deployed/aot-ltnk-laser-Proxy hoeren jetzt direkt auf
+# aot-laser-fence-upgrade.
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Toxic Upgrade (konsolidiert, 2026-07-04) ===
@@ -1494,7 +1479,7 @@ aot-tmpl-age1:
 		Image: tmpl
 	Buildable:
 		BuildPaletteOrder: 100
-		Prerequisites: anyhq, ~techlevel.high, ~aot-age1, ~!aot-age2
+		Prerequisites: anyhq, proc, ~techlevel.high, ~aot-age1, ~!aot-age2
 		BuildLimit: 1
 		Queue: Building.Nod
 		Icon: icon
@@ -1511,7 +1496,7 @@ aot-tmpl-age2:
 		Sequence: aot-age2-idle
 	Buildable:
 		BuildPaletteOrder: 100
-		Prerequisites: anyhq, ~techlevel.high, ~aot-age1, ~aot-age2, !aot-tmpl
+		Prerequisites: anyhq, proc, ~techlevel.high, ~aot-age1, ~aot-age2, !aot-tmpl
 		BuildLimit: 1
 		Queue: Building.Nod
 		Icon: aot-age2-icon
@@ -1570,7 +1555,7 @@ aot-age2-upgrade-gdi:
 		Cost: 1000
 	Buildable:
 		BuildPaletteOrder: 6
-		Prerequisites: ~atec, ~aot-age1-purchased, ~!aot-age2-purchased, aot-age1-purchased, aot-proc-gdi, weap
+		Prerequisites: ~atec, ~aot-age1-purchased, ~!aot-age2-purchased, aot-age1-purchased, aot-proc-gdi
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -1588,7 +1573,7 @@ aot-age2-upgrade-nod:
 		Cost: 1000
 	Buildable:
 		BuildPaletteOrder: 6
-		Prerequisites: ~stec, ~aot-age1-purchased, ~!aot-age2-purchased, aot-age1-purchased, aot-proc-nod, afld
+		Prerequisites: ~stec, ~aot-age1-purchased, ~!aot-age2-purchased, aot-age1-purchased, aot-proc-nod
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -1606,7 +1591,7 @@ aot-age3-upgrade-gdi:
 		Cost: 1000
 	Buildable:
 		BuildPaletteOrder: 7
-		Prerequisites: ~atec, ~aot-age2-purchased, ~!aot-age3-purchased, aot-age2-purchased
+		Prerequisites: ~atec, ~aot-age2-purchased, ~!aot-age3-purchased, aot-age2-purchased, aot-orbc
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -1624,7 +1609,7 @@ aot-age3-upgrade-nod:
 		Cost: 1000
 	Buildable:
 		BuildPaletteOrder: 7
-		Prerequisites: ~stec, ~aot-age2-purchased, ~!aot-age3-purchased, aot-age2-purchased, tmpl
+		Prerequisites: ~stec, ~aot-age2-purchased, ~!aot-age3-purchased, aot-age2-purchased, aot-shrine
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -1827,6 +1812,7 @@ aot-upgrade-harpy:
 		Prerequisite: aot-harpy-upgrade
 
 	Interactable:
+
 # === Age of Tiberium (aotmod) - ORCA Upgrade ===
 # Tier 1 / sichtbar ab Age 1. Wandelt alle Apaches zu ORCAs um.
 aot-upgrade-orca:
@@ -2811,6 +2797,8 @@ aot-silo-age0:
 	Inherits: SILO
 	RenderSprites:
 		Image: silo
+	ProvidesPrerequisite@buildingname:
+		Prerequisite: silo
 	-ActorPreviewPlaceBuildingPreview:
 	SequencePlaceBuildingPreview:
 		Sequence: aot-ra-idle
@@ -2826,6 +2814,8 @@ aot-silo-age1:
 	Inherits: SILO
 	RenderSprites:
 		Image: silo
+	ProvidesPrerequisite@buildingname:
+		Prerequisite: silo
 	-ActorPreviewPlaceBuildingPreview:
 	SequencePlaceBuildingPreview:
 		Sequence: idle
@@ -2841,6 +2831,8 @@ aot-silo-age2:
 	Inherits: SILO
 	RenderSprites:
 		Image: silo
+	ProvidesPrerequisite@buildingname:
+		Prerequisite: silo
 	-ActorPreviewPlaceBuildingPreview:
 	SequencePlaceBuildingPreview:
 		Sequence: aot-ts-idle
@@ -3394,18 +3386,22 @@ aot-wall-nod-laser:
 aot-upgrade-laser-fence:
 	Tooltip:
 		# Umbenannt (User-Wunsch 2026-07-04): deckt jetzt auch das NOD-Laser-Gate ab,
-		# nicht mehr nur die Barbwire-Fence.
-		Name: Laser Defense Systems
+		# nicht mehr nur die Barbwire-Fence. Erneut umbenannt (User-Wunsch
+		# 2026-07-05): "Laser Defense Systems" -> "Laser Technologies", da die
+		# Upgrade-Prerequisite jetzt auch vom Light Tank Laser-Switch (konsolidiert,
+		# siehe LTNK in aot-units.yaml, ehemals eigenes aot-upgrade-ltnk) als
+		# generelle Laser-Tech-Voraussetzung genutzt wird, nicht mehr nur Verteidigung.
+		Name: Laser Technologies
 
 	Buildable:
 		BuildPaletteOrder: 45
-		# Sichtbar ab Age 1, baubar sobald TMPL steht (User-Wunsch 2026-07-04, ersetzt
-		# die alte Age2+Shrine-Gate).
-		Prerequisites: ~aot-age1, tmpl
+		# Sichtbar ab Age 2, baubar sobald Age 2 + Secret Shrine (aot-shrine) stehen
+		# (User-Wunsch 2026-07-05, ersetzt die vorherige Age1+TMPL-Gate).
+		Prerequisites: ~aot-age2, aot-shrine
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
-		Description: Upgrades fences with Laser-barriers and unlocks additional laser defense capabilities
+		Description: Upgrades fences with Laser-barriers, unlocks additional laser defense capabilities, and upgrades Light Tank with a Scorpio Laser turret aswell as Lasers for Harpy and Buggy.
 
 	Valued:
 		Cost: 800
