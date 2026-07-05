@@ -381,7 +381,7 @@ aot-upgrade-humvee:
 
 	Buildable:
 		BuildPaletteOrder: 30
-		Prerequisites: ~atec, lite, ~pyle, ~aot-age1, aot-age1, fix, ~!aot-apc-upgrade
+		Prerequisites: ~lite, ~aot-age1, aot-age1, lite, pyle, fix, ~!aot-apc-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -407,7 +407,7 @@ aot-upgrade-apc:
 
 	Buildable:
 		BuildPaletteOrder: 31
-		Prerequisites: ~atec, lite, ~pyle, ~aot-age1, aot-age1, fix, ~!aot-humvee-upgrade
+		Prerequisites: ~lite, ~aot-age1, aot-age1, lite, pyle, fix, ~!aot-humvee-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -1296,7 +1296,16 @@ aot-nod-radar:
 		Name: actor-aot-nod-radar.name
 	ProvidesPrerequisite:
 		Prerequisite: anyhq
+	# KRITISCH (Bugfix 2026-07-05, User-Fund: SAM trotz gebauter Radar Dome nicht
+	# freigeschaltet): ProvidesPrerequisite ohne expliziten Wert defaultet auf
+	# den NAMEN DES TATSAECHLICH GEBAUTEN AKTORS (init.Self.Info.Name) - nicht
+	# auf den Namen dieser Basis-Vorlage. Da "aot-nod-radar" selbst nie direkt
+	# gebaut wird (nur die drei Alters-Proxies aot-nod-radar-age0/age1/age2, die
+	# jeweils IHREN EIGENEN Namen liefern wuerden), kam "aot-nod-radar" als
+	# Prerequisite-String nie zustande. Explizite Wert-Angabe noetig - exakt
+	# dasselbe Muster wie bei TMPL/hpad/silo in dieser Datei.
 	ProvidesPrerequisite@buildingname:
+		Prerequisite: aot-nod-radar
 	# Nicht direkt baubar — zwei Proxy-Aktoren (Doppel-Aktor-Pattern) für Icon-Wechsel ab Age 2.
 	Building:
 		Footprint: xx xx ==
@@ -3213,6 +3222,327 @@ OBLI:
 	Buildable:
 		Prerequisites: ~aot-age3, aot-shrine, aot-laser-fence-upgrade
 		Queue: Building.Nod
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - NOD SAM Site (RA-Import, 2026-07-05) ===
+# User-Wunsch: Verschoben von Support.Nod in die normale Baumenue-Queue.
+# RA-Remastered-Sprite (rotierender Turm, "ra-idle"/"ra-turret"/
+# "ra-damaged-turret" im geteilten "sam"-Image, siehe structures-overrides.
+# yaml) ist jetzt der STANDARD-Look, ersetzt die bisherige TD-Pop-up-Silo-
+# Optik als Default. Die TD-Frames/-Mechanik (WithEmbeddedTurretSpriteBody +
+# AttackPopupTurreted, native in structures.yaml) bleiben komplett erhalten,
+# sind aber jetzt nur noch ueber das "Bunkered SAM"-Upgrade (Age 1) aktiv.
+# "Cloaked SAM"-Upgrade (Age 2) ergaenzt Stealth-Tarnung analog zum U-Boot
+# (siehe sub-system.md), pausiert bei Angriff/Beschaedigung/Low-Power.
+SAM:
+	Buildable:
+		Queue: Building.Nod
+		# Voraussetzung von "hand" (Hand of Nod) auf Energieversorgung + Radar
+		# Dome geaendert (User-Wunsch 2026-07-05). "anypower" = generischer
+		# Prereq-String, den jedes NOD-Kraftwerk bereitstellt (Konvention im
+		# gesamten Mod, siehe z.B. GUN/NUK2). "aot-nod-radar" = NOD Radar Dome.
+		Prerequisites: anypower, aot-nod-radar
+
+	# KRITISCH (Crash-Historie 2026-07-05, User-Funde: "sam hat mehrere Traits
+	# vom Typ AttackBase" / "Turreted: Sequence contains more than one matching
+	# element" / "sam hat mehrere Traits vom Typ AttackFollow"): ZWEI parallele,
+	# nur per RequiresCondition ein/ausgeblendete Attack-Traits (AttackTurreted +
+	# AttackPopupTurreted) sind in dieser Engine-Version NICHT moeglich -
+	# RequiresCondition blendet nur das VERHALTEN aus, nicht die Trait-INSTANZ
+	# selbst. Gleich DREI verschiedene Engine-Stellen verlangen Eindeutigkeit
+	# ueber die abstrakte Basisklasse AttackBase/AttackFollow (RenderRangeCircle,
+	# Turreted.Created(), AttackFollow.AttackActivity-Konstruktor) - Whack-a-Mole
+	# ohne Ende. Endgueltige Loesung: EIGENER C#-Trait `AotAttackPopupOrTurreted`
+	# (engine/OpenRA.Mods.Cnc/Traits/Attack/AotAttackPopupOrTurreted.cs) vereint
+	# BEIDE Verhalten in EINER Instanz - der Bunkered-Zustand wird per
+	# BooleanExpression (IObservesVariables) gelesen, nicht per RequiresCondition,
+	# es gibt also immer nur EIN AttackBase-Trait auf diesem Aktor.
+	-AttackPopupTurreted:
+	AotAttackPopupOrTurreted:
+		BunkeredCondition: aot-sam-bunkered
+		PauseOnCondition: lowpower || build-incomplete
+
+	GrantConditionOnPrerequisite@BUNKERED:
+		Condition: aot-sam-bunkered
+		Prerequisites: aot-sam-bunkered-upgrade
+
+	GrantConditionOnPrerequisite@CLOAK:
+		Condition: aot-sam-cloak-active
+		Prerequisites: aot-sam-cloak-upgrade
+
+	# RA-Render-Pfad (Default, 2026-07-05): neue WithSpriteBody/WithSpriteTurret-
+	# Instanzen fuer den rotierenden Turm. "Name: body-ra" bewusst NICHT "body" -
+	# AotAttackPopupOrTurreted sucht (wie das Original AttackPopupTurreted) per
+	# .Single() nach GENAU einer WithSpriteBody-Instanz mit Name=="body"
+	# (Default, matcht die native WithEmbeddedTurretSpriteBody). Mit zwei
+	# WithSpriteBody-Instanzen namens "body" waere das derselbe .Single()-
+	# Kollisions-Crash wie bei GUN/FTUR (siehe gun-turret-system.md) - hier
+	# vorab vermieden durch einen eindeutig ANDEREN Namen.
+	WithSpriteBody@ra:
+		Sequence: ra-idle
+		Name: body-ra
+		RequiresCondition: !aot-sam-bunkered
+
+	WithSpriteTurret@ra:
+		Sequence: ra-turret
+		RequiresCondition: !build-incomplete && !aot-sam-bunkered
+		Recoils: false
+
+	# TD-Render-Pfad (Bunkered SAM-Upgrade): bereits nativ vorhandene
+	# WithEmbeddedTurretSpriteBody bleibt inhaltlich unveraendert - nur
+	# RequiresCondition ergaenzt (reiner Feld-Merge, kein "-Trait:" noetig).
+	WithEmbeddedTurretSpriteBody:
+		RequiresCondition: aot-sam-bunkered
+
+	# Hoehere Panzerung im Bunkered-Zustand (User-Wunsch). "-Armor:" ist hier
+	# legitim, da Concrete-Armor NUR in der nativen structures.yaml (frueher
+	# geladene Datei) direkt gesetzt ist, nicht in dieser Datei selbst.
+	-Armor:
+	Armor@base:
+		Type: Concrete
+		RequiresCondition: !aot-sam-bunkered
+	Armor@bunkered:
+		Type: Heavy
+		RequiresCondition: aot-sam-bunkered
+
+	# Cloaked SAM-Upgrade: getarnt solange nicht feuernd (UncloakOn: Attack),
+	# ueber 50% HP und nicht Low-Power. GrantConditionOnDamageState liefert die
+	# HP-Bedingung (Heavy/Critical = <=50% HP in diesem Mod, siehe Damage-
+	# States-Konvention), PauseOnCondition erzwingt sichtbaren Zustand in
+	# beiden Faellen (Cloak.Cloaked ist false solange IsTraitPaused true ist).
+	GrantConditionOnDamageState@damaged:
+		Condition: aot-sam-damaged
+		ValidDamageStates: Heavy, Critical
+
+	Cloak:
+		RequiresCondition: aot-sam-cloak-active
+		CloakStyle: Alpha
+		InitialDelay: 25
+		# CloakDelay erhoeht (User-Wunsch 2026-07-05): vorher 25 Ticks (~1s ab dem
+		# Angriffs-Trigger) - das SAM begann bereits zu tarnen, waehrend der Turm
+		# (im Bunkered-Zustand) noch sichtbar am Einfahren war. Neuer Wert deckt
+		# CloseDelay (125 Ticks Leerlauf bis Einfahr-Beginn, siehe
+		# AotAttackPopupOrTurreted) PLUS ca. 1 weitere Sekunde (25 Ticks) danach ab,
+		# bis der Turm sicher komplett eingefahren ist. Kein Effekt auf Decloak -
+		# UncloakOn: Attack/Damage triggert weiterhin sofort, ganz ohne Delay.
+		CloakDelay: 150
+		UncloakOn: Attack, Damage
+		CloakSound: cloak5.aud
+		UncloakSound: cloak5.aud
+		PauseOnCondition: aot-sam-damaged || lowpower
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - SAM Upgrades: Bunkered (Age 1) + Cloak (Age 2) ===
+aot-upgrade-sam-bunkered:
+	Tooltip:
+		Name: Bunkered SAM
+
+	Buildable:
+		BuildPaletteOrder: 56
+		Prerequisites: ~aot-age1, aot-age1
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Reactivates the original recessed SAM silo. SAM sites retract underground between shots for increased armor protection.
+
+	Valued:
+		Cost: 400
+
+	RenderSprites:
+		Image: aot-upgrade-sam-bunkered
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-sam-bunkered-upgrade
+
+	Interactable:
+
+aot-upgrade-sam-cloak:
+	Tooltip:
+		Name: Cloaked SAM
+
+	Buildable:
+		BuildPaletteOrder: 57
+		Prerequisites: ~aot-age2, aot-age2
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Grants SAM sites stealth technology. Cloaked while not firing, above 50% health, and not low on power.
+
+	Valued:
+		Cost: 500
+
+	RenderSprites:
+		Image: aot-upgrade-sam-cloak
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-sam-cloak-upgrade
+
+	Interactable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - GDI Pillbox (Garrison-Verteidigung, 2026-07-05) ===
+# RA-Remastered-Import (PBOX/PBOXMAKE). Keine eigene Waffe - komplett abhaengig
+# von Garrison-Infanterie (5 Slots), 1:1 das Muster von RAs eigenem PBOX
+# (Cargo + AttackGarrisoned mit 6 Fire-Ports, siehe engine/mods/ra/rules/
+# structures.yaml). "Armaments: garrisoned" filtert auf die neue
+# Armament@GARRISONED-Variante, die jede aot-Infanterie-Einheit bekommt (siehe
+# aot-units.yaml). Inherits@AUTOTARGET: ^AutoTargetAll (statt GroundAssaultMove)
+# - noetig, damit z.B. ein garnisonierter Rocket Soldier (E3, Rockets-Waffe hat
+# bereits ValidTargets inkl. Air) auch automatisch Luftziele anvisiert.
+aot-pillbox:
+	Inherits: ^Support
+	Inherits@IDISABLE: ^DisabledOverlay
+	Inherits@AUTOTARGET: ^AutoTargetAll
+	# Custom RA-Sprite ohne "dead"-Rubble-Frame -> WithDeathAnimation (von
+	# ^Support/^BaseBuilding geerbt) wuerde beim Zerstoeren crashen (siehe
+	# building-dead-sequence-crash.md - reiner Laufzeit-Crash, check-yaml
+	# meldet nur eine Warnung, keinen harten Fehler).
+	-WithDeathAnimation:
+	# Guard Tower Upgrade (Phase 2, 2026-07-05): reine Namens-/Icon-Aenderung,
+	# Pillbox-Funktionalitaet (Cargo/AttackGarrisoned/Stats) bleibt unveraendert -
+	# 1:1 das FTUR-Toxic-Tower-Tooltip-Switch-Muster.
+	GrantConditionOnPrerequisite@GUARDTOWER:
+		Condition: aot-guard-tower-active
+		Prerequisites: aot-guard-tower-upgrade
+	# "-Tooltip:" legitim: die unbenannte Tooltip-Instanz kommt von ^Building
+	# (GenericName: meta-building-generic-name), nicht aus dieser Datei -
+	# ohne diese Entfernung bleibt sie ohne Name (FieldLoader.Require) zurueck
+	# und crasht beim Laden.
+	-Tooltip:
+	Tooltip@normal:
+		Name: Pillbox
+		RequiresCondition: !aot-guard-tower-active
+	Tooltip@guard:
+		Name: Guard Tower
+		RequiresCondition: aot-guard-tower-active
+	Valued:
+		Cost: 100
+	Health:
+		HP: 41000
+	Armor:
+		Type: Concrete
+	Building:
+		Footprint: x
+		Dimensions: 1,1
+	# Sichtweite + Waffenreichweite steigen mit dem Guard-Tower-Upgrade
+	# (User-Wunsch 2026-07-05). RevealsShroud ist ConditionalTrait (unproblematisch
+	# mehrfach benannt, anders als AttackBase-Familie) - kein "-RevealsShroud:"
+	# noetig, da die unbenannte Version nur direkt in dieser Datei stand (nicht
+	# von ^Support/^Building geerbt).
+	RevealsShroud@normal:
+		Range: 6c0
+		RequiresCondition: !aot-guard-tower-active
+	RevealsShroud@guard:
+		Range: 9c0
+		RequiresCondition: aot-guard-tower-active
+	# RangeMultiplier wirkt auf JEDE Waffe, die von diesem Aktor abgefeuert wird
+	# - also auch auf die geliehene Garrison-Waffe der eingeladenen Infanterie.
+	# Eigenstaendiger Modifier-Trait (kein AttackBase-Abkoemmling), daher ohne
+	# Risiko einer zweiten-Instanz-Kollision.
+	RangeMultiplier:
+		RequiresCondition: aot-guard-tower-active
+		Modifier: 150
+	# Kein eigenes Buildable mehr (2026-07-05) - Proxy-Pattern (aot-pillbox-base/
+	# aot-pillbox-guard unten) steuert Bau-Icon-Wechsel nach dem Upgrade, 1:1
+	# das GUN/FTUR-Muster.
+	RenderSprites:
+		Image: aot-pillbox
+	# Sprite-Wechsel nach dem Guard-Tower-Upgrade (2026-07-05): TS Searchlight
+	# Tower (GASPOT), per Gemini neu gezeichnet. "-WithSpriteBody:" legitim -
+	# entfernt die von ^Building GEERBTE unbenannte Instanz (die eigene direkt
+	# in dieser Datei definierte Version wird im selben Edit ersatzlos durch
+	# die drei benannten Varianten unten ersetzt, kein Bezug auf die eigene
+	# Zeile noetig). Ohne diese Entfernung blieben VIER WithSpriteBody-
+	# Instanzen uebrig (die geerbte + 3 neue), die geerbte haette denselben
+	# Default-Namen "body" wie WithSpriteBody@normal -> derselbe .Single()-
+	# Kollisions-Crash wie bei GUN/FTUR (siehe gun-turret-system.md).
+	# Body-Remap-Layer 1:1 das aot-nod-radar-Muster (WithSpriteBody@age2remap)
+	# - kein Palette:/IsPlayerPalette: am Trait noetig, das Overlay-PNG traegt
+	# die 176-191-Rampe direkt in seiner eigenen Palette.
+	-WithSpriteBody:
+	WithSpriteBody@normal:
+		Sequence: idle
+		Name: body
+		RequiresCondition: !aot-guard-tower-active
+	WithSpriteBody@guard:
+		Sequence: guard-idle
+		Name: body-guard
+		RequiresCondition: aot-guard-tower-active
+	WithSpriteBody@guardremap:
+		Sequence: guard-remap
+		Name: body-guard-remap
+		RequiresCondition: aot-guard-tower-active
+	Cargo:
+		Types: Infantry
+		MaxWeight: 5
+	WithCargoPipsDecoration:
+		Position: BottomLeft
+		Margin: 4, 3
+		RequiresSelection: true
+	# 6 Fire-Ports rundherum (identische Geometrie wie RAs PBOX) - je ~60 Grad
+	# Sichtkegel, deckt alle Richtungen ab.
+	AttackGarrisoned:
+		PauseOnCondition: lowpower || build-incomplete
+		Armaments: garrisoned
+		PortOffsets: 384,0,128, 224,-341,128, -224,-341,128, -384,0,128, -224,341,128, 224,341,128
+		PortYaws: 0, 176, 341, 512, 682, 853
+		PortCones: 88, 88, 88, 88, 88, 88
+	Power:
+		Amount: -20
+	# RenderDetectionCircle (von ^Support geerbt) verlangt DetectCloaked -
+	# ohne das crasht der Aktor beim Laden ("not constructible").
+	DetectCloaked:
+		Range: 5c0
+# === Ende aotmod ===
+
+# Proxy-Aktoren fuer den Bau-Icon-/Namens-Wechsel nach dem Guard-Tower-Upgrade
+# (User-Icons, 2026-07-05), 1:1 das GUN/E4-Muster: beide bauen denselben
+# "aot-pillbox", nur welches Icon/welche Beschreibung im Baumenue erscheint
+# unterscheidet sich je nach Guard-Tower-Upgrade-Stand.
+aot-pillbox-base:
+	Inherits: aot-pillbox
+	RenderSprites:
+		Image: aot-pillbox
+	Buildable:
+		BuildPaletteOrder: 45
+		Prerequisites: barracks, ~!aot-guard-tower-upgrade
+		Queue: Building.GDI
+		Description: Garrisonable defense structure. Holds up to 5 infantry, who fire out through the pillbox using their own weapons.
+
+aot-pillbox-guard:
+	Inherits: aot-pillbox
+	RenderSprites:
+		Image: aot-pillbox
+	Buildable:
+		BuildPaletteOrder: 45
+		Prerequisites: barracks, ~aot-guard-tower-upgrade
+		Queue: Building.GDI
+		Icon: guard-icon
+		Description: Upgraded Pillbox with extended sight and weapon range. Holds up to 5 infantry, who fire out through the tower using their own weapons.
+
+# === Age of Tiberium (aotmod) - Guard Tower Upgrade (Phase 2, Age 1 + SLAB) ===
+aot-upgrade-guard-tower:
+	Tooltip:
+		Name: Guard Tower Upgrade
+
+	Buildable:
+		BuildPaletteOrder: 46
+		Prerequisites: ~aot-age1, aot-age1, aot-slab
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Upgrades all Pillboxes to Guard Towers with extended sight and weapon range (+50%).
+
+	Valued:
+		Cost: 500
+
+	RenderSprites:
+		Image: aot-upgrade-guard-tower
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-guard-tower-upgrade
+
+	Interactable:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - GDI Fortified Wall (Brick+Sandbag-Kombiwall) ===
