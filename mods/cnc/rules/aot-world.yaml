@@ -4,7 +4,7 @@ World:
 		ClassName: options-starting-units.light-support
 		Factions: gdi
 		BaseActor: mcv
-		SupportActors: aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e3-gdi,aot-e3-gdi,aot-e6-gdi
+		SupportActors: aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e3-gdi,aot-e3-gdi,aot-e2-gdi
 	StartingUnits@defaultnoda:
 		Class: light
 		ClassName: options-starting-units.light-support
@@ -28,10 +28,10 @@ World:
 		ClassName: options-starting-units.heavy-support
 		Factions: gdi
 		BaseActor: mcv
-		SupportActors: aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e3-gdi,aot-e3-gdi,aot-e6-gdi,MTNK,MTNK,MTNK
+		SupportActors: aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e3-gdi,aot-e3-gdi,aot-e2-gdi,MTNK,MTNK,MTNK
 	StartingUnits@heavygdib:
 		Class: heavy
 		ClassName: options-starting-units.heavy-support
 		Factions: gdi
 		BaseActor: mcv
-		SupportActors: aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e3-gdi,aot-e3-gdi,aot-e6-gdi,MTNK,MTNK,aot-jeep-base,aot-jeep-base
+		SupportActors: aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e3-gdi,aot-e3-gdi,aot-e2-gdi,MTNK,MTNK,aot-jeep-base,aot-jeep-base
