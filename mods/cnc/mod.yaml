@@ -256,6 +256,7 @@ Rules:
 	cnchd|rules/aot-factions.yaml
 	cnchd|rules/aot-structures.yaml
 	cnchd|rules/aot-units.yaml
+	cnchd|rules/aot-world.yaml
 	# === Ende aotmod ===
 
 Sequences:
