@@ -16,7 +16,7 @@ World:
 		ClassName: options-starting-units.heavy-support
 		Factions: nod
 		BaseActor: mcv
-		SupportActors: aot-e1-nod,aot-e1-nod,aot-e1-nod,aot-e1-nod,aot-e1-nod,aot-e3-nod,aot-e3-nod,aot-e4-nod,LTNK,LTNK,LTNK
+		SupportActors: aot-e1-nod,aot-e1-nod,aot-e1-nod,aot-e1-nod,aot-e1-nod,aot-e3-nod,aot-e3-nod,aot-e3-nod,aot-e3-nod,aot-e4-nod,aot-e4-nod,aot-e4-nod,TTNK
 	StartingUnits@heavynodb:
 		Class: heavy
 		ClassName: options-starting-units.heavy-support
