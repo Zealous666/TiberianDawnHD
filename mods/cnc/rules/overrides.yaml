@@ -191,6 +191,16 @@ RMBO:
 		BaseName: aot-ts-player
 		BasePalette: aot-unittem
 		RemapIndex: 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
+	# Nod Avatar-Palette: eigene abgedunkelte unittem-Variante (Chrome-Highlights
+	# gecrusht) + Face-Glow (urspruenglich Idx 2/9, cyan) auf House-Color-Idx
+	# 17/23 ummgemappt, siehe [[nod-avatar-system]].
+	PaletteFromFile@aot-avatar-base:
+		Name: aot-avatar-base
+		Filename: aot-avatar-base.pal
+	PlayerColorPalette@aot-avatar:
+		BaseName: aot-avatar-player
+		BasePalette: aot-avatar-base
+		RemapIndex: 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
 	# Saboteur-Palette: unittem mit dunkelgrauen Indizes 176-191 (statt gelb)
 	PaletteFromFile@aot-saboteur-unittem:
 		Name: aot-saboteur-unittem
@@ -267,38 +277,10 @@ TMPL:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Upgrade-Queue + Age Super Powers auf FACT ===
-# Upgrade-Queue: normale Upgrades (Age 1/2/3 kaufbar hier).
 # Super Powers: sichtbar sobald FACT steht, HOLD bis Upgrade gekauft,
 #   dann 10 Sek Auto-Countdown, danach auto-fire → spawnt Marker → aot-age1/2/3 aktiv.
+# Upgrade-Queue wurde von FACT zu ATEC (GDI) / STEC (NOD) verschoben (aot-structures.yaml).
 FACT:
-	Production@UPGRADEGDI:
-		Produces: Upgrade.GDI
-		MoveIntoWorld: false
-	Production@UPGRADENOD:
-		Produces: Upgrade.Nod
-		MoveIntoWorld: false
-	ProductionQueue@UpgradeGDI:
-		Type: Upgrade.GDI
-		Factions: gdi
-		Group: Upgrade
-		ReadyAudio: ConstructionComplete
-		ReadyTextNotification: notification-construction-complete
-		BlockedAudio: NoBuild
-		BlockedTextNotification: notification-unable-to-build-more
-		QueuedAudio: Building
-		OnHoldAudio: OnHold
-		CancelledAudio: Cancelled
-	ProductionQueue@UpgradeNod:
-		Type: Upgrade.Nod
-		Factions: nod
-		Group: Upgrade
-		ReadyAudio: ConstructionComplete
-		ReadyTextNotification: notification-construction-complete
-		BlockedAudio: NoBuild
-		BlockedTextNotification: notification-unable-to-build-more
-		QueuedAudio: Building
-		OnHoldAudio: OnHold
-		CancelledAudio: Cancelled
 	SupportPowerChargeBar:
 	GrantConditionOnPrerequisite@age1purchased:
 		Condition: aot-age1-purchased-cond
@@ -382,7 +364,7 @@ aot-proc-gdi:
 	ProvidesPrerequisite@aotid:
 		Prerequisite: aot-proc-gdi
 	Buildable:
-		Prerequisites: ~aot-age1, aot-age1, aot-weap
+		Prerequisites: ~aot-age1, aot-age1, aot-weap, silo
 		Queue: Building.GDI
 # === Ende aotmod ===
 
@@ -396,7 +378,7 @@ aot-proc-nod:
 	ProvidesPrerequisite@aotid:
 		Prerequisite: aot-proc-nod
 	Buildable:
-		Prerequisites: ~aot-age1, aot-age1, afld
+		Prerequisites: ~aot-age1, aot-age1, afld, silo
 		Queue: Building.Nod
 # === Ende aotmod ===
 
@@ -440,6 +422,11 @@ MSAM:
 		IntoActor: aot-msam-hover-aa
 		TerrainTypes: Clear, Rough, Road, Bridge, Tiberium, BlueTiberium, Beach, Water, Rock
 		RequiresCondition: aot-hover-aa-upgrade
+	# Fire Position (Phase 3) Garrison-Waffe. 227mm ist bereits Blockable:false,
+	# daher keine eigene Garrison-Waffenvariante noetig (direkte Wiederverwendung).
+	Armament@garrisoned:
+		Name: garrisoned
+		Weapon: 227mm
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - HPAD: kein direktes Buildable, Proxy-Aktoren übernehmen ===
@@ -525,6 +512,9 @@ HELI:
 	GrantConditionOnPrerequisite@harpyupgrade:
 		Condition: aot-harpy-upgraded
 		Prerequisites: aot-harpy-upgrade
+	GrantConditionOnPrerequisite@harpylaser:
+		Condition: aot-harpy-laser
+		Prerequisites: aot-harpy-upgrade, aot-laser-fence-upgrade
 	-WithFacingSpriteBody:
 	WithFacingSpriteBody@hind:
 		Sequence: aot-hind-idle
@@ -563,7 +553,11 @@ HELI:
 	Armament@PRIMARY_harpy:
 		Weapon: aot-HarpyAGGun
 		LocalOffset: 128,-213,-85, 128,213,-85
-		PauseOnCondition: !ammo || !aot-harpy-upgraded
+		PauseOnCondition: !ammo || !aot-harpy-upgraded || aot-harpy-laser
+	Armament@PRIMARY_harpy_laser:
+		Weapon: aot-HarpyLaser
+		LocalOffset: 128,-213,-85, 128,213,-85
+		PauseOnCondition: !ammo || !aot-harpy-upgraded || !aot-harpy-laser
 	Armament@SECONDARY:
 		PauseOnCondition: true
 	Cloak:
@@ -580,6 +574,27 @@ HELI:
 		ValidDamageStates: Critical
 	SpawnActorOnDeath:
 		Actor: aot-harpy-husk
+
+# === Age of Tiberium (aotmod) - BGGY Laser Technologies Upgrade ===
+# Sobald "Laser Technologies" (aot-laser-fence-upgrade) aktiv ist, wechselt JEDER
+# Buggy (bereits gebaute wie neu gebaute) automatisch die Waffe auf denselben
+# Laser wie der Harpy (aot-HarpyLaser). Kein eigener Upgrade-Aktor noetig -
+# die Condition greift direkt auf das globale Prerequisite zu (analog HELI/Harpy).
+BGGY:
+	-Buildable:
+	GrantConditionOnPrerequisite@laserupgrade:
+		Condition: aot-bggy-laser
+		Prerequisites: aot-laser-fence-upgrade
+	-Armament:
+	Armament:
+		Weapon: MachineGun
+		LocalOffset: 171,0,43
+		MuzzleSequence: muzzle
+		RequiresCondition: !aot-bggy-laser
+	Armament@laser:
+		Weapon: aot-HarpyLaser
+		LocalOffset: 171,0,43
+		RequiresCondition: aot-bggy-laser
 
 # === Age of Tiberium (aotmod) - Hovercraft Cargo: Fahrzeuge als Passagiere ===
 # Leichte Fahrzeuge können in den Hovercraft Transport (aot-transport-hover) geladen werden.

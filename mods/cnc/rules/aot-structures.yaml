@@ -659,6 +659,20 @@ ATEC:
 	-WithDeathAnimation:
 	Tooltip:
 		Name: Tech Center
+	Production@UPGRADEGDI:
+		Produces: Upgrade.GDI
+		MoveIntoWorld: false
+	ProductionQueue@UpgradeGDI:
+		Type: Upgrade.GDI
+		Factions: gdi
+		Group: Upgrade
+		ReadyAudio: ConstructionComplete
+		ReadyTextNotification: notification-construction-complete
+		BlockedAudio: NoBuild
+		BlockedTextNotification: notification-unable-to-build-more
+		QueuedAudio: Building
+		OnHoldAudio: OnHold
+		CancelledAudio: Cancelled
 	Valued:
 		Cost: 1500
 	Health:
@@ -780,6 +794,20 @@ STEC:
 	-WithDeathAnimation:
 	Tooltip:
 		Name: Tech Center
+	Production@UPGRADENOD:
+		Produces: Upgrade.Nod
+		MoveIntoWorld: false
+	ProductionQueue@UpgradeNod:
+		Type: Upgrade.Nod
+		Factions: nod
+		Group: Upgrade
+		ReadyAudio: ConstructionComplete
+		ReadyTextNotification: notification-construction-complete
+		BlockedAudio: NoBuild
+		BlockedTextNotification: notification-unable-to-build-more
+		QueuedAudio: Building
+		OnHoldAudio: OnHold
+		CancelledAudio: Cancelled
 	Valued:
 		Cost: 1500
 	Health:
@@ -3184,6 +3212,16 @@ aot-shrine:
 		Range: 5c0
 	Power:
 		Amount: -250
+	RallyPoint:
+	CommandBarBlacklist:
+		DisableStop: false
+	Exit@1:
+		Priority: 2
+		SpawnOffset: 512, 1024, 0
+		ExitCell: 2, 2
+	Exit@fallback1:
+		SpawnOffset: -1024, 256, 0
+		ExitCell: -1, 1
 	WithBuildingBib:
 	RenderSprites:
 		Image: aot-shrine
@@ -3210,6 +3248,28 @@ aot-shrine:
 		BuildLimit: 1
 		Icon: icon
 		Description: Ancient Nod relic. Unlocks NOD's most powerful combat systems and superweapons.
+	# Eigene Production-Queue nur fuer Nod Avatar + Cyborg Commando (User-Wunsch
+	# 2026-07-06): "Group: Infantry" merged sie visuell in denselben Sidebar-Tab
+	# wie HAND's Infantry.Nod-Queue, aber es ist ein eigener Queue-Typ, den nur
+	# die Shrine produziert (nicht HAND).
+	Production:
+		Produces: Infantry.NodElite
+	ProductionQueue:
+		Type: Infantry.NodElite
+		DisplayOrder: 3
+		Group: Infantry
+		LowPowerModifier: 150
+		ReadyAudio: UnitReady
+		ReadyTextNotification: notification-unit-ready
+		BlockedAudio: NoBuild
+		BlockedTextNotification: notification-unable-to-build-more
+		LimitedAudio: BuildingInProgress
+		LimitedTextNotification: notification-unable-to-comply-building-in-progress
+		QueuedAudio: Training
+		OnHoldAudio: OnHold
+		CancelledAudio: Cancelled
+	ProductionBar:
+		ProductionType: Infantry.NodElite
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Obelisk of Light (OBLI) ===
@@ -3380,6 +3440,35 @@ aot-upgrade-sam-cloak:
 	Interactable:
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - Nod Avatar Laser Upgrade (eigenstaendig, kein Laser-Fence-Reuse) ===
+# User-Wunsch: separates Upgrade fuer den Avatar (nicht das mod-weite "Laser
+# Technologies"/aot-upgrade-laser-fence). Schaltet ausschliesslich die
+# Cyborg-Kanone des Nod Avatar auf aot-HarpyLaser um (Flammenwerfer bleibt
+# unveraendert), siehe aot-avatar in aot-units.yaml.
+aot-upgrade-avatar-laser:
+	Tooltip:
+		Name: Avatar Laser Cannon
+
+	Buildable:
+		BuildPaletteOrder: 58
+		Prerequisites: ~aot-age3, aot-shrine
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Replaces the Nod Avatar's cyborg chaingun with a devastating laser cannon.
+
+	Valued:
+		Cost: 1000
+
+	RenderSprites:
+		Image: aot-upgrade-avatar-laser
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-avatar-laser-upgrade
+
+	Interactable:
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - GDI Pillbox (Garrison-Verteidigung, 2026-07-05) ===
 # RA-Remastered-Import (PBOX/PBOXMAKE). Keine eigene Waffe - komplett abhaengig
 # von Garrison-Infanterie (5 Slots), 1:1 das Muster von RAs eigenem PBOX
@@ -3472,6 +3561,25 @@ aot-pillbox:
 		Sequence: guard-remap
 		Name: body-guard-remap
 		RequiresCondition: aot-guard-tower-active
+	# KRITISCHER Bugfix (2026-07-05, User-Fund: "Verkaufen tut nichts"):
+	# Sellable.Sell() sucht sich per WithMakeAnimation.HasActiveBody() die
+	# AKTIVE Sprite-Instanz und spielt deren "make"-Sequenz RUECKWAERTS ab, bevor
+	# der Aktor entfernt wird. Das von ^BaseBuilding geerbte, unbenannte
+	# WithMakeAnimation zeigt per Default nur auf BodyNames:"body" (die
+	# Pillbox-Variante) - im Guard-Tower-Zustand ist "body" aber deaktiviert
+	# (RequiresCondition: !aot-guard-tower-active), wodurch die Sell-Animation
+	# nie fertig wird und der Aktor stehen bleibt (Sound/Abzug passieren, aber
+	# der Aktor verschwindet nie). "-WithMakeAnimation:" legitim (von
+	# ^BaseBuilding geerbt).
+	-WithMakeAnimation:
+	WithMakeAnimation@normal:
+		BodyNames: body
+		Condition: build-incomplete
+		Sequence: make
+	WithMakeAnimation@guard:
+		BodyNames: body-guard
+		Condition: build-incomplete
+		Sequence: make
 	Cargo:
 		Types: Infantry
 		MaxWeight: 5
@@ -3503,6 +3611,10 @@ aot-pillbox-base:
 	Inherits: aot-pillbox
 	RenderSprites:
 		Image: aot-pillbox
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: idle
+		SequenceAlpha: 0.65
 	Buildable:
 		BuildPaletteOrder: 45
 		Prerequisites: barracks, ~!aot-guard-tower-upgrade
@@ -3513,6 +3625,10 @@ aot-pillbox-guard:
 	Inherits: aot-pillbox
 	RenderSprites:
 		Image: aot-pillbox
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: guard-idle
+		SequenceAlpha: 0.65
 	Buildable:
 		BuildPaletteOrder: 45
 		Prerequisites: barracks, ~aot-guard-tower-upgrade
@@ -3543,6 +3659,62 @@ aot-upgrade-guard-tower:
 		Prerequisite: aot-guard-tower-upgrade
 
 	Interactable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Fire Position (Phase 3, Vehicle-Garrison) ===
+# Analog Pillbox (siehe pillbox-garrison-system.md), aber Cargo faengt
+# EIN Fahrzeug statt 5 Infanterie, und WithCargo macht das eingeladene
+# Fahrzeug sichtbar (wie beim Hovercraft-Transport/LST, das Fahrzeuge visuell
+# on-top rendert statt sie komplett aus der Welt zu entfernen).
+aot-fireposition:
+	Inherits: ^Support
+	Inherits@IDISABLE: ^DisabledOverlay
+	Inherits@AUTOTARGET: ^AutoTargetAll
+	Tooltip:
+		Name: Fire Position
+	Valued:
+		Cost: 200
+	Health:
+		HP: 60000
+	Armor:
+		Type: Concrete
+	Building:
+		Footprint: xx xx
+		Dimensions: 2,2
+	RevealsShroud:
+		Range: 6c0
+	RenderSprites:
+		Image: aot-fireposition
+	WithSpriteBody:
+		Sequence: idle
+	WithBuildingBib:
+	Cargo:
+		Types: GroundVehicle
+		MaxWeight: 5
+	WithCargo:
+		DisplayTypes: GroundVehicle
+		PassengerZOffset: -256
+		PassengerTurretZOffset: 512
+	WithCargoPipsDecoration:
+		Position: BottomLeft
+		Margin: 4, 3
+		RequiresSelection: true
+	AttackGarrisoned:
+		PauseOnCondition: lowpower || build-incomplete
+		Armaments: garrisoned
+		PortOffsets: 0,0,150, 0,0,150, 0,0,150, 0,0,150, 0,0,150, 0,0,150
+		PortYaws: 0, 170, 341, 512, 682, 853
+		PortCones: 88, 88, 88, 88, 88, 88
+	Power:
+		Amount: -30
+	DetectCloaked:
+		Range: 5c0
+	Buildable:
+		BuildPaletteOrder: 46
+		Prerequisites: lite
+		Queue: Building.GDI
+		Icon: icon
+		Description: Garrisonable defense structure for one vehicle. The docked vehicle stays visible and fires out through the position using its own weapon.
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - GDI Fortified Wall (Brick+Sandbag-Kombiwall) ===
