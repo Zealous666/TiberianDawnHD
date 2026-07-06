@@ -1627,6 +1627,10 @@ aot-hind:
 		Filename: hind_hrpy.png
 		Length: 1
 		RemasteredFilename:
+	aot-harpy-laser-icon:
+		Filename: hind_laser.png
+		Length: 1
+		RemasteredFilename:
 	# aot-harpy-test-idle + aot-harpy-test-remap: in vehicles-overrides.yaml unter aot-hind: (mode-P erhalten)
 
 aot-upgrade-harpy:
@@ -1979,6 +1983,61 @@ aot-cyc2:
 		Length: 1
 		RemasteredFilename:
 # === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Nod Avatar (TS Firestorm CABAL "Core Defender") ===
+# Quelle: defender.shp aus expand01.mix (Firestorm). artfs.ini [DEFENDER]: Voxel=no,
+# Remapable=no (kein House-Color-Layer noetig, reines RGBA-Sprite), Facings=8,
+# StartStandFrame=0, StartWalkFrame=8 (WalkFrames=8), StartFiringFrame=72 (FiringFrames=12).
+# "Damaged"-Spiegel-Haelfte (Frames 168-335) wird nicht genutzt (kein Bedarf, analog
+# Cyborg Commando ohne eigenen Damaged-Body).
+aot-avatar:
+	Defaults:
+		Filename: aot-avatar-body.shp
+		Scale: 0.375
+		Tick: 80
+	stand:
+		Start: 0
+		Length: 1
+		Facings: -8
+	idle1:
+		Start: 0
+		Length: 1
+		Facings: -8
+	idle2:
+		Start: 0
+		Length: 1
+		Facings: -8
+	idle3:
+		Start: 0
+		Length: 1
+		Facings: -8
+	idle4:
+		Start: 0
+		Length: 1
+		Facings: -8
+	run:
+		Start: 8
+		Length: 8
+		Facings: -8
+	attack:
+		Start: 72
+		Length: 12
+		Facings: -8
+	icon:
+		Filename: avat_base.png
+		Length: 1
+	icon-laser:
+		Filename: avat_laser.png
+		Length: 1
+# === Ende aotmod ===
+
+# Bau-Icon fuer das separate Avatar-Laser-Upgrade (eigener Upgrade-Aktor,
+# siehe aot-upgrade-avatar-laser in aot-structures.yaml) - dasselbe Icon
+# wie der Avatar im Laser-Zustand.
+aot-upgrade-avatar-laser:
+	icon:
+		Filename: avat_laser.png
+		Length: 1
 
 # === Age of Tiberium (aotmod) - Zone Trooper (TS JUMPJET-Sprites, Age-3 Drop-Pod-Einheit) ===
 # Frame-Layout 1:1 aus engine/mods/ts/sequences/infantry.yaml (jumpjet:) übernommen.
@@ -2871,10 +2930,12 @@ tmpl:
 		Filename: tmpl_base.png
 		RemasteredFilename:
 		Length: 1
+		Offset: 0,0
 	aot-age2-icon:
 		Filename: tmpl_ages.png
 		RemasteredFilename:
 		Length: 1
+		Offset: 0,0
 	aot-age2-idle:
 		Filename: aot-tmpl-ts-idle.png
 		RemasteredFilename:
@@ -3254,6 +3315,22 @@ aot-ftur-fb2:
 		ZOffset: 1023
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - Toxic-Projektil (gruen eingefaerbtes FB1/FB2) ===
+# Recolor von aot-ftur-fb1/fb2 (Hue -> Toxic-Gruen ~100deg, Saettigung/Value
+# beibehalten fuer Schattierung/Glueh-Effekt). Gemeinsames Toxic-Projektil fuer
+# Nod Avatar UND Flame Tower nach dem Toxic-Upgrade, siehe nod-avatar-system.md.
+aot-toxic-fb1:
+	idle:
+		RemasteredFilename: aot-toxic-fb1.zip
+		Length: *
+		ZOffset: 1023
+aot-toxic-fb2:
+	idle:
+		RemasteredFilename: aot-toxic-fb2.zip
+		Length: *
+		ZOffset: 1023
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - GDI Quad Helipad (aot-hpad-gdi) ===
 # 4x4-Composite: 4x HPAD-Pad (je 2x2 Zellen, TD-Remastered) quadratisch angeordnet
 # um einen dekorativen GTWR (Guard Tower, ohne Funktion) in der Mittellücke, die durch
@@ -3317,4 +3394,92 @@ aot-hpad4:
 	hpad-blue-icon:
 		Filename: hpad_blue.png
 		Length: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - GDI Pillbox (RA-Import, 2026-07-05) ===
+# Frame-Layout 1:1 von RAs eigenem "pbox:"-Sequenzblock uebernommen
+# (engine/mods/ra/sequences/structures.yaml): idle=Frame 0, damaged-idle=Frame 1
+# (statisches Gebaeude, kein Turm/keine Facings - die Garrison-Einheiten feuern
+# unsichtbar aus Fire-Ports, siehe AttackGarrisoned in aot-structures.yaml).
+aot-pillbox:
+	idle:
+		RemasteredFilename: aot-pillbox.zip
+		Length: 1
+	damaged-idle:
+		RemasteredFilename: aot-pillbox.zip
+		Start: 1
+		Length: 1
+	make:
+		RemasteredFilename: aot-pillbox-make.zip
+		Length: *
+	# Custom Bau-Icon (User-Icon, 2026-07-05), ersetzt den vorherigen
+	# Platzhalter (Idle-Frame 0).
+	icon:
+		RemasteredFilename: aot-pillbox-icon.png
+		Length: 1
+	# Proxy-Icon nach dem Guard-Tower-Upgrade (Phase 2), genutzt von
+	# aot-pillbox-guard ueber Buildable.Icon.
+	guard-icon:
+		RemasteredFilename: aot-guard-tower-icon.png
+		Length: 1
+	# TS Searchlight Tower (GASPOT/"Light Tower"), per Gemini sauber neu
+	# gezeichnet (2026-07-05) - visueller Sprite-Wechsel fuers Guard-Tower-
+	# Upgrade. Zwei-Layer-Player-Color (Body + Index-176-191-Remap-Overlay,
+	# siehe ts-assets.md), 1:1 das aot-nod-radar-Muster (radar-base-remap.png)
+	# nachgebaut: KEIN Palette:/IsPlayerPalette: am Trait noetig, das Overlay-
+	# PNG traegt die 176-191-Graustufenrampe direkt in seiner eigenen Palette.
+	guard-idle:
+		Filename: aot-pillbox-guard-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.0875
+		Offset: 0,-115
+	guard-remap:
+		Filename: aot-pillbox-guard-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.0875
+		Offset: 0,-115
+# === Ende aotmod ===
+
+# Bau-Icon fuer das Guard-Tower-Upgrade selbst (Phase 2, 2026-07-05).
+aot-upgrade-guard-tower:
+	icon:
+		RemasteredFilename: aot-guard-tower-icon.png
+		Length: 1
+
+# === Age of Tiberium (aotmod) - Fire Position (Phase 3, Vehicle-Garrison) ===
+# Sandsack-Rahmen aus 4 RA-SBAG-Wall-Sprites (sbag-0006/0012/0009/0003),
+# buendig aneinander gesetzt (User-bestaetigt). Untergrund ist KEIN eigenes
+# Sprite - WithBuildingBib nutzt dieselbe bib3-Kachel wie Silo/Hand/Pyle
+# (siehe bib: unten, 1:1 von silo: kopiert).
+aot-fireposition:
+	idle:
+		RemasteredFilename: aot-fireposition-idle.png
+		Length: 1
+	dead:
+		RemasteredFilename: aot-fireposition-dead.png
+		Length: 1
+	make:
+		RemasteredFilename: aot-fireposition-idle.png
+		Length: 1
+	icon:
+		RemasteredFilename: aot-fire-position-icon.png
+		Length: 1
+	bib:
+		Filename: bib3.tem
+		TilesetFilenames:
+			DESERT: bib3.des
+			WINTER: bib3.win
+			SNOW: bib3.sno
+			TEMPERAT: bib3.tem
+		Length: *
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\TEMPERATE\BIB3\BIB3.TEM-{0:D4}.DDS
+			Count: 4
+		RemasteredTilesetFilenamesPattern:
+			WINTER: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\BIB3.WIN\BIB3.WIN-{0:D4}.DDS
+				Count: 4
+			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\BIB3.DES\BIB3.DES-{0:D4}.DDS
+				Count: 4
+		RemasteredPremultiplied: false
 # === Ende aotmod ===

@@ -15,7 +15,7 @@ aot-dog-nod:
 		AddToArmyValue: true
 	Buildable:
 		BuildPaletteOrder: 60
-		Prerequisites: barracks
+		Prerequisites: barracks, stec
 		Queue: Infantry.Nod
 		Description: Fast anti-infantry unit. Instantly kills enemy soldiers.
 	Health:
@@ -159,7 +159,7 @@ aot-spy-gdi:
 		Voice: Move
 	Buildable:
 		BuildPaletteOrder: 55
-		Prerequisites: barracks, anyhq
+		Prerequisites: barracks, atec
 		Queue: Infantry.GDI
 		Description: Disguised agent. Infiltrates enemy buildings to steal credits, reveal the map, or reset support powers.
 	Health:
@@ -213,6 +213,12 @@ aot-e1-gdi:
 		Prerequisites: barracks
 		Queue: Infantry.GDI
 		Description: actor-e1.description
+	# Garrison-Waffe (2026-07-05, Pillbox-System): eigene Blockable:false-
+	# Variante, damit die Pillbox ueber Mauern schiessen kann - siehe
+	# aot-M16Garrisoned in aot-weapons.yaml.
+	Armament@GARRISONED:
+		Name: garrisoned
+		Weapon: aot-M16Garrisoned
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - NOD Rifleman ===
@@ -225,6 +231,9 @@ aot-e1-nod:
 		Prerequisites: barracks
 		Queue: Infantry.Nod
 		Description: actor-e1.description
+	Armament@GARRISONED:
+		Name: garrisoned
+		Weapon: aot-M16Garrisoned
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - GDI + NOD Engineer (E6-Split, eigene Icons) ===
@@ -279,7 +288,7 @@ aot-medi-gdi:
 		ValidTargets: Heal
 	Buildable:
 		BuildPaletteOrder: 45
-		Prerequisites: barracks
+			Prerequisites: barracks, aot-age1
 		Queue: Infantry.GDI
 		Description: Unarmed medic. Heals friendly infantry in the field.
 # === Ende aotmod ===
@@ -447,6 +456,11 @@ aot-e2-gdi:
 		Prerequisites: anyhq, ~techlevel.medium
 		Queue: Infantry.GDI
 		Description: actor-e2.description
+	# Garrison-Waffe (2026-07-05): Grenade ist bereits Blockable:false
+	# (^BallisticWeapon), kann direkt wiederverwendet werden.
+	Armament@GARRISONED:
+		Name: garrisoned
+		Weapon: Grenade
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - NOD Bazooka / Rocket Soldier (eigenes Icon, nur noch NOD) ===
@@ -459,6 +473,27 @@ aot-e3-nod:
 		Prerequisites: barracks
 		Queue: Infantry.Nod
 		Description: actor-e3.description
+	# Garrison-Waffe (2026-07-05): Rockets ist bereits Blockable:false
+	# (^MissileWeapon) UND hat ValidTargets inkl. Air - Rocket Soldier kann
+	# garnisoniert weiterhin Luftziele treffen (User-Anforderung).
+	Armament@GARRISONED:
+		Name: garrisoned
+		Weapon: Rockets
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - GDI Bazooka / Rocket Soldier ===
+aot-e3-gdi:
+	Inherits: E3
+	RenderSprites:
+		Image: aot-e3-gdi
+	Buildable:
+		BuildPaletteOrder: 21
+		Prerequisites: barracks
+		Queue: Infantry.GDI
+		Description: actor-e3.description
+	Armament@GARRISONED:
+		Name: garrisoned
+		Weapon: Rockets
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - NOD Flamethrower → Toxic Trooper Upgrade (Age 3) ===
@@ -470,7 +505,9 @@ aot-e4-nod:
 		Image: aot-e4-nod
 	GrantConditionOnPrerequisite@TOXIC:
 		Condition: aot-e4-toxic
-		Prerequisites: aot-e4-toxic-upgrade
+		# Umbenannt (2026-07-04): aot-e4-toxic-upgrade -> aot-toxic-upgrade, da das
+		# Upgrade jetzt auch TTNK und FTUR umstellt, siehe aot-upgrade-e4-toxic.
+		Prerequisites: aot-toxic-upgrade
 	Armament:
 		Weapon: Flamethrower
 		LocalOffset: 341,0,256
@@ -482,6 +519,17 @@ aot-e4-nod:
 		LocalOffset: 341,0,256
 		FireDelay: 3
 		MuzzleSequence: muzzle-chem
+		RequiresCondition: aot-e4-toxic
+	# Garrison-Waffen (2026-07-05, Pillbox-System): folgen demselben Flame/
+	# Toxic-Umschalt-Muster wie die Primaerwaffe oben, mit den Blockable:false-
+	# Varianten aus aot-weapons.yaml.
+	Armament@GARRISONED-FLAME:
+		Name: garrisoned
+		Weapon: aot-FlamethrowerGarrisoned
+		RequiresCondition: !aot-e4-toxic
+	Armament@GARRISONED-TOXIC:
+		Name: garrisoned
+		Weapon: aot-ChemsprayGarrisoned
 		RequiresCondition: aot-e4-toxic
 	-Buildable:
 # === Ende aotmod ===
@@ -717,6 +765,23 @@ MTNK:
 		Weapon: aot-MtnkRailgun
 		RequiresCondition: aot-mtnk-railgun
 		LocalOffset: 768,0,90
+
+	# Fire Position (Phase 3) Garrison-Waffen - eigene "garrisoned"-Variante je
+	# Upgrade-Stufe, gleiche Conditions wie die normalen Armaments oben.
+	Armament@garrisoned:
+		Name: garrisoned
+		Weapon: aot-120mmGarrisoned
+		RequiresCondition: !aot-mtnk-predator
+
+	Armament@garrisonedpredator:
+		Name: garrisoned
+		Weapon: aot-MtnkPredatorGarrisoned
+		RequiresCondition: aot-mtnk-predator && !aot-mtnk-railgun
+
+	Armament@garrisonedrailgun:
+		Name: garrisoned
+		Weapon: aot-MtnkRailgun
+		RequiresCondition: aot-mtnk-railgun
 
 	-WithSpriteTurret:
 
@@ -1029,7 +1094,7 @@ aot-ltnk-tick:
 	Buildable:
 		Queue: Vehicle.Nod
 		BuildPaletteOrder: 40
-		Prerequisites: ~aot-age1, aot-age1, afld, ~aot-ltnk-upgrade, ~!aot-ltnk-upgrade2
+		Prerequisites: ~aot-age1, aot-age1, afld, ~aot-ltnk-upgrade, ~!aot-laser-fence-upgrade
 		Icon: ltnk-tick-icon
 		Description: Light Tank upgraded with Tick Tank chassis. Enables dig-in siege mode. Requires FIX facility.
 	Tooltip:
@@ -1042,7 +1107,7 @@ aot-ltnk-laser:
 	Buildable:
 		Queue: Vehicle.Nod
 		BuildPaletteOrder: 40
-		Prerequisites: ~aot-age1, aot-age1, afld, ~aot-ltnk-upgrade2
+		Prerequisites: ~aot-age1, aot-age1, afld, ~aot-laser-fence-upgrade
 		Icon: ltnk-laser-icon
 		Description: Light Tank (Tick Chassis) with experimental laser turret. Remains deployed after upgrade.
 	Tooltip:
@@ -1072,7 +1137,7 @@ LTNK:
 
 	GrantConditionOnPrerequisite@upgrade2:
 		Condition: aot-ltnk-upgraded2
-		Prerequisites: aot-ltnk-upgrade2
+		Prerequisites: aot-laser-fence-upgrade
 
 	-WithFacingSpriteBody:
 
@@ -1155,7 +1220,7 @@ aot-ltnk-deployed:
 
 	GrantConditionOnPrerequisite@laser:
 		Condition: aot-ltnk-upgraded2
-		Prerequisites: aot-ltnk-upgrade2
+		Prerequisites: aot-laser-fence-upgrade
 
 	RenderSprites:
 		Image: aot-gatick
@@ -1401,9 +1466,25 @@ aot-harpy-upgraded:
 	Buildable:
 		Queue: Aircraft.Nod
 		BuildPaletteOrder: 20
-		Prerequisites: anyhq, ~aot-harpy-upgrade
+		Prerequisites: anyhq, ~aot-harpy-upgrade, ~!aot-laser-fence-upgrade
 		Icon: aot-harpy-icon
 		Description: Upgraded attack helicopter. Deals increased damage with a higher fire rate. Reloads ammunition automatically while airborne. Cloaks when not engaged.
+	Tooltip:
+		Name: Harpy
+
+aot-harpy-upgraded-laser:
+	Inherits: HELI
+	AmmoPool:
+		Ammo: 6
+	ReloadAmmoPool:
+		Delay: 30
+		Count: 2
+	Buildable:
+		Queue: Aircraft.Nod
+		BuildPaletteOrder: 20
+		Prerequisites: anyhq, ~aot-harpy-upgrade, ~aot-laser-fence-upgrade
+		Icon: aot-harpy-laser-icon
+		Description: Upgraded attack helicopter with laser cannon. High single-target damage at medium range. Reloads ammunition automatically while airborne. Cloaks when not engaged.
 	Tooltip:
 		Name: Harpy
 # === Ende aotmod ===
@@ -1511,7 +1592,8 @@ AJET:
 # === Age of Tiberium (aotmod) - TTNK Heavy Tank (NOD, Tier 0) ===
 # Age-0: RA Remastered 3TNK Sprites, Dual-Kanone (aot-TtnkDual).
 # Age-1 Upgrade: Flame Tank (FTNK Sprites, BigFlamer × 2, AttackFrontal).
-# Age-3 Upgrade: Toxin Tank (Chemspray × 2, Sprite-Wechsel später).
+# Toxic Upgrade (konsolidiert, 2026-07-04): Toxin Tank (Chemspray × 2). Separates
+# Stealth-Tank-Upgrade (aot-ttnk-cloak) komplett entfernt.
 TTNK:
 	Inherits: ^Tank
 	Inherits@EXPERIENCE: ^GainsExperience
@@ -1524,13 +1606,10 @@ TTNK:
 		RequiresCondition: !aot-ttnk-flame
 	Tooltip@flame:
 		Name: actor-ttnk-flame.name
-		RequiresCondition: aot-ttnk-flame && !aot-ttnk-toxin && !aot-ttnk-cloak
+		RequiresCondition: aot-ttnk-flame && !aot-ttnk-toxin
 	Tooltip@toxin:
 		Name: actor-ttnk-toxin.name
 		RequiresCondition: aot-ttnk-toxin
-	Tooltip@cloak:
-		Name: actor-ttnk-cloak.name
-		RequiresCondition: aot-ttnk-cloak
 	UpdatesPlayerStatistics:
 		AddToArmyValue: true
 	Mobile:
@@ -1584,19 +1663,11 @@ TTNK:
 		Prerequisites: aot-ttnk-flame-upgrade
 	GrantConditionOnPrerequisite@toxin-upgrade:
 		Condition: aot-ttnk-toxin
-		Prerequisites: aot-ttnk-toxin-upgrade
-	GrantConditionOnPrerequisite@cloak-upgrade:
-		Condition: aot-ttnk-cloak
-		Prerequisites: aot-ttnk-cloak-upgrade
-	Cloak:
-		InitialDelay: 85
-		CloakDelay: 85
-		CloakSound: trans1.aud
-		UncloakSound: trans1.aud
-		CloakStyle: Alpha
-		CloakedAlpha: 0.4
-		UncloakOn: Attack, Unload, Dock, Damage, Heal
-		RequiresCondition: aot-ttnk-cloak
+		# Umbenannt (2026-07-04): aot-ttnk-toxin-upgrade -> aot-toxic-upgrade,
+		# konsolidiertes Upgrade siehe aot-upgrade-e4-toxic.
+		# aot-ttnk-flame-upgrade zusaetzlich Pflicht (2026-07-05): Toxin-Wechsel
+		# darf erst greifen, wenn der Flame-Tank-Upgrade bereits gekauft wurde.
+		Prerequisites: aot-toxic-upgrade, aot-ttnk-flame-upgrade
 	WithSpriteTurret@normal:
 		Sequence: turret
 		RequiresCondition: !aot-ttnk-flame
@@ -1640,7 +1711,7 @@ aot-ttnk-flame:
 		Image: ttnk
 	Buildable:
 		BuildPaletteOrder: 2
-		Prerequisites: lite, ~aot-ttnk-flame-upgrade, ~!aot-ttnk-toxin-upgrade, ~!aot-ttnk-cloak-upgrade
+		Prerequisites: lite, ~aot-ttnk-flame-upgrade, ~!aot-toxic-upgrade
 		Queue: LightVehicle.Nod
 		Icon: aot-flame-icon
 		Description: Upgraded Heavy Tank armed with dual flamethrowers.
@@ -1653,25 +1724,44 @@ aot-ttnk-toxin:
 		Image: ttnk
 	Buildable:
 		BuildPaletteOrder: 2
-		Prerequisites: lite, ~aot-ttnk-toxin-upgrade
+		Prerequisites: lite, ~aot-ttnk-flame-upgrade, ~aot-toxic-upgrade
 		Queue: LightVehicle.Nod
 		Icon: aot-toxin-icon
 		Description: Flame Tank upgraded with dual toxic tiberian-sprayers.
 	Tooltip@normal:
 		Name: actor-ttnk-toxin.name
 
-aot-ttnk-cloak:
-	Inherits: TTNK
+# === Age of Tiberium (aotmod) - BGGY Queue-Proxies (Doppel-Aktor-Pattern) ===
+# aot-bggy-base: sichtbar ab Age 1, baubar sobald LITE (Vehicle Factory) und
+# HAND (Infantry Production) stehen. aot-bggy-laser: gleiche Sichtbarkeit,
+# ersetzt aot-bggy-base sobald "Laser Technologies" (aot-laser-fence-upgrade)
+# gekauft wurde - die eigentliche Waffe/Icon-Logik steckt in overrides.yaml (BGGY).
+aot-bggy-base:
+	Inherits: BGGY
 	RenderSprites:
-		Image: ttnk
+		Image: bggy
 	Buildable:
-		BuildPaletteOrder: 2
-		Prerequisites: lite, ~aot-ttnk-cloak-upgrade
 		Queue: LightVehicle.Nod
-		Icon: aot-cloak-icon
-		Description: Flame Tank equipped with a stealth field. Cloaks when not engaged.
-	Tooltip@normal:
-		Name: actor-ttnk-cloak.name
+		BuildPaletteOrder: 1
+		Prerequisites: ~aot-age1, lite, hand, ~!aot-laser-fence-upgrade
+		Icon: aot-bggy-icon
+		Description: Fast NOD scout buggy armed with a machine gun.
+	Tooltip:
+		Name: Buggy
+
+aot-bggy-laser:
+	Inherits: BGGY
+	RenderSprites:
+		Image: bggy
+	Buildable:
+		Queue: LightVehicle.Nod
+		BuildPaletteOrder: 1
+		Prerequisites: ~aot-age1, lite, hand, ~aot-laser-fence-upgrade
+		Icon: aot-bggy-laser-icon
+		Description: NOD scout buggy upgraded with a laser cannon.
+	Tooltip:
+		Name: Buggy (Laser)
+# === Ende aotmod ===
 
 # FTNK aus NOD Buildlist entfernen (Heavy Tank übernimmt diese Rolle)
 FTNK:
@@ -1730,9 +1820,9 @@ aot-cyborg:
 	Armament:
 		Weapon: aot-CyborgChainGun
 	Buildable:
-		Queue: Infantry.Nod
+		Queue: Infantry.NodElite
 		BuildPaletteOrder: 70
-		Prerequisites: ~hand, ~aot-age2
+		Prerequisites: ~aot-age2, aot-shrine
 		Icon: icon
 		Description: Cybernetic NOD soldier. Enters crippled mode at critical HP.
 # === Ende aotmod ===
@@ -1773,11 +1863,93 @@ aot-cyc2:
 	Armament:
 		Weapon: aot-CyCannon
 	Buildable:
-		Queue: Infantry.Nod
+		Queue: Infantry.NodElite
 		BuildPaletteOrder: 71
-		Prerequisites: ~hand, ~aot-age3
+		Prerequisites: ~aot-age3, aot-shrine
 		Icon: icon
 		Description: Elite NOD cyborg with plasma cannon. Devastating vs. all targets. Limit: 1.
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Nod Avatar (TS Firestorm CABAL "Core Defender") ===
+# TS: DEFENDER (artfs.ini/firestrm.ini) — Voxel=no, Remapable=no (kein House-Color-Layer),
+# Facings=8. Kein VoiceSelect/-Move/-Attack im Original (leere Felder) -> Cyborg Commando
+# Voice wiederverwendet (User-Entscheidung). Waffen: normale Cyborg-Kanone + Flammenwerfer
+# (Flame Trooper-Waffe inkl. Projektil/Impact) GLEICHZEITIG aktiv. Eigenstaendiges Upgrade
+# "Avatar Laser Cannon" (aot-upgrade-avatar-laser, separater Aktor, NICHT das mod-weite
+# "Laser Technologies"/aot-upgrade-laser-fence — User-Wunsch: separates Upgrade) ersetzt
+# die Cyborg-Kanone durch aot-HarpyLaser; Flammenwerfer bleibt unveraendert. Kein
+# "die"-Sprite im Original (nur Partikel-Explosion, Explosion=DEFD_EXP) -> WithDeathAnimation
+# entfernt.
+aot-avatar:
+	Inherits: E1
+	WithShadow:
+		Offset: 0, 48, 0
+		ZOffset: -129
+	RenderSprites:
+		Image: aot-avatar
+		PlayerPalette: aot-avatar-player
+	WithInfantryBody:
+		StandSequences: stand
+		DefaultAttackSequence: attack
+		Palette: aot-avatar-player
+		IsPlayerPalette: true
+	-WithDeathAnimation:
+	Voiced:
+		VoiceSet: CyborgCommandoVoice
+	Tooltip:
+		Name: Nod Avatar
+	Health:
+		HP: 75000
+	Mobile:
+		Speed: 42
+	Valued:
+		Cost: 2500
+	GrantConditionOnPrerequisite@LASER:
+		Condition: aot-avatar-laser
+		Prerequisites: aot-avatar-laser-upgrade
+	GrantConditionOnPrerequisite@TOXIC:
+		Condition: aot-avatar-toxic
+		Prerequisites: aot-toxic-upgrade
+	-Armament:
+	Armament@PRIMARY:
+		Weapon: aot-CyborgChainGun
+		LocalOffset: 0,340,800
+		RequiresCondition: !aot-avatar-laser
+	Armament@LASER:
+		Weapon: aot-HarpyLaser
+		LocalOffset: 0,340,800
+		RequiresCondition: aot-avatar-laser
+	Armament@FLAME:
+		Weapon: aot-AvatarFlame
+		LocalOffset: 350,-340,256
+		FireDelay: 3
+		RequiresCondition: !aot-avatar-toxic
+	Armament@TOXIC:
+		Weapon: aot-AvatarToxic
+		LocalOffset: 350,-340,256
+		FireDelay: 3
+		RequiresCondition: aot-avatar-toxic
+	Selectable:
+		Bounds: 1536, 1536, 0, -512
+		DecorationBounds: 1024, 1450, 0, -512
+	Buildable:
+		Queue: Infantry.NodElite
+		BuildPaletteOrder: 72
+		Prerequisites: ~aot-age3, afld, aot-shrine, ~!aot-avatar-laser-upgrade
+		Icon: icon
+		Description: Massive NOD cyborg walker armed with a chaingun and flamethrower. CABAL's ultimate war machine.
+
+# Sidebar-Proxy: schaltet nur das Icon um, sobald das Avatar Laser Cannon Upgrade
+# gekauft wurde (Waffen-Umschaltung passiert bereits automatisch auf aot-avatar
+# selbst, analog BGGY).
+aot-avatar-laser:
+	Inherits: aot-avatar
+	Buildable:
+		Queue: Infantry.NodElite
+		BuildPaletteOrder: 72
+		Prerequisites: ~aot-age3, afld, aot-shrine, ~aot-avatar-laser-upgrade
+		Icon: icon-laser
+		Description: Massive NOD cyborg walker armed with a laser cannon and flamethrower. CABAL's ultimate war machine.
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Zone Trooper (GDI, TS JUMPJET-Sprites, MTNK-Railgun, Ghost-Stalker-Voice) ===
@@ -1868,6 +2040,11 @@ aot-zonetrooper:
 	Valued:
 		Cost: 1500
 	Armament:
+		Weapon: aot-MtnkRailgun
+	# Garrison-Waffe (2026-07-05): aot-MtnkRailgun nutzt LaserZap, das per
+	# Engine-Default bereits Blockable:false ist - direkt wiederverwendbar.
+	Armament@GARRISONED:
+		Name: garrisoned
 		Weapon: aot-MtnkRailgun
 # === Ende aotmod ===
 
@@ -2725,6 +2902,8 @@ aot-msam-hover-mlrs:
 	Armament:
 		Weapon: aot-DestroyerRockets
 	-Armament@SECONDARY:
+	Armament@garrisoned:
+		Weapon: aot-DestroyerRocketsGarrisoned
 	Turreted:
 		TurnSpeed: 512
 		Offset: -256, 0, 200
@@ -2792,6 +2971,15 @@ aot-msam-hover-aa:
 		RecoilRecovery: 8
 		LocalOffset: 175,100,64, 175,-100,64
 		MuzzleSequence: aot-apc-muzzle-air
+		PauseOnCondition: reload-ground
+		ReloadingCondition: reload-air
+	Armament@garrisoned:
+		Weapon: aot-HoverAAGunGarrisoned
+		PauseOnCondition: reload-air
+		ReloadingCondition: reload-ground
+	Armament@garrisonedair:
+		Name: garrisoned
+		Weapon: aot-HoverAAGun.AA
 		PauseOnCondition: reload-ground
 		ReloadingCondition: reload-air
 	GrantConditionOnAttack:

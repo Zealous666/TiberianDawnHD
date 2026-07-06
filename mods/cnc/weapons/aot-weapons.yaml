@@ -90,6 +90,113 @@ aot-LtnkLaser:
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: Scorch
 		InvalidTargets: Vehicle, Structure, Wall, Husk, Trees, Creep
+
+# === Age of Tiberium (aotmod) - GUN Turret Laser Defense Systems Upgrade ===
+# Eigener Eintrag (statt aot-LtnkLaser direkt zu teilen) fuer unabhaengiges Balancing,
+# Werte vorerst 1:1 vom LTNK-Laser uebernommen (roter LaserZap-Default, kein Color:).
+aot-GunLaser:
+	Inherits: aot-LtnkLaser
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - FTUR Flame Tower (RA-Import, NOD Age 0) ===
+# Stats 1:1 von RA's FireballLauncher + ^FireWeapon uebernommen (engine/mods/ra/
+# weapons/other.yaml), da diese Basis-Traits im cnc-Mod nicht existieren. Projektil
+# JETZT ebenfalls authentisch (User-Korrektur 2026-07-04): Image/TrailImage auf die
+# importierten FB1/FB2-Sequenzen (aot-ftur-fb1/aot-ftur-fb2, siehe aot-sequences.yaml)
+# umgebogen, Speed 1:1 RA-Wert. Sound bleibt bewusst vom cnc-eigenen ^FlameWeapon
+# (flamer2.aud) - RA's FireballLauncher hat GAR KEINEN Report (in vanilla RA stumm).
+# Explosions-Effekt auf med_napalm umgebogen (RA's "napalm" existiert im cnc-Mod nicht).
+# KRITISCHER Bugfix (2026-07-04, User-Report "macht gar keinen Schaden"): ValidTargets
+# nutzte RA's eigene Tag-Konvention ("GroundActor"/"WaterActor") 1:1 aus RA's
+# ^FireWeapon uebernommen - dieser CNC-Mod nutzt aber die cnc-eigene Konvention OHNE
+# "Actor"-Suffix (siehe ^FlameWeapon: "ValidTargets: Ground, Water, Trees"). Da echte
+# Einheiten hier nie als "GroundActor"/"WaterActor" getaggt sind, traf der Warhead
+# NIE ein gueltiges Ziel -> 0 Schaden gegen alles ausser (theoretisch) Trees. Auf die
+# cnc-Konvention umgestellt.
+aot-FturFlame:
+	ValidTargets: Ground, Water, Trees
+	ReloadDelay: 70
+	Range: 5c0
+	InvalidTargets: Wall
+	Report: flamer2.aud
+	Burst: 2
+	BurstDelays: 20
+	Projectile: Bullet
+		Speed: 250
+		Image: aot-ftur-fb1
+		TrailImage: aot-ftur-fb2
+		# Blockable defaultet auf true (Bullet.cs) - ein Verteidigungsturm hinter
+		# der eigenen Mauer/dem Zaun konnte dadurch nicht ueber diese hinweg
+		# feuern (Fence/Wall haben BlocksProjectiles, siehe aot-structures.yaml).
+		# User-Fund 2026-07-05: "muss ueber Zaeune feuern - kommt gerade nicht
+		# durch". Fix: Projektil ignoriert eigene BlocksProjectiles-Hindernisse.
+		Blockable: false
+	Warhead@1Dam: SpreadDamage
+		Spread: 213
+		Damage: 15000
+		ValidTargets: Ground, Water, Trees
+		Versus:
+			None: 90
+			Wood: 50
+			Tree: 50
+			Light: 60
+			Heavy: 25
+			Concrete: 20
+		DamageTypes: Prone50Percent, TriggerProne, FireDeath, Incendiary
+	Warhead@2Smu: LeaveSmudge
+		SmudgeType: Scorch
+		InvalidTargets: Structure, Wall
+	Warhead@3Eff: CreateEffect
+		Explosions: med_napalm
+
+# === Age of Tiberium (aotmod) - FTUR Toxic Tower Upgrade-Waffe ===
+# "Toxic projectile" + "toxic impact" (User-Wunsch 2026-07-04, Toxic-Upgrade-
+# Konsolidierung): Inherits Chemspray (dieselbe Basis wie E4 Toxic Trooper und
+# TTNK aot-TtnkChemspray), nur ReloadDelay/Range/Burst an FTUR angepasst.
+# KRITISCHER Bugfix (2026-07-05, User-Fund "kein Projektil"): Chemsprays
+# geerbtes Bullet-Projektil hat KEIN Image (bewusst unsichtbar bei E4/TTNK,
+# dort kurze Reichweite/schnelle Ziel-Treffer kaum auffaellig) - beim Turm mit
+# 5c0 Reichweite wirkte das Fehlen sichtbarer Flugbahn wie ein Bug. Eigenes
+# sichtbares Projektil ergaenzt: aot-plasma-green (bereits im Mod vorhanden,
+# genutzt vom Cyborg Commando CyCannon, siehe aot-CyCannon oben). Zusaetzlich
+# Blockable: false (identischer Grund wie bei aot-FturFlame oben: "muss ueber
+# Zaeune feuern").
+aot-FturToxic:
+	Inherits: Chemspray
+	ReloadDelay: 70
+	Range: 5c0
+	Burst: 2
+	BurstDelays: 20
+	Projectile: Bullet
+		Speed: 250
+		Image: aot-toxic-fb1
+		TrailImage: aot-toxic-fb2
+		Blockable: false
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Nod Avatar Flame/Toxic (FTUR-Fireball-Projektil) ===
+# User-Wunsch 2026-07-06: sichtbares Feuerball-Projektil statt Muzzle-Overlay
+# (das war im Avatar-Body kaum sichtbar). Wiederverwendet aot-ftur-fb1/fb2
+# (Feuerball+Rauchschweif) 1:1 von aot-FturFlame. Toxic-Variante nutzt das neue
+# gruen eingefaerbte aot-toxic-fb1/fb2 (siehe aot-sequences.yaml), dasselbe
+# Projektil wie aot-FturToxic (oben) - ein gemeinsames Toxic-Sprite fuer beide.
+aot-AvatarFlame:
+	Inherits: Flamethrower
+	Projectile: Bullet
+		Speed: 250
+		Image: aot-ftur-fb1
+		TrailImage: aot-ftur-fb2
+		Blockable: false
+
+aot-AvatarToxic:
+	Inherits: Chemspray
+	Projectile: Bullet
+		Speed: 250
+		Image: aot-toxic-fb1
+		TrailImage: aot-toxic-fb2
+		Blockable: false
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - Apache AG Missiles ===
 OrcaAGMissiles:
 	Warhead@1Dam: SpreadDamage
@@ -118,8 +225,12 @@ aot-HarpyAGGun:
 	Burst: 2
 	BurstDelays: 0
 	ReloadDelay: 20
+	Report: aot-hind-mg.aud
 	Warhead@1Dam: SpreadDamage
 		Damage: 2000
+
+aot-HarpyLaser:
+	Inherits: aot-LtnkLaser
 
 # === Age of Tiberium (aotmod) - AJET Waffen ===
 # Basieren auf A10-Waffen (Vulcan/Napalm), aber ohne Burst-Offsets die für den
@@ -807,4 +918,58 @@ aot-DropshipExplode:
 	Warhead@1Eff: CreateEffect
 		Explosions: small_building
 		ImpactSounds: xplos.aud
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Garrison-Waffen fuer Pillbox (2026-07-05) ===
+# AttackGarrisoned-Fire-Ports duerfen nicht durch Mauern blockiert werden
+# (User-Wunsch: "Pillbox muss ueber Mauern schiessen koennen"). Bullet-
+# Projektile sind per Default Blockable:true - E2 (Grenade) und E3 (Rockets)
+# haben das schon selbst auf false (^BallisticWeapon bzw. ^MissileWeapon), E1
+# (M16), E4 (Flamethrower/Chemspray) NICHT - dafuer diese Varianten mit
+# Blockable:false. Nur fuer die Armament@GARRISONED-Instanz genutzt, das
+# normale Feld-Verhalten der Einheiten bleibt unveraendert.
+aot-M16Garrisoned:
+	Inherits: M16
+	Projectile: Bullet
+		Blockable: false
+	# Damage-Multiplier vs. Infanterie (User-Wunsch 2026-07-05): macht die
+	# Pillbox zur effizienten Infanterie-Abwehr. Nur die Garrison-Variante
+	# betroffen - E1s normale Feld-Waffe (M16) bleibt unveraendert.
+	Warhead@1Dam: SpreadDamage
+		Versus:
+			None: 300
+
+aot-FlamethrowerGarrisoned:
+	Inherits: Flamethrower
+	Projectile: Bullet
+		Blockable: false
+
+aot-ChemsprayGarrisoned:
+	Inherits: Chemspray
+	Projectile: Bullet
+		Blockable: false
+
+# === Age of Tiberium (aotmod) - Garrison-Waffen fuer Fire Position (Phase 3) ===
+# Vehicle-Garrison-Waffen: gleiche Logik wie bei Pillbox - Blockable:false auf
+# der geliehenen Garrison-Variante, damit das Fire-Position-Gebaeude ueber Mauern
+# schiessen kann. Normale Feldwaffe der Fahrzeuge bleibt unveraendert (Blockable: true).
+aot-120mmGarrisoned:
+	Inherits: 120mm
+	Projectile: Bullet
+		Blockable: false
+
+aot-MtnkPredatorGarrisoned:
+	Inherits: aot-MtnkPredator
+	Projectile: Bullet
+		Blockable: false
+
+aot-DestroyerRocketsGarrisoned:
+	Inherits: aot-DestroyerRockets
+	Projectile: Missile
+		Blockable: false
+
+aot-HoverAAGunGarrisoned:
+	Inherits: aot-HoverAAGun
+	Projectile: Bullet
+		Blockable: false
 # === Ende aotmod ===
