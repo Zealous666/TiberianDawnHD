@@ -596,6 +596,33 @@ BGGY:
 		LocalOffset: 171,0,43
 		RequiresCondition: aot-bggy-laser
 
+# === Age of Tiberium (aotmod) - NOD Stealth Tank: Age-Gate + Cargo Upgrade ===
+# Baubar/sichtbar ab Age 1 statt techlevel.high (siehe Proxy-Aktoren aot-stnk-base/aot-stnk-cargo
+# in aot-units.yaml). Cargo Upgrade gibt 5 Infanterie-Slots, gilt sofort fuer bereits gebaute
+# Stealth Tanks (GrantConditionOnPrerequisite reagiert auf alle existierenden Aktoren).
+# Enttarnen beim Ein-/Aussteigen mit Delay, analog aot-sub (siehe sub-cargo-system): "Load" zu
+# UncloakOn ergaenzt, Cargo.LoadingCondition pausiert das Cloak waehrend des Ladevorgangs selbst,
+# CloakDelay (85 = ~3.4s, aus Engine-Default uebernommen) startet danach ueber UncloakOn neu.
+STNK:
+	-Buildable:
+	GrantConditionOnPrerequisite@cargo:
+		Condition: aot-stnk-cargo-upgrade
+		Prerequisites: aot-stnk-cargo-upgrade
+	Cargo:
+		Types: Infantry
+		MaxWeight: 5
+		UnloadVoice: Unload
+		LoadingCondition: aot-stnk-loading
+		RequiresCondition: aot-stnk-cargo-upgrade
+	WithCargoPipsDecoration@cargo:
+		Position: BottomLeft
+		Margin: 4, 3
+		RequiresSelection: true
+		RequiresCondition: aot-stnk-cargo-upgrade
+	Cloak:
+		UncloakOn: Attack, Unload, Dock, Damage, Heal, Load
+		PauseOnCondition: cloak-force-disabled || aot-stnk-loading
+
 # === Age of Tiberium (aotmod) - Hovercraft Cargo: Fahrzeuge als Passagiere ===
 # Leichte Fahrzeuge können in den Hovercraft Transport (aot-transport-hover) geladen werden.
 # CargoType: GroundVehicle, Weight: 5 füllt MaxWeight: 5 komplett (= 1 Fahrzeug statt 5 Inf).

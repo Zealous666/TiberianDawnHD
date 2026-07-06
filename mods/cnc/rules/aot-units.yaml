@@ -2334,6 +2334,36 @@ aot-sub-cargo-proxy:
 	Tooltip:
 		Name: actor-aot-sub-cargo.name
 
+# === Age of Tiberium (aotmod) - NOD Stealth Tank Proxies ===
+# Sichtbar/baubar ab Age 1 + TMPL (ersetzt techlevel.high). Cargo-Upgrade (5 Infanterie-Slots)
+# wird zentral auf STNK selbst getragen (overrides.yaml) - die zwei Proxies dienen nur dem
+# Icon-Wechsel im Baumenue, analog aot-sub-base/aot-sub-cargo-proxy.
+aot-stnk-base:
+	Inherits: STNK
+	RenderSprites:
+		Image: stnk
+	Buildable:
+		Queue: Vehicle.Nod
+		BuildPaletteOrder: 90
+		Prerequisites: ~aot-age1, tmpl, ~!aot-stnk-cargo-upgrade
+		Icon: aot-stnk-icon
+		Description: actor-stnk.description
+	Tooltip:
+		Name: actor-stnk.name
+
+aot-stnk-cargo:
+	Inherits: STNK
+	RenderSprites:
+		Image: stnk
+	Buildable:
+		Queue: Vehicle.Nod
+		BuildPaletteOrder: 90
+		Prerequisites: ~aot-age1, tmpl, ~aot-stnk-cargo-upgrade
+		Icon: aot-stnk-cargo-icon
+		Description: actor-stnk.description
+	Tooltip:
+		Name: actor-stnk.name
+
 # === Age of Tiberium (aotmod) - NOD Missile Sub (aot-msub) ===
 # RA Wolf-Class Missile Submarine. Ballistische Raketen, langsam + schwer zu drehen.
 # Taucht wie aot-sub. Feuert NUR aufgetaucht (UncloakOn: Attack bereits gesetzt).

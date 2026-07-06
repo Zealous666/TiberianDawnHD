@@ -2669,6 +2669,35 @@ aot-upgrade-sub-cargo:
 	Interactable:
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - Stealth Tank Cargo Upgrade ===
+# Stealth Tank erhält 5 Infanterie-Passagier-Slots. Cargo-Trait liegt auf STNK selbst
+# (overrides.yaml, GrantConditionOnPrerequisite) - gilt daher sofort auch für bereits
+# gebaute Stealth Tanks, nicht nur neu produzierte. Sichtbar ab Age 3, baubar mit Shrine + TMPL.
+aot-upgrade-stnk-cargo:
+	Tooltip:
+		Name: actor-aot-upgrade-stnk-cargo.name
+
+	Buildable:
+		BuildPaletteOrder: 47
+		Prerequisites: ~aot-age3, aot-shrine, tmpl, ~!aot-stnk-cargo-upgrade
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Icon: icon
+		Description: actor-aot-upgrade-stnk-cargo.description
+
+	Valued:
+		Cost: 400
+
+	RenderSprites:
+		Image: aot-upgrade-stnk-cargo
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-stnk-cargo-upgrade
+
+	Interactable:
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - Vessel Gun Upgrade (NOD-exklusiv) ===
 # Transport Vessel erhält Gunboat-MG-Turret (MGUN). Ab Age 1 + FIX + SubPen.
 # Ändert Unit-Name in "Armed Transport Vessel".

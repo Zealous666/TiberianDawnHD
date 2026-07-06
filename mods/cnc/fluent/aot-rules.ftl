@@ -71,6 +71,10 @@ actor-aot-upgrade-msub-mine =
     .name = Mine Layer Upgrade
     .description = Equips the Missile Sub with a sea mine deployment system. Sub can lay up to 5 mines and rearm at the Sub Pen. Mines are cloaked to enemies. After upgrade, the sub fires 1 missile instead of 2.
 
+actor-aot-upgrade-stnk-cargo =
+    .name = Stealth Tank Cargo Upgrade
+    .description = Equips all Stealth Tanks with 5 infantry transport slots, including tanks already built.
+
 actor-aot-msub-drone =
     .name = Drone Attack Sub
 

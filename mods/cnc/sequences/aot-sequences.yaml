@@ -2423,6 +2423,12 @@ aot-upgrade-sub-cargo:
 		Filename: sub_cargo.png
 		Length: 1
 
+# Stealth Tank Cargo Upgrade Icon
+aot-upgrade-stnk-cargo:
+	icon:
+		Filename: stlh_cargo.png
+		Length: 1
+
 aot-upgrade-msub-mine:
 	icon:
 		Filename: sub_mine.png

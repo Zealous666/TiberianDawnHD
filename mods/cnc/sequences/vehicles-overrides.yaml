@@ -368,6 +368,10 @@ stnk:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\STNK.ZIP
 	icon:
 		RemasteredFilename:
+	aot-stnk-icon:
+		RemasteredFilename: stlh_base.png
+	aot-stnk-cargo-icon:
+		RemasteredFilename: stlh_cargo.png
 
 stnk.destroyed:
 	idle:
