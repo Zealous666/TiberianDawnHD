@@ -1536,7 +1536,7 @@ aot-tmpl-age2:
 		Prerequisites: anyhq, proc, ~techlevel.high, ~aot-age1, ~aot-age2, !aot-tmpl
 		BuildLimit: 1
 		Queue: Building.Nod
-		Icon: aot-age2-icon
+		Icon: icon
 		Description: actor-tmpl.description
 	Tooltip:
 		Name: actor-tmpl.name
