@@ -3403,7 +3403,7 @@ aot-upgrade-sam-bunkered:
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
-		Description: Reactivates the original recessed SAM silo. SAM sites retract underground between shots for increased armor protection.
+		Description: SAM sites retract underground between shots for increased armor protection.
 
 	Valued:
 		Cost: 400
