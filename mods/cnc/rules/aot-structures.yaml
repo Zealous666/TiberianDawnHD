@@ -578,7 +578,7 @@ aot-upgrade-e4-toxic:
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
-		Description: Upgrades all Flamethrowers, Flame Tanks, and Flame Towers with toxic weaponry for improved damage vs. all ground targets.
+		Description: Upgrades all Flamethrowers, Flame Tanks, Flame Towers, and the Nod Avatar with toxic weaponry for improved damage vs. all ground targets.
 
 	Valued:
 		Cost: 400
@@ -3422,7 +3422,7 @@ aot-upgrade-sam-cloak:
 
 	Buildable:
 		BuildPaletteOrder: 57
-		Prerequisites: ~aot-age2, aot-age2
+		Prerequisites: ~aot-age2, aot-age2, aot-sam-bunkered-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
