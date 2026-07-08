@@ -469,46 +469,45 @@ aot-nod-radar:
 		Filename: aot-nod-radar-age2-icon.png
 		RemasteredFilename:
 		Length: 1
-	# === TS NOD Radar (NARADR) ab Age 2 — Zwei-Layer + animierte Schüssel ===
-	# Alle age2-Sequenzen gleiche Scale/Offset → Basis, Schüssel, Remap, Make decken sich.
+	# === TS NOD Radar (NARADR) ab Age 2 — fixe Einzelbild-Basis + Dish-Overlay (2026-07-08) ===
+	# Aus dem gebackenen 24-Frame-Kombi-Sprite bei Linie 17 (native y=355) horizontal geteilt:
+	# oberhalb = Dish-Rotation (24 Frames), unterhalb = Basis, davon NUR Frame 0 einmalig
+	# verwendet -> Basis kann strukturell nicht mehr zwischen Frames springen, da es buchstaeblich
+	# immer derselbe Pixel-Frame ist. Scale identisch zum Kombi-Sprite (reiner Crop, keine
+	# Neuskalierung); Offsets aus der Kombi-Offset (2,111) fuer den jeweiligen Crop-Ausschnitt
+	# neu hergeleitet (Formel: screen_y = Scale*(y_nativ - Canvas_h/2 + Offset_y) muss fuer
+	# denselben y_nativ-Punkt in Voll- und Teil-Canvas uebereinstimmen).
 	aot-age2-idle:
-		Filename: radar-base-idle.png
+		Filename: aot-nod-radar-age2-base-only.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.5
-		Offset: 0,3
+		Scale: 0.0512
+		Offset: 2,289
 	damaged-aot-age2-idle:
-		Filename: radar-base-idle.png
+		Filename: aot-nod-radar-age2-base-only.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.5
-		Offset: 0,3
+		Scale: 0.0512
+		Offset: 2,289
 	aot-age2-remap:
-		Filename: radar-base-remap.png
+		Filename: aot-nod-radar-age2-base-only-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.5
-		Offset: 0,3
+		Scale: 0.0512
+		Offset: 2,289
 	damaged-aot-age2-remap:
-		Filename: radar-base-remap.png
+		Filename: aot-nod-radar-age2-base-only-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.5
-		Offset: 0,3
+		Scale: 0.0512
+		Offset: 2,289
 	aot-age2-dish:
-		Filename: radar-dish.png
+		Filename: aot-nod-radar-age2-dish-only.png
 		RemasteredFilename:
 		Length: 24
 		Tick: 120
-		Scale: 0.5
-		Offset: 0,3
-	aot-age2-dish-remap:
-		Filename: radar-dish-remap.png
-		RemasteredFilename:
-		Length: 24
-		Tick: 120
-		Scale: 0.5
-		Offset: 0,3
+		Scale: 0.0512
+		Offset: 2,-25
 	aot-age2-make:
 		Filename: radar-make.png
 		RemasteredFilename:
@@ -531,44 +530,40 @@ aot-nod-radar-age1:
 		Tick: 120
 		Scale: 0.57
 		Offset: 0,-30
+	# Synchronisiert mit dem Hauptblock 'aot-nod-radar' (siehe Kommentar dort) — Gebaeude, die
+	# bereits in Age 1 als aot-nod-radar-age1 platziert wurden, bleiben diese Actor-Instanz,
+	# auch nachdem Age 2 aktiviert. Ohne diesen Sync wuerden sie weiter die alten Sprites zeigen.
 	aot-age2-idle:
-		Filename: radar-base-idle.png
+		Filename: aot-nod-radar-age2-base-only.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.5
-		Offset: 0,3
+		Scale: 0.0512
+		Offset: 2,289
 	damaged-aot-age2-idle:
-		Filename: radar-base-idle.png
+		Filename: aot-nod-radar-age2-base-only.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.5
-		Offset: 0,3
+		Scale: 0.0512
+		Offset: 2,289
 	aot-age2-remap:
-		Filename: radar-base-remap.png
+		Filename: aot-nod-radar-age2-base-only-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.5
-		Offset: 0,3
+		Scale: 0.0512
+		Offset: 2,289
 	damaged-aot-age2-remap:
-		Filename: radar-base-remap.png
+		Filename: aot-nod-radar-age2-base-only-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.5
-		Offset: 0,3
+		Scale: 0.0512
+		Offset: 2,289
 	aot-age2-dish:
-		Filename: radar-dish.png
+		Filename: aot-nod-radar-age2-dish-only.png
 		RemasteredFilename:
 		Length: 24
 		Tick: 120
-		Scale: 0.5
-		Offset: 0,3
-	aot-age2-dish-remap:
-		Filename: radar-dish-remap.png
-		RemasteredFilename:
-		Length: 24
-		Tick: 120
-		Scale: 0.5
-		Offset: 0,3
+		Scale: 0.0512
+		Offset: 2,-25
 	aot-age2-make:
 		Filename: radar-make.png
 		RemasteredFilename:

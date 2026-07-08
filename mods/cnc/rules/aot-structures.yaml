@@ -1490,25 +1490,28 @@ aot-nod-radar:
 		Name: body-age1
 		PauseOnCondition: lowpower
 		RequiresCondition: aot-age1-active && !aot-age2-active
+	# Basis = EINZIGES fixes Frame (aus dem Kombi-Sprite bei Linie 17 abgeschnitten) -> kann
+	# strukturell nicht zwischen Frames springen. Dish = separate 24-Frame-Overlay-Animation
+	# (oberer Teil desselben Kombi-Sprites), liegt immer VOR der Basis (wie im echten TS-Original,
+	# das ebenfalls nie dynamisch verdeckt hat - siehe radar-system.md).
 	WithSpriteBody@age2:
 		Sequence: aot-age2-idle
 		Name: body-age2
 		PauseOnCondition: lowpower
 		RequiresCondition: aot-age2-active
-	# Player-Color-Overlay (Body, Indizes 176-191 → player-Palette).
+		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
+		# PlayerColorShift verschiebt jeden Pixel im Gruen-Hue-Fenster (0.29-0.37) zur
+		# Spielerfarbe (siehe silo-system.md). Body ist RGBA/truecolor -> explizit absichern.
+		Palette: effect
+		IsPlayerPalette: false
+	# Player-Color-Overlay (Emblem sitzt auf der fixen Basis -> ein statisches Frame reicht).
+	# Indiziertes Sprite, Player-Fallback hier korrekt/gewollt (direkter Index-Remap, kein ColorShift).
 	WithSpriteBody@age2remap:
 		Sequence: aot-age2-remap
 		Name: body-age2-remap
 		RequiresCondition: aot-age2-active && !build-incomplete
-	# Rotierende Radarschüssel (animiert) — Body + Player-Color-Overlay.
 	WithIdleOverlay@dish:
 		Sequence: aot-age2-dish
-		PauseOnCondition: lowpower
-		RequiresCondition: aot-age2-active && !build-incomplete
-	WithIdleOverlay@dishremap:
-		Sequence: aot-age2-dish-remap
-		Palette: player
-		IsPlayerPalette: True
 		PauseOnCondition: lowpower
 		RequiresCondition: aot-age2-active && !build-incomplete
 	-WithMakeAnimation:
