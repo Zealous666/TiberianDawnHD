@@ -58,6 +58,10 @@ bggy:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\COMMON\VFX\MINIGUN.ZIP
 	icon:
 		RemasteredFilename:
+	aot-bggy-icon:
+		RemasteredFilename: bggy_base.png
+	aot-bggy-laser-icon:
+		RemasteredFilename: bggy_laser.png
 
 bggy.destroyed:
 	Defaults:
@@ -148,23 +152,17 @@ aot-upgrade-ttnk:
 		Filename: ttnk_flame.png
 		RemasteredFilename:
 
-aot-upgrade-ttnk-toxin:
-	icon:
-		Filename: ttnk_gas.png
-		RemasteredFilename:
-
-aot-upgrade-ttnk-cloak:
-	icon:
-		Filename: ttnk_cloak.png
-		RemasteredFilename:
+# aot-upgrade-ttnk-toxin/aot-upgrade-ttnk-cloak Icons entfernt (2026-07-04) -
+# beide Aktoren geloescht, Toxin kommt jetzt ueber das konsolidierte
+# aot-upgrade-e4-toxic, Stealth-Tank-Upgrade komplett entfernt.
 
 aot-upgrade-ltnk-tick:
 	icon:
 		RemasteredFilename: ltnk_tick.png
 
-aot-upgrade-ltnk:
-	icon:
-		RemasteredFilename: ltnk_laser.png
+# aot-upgrade-ltnk Icon entfernt (2026-07-05) - Aktor geloescht, Laser-Switch
+# laeuft jetzt ueber das konsolidierte aot-upgrade-laser-fence ("Laser
+# Technologies").
 
 # === Age of Tiberium (aotmod) - Recon Jeep / HUMVEE / APC Icons ===
 jeep:

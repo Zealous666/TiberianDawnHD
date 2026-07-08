@@ -972,4 +972,48 @@ aot-HoverAAGunGarrisoned:
 	Inherits: aot-HoverAAGun
 	Projectile: Bullet
 		Blockable: false
+
+# Restliche Fire-Position-faehige Fahrzeuge (2026-07-06): JEEP/BGGY/HTNK/LTNK/TTNK/APC.
+# BIKE (BikeRockets) und die Laser-Waffen (aot-HarpyLaser/aot-HtnkLaser/aot-LtnkLaser,
+# alle LaserZap) sind bereits Blockable:false per Engine-/Waffen-Default - direkte
+# Wiederverwendung ohne eigene Garrisoned-Kopie (wie 227mm bei MSAM oben).
+aot-MachineGunHGarrisoned:
+	Inherits: MachineGunH
+	Projectile: Bullet
+		Blockable: false
+
+aot-JeepHumveeGarrisoned:
+	Inherits: aot-JeepHumvee
+	Projectile: Bullet
+		Blockable: false
+
+aot-MachineGunGarrisoned:
+	Inherits: MachineGun
+	Projectile: Bullet
+		Blockable: false
+
+aot-120mmDualGarrisoned:
+	Inherits: 120mmDual
+	Projectile: Bullet
+		Blockable: false
+
+aot-70mmGarrisoned:
+	Inherits: 70mm
+	Projectile: Bullet
+		Blockable: false
+
+aot-TtnkDualGarrisoned:
+	Inherits: aot-TtnkDual
+	Projectile: Bullet
+		Blockable: false
+
+aot-BigFlamerGarrisoned:
+	Inherits: BigFlamer
+	Projectile: Bullet
+		Blockable: false
+
+aot-TtnkChemsprayGarrisoned:
+	Inherits: aot-TtnkChemspray
+	Projectile: Bullet
+		Blockable: false
 # === Ende aotmod ===

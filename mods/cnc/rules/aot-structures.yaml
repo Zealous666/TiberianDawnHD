@@ -80,14 +80,39 @@ LITE:
 		ProductionType: LightVehicle.Nod
 	Power:
 		Amount: -20
+	GrantConditionOnPrerequisite@aotage2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
 	RenderSprites:
 		Image: lite
-	WithSpriteBody:
+	-WithSpriteBody:
+	WithSpriteBody@base:
 		Sequence: idle
 		Name: body
+		RequiresCondition: !aot-age2-active
+	WithSpriteBody@ts:
+		Sequence: aot-age2-idle
+		Name: body-ts
+		RequiresCondition: aot-age2-active
+	WithIdleOverlay@tsremap:
+		Sequence: aot-age2-idle-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-age2-active && !build-incomplete
 	WithIdleOverlay@ROOF:
 		Sequence: roof
-		RequiresCondition: !build-incomplete
+		RequiresCondition: !build-incomplete && !aot-age2-active
+	-WithMakeAnimation:
+	WithMakeAnimation@base:
+		BodyNames: body
+		Condition: build-incomplete
+		Sequence: make
+		RequiresCondition: !aot-age2-active
+	WithMakeAnimation@ts:
+		BodyNames: body-ts
+		Condition: build-incomplete
+		Sequence: aot-age2-make
+		RequiresCondition: aot-age2-active
 	-ActorPreviewPlaceBuildingPreview:
 	SequencePlaceBuildingPreview:
 		Sequence: place
@@ -158,7 +183,19 @@ FACT:
 	WithSpriteBody@td:
 		Sequence: idle
 		Name: body-td
-		RequiresCondition: aot-age1-active
+		RequiresCondition: aot-age1-active && !aot-age2-active
+	WithSpriteBody@ts:
+		Sequence: aot-age2-idle
+		Name: body-ts
+		RequiresCondition: aot-age2-active
+	WithIdleOverlay@tsremap:
+		Sequence: aot-age2-idle-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-age2-active && !build-incomplete
+	WithIdleOverlay@lights:
+		Sequence: aot-age2-lights
+		RequiresCondition: aot-age2-active && !build-incomplete
 	-WithMakeAnimation:
 	WithMakeAnimation@ra:
 		BodyNames: body
@@ -168,6 +205,10 @@ FACT:
 		BodyNames: body-td
 		Condition: build-incomplete
 		Sequence: make
+	WithMakeAnimation@ts:
+		BodyNames: body-ts
+		Condition: build-incomplete
+		Sequence: aot-age2-make
 	-WithBuildingPlacedAnimation:
 	WithBuildingPlacedAnimation@ra:
 		Body: body
@@ -175,7 +216,7 @@ FACT:
 		RequiresCondition: !aot-age1-active
 	WithBuildingPlacedAnimation@td:
 		Body: body-td
-		RequiresCondition: aot-age1-active
+		RequiresCondition: aot-age1-active && !aot-age2-active
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - PYLE: RA Allied Barracks Sprites in Age 0, TD ab Age 1 ===
@@ -187,6 +228,9 @@ PYLE:
 	GrantConditionOnPrerequisite@aotage1:
 		Condition: aot-age1-active
 		Prerequisites: aot-age1
+	GrantConditionOnPrerequisite@aotage2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
 	-WithSpriteBody:
 	WithSpriteBody@ra:
 		Sequence: aot-ra-idle
@@ -195,7 +239,16 @@ PYLE:
 	WithSpriteBody@td:
 		Sequence: idle
 		Name: body-td
-		RequiresCondition: aot-age1-active
+		RequiresCondition: aot-age1-active && !aot-age2-active
+	WithSpriteBody@ts:
+		Sequence: aot-age2-idle
+		Name: body-ts
+		RequiresCondition: aot-age2-active
+	WithIdleOverlay@tsremap:
+		Sequence: aot-age2-idle-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-age2-active && !build-incomplete
 	-WithMakeAnimation:
 	WithMakeAnimation@ra:
 		BodyNames: body
@@ -205,6 +258,10 @@ PYLE:
 		BodyNames: body-td
 		Condition: build-incomplete
 		Sequence: make
+	WithMakeAnimation@ts:
+		BodyNames: body-ts
+		Condition: build-incomplete
+		Sequence: aot-age2-make
 	WithBuildingPlacedAnimation@ra:
 		Body: body
 		Sequence: aot-ra-build
@@ -212,7 +269,7 @@ PYLE:
 	WithBuildingPlacedAnimation@td:
 		Body: body-td
 		Sequence: make
-		RequiresCondition: aot-age1-active
+		RequiresCondition: aot-age1-active && !aot-age2-active
 
 aot-pyle-age0:
 	Inherits: PYLE
@@ -246,8 +303,27 @@ aot-pyle-age1:
 	Buildable:
 		Queue: Building.GDI
 		BuildPaletteOrder: 20
-		Prerequisites: ~aot-age1, anypower
+		Prerequisites: ~aot-age1, ~!aot-age2, anypower
 		Icon: aot-td-icon
+		Description: Trains infantry.
+	Tooltip:
+		Name: actor-pyle.name
+
+aot-pyle-age2:
+	Inherits: PYLE
+	RenderSprites:
+		Image: pyle
+	ProvidesPrerequisite@pylename:
+		Prerequisite: pyle
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: aot-age2-idle
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.GDI
+		BuildPaletteOrder: 20
+		Prerequisites: ~aot-age2, anypower
+		Icon: aot-age2-icon
 		Description: Trains infantry.
 	Tooltip:
 		Name: actor-pyle.name
@@ -260,6 +336,9 @@ HAND:
 	GrantConditionOnPrerequisite@aotage1:
 		Condition: aot-age1-active
 		Prerequisites: aot-age1
+	GrantConditionOnPrerequisite@aotage2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
 	-WithSpriteBody:
 	WithSpriteBody@ra:
 		Sequence: aot-ra-idle
@@ -268,7 +347,16 @@ HAND:
 	WithSpriteBody@td:
 		Sequence: idle
 		Name: body-td
-		RequiresCondition: aot-age1-active
+		RequiresCondition: aot-age1-active && !aot-age2-active
+	WithSpriteBody@ts:
+		Sequence: aot-age2-idle
+		Name: body-ts
+		RequiresCondition: aot-age2-active
+	WithIdleOverlay@tsremap:
+		Sequence: aot-age2-idle-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-age2-active && !build-incomplete
 	-WithMakeAnimation:
 	WithMakeAnimation@ra:
 		BodyNames: body
@@ -278,6 +366,10 @@ HAND:
 		BodyNames: body-td
 		Condition: build-incomplete
 		Sequence: make
+	WithMakeAnimation@ts:
+		BodyNames: body-ts
+		Condition: build-incomplete
+		Sequence: aot-age2-make
 	WithBuildingPlacedAnimation@ra:
 		Body: body
 		Sequence: aot-ra-build
@@ -285,7 +377,7 @@ HAND:
 	WithBuildingPlacedAnimation@td:
 		Body: body-td
 		Sequence: make
-		RequiresCondition: aot-age1-active
+		RequiresCondition: aot-age1-active && !aot-age2-active
 
 aot-hand-age0:
 	Inherits: HAND
@@ -319,8 +411,27 @@ aot-hand-age1:
 	Buildable:
 		Queue: Building.Nod
 		BuildPaletteOrder: 20
-		Prerequisites: ~aot-age1, anypower
+		Prerequisites: ~aot-age1, ~!aot-age2, anypower
 		Icon: aot-td-icon
+		Description: Trains infantry.
+	Tooltip:
+		Name: actor-hand.name
+
+aot-hand-age2:
+	Inherits: HAND
+	RenderSprites:
+		Image: hand
+	ProvidesPrerequisite@handname:
+		Prerequisite: hand
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: aot-age2-idle
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.Nod
+		BuildPaletteOrder: 20
+		Prerequisites: ~aot-age2, anypower
+		Icon: aot-age2-icon
 		Description: Trains infantry.
 	Tooltip:
 		Name: actor-hand.name
@@ -1292,7 +1403,7 @@ aot-hq-base:
 	Buildable:
 		Queue: Building.GDI
 		BuildPaletteOrder: 50
-		Prerequisites: vehicleproduction, ~techlevel.medium, ~!aot-ion-cannon-upgrade
+		Prerequisites: vehicleproduction, ~techlevel.medium, ~!aot-age2, ~!aot-ion-cannon-upgrade
 		Icon: aot-base-icon
 
 aot-hq-ion:
@@ -1302,7 +1413,27 @@ aot-hq-ion:
 	Buildable:
 		Queue: Building.GDI
 		BuildPaletteOrder: 50
-		Prerequisites: vehicleproduction, ~techlevel.medium, ~aot-ion-cannon-upgrade
+		Prerequisites: vehicleproduction, ~techlevel.medium, ~!aot-age2, ~aot-ion-cannon-upgrade
+		Icon: aot-ion-icon
+
+aot-hq-base-age2:
+	Inherits: HQ
+	RenderSprites:
+		Image: hq
+	Buildable:
+		Queue: Building.GDI
+		BuildPaletteOrder: 50
+		Prerequisites: vehicleproduction, ~aot-age2, ~!aot-ion-cannon-upgrade
+		Icon: aot-age2-icon
+
+aot-hq-ion-age2:
+	Inherits: HQ
+	RenderSprites:
+		Image: hq
+	Buildable:
+		Queue: Building.GDI
+		BuildPaletteOrder: 50
+		Prerequisites: vehicleproduction, ~aot-age2, ~aot-ion-cannon-upgrade
 		Icon: aot-ion-icon
 # === Ende aotmod ===
 
@@ -1954,6 +2085,10 @@ FIX:
 	GrantConditionOnPrerequisite@aotage1:
 		Condition: aot-age1-active
 		Prerequisites: aot-age1
+	# Age-2: beide Fraktionen wechseln auf TS GADEPT-Sprite
+	GrantConditionOnPrerequisite@aotage2:
+		Condition: aot-fix-age2-active
+		Prerequisites: aot-age2
 	-WithSpriteBody:
 	WithSpriteBody@ra:
 		Sequence: aot-ra-idle
@@ -1962,7 +2097,16 @@ FIX:
 	WithSpriteBody@td:
 		Sequence: idle
 		Name: body-td
-		RequiresCondition: aot-age1-active
+		RequiresCondition: aot-age1-active && !aot-fix-age2-active
+	WithSpriteBody@ts:
+		Sequence: aot-age2-nod-idle
+		Name: body-ts
+		RequiresCondition: aot-fix-age2-active
+	WithIdleOverlay@tsremap:
+		Sequence: aot-age2-nod-idle-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-fix-age2-active && !build-incomplete
 	-WithMakeAnimation:
 	WithMakeAnimation@ra:
 		BodyNames: body
@@ -1972,6 +2116,11 @@ FIX:
 		BodyNames: body-td
 		Condition: build-incomplete
 		Sequence: make
+	WithMakeAnimation@ts:
+		BodyNames: body-ts
+		Condition: build-incomplete
+		Sequence: aot-age2-nod-make
+		RequiresCondition: aot-fix-age2-active
 	WithBuildingPlacedAnimation@ra:
 		Body: body
 		Sequence: aot-ra-build
@@ -1979,7 +2128,7 @@ FIX:
 	WithBuildingPlacedAnimation@td:
 		Body: body-td
 		Sequence: make
-		RequiresCondition: aot-age1-active
+		RequiresCondition: aot-age1-active && !aot-fix-age2-active
 
 aot-fix-age0:
 	Inherits: FIX
@@ -2011,9 +2160,66 @@ aot-fix-age1:
 		Sequence: idle
 		SequenceAlpha: 0.65
 	Buildable:
-		Queue: Building.GDI, Building.Nod
+		Queue: Building.GDI
 		BuildPaletteOrder: 40
-		Prerequisites: ~aot-age1, vehicleproduction
+		Prerequisites: ~aot-age1, ~!aot-age2, vehicleproduction
+		Icon: aot-td-icon
+		Description: Repairs vehicles.
+	Tooltip:
+		Name: actor-fix.name
+
+aot-fix-age2:
+	Inherits: FIX
+	RenderSprites:
+		Image: fix
+	ProvidesPrerequisite@fixname:
+		Prerequisite: fix
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: aot-age2-nod-idle
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.GDI
+		BuildPaletteOrder: 40
+		Prerequisites: ~aot-age2, vehicleproduction
+		Icon: aot-td-icon
+		Description: Repairs vehicles.
+	Tooltip:
+		Name: actor-fix.name
+
+aot-fix-age1-nod:
+	Inherits: FIX
+	RenderSprites:
+		Image: fix
+	ProvidesPrerequisite@fixname:
+		Prerequisite: fix
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: idle
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.Nod
+		BuildPaletteOrder: 40
+		Prerequisites: ~aot-age1, ~!aot-age2, vehicleproduction
+		Icon: aot-td-icon
+		Description: Repairs vehicles.
+	Tooltip:
+		Name: actor-fix.name
+
+aot-fix-age2-nod:
+	Inherits: FIX
+	RenderSprites:
+		Image: fix
+	ProvidesPrerequisite@fixname:
+		Prerequisite: fix
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: aot-age2-nod-idle
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.Nod
+		BuildPaletteOrder: 40
+		Prerequisites: ~aot-age2, vehicleproduction
 		Icon: aot-td-icon
 		Description: Repairs vehicles.
 	Tooltip:
@@ -2042,16 +2248,54 @@ NUKE:
 	WithSpriteBody@td:
 		Sequence: idle
 		Name: body-td
-		RequiresCondition: aot-age1-active && !aot-turbine-active
+		RequiresCondition: aot-age1-active && !aot-age2-gdi && !aot-age2-nod && !aot-turbine-active
+	# GDI Age-2: aot-weap nur bei GDI vorhanden → schaltet GDI-spezifischen TS-Sprite
+	GrantConditionOnPrerequisite@aotage2gdi:
+		Condition: aot-age2-gdi
+		Prerequisites: aot-age2, aot-weap
+	# NOD Age-2: afld nur bei NOD vorhanden → schaltet NOD-spezifischen TS-Sprite
+	GrantConditionOnPrerequisite@aotage2nod:
+		Condition: aot-age2-nod
+		Prerequisites: aot-age2, afld
+	# Age-2 GDI, kein Turbinen-Upgrade → GDI TS GTPOWR ohne Turbinen
+	WithSpriteBody@ts:
+		Sequence: aot-age2-idle
+		Name: body-ts
+		RequiresCondition: aot-age2-gdi && !aot-turbine-active
+	WithIdleOverlay@tsremap:
+		Sequence: aot-age2-idle-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-age2-gdi && !aot-turbine-active && !build-incomplete
+	# Age-2 GDI + Turbinen-Upgrade → GDI TS GTPOWR mit Turbinen
+	WithSpriteBody@tsturbine:
+		Sequence: aot-age2-turbine-idle
+		Name: body-tsturbine
+		RequiresCondition: aot-age2-gdi && aot-turbine-active
+	WithIdleOverlay@tsturbineremap:
+		Sequence: aot-age2-turbine-idle-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-age2-gdi && aot-turbine-active && !build-incomplete
+	# Age-2 NOD → NOD TS NTPOWR
+	WithSpriteBody@tsnod:
+		Sequence: aot-age2-nod-idle
+		Name: body-tsnod
+		RequiresCondition: aot-age2-nod
+	WithIdleOverlay@tsnodrremap:
+		Sequence: aot-age2-nod-idle-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-age2-nod && !build-incomplete
+	# Age-1, Turbinen-Upgrade → TD NUKE + Turbinen (unverändert)
 	WithSpriteBody@turbine:
 		Sequence: aot-turbine-idle
 		Name: body-turbine
-		RequiresCondition: aot-turbine-active
-	# Player-Color-Overlay-Layer (indizierte Maske 176-191 → player-Palette, dynamisch).
+		RequiresCondition: !aot-age2-gdi && aot-turbine-active
 	WithSpriteBody@turbineremap:
 		Sequence: aot-turbine-remap
 		Name: body-turbine-remap
-		RequiresCondition: aot-turbine-active && !build-incomplete
+		RequiresCondition: !aot-age2-gdi && aot-turbine-active && !build-incomplete
 	-WithMakeAnimation:
 	WithMakeAnimation@ra:
 		BodyNames: body
@@ -2061,6 +2305,16 @@ NUKE:
 		BodyNames: body-td
 		Condition: build-incomplete
 		Sequence: make
+	WithMakeAnimation@ts:
+		BodyNames: body-ts
+		Condition: build-incomplete
+		Sequence: aot-age2-make
+		RequiresCondition: aot-age2-gdi && !aot-turbine-active
+	WithMakeAnimation@tsnod:
+		BodyNames: body-tsnod
+		Condition: build-incomplete
+		Sequence: aot-age2-nod-make
+		RequiresCondition: aot-age2-nod
 	WithMakeAnimation@turbine:
 		BodyNames: body-turbine
 		Condition: build-incomplete
@@ -2102,7 +2356,7 @@ aot-nuke-age1:
 	Buildable:
 		Queue: Building.GDI, Building.Nod
 		BuildPaletteOrder: 10
-		Prerequisites: ~aot-age1, ~!aot-nuke-turbine-upgrade, fact
+		Prerequisites: ~aot-age1, ~!aot-age2, ~!aot-nuke-turbine-upgrade, fact
 		Icon: aot-td-icon
 		Description: Generates power.
 	Tooltip:
@@ -2119,7 +2373,41 @@ aot-nuke-turbine:
 	Buildable:
 		Queue: Building.GDI
 		BuildPaletteOrder: 10
-		Prerequisites: ~aot-age1, ~aot-nuke-turbine-upgrade, fact
+		Prerequisites: ~aot-age1, ~!aot-age2, ~aot-nuke-turbine-upgrade, fact
+		Icon: aot-turbine-icon
+		Description: Generates power.
+	Tooltip:
+		Name: actor-nuke.name
+
+aot-nuke-age2:
+	Inherits: NUKE
+	RenderSprites:
+		Image: nuke
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: aot-age2-idle
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.GDI, Building.Nod
+		BuildPaletteOrder: 10
+		Prerequisites: ~aot-age2, ~!aot-nuke-turbine-upgrade, fact
+		Icon: aot-age2-icon
+		Description: Generates power.
+	Tooltip:
+		Name: actor-nuke.name
+
+aot-nuke-turbine-age2:
+	Inherits: NUKE
+	RenderSprites:
+		Image: nuke
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: aot-age2-turbine-idle
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.GDI
+		BuildPaletteOrder: 10
+		Prerequisites: ~aot-age2, ~aot-nuke-turbine-upgrade, fact
 		Icon: aot-turbine-icon
 		Description: Generates power.
 	Tooltip:
@@ -2146,6 +2434,9 @@ NUK2:
 		Condition: aot-age1-active
 		Prerequisites: aot-age1
 	-WithSpriteBody:
+	GrantConditionOnPrerequisite@aotage2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
 	WithSpriteBody@ra:
 		Sequence: aot-ra-idle
 		Name: body
@@ -2153,7 +2444,16 @@ NUK2:
 	WithSpriteBody@td:
 		Sequence: idle
 		Name: body-td
-		RequiresCondition: aot-age1-active
+		RequiresCondition: aot-age1-active && !aot-age2-active
+	WithSpriteBody@ts:
+		Sequence: aot-age2-idle
+		Name: body-ts
+		RequiresCondition: aot-age2-active
+	WithIdleOverlay@tsremap:
+		Sequence: aot-age2-idle-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-age2-active && !build-incomplete
 	-WithMakeAnimation:
 	WithMakeAnimation@ra:
 		BodyNames: body
@@ -2163,6 +2463,10 @@ NUK2:
 		BodyNames: body-td
 		Condition: build-incomplete
 		Sequence: make
+	WithMakeAnimation@ts:
+		BodyNames: body-ts
+		Condition: build-incomplete
+		Sequence: aot-age2-make
 
 aot-nuk2-age0:
 	Inherits: NUK2
@@ -2192,8 +2496,25 @@ aot-nuk2-age1:
 	Buildable:
 		Queue: Building.Nod
 		BuildPaletteOrder: 70
-		Prerequisites: ~aot-age1, nuke, anyhq
+		Prerequisites: ~aot-age1, ~!aot-age2, nuke, anyhq
 		Icon: aot-td-icon
+		Description: Generates more power than the standard Power Plant.
+	Tooltip:
+		Name: actor-nuk2.name
+
+aot-nuk2-age2:
+	Inherits: NUK2
+	RenderSprites:
+		Image: nuk2
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: aot-age2-idle
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.Nod
+		BuildPaletteOrder: 70
+		Prerequisites: ~aot-age2, nuke, anyhq
+		Icon: aot-age2-icon
 		Description: Generates more power than the standard Power Plant.
 	Tooltip:
 		Name: actor-nuk2.name
@@ -2789,6 +3110,49 @@ PROC:
 		Types: SpyInfiltrate
 		InfiltratedNotification: BuildingInfiltrated
 		InfiltratedTextNotification: notification-building-infiltrated
+	-WithResourceLevelOverlay:
+	GrantConditionOnPrerequisite@aotage2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
+	-WithSpriteBody:
+	WithSpriteBody@base:
+		Sequence: idle
+		Name: body
+		RequiresCondition: !aot-age2-active
+	WithSpriteBody@ts:
+		Sequence: aot-age2-idle
+		Name: body-ts
+		RequiresCondition: aot-age2-active
+	WithIdleOverlay@tsremap:
+		Sequence: aot-age2-idle-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-age2-active && !build-incomplete
+	WithIdleOverlay@tsanim:
+		Sequence: aot-age2-anim
+		RequiresCondition: aot-age2-active && !build-incomplete
+	-WithMakeAnimation:
+	WithMakeAnimation@base:
+		BodyNames: body
+		Condition: build-incomplete
+		Sequence: make
+	WithMakeAnimation@ts:
+		BodyNames: body-ts
+		Condition: build-incomplete
+		Sequence: aot-age2-make
+
+WEAP:
+	WithProductionDoorOverlay:
+		RequiresCondition: !build-incomplete
+	-WithSpriteBody:
+	WithSpriteBody@base:
+		Sequence: idle
+		Name: body
+	-WithMakeAnimation:
+	WithMakeAnimation@base:
+		BodyNames: body
+		Condition: build-incomplete
+		Sequence: make
 
 SILO:
 	InfiltrateForCash:
@@ -2840,11 +3204,20 @@ SILO:
 		Sequence: aot-ts-idle
 		Name: body-ts
 		RequiresCondition: aot-age2-active
+		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player"
+		# zurueck -> PlayerColorShift (combined.frag ColorShift(), MinHue 0.29 /
+		# MaxHue 0.37) verschiebt JEDEN Pixel im Gruen-Farbton zur Spielerfarbe.
+		# 71,7% des Tiberium-Gruens (Hue ~0.343) liegen drin -> Tiberium wurde blau.
+		# Gleiches Muster wie bei den Gates, siehe ts-gates-system.md.
+		Palette: effect
+		IsPlayerPalette: false
+	# Player-Color kommt ausschliesslich ueber dieses indizierte Remap-Overlay
+	# (Indizes 187-190 -> PlayerColorPalette RemapIndex 176-191): Streben + Fin.
 	WithIdleOverlay@tsremap:
 		Sequence: aot-ts-idle-remap
 		Palette: player
 		IsPlayerPalette: True
-		RequiresCondition: aot-age2-active
+		RequiresCondition: aot-age2-active && !build-incomplete
 	-WithMakeAnimation:
 	WithMakeAnimation@ra:
 		BodyNames: body

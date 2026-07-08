@@ -676,6 +676,17 @@ JEEP:
 		LocalOffset: 171,0,85
 		MuzzleSequence: muzzle
 		RequiresCondition: aot-jeep-humvee
+
+	# Fire Position (Phase 3) Garrison-Waffen, gleiche Conditions wie oben.
+	Armament@garrisoned:
+		Name: garrisoned
+		Weapon: aot-MachineGunHGarrisoned
+		RequiresCondition: !aot-jeep-humvee
+
+	Armament@garrisonedhumvee:
+		Name: garrisoned
+		Weapon: aot-JeepHumveeGarrisoned
+		RequiresCondition: aot-jeep-humvee
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - MTNK Queue-Proxies (Doppel-Aktor-Pattern) ===
@@ -881,6 +892,25 @@ HTNK:
 		LocalOffset: 900,180,340, 900,-180,340
 		RequiresCondition: aot-htnk-laser
 
+	# Fire Position (Phase 3) Garrison-Waffen. Haupt-120mm/Railgun UND optionaler
+	# Rocket-Launcher (secondary) - beide Namen "garrisoned", feuern gleichzeitig
+	# (AttackGarrisoned.Armaments filtert per Name, nicht per Instanz), genau wie
+	# die normalen primary+secondary-Waffen am echten HTNK gleichzeitig feuern.
+	Armament@garrisoned:
+		Name: garrisoned
+		Weapon: aot-120mmDualGarrisoned
+		RequiresCondition: !aot-htnk-laser
+
+	Armament@garrisonedlaser:
+		Name: garrisoned
+		Weapon: aot-HtnkLaser
+		RequiresCondition: aot-htnk-laser
+
+	Armament@garrisonedrocket:
+		Name: garrisoned
+		Weapon: MammothMissiles
+		RequiresCondition: aot-htnk-rocket
+
 	-WithSpriteTurret:
 
 	WithSpriteTurret@base:
@@ -915,6 +945,22 @@ APC:
 		RequiresCondition: !aot-amphibious-upgrade
 
 	Armament@SECONDARY:
+		RequiresCondition: !aot-amphibious-upgrade
+
+	# Fire Position (Phase 3) Garrison-Waffen. Kein Turret (AttackFrontal) - der
+	# ganze Koerper zielt beim Garnisonieren, wie bei jeder turmlosen Einheit.
+	# Ground- (primary) UND Air-Waffe (secondary, ererbte vanilla APCGun.AA -
+	# bereits Blockable:false) feuern gleichzeitig, beide Name "garrisoned".
+	# Amphibische APC ist waffenlos (siehe Armament@PRIMARY/@SECONDARY oben),
+	# daher keine Garrison-Waffe fuer den amphibischen Zustand.
+	Armament@garrisoned:
+		Name: garrisoned
+		Weapon: aot-JeepHumveeGarrisoned
+		RequiresCondition: !aot-amphibious-upgrade
+
+	Armament@garrisonedair:
+		Name: garrisoned
+		Weapon: APCGun.AA
 		RequiresCondition: !aot-amphibious-upgrade
 
 	GrantConditionOnPrerequisite@AMPHIBIOUS:
@@ -1178,6 +1224,17 @@ LTNK:
 		MuzzleSequence: muzzle
 
 	Armament@upgraded2:
+		Weapon: aot-LtnkLaser
+		RequiresCondition: aot-ltnk-upgraded2
+
+	# Fire Position (Phase 3) Garrison-Waffen, gleiche Conditions wie oben.
+	Armament@garrisoned:
+		Name: garrisoned
+		Weapon: aot-70mmGarrisoned
+		RequiresCondition: !aot-ltnk-upgraded2
+
+	Armament@garrisonedlaser:
+		Name: garrisoned
 		Weapon: aot-LtnkLaser
 		RequiresCondition: aot-ltnk-upgraded2
 		LocalOffset: 768,0,90
@@ -1641,6 +1698,19 @@ TTNK:
 		Weapon: aot-TtnkChemspray
 		LocalOffset: 512,128,42, 512,-128,42
 		MuzzleSequence: aot-toxin-muzzle
+		RequiresCondition: aot-ttnk-toxin
+	# Fire Position (Phase 3) Garrison-Waffen, gleiche Conditions wie oben.
+	Armament@garrisoned:
+		Name: garrisoned
+		Weapon: aot-TtnkDualGarrisoned
+		RequiresCondition: !aot-ttnk-flame
+	Armament@garrisonedflame:
+		Name: garrisoned
+		Weapon: aot-BigFlamerGarrisoned
+		RequiresCondition: aot-ttnk-flame && !aot-ttnk-toxin
+	Armament@garrisonedtoxin:
+		Name: garrisoned
+		Weapon: aot-TtnkChemsprayGarrisoned
 		RequiresCondition: aot-ttnk-toxin
 	Encyclopedia:
 		Description: actor-ttnk.encyclopedia

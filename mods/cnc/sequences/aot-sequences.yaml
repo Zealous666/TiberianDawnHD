@@ -376,6 +376,45 @@ hq:
 		Start: 16
 		Length: 16
 		Tick: 100
+	aot-age2-icon:
+		Filename: hq_base.png
+		RemasteredFilename:
+		Length: 1
+	aot-age2-idle:
+		Filename: aot-gtradr-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+	damaged-aot-age2-idle:
+		Filename: aot-gtradr-damaged-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+	aot-age2-idle-remap:
+		Filename: aot-gtradr-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+	damaged-aot-age2-idle-remap:
+		Filename: aot-gtradr-damaged-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+	aot-age2-anim:
+		Filename: aot-gtradr-anim.png
+		RemasteredFilename:
+		Length: 15
+		Scale: 0.55
+	aot-age2-make:
+		Filename: aot-gtradr-make.png
+		RemasteredFilename:
+		Length: 20
+		Scale: 0.55
+	aot-age2-make-remap:
+		Filename: aot-gtradr-make-remap.png
+		RemasteredFilename:
+		Length: 20
+		Scale: 0.55
 # === Ende aotmod ===
 
 # === NOD Radar (aot-nod-radar): RA DOME Sprites ===
@@ -620,6 +659,54 @@ fact:
 		RemasteredStart: 27
 		RemasteredLength: 25
 		Scale: 0.85
+		# Age-2: Gemini-Render GDI Construction Yard
+	aot-age2-icon:
+		Filename: aot-gtcnst-gemini-idle.png
+		RemasteredFilename:
+		Length: 1
+	aot-age2-idle:
+		Filename: aot-gtcnst-gemini-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.0723
+		Offset: 0, 0
+	damaged-aot-age2-idle:
+		Filename: aot-gtcnst-gemini-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.0723
+		Offset: 0, 0
+	aot-age2-idle-remap:
+		Filename: aot-gtcnst-gemini-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.0723
+		Offset: 0, 0
+	damaged-aot-age2-idle-remap:
+		Filename: aot-gtcnst-gemini-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.0723
+		Offset: 0, 0
+	aot-age2-lights:
+		Filename: aot-gtcnst-gemini-anim.png
+		RemasteredFilename:
+		Length: 7
+		Scale: 0.0723
+		Offset: 0, 0
+		Tick: 200
+	aot-age2-make:
+		Filename: aot-gtcnst-make.png
+		RemasteredFilename:
+		Length: 24
+		Scale: 0.55
+		Offset: 0, 0
+	aot-age2-make-remap:
+		Filename: aot-gtcnst-make-remap.png
+		RemasteredFilename:
+		Length: 24
+		Scale: 0.55
+		Offset: 0, 0
 # === Ende aotmod ===
 
 # === MCV: RA sprites für Age 0 ===
@@ -669,28 +756,28 @@ silo:
 		Scale: 0.1875
 		Offset: 0,-1
 	aot-ts-idle:
-		Filename: aot-silo-ts-idle.png
+		Filename: aot-nod-silo-ts-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.70
+		Scale: 0.051
 		Offset: 0,-20
 	damaged-aot-ts-idle:
-		Filename: aot-silo-ts-damaged.png
+		Filename: aot-nod-silo-ts-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.70
+		Scale: 0.051
 		Offset: 0,-20
 	aot-ts-idle-remap:
-		Filename: aot-silo-ts-idle-remap.png
+		Filename: aot-nod-silo-ts-idle-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.70
+		Scale: 0.051
 		Offset: 0,-20
 	damaged-aot-ts-idle-remap:
-		Filename: aot-silo-ts-damaged-remap.png
+		Filename: aot-nod-silo-ts-idle-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.70
+		Scale: 0.051
 		Offset: 0,-20
 	aot-ts-make:
 		Filename: aot-silomake-ts.png
@@ -820,6 +907,25 @@ lite:
 		Filename: lite_base.png
 		RemasteredFilename:
 		Length: 1
+	aot-age2-idle:
+		Filename: aot-gtweap-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+	damaged-aot-age2-idle:
+		Filename: aot-gtweap-damaged-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+	aot-age2-idle-remap:
+		Filename: aot-gtweap-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+	aot-age2-make:
+		Filename: weapmake.shp
+		RemasteredFilename:
+		Tick: 80
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Shipyard (aot-shipyard): RA SYRD Remaster (umgepackt flach) ===
@@ -885,6 +991,70 @@ proc:
 		Filename: proc_base.png
 		RemasteredFilename:
 		Length: 1
+	aot-age2-nod-idle:
+		Filename: aot-ntrefn-gemini-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.100
+		Offset: 0, 0
+	damaged-aot-age2-nod-idle:
+		Filename: aot-ntrefn-gemini-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.100
+	aot-age2-nod-idle-remap:
+		Filename: aot-ntrefn-gemini-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.100
+		Offset: 0, 0
+	damaged-aot-age2-nod-idle-remap:
+		Filename: aot-ntrefn-gemini-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.100
+		Offset: 0, 0
+	aot-age2-nod-anim:
+		Filename: aot-ntrefn-anim.png
+		RemasteredFilename:
+		Length: 20
+		Scale: 0.55
+		Offset: 17, 0, 1536
+			Tick: 150
+	aot-age2-idle:
+		Filename: aot-ntrefn-gemini-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.100
+	damaged-aot-age2-idle:
+		Filename: aot-ntrefn-gemini-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.100
+	aot-age2-idle-remap:
+		Filename: aot-ntrefn-gemini-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.100
+		Offset: 0, 0
+	damaged-aot-age2-idle-remap:
+		Filename: aot-ntrefn-gemini-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.100
+		Offset: 0, 0
+	aot-age2-anim:
+		Filename: aot-ntrefn-anim.png
+		RemasteredFilename:
+		Length: 20
+		Scale: 0.55
+		Offset: 17, 0, 1536
+			Tick: 150
+	aot-age2-make:
+		Filename: aot-ntrefn-gemini-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.100
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - WEAP (Weapons Factory): Custom Icon ===
@@ -1708,6 +1878,35 @@ hand:
 	make:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\HANDMAKE.ZIP
 		RemasteredScale: 0.9
+	aot-age2-icon:
+		Filename: hand_ages.png
+		RemasteredFilename:
+		Length: 1
+	aot-age2-idle:
+		Filename: aot-nthand-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+	damaged-aot-age2-idle:
+		Filename: aot-nthand-damaged-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+	aot-age2-idle-remap:
+		Filename: aot-nthand-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+	damaged-aot-age2-idle-remap:
+		Filename: aot-nthand-damaged-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+	aot-age2-make:
+		Filename: aot-nthand-make.png
+		RemasteredFilename:
+		Length: 15
+		Scale: 0.55
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - FIX: RA Repair Facility Sprites für Age 0 ===
@@ -1741,6 +1940,36 @@ fix:
 	damaged-aot-ra-build:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\FIXMAKE.ZIP
 		RemasteredLength: 14
+		# Age-2: Gemini-Render GDI Repair Depot
+	aot-age2-nod-idle:
+		Filename: aot-gadept-gemini-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.046
+		Offset: 0, 0
+	damaged-aot-age2-nod-idle:
+		Filename: aot-gadept-gemini-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.046
+	aot-age2-nod-idle-remap:
+		Filename: aot-gadept-gemini-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.046
+		Offset: 0, 0
+	damaged-aot-age2-nod-idle-remap:
+		Filename: aot-gadept-gemini-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.046
+		Offset: 0, 0
+	aot-age2-nod-make:
+		Filename: aot-gtdept-make.png
+		RemasteredFilename:
+		Length: 10
+		Scale: 0.55
+		Offset: 0, 0
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - PYLE: RA Allied Barracks Sprites für Age 0 ===
@@ -1780,6 +2009,45 @@ pyle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\TENTMAKE.ZIP
 		RemasteredLength: 13
 		RemasteredScale: 0.9
+	aot-age2-icon:
+		Filename: pyle_ages.png
+		RemasteredFilename:
+		Length: 1
+	aot-age2-idle:
+		Filename: aot-gtpile-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+	damaged-aot-age2-idle:
+		Filename: aot-gtpile-damaged-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+	aot-age2-idle-remap:
+		Filename: aot-gtpile-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+	damaged-aot-age2-idle-remap:
+		Filename: aot-gtpile-damaged-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+	aot-age2-anim:
+		Filename: aot-gtpile-anim.png
+		RemasteredFilename:
+		Length: 8
+		Scale: 0.55
+	aot-age2-make:
+		Filename: aot-gtpile-make.png
+		RemasteredFilename:
+		Length: 20
+		Scale: 0.55
+	aot-age2-make-remap:
+		Filename: aot-gtpile-make-remap.png
+		RemasteredFilename:
+		Length: 20
+		Scale: 0.55
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - NUKE Power Plant: RA POWR vor Age 1, TD danach ===
@@ -1852,6 +2120,92 @@ nuke:
 		Length: 20
 		Scale: 0.55
 		Offset: 0, 24
+	# Age-2 GDI TS GTPOWR (ohne Turbinen)
+	aot-age2-idle:
+		Filename: aot-gtpowr-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+		Offset: 0, 10
+	damaged-aot-age2-idle:
+		Filename: aot-gtpowr-damaged-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+		Offset: 0, 10
+	aot-age2-idle-remap:
+		Filename: aot-gtpowr-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+		Offset: 0, 10
+	damaged-aot-age2-idle-remap:
+		Filename: aot-gtpowr-damaged-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+		Offset: 0, 10
+	aot-age2-make:
+		Filename: aot-gtpowr-make.png
+		RemasteredFilename:
+		Length: 20
+		Scale: 0.55
+		Offset: 0, 10
+	# Age-2 GDI TS GTPOWR + Turbinen
+	aot-age2-turbine-idle:
+		Filename: aot-gtpowr-turbine-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+		Offset: 0, 10
+	damaged-aot-age2-turbine-idle:
+		Filename: aot-gtpowr-damaged-turbine-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+		Offset: 0, 10
+	aot-age2-turbine-idle-remap:
+		Filename: aot-gtpowr-turbine-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+		Offset: 0, 10
+	damaged-aot-age2-turbine-idle-remap:
+		Filename: aot-gtpowr-damaged-turbine-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+		Offset: 0, 10
+	# Age-2 NOD TS NTPOWR
+	aot-age2-nod-idle:
+		Filename: aot-ntpowr-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+	damaged-aot-age2-nod-idle:
+		Filename: aot-ntpowr-damaged-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+	aot-age2-nod-idle-remap:
+		Filename: aot-ntpowr-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+	damaged-aot-age2-nod-idle-remap:
+		Filename: aot-ntpowr-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+	aot-age2-nod-make:
+		Filename: aot-ntpowr-make.png
+		RemasteredFilename:
+		Length: 19
+		Scale: 0.55
+	aot-age2-icon:
+		Filename: nuke_turbine.png
+		RemasteredFilename:
+		Length: 1
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - NUK2 Advanced Power Plant: RA APWR vor Age 1, TD danach ===
@@ -1890,6 +2244,35 @@ nuk2:
 			SNOW: bib2.sno
 			TEMPERAT: bib2.tem
 		Length: *
+	aot-age2-idle:
+		Filename: aot-ntapwr-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+	damaged-aot-age2-idle:
+		Filename: aot-ntapwr-damaged-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+	aot-age2-idle-remap:
+		Filename: aot-ntapwr-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+	damaged-aot-age2-idle-remap:
+		Filename: aot-ntapwr-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+	aot-age2-make:
+		Filename: aot-ntapwr-make.png
+		RemasteredFilename:
+		Length: 19
+		Scale: 0.55
+	aot-age2-icon:
+		Filename: nuk2_ages.png
+		RemasteredFilename:
+		Length: 1
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Turbine Technology Upgrade Icon ===

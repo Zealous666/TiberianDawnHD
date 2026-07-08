@@ -242,19 +242,39 @@ HQ:
 	GrantConditionOnPrerequisite@age1sprite:
 		Condition: aot-hq-advanced
 		Prerequisites: aot-age1
+	GrantConditionOnPrerequisite@aotage2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
 	-WithSpriteBody:
 	WithSpriteBody@hq:
 		Sequence: idle
 		Name: body
-		RequiresCondition: !aot-hq-advanced
+		RequiresCondition: !aot-hq-advanced && !aot-age2-active
 	WithSpriteBody@eye:
 		Sequence: aot-eye-idle
 		Name: body-eye
-		RequiresCondition: aot-hq-advanced
+		RequiresCondition: aot-hq-advanced && !aot-age2-active
+	WithSpriteBody@ts:
+		Sequence: aot-age2-idle
+		Name: body-ts
+		RequiresCondition: aot-age2-active
+	WithIdleOverlay@tsremap:
+		Sequence: aot-age2-idle-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-age2-active && !build-incomplete
+	WithIdleOverlay@tsanim:
+		Sequence: aot-age2-anim
+		RequiresCondition: aot-age2-active && !build-incomplete
 	-WithMakeAnimation:
 	WithMakeAnimation@aot:
 		BodyNames: body, body-eye
 		Condition: build-incomplete
+		RequiresCondition: !aot-age2-active
+	WithMakeAnimation@ts:
+		BodyNames: body-ts
+		Condition: build-incomplete
+		Sequence: aot-age2-make
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - EYE: nicht baubar (wird durch HQ+Ion Cannon Upgrade ersetzt) ===
@@ -364,8 +384,47 @@ aot-proc-gdi:
 	ProvidesPrerequisite@aotid:
 		Prerequisite: aot-proc-gdi
 	Buildable:
-		Prerequisites: ~aot-age1, aot-age1, aot-weap, silo
+		Prerequisites: ~aot-age1, aot-age1, ~!aot-age2, aot-weap, silo
 		Queue: Building.GDI
+	WithSpriteBody@ts:
+		Sequence: aot-age2-nod-idle
+		Name: body-ts
+		RequiresCondition: aot-age2-active
+	WithIdleOverlay@tsremap:
+		Sequence: aot-age2-nod-idle-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-age2-active && !build-incomplete
+	WithIdleOverlay@tsanim:
+		Sequence: aot-age2-nod-anim
+		RequiresCondition: aot-age2-active && !build-incomplete
+
+aot-proc-gdi-age2:
+	Inherits: PROC
+	RenderSprites:
+		Image: proc
+	ProvidesPrerequisite@buildingname:
+		Prerequisite: proc
+	ProvidesPrerequisite@aotid:
+		Prerequisite: aot-proc-gdi
+	Buildable:
+		Prerequisites: ~aot-age2, aot-age2, aot-weap, silo
+		Queue: Building.GDI
+	WithSpriteBody@ts:
+		Sequence: aot-age2-nod-idle
+		Name: body-ts
+		RequiresCondition: aot-age2-active
+	WithIdleOverlay@tsremap:
+		Sequence: aot-age2-nod-idle-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-age2-active && !build-incomplete
+	WithIdleOverlay@tsanim:
+		Sequence: aot-age2-nod-anim
+		RequiresCondition: aot-age2-active && !build-incomplete
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: aot-age2-nod-idle
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - aot-proc-nod: PROC für NOD (braucht Airfield) ===
@@ -378,8 +437,47 @@ aot-proc-nod:
 	ProvidesPrerequisite@aotid:
 		Prerequisite: aot-proc-nod
 	Buildable:
-		Prerequisites: ~aot-age1, aot-age1, afld, silo
+		Prerequisites: ~aot-age1, aot-age1, ~!aot-age2, afld, silo
 		Queue: Building.Nod
+	WithSpriteBody@ts:
+		Sequence: aot-age2-nod-idle
+		Name: body-ts
+		RequiresCondition: aot-age2-active
+	WithIdleOverlay@tsremap:
+		Sequence: aot-age2-nod-idle-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-age2-active && !build-incomplete
+	WithIdleOverlay@tsanim:
+		Sequence: aot-age2-nod-anim
+		RequiresCondition: aot-age2-active && !build-incomplete
+
+aot-proc-nod-age2:
+	Inherits: PROC
+	RenderSprites:
+		Image: proc
+	ProvidesPrerequisite@buildingname:
+		Prerequisite: proc
+	ProvidesPrerequisite@aotid:
+		Prerequisite: aot-proc-nod
+	Buildable:
+		Prerequisites: ~aot-age2, aot-age2, afld, silo
+		Queue: Building.Nod
+	WithSpriteBody@ts:
+		Sequence: aot-age2-nod-idle
+		Name: body-ts
+		RequiresCondition: aot-age2-active
+	WithIdleOverlay@tsremap:
+		Sequence: aot-age2-nod-idle-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-age2-active && !build-incomplete
+	WithIdleOverlay@tsanim:
+		Sequence: aot-age2-nod-anim
+		RequiresCondition: aot-age2-active && !build-incomplete
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: aot-age2-nod-idle
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - APC: erst nach APC Upgrade baubar ===
@@ -595,6 +693,15 @@ BGGY:
 		Weapon: aot-HarpyLaser
 		LocalOffset: 171,0,43
 		RequiresCondition: aot-bggy-laser
+	# Fire Position (Phase 3) Garrison-Waffen, gleiche Conditions wie oben.
+	Armament@garrisoned:
+		Name: garrisoned
+		Weapon: aot-MachineGunGarrisoned
+		RequiresCondition: !aot-bggy-laser
+	Armament@garrisonedlaser:
+		Name: garrisoned
+		Weapon: aot-HarpyLaser
+		RequiresCondition: aot-bggy-laser
 
 # === Age of Tiberium (aotmod) - NOD Stealth Tank: Age-Gate + Cargo Upgrade ===
 # Baubar/sichtbar ab Age 1 statt techlevel.high (siehe Proxy-Aktoren aot-stnk-base/aot-stnk-cargo
@@ -641,6 +748,13 @@ BIKE:
 		CargoType: GroundVehicle
 		Weight: 5
 		CustomPipType: green
+	# Fire Position (Phase 3) Garrison-Waffe. BikeRockets erbt ^MissileWeapon,
+	# das schon Blockable:false per Default setzt - direkte Wiederverwendung
+	# ohne eigene Garrisoned-Kopie (wie 227mm bei MSAM). Kein Turret (AttackFrontal)
+	# - der ganze Koerper zielt beim Garnisonieren.
+	Armament@garrisoned:
+		Name: garrisoned
+		Weapon: BikeRockets
 MSAM:
 	Passenger:
 		CargoType: GroundVehicle
@@ -679,6 +793,8 @@ APC:
 
 # === Age of Tiberium (aotmod) - Fahrzeuge capturable für Carjacker ===
 ^Vehicle:
+	Repairable:
+		RepairActors: aot-fix-age0, aot-fix-age1, aot-fix-age2, aot-fix-age1-nod, aot-fix-age2-nod
 	GrantConditionOnDamageState@AOTREPAIR:
 		Condition: aot-vehicle-damaged
 		ValidDamageStates: Light, Medium, Heavy, Critical

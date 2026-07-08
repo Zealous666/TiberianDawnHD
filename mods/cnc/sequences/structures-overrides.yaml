@@ -336,9 +336,12 @@ obli:
 	bib:
 		RemasteredFilename: blank.png
 	# Custom Bau-Icon (User-Icon, 2026-07-05), ersetzt den vorherigen leeren
-	# Platzhalter.
+	# Platzhalter. RemasteredOffset:0,0 explizit noetig, sonst erbt die Icon-
+	# Sequenz das "Defaults: RemasteredOffset: 0,-64" (fuer das Ingame-Sprite
+	# gedacht) und verschiebt/beschneidet das Icon-PNG sichtbar falsch.
 	icon:
 		RemasteredFilename: aot-obli-icon.png
+		RemasteredOffset: 0,0
 		Length: 1
 
 brik:
@@ -403,8 +406,53 @@ sam:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\SAMMAKE.ZIP
 	muzzle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\SAMFIRE.ZIP
+	# Custom Bau-Icon (User-Icon, 2026-07-05), ersetzt den vorherigen leeren
+	# Platzhalter. Wird von SAM UND beiden Upgrade-Aktoren geteilt (User-Wunsch:
+	# "verwende ueberall dasselbe Icon ohne Aenderung").
 	icon:
-		RemasteredFilename:
+		RemasteredFilename: aot-sam-icon.png
+		Length: 1
+	# RA-Remastered-Sprite (2026-07-05, User-Wunsch): neuer Standard-Look, ersetzt
+	# die TD-Pop-up-Silo-Optik als Default (TD-Frames oben bleiben unveraendert -
+	# aktiv nur noch ueber das "Bunkered SAM"-Upgrade, siehe aot-structures.yaml).
+	# Muss im SELBEN Image "sam" liegen (nicht als eigenes Image) - RenderSprites.
+	# Image ist EIN fester Wert pro Aktor, kann nicht per Bedingung wechseln (siehe
+	# ftur-system.md fuer denselben Lernpunkt bei FTUR/Toxic Tower). Frame-Indizes
+	# 1:1 von RAs eigenem "sam:"-Sequenzblock (engine/mods/ra/sequences/
+	# structures.yaml) uebernommen: turret=Facings 32 ab Frame 0, damaged-turret=
+	# Start 34 Facings 32. "ra-idle" nutzt (wie im RA-Original per gunmake.shp-
+	# Trick) ein Platzhalter-Frame aus der eigenen RA-Bau-Animation.
+	# SAMFIRE/Muzzle-Feuer-Effekt fuer die RA-Variante NICHT verdrahtet (User-
+	# Wunsch: "aendere zunaechst die Gebaeude-Sprites") - Asset liegt bereits als
+	# aot-sam-fire.zip bereit, hat aber eine Luecke bei Frame 54 (143 statt 144
+	# Frames), muss vor Verdrahtung noch genauer geprueft werden.
+	ra-idle:
+		RemasteredFilename: aot-sam-make.zip
+		Length: 1
+	ra-turret:
+		RemasteredFilename: aot-sam.zip
+		Facings: 32
+		UseClassicFacings: True
+	ra-damaged-turret:
+		RemasteredFilename: aot-sam.zip
+		Start: 34
+		Facings: 32
+		UseClassicFacings: True
+
+# Bau-Icons fuer die beiden SAM-Upgrades (2026-07-05) - dasselbe Icon wie SAM
+# selbst (User-Wunsch: "verwende ueberall dasselbe Icon ohne Aenderung").
+aot-upgrade-sam-bunkered:
+	icon:
+		RemasteredFilename: aot-sam-icon.png
+		Length: 1
+
+aot-upgrade-sam-cloak:
+	icon:
+		RemasteredFilename: aot-sam-icon.png
+		Length: 1
+	ra-make:
+		RemasteredFilename: aot-sam-make.zip
+		Length: *
 
 gtwr:
 	Defaults:
