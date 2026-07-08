@@ -110,3 +110,17 @@ mods/cnc/rules/structures.yaml
 *.sequences.temperat.png
 *.cursors.png
 "DATA\\ART\\TEXTURES\\SRGB\\TIBERIAN_DAWN\\STRUCTURES\\GUN.ZIP"
+
+# Arbeitsmüll im Repo-Root.
+# WICHTIG: alles hier root-anchored ("/" davor). Unter mods/ liegen 41 getrackte
+# .shp/.pal (z.B. mods/cnc/bits/aot-silo.shp, mods/cnc/bits/unittem.pal) —
+# ein ungeankertes "*.shp" würde die mit ignorieren.
+
+# Assets, die "engine/utility.sh --extract" ins aktuelle Verzeichnis schreibt:
+/*.shp
+/*.pal
+
+# Lokale Debug-Artefakte (Logs, Wegwerf-Skripte):
+/debug-logs/
+/debug-*.sh
+/recolor-*.py
