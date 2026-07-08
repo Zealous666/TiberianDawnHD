@@ -68,14 +68,14 @@
   - [ ] NOD powerplant
   - [ ] NOD advanced powerplant
   - [ ] GDI barracks
-  - [ ] NOD hand
+  - [x] NOD hand
   - [ ] GDI radar
   - [ ] GDI firestorm generator
   - [ ] FS mobile war factory (LITE)
   - [x] Construction yard
   - [x] Refinery
   - [x] Repair Facility
-  - [ ] Storage Silo
+  - [x] Storage Silo
   - [ ] Proxy Icons
   - [ ] Damage Models
 - [ ] Defense Ideas

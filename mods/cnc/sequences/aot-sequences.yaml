@@ -380,31 +380,42 @@ hq:
 		Filename: hq_base.png
 		RemasteredFilename:
 		Length: 1
+	# Neues Gemini-Sprite (2026-07-08): statisch, keine Dish-Schwenk-Animation mehr (User-
+	# Entscheidung -- die alte aot-gtradr-anim.png war ohnehin nur ein sehr dezenter Funkel-
+	# Effekt, keine echte Bewegung. Lichter werden spaeter separat animiert.
 	aot-age2-idle:
-		Filename: aot-gtradr-idle.png
+		Filename: aot-hq-age2-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
+		Scale: 0.0698
+		Offset: -2,-54
 	damaged-aot-age2-idle:
-		Filename: aot-gtradr-damaged-idle.png
+		Filename: aot-hq-age2-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
+		Scale: 0.0698
+		Offset: -2,-54
 	aot-age2-idle-remap:
-		Filename: aot-gtradr-idle-remap.png
+		Filename: aot-hq-age2-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
+		Scale: 0.0698
+		Offset: -2,-54
 	damaged-aot-age2-idle-remap:
-		Filename: aot-gtradr-damaged-idle-remap.png
+		Filename: aot-hq-age2-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
-	aot-age2-anim:
-		Filename: aot-gtradr-anim.png
+		Scale: 0.0698
+		Offset: -2,-54
+	# Unabhaengige, unregelmaessig auf-/abblendende Lichtpunkte (7 Positionen, je eigene
+	# zufaellige Puls-Phase -- kein synchrones Lauflicht wie bei FACT).
+	aot-age2-lights:
+		Filename: aot-hq-age2-lights.png
 		RemasteredFilename:
-		Length: 15
-		Scale: 0.55
+		Length: 24
+		Scale: 0.0698
+		Offset: -2,-54
+		Tick: 180
 	aot-age2-make:
 		Filename: aot-gtradr-make.png
 		RemasteredFilename:

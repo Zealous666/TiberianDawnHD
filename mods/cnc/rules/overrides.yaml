@@ -258,13 +258,20 @@ HQ:
 		Sequence: aot-age2-idle
 		Name: body-ts
 		RequiresCondition: aot-age2-active
+		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
+		# PlayerColorShift verschiebt jeden Pixel im Gruen-Hue-Fenster zur Spielerfarbe
+		# (siehe silo-system.md). Body ist RGBA/truecolor -> explizit absichern.
+		Palette: effect
+		IsPlayerPalette: false
 	WithIdleOverlay@tsremap:
 		Sequence: aot-age2-idle-remap
 		Palette: player
 		IsPlayerPalette: True
 		RequiresCondition: aot-age2-active && !build-incomplete
-	WithIdleOverlay@tsanim:
-		Sequence: aot-age2-anim
+	WithIdleOverlay@lights:
+		Sequence: aot-age2-lights
+		Palette: effect
+		IsPlayerPalette: false
 		RequiresCondition: aot-age2-active && !build-incomplete
 	-WithMakeAnimation:
 	WithMakeAnimation@aot:
