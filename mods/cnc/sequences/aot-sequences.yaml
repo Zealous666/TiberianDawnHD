@@ -2126,83 +2126,109 @@ nuke:
 		Length: 20
 		Scale: 0.55
 		Offset: 0, 24
-	# Age-2 GDI TS GTPOWR (ohne Turbinen)
+	# Age-2 GDI TS GTPOWR (ohne Turbinen) — Gemini-Render (2026-07-08), Canvas 1024x1024,
+	# Scale/Offset gegen alte aot-gtpowr-idle.png (96x96, Scale 0.55/Offset 0,10) am Content-Bbox
+	# hergeleitet (screen_y = Scale*(y_nativ - Canvas_h/2 + Offset_y) muss übereinstimmen).
 	aot-age2-idle:
-		Filename: aot-gtpowr-idle.png
+		Filename: aot-gtpowr-gemini-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
-		Offset: 0, 10
+		Scale: 0.0516
+		Offset: 0, 102
 	damaged-aot-age2-idle:
-		Filename: aot-gtpowr-damaged-idle.png
+		Filename: aot-gtpowr-gemini-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
-		Offset: 0, 10
+		Scale: 0.0516
+		Offset: 0, 102
 	aot-age2-idle-remap:
-		Filename: aot-gtpowr-idle-remap.png
+		Filename: aot-gtpowr-gemini-idle-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
-		Offset: 0, 10
+		Scale: 0.0516
+		Offset: 0, 102
 	damaged-aot-age2-idle-remap:
-		Filename: aot-gtpowr-damaged-idle-remap.png
+		Filename: aot-gtpowr-gemini-idle-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
-		Offset: 0, 10
+		Scale: 0.0516
+		Offset: 0, 102
 	aot-age2-make:
 		Filename: aot-gtpowr-make.png
 		RemasteredFilename:
 		Length: 20
 		Scale: 0.55
 		Offset: 0, 10
-	# Age-2 GDI TS GTPOWR + Turbinen
+	# Age-2 GDI TS GTPOWR + Turbinen — Gemini-Render (2026-07-08), gleiche Scale/Offset wie
+	# aot-age2-idle (identisches Gebaeude-Footprint, nur Kuppel-Optik anders). Zusätzlich
+	# aot-age2-turbine-lights: 3 unabhängig langsam auf-/abdimmende gelbrötliche Lichtscheine
+	# an den offenen Schloten der drei Turbinen-Kuppeln (Gaussian-Puls-Technik wie GDI-HQ-Radar).
 	aot-age2-turbine-idle:
-		Filename: aot-gtpowr-turbine-idle.png
+		Filename: aot-gtpowr-gemini-turbine-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
-		Offset: 0, 10
+		Scale: 0.0516
+		Offset: 0, 102
 	damaged-aot-age2-turbine-idle:
-		Filename: aot-gtpowr-damaged-turbine-idle.png
+		Filename: aot-gtpowr-gemini-turbine-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
-		Offset: 0, 10
+		Scale: 0.0516
+		Offset: 0, 102
 	aot-age2-turbine-idle-remap:
-		Filename: aot-gtpowr-turbine-idle-remap.png
+		Filename: aot-gtpowr-gemini-turbine-idle-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
-		Offset: 0, 10
+		Scale: 0.0516
+		Offset: 0, 102
 	damaged-aot-age2-turbine-idle-remap:
-		Filename: aot-gtpowr-damaged-turbine-idle-remap.png
+		Filename: aot-gtpowr-gemini-turbine-idle-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
-		Offset: 0, 10
-	# Age-2 NOD TS NTPOWR
+		Scale: 0.0516
+		Offset: 0, 102
+	aot-age2-turbine-lights:
+		Filename: aot-gtpowr-gemini-turbine-lights.png
+		RemasteredFilename:
+		Length: 24
+		Scale: 0.0516
+		Offset: 0, 102
+		Tick: 220
+	# Age-2 NOD TS NTPOWR — Gemini-Render (2026-07-08), Canvas 1264x843, Scale/Offset gegen
+	# alte aot-ntpowr-idle.png (144x96, Scale 0.55/Offset 0,0) am Content-Bbox hergeleitet.
+	# Lichter: einzelne unabhängig flackernde Punkte an den Rohr-/Ventil-Details (wie GDI-HQ-Radar),
+	# nicht auf glatten Flächen.
 	aot-age2-nod-idle:
-		Filename: aot-ntpowr-idle.png
+		Filename: aot-ntpowr-gemini-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
+		Scale: 0.0595
+		Offset: 0, -21
 	damaged-aot-age2-nod-idle:
-		Filename: aot-ntpowr-damaged-idle.png
+		Filename: aot-ntpowr-gemini-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
+		Scale: 0.0595
+		Offset: 0, -21
 	aot-age2-nod-idle-remap:
-		Filename: aot-ntpowr-idle-remap.png
+		Filename: aot-ntpowr-gemini-idle-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
+		Scale: 0.0595
+		Offset: 0, -21
 	damaged-aot-age2-nod-idle-remap:
-		Filename: aot-ntpowr-idle-remap.png
+		Filename: aot-ntpowr-gemini-idle-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
+		Scale: 0.0595
+		Offset: 0, -21
+	aot-age2-nod-lights:
+		Filename: aot-ntpowr-gemini-lights.png
+		RemasteredFilename:
+		Length: 24
+		Scale: 0.0595
+		Offset: 0, -21
+		Tick: 180
 	aot-age2-nod-make:
 		Filename: aot-ntpowr-make.png
 		RemasteredFilename:
@@ -2250,26 +2276,40 @@ nuk2:
 			SNOW: bib2.sno
 			TEMPERAT: bib2.tem
 		Length: *
+	# Age-2 NOD TS NTAPWR (Advanced Power Plant) — Gemini-Render (2026-07-08), Canvas 1133x944,
+	# Scale/Offset gegen alte aot-ntapwr-idle.png (144x120, Scale 0.55/Offset 0,0) am Content-Bbox
+	# hergeleitet. Lichter: einzelne unabhängig flackernde Punkte an den Rohr-/Ventil-Details.
 	aot-age2-idle:
-		Filename: aot-ntapwr-idle.png
+		Filename: aot-ntapwr-gemini-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
+		Scale: 0.0721
+		Offset: 0, -45
 	damaged-aot-age2-idle:
-		Filename: aot-ntapwr-damaged-idle.png
+		Filename: aot-ntapwr-gemini-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
+		Scale: 0.0721
+		Offset: 0, -45
 	aot-age2-idle-remap:
-		Filename: aot-ntapwr-idle-remap.png
+		Filename: aot-ntapwr-gemini-idle-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
+		Scale: 0.0721
+		Offset: 0, -45
 	damaged-aot-age2-idle-remap:
-		Filename: aot-ntapwr-idle-remap.png
+		Filename: aot-ntapwr-gemini-idle-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
+		Scale: 0.0721
+		Offset: 0, -45
+	aot-age2-lights:
+		Filename: aot-ntapwr-gemini-lights.png
+		RemasteredFilename:
+		Length: 24
+		Scale: 0.0721
+		Offset: 0, -45
+		Tick: 180
 	aot-age2-make:
 		Filename: aot-ntapwr-make.png
 		RemasteredFilename:

@@ -2260,35 +2260,57 @@ NUKE:
 	GrantConditionOnPrerequisite@aotage2nod:
 		Condition: aot-age2-nod
 		Prerequisites: aot-age2, afld
-	# Age-2 GDI, kein Turbinen-Upgrade → GDI TS GTPOWR ohne Turbinen
+	# Age-2 GDI, kein Turbinen-Upgrade → GDI TS GTPOWR ohne Turbinen (Gemini-Render 2026-07-08)
 	WithSpriteBody@ts:
 		Sequence: aot-age2-idle
 		Name: body-ts
 		RequiresCondition: aot-age2-gdi && !aot-turbine-active
+		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
+		# PlayerColorShift verschiebt jeden Pixel im Blau-Farbton zur Spielerfarbe. Siehe
+		# silo-system.md / ts-gates-system.md fuer das gleiche Muster.
+		Palette: effect
+		IsPlayerPalette: false
 	WithIdleOverlay@tsremap:
 		Sequence: aot-age2-idle-remap
 		Palette: player
 		IsPlayerPalette: True
 		RequiresCondition: aot-age2-gdi && !aot-turbine-active && !build-incomplete
-	# Age-2 GDI + Turbinen-Upgrade → GDI TS GTPOWR mit Turbinen
+	# Age-2 GDI + Turbinen-Upgrade → GDI TS GTPOWR mit Turbinen (Gemini-Render 2026-07-08)
 	WithSpriteBody@tsturbine:
 		Sequence: aot-age2-turbine-idle
 		Name: body-tsturbine
 		RequiresCondition: aot-age2-gdi && aot-turbine-active
+		Palette: effect
+		IsPlayerPalette: false
 	WithIdleOverlay@tsturbineremap:
 		Sequence: aot-age2-turbine-idle-remap
 		Palette: player
 		IsPlayerPalette: True
 		RequiresCondition: aot-age2-gdi && aot-turbine-active && !build-incomplete
-	# Age-2 NOD → NOD TS NTPOWR
+	# Drei unabhängig langsam auf-/abdimmende gelbrötliche Lichtscheine an den offenen
+	# Schloten der Turbinen-Kuppeln (Gaussian-Puls-Technik wie GDI-HQ-Radar aot-age2-lights).
+	WithIdleOverlay@tsturbinelights:
+		Sequence: aot-age2-turbine-lights
+		Palette: effect
+		IsPlayerPalette: false
+		RequiresCondition: aot-age2-gdi && aot-turbine-active && !build-incomplete
+	# Age-2 NOD → NOD TS NTPOWR (Gemini-Render 2026-07-08)
 	WithSpriteBody@tsnod:
 		Sequence: aot-age2-nod-idle
 		Name: body-tsnod
 		RequiresCondition: aot-age2-nod
+		Palette: effect
+		IsPlayerPalette: false
 	WithIdleOverlay@tsnodrremap:
 		Sequence: aot-age2-nod-idle-remap
 		Palette: player
 		IsPlayerPalette: True
+		RequiresCondition: aot-age2-nod && !build-incomplete
+	# Einzelne unabhängig flackernde Lichtpunkte an Rohr-/Ventil-Details (wie GDI-HQ-Radar).
+	WithIdleOverlay@tsnodlights:
+		Sequence: aot-age2-nod-lights
+		Palette: effect
+		IsPlayerPalette: false
 		RequiresCondition: aot-age2-nod && !build-incomplete
 	# Age-1, Turbinen-Upgrade → TD NUKE + Turbinen (unverändert)
 	WithSpriteBody@turbine:
@@ -2452,10 +2474,18 @@ NUK2:
 		Sequence: aot-age2-idle
 		Name: body-ts
 		RequiresCondition: aot-age2-active
+		Palette: effect
+		IsPlayerPalette: false
 	WithIdleOverlay@tsremap:
 		Sequence: aot-age2-idle-remap
 		Palette: player
 		IsPlayerPalette: True
+		RequiresCondition: aot-age2-active && !build-incomplete
+	# Einzelne unabhängig flackernde Lichtpunkte an Rohr-/Ventil-Details (wie GDI-HQ-Radar).
+	WithIdleOverlay@tslights:
+		Sequence: aot-age2-lights
+		Palette: effect
+		IsPlayerPalette: false
 		RequiresCondition: aot-age2-active && !build-incomplete
 	-WithMakeAnimation:
 	WithMakeAnimation@ra:
