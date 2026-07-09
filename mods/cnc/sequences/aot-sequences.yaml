@@ -1399,25 +1399,25 @@ mslo:
 		Filename: aot-blank.png
 		Length: 1
 	aot-ts-idle:
-		Filename: aot-namisl-idle.png
+		Filename: namisl-gemini-idle.png
 		Length: 1
-		Scale: 0.5
-		Offset: -4,9
+		Scale: 0.0466
+		Offset: 0,333
 	aot-ts-idle-remap:
-		Filename: aot-namisl-idle-remap.png
+		Filename: namisl-gemini-idle-remap.png
 		Length: 1
-		Scale: 0.5
-		Offset: -4,9
+		Scale: 0.0466
+		Offset: 0,333
 	damaged-aot-ts-idle:
-		Filename: aot-namisl-damaged-idle.png
+		Filename: namisl-gemini-idle.png
 		Length: 1
-		Scale: 0.5
-		Offset: -4,9
+		Scale: 0.0466
+		Offset: 0,333
 	damaged-aot-ts-idle-remap:
-		Filename: aot-namisl-damaged-idle-remap.png
+		Filename: namisl-gemini-idle-remap.png
 		Length: 1
-		Scale: 0.5
-		Offset: -4,9
+		Scale: 0.0466
+		Offset: 0,333
 	aot-ts-active:
 		Filename: aot-namisl-active.png
 		Length: 11
