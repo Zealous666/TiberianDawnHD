@@ -825,9 +825,22 @@ ATEC:
 	WithSpriteBody@ts:
 		Sequence: atec-ts-idle
 		Name: body-ts
+		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
+		# PlayerColorShift verschiebt jeden Pixel im entsprechenden Farbton zur Spielerfarbe.
+		Palette: effect
+		IsPlayerPalette: false
 		RequiresCondition: aot-age2-active
-	WithIdleOverlay@lights:
-		Sequence: atec-ts-lights
+	WithIdleOverlay@remap:
+		Sequence: atec-ts-idle-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-age2-active
+	# Kuppel: eigene pulsierende Player-Color-Sequenz (16 Helligkeitsstufen, Cosinus-Puls
+	# ueber 24 Frames), analog Secret Shrine Spitze - ersetzt die alte fixe Lichter-Animation.
+	WithIdleOverlay@domepulse:
+		Sequence: atec-ts-dome-pulse
+		Palette: player
+		IsPlayerPalette: True
 		RequiresCondition: aot-age2-active
 	-WithMakeAnimation:
 	WithMakeAnimation@ra:
@@ -961,6 +974,10 @@ STEC:
 	WithSpriteBody@ts:
 		Sequence: stec-ts-idle
 		Name: body-ts
+		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
+		# PlayerColorShift verschiebt jeden Pixel im entsprechenden Farbton zur Spielerfarbe.
+		Palette: effect
+		IsPlayerPalette: false
 		RequiresCondition: aot-age2-active
 	WithIdleOverlay@tsremap:
 		Sequence: stec-ts-remap
@@ -1609,6 +1626,11 @@ TMPL:
 		Prerequisite: tmpl
 	ProvidesPrerequisite@aottmpl:
 		Prerequisite: aot-tmpl
+	# Healthbar saß ohne explizite Selectable.Bounds weit ueber dem Gebaeude (Engine-Default
+	# fuer ^3x2Shape offenbar zu hoch berechnet). Gleicher Fix wie bei ORBC/ATEC/STEC (identisches
+	# 3x3-Footprint xxx xxx ===).
+	Selectable:
+		Bounds: 3072, 2048
 	GrantConditionOnPrerequisite@aotage2:
 		Condition: aot-age2-active
 		Prerequisites: aot-age2
@@ -1623,9 +1645,15 @@ TMPL:
 		Name: body-ts
 		PauseOnCondition: lowpower
 		RequiresCondition: aot-age2-active
+		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
+		# PlayerColorShift verschiebt jeden Pixel im entsprechenden Farbton zur Spielerfarbe.
+		Palette: effect
+		IsPlayerPalette: false
 	WithSpriteBody@tsremap:
 		Sequence: aot-age2-remap
 		Name: body-ts-remap
+		Palette: player
+		IsPlayerPalette: True
 		RequiresCondition: aot-age2-active && !build-incomplete
 	WithIdleOverlay@tslight:
 		Sequence: aot-age2-light
@@ -3686,10 +3714,21 @@ aot-shrine:
 	WithSpriteBody:
 		Sequence: idle
 		Name: body
+		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
+		# PlayerColorShift verschiebt jeden Pixel im entsprechenden Farbton zur Spielerfarbe.
+		Palette: effect
+		IsPlayerPalette: false
 	WithIdleOverlay@remap:
 		Sequence: idle-remap
 		Palette: player
 		IsPlayerPalette: True
+	# Blaue Spitze: eigene pulsierende Player-Color-Sequenz (16 Helligkeitsstufen, Cosinus-
+	# Puls über 24 Frames) statt der bisherigen fixen blauen Farbe.
+	WithIdleOverlay@tippulse:
+		Sequence: tip-pulse
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: !build-incomplete
 	WithIdleOverlay@active:
 		Sequence: active
 		RequiresCondition: !build-incomplete

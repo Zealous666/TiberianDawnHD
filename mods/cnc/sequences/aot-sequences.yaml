@@ -1097,24 +1097,36 @@ atec:
 		RemasteredLength: 1
 		Scale: 0.85
 	atec-ts-idle:
-		Filename: atec-ts-body.png
+		Filename: atec-gemini-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
-		Offset: -20, 0
+		Scale: 0.08
+		Offset: -28, 177
+	atec-ts-idle-remap:
+		Filename: atec-gemini-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.08
+		Offset: -28, 177
 	atec-ts-damaged-idle:
-		Filename: atec-ts-damaged.png
+		Filename: atec-gemini-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
-		Offset: -20, 0
-	atec-ts-lights:
-		Filename: atec-ts-lights.png
+		Scale: 0.08
+		Offset: -28, 177
+	atec-ts-damaged-idle-remap:
+		Filename: atec-gemini-idle-remap.png
 		RemasteredFilename:
-		Length: 8
-		Tick: 200
-		Scale: 0.55
-		Offset: -20, 0
+		Length: 1
+		Scale: 0.08
+		Offset: -28, 177
+	atec-ts-dome-pulse:
+		Filename: atec-gemini-dome-pulse.png
+		RemasteredFilename:
+		Length: 24
+		Tick: 240
+		Scale: 0.08
+		Offset: -28, 177
 	make:
 		Filename: weapmake.shp
 		RemasteredFilename:
@@ -1143,11 +1155,11 @@ atec:
 		RemasteredLength: 1
 		Scale: 0.85
 	atec-ts-place:
-		Filename: atec-ts-body.png
+		Filename: atec-gemini-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
-		Offset: -20, 0
+		Scale: 0.08
+		Offset: -28, 177
 	bib:
 		TilesetFilenames:
 			DESERT: bib2.des
@@ -1203,30 +1215,30 @@ stec:
 		RemasteredLength: 1
 		Scale: 0.85
 	stec-ts-idle:
-		Filename: stec-ts-body.png
+		Filename: stec-gemini-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.6
-		Offset: -5, 0
+		Scale: 0.0546
+		Offset: -54, 167
 	stec-ts-damaged-idle:
-		Filename: stec-ts-damaged.png
+		Filename: stec-gemini-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.6
-		Offset: -5, 0
+		Scale: 0.0546
+		Offset: -54, 167
 	stec-ts-remap:
-		Filename: stec-ts-body-remap.png
+		Filename: stec-gemini-idle-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.6
-		Offset: -5, 0
+		Scale: 0.0546
+		Offset: -54, 167
 	stec-ts-lights:
-		Filename: stec-ts-lights.png
+		Filename: stec-gemini-lights.png
 		RemasteredFilename:
 		Length: 10
 		Tick: 120
-		Scale: 0.6
-		Offset: -5, 0
+		Scale: 0.0546
+		Offset: -54, 167
 	make:
 		Filename: weapmake.shp
 		RemasteredFilename:
@@ -1255,11 +1267,11 @@ stec:
 		RemasteredLength: 1
 		Scale: 0.85
 	stec-ts-place:
-		Filename: stec-ts-body.png
+		Filename: stec-gemini-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.6
-		Offset: -5, 0
+		Scale: 0.0546
+		Offset: -54, 167
 	bib:
 		TilesetFilenames:
 			DESERT: bib2.des
@@ -3317,30 +3329,44 @@ aot-minp:
 # Keine TS-Buildup-Grafik vorhanden (NTPYRA ist in TS ein Map-Deko-Objekt, TechLevel=-1) -> weapmake.shp
 # als Platzhalter-Bauanimation (gleiches Muster wie STEC Age 0/1).
 aot-shrine:
+	# Gemini-Render (2026-07-09), Scale/Offset gegen alten Sprite (192x192, Scale 0.5/
+	# Offset 0,10) am Content-Bbox hergeleitet (Bottom+Center-Anchor-Formel). Blaue Spitze
+	# jetzt player-color (vorher fix blau) + eigene pulsierende Helligkeits-Animation.
 	idle:
-		Filename: aot-shrine-idle.png
+		Filename: aot-shrine-gemini-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.5
-		Offset: 0,10
+		Scale: 0.09
+		Offset: 2,201
 	idle-remap:
-		Filename: aot-shrine-idle-remap.png
+		Filename: aot-shrine-gemini-idle-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.5
-		Offset: 0,10
+		Scale: 0.09
+		Offset: 2,201
 	damaged-idle:
-		Filename: aot-shrine-damaged-idle.png
+		Filename: aot-shrine-gemini-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.5
-		Offset: 0,10
+		Scale: 0.09
+		Offset: 2,201
 	damaged-idle-remap:
-		Filename: aot-shrine-damaged-idle-remap.png
+		Filename: aot-shrine-gemini-idle-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.5
-		Offset: 0,10
+		Scale: 0.09
+		Offset: 2,201
+	# Blaue Spitze: eigene Player-Color-Remap-Sequenz, die zwischen 16 Helligkeitsstufen der
+	# Rampe pulsiert (Cosinus-Kurve 0.45..1.0 über 24 Frames, ruhigerer Tick), statt einer
+	# statischen Farbe. Maske verschärft (Sat>0.5/Val>0.4) — vorher zu locker, faerbte die
+	# gesamte Schattenseite der Pyramide mit ein (Rauschen).
+	tip-pulse:
+		Filename: aot-shrine-gemini-tip-pulse.png
+		RemasteredFilename:
+		Length: 24
+		Tick: 240
+		Scale: 0.09
+		Offset: 2,201
 	active:
 		Filename: aot-shrine-active.png
 		RemasteredFilename:
@@ -3353,11 +3379,11 @@ aot-shrine:
 		RemasteredFilename:
 		Tick: 80
 	place:
-		Filename: aot-shrine-idle.png
+		Filename: aot-shrine-gemini-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.5
-		Offset: 0,10
+		Scale: 0.09
+		Offset: 2,201
 	bib:
 		TilesetFilenames:
 			DESERT: bib1.des
@@ -3395,30 +3421,32 @@ tmpl:
 		RemasteredFilename:
 		Length: 1
 		Offset: 0,0
+	# Gemini-Render (2026-07-09), Scale/Offset gegen alten Sprite (192x168, Scale 0.5/
+	# Offset -8,-6) am Content-Bbox hergeleitet (Bottom+Center-Anchor-Formel).
 	aot-age2-idle:
-		Filename: aot-tmpl-ts-idle.png
+		Filename: aot-tmpl-gemini-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.5
-		Offset: -8,-6
+		Scale: 0.0627
+		Offset: 0,51
 	damaged-aot-age2-idle:
-		Filename: aot-tmpl-ts-damaged-idle.png
+		Filename: aot-tmpl-gemini-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.5
-		Offset: -8,-6
+		Scale: 0.0627
+		Offset: 0,51
 	aot-age2-remap:
-		Filename: aot-tmpl-ts-idle-remap.png
+		Filename: aot-tmpl-gemini-idle-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.5
-		Offset: -8,-6
+		Scale: 0.0627
+		Offset: 0,51
 	damaged-aot-age2-remap:
-		Filename: aot-tmpl-ts-damaged-idle-remap.png
+		Filename: aot-tmpl-gemini-idle-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.5
-		Offset: -8,-6
+		Scale: 0.0627
+		Offset: 0,51
 	aot-age2-make:
 		Filename: aot-tmpl-ts-make.png
 		RemasteredFilename:
@@ -3426,7 +3454,10 @@ tmpl:
 		Tick: 80
 		Scale: 0.5
 		Offset: -8,-6
-	# TS ActiveAnim (NATMPL_A) — winziger dunkler Blink-Punkt an der Turmspitze (24px, kein House-Color).
+	# TS ActiveAnim (NATMPL_A) — winziger dunkler Blink-Punkt an der Turmspitze (24px, kein
+	# House-Color). Scale/Offset UNVERAENDERT auf dem alten 192x168-Canvas belassen: der neue
+	# Gemini-Body wurde per Bottom+Center-Anchor exakt auf denselben Bildschirm-Ankerpunkt wie
+	# der alte Body kalibriert, daher bleibt der Blink-Punkt ohne Anpassung deckungsgleich.
 	aot-age2-light:
 		Filename: aot-tmpl-ts-light.png
 		RemasteredFilename:
