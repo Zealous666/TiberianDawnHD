@@ -55,13 +55,13 @@
   - [ ] APC -> AAPC / Mine Layer
   - [ ] MTNK -> Predator / Titan
   - [x] MLRS -> Hover MLRS & Hover AA / Jugg
-- [ ] Upscaling Building sprites
+- [ ] Upscaling Building sprites (TS)
   Tiberian Sun voxel assets
   - [x] GDI powerplant turbines
   - [x] NOD radar dome
   - [ ] NOD temple
   - [ ] NOD secret shrine (pyramid)
-  - [ ] GDI orbital command (uplink)
+  - [x] GDI orbital command (uplink)
   - [ ] GDI tech centre
   - [ ] NOD tech centre
   - [ ] NOD missile silo
@@ -70,7 +70,7 @@
   - [ ] GDI barracks
   - [ ] NOD hand
   - [x] GDI radar
-  - [ ] GDI firestorm generator
+  - [x] GDI firestorm generator
   - [ ] FS mobile war factory (LITE)
   - [x] Construction yard
   - [x] Refinery

@@ -3436,6 +3436,10 @@ ORBC:
 		RequiresCondition: aot-zonetrooper-drop-active
 	WithSpriteBody:
 		Sequence: idle
+		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
+		# PlayerColorShift verschiebt jeden Pixel im entsprechenden Farbton zur Spielerfarbe.
+		Palette: effect
+		IsPlayerPalette: false
 	WithIdleOverlay@remap:
 		Sequence: idle-remap
 		Palette: player

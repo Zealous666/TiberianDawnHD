@@ -1492,26 +1492,28 @@ orbc:
 			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\BIB2.DES\BIB2.DES-{0:D4}.DDS
 				Count: 6
 		RemasteredPremultiplied: false
+	# Gemini-Render (2026-07-09), Scale/Offset gegen alten Sprite (144x120, Scale 0.55/
+	# Offset 20,0) am Content-Bbox hergeleitet (Bottom+Center-Anchor-Formel).
 	idle:
-		Filename: aot-orbc-idle.png
+		Filename: aot-orbc-gemini-idle.png
 		Length: 1
-		Scale: 0.55
-		Offset: 20,0
+		Scale: 0.0628
+		Offset: 25,64
 	idle-remap:
-		Filename: aot-orbc-idle-remap.png
+		Filename: aot-orbc-gemini-idle-remap.png
 		Length: 1
-		Scale: 0.55
-		Offset: 20,0
+		Scale: 0.0628
+		Offset: 25,64
 	damaged-idle:
-		Filename: aot-orbc-damaged-idle.png
+		Filename: aot-orbc-gemini-idle.png
 		Length: 1
-		Scale: 0.55
-		Offset: 20,0
+		Scale: 0.0628
+		Offset: 25,64
 	damaged-idle-remap:
-		Filename: aot-orbc-damaged-idle-remap.png
+		Filename: aot-orbc-gemini-idle-remap.png
 		Length: 1
-		Scale: 0.55
-		Offset: 20,0
+		Scale: 0.0628
+		Offset: 25,64
 	make:
 		Filename: aot-orbc-make.png
 		Length: 17
@@ -1528,29 +1530,33 @@ orbc:
 		Tick: 100
 		Scale: 0.55
 		Offset: 20,0
+	# Offsets neu berechnet gegen die zwei runden Sockel im neuen Gemini-Body (links/hinten
+	# = Ion Cannon, rechts/vorne = Zone Trooper Drop) — Scale bleibt 0.55 (altes 144x120-TS-
+	# Canvas, unveraendert), nur Offset an die neue Body-Registrierung angepasst. Erste
+	# Näherung, ggf. nach Screenshot-Check noch feinjustieren (User-Ankündigung).
 	ioncannon-addon:
 		Filename: aot-orbc-ioncannon.png
 		Length: 28
 		Tick: 100
 		Scale: 0.55
-		Offset: 20,0
+		Offset: -1,-10
 	zonetrooperdrop-addon:
 		Filename: aot-orbc-zonetrooperdrop.png
 		Length: 28
 		Tick: 100
 		Scale: 0.55
-		Offset: -4,-10
+		Offset: 22,-3
 	zonetrooperdrop-addon-remap:
 		Filename: aot-orbc-zonetrooperdrop-remap.png
 		Length: 28
 		Tick: 100
 		Scale: 0.55
-		Offset: -4,-10
+		Offset: 22,-3
 	place:
-		Filename: aot-orbc-idle.png
+		Filename: aot-orbc-gemini-idle.png
 		Length: 1
-		Scale: 0.55
-		Offset: 20,0
+		Scale: 0.0628
+		Offset: 25,64
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - SLAB: Science Lab (GDI, ab Age 1) ===
