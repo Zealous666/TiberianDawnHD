@@ -744,23 +744,36 @@ mcv:
 # ersetzt, damit auch der unveränderte Basis-SILO-Aktor (Image: silo) sie findet (Muster wie PYLE/HAND).
 silo:
 	aot-ra-idle:
-		Filename: aot-silo-idle.png
+		Filename: aot-silo-gemini-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.1875
-		Offset: 0,-1
+		Scale: 0.036
+		Offset: 0,-120
 	damaged-aot-ra-idle:
-		Filename: aot-silo-damaged.png
+		Filename: aot-silo-gemini-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.1875
-		Offset: 0,-1
-	aot-ra-make:
-		Filename: aot-silomake.png
+		Scale: 0.036
+		Offset: 0,-120
+	aot-ra-idle-remap:
+		Filename: aot-silo-gemini-idle-remap.png
 		RemasteredFilename:
-		Length: *
-		Scale: 0.1875
-		Offset: 0,-1
+		Length: 1
+		Scale: 0.036
+		Offset: 0,-120
+	damaged-aot-ra-idle-remap:
+		Filename: aot-silo-gemini-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.036
+		Offset: 0,-120
+	aot-ra-make:
+		Filename: aot-silo-gemini-make.png
+		RemasteredFilename:
+		Length: 14
+		Tick: 80
+		Scale: 0.1286
+		Offset: 0,-34
 	aot-ts-idle:
 		Filename: aot-nod-silo-ts-idle.png
 		RemasteredFilename:

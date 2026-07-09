@@ -3354,7 +3354,16 @@ SILO:
 	WithSpriteBody@ra:
 		Sequence: aot-ra-idle
 		Name: body
+		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
+		# PlayerColorShift verschiebt jeden Pixel im entsprechenden Farbton zur Spielerfarbe.
+		Palette: effect
+		IsPlayerPalette: false
 		RequiresCondition: !aot-age1-active
+	WithIdleOverlay@raremap:
+		Sequence: aot-ra-idle-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: !aot-age1-active && !build-incomplete
 	WithResourceLevelSpriteBody@td:
 		Sequence: stages
 		Name: body-td
