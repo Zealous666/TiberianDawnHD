@@ -169,6 +169,21 @@ aot-lite-nod:
 		Palette: player
 		IsPlayerPalette: True
 		RequiresCondition: aot-age2-active && !build-incomplete
+	# Zwei-Layer-System wie Age 0/1 (body unterhalb, roof oberhalb der Einheit) -
+	# ROOF-Overlay ersetzt fuer Age 2 die alte Einzel-Sprite-Loesung.
+	WithIdleOverlay@tsroof:
+		Sequence: aot-age2-roof
+		Palette: effect
+		IsPlayerPalette: false
+		RequiresCondition: aot-age2-active && !build-incomplete
+	WithIdleOverlay@tsroofremap:
+		Sequence: aot-age2-roof-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-age2-active && !build-incomplete
+	WithIdleOverlay@tsblink:
+		Sequence: aot-age2-blink
+		RequiresCondition: aot-age2-active && !build-incomplete
 	WithMakeAnimation@ts:
 		BodyNames: body-ts
 		Condition: build-incomplete

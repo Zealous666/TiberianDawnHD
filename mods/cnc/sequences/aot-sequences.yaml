@@ -1011,20 +1011,45 @@ lite-nod:
 		RemasteredFilename:
 		Length: 1
 	aot-age2-idle:
-		Filename: aot-gtweap-idle.png
+		Filename: weap2n-gemini-body.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
+		Scale: 0.0528
+		Offset: 4, 65
 	damaged-aot-age2-idle:
-		Filename: aot-gtweap-damaged-idle.png
+		Filename: weap2n-gemini-body.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
+		Scale: 0.0528
+		Offset: 4, 65
 	aot-age2-idle-remap:
-		Filename: aot-gtweap-idle-remap.png
+		Filename: weap2n-gemini-body-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
+		Scale: 0.0528
+		Offset: 4, 65
+	aot-age2-roof:
+		Filename: weap2n-gemini-roof.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.0528
+		Offset: 4, 65
+		ZOffset: 2048
+	aot-age2-roof-remap:
+		Filename: weap2n-gemini-roof-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.0528
+		Offset: 4, 65
+		ZOffset: 2048
+	aot-age2-blink:
+		Filename: weap2n-gemini-blink.png
+		RemasteredFilename:
+		Length: 16
+		Tick: 130
+		Scale: 0.0528
+		Offset: 4, 65
+		ZOffset: 2048
 	aot-age2-make:
 		Filename: weapmake.shp
 		RemasteredFilename:
