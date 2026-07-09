@@ -1,12 +1,14 @@
 # === Age of Tiberium (aotmod) - Vehicle Factory (LITE) ===
-# Günstigere Fahrzeugfabrik für GDI & NOD. Nur Powerplant nötig (kein Refinery).
-# Sprite: RA War Factory (WEAP.ZIP). Stats wie Barracks (500 Credits, 60000 HP).
-# Factions: gdi/nod auf ProductionQueue trennt die Fahrzeug-Tabs sauber (wie FACT).
+# Günstigere Fahrzeugfabrik. Nur Powerplant nötig (kein Refinery).
+# Sprite: RA War Factory (WEAP.ZIP), Age 0/1 IDENTISCH für beide Fraktionen.
+# Ab Age 2 pro Fraktion eigenes Sprite -> Faction-Split in aot-lite-gdi/aot-lite-nod,
+# LITE ist nur noch die gemeinsame Basis (kein Buildable/Production mehr direkt drauf).
 LITE:
 	Inherits: ^BaseBuilding
 	Inherits@shape: ^3x2Shape
 	# Custom TS/RA-Sprite ohne "dead"-Rubble-Frame -> WithDeathAnimation (von ^BaseBuilding
-	# geerbt) würde beim Zerstören crashen ("Image `lite` does not have a sequence named `dead`").
+	# geerbt) würde beim Zerstören crashen ("Image `lite-gdi`/`lite-nod` does not have a
+	# sequence named `dead`").
 	-WithDeathAnimation:
 	Tooltip:
 		Name: actor-lite.name
@@ -14,20 +16,10 @@ LITE:
 		Cost: 500
 	Health:
 		HP: 60000
-	Buildable:
-		BuildPaletteOrder: 30
-		Prerequisites: anypower
-		Queue: Building.GDI, Building.Nod
-		Description: Basic vehicle production facility. Requires only a Power Plant.
 	Building:
 		Footprint: xxx xxx ===
 		Dimensions: 3,3
 		LocalCenterOffset: 0,-512,0
-	ProvidesPrerequisite:
-		Prerequisite: vehicleproduction
-	ProvidesPrerequisite@lite:
-		Prerequisite: lite
-	ProvidesPrerequisite@buildingname:
 	RallyPoint:
 	CommandBarBlacklist:
 		DisableStop: false
@@ -40,11 +32,47 @@ LITE:
 		SpawnOffset: 0,512,0
 		ExitCell: 1,2
 		ExitDelay: 3
-	Production@GDI:
+	Power:
+		Amount: -20
+	GrantConditionOnPrerequisite@aotage2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
+	-WithSpriteBody:
+	WithSpriteBody@base:
+		Sequence: idle
+		Name: body
+		RequiresCondition: !aot-age2-active
+	WithIdleOverlay@ROOF:
+		Sequence: roof
+		RequiresCondition: !build-incomplete && !aot-age2-active
+	-WithMakeAnimation:
+	WithMakeAnimation@base:
+		BodyNames: body
+		Condition: build-incomplete
+		Sequence: make
+		RequiresCondition: !aot-age2-active
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: place
+		SequenceAlpha: 0.65
+
+aot-lite-gdi:
+	Inherits: LITE
+	RenderSprites:
+		Image: lite-gdi
+	Buildable:
+		BuildPaletteOrder: 30
+		Prerequisites: anypower
+		Queue: Building.GDI
+		Description: Basic vehicle production facility. Requires only a Power Plant.
+	ProvidesPrerequisite:
+		Prerequisite: vehicleproduction
+	ProvidesPrerequisite@lite:
+		Prerequisite: lite
+	ProvidesPrerequisite@buildingname:
+	Production:
 		Produces: LightVehicle.GDI
-	Production@NOD:
-		Produces: LightVehicle.Nod
-	ProductionQueue@GDI:
+	ProductionQueue:
 		Type: LightVehicle.GDI
 		DisplayOrder: 3
 		Factions: gdi
@@ -59,7 +87,59 @@ LITE:
 		QueuedAudio: Training
 		OnHoldAudio: OnHold
 		CancelledAudio: Cancelled
-	ProductionQueue@NOD:
+	ProductionBar:
+		ProductionType: LightVehicle.GDI
+	WithSpriteBody@ts:
+		Sequence: aot-age2-idle
+		Name: body-ts
+		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
+		# PlayerColorShift verschiebt jeden Pixel im entsprechenden Farbton zur Spielerfarbe.
+		Palette: effect
+		IsPlayerPalette: false
+		RequiresCondition: aot-age2-active
+	WithIdleOverlay@tsremap:
+		Sequence: aot-age2-idle-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-age2-active && !build-incomplete
+	# Zwei-Layer-System wie Age 0/1 (body unterhalb, roof oberhalb der Einheit) -
+	# ROOF-Overlay ersetzt fuer Age 2 die alte Einzel-Sprite-Loesung.
+	WithIdleOverlay@tsroof:
+		Sequence: aot-age2-roof
+		Palette: effect
+		IsPlayerPalette: false
+		RequiresCondition: aot-age2-active && !build-incomplete
+	WithIdleOverlay@tsroofremap:
+		Sequence: aot-age2-roof-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-age2-active && !build-incomplete
+	WithIdleOverlay@tsblink:
+		Sequence: aot-age2-blink
+		RequiresCondition: aot-age2-active && !build-incomplete
+	WithMakeAnimation@ts:
+		BodyNames: body-ts
+		Condition: build-incomplete
+		Sequence: aot-age2-make
+		RequiresCondition: aot-age2-active
+
+aot-lite-nod:
+	Inherits: LITE
+	RenderSprites:
+		Image: lite-nod
+	Buildable:
+		BuildPaletteOrder: 30
+		Prerequisites: anypower
+		Queue: Building.Nod
+		Description: Basic vehicle production facility. Requires only a Power Plant.
+	ProvidesPrerequisite:
+		Prerequisite: vehicleproduction
+	ProvidesPrerequisite@lite:
+		Prerequisite: lite
+	ProvidesPrerequisite@buildingname:
+	Production:
+		Produces: LightVehicle.Nod
+	ProductionQueue:
 		Type: LightVehicle.Nod
 		DisplayOrder: 3
 		Factions: nod
@@ -74,49 +154,26 @@ LITE:
 		QueuedAudio: Training
 		OnHoldAudio: OnHold
 		CancelledAudio: Cancelled
-	ProductionBar@GDI:
-		ProductionType: LightVehicle.GDI
-	ProductionBar@NOD:
+	ProductionBar:
 		ProductionType: LightVehicle.Nod
-	Power:
-		Amount: -20
-	GrantConditionOnPrerequisite@aotage2:
-		Condition: aot-age2-active
-		Prerequisites: aot-age2
-	RenderSprites:
-		Image: lite
-	-WithSpriteBody:
-	WithSpriteBody@base:
-		Sequence: idle
-		Name: body
-		RequiresCondition: !aot-age2-active
 	WithSpriteBody@ts:
 		Sequence: aot-age2-idle
 		Name: body-ts
+		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
+		# PlayerColorShift verschiebt jeden Pixel im entsprechenden Farbton zur Spielerfarbe.
+		Palette: effect
+		IsPlayerPalette: false
 		RequiresCondition: aot-age2-active
 	WithIdleOverlay@tsremap:
 		Sequence: aot-age2-idle-remap
 		Palette: player
 		IsPlayerPalette: True
 		RequiresCondition: aot-age2-active && !build-incomplete
-	WithIdleOverlay@ROOF:
-		Sequence: roof
-		RequiresCondition: !build-incomplete && !aot-age2-active
-	-WithMakeAnimation:
-	WithMakeAnimation@base:
-		BodyNames: body
-		Condition: build-incomplete
-		Sequence: make
-		RequiresCondition: !aot-age2-active
 	WithMakeAnimation@ts:
 		BodyNames: body-ts
 		Condition: build-incomplete
 		Sequence: aot-age2-make
 		RequiresCondition: aot-age2-active
-	-ActorPreviewPlaceBuildingPreview:
-	SequencePlaceBuildingPreview:
-		Sequence: place
-		SequenceAlpha: 0.65
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Ore Mine ===

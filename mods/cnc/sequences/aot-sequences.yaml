@@ -452,7 +452,7 @@ aot-nod-radar:
 		Length: 12
 		Tick: 120
 		Scale: 0.57
-		Offset: 0,-48
+		Offset: 0,-30
 	make:
 		Filename: weapmake.shp
 		RemasteredFilename:
@@ -861,7 +861,104 @@ oret:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Vehicle Factory (LITE): RA War Factory Sprites ===
-lite:
+lite-gdi:
+	idle:
+		Filename: lite-body.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.17
+	damaged-idle:
+		Filename: lite-body.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.17
+	roof:
+		Filename: lite-roof.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.17
+		ZOffset: 2048
+	damaged-roof:
+		Filename: lite-roof-damaged.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.17
+		ZOffset: 2048
+	make:
+		Filename: weapmake.shp
+		RemasteredFilename:
+		Tick: 80
+	place:
+		Filename: lite-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.17
+	bib:
+		TilesetFilenames:
+			DESERT: bib2.des
+			WINTER: bib2.win
+			SNOW: bib2.sno
+			TEMPERAT: bib2.tem
+			JUNGLE: bib2.jun
+		Length: *
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\TEMPERATE\BIB2\BIB2.TEM-{0:D4}.DDS
+			Count: 6
+		RemasteredTilesetFilenamesPattern:
+			WINTER: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\BIB2.WIN\BIB2.WIN-{0:D4}.DDS
+				Count: 6
+			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\BIB2.DES\BIB2.DES-{0:D4}.DDS
+				Count: 6
+		RemasteredPremultiplied: false
+	icon:
+		Filename: lite_base.png
+		RemasteredFilename:
+		Length: 1
+	aot-age2-idle:
+		Filename: weap2-gemini-body.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.0461
+		Offset: 24, 276
+	damaged-aot-age2-idle:
+		Filename: weap2-gemini-body.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.0461
+		Offset: 24, 276
+	aot-age2-idle-remap:
+		Filename: weap2-gemini-body-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.0461
+		Offset: 24, 276
+	aot-age2-roof:
+		Filename: weap2-gemini-roof.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.0461
+		Offset: 24, 276
+		ZOffset: 2048
+	aot-age2-roof-remap:
+		Filename: weap2-gemini-roof-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.0461
+		Offset: 24, 276
+		ZOffset: 2048
+	aot-age2-blink:
+		Filename: weap2-gemini-blink.png
+		RemasteredFilename:
+		Length: 16
+		Tick: 130
+		Scale: 0.0461
+		Offset: 24, 276
+		ZOffset: 2048
+	aot-age2-make:
+		Filename: weapmake.shp
+		RemasteredFilename:
+		Tick: 80
+
+lite-nod:
 	idle:
 		Filename: lite-body.png
 		RemasteredFilename:
