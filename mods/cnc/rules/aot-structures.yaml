@@ -3545,9 +3545,16 @@ SLAB:
 		Sequence: aot-ts-idle
 		Name: body-ts
 		RequiresCondition: aot-age2-active
+		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
+		# PlayerColorShift verschiebt jeden Pixel im entsprechenden Farbton zur Spielerfarbe.
+		# Siehe silo-system.md / powerplant-system.md fuer das gleiche Muster.
+		Palette: effect
+		IsPlayerPalette: false
 	WithSpriteBody@tsremap:
 		Sequence: aot-ts-idle-remap
 		Name: body-tsremap
+		Palette: player
+		IsPlayerPalette: True
 		RequiresCondition: aot-age2-active && !build-incomplete
 	-WithMakeAnimation:
 	WithMakeAnimation@ra:
@@ -3558,11 +3565,23 @@ SLAB:
 		BodyNames: body-ts
 		Condition: build-incomplete
 		Sequence: aot-ts-make
+	# Unabhängig flackerndes Licht am Energiekern — NACH der Basis, aber VOR dem Arm-Overlay
+	# deklariert, damit der Greifarm es an der Überlappungszone (Klaue vor der Kuppel) korrekt
+	# verdeckt (Sprite-Add-Reihenfolge = Painter's-Algorithm-Schicht).
+	WithIdleOverlay@tslights:
+		Sequence: aot-ts-lights
+		Palette: effect
+		IsPlayerPalette: false
+		RequiresCondition: aot-age2-active && !build-incomplete
 	WithIdleOverlay@tstower:
 		Sequence: aot-ts-tower
+		Palette: effect
+		IsPlayerPalette: false
 		RequiresCondition: aot-age2-active && !build-incomplete
 	WithIdleOverlay@tstowerremap:
 		Sequence: aot-ts-tower-remap
+		Palette: player
+		IsPlayerPalette: True
 		RequiresCondition: aot-age2-active && !build-incomplete
 	# Flame-Overlay NACH den Tower-Overlays deklariert, damit es ueber ihnen
 	# rendert (Sprite-Add-Reihenfolge = Painter's-Algorithm-Schicht bei

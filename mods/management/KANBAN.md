@@ -57,19 +57,19 @@
   - [x] MLRS -> Hover MLRS & Hover AA / Jugg
 - [ ] Upscaling Building sprites
   Tiberian Sun voxel assets
-  - [ ] GDI powerplant turbines
-  - [ ] NOD radar dome
+  - [x] GDI powerplant turbines
+  - [x] NOD radar dome
   - [ ] NOD temple
   - [ ] NOD secret shrine (pyramid)
   - [ ] GDI orbital command (uplink)
   - [ ] GDI tech centre
   - [ ] NOD tech centre
   - [ ] NOD missile silo
-  - [ ] NOD powerplant
-  - [ ] NOD advanced powerplant
+  - [x] NOD powerplant
+  - [x] NOD advanced powerplant
   - [ ] GDI barracks
-  - [x] NOD hand
-  - [ ] GDI radar
+  - [ ] NOD hand
+  - [x] GDI radar
   - [ ] GDI firestorm generator
   - [ ] FS mobile war factory (LITE)
   - [x] Construction yard

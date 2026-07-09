@@ -1594,26 +1594,32 @@ slab:
 	place:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\PDOX.ZIP
 		RemasteredLength: 1
+	# Gemini-Render (2026-07-09) mit bereits eingebackenem Deckel/Arm — für das permanente
+	# Overlay wieder in Basis (Kuppel+Sockel+Energiekern) und Arm/Deckel gesliced (Freihand-
+	# Polygon um die Kran-/Greifarm-Silhouette), damit das neue Flacker-Licht am Energiekern
+	# ZWISCHEN Basis und Arm sitzen kann (Arm verdeckt es an der Überlappungszone am Greifer).
+	# Scale/Offset gegen alten Sprite (144x120, Scale 0.55/Offset -12,-8) am Content-Bbox
+	# hergeleitet (Bottom+Center-Anchor-Formel).
 	aot-ts-idle:
-		Filename: aot-slab-ts-idle.png
+		Filename: aot-slab-gemini-base.png
 		Length: 1
-		Scale: 0.55
-		Offset: -12,-8
+		Scale: 0.0681
+		Offset: -11,101
 	aot-ts-idle-remap:
-		Filename: aot-slab-ts-idle-remap.png
+		Filename: aot-slab-gemini-base-remap.png
 		Length: 1
-		Scale: 0.55
-		Offset: -12,-8
+		Scale: 0.0681
+		Offset: -11,101
 	damaged-aot-ts-idle:
-		Filename: aot-slab-ts-damaged-idle.png
+		Filename: aot-slab-gemini-base.png
 		Length: 1
-		Scale: 0.55
-		Offset: -12,-8
+		Scale: 0.0681
+		Offset: -11,101
 	damaged-aot-ts-idle-remap:
-		Filename: aot-slab-ts-damaged-idle-remap.png
+		Filename: aot-slab-gemini-base-remap.png
 		Length: 1
-		Scale: 0.55
-		Offset: -12,-8
+		Scale: 0.0681
+		Offset: -11,101
 	aot-ts-make:
 		Filename: aot-slab-ts-make.png
 		Length: 15
@@ -1625,20 +1631,32 @@ slab:
 		Scale: 0.55
 		Offset: -12,-8
 	aot-ts-place:
-		Filename: aot-slab-ts-idle.png
+		Filename: aot-slab-gemini-base.png
 		Length: 1
-		Scale: 0.55
-		Offset: -12,-8
+		Scale: 0.0681
+		Offset: -11,101
 	aot-ts-tower:
-		Filename: aot-slab-ts-tower.png
+		Filename: aot-slab-gemini-arm.png
 		Length: 1
-		Scale: 0.55
-		Offset: -12,-8
+		Scale: 0.0681
+		Offset: -11,101
 	aot-ts-tower-remap:
-		Filename: aot-slab-ts-tower-remap.png
+		Filename: aot-slab-gemini-arm-remap.png
 		Length: 1
-		Scale: 0.55
-		Offset: -12,-8
+		Scale: 0.0681
+		Offset: -11,101
+	# Unabhängig flackerndes blaues Licht am Energiekern (zwischen Basis und Arm-Overlay).
+	aot-ts-lights:
+		Filename: aot-slab-gemini-lights.png
+		Length: 24
+		Scale: 0.0681
+		Offset: -11,101
+		Tick: 140
+	# Firestorm-Matrix Ready/Active-Flamme (gtfire_b.shp) — Scale/Offset UNVERÄNDERT auf dem
+	# alten 144x120-Canvas belassen: da der neue Gemini-Body per Bottom+Center-Anchor exakt
+	# auf denselben Bildschirm-Ankerpunkt kalibriert wurde wie der alte Body, bleibt die
+	# Flamme ohne Anpassung weiterhin deckungsgleich (Umskalieren auf die falsche Canvas-Größe
+	# würde sie auf ~10px schrumpfen).
 	aot-ts-flame:
 		Filename: aot-slab-ts-flame.png
 		Length: 16
