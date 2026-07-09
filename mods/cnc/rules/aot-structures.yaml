@@ -225,6 +225,14 @@ FACT:
 # aot-pyle-age1: TD-Icon, sichtbar ab aot-age1.
 PYLE:
 	-Buildable:
+	# Spawn-Ausgang war oben-mittig/rechts-oben (auf altes TD-Sprite abgestimmt) -> auf
+	# links-unten verschoben, passend zur Rampe des neuen Age-2-Gemini-Sprites.
+	Exit@1:
+		SpawnOffset: -600,500,0
+		ExitCell: 0,1
+	Exit@2:
+		SpawnOffset: -500,550,0
+		ExitCell: 0,1
 	GrantConditionOnPrerequisite@aotage1:
 		Condition: aot-age1-active
 		Prerequisites: aot-age1
@@ -243,11 +251,18 @@ PYLE:
 	WithSpriteBody@ts:
 		Sequence: aot-age2-idle
 		Name: body-ts
+		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
+		# PlayerColorShift verschiebt jeden Pixel im entsprechenden Farbton zur Spielerfarbe.
+		Palette: effect
+		IsPlayerPalette: false
 		RequiresCondition: aot-age2-active
 	WithIdleOverlay@tsremap:
 		Sequence: aot-age2-idle-remap
 		Palette: player
 		IsPlayerPalette: True
+		RequiresCondition: aot-age2-active && !build-incomplete
+	WithIdleOverlay@tsblink:
+		Sequence: aot-age2-blink
 		RequiresCondition: aot-age2-active && !build-incomplete
 	-WithMakeAnimation:
 	WithMakeAnimation@ra:
@@ -333,6 +348,10 @@ aot-pyle-age2:
 # Analog zu PYLE. Doppel-Aktor-Pattern für Queue-Icon-Wechsel.
 HAND:
 	-Buildable:
+	# Spawn-Ausgang analog PYLE nach links-unten verschoben (Original stand rechts-unten).
+	Exit@1:
+		SpawnOffset: -512,1024,0
+		ExitCell: 0,2
 	GrantConditionOnPrerequisite@aotage1:
 		Condition: aot-age1-active
 		Prerequisites: aot-age1
@@ -351,11 +370,18 @@ HAND:
 	WithSpriteBody@ts:
 		Sequence: aot-age2-idle
 		Name: body-ts
+		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
+		# PlayerColorShift verschiebt jeden Pixel im entsprechenden Farbton zur Spielerfarbe.
+		Palette: effect
+		IsPlayerPalette: false
 		RequiresCondition: aot-age2-active
 	WithIdleOverlay@tsremap:
 		Sequence: aot-age2-idle-remap
 		Palette: player
 		IsPlayerPalette: True
+		RequiresCondition: aot-age2-active && !build-incomplete
+	WithIdleOverlay@tsblink:
+		Sequence: aot-age2-blink
 		RequiresCondition: aot-age2-active && !build-incomplete
 	-WithMakeAnimation:
 	WithMakeAnimation@ra:

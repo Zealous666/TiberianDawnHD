@@ -1925,25 +1925,36 @@ hand:
 		RemasteredFilename:
 		Length: 1
 	aot-age2-idle:
-		Filename: aot-nthand-idle.png
+		Filename: hand-gemini-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
+		Scale: 0.068
+		Offset: 88, 161
 	damaged-aot-age2-idle:
-		Filename: aot-nthand-damaged-idle.png
+		Filename: hand-gemini-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
+		Scale: 0.068
+		Offset: 88, 161
 	aot-age2-idle-remap:
-		Filename: aot-nthand-idle-remap.png
+		Filename: hand-gemini-idle-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
+		Scale: 0.068
+		Offset: 88, 161
 	damaged-aot-age2-idle-remap:
-		Filename: aot-nthand-damaged-idle-remap.png
+		Filename: hand-gemini-idle-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
+		Scale: 0.068
+		Offset: 88, 161
+	aot-age2-blink:
+		Filename: hand-gemini-blink.png
+		RemasteredFilename:
+		Length: 16
+		Tick: 130
+		Scale: 0.068
+		Offset: 88, 161
 	aot-age2-make:
 		Filename: aot-nthand-make.png
 		RemasteredFilename:
@@ -2056,30 +2067,36 @@ pyle:
 		RemasteredFilename:
 		Length: 1
 	aot-age2-idle:
-		Filename: aot-gtpile-idle.png
+		Filename: pyle-gemini-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
+		Scale: 0.0516
+		Offset: -2, 163
 	damaged-aot-age2-idle:
-		Filename: aot-gtpile-damaged-idle.png
+		Filename: pyle-gemini-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
+		Scale: 0.0516
+		Offset: -2, 163
 	aot-age2-idle-remap:
-		Filename: aot-gtpile-idle-remap.png
+		Filename: pyle-gemini-idle-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
+		Scale: 0.0516
+		Offset: -2, 163
 	damaged-aot-age2-idle-remap:
-		Filename: aot-gtpile-damaged-idle-remap.png
+		Filename: pyle-gemini-idle-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.55
-	aot-age2-anim:
-		Filename: aot-gtpile-anim.png
+		Scale: 0.0516
+		Offset: -2, 163
+	aot-age2-blink:
+		Filename: pyle-gemini-blink.png
 		RemasteredFilename:
-		Length: 8
-		Scale: 0.55
+		Length: 16
+		Tick: 130
+		Scale: 0.0516
+		Offset: -2, 163
 	aot-age2-make:
 		Filename: aot-gtpile-make.png
 		RemasteredFilename:
