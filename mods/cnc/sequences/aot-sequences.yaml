@@ -918,32 +918,32 @@ lite-gdi:
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.0461
-		Offset: 24, 276
+		Offset: 24, 96
 	damaged-aot-age2-idle:
 		Filename: weap2-gemini-body.png
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.0461
-		Offset: 24, 276
+		Offset: 24, 96
 	aot-age2-idle-remap:
 		Filename: weap2-gemini-body-remap.png
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.0461
-		Offset: 24, 276
+		Offset: 24, 96
 	aot-age2-roof:
 		Filename: weap2-gemini-roof.png
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.0461
-		Offset: 24, 276
+		Offset: 24, 96
 		ZOffset: 2048
 	aot-age2-roof-remap:
 		Filename: weap2-gemini-roof-remap.png
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.0461
-		Offset: 24, 276
+		Offset: 24, 96
 		ZOffset: 2048
 	aot-age2-blink:
 		Filename: weap2-gemini-blink.png
@@ -951,7 +951,7 @@ lite-gdi:
 		Length: 16
 		Tick: 130
 		Scale: 0.0461
-		Offset: 24, 276
+		Offset: 24, 96
 		ZOffset: 2048
 	aot-age2-make:
 		Filename: weapmake.shp
