@@ -192,7 +192,7 @@ aot-spy-gdi:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - GDI Commando (RMBO, exklusiv GDI, ab Age 3) ===
-# Ab Infantry Railguns Upgrade: Waffe wechselt auf aot-MtnkRailgun, Icon auf gdi_commando_rail.
+# Ab Infantry Railguns Upgrade: Waffe wechselt auf aot-CommandoRailgun, Icon auf gdi_commando_rail.
 # Doppel-Proxy-Pattern für Icon-Wechsel (analog BGGY/LTNK).
 aot-rmbo-gdi:
 	Inherits: RMBO
@@ -207,7 +207,7 @@ aot-rmbo-gdi:
 		Weapon: Sniper
 		RequiresCondition: !aot-commando-railgun-active
 	Armament@railgun:
-		Weapon: aot-MtnkRailgun
+		Weapon: aot-CommandoRailgun
 		RequiresCondition: aot-commando-railgun-active
 
 aot-rmbo-gdi-base:
@@ -900,13 +900,13 @@ MTNK:
 		RequiresCondition: aot-mtnk-titan && !aot-mtnk-titan-railgun
 		Recoil: 128
 		RecoilRecovery: 26
-		LocalOffset: 768,0,90
+		LocalOffset: 1152,0,90
 		MuzzleSequence: muzzle
 
 	Armament@titan-railgun:
 		Weapon: aot-MtnkRailgun
 		RequiresCondition: aot-mtnk-titan-railgun
-		LocalOffset: 768,0,90
+		LocalOffset: 1152,0,90
 
 	# Fire Position (Phase 3) Garrison-Waffen - eigene "garrisoned"-Variante je
 	# Upgrade-Stufe, gleiche Conditions wie die normalen Armaments oben.

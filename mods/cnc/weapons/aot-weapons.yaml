@@ -15,6 +15,33 @@ aot-JeepHumvee:
 			Light: 70
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - GDI Commando Railgun ===
+# Identischer Infanterie-Schaden wie Sniper (10000, None:100%), deutlich mehr vs Fahrzeuge.
+# Range wie Sniper (8c0), LaserZap-Projektil, leicht längere ReloadDelay (50 statt 40).
+aot-CommandoRailgun:
+	ReloadDelay: 50
+	Range: 8c0
+	Report: bigggun1.aud
+	Projectile: LaserZap
+		Width: 50
+		Color: A0C8FF
+		HitAnim: laserfire
+		ZOffset: 2047
+	Warhead@1Dam: SpreadDamage
+		Spread: 42
+		Damage: 10000
+		Versus:
+			None: 100
+			Wood: 50
+			Light: 150
+			Heavy: 80
+			Concrete: 0
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+	Warhead@2Smu: LeaveSmudge
+		SmudgeType: Scorch
+		InvalidTargets: Infantry, Structure, Wall, Husk, Trees, Creep
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - MTNK Predator: schnelleres 120mm ===
 # Tier 2: ReloadDelay 40→25 (37.5% schneller), gleiche Projektil/Warhead-Basis.
 aot-MtnkPredator:
@@ -981,6 +1008,15 @@ aot-MachineGunHGarrisoned:
 	Inherits: MachineGunH
 	Projectile: Bullet
 		Blockable: false
+
+# GDI Wolverine Mech — AssaultCannon (TS: tsgun4.aud, Range 5, anti-infantry)
+aot-WolverineCannon:
+	Inherits: MachineGunH
+	Range: 5c0
+	ReloadDelay: 50
+	Report: tsgun4.aud
+	Warhead@1Dam:
+		Damage: 2000
 
 aot-JeepHumveeGarrisoned:
 	Inherits: aot-JeepHumvee
