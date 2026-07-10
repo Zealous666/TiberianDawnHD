@@ -3772,7 +3772,7 @@ aot-wall-gdi:
 # === Age of Tiberium (aotmod) - Firestorm Defense Upgrade Icon ===
 aot-upgrade-firestorm-defense:
 	icon:
-		Filename: aot-upgrade-firestorm-icon.png
+		Filename: aot-fs-matrix-icon.png
 		RemasteredFilename:
 		Length: 1
 # === Ende aotmod ===

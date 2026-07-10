@@ -217,6 +217,15 @@ RMBO:
 		BaseName: aot-vxl-player
 		BasePalette: aot-vxl-ramp
 		RemapIndex: 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191
+	# Wolverine-Palette: unittem mit dunkelgrau entsättigten Nicht-House-Indizes,
+	# House-Color 16-31 bleibt für PlayerColorPalette-Remap (Cyborg-Muster, siehe [[recon-jeep-system]]).
+	PaletteFromFile@aot-wolverine-base:
+		Name: aot-wolverine-base
+		Filename: aot-wolverine-base.pal
+	PlayerColorPalette@aot-wolverine:
+		BaseName: aot-wolverine-player
+		BasePalette: aot-wolverine-base
+		RemapIndex: 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
 
 STNK:
 	Cloak:
