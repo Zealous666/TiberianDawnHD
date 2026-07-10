@@ -1025,7 +1025,7 @@ aot-htnk-base:
 	Buildable:
 		Queue: Vehicle.GDI
 		BuildPaletteOrder: 60
-		Prerequisites: ~aot-weap, ~aot-age1, aot-age1, weap, atec, ~!aot-htnk-rocket-upgrade, ~!aot-htnk-railgun-upgrade
+		Prerequisites: ~aot-weap, ~aot-age1, aot-age1, weap, atec, ~!aot-htnk-rocket-upgrade, ~!aot-mtnk-railgun-upgrade
 		Description: Heavily armored GDI battle tank with dual 120mm cannons.
 	Tooltip:
 		Name: Mammoth Tank
@@ -1037,7 +1037,7 @@ aot-htnk-rocket:
 	Buildable:
 		Queue: Vehicle.GDI
 		BuildPaletteOrder: 60
-		Prerequisites: ~aot-age1, aot-age1, ~aot-htnk-rocket-upgrade, ~!aot-htnk-railgun-upgrade
+		Prerequisites: ~aot-age1, aot-age1, ~aot-htnk-rocket-upgrade, ~!aot-mtnk-railgun-upgrade
 		Icon: aot-htnk-rocket-icon
 		Description: Mammoth Tank equipped with dual rocket launchers for additional anti-air and ground firepower.
 	Tooltip:
@@ -1050,9 +1050,9 @@ aot-htnk-laser:
 	Buildable:
 		Queue: Vehicle.GDI
 		BuildPaletteOrder: 60
-		Prerequisites: ~aot-age1, aot-age1, ~aot-htnk-railgun-upgrade
+		Prerequisites: ~aot-age1, aot-age1, ~aot-mtnk-railgun-upgrade
 		Icon: aot-htnk-laser-icon
-		Description: Mammoth Tank with dual high-powered railguns replacing the 120mm cannons. Devastating against all targets.
+		Description: Mammoth Tank with dual high-powered railguns. Requires the Tank Railguns upgrade (Predator path).
 	Tooltip:
 		Name: Mammoth Tank (Railgun)
 
@@ -1063,7 +1063,7 @@ HTNK:
 
 	GrantConditionOnPrerequisite@LASER:
 		Condition: aot-htnk-laser
-		Prerequisites: aot-htnk-railgun-upgrade
+		Prerequisites: aot-mtnk-railgun-upgrade
 
 	Tooltip@rocket:
 		Name: Mammoth Tank

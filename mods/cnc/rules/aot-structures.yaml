@@ -2001,10 +2001,12 @@ aot-upgrade-mtnk-predator:
 
 	Interactable:
 
-# === Age of Tiberium (aotmod) - MTNK Railgun Upgrade ===
+# === Age of Tiberium (aotmod) - Tank Railguns Upgrade ===
+# Setzt Predator-Upgrade voraus – Titan-Pfad schließt dieses Upgrade aus.
+# Schaltet Railguns für Predator MTNK UND Mammoth Tank frei.
 aot-upgrade-mtnk-railgun:
 	Tooltip:
-		Name: Railgun Upgrade
+		Name: Tank Railguns
 
 	Buildable:
 		BuildPaletteOrder: 21
@@ -2012,7 +2014,7 @@ aot-upgrade-mtnk-railgun:
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
-		Description: Main Tank & Titan upgrade with Railguns for higher damage.
+		Description: Equips the Predator Main Tank and Mammoth Tank with high-powered railguns. Requires the Predator Upgrade - incompatible with the Titan chassis path.
 
 	Valued:
 		Cost: 1000
@@ -2098,31 +2100,6 @@ aot-upgrade-htnk-rocket:
 
 	Interactable:
 
-# === Age of Tiberium (aotmod) - HTNK Dual-Railgun Upgrade ===
-# Erfordert Age 3 + ATEC + GDI War Factory. Schaltet aot-htnk-railgun-upgrade frei →
-# HTNK wechselt von Standard-Railguns zu Dual-Railguns (aot-HtnkLaser Waffe).
-aot-upgrade-htnk-railgun:
-	Tooltip:
-		Name: Dual-Railgun Upgrade
-
-	Buildable:
-		BuildPaletteOrder: 25
-		Prerequisites: ~aot-weap, ~aot-age3, aot-age3, atec
-		Queue: Upgrade.GDI
-		BuildLimit: 1
-		MoveIntoWorld: false
-		Description: Upgrades the Mammoth Tank with Dual Railguns for maximum firepower.
-
-	Valued:
-		Cost: 1500
-
-	RenderSprites:
-		Image: aot-upgrade-htnk-railgun
-
-	ProvidesPrerequisite:
-		Prerequisite: aot-htnk-railgun-upgrade
-
-	Interactable:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - HPAD: Proxy-Aktoren für GDI/NOD-Icons ===
