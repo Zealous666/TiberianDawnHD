@@ -44,7 +44,7 @@ LITE:
 		RequiresCondition: !aot-age2-active
 	WithIdleOverlay@ROOF:
 		Sequence: roof
-		RequiresCondition: !build-incomplete && !aot-age2-active
+		RequiresCondition: !aot-age2-active
 	-WithMakeAnimation:
 	WithMakeAnimation@base:
 		BodyNames: body
@@ -236,7 +236,9 @@ FACT:
 
 # === Age of Tiberium (aotmod) - FACT: RA sprites in Age 0, TD ab Age 1 ===
 # Zwei WithSpriteBody (body/body-td) gegenseitig exklusiv via aot-age1-active.
-# RA idle = Frame 0 (eingefroren). Keine Build-Placed-Animation — Originalverhalten.
+# RA idle = Frame 0 (eingefroren). WithBuildingPlacedAnimation@ra/@td weiter unten spielt
+# beim MCV-Deploy die echten FACT.ZIP-Frames 1-25 ab (siehe fact-mcv-sprites.md) — Kommentar
+# war stale, widersprach dem tatsächlichen Trait-Setup.
 FACT:
 	GrantConditionOnPrerequisite@aotage1:
 		Condition: aot-age1-active
@@ -657,6 +659,32 @@ aot-upgrade-apc2:
 	Interactable:
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - GDI Wolverine Mech Upgrade ===
+# Sichtbar ab Age 2 (unabhängig von HUMVEE). Verschwindet wenn APC-Upgrade gewählt wurde.
+aot-upgrade-wolverine:
+	Tooltip:
+		Name: Wolverine Upgrade
+
+	Buildable:
+		BuildPaletteOrder: 33
+		Prerequisites: lite, ~pyle, ~aot-age2, aot-age2, ~!aot-apc-upgrade
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Unlocks the Wolverine Mech. Fast anti-infantry walker. Requires Age 2.
+
+	Valued:
+		Cost: 250
+
+	RenderSprites:
+		Image: aot-upgrade-wolverine
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-wolverine-upgrade
+
+	Interactable:
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - MSAM: Hover MLRS Upgrade ===
 aot-upgrade-hover-mlrs:
 	Tooltip:
@@ -830,6 +858,33 @@ aot-upgrade-ion-cannon:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Zone Trooper Drop Upgrade (Orbital Command, Age 3) ===
+# === Age of Tiberium (aotmod) - Infantry Railguns Upgrade (GDI, Age 3) ===
+# Schaltet Railgun-Bewaffnung für GDI-Infanterie frei (Commando-Waffenwechsel).
+# Voraussetzung für Zone Trooper Drop Upgrade (aot-zonetrooper-drop-upgrade).
+aot-upgrade-infantry-railgun:
+	Tooltip:
+		Name: Infantry Railguns
+
+	Buildable:
+		BuildPaletteOrder: 5
+		Prerequisites: ~aot-age3, aot-age3, pyle, atec
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Equips GDI infantry with experimental railgun technology. Required for Zone Trooper deployment.
+
+	Valued:
+		Cost: 1000
+
+	RenderSprites:
+		Image: aot-upgrade-infantry-railgun
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-infantry-railgun-upgrade
+
+	Interactable:
+# === Ende aotmod ===
+
 # Erfordert Age 3 + Orbital Command. Schaltet aot-zonetrooper-drop-upgrade frei →
 # ORBC bekommt die Zone Trooper Drop Support Power (siehe ORBC.NukePower@zonetrooperdrop).
 aot-upgrade-zonetrooper-drop:
@@ -838,7 +893,7 @@ aot-upgrade-zonetrooper-drop:
 
 	Buildable:
 		BuildPaletteOrder: 6
-		Prerequisites: ~atec, ~aot-orbc, ~aot-age3, aot-age3
+		Prerequisites: ~atec, ~aot-orbc, ~aot-age3, aot-age3, aot-infantry-railgun-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		Icon: icon
@@ -1637,7 +1692,7 @@ aot-nod-radar:
 	WithMakeAnimation@age1:
 		BodyNames: body-age1
 		Condition: build-incomplete
-		Sequence: make
+		Sequence: aot-age1-make
 	WithMakeAnimation@age2:
 		BodyNames: body-age2
 		Condition: build-incomplete
@@ -1929,7 +1984,7 @@ aot-upgrade-mtnk-predator:
 
 	Buildable:
 		BuildPaletteOrder: 20
-		Prerequisites: ~atec, ~lite, ~techlevel.medium, ~aot-age2, aot-age2
+		Prerequisites: ~atec, ~lite, ~techlevel.medium, ~aot-age2, aot-age2, ~!aot-mtnk-titan-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -1967,6 +2022,54 @@ aot-upgrade-mtnk-railgun:
 
 	ProvidesPrerequisite:
 		Prerequisite: aot-mtnk-railgun-upgrade
+
+	Interactable:
+
+# === Age of Tiberium (aotmod) - MTNK Titan Upgrade ===
+aot-upgrade-mtnk-titan:
+	Tooltip:
+		Name: Titan Upgrade
+
+	Buildable:
+		BuildPaletteOrder: 22
+		Prerequisites: ~atec, ~lite, ~techlevel.medium, ~aot-age2, aot-age2, ~!aot-mtnk-predator-upgrade
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Main Tank upgrade to TS-style Titan Mech chassis with independent turret.
+
+	Valued:
+		Cost: 500
+
+	RenderSprites:
+		Image: aot-upgrade-mtnk-titan
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-mtnk-titan-upgrade
+
+	Interactable:
+
+# === Age of Tiberium (aotmod) - MTNK Titan Railgun Upgrade ===
+aot-upgrade-mtnk-titan-railgun:
+	Tooltip:
+		Name: Titan Railgun Upgrade
+
+	Buildable:
+		BuildPaletteOrder: 23
+		Prerequisites: ~atec, ~lite, ~techlevel.medium, ~aot-mtnk-titan-upgrade, ~aot-age3, aot-mtnk-titan-upgrade, aot-age3
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Upgrades the Titan Mech with Railgun for higher damage.
+
+	Valued:
+		Cost: 1000
+
+	RenderSprites:
+		Image: aot-upgrade-mtnk-titan-railgun
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-mtnk-titan-railgun-upgrade
 
 	Interactable:
 # === Ende aotmod ===

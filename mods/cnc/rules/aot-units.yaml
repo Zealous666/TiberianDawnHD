@@ -192,14 +192,44 @@ aot-spy-gdi:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - GDI Commando (RMBO, exklusiv GDI, ab Age 3) ===
+# Ab Infantry Railguns Upgrade: Waffe wechselt auf aot-MtnkRailgun, Icon auf gdi_commando_rail.
+# Doppel-Proxy-Pattern für Icon-Wechsel (analog BGGY/LTNK).
 aot-rmbo-gdi:
 	Inherits: RMBO
 	RenderSprites:
 		Image: aot-rmbo-gdi
+	-Buildable:
+	GrantConditionOnPrerequisite@RAILGUN:
+		Condition: aot-commando-railgun-active
+		Prerequisites: aot-infantry-railgun-upgrade
+	-Armament:
+	Armament@normal:
+		Weapon: Sniper
+		RequiresCondition: !aot-commando-railgun-active
+	Armament@railgun:
+		Weapon: aot-MtnkRailgun
+		RequiresCondition: aot-commando-railgun-active
+
+aot-rmbo-gdi-base:
+	Inherits: aot-rmbo-gdi
+	RenderSprites:
+		Image: aot-rmbo-gdi
 	Buildable:
 		BuildPaletteOrder: 50
-		Prerequisites: barracks, ~aot-age3
+		Prerequisites: barracks, ~aot-age3, ~!aot-infantry-railgun-upgrade
 		Queue: Infantry.GDI
+		Icon: icon
+		Description: actor-rmbo.description
+
+aot-rmbo-gdi-rail:
+	Inherits: aot-rmbo-gdi
+	RenderSprites:
+		Image: aot-rmbo-gdi
+	Buildable:
+		BuildPaletteOrder: 50
+		Prerequisites: barracks, ~aot-age3, ~aot-infantry-railgun-upgrade
+		Queue: Infantry.GDI
+		Icon: icon-rail
 		Description: actor-rmbo.description
 # === Ende aotmod ===
 
@@ -627,21 +657,33 @@ aot-mcv-age1:
 		Name: Mobile Construction Vehicle
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - Recon Jeep / HUMVEE ===
+# === Age of Tiberium (aotmod) - Recon Jeep / HUMVEE / Wolverine ===
+# Tier 0: Recon Jeep (kein Upgrade)
+# Tier 1: HUMVEE (aot-humvee-upgrade) — stärkeres MG
+# Tier 2: Wolverine (aot-wolverine-upgrade, ab Age 2 unabhängig von HUMVEE) — TS-Mech-Sprite, hat Priorität über HUMVEE
+# Wolverine-Sprite hat Vorrang: aot-jeep-wolverine überschreibt HUMVEE- und Base-Body.
 JEEP:
 	GrantConditionOnPrerequisite@HUMVEE:
 		Condition: aot-jeep-humvee
 		Prerequisites: aot-humvee-upgrade
 
+	GrantConditionOnPrerequisite@WOLVERINE:
+		Condition: aot-jeep-wolverine
+		Prerequisites: aot-wolverine-upgrade
+
 	-Tooltip:
 
 	Tooltip@base:
 		Name: Recon Jeep
-		RequiresCondition: !aot-jeep-humvee
+		RequiresCondition: !aot-jeep-humvee && !aot-jeep-wolverine
 
 	Tooltip@humvee:
 		Name: GDI HUMVEE
-		RequiresCondition: aot-jeep-humvee
+		RequiresCondition: aot-jeep-humvee && !aot-jeep-wolverine
+
+	Tooltip@wolverine:
+		Name: Wolverine
+		RequiresCondition: aot-jeep-wolverine
 
 	-Buildable:
 
@@ -649,44 +691,78 @@ JEEP:
 
 	WithFacingSpriteBody@base:
 		Sequence: aot-ra-idle
-		RequiresCondition: !aot-jeep-humvee
+		RequiresCondition: !aot-jeep-humvee && !aot-jeep-wolverine
 
 	WithFacingSpriteBody@humvee:
 		Sequence: idle
-		RequiresCondition: aot-jeep-humvee
+		RequiresCondition: aot-jeep-humvee && !aot-jeep-wolverine
+
+	WithFacingSpriteBody@wolverine:
+		Sequence: aot-wolverine-stand
+		Name: body-wolverine
+		RequiresCondition: aot-jeep-wolverine
+
+	WithFacingSpriteBody@wolverine-remap:
+		Sequence: aot-wolverine-stand-remap
+		Name: body-wolverine-remap
+		Palette: aot-vxl-player
+		IsPlayerPalette: true
+		RequiresCondition: aot-jeep-wolverine
+
+	WithMoveAnimation@wolverine:
+		MoveSequence: aot-wolverine-run
+		Body: body-wolverine
+		RequiresCondition: aot-jeep-wolverine
+
+	WithMoveAnimation@wolverine-remap:
+		MoveSequence: aot-wolverine-run-remap
+		Body: body-wolverine-remap
+		RequiresCondition: aot-jeep-wolverine
+
+	# Synthetischer Schatten (Cyborg-Muster): SHP-Body hat keine Schatten-Frames.
+	# Nur beim Wolverine aktiv, damit JEEP/HUMVEE (eingebauter Schatten) keinen Doppelschatten bekommen.
+	WithShadow@wolverine:
+		Offset: 0, 48, 0
+		ZOffset: -129
+		RequiresCondition: aot-jeep-wolverine
 
 	-WithSpriteTurret:
 
 	WithSpriteTurret@base:
 		Sequence: aot-ra-turret
-		RequiresCondition: !aot-jeep-humvee
+		RequiresCondition: !aot-jeep-humvee && !aot-jeep-wolverine
 
 	WithSpriteTurret@humvee:
 		Sequence: turret
-		RequiresCondition: aot-jeep-humvee
+		RequiresCondition: aot-jeep-humvee && !aot-jeep-wolverine
 
 	Armament:
 		Weapon: MachineGunH
 		LocalOffset: 171,0,85
 		MuzzleSequence: muzzle
-		RequiresCondition: !aot-jeep-humvee
+		RequiresCondition: !aot-jeep-humvee && !aot-jeep-wolverine
 
 	Armament@humvee:
 		Weapon: aot-JeepHumvee
 		LocalOffset: 171,0,85
 		MuzzleSequence: muzzle
-		RequiresCondition: aot-jeep-humvee
+		RequiresCondition: aot-jeep-humvee && !aot-jeep-wolverine
 
-	# Fire Position (Phase 3) Garrison-Waffen, gleiche Conditions wie oben.
+	Armament@wolverine:
+		Weapon: aot-WolverineCannon
+		LocalOffset: 0,0,620
+		RequiresCondition: aot-jeep-wolverine
+
+	# Fire Position (Phase 3) Garrison-Waffen
 	Armament@garrisoned:
 		Name: garrisoned
 		Weapon: aot-MachineGunHGarrisoned
-		RequiresCondition: !aot-jeep-humvee
+		RequiresCondition: !aot-jeep-humvee && !aot-jeep-wolverine
 
 	Armament@garrisonedhumvee:
 		Name: garrisoned
 		Weapon: aot-JeepHumveeGarrisoned
-		RequiresCondition: aot-jeep-humvee
+		RequiresCondition: aot-jeep-humvee && !aot-jeep-wolverine
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - MTNK Queue-Proxies (Doppel-Aktor-Pattern) ===
@@ -700,7 +776,7 @@ aot-mtnk-base:
 	Buildable:
 		Queue: LightVehicle.GDI
 		BuildPaletteOrder: 5
-		Prerequisites: ~lite, gdi-hq, ~!aot-mtnk-predator-upgrade
+		Prerequisites: ~lite, gdi-hq, ~!aot-mtnk-predator-upgrade, ~!aot-mtnk-titan-upgrade
 		Description: GDI medium battle tank.
 	Tooltip:
 		Name: Medium Tank
@@ -712,7 +788,7 @@ aot-mtnk-pred:
 	Buildable:
 		Queue: LightVehicle.GDI
 		BuildPaletteOrder: 5
-		Prerequisites: ~lite, gdi-hq, ~aot-mtnk-predator-upgrade, ~!aot-mtnk-railgun-upgrade
+		Prerequisites: ~lite, gdi-hq, ~aot-mtnk-predator-upgrade, ~!aot-mtnk-railgun-upgrade, ~!aot-mtnk-titan-upgrade
 		Icon: aot-mtnk-pred-icon
 		Description: GDI medium battle tank.
 	Tooltip:
@@ -725,11 +801,37 @@ aot-mtnk-rail:
 	Buildable:
 		Queue: LightVehicle.GDI
 		BuildPaletteOrder: 5
-		Prerequisites: ~lite, gdi-hq, ~aot-mtnk-railgun-upgrade
+		Prerequisites: ~lite, gdi-hq, ~aot-mtnk-railgun-upgrade, ~!aot-mtnk-titan-upgrade
 		Icon: aot-mtnk-rail-icon
 		Description: GDI medium battle tank.
 	Tooltip:
 		Name: Medium Tank (Railgun)
+
+aot-mtnk-titn:
+	Inherits: MTNK
+	RenderSprites:
+		Image: mtnk
+	Buildable:
+		Queue: LightVehicle.GDI
+		BuildPaletteOrder: 5
+		Prerequisites: ~lite, gdi-hq, ~aot-mtnk-titan-upgrade, ~!aot-mtnk-titan-railgun-upgrade
+		Icon: aot-mtnk-titn-icon
+		Description: GDI Titan Mech — upgraded Medium Tank chassis with independent turret.
+	Tooltip:
+		Name: Titan Mech
+
+aot-mtnk-titn-rail:
+	Inherits: MTNK
+	RenderSprites:
+		Image: mtnk
+	Buildable:
+		Queue: LightVehicle.GDI
+		BuildPaletteOrder: 5
+		Prerequisites: ~lite, gdi-hq, ~aot-mtnk-titan-railgun-upgrade
+		Icon: aot-mtnk-titn-rail-icon
+		Description: GDI Titan Mech with Railgun.
+	Tooltip:
+		Name: Titan Mech (Railgun)
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - MTNK Upgrade-Conditions ===
@@ -742,11 +844,19 @@ MTNK:
 		Condition: aot-mtnk-railgun
 		Prerequisites: aot-mtnk-railgun-upgrade
 
+	GrantConditionOnPrerequisite@TITAN:
+		Condition: aot-mtnk-titan
+		Prerequisites: aot-mtnk-titan-upgrade
+
+	GrantConditionOnPrerequisite@TITAN-RAIL:
+		Condition: aot-mtnk-titan-railgun
+		Prerequisites: aot-mtnk-titan-railgun-upgrade
+
 	-Tooltip:
 
 	Tooltip@normal:
 		Name: Medium Tank
-		RequiresCondition: !aot-mtnk-predator
+		RequiresCondition: !aot-mtnk-predator && !aot-mtnk-titan
 
 	Tooltip@predator:
 		Name: Medium Tank (Predator)
@@ -756,9 +866,17 @@ MTNK:
 		Name: Medium Tank (Railgun)
 		RequiresCondition: aot-mtnk-railgun
 
+	Tooltip@titan:
+		Name: Titan Mech
+		RequiresCondition: aot-mtnk-titan && !aot-mtnk-titan-railgun
+
+	Tooltip@titan-railgun:
+		Name: Titan Mech (Railgun)
+		RequiresCondition: aot-mtnk-titan-railgun
+
 	Armament:
 		Weapon: 120mm
-		RequiresCondition: !aot-mtnk-predator
+		RequiresCondition: !aot-mtnk-predator && !aot-mtnk-titan
 		Recoil: 128
 		RecoilRecovery: 26
 		LocalOffset: 768,0,90
@@ -777,12 +895,25 @@ MTNK:
 		RequiresCondition: aot-mtnk-railgun
 		LocalOffset: 768,0,90
 
+	Armament@titan:
+		Weapon: aot-MtnkPredator
+		RequiresCondition: aot-mtnk-titan && !aot-mtnk-titan-railgun
+		Recoil: 128
+		RecoilRecovery: 26
+		LocalOffset: 768,0,90
+		MuzzleSequence: muzzle
+
+	Armament@titan-railgun:
+		Weapon: aot-MtnkRailgun
+		RequiresCondition: aot-mtnk-titan-railgun
+		LocalOffset: 768,0,90
+
 	# Fire Position (Phase 3) Garrison-Waffen - eigene "garrisoned"-Variante je
 	# Upgrade-Stufe, gleiche Conditions wie die normalen Armaments oben.
 	Armament@garrisoned:
 		Name: garrisoned
 		Weapon: aot-120mmGarrisoned
-		RequiresCondition: !aot-mtnk-predator
+		RequiresCondition: !aot-mtnk-predator && !aot-mtnk-titan
 
 	Armament@garrisonedpredator:
 		Name: garrisoned
@@ -794,11 +925,21 @@ MTNK:
 		Weapon: aot-MtnkRailgun
 		RequiresCondition: aot-mtnk-railgun
 
+	Armament@garrisonedtitan:
+		Name: garrisoned
+		Weapon: aot-MtnkPredatorGarrisoned
+		RequiresCondition: aot-mtnk-titan && !aot-mtnk-titan-railgun
+
+	Armament@garrisonedtitanrailgun:
+		Name: garrisoned
+		Weapon: aot-MtnkRailgun
+		RequiresCondition: aot-mtnk-titan-railgun
+
 	-WithSpriteTurret:
 
 	WithSpriteTurret@base:
 		Sequence: turret
-		RequiresCondition: !aot-mtnk-predator
+		RequiresCondition: !aot-mtnk-predator && !aot-mtnk-titan
 
 	WithSpriteTurret@predator:
 		Sequence: aot-mtnk-turret-predator
@@ -807,6 +948,70 @@ MTNK:
 	WithSpriteTurret@railgun:
 		Sequence: aot-mtnk-turret-railgun
 		RequiresCondition: aot-mtnk-railgun
+
+	# Titan Turret (32 Facings, Zwei-Layer Player-Color + Body-Detail)
+	WithSpriteTurret@titan:
+		Sequence: aot-titan-turret
+		RequiresCondition: aot-mtnk-titan && !aot-mtnk-titan-railgun
+
+	WithSpriteTurret@titan-remap:
+		Sequence: aot-titan-turret-remap
+		Palette: aot-vxl-player
+		IsPlayerPalette: true
+		RequiresCondition: aot-mtnk-titan && !aot-mtnk-titan-railgun
+
+	WithSpriteTurret@titan-railgun:
+		Sequence: aot-titan-turret-railgun
+		RequiresCondition: aot-mtnk-titan-railgun
+
+	WithSpriteTurret@titan-railgun-remap:
+		Sequence: aot-titan-turret-railgun-remap
+		Palette: aot-vxl-player
+		IsPlayerPalette: true
+		RequiresCondition: aot-mtnk-titan-railgun
+
+	# Titan Barrel (mmchbarl.vxl, 104px, +16-Frame-Shift) — über Housing
+	WithSpriteTurret@titan-barrel:
+		Sequence: aot-titan-barrel-black
+		RequiresCondition: aot-mtnk-titan && !aot-mtnk-titan-railgun
+
+	WithSpriteTurret@titan-barrel-railgun:
+		Sequence: aot-titan-barrel-white
+		RequiresCondition: aot-mtnk-titan-railgun
+
+	# Titan Body Sprite-Swap (8 Facings, Zwei-Layer Player-Color)
+	-WithFacingSpriteBody:
+
+	WithFacingSpriteBody@base:
+		Sequence: idle
+		RequiresCondition: !aot-mtnk-titan
+
+	WithFacingSpriteBody@titan:
+		Sequence: aot-titan-stand
+		Name: body-titan
+		RequiresCondition: aot-mtnk-titan
+
+	WithFacingSpriteBody@titan-remap:
+		Sequence: aot-titan-stand-remap
+		Name: body-titan-remap
+		Palette: aot-vxl-player
+		IsPlayerPalette: true
+		RequiresCondition: aot-mtnk-titan
+
+	WithMoveAnimation@titan:
+		MoveSequence: aot-titan-run
+		Body: body-titan
+		RequiresCondition: aot-mtnk-titan
+
+	WithMoveAnimation@titan-remap:
+		MoveSequence: aot-titan-run-remap
+		Body: body-titan-remap
+		RequiresCondition: aot-mtnk-titan
+
+	WithShadow@titan:
+		Offset: 0, 48, 0
+		ZOffset: -129
+		RequiresCondition: aot-mtnk-titan
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - HTNK Upgrades ===
@@ -982,9 +1187,10 @@ APC:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Jeep Queue-Proxies (Doppel-Aktor-Pattern) ===
-# aot-jeep-base: Recon-Jeep-Icon vor HUMVEE-Upgrade.
-# aot-jeep-humvee: HUMVEE-Icon nach HUMVEE-Upgrade.
-# Beide verschwinden wenn APC-Upgrade aktiv (~!aot-apc-upgrade).
+# aot-jeep-base:      Recon-Jeep-Icon vor jedem Upgrade.
+# aot-jeep-humvee:    HUMVEE-Icon nach HUMVEE-, vor Wolverine-Upgrade.
+# aot-jeep-wolverine: Wolverine-Icon nach Wolverine-Upgrade (unabhängig von HUMVEE).
+# Alle verschwinden wenn APC-Upgrade aktiv (~!aot-apc-upgrade).
 aot-jeep-base:
 	Inherits: JEEP
 	RenderSprites:
@@ -992,8 +1198,8 @@ aot-jeep-base:
 	Buildable:
 		Queue: LightVehicle.GDI
 		BuildPaletteOrder: 3
-		Prerequisites: lite, pyle, ~!aot-humvee-upgrade, ~!aot-apc-upgrade
-		Description: Fast reconnaissance vehicle. Can carry 1 soldier.
+		Prerequisites: lite, pyle, ~!aot-humvee-upgrade, ~!aot-wolverine-upgrade, ~!aot-apc-upgrade
+		Description: Fast reconnaissance vehicle.
 	Tooltip:
 		Name: Recon Jeep
 
@@ -1004,11 +1210,24 @@ aot-jeep-humvee:
 	Buildable:
 		Queue: LightVehicle.GDI
 		BuildPaletteOrder: 3
-		Prerequisites: lite, pyle, ~aot-humvee-upgrade, ~!aot-apc-upgrade
+		Prerequisites: lite, pyle, ~aot-humvee-upgrade, ~!aot-apc-upgrade, ~!aot-wolverine-upgrade
 		Icon: aot-humvee-icon
 		Description: Fast reconnaissance vehicle with HUMVEE armor and stronger machine gun.
 	Tooltip:
 		Name: GDI HUMVEE
+
+aot-jeep-wolverine:
+	Inherits: JEEP
+	RenderSprites:
+		Image: jeep
+	Buildable:
+		Queue: LightVehicle.GDI
+		BuildPaletteOrder: 3
+		Prerequisites: lite, pyle, ~!aot-apc-upgrade, ~aot-wolverine-upgrade
+		Icon: aot-wolverine-icon
+		Description: Wolverine Mech. Fast anti-infantry walker.
+	Tooltip:
+		Name: Wolverine
 aot-apc-amphibious:
 	Inherits: APC
 	RenderSprites:
@@ -1065,6 +1284,8 @@ aot-apc-amphibious:
 			gray: pip-gray
 			yellow: pip-yellow
 			red: pip-red
+# === Ende aotmod ===
+
 # === Ende aotmod ===
 
 
