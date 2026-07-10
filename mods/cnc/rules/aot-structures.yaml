@@ -1988,7 +1988,7 @@ aot-upgrade-mtnk-predator:
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
-		Description: Main Tank upgrade with Predator-Turret for faster fire-rate.
+		Description: Upgrades the Main Tank with a Predator turret for a faster fire rate. Enables Tank Railguns for Medium Tank and Mammoth Tank. Incompatible with the Titan and Juggernaut path.
 
 	Valued:
 		Cost: 500
@@ -2038,7 +2038,7 @@ aot-upgrade-mtnk-titan:
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
-		Description: Main Tank upgrade to TS-style Titan Mech chassis with independent turret.
+		Description: Upgrades the Main Tank to a TS-style Titan Mech chassis with independent turret rotation. Enables Titan Railguns and the Juggernaut Artillery. Incompatible with Predator upgrades and Tank Railguns.
 
 	Valued:
 		Cost: 500
