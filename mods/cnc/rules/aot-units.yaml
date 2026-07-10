@@ -1126,9 +1126,13 @@ HTNK:
 		Sequence: turret
 		RequiresCondition: aot-htnk-rocket && !aot-htnk-laser
 
+	WithSpriteTurret@laseronly:
+		Sequence: aot-htnk-railgun-norocket-turret
+		RequiresCondition: aot-htnk-laser && !aot-htnk-rocket
+
 	WithSpriteTurret@laser:
 		Sequence: aot-htnk-railgun-turret
-		RequiresCondition: aot-htnk-laser
+		RequiresCondition: aot-htnk-laser && aot-htnk-rocket
 # === Ende aotmod ===
 
 

@@ -86,6 +86,69 @@ mtnk:
 		RemasteredFilename: aot-mtnk-turret-railgun.zip
 		Facings: 32
 		UseClassicFacings: True
+	aot-mtnk-titn-icon:
+		RemasteredFilename: mtnk_2_titn.png
+	aot-mtnk-titn-rail-icon:
+		RemasteredFilename: mtnk_3_titnrail.png
+	# Titan body: 8 Facings × 15 Walk-Frames (Scale3x Bake aus mmch.shp, Frames 0-119)
+	aot-titan-stand:
+		RemasteredFilename: aot-titan-body.zip
+		Start: 0
+		Facings: -8
+		Stride: 15
+		Scale: 1.0
+	aot-titan-stand-remap:
+		RemasteredFilename: aot-titan-body-remap.png
+		Start: 0
+		Facings: -8
+		Stride: 15
+		Scale: 1.0
+	aot-titan-run:
+		RemasteredFilename: aot-titan-body.zip
+		Start: 0
+		Length: 15
+		Facings: -8
+		Tick: 60
+		Scale: 1.0
+	aot-titan-run-remap:
+		RemasteredFilename: aot-titan-body-remap.png
+		Start: 0
+		Length: 15
+		Facings: -8
+		Tick: 60
+		Scale: 1.0
+	# Titan turret: 32 Facings (Scale3x Bake aus mmch.shp, Frames 120-151)
+	aot-titan-turret:
+		RemasteredFilename: aot-titan-turret.zip
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 1.0
+	aot-titan-turret-remap:
+		RemasteredFilename: aot-titan-turret-remap.png
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 1.0
+	aot-titan-turret-railgun:
+		RemasteredFilename: aot-titan-turret-railgun.zip
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 1.0
+	aot-titan-turret-railgun-remap:
+		RemasteredFilename: aot-titan-turret-railgun-remap.png
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 1.0
+	# Titan barrel: mmchbarl.vxl, 32 Facings, 260px (78px bottom-padding für Höhen-Alignment)
+	aot-titan-barrel-black:
+		RemasteredFilename: aot-titan-barrel-black.zip
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 1.0
+	aot-titan-barrel-white:
+		RemasteredFilename: aot-titan-barrel-white.zip
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 1.0
 
 mtnk.destroyed:
 	Defaults:
@@ -170,6 +233,48 @@ jeep:
 		RemasteredFilename: jeep_1_base.png
 	aot-humvee-icon:
 		RemasteredFilename: jeep_2_humvee.png
+	aot-wolverine-icon:
+		RemasteredFilename: jeep_3_wolv.png
+	# Zwei-Layer-Bake (APC-Muster): Body-ZIP (schwarze Details) + Remap-PNG (ganzer Körper
+	# in Player-Color-Rampe 176-191). LANCZOS-geglättet, Remap über aot-vxl-player Palette.
+	aot-wolverine-stand:
+		RemasteredFilename: aot-wolverine.zip
+		Start: 96
+		Facings: -8
+		Scale: 1.13
+	aot-wolverine-stand-remap:
+		RemasteredFilename: aot-wolverine-remap.png
+		Start: 96
+		Facings: -8
+		Scale: 1.13
+	aot-wolverine-run:
+		RemasteredFilename: aot-wolverine.zip
+		Start: 0
+		Length: 12
+		Facings: -8
+		Tick: 48
+		Scale: 1.13
+	aot-wolverine-run-remap:
+		RemasteredFilename: aot-wolverine-remap.png
+		Start: 0
+		Length: 12
+		Facings: -8
+		Tick: 48
+		Scale: 1.13
+	aot-wolverine-shoot:
+		RemasteredFilename: aot-wolverine.zip
+		Start: 104
+		Length: 4
+		Facings: -8
+		Tick: 80
+		Scale: 1.13
+	aot-wolverine-shoot-remap:
+		RemasteredFilename: aot-wolverine-remap.png
+		Start: 104
+		Length: 4
+		Facings: -8
+		Tick: 80
+		Scale: 1.13
 
 apc:
 	icon:
@@ -216,6 +321,10 @@ aot-apc2:
 		RemasteredFilename: jeep_4_apc2.png
 		Length: 1
 		Facings: 1
+
+aot-upgrade-wolverine:
+	icon:
+		RemasteredFilename: jeep_3_wolv.png
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Ion Cannon Upgrade Icon (Platzhalter: LTNK-Icon) ===
@@ -231,6 +340,14 @@ aot-upgrade-mtnk-predator:
 aot-upgrade-mtnk-railgun:
 	icon:
 		RemasteredFilename: aot-upgrade-mtnk-railgun.png
+
+aot-upgrade-mtnk-titan:
+	icon:
+		RemasteredFilename: aot-upgrade-mtnk-titan.png
+
+aot-upgrade-mtnk-titan-railgun:
+	icon:
+		RemasteredFilename: aot-upgrade-mtnk-titan-railgun.png
 
 aot-upgrade-e4-toxic:
 	icon:
@@ -248,6 +365,11 @@ htnk:
 		UseClassicFacings: True
 	aot-htnk-railgun-turret:
 		RemasteredFilename: aot-htnk-railgun-turret.zip
+		Start: 32
+		Facings: 32
+		UseClassicFacings: True
+	aot-htnk-railgun-norocket-turret:
+		RemasteredFilename: aot-htnk-railgun-norocket-turret.zip
 		Start: 32
 		Facings: 32
 		UseClassicFacings: True
