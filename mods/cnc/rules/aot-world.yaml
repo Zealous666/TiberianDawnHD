@@ -16,13 +16,13 @@ World:
 		ClassName: options-starting-units.heavy-support
 		Factions: nod
 		BaseActor: mcv
-		SupportActors: aot-e1-nod,aot-e1-nod,aot-e1-nod,aot-e1-nod,aot-e1-nod,aot-e3-nod,aot-e3-nod,aot-e3-nod,aot-e3-nod,aot-e4-nod,aot-e4-nod,aot-e4-nod,TTNK
+		SupportActors: aot-e1-nod,aot-e1-nod,aot-e1-nod,aot-e1-nod,aot-e1-nod,aot-e3-nod,aot-e3-nod,aot-e4-nod,TTNK,TTNK
 	StartingUnits@heavynodb:
 		Class: heavy
 		ClassName: options-starting-units.heavy-support
 		Factions: nod
 		BaseActor: mcv
-		SupportActors: aot-e1-nod,aot-e1-nod,aot-e1-nod,aot-e1-nod,aot-e1-nod,aot-e3-nod,aot-e3-nod,aot-e4-nod,TTNK,TTNK
+		SupportActors: aot-e1-nod,aot-e1-nod,aot-e1-nod,aot-e1-nod,aot-e1-nod,aot-e3-nod,aot-e3-nod,aot-e4-nod,TTNK,aot-v2-base
 	StartingUnits@heavygdia:
 		Class: heavy
 		ClassName: options-starting-units.heavy-support
