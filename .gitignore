@@ -54,6 +54,8 @@ engine/**
 !engine/OpenRA.Mods.Cnc/Traits/AotSinkOnWater.cs
 !engine/OpenRA.Mods.Cnc/Traits/AotSpyRenderer.cs
 !engine/OpenRA.Mods.Cnc/Traits/AotTransformsOnTerrain.cs
+!engine/OpenRA.Mods.Cnc/UtilityCommands/
+!engine/OpenRA.Mods.Cnc/UtilityCommands/VxlToPngCommand.cs
 
 # Visual Studio
 Release

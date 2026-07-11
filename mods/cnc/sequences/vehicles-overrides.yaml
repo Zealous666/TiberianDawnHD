@@ -150,6 +150,82 @@ mtnk:
 		UseClassicFacings: True
 		Scale: 1.0
 
+	# Juggernaut barrel: aot-titan-barrel-black.zip Placeholder (kein VXL vorhanden)
+	# Deployed turret: djugg_a.shp, 32 Facings reversed (UseClassicFacings: True)
+
+aot-jugg:
+	# idle: Pflicht für BodyOrientation/QuantizeFacingsFromSequence (Facings: -8 = 8 Facings)
+	idle:
+		RemasteredFilename: aot-jugg-body.zip
+		Start: 0
+		Facings: -8
+		Stride: 15
+		Scale: 1.05
+	# Walk body: 8 Facings × 15 Walk-Frames (Scale3x Bake aus jugger.shp, Frames 0-119)
+	aot-jugg-stand:
+		RemasteredFilename: aot-jugg-body.zip
+		Start: 0
+		Facings: -8
+		Stride: 15
+		Scale: 1.05
+	aot-jugg-stand-remap:
+		RemasteredFilename: aot-jugg-body-remap.png
+		Start: 0
+		Facings: -8
+		Stride: 15
+		Scale: 1.05
+	aot-jugg-run:
+		RemasteredFilename: aot-jugg-body.zip
+		Start: 0
+		Length: 15
+		Facings: -8
+		Tick: 60
+		Scale: 1.05
+	aot-jugg-run-remap:
+		RemasteredFilename: aot-jugg-body-remap.png
+		Start: 0
+		Length: 15
+		Facings: -8
+		Tick: 60
+		Scale: 1.05
+	# Deployed body: 3 Frames (normal, damaged, dead) aus djugg.shp
+	aot-jugg-deployed:
+		RemasteredFilename: aot-jugg-deployed.zip
+		Facings: 1
+		Scale: 1.05
+	aot-jugg-deployed-remap:
+		RemasteredFilename: aot-jugg-deployed-remap.png
+		Facings: 1
+		Scale: 1.05
+	# Deployed turret: 32 Facings reversed aus djugg_a.shp (Gehäuse)
+	aot-jugg-turret:
+		RemasteredFilename: aot-jugg-turret.zip
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 1.05
+	aot-jugg-turret-remap:
+		RemasteredFilename: aot-jugg-turret-remap.png
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 1.05
+	# Deploy-Animation: 18 Frames aus djuggmk.shp
+	aot-jugg-make:
+		RemasteredFilename: aot-jugg-make.zip
+		Length: 18
+		Facings: 1
+		Scale: 1.05
+	aot-jugg-make-remap:
+		RemasteredFilename: aot-jugg-make-remap.png
+		Length: 18
+		Facings: 1
+		Scale: 1.05
+	# Icon
+	aot-jugg-icon:
+		RemasteredFilename: jugg_base.png
+	muzzle:
+		Filename: gunfire2.shp
+		Length: *
+
 mtnk.destroyed:
 	Defaults:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\MTNK.ZIP

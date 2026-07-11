@@ -1068,4 +1068,29 @@ aot-TtnkChemsprayGarrisoned:
 	Inherits: aot-TtnkChemspray
 	Projectile: Bullet
 		Blockable: false
+
+aot-JuggCannon:
+	Inherits: ^BallisticWeapon
+	ReloadDelay: 175
+	Range: 18c0
+	MinRange: 5c0
+	Burst: 6
+	BurstDelays: 5, 5, 25, 5, 5
+	Report: jugger1-single.aud
+	TargetActorCenter: true
+	Projectile: Bullet
+		Speed: 204
+		Blockable: false
+		LaunchAngle: 56
+		Inaccuracy: 1c0
+		ContrailLength: 30
+	Warhead@1Dam: SpreadDamage
+		Damage: 3300
+		Versus:
+			None: 35
+			Wood: 70
+			Light: 85
+			Heavy: 80
+			Concrete: 80
+
 # === Ende aotmod ===
