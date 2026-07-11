@@ -641,7 +641,7 @@ aot-upgrade-apc2:
 
 	Buildable:
 		BuildPaletteOrder: 32
-		Prerequisites: ~atec, lite, ~pyle, ~aot-age2, aot-age2, aot-apc-upgrade, ~!aot-humvee-upgrade
+		Prerequisites: ~atec, lite, ~pyle, ~aot-age2, aot-age2, aot-apc-upgrade, ~!aot-humvee-upgrade, ~!aot-minelayer-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -655,6 +655,33 @@ aot-upgrade-apc2:
 
 	ProvidesPrerequisite:
 		Prerequisite: aot-amphibious-upgrade
+
+	Interactable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - GDI Mine Layer Upgrade (2. Age-2-APC-Zweig) ===
+# Entweder-Oder mit Amphibious APC (~! gegenseitig). Nach APC-Upgrade + Age 2.
+# Braucht FIX (Mine Layer munitioniert dort auf). Siehe [[minelayer-system]].
+aot-upgrade-minelayer:
+	Tooltip:
+		Name: Mine Layer Upgrade
+
+	Buildable:
+		BuildPaletteOrder: 34
+		Prerequisites: ~aot-weap, weap, ~aot-age2, aot-age2, aot-apc-upgrade, ~aot-apc-upgrade
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Unlocks the Mine Layer APC. Deploys 5 anti-vehicle mines, rearms at the Repair Facility.
+
+	Valued:
+		Cost: 300
+
+	RenderSprites:
+		Image: aot-upgrade-minelayer
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-minelayer-upgrade
 
 	Interactable:
 # === Ende aotmod ===

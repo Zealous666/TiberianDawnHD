@@ -1290,6 +1290,72 @@ aot-apc-amphibious:
 			red: pip-red
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - GDI Mine Layer (2. Age-2-APC-Zweig, RA Allied MNLY) ===
+# Legt 5 Anti-Vehicle-Minen (aot-minv), munitioniert an FIX auf. Waffenlos, kein Cargo.
+# MNLY-Sprite hat eingebauten Team-Color-Kanal → Player-Color automatisch (kein Bake/Remap).
+# Siehe [[minelayer-system]] + RA MNLY (engine/mods/ra/rules/vehicles.yaml:506).
+aot-minelayer:
+	Inherits: APC
+	RenderSprites:
+		Image: aot-minelayer
+	# Waffenlos + turmlos, kein AutoTarget (Mine Layer schießt nicht)
+	-AttackFrontal:
+	-AutoTarget:
+	-AutoTargetPriority@DEFAULT:
+	-AutoTargetPriority@ATTACKANYTHING:
+	-AutoTargetPriority@Air:
+	-AttackMove:
+	-Armament@PRIMARY:
+	-Armament@SECONDARY:
+	-Armament@garrisoned:
+	-Armament@garrisonedair:
+	-WithMuzzleOverlay:
+	-GrantConditionOnAttack:
+	# Kein Amphibious-Verhalten
+	-GrantConditionOnPrerequisite@AMPHIBIOUS:
+	-AotTransformsOnTerrain@WATER:
+	# Kein Transport (RA MNLY hat keinen Cargo)
+	-Cargo:
+	-WithCargoPipsDecoration:
+	# MNLY-Sprite (Team-Color automatisch), ersetzt APC-Body-Swap
+	-WithFacingSpriteBody@base:
+	-WithFacingSpriteBody@amphibious:
+	WithFacingSpriteBody:
+		Sequence: idle
+	# Minenverleger-Mechanik (RA MNLY)
+	Minelayer:
+		Mine: aot-minv
+		AmmoPoolName: primary
+		TileUnknownName: build-valid
+		TerrainTypes: Clear, Road, Rough, Bridge, Tiberium, BlueTiberium, Beach
+	MineImmune:
+	AmmoPool:
+		Ammo: 5
+		ReloadDelay: 0
+	Rearmable:
+		RearmActors: aot-fix-age0, aot-fix-age1, aot-fix-age2, aot-fix-age1-nod, aot-fix-age2-nod
+	Repairable:
+		RepairActors: aot-fix-age0, aot-fix-age1, aot-fix-age2, aot-fix-age1-nod, aot-fix-age2-nod
+	DetectCloaked:
+		Range: 5c0
+		DetectionTypes: Mine
+	Targetable:
+		TargetTypes: Ground, Vehicle, Mine
+	WithAmmoPipsDecoration:
+		Position: BottomLeft
+		Margin: 4, 3
+		RequiresSelection: true
+	# Explodiert bei Tod wie in RA (legt eine Mine ab)
+	FireWarheadsOnDeath:
+		Weapon: aot-ATMine
+	Buildable:
+		Queue: Vehicle.GDI
+		BuildPaletteOrder: 62
+		Prerequisites: ~aot-weap, weap, ~aot-minelayer-upgrade
+		Icon: icon
+		Description: Deploys 5 anti-vehicle mines. Rearms at the Repair Facility. Unarmed, no transport.
+	Tooltip:
+		Name: Mine Layer
 # === Ende aotmod ===
 
 

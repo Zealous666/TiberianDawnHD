@@ -132,7 +132,7 @@ namespace OpenRA.Mods.Common.Traits
 					yield break;
 
 				yield return new BeginMinefieldOrderTargeter(Info.AbilityCursor);
-				yield return new DeployOrderTargeter("PlaceMine", 5, () => IsCellAcceptable(self, self.Location) ? Info.DeployCursor : Info.DeployBlockedCursor);
+				yield return new DeployOrderTargeter("PlaceMine", 5, () => (ammoPool == null || ammoPool.HasAmmo) && IsCellAcceptable(self, self.Location) ? Info.DeployCursor : Info.DeployBlockedCursor);
 			}
 		}
 
@@ -169,7 +169,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		bool IIssueDeployOrder.CanIssueDeployOrder(Actor self, bool queued)
 		{
-			if (IsTraitDisabled)
+			if (self.IsDead || IsTraitDisabled)
 				return false;
 
 			// If AmmoCondition is configured, rely on condition state (driven by AmmoPool directly).
