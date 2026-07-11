@@ -1093,4 +1093,90 @@ aot-JuggCannon:
 			Heavy: 80
 			Concrete: 80
 
+# === Age of Tiberium (aotmod) - V2 Rocket Launcher Waffen ===
+# aot-V2Rocket: Basis-Waffe Age 0 (SCUD-artig, einzel, vertikal).
+# aot-V2Napalm: Age-1-Napalm-Upgrade, Burst:2, Incendiary-Warhead.
+# aot-V2Toxic:  Age-3 via aot-toxic-upgrade, gleiche Stats, Tiberium-Warhead statt Napalm.
+aot-V2Rocket:
+	Inherits: ^BallisticWeapon
+	ReloadDelay: 200
+	Range: 9c0
+	MinRange: 3c0
+	Report: missile1.wav
+	Projectile: Bullet
+		Speed: 170
+		Blockable: false
+		TrailImage: smokey
+		TrailDelay: 5
+		Inaccuracy: 213
+		Image: V2
+		Shadow: True
+		LaunchAngle: 62
+	Warhead@1Dam: SpreadDamage
+		Spread: 341
+		Damage: 3000
+		Falloff: 1000, 368, 135, 50, 18, 7, 0
+		ValidTargets: Ground, Water, Trees
+		Versus:
+			None: 70
+			Wood: 40
+			Tree: 40
+			Light: 15
+			Heavy: 8
+			Concrete: 10
+		DamageTypes: Prone50Percent, TriggerProne, SmallExplosionDeath
+	Warhead@3Eff: CreateEffect
+		Explosions: big_napalm
+
+aot-V2Napalm:
+	Inherits: aot-V2Rocket
+	ReloadDelay: 50
+	Range: 8c0
+	MinRange: 2c0
+	Burst: 2
+	BurstDelays: 25
+	Report: missile1.wav
+	Warhead@1Dam: SpreadDamage
+		Spread: 512
+		Damage: 2500
+		Falloff: 1000, 500, 200, 80, 0
+		ValidTargets: Ground, Water, Trees
+		Versus:
+			None: 200
+			Wood: 40
+			Tree: 40
+			Light: 5
+			Heavy: 3
+			Concrete: 4
+		DamageTypes: Prone50Percent, TriggerProne, SmallExplosionDeath, Incendiary
+	Warhead@3Eff: CreateEffect
+		Explosions: big_napalm
+
+aot-V2Toxic:
+	Inherits: aot-V2Napalm
+	Warhead@1Dam: SpreadDamage
+		Spread: 512
+		Damage: 2500
+		Falloff: 1000, 500, 200, 80, 0
+		ValidTargets: Ground, Water, Trees
+		Versus:
+			None: 200
+			Wood: 40
+			Tree: 40
+			Light: 6
+			Heavy: 4
+			Concrete: 5
+		DamageTypes: Prone50Percent, TriggerProne, SmallExplosionDeath, Tiberium
+	Warhead@3Eff: CreateEffect
+		Explosions: chemball
+
+# === Age of Tiberium (aotmod) - Heavy Artillery Shell (1/3 längere Reichweite, TS 155mm Sounds) ===
+aot-ArtilleryShell-Heavy:
+	Inherits: ArtilleryShell
+	Range: 14c640
+	Report: 120mmf.aud
+	Warhead@2Eff: CreateEffect
+		Explosions: med_frag
+		ImpactSounds: expnew06.aud
+		ValidTargets: Ground, Air, GroundActor, AirborneActor, WaterActor, Trees
 # === Ende aotmod ===

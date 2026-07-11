@@ -141,3 +141,54 @@ actor-silo =
     .name = Silo
     .description =
     Resource storage and ore-delivery dock
+
+actor-aot-v2-base =
+    .name = V2 Rocket Launcher
+    .description =
+    Long-range rocket artillery. Fires a single ballistic missile.
+    Effective vs. all ground targets.
+
+actor-aot-v2-napalm =
+    .name = V2 Rocket Launcher (Napalm)
+    .description =
+    Napalm-upgraded V2. Fires two rockets in rapid succession.
+    Highly effective vs. infantry.
+
+actor-aot-v2-toxic =
+    .name = Toxic Rocket Launcher
+    .description =
+    Toxic-upgraded V2. Fires two toxic rockets in rapid succession.
+    Highly effective vs. infantry.
+
+actor-aot-upgrade-v2-napalm =
+    .name = Napalm Rocket Launcher Upgrade
+    .description =
+    Upgrades the V2 Rocket Launcher with dual napalm warheads.
+    Requires Age 1, Airstrip and Temple of Nod.
+    Mutually exclusive with the Howitzer Upgrade.
+
+actor-aot-upgrade-v2-howitzer =
+    .name = Howitzer Upgrade
+    .description =
+    Replaces the V2 Rocket Launcher with the Mobile Howitzer.
+    Medium-range direct-fire artillery, effective vs. armor and structures.
+    Requires Age 1, Airstrip and Temple of Nod.
+    Mutually exclusive with the Napalm Rocket Launcher Upgrade.
+
+actor-aot-arty-howitzer =
+    .name = Mobile Howitzer
+
+actor-aot-arty-heavy =
+    .name = Heavy Artillery
+    .description =
+    Heavy siege artillery. Deploy to fire. Devastating vs. structures and armor.
+
+actor-aot-arty-heavy-deployed =
+    .name = Heavy Artillery (Deployed)
+
+actor-aot-upgrade-heavy-artillery =
+    .name = Heavy Artillery Upgrade
+    .description =
+    Upgrades the Mobile Howitzer with heavy siege artillery.
+    Adds deploy capability and devastating firepower vs. structures.
+    Requires Age 3 and Howitzer Upgrade.

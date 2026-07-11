@@ -812,9 +812,9 @@ aot-mtnk-titn:
 	RenderSprites:
 		Image: mtnk
 	Buildable:
-		Queue: LightVehicle.GDI
+		Queue: Vehicle.GDI
 		BuildPaletteOrder: 5
-		Prerequisites: ~lite, gdi-hq, ~aot-mtnk-titan-upgrade, ~!aot-mtnk-titan-railgun-upgrade
+		Prerequisites: ~aot-weap, gdi-hq, ~aot-mtnk-titan-upgrade, ~!aot-mtnk-titan-railgun-upgrade
 		Icon: aot-mtnk-titn-icon
 		Description: GDI Titan Mech — upgraded Medium Tank chassis with independent turret.
 	Tooltip:
@@ -825,9 +825,9 @@ aot-mtnk-titn-rail:
 	RenderSprites:
 		Image: mtnk
 	Buildable:
-		Queue: LightVehicle.GDI
+		Queue: Vehicle.GDI
 		BuildPaletteOrder: 5
-		Prerequisites: ~lite, gdi-hq, ~aot-mtnk-titan-railgun-upgrade
+		Prerequisites: ~aot-weap, gdi-hq, ~aot-mtnk-titan-railgun-upgrade
 		Icon: aot-mtnk-titn-rail-icon
 		Description: GDI Titan Mech with Railgun.
 	Tooltip:
@@ -2091,6 +2091,328 @@ aot-ttnk-toxin:
 		Description: Flame Tank upgraded with dual toxic tiberian-sprayers.
 	Tooltip@normal:
 		Name: actor-ttnk-toxin.name
+
+# === Age of Tiberium (aotmod) - V2 Rocket Launcher NOD (Age 0, Doppel-Aktor-Pattern) ===
+# aot-v2-base: sofort in LITE (NOD) baubar, verschwindet nach Napalm- ODER Howitzer-Upgrade.
+# aot-v2-napalm: ersetzt aot-v2-base nach Napalm-Upgrade, TD-MLRS-Icon, 2-Raketen-Burst.
+# Beide erben ^Tank (wie ARTY/MSAM) und definieren alles direkt — V2RL existiert nicht im CnC-Mod.
+# Weapon-Switch (napalm/toxic) liegt direkt auf den Aktoren via GrantConditionOnPrerequisite.
+aot-v2-base:
+	Inherits: ^Tank
+	Inherits@EXPERIENCE: ^GainsExperience
+	Inherits@AUTOTARGET: ^AutoTargetGroundAssaultMove
+	Valued:
+		Cost: 700
+	UpdatesPlayerStatistics:
+		AddToArmyValue: true
+	Buildable:
+		BuildPaletteOrder: 5
+		Prerequisites: lite, anyhq, ~!aot-napalm-upgrade, ~!aot-howitzer-upgrade
+		Queue: LightVehicle.Nod
+		Icon: icon
+		Description: Long-range rocket artillery. Fires a single ballistic missile. Effective vs. all ground targets.
+	Tooltip:
+		Name: actor-aot-v2-base.name
+	Health:
+		HP: 12000
+	Armor:
+		Type: Light
+	Mobile:
+		Speed: 48
+		TurnSpeed: 16
+	Repairable:
+		HpPerStep: 606
+	RevealsShroud:
+		Range: 6c0
+	AttackFrontal:
+		FacingTolerance: 0
+		TargetFrozenActors: True
+		ForceFireIgnoresActors: True
+	Armament:
+		Weapon: aot-V2Rocket
+		ReloadingCondition: reloading
+		RequiresCondition: !aot-napalm-active
+	Armament@napalm:
+		Weapon: aot-V2Napalm
+		ReloadingCondition: reloading
+		RequiresCondition: aot-napalm-active
+	GrantConditionOnPrerequisite@napalm:
+		Condition: aot-napalm-active
+		Prerequisites: aot-napalm-upgrade
+	Turreted:
+		TurnSpeed: 0
+		RealignDelay: -1
+	WithSpriteTurret:
+		RequiresCondition: aot-napalm-active && !reloading
+		Sequence: napalm-turret
+	WithFacingSpriteBody:
+		RequiresCondition: !reloading && !aot-napalm-active
+		Name: loaded
+	WithFacingSpriteBody@EMPTY:
+		RequiresCondition: reloading && !aot-napalm-active
+		Sequence: empty-idle
+		Name: reloading
+	WithFacingSpriteBody@NAPALM:
+		RequiresCondition: aot-napalm-active
+		Sequence: napalm-idle
+		Name: napalmloaded
+	RenderSprites:
+		Image: v2rl
+	FireWarheadsOnDeath:
+		Weapon: UnitExplodeBig
+		EmptyWeapon: UnitExplodeBig
+	Selectable:
+		DecorationBounds: 1194, 1194
+
+aot-v2-napalm:
+	Inherits: aot-v2-base
+	Buildable:
+		BuildPaletteOrder: 5
+		Prerequisites: lite, anyhq, ~aot-napalm-upgrade
+		Queue: LightVehicle.Nod
+		Icon: aot-v2-napalm-icon
+		Description: Napalm-upgraded V2. Fires two rockets in rapid succession. Highly effective vs. infantry.
+	-Tooltip:
+	Tooltip@NAPALM:
+		Name: actor-aot-v2-napalm.name
+		RequiresCondition: !aot-v2-toxic
+	Tooltip@TOXIC:
+		Name: actor-aot-v2-toxic.name
+		RequiresCondition: aot-v2-toxic
+	GrantConditionOnPrerequisite@toxic:
+		Condition: aot-v2-toxic
+		Prerequisites: aot-toxic-upgrade
+	-Armament:
+	Armament@napalm:
+		Weapon: aot-V2Napalm
+		ReloadingCondition: reloading
+		RequiresCondition: !aot-v2-toxic
+	Armament@toxic:
+		Weapon: aot-V2Toxic
+		ReloadingCondition: reloading
+		RequiresCondition: aot-v2-toxic
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - ARTY Howitzer (freigeschalten durch Howitzer-Upgrade) ===
+# ARTY hat -Buildable: in overrides.yaml. Dieser Proxy erbt von ARTY und stellt
+# Buildable nur bereit wenn aot-howitzer-upgrade aktiv.
+aot-arty-howitzer:
+	Inherits: ARTY
+	RenderSprites:
+		Image: arty
+	Buildable:
+		BuildPaletteOrder: 5
+		Prerequisites: afld, ~aot-howitzer-upgrade, ~!aot-heavy-artillery-upgrade
+		Queue: Vehicle.Nod
+		Icon: aot-arty-howitzer-icon
+		Description: Medium-range howitzer artillery. Strong vs. light armor and structures.
+	GrantConditionOnPrerequisite@heavy:
+		Condition: aot-heavy-upgraded
+		Prerequisites: aot-heavy-artillery-upgrade
+	# Nach Heavy-Upgrade: ARTY-Basisangriff (undeployed) komplett deaktivieren
+	AttackFrontal:
+		RequiresCondition: !aot-heavy-upgraded
+	Armament:
+		RequiresCondition: !aot-heavy-upgraded
+	# Deployed: verankert wie Juggernaut (Immovable + Pause + Order-Reject)
+	Mobile:
+		ImmovableCondition: aot-howitzer-deployed
+		PauseOnCondition: aot-howitzer-deployed
+	RejectsOrders:
+		Reject: Move, ForceMove, Stop, AttackMove, AssaultMove
+		RemoveOrders: true
+		RequiresCondition: aot-howitzer-deployed
+	-Tooltip:
+	Tooltip:
+		Name: actor-aot-arty-howitzer.name
+		RequiresCondition: !aot-heavy-upgraded
+	Tooltip@upgraded:
+		Name: actor-aot-arty-heavy.name
+		RequiresCondition: aot-heavy-upgraded
+	-WithFacingSpriteBody:
+	WithFacingSpriteBody@base:
+		Name: body-base
+		RequiresCondition: !aot-heavy-upgraded
+	WithFacingSpriteBody@heavy:
+		Name: body-heavy
+		Sequence: aot-arty-howitzer-heavy-idle
+		Palette: aot-vxl-player
+		IsPlayerPalette: true
+		RequiresCondition: aot-heavy-upgraded
+	WithFacingSpriteBody@heavy-remap:
+		Name: body-heavy-remap
+		Sequence: aot-arty-howitzer-heavy-idle-remap
+		Palette: aot-vxl-player
+		IsPlayerPalette: true
+		RequiresCondition: aot-heavy-upgraded
+	# Turret + Barrel (koaxial undeployed, rotierend deployed)
+	Turreted:
+		Turret: turret
+		TurnSpeed: 32
+		RealignDelay: -1
+		Offset: -46, 0, 0
+	WithSpriteTurret@turret-undeployed:
+		Turret: turret
+		Sequence: aot-arty-barrel
+		RequiresCondition: aot-heavy-upgraded && !aot-howitzer-deployed
+	WithSpriteTurret@turret-undeployed-remap:
+		Turret: turret
+		Sequence: aot-arty-barrel-remap
+		Palette: aot-vxl-player
+		IsPlayerPalette: true
+		RequiresCondition: aot-heavy-upgraded && !aot-howitzer-deployed
+	WithSpriteTurret@turret-deployed:
+		Turret: turret
+		Sequence: aot-arty-barrel
+		RequiresCondition: aot-heavy-upgraded && aot-howitzer-deployed
+	WithSpriteTurret@turret-deployed-remap:
+		Turret: turret
+		Sequence: aot-arty-barrel-remap
+		Palette: aot-vxl-player
+		IsPlayerPalette: true
+		RequiresCondition: aot-heavy-upgraded && aot-howitzer-deployed
+	# Deploy-Mechanik (nur bei Heavy Upgrade aktiv)
+	GrantConditionOnDeploy:
+		DeployedCondition: aot-howitzer-deployed
+		RequiresCondition: aot-heavy-upgraded
+		Facing: 384
+		DeploySounds: place2.aud
+		UndeploySounds: clicky1.aud
+	# Attack + Armament (deployed only, Heavy Upgrade only)
+	AttackTurreted:
+		Armaments: primary
+		Turrets: turret
+		RequiresCondition: aot-howitzer-deployed && aot-heavy-upgraded
+		Voice: Attack
+		TargetFrozenActors: true
+	Armament@primary:
+		Weapon: aot-ArtilleryShell-Heavy
+		RequiresCondition: aot-howitzer-deployed && aot-heavy-upgraded
+		LocalOffset: 624,0,208
+		MuzzleSequence: muzzle
+
+# === Age of Tiberium (aotmod) - ARTY Heavy Artillery (freigeschalten durch Heavy Artillery Upgrade, Age 3) ===
+# TS-Voxel-basierte Heavy Artillery mit Deploy-Mechanik (nach Juggernaut-Pattern).
+# Undeployed: mobil, kein Schuss. Deployed: verankert, Turret + Schuss möglich.
+aot-arty-heavy:
+	Inherits: ^Tank
+	Inherits@EXPERIENCE: ^GainsExperience
+	Inherits@AUTOTARGET: ^AutoTargetGround
+	Valued:
+		Cost: 1200
+	UpdatesPlayerStatistics:
+		AddToArmyValue: true
+	Buildable:
+		BuildPaletteOrder: 6
+		Prerequisites: ~aot-age3, aot-age3, afld, aot-howitzer-upgrade, ~aot-heavy-artillery-upgrade, aot-heavy-artillery-upgrade
+		Queue: Vehicle.Nod
+		Icon: aot-arty-heavy-adv-icon
+		Description: Heavy siege artillery. Deploy to fire. Devastating vs. structures and armor.
+	Tooltip:
+		Name: actor-aot-arty-heavy.name
+		RequiresCondition: !arty-deployed
+	Tooltip@deployed:
+		Name: actor-aot-arty-heavy-deployed.name
+		RequiresCondition: arty-deployed
+	Health:
+		HP: 50000
+	Armor:
+		Type: Heavy
+	Mobile:
+		Speed: 55
+		TurnSpeed: 18
+		ImmovableCondition: arty-deployed
+		PauseOnCondition: arty-deployed
+	RejectsOrders:
+		Reject: Move, ForceMove, Stop, AttackMove
+		RemoveOrders: true
+		RequiresCondition: arty-deployed
+	RevealsShroud:
+		Range: 10c0
+	RenderSprites:
+		Image: arty
+	# Undeployed body (Voxel walk, 32 Facings, Zwei-Layer Player-Color)
+	WithFacingSpriteBody@body:
+		Sequence: aot-arty-howitzer-heavy-idle
+		Name: arty-body
+		Palette: aot-vxl-player
+		IsPlayerPalette: true
+		RequiresCondition: !arty-deployed
+	WithFacingSpriteBody@body-remap:
+		Sequence: aot-arty-howitzer-heavy-idle-remap
+		Name: arty-body-remap
+		Palette: aot-vxl-player
+		IsPlayerPalette: true
+		RequiresCondition: !arty-deployed
+	WithShadow:
+		Offset: 0, 48, 0
+		ZOffset: -129
+	# Deployed body (nutzt gleiche Sequenzen wie undeployed, kein visueller Unterschied)
+	WithFacingSpriteBody@deployed:
+		Sequence: aot-arty-howitzer-heavy-idle
+		Name: arty-deployed
+		Palette: aot-vxl-player
+		IsPlayerPalette: true
+		RequiresCondition: arty-deployed
+	WithFacingSpriteBody@deployed-remap:
+		Sequence: aot-arty-howitzer-heavy-idle-remap
+		Name: arty-deployed-remap
+		Palette: aot-vxl-player
+		IsPlayerPalette: true
+		RequiresCondition: arty-deployed
+	# Deployed turret (32 Facings, Zwei-Layer Player-Color)
+	Turreted:
+		Turret: turret
+		TurnSpeed: 32
+		RealignDelay: -1
+		Offset: -46, 0, 0
+	WithSpriteTurret@turret-undeployed:
+		Turret: turret
+		Sequence: aot-arty-barrel
+		RequiresCondition: !arty-deployed
+	WithSpriteTurret@turret-undeployed-remap:
+		Turret: turret
+		Sequence: aot-arty-barrel-remap
+		Palette: aot-vxl-player
+		IsPlayerPalette: true
+		RequiresCondition: !arty-deployed
+	WithSpriteTurret@turret:
+		Turret: turret
+		Sequence: aot-arty-barrel
+		RequiresCondition: arty-deployed
+	WithSpriteTurret@turret-remap:
+		Turret: turret
+		Sequence: aot-arty-barrel-remap
+		Palette: aot-vxl-player
+		IsPlayerPalette: true
+		RequiresCondition: arty-deployed
+	# Angriff: nur wenn deployed
+	AttackTurreted:
+		Armaments: primary
+		Turrets: turret
+		RequiresCondition: arty-deployed
+		Voice: Attack
+		TargetFrozenActors: true
+	Armament@primary:
+		Weapon: aot-ArtilleryShell-Heavy
+		RequiresCondition: arty-deployed
+		LocalOffset: 624,0,208
+		MuzzleSequence: muzzle
+	# Deploy-Mechanik: Immobil wenn deployed, kein Auto-Undeploy
+	GrantConditionOnDeploy:
+		DeployedCondition: arty-deployed
+		UndeployedCondition: arty-undeployed
+		Facing: 384
+		DeploySounds: place2.aud
+		UndeploySounds: clicky1.aud
+	UpdatesPlayerStatistics:
+		AddToArmyValue: true
+	-Voiced:
+	Voiced:
+		VoiceSet: VehicleVoice
+	Selectable:
+		DecorationBounds: 1300, 1400
+# === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - BIKE Queue-Proxies (Doppel-Aktor-Pattern) ===
 # aot-bike-base: sichtbar + baubar ab Age 1 in LITE (NOD), erfordert HAND.

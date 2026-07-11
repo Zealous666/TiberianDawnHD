@@ -856,6 +856,82 @@ aot-upgrade-e4-toxic:
 	Interactable:
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - V2 Rocket Launcher Upgrades (Age 1, NOD Ausschluss-Paar) ===
+# Beide sichtbar ab Age 1 + AFLD + TMPL. Gegenseitiger Ausschluss via ~!.
+# Napalm-Pfad: V2 wird zu 2-Raketen-Burst mit Napalm-Schaden (Age-3 Toxic-Erweiterung via
+# aot-toxic-upgrade, kein eigenes separates Upgrade noetig).
+# Howitzer-Pfad: V2 deaktiviert, ARTY (TD Artillery) in LITE freigeschalten.
+# Age-3-Fortsetzung fuer Howitzer ("Heavy Artillery Upgrade") noch NICHT gebaut.
+aot-upgrade-v2-napalm:
+	Tooltip:
+		Name: actor-aot-upgrade-v2-napalm.name
+
+	Buildable:
+		BuildPaletteOrder: 11
+		Prerequisites: ~aot-age1, aot-age1, afld, tmpl, ~!aot-howitzer-upgrade
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Upgrades the V2 Rocket Launcher with dual napalm warheads. Fires two rockets in rapid succession. Highly effective vs. infantry.
+
+	Valued:
+		Cost: 600
+
+	RenderSprites:
+		Image: aot-upgrade-v2-napalm
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-napalm-upgrade
+
+	Interactable:
+
+aot-upgrade-v2-howitzer:
+	Tooltip:
+		Name: actor-aot-upgrade-v2-howitzer.name
+
+	Buildable:
+		BuildPaletteOrder: 12
+		Prerequisites: ~aot-age1, aot-age1, afld, tmpl, ~!aot-napalm-upgrade
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Replaces the V2 Rocket Launcher with the Howitzer. Direct-fire medium artillery effective vs. armor and structures.
+
+	Valued:
+		Cost: 600
+
+	RenderSprites:
+		Image: aot-upgrade-v2-howitzer
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-howitzer-upgrade
+
+	Interactable:
+
+aot-upgrade-heavy-artillery:
+	Tooltip:
+		Name: actor-aot-upgrade-heavy-artillery.name
+
+	Buildable:
+		BuildPaletteOrder: 13
+		Prerequisites: ~aot-age3, aot-age3, aot-howitzer-upgrade
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Upgrades the Mobile Howitzer with heavy siege artillery. Adds deploy capability and devastating firepower vs. structures.
+
+	Valued:
+		Cost: 800
+
+	RenderSprites:
+		Image: aot-upgrade-heavy-artillery
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-heavy-artillery-upgrade
+
+	Interactable:
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - Ion Cannon Upgrade (Orbital Command, Age 2) ===
 # Erfordert Age 2 + Orbital Command. Schaltet aot-ion-cannon-upgrade frei →
 # ORBC bekommt die Ion Cannon Strike Support Power (siehe ORBC.IonCannonPower).

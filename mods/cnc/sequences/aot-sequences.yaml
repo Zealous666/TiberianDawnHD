@@ -3520,6 +3520,18 @@ aot-minp:
 		RemasteredLength: 1
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - GDI Mine Layer (RA Allied MNLY) ===
+# RA Remastered UNITS\MNLY.ZIP, direkt referenzierbar (wie JEEP/APC). idle 0-31 (32 Facings),
+# KEIN Turret (Minelayer hat keinen). Icon: kommt vom User (Platzhalter unten).
+# Aktor/Upgrade NOCH NICHT implementiert — wartet auf Icon. Siehe [[recon-jeep-system]].
+aot-minelayer:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\MNLY.ZIP
+		Facings: 32
+		UseClassicFacings: True
+	# icon: kommt vom User (RemasteredFilename: <mine-layer-icon>.png)
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - Nod Shrine (aot-shrine) Sprites ===
 # TS NTPYRA ("NOD Pyramid"), Zwei-Layer-Compositing (Body silbergrau + House-Color-Overlay 176-191)
 # wie STEC/MSLO/ORBC. ntpyra_a (Funken-Overlay) hat keine relevanten House-Color-Pixel -> simpler RGBA-Bake.
@@ -4169,4 +4181,33 @@ aot-fireposition:
 			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\BIB3.DES\BIB3.DES-{0:D4}.DDS
 				Count: 4
 		RemasteredPremultiplied: false
+# === Age of Tiberium (aotmod) - V2 Missile Projektil-Sprite ===
+# Klassisch: v2.shp aus RA (nicht in CnC). HD: MISSILE.ZIP aus TEXTURES_RA_SRGB.MEG.
+# 32 Facings, UseClassicFacings wie original RA v2-Sequenz.
+v2:
+	idle:
+		Filename: shadow.shp
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\VFX\MISSILE.ZIP
+		Facings: 32
+		UseClassicFacings: True
+		ZOffset: 1023
+
+# === Age of Tiberium (aotmod) - V2 Upgrade-Aktoren Icons ===
+aot-upgrade-v2-napalm:
+	icon:
+		Filename: v2rlicon.shp
+		RemasteredFilename: v2_mlrs.png
+		Length: 1
+
+aot-upgrade-v2-howitzer:
+	icon:
+		Filename: artyicnh.tem
+		RemasteredFilename: arty_howitzer_base.png
+		Length: 1
+
+aot-upgrade-heavy-artillery:
+	icon:
+		Filename: artyicnh.tem
+		RemasteredFilename: arty_heavy_adv.png
+		Length: 1
 # === Ende aotmod ===

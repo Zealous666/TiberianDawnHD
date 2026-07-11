@@ -401,6 +401,14 @@ aot-apc2:
 aot-upgrade-wolverine:
 	icon:
 		RemasteredFilename: jeep_3_wolv.png
+
+aot-upgrade-minelayer:
+	icon:
+		RemasteredFilename: jeep_4_mine.png
+
+aot-minelayer:
+	icon:
+		RemasteredFilename: jeep_4_mine.png
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Ion Cannon Upgrade Icon (Platzhalter: LTNK-Icon) ===
@@ -492,7 +500,6 @@ bike:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\BIKE.ZIP
 	icon:
 		RemasteredFilename:
-
 	aot-bike-icon:
 		Filename: bike_base.png
 		RemasteredFilename:
@@ -586,6 +593,34 @@ stnk.destroyed:
 	idle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\STNK.ZIP
 
+v2rl:
+	Defaults:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\V2RL.ZIP
+	idle:
+		Facings: 32
+		UseClassicFacings: True
+	empty-idle:
+		Start: 32
+		Facings: 32
+		UseClassicFacings: True
+	icon:
+		RemasteredFilename: v2_base.png
+		Length: 1
+	aot-v2-napalm-icon:
+		RemasteredFilename: v2_mlrs.png
+		Length: 1
+	napalm-idle:
+		Filename: shadow.shp
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\MLRS.ZIP
+		Facings: 32
+		UseClassicFacings: True
+	napalm-turret:
+		Filename: shadow.shp
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\MLRS.ZIP
+		Start: 32
+		Facings: 32
+		UseClassicFacings: True
+
 arty:
 	idle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\ARTY.ZIP
@@ -593,6 +628,64 @@ arty:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\GUNFIRE.ZIP
 	icon:
 		RemasteredFilename:
+	aot-arty-howitzer-icon:
+		RemasteredFilename: arty_howitzer_base.png
+		Length: 1
+	aot-arty-heavy-adv-icon:
+		RemasteredFilename: arty_heavy_adv.png
+		Length: 1
+	# Howitzer-Upgrade Sprite-Wechsel: TS-Voxel-Sequenzen im arty-Block für on-the-fly Switch
+	aot-arty-howitzer-heavy-idle:
+		RemasteredFilename: aot-arty-heavy-test.zip
+		Facings: 32
+		UseClassicFacings: True
+	aot-arty-howitzer-heavy-idle-remap:
+		RemasteredFilename: aot-arty-heavy-test-remap.png
+		Facings: 32
+		UseClassicFacings: True
+	# Barrel-Sequenzen für deployed + undeployed Rendering (beide Moden)
+	aot-arty-barrel:
+		RemasteredFilename: aot-arty-barrel-test.zip
+		Facings: 32
+		UseClassicFacings: True
+	aot-arty-barrel-remap:
+		RemasteredFilename: aot-arty-barrel-test-remap.png
+		Facings: 32
+		UseClassicFacings: True
+
+aot-arty-heavy:
+	idle:
+		RemasteredFilename: aot-arty-heavy-test.zip
+		Facings: 32
+		UseClassicFacings: True
+	idle-remap:
+		RemasteredFilename: aot-arty-heavy-test-remap.png
+		Facings: 32
+		UseClassicFacings: True
+	aot-arty-heavy-deployed:
+		RemasteredFilename: aot-arty-heavy-test.zip
+		Start: 0
+		Length: 1
+		Facings: 1
+	aot-arty-heavy-deployed-remap:
+		RemasteredFilename: aot-arty-heavy-test-remap.png
+		Start: 0
+		Length: 1
+		Facings: 1
+	aot-arty-barrel:
+		RemasteredFilename: aot-arty-barrel-test.zip
+		Facings: 32
+		UseClassicFacings: True
+	aot-arty-barrel-remap:
+		RemasteredFilename: aot-arty-barrel-test-remap.png
+		Facings: 32
+		UseClassicFacings: True
+	aot-arty-heavy-adv-icon:
+		RemasteredFilename: arty_heavy_adv.png
+		Length: 1
+	muzzle:
+		Filename: gunfire2.shp
+		Length: *
 
 arty.destroyed:
 	idle:
