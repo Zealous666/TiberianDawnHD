@@ -540,6 +540,10 @@ MSAM:
 		Weapon: 227mm
 # === Ende aotmod ===
 
+# MLRS (NOD Anti-Air): aus Bauliste entfernen
+MLRS:
+	-Buildable:
+
 # === Age of Tiberium (aotmod) - HPAD: kein direktes Buildable, Proxy-Aktoren übernehmen ===
 HPAD:
 	-Buildable:
