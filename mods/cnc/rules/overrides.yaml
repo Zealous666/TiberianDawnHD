@@ -500,7 +500,7 @@ aot-proc-nod-age2:
 # Verhindert APC-Produktion bis der Spieler das APC Upgrade (Entweder/Oder) kauft.
 APC:
 	Buildable:
-		Prerequisites: lite, ~aot-apc-upgrade, ~!aot-humvee-upgrade, ~!aot-amphibious-upgrade
+		Prerequisites: lite, ~aot-apc-upgrade, ~!aot-humvee-upgrade, ~!aot-amphibious-upgrade, ~!aot-minelayer-upgrade
 		Queue: LightVehicle.GDI
 		Description: Armored Personnel Carrier. Can carry 5 soldiers.
 		BuildPaletteOrder: 4
@@ -518,10 +518,7 @@ MTNK:
 HTNK:
 
 MSAM:
-	Buildable:
-		Prerequisites: anyhq, ~techlevel.medium, ~aot-age1, aot-age1, weap, ~!aot-hover-mlrs-upgrade, ~!aot-hover-aa-upgrade
-		Queue: Vehicle.GDI
-		BuildPaletteOrder: 4
+	-Buildable:
 	GrantConditionOnPrerequisite@HOVER_MLRS:
 		Condition: aot-hover-mlrs-upgrade
 		Prerequisites: aot-hover-mlrs-upgrade
@@ -869,3 +866,10 @@ SBAG:
 
 CYCL:
 	-Buildable:
+
+# === Age of Tiberium (aotmod) - ARTY Howitzer Gate ===
+# ARTY hat Buildable in der Engine (Vehicle.Nod) — hier entfernen, Proxy aot-arty-howitzer
+# (aot-units.yaml) stellt es nur frei wenn Howitzer-Upgrade gekauft.
+ARTY:
+	-Buildable:
+# === Ende aotmod ===
