@@ -259,6 +259,22 @@ aot-HarpyAGGun:
 aot-HarpyLaser:
 	Inherits: aot-LtnkLaser
 
+# === Age of Tiberium (aotmod) - BIKE Laser (Laser Technologies Upgrade) ===
+# Dual-Laser für NOD Recon Bike: je ein Schuss aus linker und rechter Kanone.
+# Erbt aot-LtnkLaser (Balancing), ValidTargets auf Ground/Water beschränkt
+# wie die ursprünglichen BikeRockets.
+aot-BikeRockets:
+	Inherits: BikeRockets
+	ValidTargets: Ground, Water
+
+aot-BikeLaser:
+	Inherits: aot-LtnkLaser
+	ValidTargets: Ground, Water
+	Burst: 2
+	BurstDelays: 6
+	ReloadDelay: 55
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - AJET Waffen ===
 # Basieren auf A10-Waffen (Vulcan/Napalm), aber ohne Burst-Offsets die für den
 # stationären A10-Überflug ausgelegt sind. AJET greift per AttackAircraft an.

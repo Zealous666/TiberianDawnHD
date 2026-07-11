@@ -417,6 +417,19 @@ bike:
 	icon:
 		RemasteredFilename:
 
+	aot-bike-icon:
+		Filename: bike_base.png
+		RemasteredFilename:
+		Length: 1
+	aot-bike-laser-icon:
+		Filename: bike_lsr.png
+		RemasteredFilename:
+		Length: 1
+	aot-bike-laser-pods:
+		RemasteredFilename: aot-bike-laser-pods.zip
+		Facings: 32
+		UseClassicFacings: True
+
 bike.destroyed:
 	idle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\BIKE.ZIP

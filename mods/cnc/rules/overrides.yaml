@@ -759,18 +759,44 @@ BGGY:
 		CargoType: GroundVehicle
 		Weight: 5
 		CustomPipType: green
+# === Age of Tiberium (aotmod) - BIKE Laser Technologies Upgrade ===
+# Waffe auf Ground/Water beschränkt (^MissileWeapon erbt ValidTargets: Ground,Water,Air).
+# Laser-Switch analog BGGY: GrantConditionOnPrerequisite greift auf aot-laser-fence-upgrade.
+# Zwei Laser-Armaments (links/rechts, gleiche Offsets wie Original-Raketen).
 BIKE:
+	-Buildable:
 	Passenger:
 		CargoType: GroundVehicle
 		Weight: 5
 		CustomPipType: green
-	# Fire Position (Phase 3) Garrison-Waffe. BikeRockets erbt ^MissileWeapon,
-	# das schon Blockable:false per Default setzt - direkte Wiederverwendung
-	# ohne eigene Garrisoned-Kopie (wie 227mm bei MSAM). Kein Turret (AttackFrontal)
-	# - der ganze Koerper zielt beim Garnisonieren.
+	GrantConditionOnPrerequisite@laserupgrade:
+		Condition: aot-bike-laser
+		Prerequisites: aot-laser-fence-upgrade
+	-Armament:
+	Armament:
+		Weapon: aot-BikeRockets
+		LocalOffset: -128, -170, 170, -128, 170, 170
+		LocalYaw: 100, -100
+		RequiresCondition: !aot-bike-laser
+	Armament@laser:
+		Weapon: aot-BikeLaser
+		LocalOffset: -128, -170, 170, -128, 170, 170
+		LocalYaw: 100, -100
+		RequiresCondition: aot-bike-laser
 	Armament@garrisoned:
 		Name: garrisoned
-		Weapon: BikeRockets
+		Weapon: aot-BikeRockets
+		RequiresCondition: !aot-bike-laser
+	Armament@garrisonedlaser:
+		Name: garrisoned
+		Weapon: aot-BikeLaser
+		RequiresCondition: aot-bike-laser
+	WithFacingSpriteBody:
+		RequiresCondition: !aot-bike-laser
+	WithFacingSpriteBody@laserpods:
+		Sequence: aot-bike-laser-pods
+		RequiresCondition: aot-bike-laser
+# === Ende aotmod ===
 MSAM:
 	Passenger:
 		CargoType: GroundVehicle

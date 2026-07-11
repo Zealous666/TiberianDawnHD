@@ -2026,6 +2026,37 @@ aot-ttnk-toxin:
 	Tooltip@normal:
 		Name: actor-ttnk-toxin.name
 
+# === Age of Tiberium (aotmod) - BIKE Queue-Proxies (Doppel-Aktor-Pattern) ===
+# aot-bike-base: sichtbar + baubar ab Age 1 in LITE (NOD), erfordert HAND.
+# aot-bike-laser: ersetzt aot-bike-base sobald Laser Technologies aktiv.
+# Waffe/Icon-Switch steckt in overrides.yaml (BIKE).
+aot-bike-base:
+	Inherits: BIKE
+	RenderSprites:
+		Image: bike
+	Buildable:
+		Queue: LightVehicle.Nod
+		BuildPaletteOrder: 2
+		Prerequisites: ~aot-age1, lite, hand, ~!aot-laser-fence-upgrade
+		Icon: aot-bike-icon
+		Description: Fast NOD recon bike armed with twin rocket launchers. Ground targets only.
+	Tooltip:
+		Name: Recon Bike
+
+aot-bike-laser:
+	Inherits: BIKE
+	RenderSprites:
+		Image: bike
+	Buildable:
+		Queue: LightVehicle.Nod
+		BuildPaletteOrder: 2
+		Prerequisites: ~aot-age1, lite, hand, ~aot-laser-fence-upgrade
+		Icon: aot-bike-laser-icon
+		Description: NOD recon bike upgraded with dual laser cannons.
+	Tooltip:
+		Name: Recon Bike (Laser)
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - BGGY Queue-Proxies (Doppel-Aktor-Pattern) ===
 # aot-bggy-base: sichtbar ab Age 1, baubar sobald LITE (Vehicle Factory) und
 # HAND (Infantry Production) stehen. aot-bggy-laser: gleiche Sichtbarkeit,
