@@ -3,22 +3,22 @@
 ## Backlog
 
 - [ ] To-Do
-  - [ ] V2 & LARS
+  - [x] V2 & LARS / Howitzer (Toxic / Heavy Arty)
   - [x] buggy & laser
-  - [ ] bike icon
+  - [x] bike icon & laser upgrade
   - [x] stealthtank & cargo
   - [ ] MiG & Banshee airstrike
-  - [ ] mobile gap genererator
-  - [ ] mobile stealth generator
+  - [ ] mobile gap genererator (GDI)
+  - [ ] mobile stealth generator (NOD)
   - [ ] sensor array (dome hat das!)
   - [x] nuke silo & toxic rocket
   - [x] uplink centre & super power
-  - [ ] titan / juggernaut
-  - [ ] wolverine
+  - [x] titan / juggernaut (heavy mechs)
+  - [x] wolverine
   - [x] shrine & avatar / laser avatar
   - [x] civlian cars
-  - [ ] starting units
-  - [ ] GDI mine layer (vs. AAPC)
+  - [x] starting units (nach NOD V2)
+  - [x] GDI mine layer (vs. AAPC)
   - [x] dropship routine (2 jeeps, 2 mtnk)
   - [ ] coop archon system
   - [ ] 1st coop mission
@@ -29,6 +29,15 @@
   - [ ] bridge repair mechanik
   - [ ] eis schollen
   - [ ] civilian ts buildings
+  - [ ] laser-tank connect-feature für age 3
+  - [ ] nod hand age 3
+  - [ ] LITE age 3
+  - [ ] barracks age 3
+  - [ ] gdi radar age 3
+  - [ ] construction yard age 3
+  - [ ] nod shrine age 3?
+  - [ ] a10 -> firehawk sprites
+  - [ ] idle menü screen
 - [ ] Fixes
   - [ ] einheiten auf repair facility verkaufen
   - [x] upgrades wenn tec center selektiert
@@ -41,6 +50,7 @@
   - [ ] fire position power bedarf entfernen
   - [ ] platzhalter-icons (tiberium wars)
   - [ ] repair facility bib-smudge
+  - [ ] yak recon flug
 
 ## Design / Konzept
 
@@ -50,41 +60,46 @@
   - [x] techtree web tool
   - [x] build order web tool
   - [x] terrain web status
-- [ ] GDI Tank & Mech idea
-  - [ ] Hmvee -> Wolverine
-  - [ ] APC -> AAPC / Mine Layer
-  - [ ] MTNK -> Predator / Titan
-  - [x] MLRS -> Hover MLRS & Hover AA / Jugg
 - [ ] Upscaling Building sprites (TS)
   Tiberian Sun voxel assets
   - [x] GDI powerplant turbines
   - [x] NOD radar dome
-  - [ ] NOD temple
-  - [ ] NOD secret shrine (pyramid)
+  - [x] NOD temple
+  - [x] NOD secret shrine (pyramid)
   - [x] GDI orbital command (uplink)
-  - [ ] GDI tech centre
-  - [ ] NOD tech centre
-  - [ ] NOD missile silo
+  - [x] GDI tech centre
+  - [x] NOD tech centre
+  - [x] NOD missile silo
   - [x] NOD powerplant
   - [x] NOD advanced powerplant
-  - [ ] GDI barracks
-  - [ ] NOD hand
+  - [x] GDI barracks
+  - [x] NOD hand
   - [x] GDI radar
   - [x] GDI firestorm generator
-  - [ ] FS mobile war factory (LITE)
+  - [x] GDI & NOD lite factories
   - [x] Construction yard
   - [x] Refinery
   - [x] Repair Facility
   - [x] Storage Silo
   - [ ] Proxy Icons
   - [ ] Damage Models
+  - [ ] Make Animations
 - [ ] Defense Ideas
   Garrison types: Gunner, Gren, Rocket, Flame, Toxic, Zone, Cyborg, Commando
   - [x] GDI Pillbox -> Guard Tower (Infantry Garrison)
   - [x] NOD 1 Gun Turret -> 2 Laser Turret (nach Laser upgrade)
   - [x] NOD 3 Obelisk (nach laser upgrade)
   - [x] NOD 0 Flame Turret -> 2 Toxic Turret (Toxic upgrade zusammen mit Flame trooper und Flame tank)
-  - [ ] GDI Fire Position (vehicle garrison)
+  - [x] GDI Fire Position (vehicle garrison)
+- [ ] Nod Artillery Idea
+  - [ ] V2 -> MLRS / Howitzer (age 1)
+  - [ ] MLRS -> Toxic MLRS (age 3)
+  - [ ] Howitzer -> Heavy Artillery (age 3)
+- [ ] GDI Tank & Mech idea
+  - [x] Hmvee -> Wolverine
+  - [ ] APC -> AAPC / Mine Layer
+  - [x] MTNK -> Predator / Titan
+  - [x] MLRS -> Hover MLRS & Hover AA / Jugg
 
 ## Rules / Balancing
 

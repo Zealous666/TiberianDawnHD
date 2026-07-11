@@ -135,6 +135,12 @@ CyborgVoice:
 		Zapped: 22-n104, 22-n106, 22-n108
 		Poisoned: 22-n104, 22-n106, 22-n108
 
+WolverineVoice:
+	Voices:
+		Select: 15-i000, 15-i040, 15-i042
+		Action: 15-i024, 15-i044
+		Attack: 15-i006, 15-i046
+
 CyborgCommandoVoice:
 	Voices:
 		Select: 23-i000, 23-i002, 23-i004, 23-i006
