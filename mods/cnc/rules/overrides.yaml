@@ -518,7 +518,8 @@ MTNK:
 HTNK:
 
 MSAM:
-	-Buildable:
+	Buildable:
+		Prerequisites: aot-unbuildable
 	GrantConditionOnPrerequisite@HOVER_MLRS:
 		Condition: aot-hover-mlrs-upgrade
 		Prerequisites: aot-hover-mlrs-upgrade
