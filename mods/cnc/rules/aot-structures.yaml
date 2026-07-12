@@ -1216,6 +1216,51 @@ STEC:
 	GrantConditionOnPrerequisite@aotage2:
 		Condition: aot-age2-active
 		Prerequisites: aot-age2
+	# === Age of Tiberium (aotmod) - NOD Airstrike-Superpower ===
+	# Ab STEC (Age 0) verfügbar, aber erst freigeschaltet durch das gleichnamige
+	# "Airstrike"-Upgrade (aot-upgrade-nod-airstrike liefert aot-nod-airstrike-upgrade).
+	# Gating-Pattern analog ORBC IonCannonPower / ZoneTrooperDrop: GrantConditionOnPrerequisite
+	# schaltet die Condition frei, AirstrikePower + Charge-Bar hängen an RequiresCondition.
+	# 2 MiGs fliegen 2× an (wie der A10-Airstrike ursprünglich) und feuern je Anflug
+	# 2 Raketen aufs Ziel statt Napalm/MG (aot-mig + aot-MigMissile, nach der RA-MiG
+	# modelliert). Mehrfach-Anflug via custom AotAirstrikePower (Passes) — die stock
+	# AirstrikePower kann nur einen Überflug (SendAirstrike ist fest verdrahtet).
+	GrantConditionOnPrerequisite@airstrike:
+		Condition: aot-nod-airstrike-active
+		Prerequisites: aot-nod-airstrike-upgrade
+	AotAirstrikePower:
+		RequiresCondition: aot-nod-airstrike-active
+		PauseOnCondition: lowpower
+		Prerequisites: ~techlevel.superweapons
+		Icon: aot-airstrike
+		ChargeInterval: 7500
+		SquadSize: 2
+		Passes: 2
+		QuantizedFacings: 8
+		Name: Airstrike
+		Description: Two MiG jets make two attack passes, each firing two guided rockets at the target area.
+		EndChargeSpeechNotification: AirstrikeReady
+		SelectTargetSpeechNotification: SelectTarget
+		InsufficientPowerSpeechNotification: InsufficientPower
+		IncomingSpeechNotification: EnemyPlanesApproaching
+		EndChargeTextNotification: notification-airstrike-ready
+		SelectTargetTextNotification: notification-select-target
+		InsufficientPowerTextNotification: notification-insufficient-power
+		IncomingTextNotification: notification-enemy-planes-approaching
+		UnitType: aot-mig
+		DisplayBeacon: True
+		BeaconPoster: airstrike
+		BeaconPosterPalette: beaconposter
+		DisplayRadarPing: True
+		CameraActor: camera
+		ArrowSequence: arrow
+		ClockSequence: clock
+		CircleSequence: circles
+		UseDirectionalTarget: True
+		DirectionArrowAnimation: airstrikedirection
+		SupportPowerPaletteOrder: 10
+	SupportPowerChargeBar:
+		RequiresCondition: aot-nod-airstrike-active
 	RenderSprites:
 		Image: stec
 	-WithSpriteBody:
@@ -1352,6 +1397,9 @@ MSLO:
 	GrantConditionOnPrerequisite@atombomb:
 		Condition: aot-atom-bomb-active
 		Prerequisites: aot-atom-bomb-upgrade
+	GrantConditionOnPrerequisite@mineclusterenhancement:
+		Condition: aot-mine-cluster-enhanced
+		Prerequisites: aot-mine-cluster-enhancement
 	-WithSpriteBody:
 	WithSpriteBody@ra:
 		Sequence: idle
@@ -1396,6 +1444,7 @@ MSLO:
 	SupportPowerChargeBar@atombomb:
 		RequiresCondition: aot-atom-bomb-active
 	NukePower@minecluster:
+		RequiresCondition: !aot-mine-cluster-enhanced
 		PauseOnCondition: lowpower
 		Prerequisites: ~techlevel.superweapons
 		IconImage: mslo
@@ -1419,8 +1468,33 @@ MSLO:
 		ClockSequence: clock
 		CircleSequence: circles
 		SupportPowerPaletteOrder: 25
+	NukePower@minecluster-enhanced:
+		RequiresCondition: aot-mine-cluster-enhanced
+		PauseOnCondition: lowpower
+		Prerequisites: ~techlevel.superweapons
+		IconImage: mslo
+		Icon: aot-minecluster-icon
+		Cursor: nuke
+		ChargeInterval: 250
+		Name: Mine Cluster Missile (Enhanced)
+		Description: Scatters 10 anti-personnel + 5 anti-vehicle mines across the target area.
+		SelectTargetSpeechNotification: SelectTarget
+		InsufficientPowerSpeechNotification: InsufficientPower
+		SelectTargetTextNotification: notification-select-target
+		InsufficientPowerTextNotification: notification-insufficient-power
+		MissileWeapon: aot-MineClusterMissileEnhanced
+		MissileImage: atomic
+		MissileDelay: 11
+		SpawnOffset: 3c0,0,-1c512
+		DisplayBeacon: True
+		DisplayRadarPing: True
+		CameraRange: 8c0
+		ArrowSequence: arrow
+		ClockSequence: clock
+		CircleSequence: circles
+		SupportPowerPaletteOrder: 25
 	AotTiberiumMissilePower@tiberium:
-		RequiresCondition: aot-tiberium-missile-active
+		RequiresCondition: aot-tiberium-missile-active && !aot-mine-cluster-enhanced
 		PauseOnCondition: lowpower
 		Prerequisites: ~techlevel.superweapons
 		IconImage: mslo
@@ -1537,7 +1611,7 @@ aot-upgrade-tiberium-missile:
 	Buildable:
 		Queue: Upgrade.Nod
 		BuildPaletteOrder: 40
-		Prerequisites: ~stec, ~aot-mslo, ~aot-age2, aot-age2
+		Prerequisites: ~stec, ~aot-mslo, ~aot-age2, aot-age2, ~!aot-mine-cluster-enhancement
 		BuildLimit: 1
 		MoveIntoWorld: false
 		Icon: aot-tiberiummissile-icon
@@ -1563,6 +1637,25 @@ aot-upgrade-atom-bomb:
 		Description: Unlocks the Atom Bomb support power on the Missile Silo. Devastating against everything.
 	ProvidesPrerequisite:
 		Prerequisite: aot-atom-bomb-upgrade
+	RenderSprites:
+		Image: mslo
+	Interactable:
+
+aot-upgrade-mine-cluster-enhancement:
+	Tooltip:
+		Name: Mine Cluster Enhancement
+	Valued:
+		Cost: 1200
+	Buildable:
+		Queue: Upgrade.Nod
+		BuildPaletteOrder: 39
+		Prerequisites: ~stec, ~aot-mslo, ~aot-age2, aot-age2, ~!aot-tiberium-missile-upgrade
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Icon: aot-minecluster-icon
+		Description: Enhances the Mine Cluster Missile with 5 anti-vehicle mines. Exclusive with Tiberium Missile upgrade.
+	ProvidesPrerequisite:
+		Prerequisite: aot-mine-cluster-enhancement
 	RenderSprites:
 		Image: mslo
 	Interactable:
@@ -1663,6 +1756,12 @@ aot-gascloud2:
 		Range: 1c256
 		Condition: aot-tiberium-gassed
 		ValidRelationships: Ally, Neutral, Enemy
+
+# Kurzlebige Gaswolke für die Toxic-V2 (20s statt 60s, sonst identisch zur Tiberium-Missile-Wolke)
+aot-gascloud-v2:
+	Inherits: aot-gascloud
+	KillsSelf:
+		Delay: 500
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - HQ Build-Menu Icons (Proxy-Aktoren) ===
@@ -2266,6 +2365,33 @@ aot-hpad-nod:
 	ProvidesPrerequisite@buildingname:
 		Prerequisite: hpad
 # === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - NOD Airstrike-Freischaltung ===
+# Schaltet die gleichnamige "Airstrike"-Superpower auf dem STEC frei (liefert
+# aot-nod-airstrike-upgrade). Sichtbar ab Age 1 (~aot-age1), baubar ab Age 1 + Airstrip
+# (aot-age1, afld). NOD-exklusiv über die Upgrade.Nod-Queue.
+aot-upgrade-nod-airstrike:
+	Tooltip:
+		Name: Airstrike
+
+	Buildable:
+		BuildPaletteOrder: 45
+		Prerequisites: ~stec, ~aot-age1, aot-age1, afld
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Unlocks the Airstrike support power. Three MiG jets fly in and each fire two guided rockets at a target area.
+
+	Valued:
+		Cost: 750
+
+	RenderSprites:
+		Image: aot-upgrade-nod-airstrike
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-nod-airstrike-upgrade
+
+	Interactable:
 
 # === Age of Tiberium (aotmod) - Harpy Upgrade ===
 # Tier 1 / sichtbar ab Age 1. Wandelt alle HINDs zu Harpies um.

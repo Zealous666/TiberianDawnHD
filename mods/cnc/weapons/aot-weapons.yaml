@@ -235,6 +235,34 @@ aot-ApacheAGMissiles:
 	Warhead@1Dam: SpreadDamage
 		Damage: 2000
 
+# === Age of Tiberium (aotmod) - MiG Airstrike-Raketen ===
+# Waffe der NOD-Airstrike-Superpower (aot-mig). Nach der RA-MiG (Maverick) modelliert:
+# 2-Raketen-Burst mit hohem Schaden gegen Fahrzeuge/Gebäude. Erbt die luftgestützte
+# OrcaAGMissiles-Basis (funktioniert vom Flugzeug), aber Maverick-Stats.
+# MinRange 0, damit die Rakete auch beim Überflug direkt über dem Ziel abgefeuert wird.
+aot-MigMissile:
+	Inherits: OrcaAGMissiles
+	ReloadDelay: 50
+	Range: 9c0
+	MinRange: 0
+	Report: rocket1.aud
+	Burst: 2
+	BurstDelays: 7
+	Projectile: Missile
+		Arm: 1
+		HorizontalRateOfTurn: 80
+		Speed: 256
+		Inaccuracy: 316
+		RangeLimit: 14c410
+	Warhead@1Dam: SpreadDamage
+		Damage: 7000
+		Versus:
+			None: 30
+			Wood: 90
+			Light: 90
+			Heavy: 115
+			Concrete: 100
+
 # === Age of Tiberium (aotmod) - HIND / Harpy Waffen ===
 # HIND: 1500 Schaden, Burst 2, kein AA.
 # Harpy: 2000 Schaden, Burst 3, kein AA.
@@ -916,6 +944,29 @@ aot-MineDeploy:
 		Speed: 800
 	Warhead@1Spawn: AotSpawnActor
 		Actor: aot-minp
+
+aot-MineDeployAntiPersonnel:
+	Inherits: aot-MineDeploy
+
+aot-MineDeployAntiVehicle:
+	ValidTargets: Ground, Water, Air, Trees
+	Projectile: Bullet
+		Speed: 800
+	Warhead@1Spawn: AotSpawnActor
+		Actor: aot-minv
+
+aot-MineClusterMissileEnhanced:
+	Inherits: aot-MineClusterMissile
+	Warhead@2Cluster: FireCluster
+		Weapon: aot-MineDeployAntiPersonnel
+		RandomClusterCount: 10
+		Dimensions: 11,11
+		Footprint: _____x_____ __xxxxxxx__ _xxxxxxxxx_ _xxxxxxxxx_ _xxxxXxxxx_ xxxxXxXxxxx _xxxxXxxxx_ _xxxxxxxxx_ _xxxxxxxxx_ __xxxxxxx__ _____x_____
+	Warhead@3ClusterAV: FireCluster
+		Weapon: aot-MineDeployAntiVehicle
+		RandomClusterCount: 5
+		Dimensions: 11,11
+		Footprint: _____x_____ __xxxxxxx__ _xxxxxxxxx_ _xxxxxxxxx_ _xxxxXxxxx_ xxxxXxXxxxx _xxxxXxxxx_ _xxxxxxxxx_ _xxxxxxxxx_ __xxxxxxx__ _____x_____
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Zone Trooper Drop: Waffe der ORBC-Superpower ===
@@ -1169,6 +1220,10 @@ aot-V2Toxic:
 		DamageTypes: Prone50Percent, TriggerProne, SmallExplosionDeath, Tiberium
 	Warhead@3Eff: CreateEffect
 		Explosions: chemball
+	# Gasfeld der Tiberium Missile (20s-Variante), 1x pro Einschlagstelle trotz Burst: 2
+	Warhead@4Gas: AotSpawnActor
+		Actor: aot-gascloud-v2
+		DedupeRange: 1c0
 
 # === Age of Tiberium (aotmod) - Heavy Artillery Shell (1/3 längere Reichweite, TS 155mm Sounds) ===
 aot-ArtilleryShell-Heavy:
