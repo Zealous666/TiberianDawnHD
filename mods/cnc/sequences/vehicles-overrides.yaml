@@ -609,6 +609,9 @@ v2rl:
 	aot-v2-napalm-icon:
 		RemasteredFilename: v2_mlrs.png
 		Length: 1
+	aot-v2-toxic-icon:
+		RemasteredFilename: v2_toxic.png
+		Length: 1
 	napalm-idle:
 		Filename: shadow.shp
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\MLRS.ZIP

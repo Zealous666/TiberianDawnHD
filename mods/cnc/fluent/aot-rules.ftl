@@ -149,7 +149,7 @@ actor-aot-v2-base =
     Effective vs. all ground targets.
 
 actor-aot-v2-napalm =
-    .name = V2 Rocket Launcher (Napalm)
+    .name = Napalm Rocket Launcher
     .description =
     Napalm-upgraded V2. Fires two rockets in rapid succession.
     Highly effective vs. infantry.
@@ -157,8 +157,8 @@ actor-aot-v2-napalm =
 actor-aot-v2-toxic =
     .name = Toxic Rocket Launcher
     .description =
-    Toxic-upgraded V2. Fires two toxic rockets in rapid succession.
-    Highly effective vs. infantry.
+    Toxic-upgraded V2. Fires two toxic rockets that leave a
+    lingering tiberium gas field at the impact site.
 
 actor-aot-upgrade-v2-napalm =
     .name = Napalm Rocket Launcher Upgrade

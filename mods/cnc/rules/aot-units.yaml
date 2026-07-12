@@ -2111,8 +2111,21 @@ aot-v2-base:
 		Queue: LightVehicle.Nod
 		Icon: icon
 		Description: Long-range rocket artillery. Fires a single ballistic missile. Effective vs. all ground targets.
+	# Tooltip-Reihenfolge wichtig: Welt nimmt den ERSTEN aktiven, Sidebar NUR den bedingungslosen (letzter).
+	# -Tooltip: PFLICHT — der von ^Tank GEERBTE Tooltip behielte sonst seine Merge-Position VOR den
+	# konditionalen und würde als erster aktiver Trait immer gewinnen (Name bliebe dauerhaft "V2").
+	-Tooltip:
+	Tooltip@NAPALM:
+		Name: actor-aot-v2-napalm.name
+		GenericName: meta-tank-generic-name
+		RequiresCondition: aot-napalm-active && !aot-v2-toxic
+	Tooltip@TOXIC:
+		Name: actor-aot-v2-toxic.name
+		GenericName: meta-tank-generic-name
+		RequiresCondition: aot-napalm-active && aot-v2-toxic
 	Tooltip:
 		Name: actor-aot-v2-base.name
+		GenericName: meta-tank-generic-name
 	Health:
 		HP: 12000
 	Armor:
@@ -2135,10 +2148,17 @@ aot-v2-base:
 	Armament@napalm:
 		Weapon: aot-V2Napalm
 		ReloadingCondition: reloading
-		RequiresCondition: aot-napalm-active
+		RequiresCondition: aot-napalm-active && !aot-v2-toxic
+	Armament@toxic:
+		Weapon: aot-V2Toxic
+		ReloadingCondition: reloading
+		RequiresCondition: aot-napalm-active && aot-v2-toxic
 	GrantConditionOnPrerequisite@napalm:
 		Condition: aot-napalm-active
 		Prerequisites: aot-napalm-upgrade
+	GrantConditionOnPrerequisite@toxic:
+		Condition: aot-v2-toxic
+		Prerequisites: aot-toxic-upgrade
 	Turreted:
 		TurnSpeed: 0
 		RealignDelay: -1
@@ -2168,7 +2188,7 @@ aot-v2-napalm:
 	Inherits: aot-v2-base
 	Buildable:
 		BuildPaletteOrder: 5
-		Prerequisites: lite, anyhq, ~aot-napalm-upgrade
+		Prerequisites: lite, anyhq, ~aot-napalm-upgrade, ~!aot-toxic-upgrade
 		Queue: LightVehicle.Nod
 		Icon: aot-v2-napalm-icon
 		Description: Napalm-upgraded V2. Fires two rockets in rapid succession. Highly effective vs. infantry.
@@ -2179,6 +2199,9 @@ aot-v2-napalm:
 	Tooltip@TOXIC:
 		Name: actor-aot-v2-toxic.name
 		RequiresCondition: aot-v2-toxic
+	# Bedingungsloser Tooltip NUR für die Sidebar (Welt nimmt die konditionalen oben)
+	Tooltip@SIDEBAR:
+		Name: actor-aot-v2-napalm.name
 	GrantConditionOnPrerequisite@toxic:
 		Condition: aot-v2-toxic
 		Prerequisites: aot-toxic-upgrade
@@ -2191,6 +2214,18 @@ aot-v2-napalm:
 		Weapon: aot-V2Toxic
 		ReloadingCondition: reloading
 		RequiresCondition: aot-v2-toxic
+
+# aot-v2-toxic: ersetzt aot-v2-napalm im Baumenü nach dem Toxic-Upgrade (eigenes Icon/Name/Beschreibung)
+aot-v2-toxic:
+	Inherits: aot-v2-napalm
+	Buildable:
+		BuildPaletteOrder: 5
+		Prerequisites: lite, anyhq, ~aot-napalm-upgrade, ~aot-toxic-upgrade
+		Queue: LightVehicle.Nod
+		Icon: aot-v2-toxic-icon
+		Description: Toxic-upgraded V2. Fires two toxic rockets that leave a lingering tiberium gas field at the impact site.
+	Tooltip@SIDEBAR:
+		Name: actor-aot-v2-toxic.name
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - ARTY Howitzer (freigeschalten durch Howitzer-Upgrade) ===
