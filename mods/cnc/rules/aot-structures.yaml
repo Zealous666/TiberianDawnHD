@@ -1229,6 +1229,9 @@ STEC:
 		Condition: aot-nod-airstrike-active
 		Prerequisites: aot-nod-airstrike-upgrade
 	AotAirstrikePower:
+		# Eindeutiger OrderName — sonst kollidiert der Support-Power-Key (Default = TraitName+"Order")
+		# mit anderen Powers gleichen Typs und die Palette zeigt Icon/Tooltip der falschen Power.
+		OrderName: AotMigAirstrikeOrder
 		RequiresCondition: aot-nod-airstrike-active
 		PauseOnCondition: lowpower
 		Prerequisites: ~techlevel.superweapons
@@ -1270,7 +1273,11 @@ STEC:
 		Condition: aot-nod-spyplane-active
 		Prerequisites: aot-nod-spyplane-upgrade
 	AirstrikePower@spyplane:
-		RequiresCondition: aot-nod-spyplane-active
+		# Eindeutiger OrderName — spyplane und parabombs sind beide AirstrikePower und würden sonst
+		# denselben Default-Key ("AirstrikePowerOrder") teilen → Palette zeigt Icon/Tooltip der Spy Plane.
+		OrderName: AotSpyPlaneOrder
+		# Verschwindet, sobald das Parabombs-Upgrade gekauft ist — Parabombs ERSETZT die Spy Plane.
+		RequiresCondition: aot-nod-spyplane-active && !aot-nod-parabombs-active
 		PauseOnCondition: lowpower
 		Prerequisites: ~techlevel.superweapons
 		Icon: aot-spyplane
@@ -1278,7 +1285,7 @@ STEC:
 		QuantizedFacings: 8
 		Name: Spy Plane
 		Description: A Yak recon plane flies over the target area and reveals it for a short time.
-		EndChargeSpeechNotification: AirstrikeReady
+		EndChargeSpeechNotification: SpyPlaneReady
 		SelectTargetSpeechNotification: SelectTarget
 		InsufficientPowerSpeechNotification: InsufficientPower
 		EndChargeTextNotification: notification-airstrike-ready
@@ -1298,7 +1305,47 @@ STEC:
 		DirectionArrowAnimation: airstrikedirection
 		SupportPowerPaletteOrder: 11
 	SupportPowerChargeBar@spyplane:
-		RequiresCondition: aot-nod-spyplane-active
+		RequiresCondition: aot-nod-spyplane-active && !aot-nod-parabombs-active
+	# === Age of Tiberium (aotmod) - NOD Parabombs-Superpower (Age-3-Folge der Spy Plane) ===
+	# Nachbau der RA-Parabomb-Power (stock AirstrikePower, Single-Pass): 1 Badger-Bomber fliegt
+	# ins Ziel, wirft 5 toxische Fallschirmbomben (aot-badr + aot-Parabomb) und dreht ab.
+	# Freigeschaltet durch das Parabombs-Upgrade (nur nach Spy Plane + Age 3 + Toxic).
+	GrantConditionOnPrerequisite@parabombs:
+		Condition: aot-nod-parabombs-active
+		Prerequisites: aot-nod-parabombs-upgrade
+	AirstrikePower@parabombs:
+		OrderName: AotParabombsOrder
+		RequiresCondition: aot-nod-parabombs-active
+		PauseOnCondition: lowpower
+		Prerequisites: ~techlevel.superweapons
+		Icon: aot-parabombs
+		ChargeInterval: 7500
+		QuantizedFacings: 8
+		SquadSize: 1
+		SquadOffset: 1792,1792,0
+		Name: Parabombs
+		Description: A heavy bomber flies over the target area and drops five toxic parabombs, each leaving a lingering gas cloud.
+		EndChargeSpeechNotification: AirstrikeReady
+		SelectTargetSpeechNotification: SelectTarget
+		InsufficientPowerSpeechNotification: InsufficientPower
+		EndChargeTextNotification: notification-airstrike-ready
+		SelectTargetTextNotification: notification-select-target
+		InsufficientPowerTextNotification: notification-insufficient-power
+		UnitType: aot-badr
+		CameraActor: aot-camera-spyplane
+		CameraRemoveDelay: 150
+		DisplayBeacon: True
+		BeaconPoster: airstrike
+		BeaconPosterPalette: beaconposter
+		DisplayRadarPing: True
+		ArrowSequence: arrow
+		ClockSequence: clock
+		CircleSequence: circles
+		UseDirectionalTarget: True
+		DirectionArrowAnimation: airstrikedirection
+		SupportPowerPaletteOrder: 12
+	SupportPowerChargeBar@parabombs:
+		RequiresCondition: aot-nod-parabombs-active
 	RenderSprites:
 		Image: stec
 	-WithSpriteBody:
@@ -1800,6 +1847,12 @@ aot-gascloud-v2:
 	Inherits: aot-gascloud
 	KillsSelf:
 		Delay: 500
+
+# Kurzlebige Gaswolke für die Parabombs (10s, halb so lang wie die Toxic-V2)
+aot-gascloud-parabomb:
+	Inherits: aot-gascloud
+	KillsSelf:
+		Delay: 250
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - HQ Build-Menu Icons (Proxy-Aktoren) ===
@@ -2408,17 +2461,19 @@ aot-hpad-nod:
 # Schaltet die gleichnamige "Airstrike"-Superpower auf dem STEC frei (liefert
 # aot-nod-airstrike-upgrade). Sichtbar ab Age 1 (~aot-age1), baubar ab Age 1 + Airstrip
 # (aot-age1, afld). NOD-exklusiv über die Upgrade.Nod-Queue.
+# Schließt das Spy-Plane-Upgrade aus (entweder/oder): ~!aot-nod-spyplane-upgrade → nach Kauf
+# des Spy-Plane-Upgrades versteckt (und umgekehrt, siehe aot-upgrade-nod-spyplane).
 aot-upgrade-nod-airstrike:
 	Tooltip:
 		Name: Airstrike
 
 	Buildable:
 		BuildPaletteOrder: 45
-		Prerequisites: ~stec, ~aot-age1, aot-age1, afld
+		Prerequisites: ~stec, ~aot-age1, aot-age1, afld, ~!aot-nod-spyplane-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
-		Description: Unlocks the Airstrike support power. Three MiG jets fly in and each fire two guided rockets at a target area.
+		Description: Unlocks the Airstrike support power: two MiG jets make two attack passes, each firing two guided rockets at the target. Mutually exclusive with the Spy Plane upgrade.
 
 	Valued:
 		Cost: 750
@@ -2428,6 +2483,63 @@ aot-upgrade-nod-airstrike:
 
 	ProvidesPrerequisite:
 		Prerequisite: aot-nod-airstrike-upgrade
+
+	Interactable:
+
+# === Age of Tiberium (aotmod) - NOD Spy-Plane-Freischaltung (Alternative zu Airstrike) ===
+# Schaltet die "Spy Plane"-Superpower auf dem STEC frei (liefert aot-nod-spyplane-upgrade).
+# Gleiche Sicht-/Baubarkeit wie das Airstrike-Upgrade (Age 1 + Airstrip). Schließt das
+# Airstrike-Upgrade aus (~!aot-nod-airstrike-upgrade) — entweder/oder.
+aot-upgrade-nod-spyplane:
+	Tooltip:
+		Name: Spy Plane Upgrade
+
+	Buildable:
+		BuildPaletteOrder: 46
+		Prerequisites: ~stec, ~aot-age1, aot-age1, afld, ~!aot-nod-airstrike-upgrade
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Unlocks the Spy Plane support power: a Yak recon plane flies over a target area and reveals it for a short time. Mutually exclusive with the Airstrike upgrade.
+
+	Valued:
+		Cost: 750
+
+	RenderSprites:
+		Image: aot-upgrade-nod-spyplane
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-nod-spyplane-upgrade
+
+	Interactable:
+
+# === Age of Tiberium (aotmod) - NOD Parabombs-Freischaltung (Age-3-Folge-Upgrade der Spy Plane) ===
+# Schaltet die "Parabombs"-Superpower auf dem STEC frei (liefert aot-nod-parabombs-upgrade).
+# Sichtbar NUR wenn der Yak-Pfad (Spy Plane) gewählt wurde UND Age 3 erreicht ist:
+#   ~aot-age3               → versteckt vor Age 3
+#   ~aot-nod-spyplane-upgrade → versteckt bis Spy-Plane-Upgrade gekauft (Yak-Pfad)
+#   ~!aot-nod-airstrike-upgrade → verschwindet, falls MiG-Airstrike-Pfad gewählt wurde
+# Baubar zusätzlich mit Toxic-Upgrade.
+aot-upgrade-nod-parabombs:
+	Tooltip:
+		Name: Parabombs
+
+	Buildable:
+		BuildPaletteOrder: 47
+		Prerequisites: ~stec, ~aot-age3, ~aot-nod-spyplane-upgrade, ~!aot-nod-airstrike-upgrade, aot-age3, aot-nod-spyplane-upgrade, aot-toxic-upgrade
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Unlocks the Parabombs support power: a heavy bomber flies over the target and drops five toxic parabombs, each leaving a lingering gas cloud. Requires the Spy Plane and Toxic upgrades.
+
+	Valued:
+		Cost: 1000
+
+	RenderSprites:
+		Image: aot-upgrade-nod-parabombs
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-nod-parabombs-upgrade
 
 	Interactable:
 

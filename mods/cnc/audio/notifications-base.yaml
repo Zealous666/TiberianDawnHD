@@ -1,5 +1,13 @@
 Speech:
+	# === Age of Tiberium (aotmod) - Spy-Plane-Ansage aus RA (RA-Remastered EVA) ===
+	# aot-eva-spyplane.aud (bits/) ist die extrahierte RA-Remastered-Ansage RAR_SFX_EVA_SPYPLN1.
+	# Prefix/Variant deaktiviert, damit kein TDR_SFX_EVA_/_EN-US.WAV drangehängt wird — es wird
+	# direkt bits/aot-eva-spyplane.aud geladen (Sound-Loader erkennt WAV-Inhalt am RIFF-Header,
+	# die .aud-Endung stammt nur vom Default-Variant-Suffix). Sprachunabhängig.
+	DisablePrefixes: SpyPlaneReady
+	DisableVariants: SpyPlaneReady
 	Notifications:
+		SpyPlaneReady: aot-eva-spyplane
 		AirstrikeReady: AIRREDY1
 		BaseAttack: BASEATK1
 		Building: BLDGING1

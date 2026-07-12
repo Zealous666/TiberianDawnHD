@@ -1924,6 +1924,18 @@ icon:
 	aot-orcatransport:
 		Filename: aot-orcatransport-icon.png
 		Length: 1
+	# === Age of Tiberium (aotmod) - NOD Airstrike-Superpower-Icon (MiG) ===
+	aot-airstrike:
+		Filename: mig_base.png
+		Length: 1
+	# === Age of Tiberium (aotmod) - NOD Spy-Plane-Superpower-Icon (Yak) ===
+	aot-spyplane:
+		Filename: mig_yak.png
+		Length: 1
+	# === Age of Tiberium (aotmod) - NOD Parabombs-Superpower-Icon (Badger) ===
+	aot-parabombs:
+		Filename: mig_parabomb.png
+		Length: 1
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - aot-heli: Gemeinsamer Image-Block für Apache + ORCA ===
@@ -2049,6 +2061,84 @@ aot-ajet:
 		Filename: ajet_icon.png
 		Length: 1
 		RemasteredFilename:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - aot-mig: MiG Attack Jet (RA Remastered MIG.ZIP) ===
+# 16 Facings (klassische mig.shp aus russian.mix als Fallback, MIG.ZIP im Remaster).
+aot-mig:
+	Defaults:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\MIG.ZIP
+	idle:
+		Filename: mig.shp
+		Facings: 16
+		InterpolatedFacings: 64
+	icon:
+		Filename: mig_base.png
+		Length: 1
+		RemasteredFilename:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - aot-upgrade-nod-airstrike: Icon der Airstrike-Freischaltung ===
+aot-upgrade-nod-airstrike:
+	icon:
+		Filename: mig_base.png
+		Length: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - aot-yak: Yak Recon Plane (RA Remastered YAK.ZIP) ===
+# 16 Facings (klassische yak.shp aus russian.mix als Fallback, YAK.ZIP im Remaster).
+aot-yak:
+	Defaults:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\YAK.ZIP
+	idle:
+		Filename: yak.shp
+		Facings: 16
+		InterpolatedFacings: 64
+	icon:
+		Filename: mig_yak.png
+		Length: 1
+		RemasteredFilename:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - aot-upgrade-nod-spyplane: Icon der Spy-Plane-Freischaltung ===
+aot-upgrade-nod-spyplane:
+	icon:
+		Filename: mig_yak.png
+		Length: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - aot-badr: Badger Bomber (RA Remastered BADR.ZIP) ===
+# 16 Facings (klassische badr.shp als Fallback, BADR.ZIP im Remaster).
+aot-badr:
+	Defaults:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\BADR.ZIP
+	idle:
+		Filename: badr.shp
+		Facings: 16
+		InterpolatedFacings: 64
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - aot-parabomb: Fallschirmbombe (RA Remastered PARABOMB.ZIP) ===
+# 13 Frames: open = 0-7 (Fallschirm entfaltet), idle = 8-12 (fällt). GravityBomb-Projektil
+# der aot-Parabomb-Waffe (Image: aot-parabomb, OpenSequence: open).
+aot-parabomb:
+	Defaults:
+		Filename: parabomb.shp
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\VFX\PARABOMB.ZIP
+	open:
+		Length: 8
+		ZOffset: 1023
+	idle:
+		Start: 8
+		Length: 5
+		ZOffset: 1023
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - aot-upgrade-nod-parabombs: Icon der Parabombs-Freischaltung ===
+aot-upgrade-nod-parabombs:
+	icon:
+		Filename: mig_parabomb.png
+		Length: 1
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - HAND: RA Soviet Barracks Sprites für Age 0 ===

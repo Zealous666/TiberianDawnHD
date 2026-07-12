@@ -1937,6 +1937,129 @@ AJET:
 		Margin: 4, 3
 		RequiresSelection: true
 
+# === Age of Tiberium (aotmod) - aot-mig: MiG Attack Jet (NOD Airstrike-Superpower) ===
+# Wird von der STEC-AirstrikePower gespawnt (nicht baubar). Basiert auf A10-Traits, aber:
+#   - RA-Remastered MIG.ZIP Sprites (16 Facings) statt A10.
+#   - AttackBomber feuert 2 Raketen (aot-MigMissile, Burst 2) statt Napalm/Vulcan,
+#     modelliert nach der RA-MiG (Maverick-Raketen, zwei Tragflächen-Startpunkte).
+aot-mig:
+	Inherits: ^Plane
+	Interactable:
+	Tooltip:
+		Name: MiG Attack Jet
+	Valued:
+		Cost: 2000
+	UpdatesPlayerStatistics:
+		AddToAssetsValue: false
+	RenderSprites:
+		Image: aot-mig
+	Aircraft:
+		TurnSpeed: 16
+		Speed: 373
+		Repulsable: False
+	AttackBomber:
+		Armaments: rockets
+		FacingTolerance: 8
+	Armament@ROCKETS:
+		Name: rockets
+		Weapon: aot-MigMissile
+		LocalOffset: 0,-640,-43, 0,640,-43
+		LocalYaw: -40, 24
+	Contrail@1:
+		Offset: -640,171,0
+		TrailLength: 15
+		StartColorAlpha: 128
+	Contrail@2:
+		Offset: -640,-171,0
+		TrailLength: 15
+		StartColorAlpha: 128
+	-MapEditorData:
+
+# === Age of Tiberium (aotmod) - aot-yak: Yak Recon Plane (NOD Spy-Plane-Superpower) ===
+# Exakter Nachbau der RA-Soviet-Spy-Plane (RA U2 + AirstrikePower@spyplane): fliegt EINEN
+# Überflug, KEINE Waffe (AttackBomber ohne Armament) — der Reveal passiert über den
+# CameraActor (aot-camera-spyplane), der beim Überflug gespawnt wird. Einziger Unterschied
+# zur RA-Vorlage: YAK-Sprite (RA Remastered YAK.ZIP) statt U2. Hohe HP wie RA-U2 (quasi
+# unverwundbar während des Aufklärungsflugs). Wird nur von der Superpower gespawnt.
+aot-yak:
+	Inherits: ^Plane
+	Interactable:
+	Tooltip:
+		Name: Yak Recon Plane
+	Valued:
+		Cost: 2000
+	UpdatesPlayerStatistics:
+		AddToAssetsValue: false
+	RenderSprites:
+		Image: aot-yak
+	Health:
+		HP: 200000
+	HitShape:
+	Aircraft:
+		CruiseAltitude: 2560
+		TurnSpeed: 28
+		Speed: 373
+		Repulsable: False
+		MaximumPitch: 56
+	AttackBomber:
+		FacingTolerance: 8
+	Contrail@1:
+		Offset: -725,683,0
+		StartColorAlpha: 128
+	Contrail@2:
+		Offset: -725,-683,0
+		StartColorAlpha: 128
+	-MapEditorData:
+
+# === Age of Tiberium (aotmod) - aot-camera-spyplane: Aufklärungs-Kamera der Spy Plane ===
+# Analog RA camera.spyplane (Inherits CAMERA). Wird von AirstrikePower@spyplane beim
+# Überflug gespawnt, deckt den Zielbereich für CameraRemoveDelay Ticks auf (RevealsShroud
+# 10c0 von CAMERA geerbt).
+aot-camera-spyplane:
+	Inherits: CAMERA
+	# Sprites nur im Editor sichtbar — Image auf das vorhandene "camera"-Sequenz-Set zeigen
+	# (sonst sucht die Engine Sequenzen unter dem Aktornamen aot-camera-spyplane -> Fehler).
+	RenderSpritesEditorOnly:
+		Image: camera
+
+# === Age of Tiberium (aotmod) - aot-badr: Badger Bomber (NOD Parabombs-Superpower) ===
+# Nachbau der RA-Parabomb-Mechanik (RA BADR.Bomber): großes, langsames Flugzeug fliegt EINEN
+# Überflug und wirft per AttackBomber 5 Fallschirmbomben (aot-Parabomb, AmmoPool 5) ins Ziel,
+# dann fliegt es davon. Sprite: RA Remastered BADR.ZIP. Wird nur von der Superpower gespawnt.
+aot-badr:
+	Inherits: ^Plane
+	Interactable:
+	Tooltip:
+		Name: Badger Bomber
+	Valued:
+		Cost: 2000
+	UpdatesPlayerStatistics:
+		AddToAssetsValue: false
+	RenderSprites:
+		Image: aot-badr
+	Health:
+		HP: 40000
+	HitShape:
+	Aircraft:
+		CruiseAltitude: 2560
+		TurnSpeed: 20
+		Speed: 180
+		Repulsable: False
+		MaximumPitch: 56
+	AttackBomber:
+		FacingTolerance: 8
+	AmmoPool:
+		Ammo: 5
+	Armament:
+		Weapon: aot-Parabomb
+	Contrail@1:
+		Offset: -432,560,0
+		StartColorAlpha: 128
+	Contrail@2:
+		Offset: -432,-560,0
+		StartColorAlpha: 128
+	-MapEditorData:
+
 # === Age of Tiberium (aotmod) - TTNK Heavy Tank (NOD, Tier 0) ===
 # Age-0: RA Remastered 3TNK Sprites, Dual-Kanone (aot-TtnkDual).
 # Age-1 Upgrade: Flame Tank (FTNK Sprites, BigFlamer × 2, AttackFrontal).

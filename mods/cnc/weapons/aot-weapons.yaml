@@ -1225,6 +1225,49 @@ aot-V2Toxic:
 		Actor: aot-gascloud-v2
 		DedupeRange: 1c0
 
+# === Age of Tiberium (aotmod) - Parabomb (RA-Import, toxisch) ===
+# 1:1 RA ParaBomb (GravityBomb-Fallschirmbombe, Image PARABOMB + OpenSequence), aber der
+# Einschlag ist auf die V2-Toxic-Wirkung umgestellt: chemball-Explosion statt Artillerie +
+# 10s-Gaswolke (aot-gascloud-parabomb) statt Krater-Rauch. Report = chute1 (RA-Fallschirmsound).
+aot-Parabomb:
+	ReloadDelay: 8
+	Range: 6c0
+	Report: aot-chute1.aud
+	ValidTargets: Ground, Water
+	Projectile: GravityBomb
+		Image: aot-parabomb
+		OpenSequence: open
+		Velocity: 0, 0, -50
+		Acceleration: 0, 0, 0
+		Shadow: False
+	# ValidTargets nutzt die CnC-Konvention "Ground/Water" (NICHT RA's "GroundActor/WaterActor" —
+	# das existiert in diesem TD-Mod nicht, sonst trifft der Warhead nichts, vgl. FTUR-Bugfix).
+	# Versus: Infanterie lethal (None 40), Fahrzeuge/Gebäude moderat. Heavy MUSS gesetzt sein,
+	# sonst Default 100% = One-Shot schwerer Panzer.
+	Warhead@1Dam: SpreadDamage
+		Spread: 1000
+		Damage: 30000
+		ValidTargets: Ground, Water
+		Versus:
+			None: 40
+			Wood: 50
+			Light: 35
+			Heavy: 20
+			Concrete: 20
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath, Tiberium
+	Warhead@2Smu: LeaveSmudge
+		SmudgeType: Crater
+		ValidTargets: Ground, Infantry
+	# Toxischer Einschlag wie aot-V2Toxic: chemball-Explosion + Gaswolke.
+	# ImpactSounds ergänzt (aot-V2Toxic hat keinen) — sonst schlägt die Bombe lautlos ein.
+	Warhead@3Eff: CreateEffect
+		Explosions: chemball
+		ImpactSounds: xplobig4.aud
+		ValidTargets: Ground, Water, Trees
+	Warhead@4Gas: AotSpawnActor
+		Actor: aot-gascloud-parabomb
+		DedupeRange: 1c0
+
 # === Age of Tiberium (aotmod) - Heavy Artillery Shell (1/3 längere Reichweite, TS 155mm Sounds) ===
 aot-ArtilleryShell-Heavy:
 	Inherits: ArtilleryShell
