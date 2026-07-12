@@ -2203,7 +2203,7 @@ aot-age1-upgrade-gdi:
 	Tooltip:
 		Name: 1st Tiberium Age
 	Valued:
-		Cost: 1000
+		Cost: 5000
 	Buildable:
 		BuildPaletteOrder: 5
 		Prerequisites: ~atec, ~!aot-age1-purchased
@@ -2221,7 +2221,7 @@ aot-age1-upgrade-nod:
 	Tooltip:
 		Name: 1st Tiberium Age
 	Valued:
-		Cost: 1000
+		Cost: 5000
 	Buildable:
 		BuildPaletteOrder: 5
 		Prerequisites: ~stec, ~!aot-age1-purchased
@@ -2239,7 +2239,7 @@ aot-age2-upgrade-gdi:
 	Tooltip:
 		Name: 2nd Tiberium Age
 	Valued:
-		Cost: 1000
+		Cost: 10000
 	Buildable:
 		BuildPaletteOrder: 6
 		Prerequisites: ~atec, ~aot-age1-purchased, ~!aot-age2-purchased, aot-age1-purchased, aot-proc-gdi
@@ -2257,7 +2257,7 @@ aot-age2-upgrade-nod:
 	Tooltip:
 		Name: 2nd Tiberium Age
 	Valued:
-		Cost: 1000
+		Cost: 10000
 	Buildable:
 		BuildPaletteOrder: 6
 		Prerequisites: ~stec, ~aot-age1-purchased, ~!aot-age2-purchased, aot-age1-purchased, aot-proc-nod
@@ -2275,7 +2275,7 @@ aot-age3-upgrade-gdi:
 	Tooltip:
 		Name: 3rd Tiberium Age
 	Valued:
-		Cost: 1000
+		Cost: 25000
 	Buildable:
 		BuildPaletteOrder: 7
 		Prerequisites: ~atec, ~aot-age2-purchased, ~!aot-age3-purchased, aot-age2-purchased, aot-orbc
@@ -2293,7 +2293,7 @@ aot-age3-upgrade-nod:
 	Tooltip:
 		Name: 3rd Tiberium Age
 	Valued:
-		Cost: 1000
+		Cost: 25000
 	Buildable:
 		BuildPaletteOrder: 7
 		Prerequisites: ~stec, ~aot-age2-purchased, ~!aot-age3-purchased, aot-age2-purchased, aot-shrine
@@ -3440,9 +3440,10 @@ GUN:
 		RequiresCondition: !build-incomplete && aot-gun-laser-active
 		Recoils: false
 
+# Guard Tower: fuer alle Fraktionen nicht baubar (User-Wunsch 2026-07-12).
+# -Buildable muss hier stehen (aot-structures laedt nach overrides.yaml).
 GTWR:
-	Buildable:
-		Queue: Support.GDI
+	-Buildable:
 
 # === Age of Tiberium (aotmod) - GUN Proxy-Aktoren (Bau-Icon-Wechsel) ===
 # Sichtbar/baubar ab Age 1 (User-Wunsch 2026-07-04: Age 0 uebernimmt stattdessen

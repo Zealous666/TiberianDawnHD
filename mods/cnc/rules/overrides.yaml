@@ -390,6 +390,11 @@ PROC:
 	-Buildable:
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - Advanced Guard Tower: fuer alle Fraktionen nicht baubar (User-Wunsch 2026-07-12) ===
+ATWR:
+	-Buildable:
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - aot-proc-gdi: PROC für GDI (braucht Advanced Factory) ===
 aot-proc-gdi:
 	Inherits: PROC
