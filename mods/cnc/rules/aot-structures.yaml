@@ -842,7 +842,7 @@ aot-upgrade-e4-toxic:
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
-		Description: Upgrades all Flamethrowers, Flame Tanks, Flame Towers, and the Nod Avatar with toxic weaponry for improved damage vs. all ground targets.
+		Description: Upgrades all Flamethrowers, Flame Tanks, Flame Towers, Napalm Rocket Launchers, and the Nod Avatar with toxic weaponry for improved damage vs. all ground targets. Toxic rockets leave a lingering tiberium gas field on impact.
 
 	Valued:
 		Cost: 400
@@ -1261,6 +1261,44 @@ STEC:
 		SupportPowerPaletteOrder: 10
 	SupportPowerChargeBar:
 		RequiresCondition: aot-nod-airstrike-active
+	# === Age of Tiberium (aotmod) - NOD Spy-Plane-Superpower (Alternative zu Airstrike) ===
+	# Exakter Nachbau der RA-Soviet-Spy-Plane (AirstrikePower@spyplane): EIN Yak fliegt einen
+	# Aufklärungs-Überflug (keine Waffe), CameraActor deckt den Zielbereich auf. Freigeschaltet
+	# durch das Spy-Plane-Upgrade — schließt das Airstrike-Upgrade aus (entweder/oder).
+	# Stock AirstrikePower (Single-Pass, wie in RA), NICHT AotAirstrikePower.
+	GrantConditionOnPrerequisite@spyplane:
+		Condition: aot-nod-spyplane-active
+		Prerequisites: aot-nod-spyplane-upgrade
+	AirstrikePower@spyplane:
+		RequiresCondition: aot-nod-spyplane-active
+		PauseOnCondition: lowpower
+		Prerequisites: ~techlevel.superweapons
+		Icon: aot-spyplane
+		ChargeInterval: 3750
+		QuantizedFacings: 8
+		Name: Spy Plane
+		Description: A Yak recon plane flies over the target area and reveals it for a short time.
+		EndChargeSpeechNotification: AirstrikeReady
+		SelectTargetSpeechNotification: SelectTarget
+		InsufficientPowerSpeechNotification: InsufficientPower
+		EndChargeTextNotification: notification-airstrike-ready
+		SelectTargetTextNotification: notification-select-target
+		InsufficientPowerTextNotification: notification-insufficient-power
+		UnitType: aot-yak
+		CameraActor: aot-camera-spyplane
+		CameraRemoveDelay: 150
+		DisplayBeacon: True
+		BeaconPoster: airstrike
+		BeaconPosterPalette: beaconposter
+		DisplayRadarPing: True
+		ArrowSequence: arrow
+		ClockSequence: clock
+		CircleSequence: circles
+		UseDirectionalTarget: True
+		DirectionArrowAnimation: airstrikedirection
+		SupportPowerPaletteOrder: 11
+	SupportPowerChargeBar@spyplane:
+		RequiresCondition: aot-nod-spyplane-active
 	RenderSprites:
 		Image: stec
 	-WithSpriteBody:
@@ -1468,7 +1506,7 @@ MSLO:
 		ClockSequence: clock
 		CircleSequence: circles
 		SupportPowerPaletteOrder: 25
-	NukePower@minecluster-enhanced:
+	AotMineClusterEnhancedPower@minecluster-enhanced:
 		RequiresCondition: aot-mine-cluster-enhanced
 		PauseOnCondition: lowpower
 		Prerequisites: ~techlevel.superweapons

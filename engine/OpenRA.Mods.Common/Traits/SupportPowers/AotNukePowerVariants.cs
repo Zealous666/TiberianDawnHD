@@ -16,4 +16,6 @@ namespace OpenRA.Mods.Common.Traits
 	public class AotTiberiumMissilePowerInfo : NukePowerInfo { }
 
 	public class AotAtomBombPowerInfo : NukePowerInfo { }
+
+	public class AotMineClusterEnhancedPowerInfo : NukePowerInfo { }
 }
