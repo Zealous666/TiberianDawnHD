@@ -5372,4 +5372,35 @@ aot-ftur-toxic:
 		Queue: Building.Nod
 		Icon: toxic-icon
 		Description: RA Flame Tower upgraded with toxic weaponry. Short-range anti-infantry/vehicle defense.
+
+# === Oil Pump (ARCO) UND Oil Derrick (V19): beide lassen beim Zerstoeren eine
+# 1000-Credits-Kiste in einer ZUFAELLIGEN, passierbaren Nachbarzelle fallen.
+# Der custom Trait AotDropActorOnDeath waehlt aus den umliegenden Zellen zufaellig
+# eine, in die der Crate wirklich hineinpasst (passierbares Terrain + frei).
+# Der jeweils bestehende (unbenannte) SpawnActorOnDeath fuer den Husk bleibt
+# unangetastet. ===
+ARCO:
+	AotDropActorOnDeath:
+		Actor: OILCRATE1000
+		Range: 1
+		OwnerType: InternalName
+		InternalOwner: Neutral
+
+V19:
+	AotDropActorOnDeath:
+		Actor: OILCRATE1000
+		Range: 1
+		OwnerType: InternalName
+		InternalOwner: Neutral
+
+# 1000-Credits-Geldkiste, die die Oil Pump beim Tod hinterlaesst.
+OILCRATE1000:
+	Inherits: ^Crate
+	Tooltip:
+		Name: meta-crate.name
+	GiveCashCrateAction:
+		Amount: 1000
+		UseCashTick: true
+	RenderSprites:
+		Image: wcrate
 # === Ende aotmod ===
