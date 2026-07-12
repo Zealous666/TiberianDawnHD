@@ -2203,7 +2203,7 @@ aot-age1-upgrade-gdi:
 	Tooltip:
 		Name: 1st Tiberium Age
 	Valued:
-		Cost: 10000
+		Cost: 5000
 	Buildable:
 		BuildPaletteOrder: 5
 		Prerequisites: ~atec, ~!aot-age1-purchased
@@ -2221,7 +2221,7 @@ aot-age1-upgrade-nod:
 	Tooltip:
 		Name: 1st Tiberium Age
 	Valued:
-		Cost: 10000
+		Cost: 5000
 	Buildable:
 		BuildPaletteOrder: 5
 		Prerequisites: ~stec, ~!aot-age1-purchased
@@ -2275,7 +2275,7 @@ aot-age3-upgrade-gdi:
 	Tooltip:
 		Name: 3rd Tiberium Age
 	Valued:
-		Cost: 10000
+		Cost: 15000
 	Buildable:
 		BuildPaletteOrder: 7
 		Prerequisites: ~atec, ~aot-age2-purchased, ~!aot-age3-purchased, aot-age2-purchased, aot-orbc
@@ -2293,7 +2293,7 @@ aot-age3-upgrade-nod:
 	Tooltip:
 		Name: 3rd Tiberium Age
 	Valued:
-		Cost: 10000
+		Cost: 15000
 	Buildable:
 		BuildPaletteOrder: 7
 		Prerequisites: ~stec, ~aot-age2-purchased, ~!aot-age3-purchased, aot-age2-purchased, aot-shrine
@@ -5434,6 +5434,9 @@ ARCO:
 		Range: 1
 		OwnerType: InternalName
 		InternalOwner: Neutral
+	# Eingenommene Oil Pump erweitert die Bauzone ihres Besitzers (an aktuellen Owner gebunden).
+	GivesBuildableArea:
+		AreaTypes: building
 
 V19:
 	AotDropActorOnDeath:
@@ -5441,6 +5444,9 @@ V19:
 		Range: 1
 		OwnerType: InternalName
 		InternalOwner: Neutral
+	# Eingenommener Oil Derrick erweitert die Bauzone seines Besitzers (an aktuellen Owner gebunden).
+	GivesBuildableArea:
+		AreaTypes: building
 
 # 1000-Credits-Geldkiste, die die Oil Pump beim Tod hinterlaesst.
 OILCRATE1000:
@@ -5448,7 +5454,7 @@ OILCRATE1000:
 	Tooltip:
 		Name: meta-crate.name
 	GiveCashCrateAction:
-		Amount: 1000
+		Amount: 2500
 		UseCashTick: true
 	RenderSprites:
 		Image: wcrate
