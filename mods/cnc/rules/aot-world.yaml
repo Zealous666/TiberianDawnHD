@@ -50,3 +50,18 @@ World:
 		HP: 24000
 	Armor:
 		Type: Tree
+
+# Verbrannte Baumreste (Txx.Husk erben von ^TreeHusk) waren bisher unzerstoerbar
+# und blockierten dauerhaft den Bauplatz. Sie bekommen jetzt EXAKT dieselbe HP wie
+# der Baum (24000) + denselben Tree-Ruestungstyp + Targetable/HitShape, damit sie
+# von denselben konventionellen Waffen weggeraeumt werden koennen. ^TreeHusk hat
+# KEIN SpawnActorOnDeath und KEINE WithDeathAnimation -> der Rest verschwindet beim
+# Zerstoeren spurlos, die Zelle wird wieder bebaubar.
+^TreeHusk:
+	Health:
+		HP: 24000
+	Armor:
+		Type: Tree
+	Targetable:
+		TargetTypes: Trees
+	HitShape:
