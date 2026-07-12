@@ -1312,4 +1312,49 @@ aot-ArtilleryShell-Heavy:
 		Explosions: med_frag
 		ImpactSounds: expnew06.aud
 		ValidTargets: Ground, Air, GroundActor, AirborneActor, WaterActor, Trees
+
+# === Age of Tiberium (aotmod) - Baeume faellbar durch konventionelle Waffen ===
+# Konventionelle Projektile (Panzerkanonen, Artillerie, Granaten, Standard-Raketen)
+# koennen jetzt Baeume faellen. Umgesetzt an den Basisvorlagen ^BallisticWeapon und
+# ^MissileWeapon: Trees als gueltiges Ziel + Tree:50 Versus (halbe Wirkung = doppelter
+# Schaden noetig, User-Wunsch 2026-07-12). MGs/Chainguns/Vulcans/Laser/Railguns haben
+# EIGENE Basen und sind damit automatisch ausgenommen. Baeume nutzen den eigenen
+# Ruestungstyp Tree (siehe aot-world.yaml ^Tree), daher wirken diese Tree-Werte NICHT
+# gegen Gebaeude (die Wood-Ruestung tragen). Baeume sind Neutral -> kein Auto-Angriff;
+# Faellen per Force-Fire (Strg+Klick), wie in Red Alert.
+^BallisticWeapon:
+	ValidTargets: Ground, Water, Trees
+	Warhead@1Dam:
+		ValidTargets: Ground, Water, Trees
+		Versus:
+			Tree: 50
+
+^MissileWeapon:
+	ValidTargets: Ground, Water, Air, Trees
+	Warhead@1Dam:
+		ValidTargets: Ground, Air, Trees
+		Versus:
+			Tree: 50
+
+# Diese drei ueberschreiben ihre ValidTargets vollstaendig und erben Trees daher NICHT
+# von der Basis -> explizit ergaenzen. Orca-AG deckt via Vererbung auch Apache/MiG ab.
+OrcaAGMissiles:
+	ValidTargets: Ground, Water, Trees
+	Warhead@1Dam:
+		ValidTargets: Ground, Trees
+		Versus:
+			Tree: 50
+
+227mm:
+	ValidTargets: Ground, Water, Trees
+	Warhead@1Dam:
+		ValidTargets: Ground, Trees
+		Versus:
+			Tree: 50
+
+227mm.stnk:
+	ValidTargets: Ground, Water, Trees
+	Warhead@1Dam:
+		Versus:
+			Tree: 50
 # === Ende aotmod ===

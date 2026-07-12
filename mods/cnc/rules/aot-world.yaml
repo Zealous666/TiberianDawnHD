@@ -35,3 +35,18 @@ World:
 		Factions: gdi
 		BaseActor: mcv
 		SupportActors: aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e3-gdi,aot-e3-gdi,aot-e2-gdi,MTNK,MTNK,aot-jeep-base,aot-jeep-base
+
+# === Age of Tiberium (aotmod) - Baeume durch konventionelle Waffen faellbar ===
+# Baeume bekommen einen EIGENEN Ruestungstyp (Tree) statt Wood. Grund: Wood ist in
+# cnc der Standard-Ruestungstyp fuer Gebaeude (^Building), d.h. wuerde man den Wood-
+# Waffenschaden fuer Baeume anpassen, aendert man auch den Schaden gegen Gebaeude.
+# Mit eigenem Tree-Typ laesst sich der Baumschaden separat einstellen (siehe
+# aot-weapons.yaml: ^BallisticWeapon/^MissileWeapon -> Tree:50 = halbe Wirkung).
+# HP von 50000 auf 24000 gesenkt (User-Wunsch 2026-07-12): Baeume fallen schneller;
+# Flammen-/Superwaffen bleiben bei 100% (deren Wood-Werte greifen bei Tree-Ruestung
+# nicht mehr -> Default 100%), konventionelle Waffen brauchen ~doppelten Schaden.
+^Tree:
+	Health:
+		HP: 24000
+	Armor:
+		Type: Tree
