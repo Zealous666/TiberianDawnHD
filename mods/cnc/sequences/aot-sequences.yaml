@@ -2617,6 +2617,10 @@ nuke:
 		Filename: nuke_turbine.png
 		RemasteredFilename:
 		Length: 1
+	aot-age2-nod-icon:
+		Filename: nuke_age2.png
+		RemasteredFilename:
+		Length: 1
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - NUK2 Advanced Power Plant: RA APWR vor Age 1, TD danach ===
@@ -2695,7 +2699,7 @@ nuk2:
 		Length: 19
 		Scale: 0.55
 	aot-age2-icon:
-		Filename: nuk2_ages.png
+		Filename: nuk2_age2.png
 		RemasteredFilename:
 		Length: 1
 # === Ende aotmod ===

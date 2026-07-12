@@ -523,7 +523,10 @@ MTNK:
 HTNK:
 
 MSAM:
-	-Buildable:
+	Buildable:
+		Prerequisites: anyhq, ~techlevel.medium, ~aot-age1, aot-age1, weap, ~!aot-hover-mlrs-upgrade, ~!aot-hover-aa-upgrade
+		Queue: Vehicle.GDI
+		BuildPaletteOrder: 4
 	GrantConditionOnPrerequisite@HOVER_MLRS:
 		Condition: aot-hover-mlrs-upgrade
 		Prerequisites: aot-hover-mlrs-upgrade

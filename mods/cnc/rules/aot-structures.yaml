@@ -769,7 +769,7 @@ aot-upgrade-ttnk:
 
 	Buildable:
 		BuildPaletteOrder: 10
-		Prerequisites: ~stec, ~aot-age1, aot-age1, stec
+		Prerequisites: ~stec, ~aot-age1, aot-age1, stec, afld
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -1757,7 +1757,7 @@ aot-upgrade-atom-bomb:
 	Buildable:
 		Queue: Upgrade.Nod
 		BuildPaletteOrder: 41
-		Prerequisites: ~stec, ~aot-mslo, ~aot-age3, aot-age3, aot-tiberium-missile-upgrade
+		Prerequisites: ~stec, ~aot-mslo, ~aot-age3, aot-age3
 		BuildLimit: 1
 		MoveIntoWorld: false
 		Icon: aot-atombomb-icon
@@ -3097,10 +3097,29 @@ aot-nuke-age2:
 		Sequence: aot-age2-idle
 		SequenceAlpha: 0.65
 	Buildable:
-		Queue: Building.GDI, Building.Nod
+		Queue: Building.GDI
 		BuildPaletteOrder: 10
 		Prerequisites: ~aot-age2, ~!aot-nuke-turbine-upgrade, fact
 		Icon: aot-age2-icon
+		Description: Generates power.
+	Tooltip:
+		Name: actor-nuke.name
+
+# NOD-Variante: eigenes Age-2-Icon (nuke_age2.png statt GDI-Turbine-Icon)
+# und NOD-Age2-Platzier-Preview (aot-age2-nod-idle statt GDI aot-age2-idle).
+aot-nuke-age2-nod:
+	Inherits: NUKE
+	RenderSprites:
+		Image: nuke
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: aot-age2-nod-idle
+		SequenceAlpha: 0.65
+	Buildable:
+		Queue: Building.Nod
+		BuildPaletteOrder: 10
+		Prerequisites: ~aot-age2, ~!aot-nuke-turbine-upgrade, fact
+		Icon: aot-age2-nod-icon
 		Description: Generates power.
 	Tooltip:
 		Name: actor-nuke.name

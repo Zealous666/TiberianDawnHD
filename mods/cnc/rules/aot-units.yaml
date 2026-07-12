@@ -1419,7 +1419,7 @@ aot-ltnk-base:
 	Buildable:
 		Queue: Vehicle.Nod
 		BuildPaletteOrder: 40
-		Prerequisites: ~aot-age1, aot-age1, afld, ~!aot-ltnk-upgrade
+		Prerequisites: ~aot-age1, aot-age1, afld, ~!aot-ltnk-upgrade, ~!aot-laser-fence-upgrade
 		Description: Fast and agile NOD light tank. Available from Age 1.
 	Tooltip:
 		Name: Light Tank
@@ -2348,8 +2348,8 @@ aot-ttnk-flame:
 		Image: ttnk
 	Buildable:
 		BuildPaletteOrder: 2
-		Prerequisites: lite, ~aot-ttnk-flame-upgrade, ~!aot-toxic-upgrade
-		Queue: LightVehicle.Nod
+		Prerequisites: afld, ~aot-ttnk-flame-upgrade, ~!aot-toxic-upgrade
+		Queue: Vehicle.Nod
 		Icon: aot-flame-icon
 		Description: Upgraded Heavy Tank armed with dual flamethrowers.
 	Tooltip@normal:
@@ -2361,8 +2361,8 @@ aot-ttnk-toxin:
 		Image: ttnk
 	Buildable:
 		BuildPaletteOrder: 2
-		Prerequisites: lite, ~aot-ttnk-flame-upgrade, ~aot-toxic-upgrade
-		Queue: LightVehicle.Nod
+		Prerequisites: afld, ~aot-ttnk-flame-upgrade, ~aot-toxic-upgrade
+		Queue: Vehicle.Nod
 		Icon: aot-toxin-icon
 		Description: Flame Tank upgraded with dual toxic tiberian-sprayers.
 	Tooltip@normal:
@@ -2432,9 +2432,10 @@ aot-v2-base:
 	GrantConditionOnPrerequisite@napalm:
 		Condition: aot-napalm-active
 		Prerequisites: aot-napalm-upgrade
+	# Toxic greift erst wenn AUCH das Napalm-Upgrade da ist (analog TTNK: toxic + flame).
 	GrantConditionOnPrerequisite@toxic:
 		Condition: aot-v2-toxic
-		Prerequisites: aot-toxic-upgrade
+		Prerequisites: aot-toxic-upgrade, aot-napalm-upgrade
 	Turreted:
 		TurnSpeed: 0
 		RealignDelay: -1
@@ -2464,8 +2465,8 @@ aot-v2-napalm:
 	Inherits: aot-v2-base
 	Buildable:
 		BuildPaletteOrder: 5
-		Prerequisites: lite, anyhq, ~aot-napalm-upgrade, ~!aot-toxic-upgrade
-		Queue: LightVehicle.Nod
+		Prerequisites: afld, anyhq, ~aot-napalm-upgrade, ~!aot-toxic-upgrade
+		Queue: Vehicle.Nod
 		Icon: aot-v2-napalm-icon
 		Description: Napalm-upgraded V2. Fires two rockets in rapid succession. Highly effective vs. infantry.
 	-Tooltip:
@@ -2480,7 +2481,7 @@ aot-v2-napalm:
 		Name: actor-aot-v2-napalm.name
 	GrantConditionOnPrerequisite@toxic:
 		Condition: aot-v2-toxic
-		Prerequisites: aot-toxic-upgrade
+		Prerequisites: aot-toxic-upgrade, aot-napalm-upgrade
 	-Armament:
 	Armament@napalm:
 		Weapon: aot-V2Napalm
@@ -2496,12 +2497,19 @@ aot-v2-toxic:
 	Inherits: aot-v2-napalm
 	Buildable:
 		BuildPaletteOrder: 5
-		Prerequisites: lite, anyhq, ~aot-napalm-upgrade, ~aot-toxic-upgrade
-		Queue: LightVehicle.Nod
+		Prerequisites: afld, anyhq, ~aot-napalm-upgrade, ~aot-toxic-upgrade
+		Queue: Vehicle.Nod
 		Icon: aot-v2-toxic-icon
 		Description: Toxic-upgraded V2. Fires two toxic rockets that leave a lingering tiberium gas field at the impact site.
-	Tooltip@SIDEBAR:
+	# Immer toxic (nur nach Toxic-Upgrade baubar, irreversibel): geerbte konditionale
+	# Tooltips entfernen und EINEN sauberen, bedingungslosen Toxic-Tooltip neu anlegen.
+	# Vermeidet die Merge-Positions-Falle (Sidebar zeigte sonst weiter "Napalm").
+	-Tooltip@NAPALM:
+	-Tooltip@TOXIC:
+	-Tooltip@SIDEBAR:
+	Tooltip:
 		Name: actor-aot-v2-toxic.name
+		GenericName: meta-tank-generic-name
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - ARTY Howitzer (freigeschalten durch Howitzer-Upgrade) ===
