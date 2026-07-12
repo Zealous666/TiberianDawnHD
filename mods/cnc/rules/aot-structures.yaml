@@ -1444,7 +1444,7 @@ MSLO:
 	SupportPowerChargeBar@atombomb:
 		RequiresCondition: aot-atom-bomb-active
 	NukePower@minecluster:
-		RequiresCondition: !aot-mine-cluster-enhanced
+		RequiresCondition: !aot-mine-cluster-enhanced && !aot-tiberium-missile-active
 		PauseOnCondition: lowpower
 		Prerequisites: ~techlevel.superweapons
 		IconImage: mslo
