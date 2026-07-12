@@ -332,7 +332,7 @@ FACT:
 		LifeTime: -1
 		OneShot: true
 		PauseOnCondition: !aot-age1-purchased-cond
-		ChargeInterval: 250
+		ChargeInterval: 15000
 		Icon: aot-age1
 		Name: 1st Tiberium Age
 		Description: The Tiberium era is emerging. New units and buildings are becoming available. (1st Tiberium Age Upgrade in Tech Centre)
@@ -343,7 +343,7 @@ FACT:
 		OneShot: true
 		RequiresCondition: aot-age1-active
 		PauseOnCondition: !aot-age2-purchased-cond
-		ChargeInterval: 250
+		ChargeInterval: 15000
 		Icon: aot-age2
 		Name: 2nd Tiberium Age
 		Description: Advanced Tiberium technologies with new upgrades and equipment becoming available. (2nd Tiberium Age Upgrade in Tech Centre)
@@ -354,7 +354,7 @@ FACT:
 		OneShot: true
 		RequiresCondition: aot-age2-active
 		PauseOnCondition: !aot-age3-purchased-cond
-		ChargeInterval: 250
+		ChargeInterval: 15000
 		Icon: aot-age3
 		Name: 3rd Tiberium Age
 		Description: Peak Tiberium technology is emerging. The most advanced units and buildings are becoming available. (3rd Tiberium Age Upgrade)
