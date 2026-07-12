@@ -1845,22 +1845,35 @@ AJET:
 	Inherits@selection: ^SelectableCombatUnit
 	Inherits@EXPERIENCE: ^GainsExperience
 	Inherits@AUTOTARGET: ^AutoTargetAllAssaultMove
+	# Firehawk-Upgrade: spielerweite Condition auf ALLE AJET (bereits gebaut + neu).
+	GrantConditionOnPrerequisite@firehawk:
+		Condition: aot-firehawk
+		Prerequisites: aot-firehawk-upgrade
 	Valued:
 		Cost: 1200
 	Tooltip:
 		Name: GDI Fighter
+		RequiresCondition: !aot-firehawk
+	Tooltip@firehawk:
+		Name: Firehawk
+		RequiresCondition: aot-firehawk
 	UpdatesPlayerStatistics:
 		AddToArmyValue: true
 	Buildable:
 		BuildPaletteOrder: 20
-		Prerequisites: ~aot-age1, aflt
+		Prerequisites: ~aot-age1, aflt, ~!aot-firehawk-upgrade
 		Queue: Aircraft.GDI.AFLT
 		Description: Ground attack jet. Armed with Vulcan cannons and napalm bombs.
 	-RejectsOrders:
 	Aircraft:
 		TurnSpeed: 16
 		Speed: 250
-		Repulsable: false
+		# Mindestabstand ~2 Zellen beim Fliegen (sonst "kuscheln" die Jets).
+		Repulsable: true
+		IdealSeparation: 2c0
+		# ^Plane bringt kein AirborneCondition mit → explizit setzen, damit Targetable@GROUND/@AIRBORNE
+		# umschalten (fliegend nur per Anti-Air treffbar, gelandet als Ground).
+		AirborneCondition: airborne
 		IdleBehavior: None
 		TakeOffOnResupply: false
 		TakeOffOnCreation: true
@@ -1871,19 +1884,41 @@ AJET:
 	RevealsShroud:
 		Range: 10c0
 		Type: GroundPosition
+		RequiresCondition: !aot-firehawk
+	# Firehawk-Upgrade: doppelte Sichtweite.
+	RevealsShroud@firehawk:
+		Range: 20c0
+		Type: GroundPosition
+		RequiresCondition: aot-firehawk
 	AttackAircraft:
 		FacingTolerance: 40
 		AttackType: Strafe
 		Voice: Attack
+	# Firehawk-Upgrade: darf auch Gebäude automatisch angreifen (DEFAULT-Prio hat kein Structure).
+	# A-10 bleibt unverändert (Default-Prio nur aktiv wenn !aot-firehawk).
+	AutoTargetPriority@DEFAULT:
+		RequiresCondition: !stance-attackanything && !aot-firehawk
+	AutoTargetPriority@firehawk:
+		RequiresCondition: !stance-attackanything && aot-firehawk
+		ValidTargets: Infantry, Vehicle, Creep, Water, Air, Support, Structure
+		InvalidTargets: NoAutoTarget
 	Armament@PRIMARY:
 		Weapon: aot-AjetVulcan
 		LocalOffset: 1024,0,-85
 		PauseOnCondition: !vulcan-ammo
+		RequiresCondition: !aot-firehawk
 	WithMuzzleOverlay:
 	Armament@SECONDARY:
 		Weapon: aot-AjetNapalm
 		LocalOffset: 0,-256,-43, 0,256,-43
 		PauseOnCondition: !napalm-ammo
+		RequiresCondition: !aot-firehawk
+	# Firehawk-Raketen: 3x Doppel-Burst, zwei Tragflächen-Startpunkte (wie Napalm).
+	Armament@ROCKETS:
+		Weapon: aot-FirehawkMissile
+		LocalOffset: 0,-256,-43, 0,256,-43
+		PauseOnCondition: !rocket-ammo
+		RequiresCondition: aot-firehawk
 	Contrail@1:
 		Offset: -640,171,0
 		TrailLength: 15
@@ -1902,9 +1937,14 @@ AJET:
 		Ammo: 20
 		AmmoCondition: napalm-ammo
 		ReloadDelay: 8
+	AmmoPool@ROCKET:
+		Name: rocket
+		Ammo: 6
+		AmmoCondition: rocket-ammo
+		ReloadDelay: 8
 	Rearmable:
 		RearmActors: aflt
-		AmmoPools: vulcan, napalm
+		AmmoPools: vulcan, napalm, rocket
 	AotReturnWhenEmpty:
 	Repairable:
 		RepairActors: aflt
@@ -1921,10 +1961,27 @@ AJET:
 		DecorationBounds: 1280, 1024
 	Targetable@GROUND:
 		TargetTypes: Ground, Vehicle
+		RequiresCondition: !airborne
 	Targetable@AIRBORNE:
 		TargetTypes: Air
+		RequiresCondition: airborne
 	RenderSprites:
 		Image: aot-ajet
+	# Firehawk-Upgrade: a10-Body aus, Firehawk-Body + Cockpit-Player-Color-Remap an.
+	-WithFacingSpriteBody:
+	WithFacingSpriteBody@a10:
+		Sequence: idle
+		RequiresCondition: !aot-firehawk
+	WithFacingSpriteBody@hawk:
+		Sequence: firehawk-idle
+		Name: body-hawk
+		RequiresCondition: aot-firehawk
+	WithFacingSpriteBody@hawk-remap:
+		Sequence: firehawk-remap
+		Name: body-hawk-remap
+		Palette: aot-vxl-player
+		IsPlayerPalette: true
+		RequiresCondition: aot-firehawk
 	Encyclopedia:
 		Description: GDI ground attack fighter jet.
 		Order: 260
@@ -1936,6 +1993,32 @@ AJET:
 		Position: BottomLeft
 		Margin: 4, 3
 		RequiresSelection: true
+		RequiresCondition: !aot-firehawk
+	WithAmmoPipsDecoration@rocket:
+		AmmoPools: rocket
+		Position: BottomLeft
+		Margin: 4, 3
+		RequiresSelection: true
+		RequiresCondition: aot-firehawk
+
+# === Age of Tiberium (aotmod) - aot-ajet-firehawk: Firehawk-Bau-Proxy (Hawk-Icon nach Upgrade) ===
+# Inherits AJET; erst nach dem Firehawk-Upgrade sichtbar (statt AJET-A10-Icon). Der gebaute Aktor
+# bekommt via GrantConditionOnPrerequisite@firehawk (aus AJET geerbt) die Condition aot-firehawk
+# → identisches Aussehen/Waffen wie umgeschaltete Bestands-AJET.
+aot-ajet-firehawk:
+	Inherits: AJET
+	-Encyclopedia:
+	RenderSprites:
+		Image: aot-ajet
+	Buildable:
+		BuildPaletteOrder: 20
+		# Sichtbar ab Age 3 (~aot-age3-purchased = tatsächliches Upgrade, NICHT der Superpower-Marker),
+		# baubar erst nach dem Firehawk-Upgrade (non-tilde = ausgegraut bis gekauft).
+		Prerequisites: ~aot-age3-purchased, aflt, aot-firehawk-upgrade
+		Queue: Aircraft.GDI.AFLT
+		Icon: firehawk-icon
+		Description: Firehawk strike fighter. Fires triple-double rocket salvos, effective against ground and air targets.
+# === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - aot-mig: MiG Attack Jet (NOD Airstrike-Superpower) ===
 # Wird von der STEC-AirstrikePower gespawnt (nicht baubar). Basiert auf A10-Traits, aber:

@@ -2065,6 +2065,31 @@ aot-ajet:
 		Filename: ajet_icon.png
 		Length: 1
 		RemasteredFilename:
+	# Firehawk-Upgrade: Body (gebackene 258px-Frames) + Player-Color-Remap (Cockpit) + Icon.
+	firehawk-idle:
+		RemasteredFilename: aot-firehawk.zip
+		Facings: 32
+		UseClassicFacings: True
+		Length: 1
+		Scale: 1.0
+	firehawk-remap:
+		RemasteredFilename: aot-firehawk-remap.png
+		RemasteredPremultiplied: False
+		Facings: 32
+		UseClassicFacings: True
+		Length: 1
+		Scale: 1.0
+	firehawk-icon:
+		Filename: ajet_hawk.png
+		Length: 1
+		RemasteredFilename:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - aot-upgrade-firehawk: Icon der Firehawk-Freischaltung ===
+aot-upgrade-firehawk:
+	icon:
+		Filename: ajet_hawk.png
+		Length: 1
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - aot-mig: MiG Attack Jet (RA Remastered MIG.ZIP) ===

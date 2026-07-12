@@ -2666,6 +2666,34 @@ aot-upgrade-orca:
 	Interactable:
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - aot-upgrade-firehawk: Firehawk-Upgrade (GDI, Age 3) ===
+# Ersetzt alle AJET (A-10) durch Firehawk: neue Sprites, Raketen statt Vulcan/Napalm, Anti-Air.
+# Wirkt auf bereits gebaute UND neue AJET via GrantConditionOnPrerequisite@firehawk (aot-units.yaml).
+# Voraussetzungen: sichtbar ab Age 3 (~aot-age3), baubar mit GDI Airfield (aflt) + Science Lab (aot-slab).
+aot-upgrade-firehawk:
+	Tooltip:
+		Name: Firehawk Upgrade
+
+	Buildable:
+		BuildPaletteOrder: 42
+		Prerequisites: ~atec, ~aot-age3-purchased, aot-age3-purchased, aflt, aot-slab
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Replaces all A-10 fighters with Firehawks. Swaps Vulcan cannons and napalm for triple-double rocket salvos, effective against ground and air targets.
+
+	Valued:
+		Cost: 2000
+
+	RenderSprites:
+		Image: aot-upgrade-firehawk
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-firehawk-upgrade
+
+	Interactable:
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - AFLT: Air Field (GDI, sichtbar ab Age 1) ===
 # Neues Gebäude analog zu HPAD, aber GDI-only und nur für das neue AJET-Flugzeug.
 # Nutzt vorerst HPAD-Sprites als Platzhalter.

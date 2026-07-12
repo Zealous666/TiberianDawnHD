@@ -263,6 +263,19 @@ aot-MigMissile:
 			Heavy: 115
 			Concrete: 100
 
+# === Age of Tiberium (aotmod) - Firehawk-Rakete (Firehawk-Upgrade des AJET) ===
+# Wie aot-MigMissile (Maverick), aber 3x Doppel-Burst = 6 Raketen pro Salve.
+# Anti-Air: ValidTargets auf Waffen- UND Warhead-Ebene um Air erweitert (OrcaAGMissiles
+# setzt beide auf Ground) -> Firehawk greift feindliche Luft-Einheiten automatisch an.
+aot-FirehawkMissile:
+	Inherits: aot-MigMissile
+	Burst: 6
+	BurstDelays: 4, 4, 4, 4, 4
+	Report: rocket1.aud
+	ValidTargets: Ground, Water, Air
+	Warhead@1Dam: SpreadDamage
+		ValidTargets: Ground, Water, Air
+
 # === Age of Tiberium (aotmod) - HIND / Harpy Waffen ===
 # HIND: 1500 Schaden, Burst 2, kein AA.
 # Harpy: 2000 Schaden, Burst 3, kein AA.
