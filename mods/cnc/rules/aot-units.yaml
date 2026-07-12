@@ -2036,10 +2036,19 @@ aot-mig:
 		AddToAssetsValue: false
 	RenderSprites:
 		Image: aot-mig
+	# ^Plane liefert (anders als ^Helicopter) KEIN Health/HitShape/Targetable + kein airborne —
+	# daher hier explizit, damit AA/SAM die MiG im Überflug abfangen kann.
+	Health:
+		HP: 10000
+	HitShape:
+	Targetable@AIRBORNE:
+		TargetTypes: Air
+		RequiresCondition: airborne
 	Aircraft:
 		TurnSpeed: 16
 		Speed: 373
 		Repulsable: False
+		AirborneCondition: airborne
 	AttackBomber:
 		Armaments: rockets
 		FacingTolerance: 8
@@ -2123,12 +2132,19 @@ aot-badr:
 	Health:
 		HP: 40000
 	HitShape:
+	# ^Plane liefert (anders als ^Helicopter) KEIN Targetable + kein airborne — daher hier
+	# explizit: airborne-Condition setzen und als Air-Ziel markieren, damit AA/SAM den
+	# Parabomber im Überflug abschießen kann.
+	Targetable@AIRBORNE:
+		TargetTypes: Air
+		RequiresCondition: airborne
 	Aircraft:
 		CruiseAltitude: 2560
 		TurnSpeed: 20
 		Speed: 180
 		Repulsable: False
 		MaximumPitch: 56
+		AirborneCondition: airborne
 	AttackBomber:
 		FacingTolerance: 8
 	AmmoPool:
@@ -2168,10 +2184,19 @@ aot-banshee:
 		Name: body-remap
 		Palette: player
 		IsPlayerPalette: True
+	# ^Plane liefert (anders als ^Helicopter) KEIN Health/HitShape/Targetable + kein airborne —
+	# daher hier explizit, damit AA/SAM die Banshee im Überflug abfangen kann.
+	Health:
+		HP: 10000
+	HitShape:
+	Targetable@AIRBORNE:
+		TargetTypes: Air
+		RequiresCondition: airborne
 	Aircraft:
 		TurnSpeed: 16
 		Speed: 373
 		Repulsable: False
+		AirborneCondition: airborne
 	AttackBomber:
 		FacingTolerance: 8
 	AmmoPool:
