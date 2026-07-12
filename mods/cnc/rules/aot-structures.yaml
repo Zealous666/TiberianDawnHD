@@ -1232,7 +1232,8 @@ STEC:
 		# Eindeutiger OrderName — sonst kollidiert der Support-Power-Key (Default = TraitName+"Order")
 		# mit anderen Powers gleichen Typs und die Palette zeigt Icon/Tooltip der falschen Power.
 		OrderName: AotMigAirstrikeOrder
-		RequiresCondition: aot-nod-airstrike-active
+		# Verschwindet, sobald das Banshee-Airstrike-Upgrade gekauft ist — Banshee ERSETZT den MiG-Airstrike.
+		RequiresCondition: aot-nod-airstrike-active && !aot-nod-banshee-active
 		PauseOnCondition: lowpower
 		Prerequisites: ~techlevel.superweapons
 		Icon: aot-airstrike
@@ -1263,7 +1264,48 @@ STEC:
 		DirectionArrowAnimation: airstrikedirection
 		SupportPowerPaletteOrder: 10
 	SupportPowerChargeBar:
-		RequiresCondition: aot-nod-airstrike-active
+		RequiresCondition: aot-nod-airstrike-active && !aot-nod-banshee-active
+	# === Age of Tiberium (aotmod) - NOD Banshee-Airstrike-Superpower (Age-3-Folge des MiG-Airstrike) ===
+	# Ersetzt den MiG-Airstrike (siehe !aot-nod-banshee-active oben). Custom AotAirstrikePower
+	# (Multi-Pass) wie beim MiG, aber 3 Banshees (SquadSize 3) statt 2 MiGs, je 2 Anflüge.
+	# Freigeschaltet durch das Banshee-Airstrike-Upgrade (nur auf dem MiG-Pfad, Age 3 + Temple).
+	GrantConditionOnPrerequisite@banshee:
+		Condition: aot-nod-banshee-active
+		Prerequisites: aot-nod-banshee-upgrade
+	AotAirstrikePower@banshee:
+		OrderName: AotBansheeAirstrikeOrder
+		RequiresCondition: aot-nod-banshee-active
+		PauseOnCondition: lowpower
+		Prerequisites: ~techlevel.superweapons
+		Icon: aot-banshee
+		ChargeInterval: 7500
+		SquadSize: 3
+		Passes: 2
+		QuantizedFacings: 8
+		Name: Banshee Airstrike
+		Description: Three Banshee fighters make two attack passes, each firing three plasma salvos that leave toxic gas clouds.
+		EndChargeSpeechNotification: AirstrikeReady
+		SelectTargetSpeechNotification: SelectTarget
+		InsufficientPowerSpeechNotification: InsufficientPower
+		IncomingSpeechNotification: EnemyPlanesApproaching
+		EndChargeTextNotification: notification-airstrike-ready
+		SelectTargetTextNotification: notification-select-target
+		InsufficientPowerTextNotification: notification-insufficient-power
+		IncomingTextNotification: notification-enemy-planes-approaching
+		UnitType: aot-banshee
+		DisplayBeacon: True
+		BeaconPoster: airstrike
+		BeaconPosterPalette: beaconposter
+		DisplayRadarPing: True
+		CameraActor: camera
+		ArrowSequence: arrow
+		ClockSequence: clock
+		CircleSequence: circles
+		UseDirectionalTarget: True
+		DirectionArrowAnimation: airstrikedirection
+		SupportPowerPaletteOrder: 13
+	SupportPowerChargeBar@banshee:
+		RequiresCondition: aot-nod-banshee-active
 	# === Age of Tiberium (aotmod) - NOD Spy-Plane-Superpower (Alternative zu Airstrike) ===
 	# Exakter Nachbau der RA-Soviet-Spy-Plane (AirstrikePower@spyplane): EIN Yak fliegt einen
 	# Aufklärungs-Überflug (keine Waffe), CameraActor deckt den Zielbereich auf. Freigeschaltet
@@ -2540,6 +2582,35 @@ aot-upgrade-nod-parabombs:
 
 	ProvidesPrerequisite:
 		Prerequisite: aot-nod-parabombs-upgrade
+
+	Interactable:
+
+# === Age of Tiberium (aotmod) - NOD Banshee-Airstrike-Freischaltung (Age-3-Folge des MiG-Airstrike) ===
+# Ersetzt die MiG-Airstrike-Superpower durch die Banshee-Airstrike (liefert aot-nod-banshee-upgrade).
+# Sichtbar NUR auf dem MiG-Pfad ab Age 3:
+#   ~aot-age3                  → versteckt vor Age 3
+#   ~aot-nod-airstrike-upgrade → versteckt außer wenn MiG-Airstrike-Upgrade gewählt wurde
+# Baubar zusätzlich mit Temple of Nod.
+aot-upgrade-nod-banshee:
+	Tooltip:
+		Name: Banshee Airstrike Upgrade
+
+	Buildable:
+		BuildPaletteOrder: 48
+		Prerequisites: ~stec, ~aot-age3, ~aot-nod-airstrike-upgrade, aot-age3, tmpl
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Unlocks the Banshee Airstrike, replacing the MiG Airstrike: three Banshee fighters make two passes firing plasma salvos that leave toxic gas clouds. Requires Age 3 and a Temple of Nod.
+
+	Valued:
+		Cost: 1000
+
+	RenderSprites:
+		Image: aot-upgrade-nod-banshee
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-nod-banshee-upgrade
 
 	Interactable:
 

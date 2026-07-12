@@ -2060,6 +2060,51 @@ aot-badr:
 		StartColorAlpha: 128
 	-MapEditorData:
 
+# === Age of Tiberium (aotmod) - aot-banshee: Banshee Fighter (NOD Banshee-Airstrike) ===
+# Ersetzt die MiGs in der Banshee-Airstrike-Version. Sprite: gebackenes TS-Voxel scrin.vxl
+# (Zwei-Layer body + Player-Color-Remap). AttackBomber feuert Burst 3 = 3 Salven pro Anflug,
+# Waffe aot-BansheeMissile (Cyborg-Plasma, 2/3 MiG-Schaden, toxischer Parabomb-Einschlag).
+# AmmoPool 6 = 2 Anflüge × 3 Salven. Wird nur von der Superpower gespawnt.
+aot-banshee:
+	Inherits: ^Plane
+	Interactable:
+	Tooltip:
+		Name: Banshee
+	Valued:
+		Cost: 2000
+	UpdatesPlayerStatistics:
+		AddToAssetsValue: false
+	RenderSprites:
+		Image: aot-banshee
+	-WithFacingSpriteBody:
+	WithFacingSpriteBody@BODY:
+		Sequence: idle
+		Name: body
+	WithFacingSpriteBody@REMAP:
+		Sequence: idle-remap
+		Name: body-remap
+		Palette: player
+		IsPlayerPalette: True
+	Aircraft:
+		TurnSpeed: 16
+		Speed: 373
+		Repulsable: False
+	AttackBomber:
+		FacingTolerance: 8
+	AmmoPool:
+		Ammo: 6
+	Armament:
+		Weapon: aot-BansheeMissile
+	Contrail@1:
+		Offset: -640,171,0
+		TrailLength: 15
+		StartColorAlpha: 128
+	Contrail@2:
+		Offset: -640,-171,0
+		TrailLength: 15
+		StartColorAlpha: 128
+	-MapEditorData:
+
 # === Age of Tiberium (aotmod) - TTNK Heavy Tank (NOD, Tier 0) ===
 # Age-0: RA Remastered 3TNK Sprites, Dual-Kanone (aot-TtnkDual).
 # Age-1 Upgrade: Flame Tank (FTNK Sprites, BigFlamer × 2, AttackFrontal).

@@ -1936,6 +1936,10 @@ icon:
 	aot-parabombs:
 		Filename: mig_parabomb.png
 		Length: 1
+	# === Age of Tiberium (aotmod) - NOD Banshee-Airstrike-Superpower-Icon ===
+	aot-banshee:
+		Filename: mig_banshee.png
+		Length: 1
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - aot-heli: Gemeinsamer Image-Block für Apache + ORCA ===
@@ -2138,6 +2142,33 @@ aot-parabomb:
 aot-upgrade-nod-parabombs:
 	icon:
 		Filename: mig_parabomb.png
+		Length: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - aot-banshee: TS-Banshee (scrin.vxl) für Banshee-Airstrike ===
+# Zwei-Layer gebackenes Voxel (bake-vxl-test.sh scrin 48 banshee, BRIGHTNESS 0.9):
+# body = aot-banshee-test.zip (RGBA), remap = aot-banshee-test-remap.png (Player-Color, idx 176-191).
+aot-banshee:
+	idle:
+		RemasteredFilename: aot-banshee-test.zip
+		RemapFilename: aot-banshee-test-remap.png
+		Facings: 32
+		UseClassicFacings: True
+		Length: 1
+		Scale: 1.0
+	idle-remap:
+		RemasteredFilename: aot-banshee-test-remap.png
+		RemasteredPremultiplied: False
+		Facings: 32
+		UseClassicFacings: True
+		Length: 1
+		Scale: 1.0
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - aot-upgrade-nod-banshee: Icon der Banshee-Airstrike-Freischaltung ===
+aot-upgrade-nod-banshee:
+	icon:
+		Filename: mig_banshee.png
 		Length: 1
 # === Ende aotmod ===
 

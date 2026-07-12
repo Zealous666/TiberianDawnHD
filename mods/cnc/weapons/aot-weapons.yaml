@@ -1268,6 +1268,41 @@ aot-Parabomb:
 		Actor: aot-gascloud-parabomb
 		DedupeRange: 1c0
 
+# === Age of Tiberium (aotmod) - Banshee-Airstrike-Waffe ===
+# Gleiches Projektil wie der Cyborg Commando (aot-plasma-green Plasma-Bullet), aber:
+#   - Damage = 2/3 der MiG-Rakete (aot-MigMissile 7000 -> 4667), Versus wie MiG (Maverick).
+#   - Burst 3 = 3 Salven pro Anflug (× 2 Anflüge = 6 Salven je Banshee).
+#   - Einschlag identisch zur Parabomb: chemball-Explosion + xplobig4 + 10s-Gaswolke.
+aot-BansheeMissile:
+	Range: 8c0
+	ReloadDelay: 60
+	Report: scrin5b.aud
+	Burst: 3
+	BurstDelays: 4
+	Projectile: Bullet
+		Image: aot-plasma-green
+		Speed: 300
+		Shadow: false
+	Warhead@1Dam: SpreadDamage
+		Spread: 341
+		Damage: 4667
+		ValidTargets: Ground, Water
+		Versus:
+			None: 30
+			Wood: 90
+			Light: 90
+			Heavy: 115
+			Concrete: 100
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath, Tiberium
+	# Einschlag wie Parabomb: toxische chemball-Explosion + Gaswolke
+	Warhead@2Eff: CreateEffect
+		Explosions: chemball
+		ImpactSounds: xplobig4.aud
+		ValidTargets: Ground, Water, Trees
+	Warhead@3Gas: AotSpawnActor
+		Actor: aot-gascloud-parabomb
+		DedupeRange: 1c0
+
 # === Age of Tiberium (aotmod) - Heavy Artillery Shell (1/3 längere Reichweite, TS 155mm Sounds) ===
 aot-ArtilleryShell-Heavy:
 	Inherits: ArtilleryShell
