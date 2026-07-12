@@ -9,7 +9,6 @@
 using System.Linq;
 using OpenRA.Mods.Common.Activities;
 using OpenRA.Primitives;
-using OpenRA.Support;
 using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Traits
@@ -37,7 +36,7 @@ namespace OpenRA.Mods.Common.Traits
 		public override object Create(ActorInitializer init) { return new OreTransporter(init.Self, this); }
 	}
 
-	public class OreTransporter : DockClientBase<OreTransporterInfo>, INotifyAddedToWorld, ITick
+	public class OreTransporter : DockClientBase<OreTransporterInfo>, ITick
 	{
 		static readonly BitSet<DockType> OreLoadType = new("OreLoad");
 		static readonly BitSet<DockType> UnloadType = new("OreDeliver");
@@ -47,11 +46,39 @@ namespace OpenRA.Mods.Common.Traits
 		int loadTicks;
 		int noDockWarningTicks;
 		IStoresResources storesResources;
-		DockClientManager dockManager;
+		IMove move;
 		readonly Actor self;
 
 		public override BitSet<DockType> GetDockType =>
 			state == TransportState.Full ? UnloadType : OreLoadType;
+
+		// Scans the entire map for the nearest dockable host of the given type by straight-line
+		// distance. Used for both legs of the cycle instead of DockClientManager.ClosestDock, whose
+		// pathfinding-based search returns null (and strands the transporter) for distant targets.
+		// A mine is destroyed the instant its store empties, so any live OreLoad host has resources.
+		TraitPair<IDockHost>? FindNearestDock(BitSet<DockType> type)
+		{
+			TraitPair<IDockHost>? best = null;
+			var bestDist = long.MaxValue;
+			foreach (var pair in self.World.ActorsWithTrait<IDockHost>())
+			{
+				var host = pair.Trait;
+				if (!host.GetDockType.Overlaps(type) || !host.IsEnabledAndInWorld)
+					continue;
+
+				if (!CanDockAt(pair.Actor, host, false, true))
+					continue;
+
+				var dist = (pair.Actor.CenterPosition - self.CenterPosition).HorizontalLengthSquared;
+				if (dist < bestDist)
+				{
+					bestDist = dist;
+					best = pair;
+				}
+			}
+
+			return best;
+		}
 
 		public override bool CanDockAt(Actor hostActor, IDockHost host, bool forceEnter = false, bool ignoreOccupancy = false)
 		{
@@ -67,45 +94,54 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			storesResources = self.TraitsImplementing<IStoresResources>()
 				.FirstOrDefault(sr => sr.HasType(Info.OreResourceType));
-			dockManager = self.Trait<DockClientManager>();
+			move = self.Trait<IMove>();
 			base.Created(self);
 		}
 
+		// The whole load/deliver cycle is driven from here based on state + idle. Once idle, queue the
+		// correct next MoveToDock (targeting an explicit host so movement never depends on a distance-
+		// sensitive dock search); the CurrentActivity guard prevents re-queueing while already moving.
 		void ITick.Tick(Actor self)
 		{
-			if (state != TransportState.Full || IsTraitDisabled)
+			if (IsTraitDisabled || self.CurrentActivity != null)
 				return;
 
-			// If idle and full, check if a delivery dock is now available and start moving.
-			if (self.CurrentActivity == null)
+			if (state == TransportState.Full)
 			{
-				if (dockManager.ClosestDock(null, UnloadType) != null)
+				// Deliver: head to the nearest owned silo anywhere on the map.
+				var silo = FindNearestDock(UnloadType);
+				if (silo.HasValue)
 				{
-					self.QueueActivity(new MoveToDock(self));
+					self.QueueActivity(new MoveToDock(self, silo.Value.Actor, silo.Value.Trait));
 					return;
 				}
-			}
 
-			if (--noDockWarningTicks > 0)
+				// Full but no delivery dock exists: warn periodically ("Silos needed").
+				if (--noDockWarningTicks <= 0)
+				{
+					noDockWarningTicks = Info.NoDockWarningInterval;
+					var owner = self.Owner;
+					Game.Sound.PlayNotification(self.World.Map.Rules, owner, "Speech", Info.NoDockNotification, owner.Faction.InternalName);
+				}
+
 				return;
-
-			noDockWarningTicks = Info.NoDockWarningInterval;
-
-			if (dockManager.ClosestDock(null, UnloadType) == null)
-			{
-				var owner = self.Owner;
-				Game.Sound.PlayNotification(self.World.Map.Rules, owner, "Speech", Info.NoDockNotification, owner.Faction.InternalName);
 			}
-		}
 
-		void INotifyAddedToWorld.AddedToWorld(Actor self)
-		{
-			self.World.AddFrameEndTask(w =>
+			// Empty (or freshly built): head to the nearest mine anywhere on the map that still has
+			// resources, whether or not it was visited before.
+			var mine = FindNearestDock(OreLoadType);
+			if (mine.HasValue)
 			{
-				if (self.IsDead || !self.IsInWorld || self.CurrentActivity != null)
-					return;
-				self.QueueActivity(new MoveToDock(self));
-			});
+				var host = mine.Value.Trait;
+
+				// A mine hidden by fog is a "hidden actor": MoveToDock's Target.FromActor(mine) would
+				// refuse to move toward it, stranding the transporter. So first drive to the mine's dock
+				// cell with a plain cell-based Move (fog-immune); by the time we arrive the transporter's
+				// own sight has revealed the mine, and the following MoveToDock docks normally.
+				var dockCell = self.World.Map.CellContaining(host.DockPosition);
+				self.QueueActivity(move.MoveTo(dockCell, 1));
+				self.QueueActivity(new MoveToDock(self, mine.Value.Actor, host));
+			}
 		}
 
 		public override void OnDockStarted(Actor self, Actor hostActor, IDockHost host)
@@ -148,15 +184,6 @@ namespace OpenRA.Mods.Common.Traits
 			return true;
 		}
 
-		public override void OnDockCompleted(Actor self, Actor hostActor, IDockHost host)
-		{
-			var currentActivity = self.CurrentActivity;
-			var hasNextActivity = currentActivity != null && currentActivity.NextActivity != null;
-
-			if (host.GetDockType.Overlaps(OreLoadType) && state == TransportState.Full && !hasNextActivity)
-				self.QueueActivity(true, new MoveToDock(self));
-			else if (host.GetDockType.Overlaps(UnloadType) && state == TransportState.Empty && !hasNextActivity)
-				self.QueueActivity(true, new MoveToDock(self));
-		}
+		// No OnDockCompleted override: the load/deliver cycle is driven entirely from ITick.
 	}
 }
