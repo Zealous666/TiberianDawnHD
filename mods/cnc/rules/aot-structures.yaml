@@ -3548,9 +3548,10 @@ aot-shipyard:
 		Footprint: XXX xxx XXX
 		Dimensions: 3,3
 		TerrainTypes: Water
+		RequiresBaseProvider: false
 	RequiresBuildableArea:
 		AreaTypes: building
-		Adjacent: 8
+		Adjacent: 4
 	-GivesBuildableArea:
 	-SpawnActorsOnSell:
 	RevealsShroud:
@@ -3636,9 +3637,10 @@ aot-subpen:
 		Footprint: XXX xxx XXX
 		Dimensions: 3,3
 		TerrainTypes: Water
+		RequiresBaseProvider: false
 	RequiresBuildableArea:
 		AreaTypes: building
-		Adjacent: 8
+		Adjacent: 4
 	-GivesBuildableArea:
 	-SpawnActorsOnSell:
 	ProvidesPrerequisite:
