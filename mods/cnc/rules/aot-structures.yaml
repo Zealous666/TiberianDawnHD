@@ -4846,7 +4846,7 @@ aot-fireposition:
 		Range: 5c0
 	Buildable:
 		BuildPaletteOrder: 46
-		Prerequisites: lite
+		Prerequisites: ~aot-age1, aot-age1, lite
 		Queue: Building.GDI
 		Icon: icon
 		Description: Garrisonable defense structure for one vehicle. The docked vehicle stays visible and fires out through the position using its own weapon.
