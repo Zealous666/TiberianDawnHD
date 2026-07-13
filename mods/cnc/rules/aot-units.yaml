@@ -4792,6 +4792,9 @@ aot-gadpsa:
 	DetectCloaked:
 		Range: 10c0
 
+	AotSensorArrayDetection:
+		Notification: CloakedUnitDetected
+
 	WithRangeCircle:
 		Type: detectcloaked
 		Range: 10c0
