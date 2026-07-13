@@ -4729,8 +4729,7 @@ aot-aray:
 
 # === Deployed Mobile Sensor Array (aot-gadpsa) ===
 # Building-Aktor, gespawnt per Transforms vom aot-aray. Kein Buildable.
-# WithMakeAnimation spielt gadpsamk.shp (36 Frames, Mast aufrichtet) beim Deployen.
-# WithIdleOverlay zeigt gadpsa_a.shp (Spinner) nach dem Deploy.
+# Statisches gadpsa.shp Frame 0, Player-Color via PlayerPalette: player.
 aot-gadpsa:
 	Inherits: ^Building
 
@@ -4765,15 +4764,6 @@ aot-gadpsa:
 	WithSpriteBody:
 		Sequence: idle
 		Name: body
-
-	WithMakeAnimation:
-		Sequence: make
-		BodyNames: body
-		Condition: build-incomplete
-
-	WithIdleOverlay@ACTIVE:
-		Sequence: active
-		RequiresCondition: !build-incomplete
 
 	Selectable:
 		Bounds: 1024, 1024
