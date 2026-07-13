@@ -211,7 +211,7 @@ aot-ore-mine:
 	DamageMultiplier:
 		Modifier: 0
 	StoresResources:
-		Capacity: 30
+		Capacity: 50
 		Resources: Tiberium
 	OreMineDurability:
 		ResourceType: Tiberium
@@ -2913,6 +2913,97 @@ aot-fix-age2-nod:
 		Name: actor-fix.name
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - Shroud Generator (GDI, RA Gap Generator) ===
+# GDI-Support-Gebäude ab Age 1. Erzeugt Hüllschatten (Shroud) im Umkreis, unter dem
+# die eigene Basis für Gegner unsichtbar wird. Mechanik/Sprites/Stats aus OpenRA
+# Red Alert (GAP-Aktor): CreatesShroud 6c0, eigene Sicht via RevealsShroud@GAPGEN,
+# stoppt bei Energiemangel. Voraussetzung: FIX (Repair Facility) + WEAP (Advanced
+# War Factory, liefert aot-weap).
+# Footprint 2x2 wie das SILO-Store (xx ==, untere Reihe nur Bib-Smudge), gleicher
+# mbSILO-Bib. RA-Sprite-Frame ist 128x256 (1 Zelle breit, 2 Zellen hoch, Anker in
+# Frame-Mitte); LocalCenterOffset schiebt den Body über dem fixen Footprint/Bib nach
+# oben, damit er mittig sitzt (Y in World-Units: 1024 = 1 Zelle, negativ = nach oben).
+aot-gap:
+	Inherits: ^BaseBuilding
+	Inherits@IDISABLE: ^DisabledOverlay
+	# RA-Sprite ohne "dead"-Rubble-Frame -> WithDeathAnimation (von ^BaseBuilding geerbt)
+	# würde beim Zerstören crashen. Siehe building-dead-sequence-crash Memory.
+	-WithDeathAnimation:
+	RenderSprites:
+		Image: aot-gap
+	Tooltip:
+		Name: Shroud Generator
+	Valued:
+		Cost: 800
+	Health:
+		HP: 50000
+	Armor:
+		Type: Heavy
+	# Strom nur wenn NICHT per Deploy abgeschaltet (aot-gap-powerdown) - wie Stealth Generator.
+	Power:
+		Amount: -60
+		RequiresCondition: !aot-gap-powerdown
+	# Deploy-Toggle: Generator an/aus schalten (wie aot-sgen). Startet AKTIV; ein Deploy-Befehl
+	# schaltet ab -> aot-gap-powerdown -> Power aus (0 Strom), Shroud + Sicht-Kappung + Dish aus.
+	# Erneuter Deploy reaktiviert. SkipMakeAnimation: kein Bauanim-Replay beim Umschalten.
+	GrantConditionOnDeploy:
+		DeployedCondition: aot-gap-powerdown
+		SkipMakeAnimation: true
+	Building:
+		Footprint: xx ==
+		Dimensions: 2,2
+		LocalCenterOffset: 0,-512,0
+	WithBuildingBib:
+	Buildable:
+		Queue: Building.GDI
+		BuildPaletteOrder: 65
+		# Sichtbar ab Age 1 (~aot-age1), baubar ab Age 1 + Science Lab (aot-slab von SLAB).
+		Prerequisites: ~aot-age1, aot-slab
+		Icon: icon
+		Description: Generates shroud over the surrounding area, hiding your base from the enemy. Enemy units caught inside can only see 2 cells. Requires power to operate.
+	ProvidesPrerequisite@buildingname:
+		Prerequisite: aot-gap
+	# Blendet feindliche Einheiten im Shroud: solange sie im CreatesShroud-Radius (8c0)
+	# sind, kappt eine externe Condition (aot-gap-suppressed) ihre RevealsShroud auf 2c0
+	# (Umsetzung in overrides.yaml an ^Vehicle/^Infantry/^Ship/^Plane/^Helicopter).
+	# ValidRelationships MUSS zu CreatesShroud passen (Neutral|Enemy). Ein per Editor/Spawn
+	# platzierter Test-Generator ist oft NEUTRAL -> mit nur "Enemy" wird die Condition nie
+	# vergeben (Shroud entsteht trotzdem, aber keine Sicht-Kappung). Wie RA Radar Jammer.
+	ProximityExternalCondition@GAPSUPPRESS:
+		Condition: aot-gap-suppressed
+		Range: 8c0
+		ValidRelationships: Enemy, Neutral
+		RequiresCondition: !lowpower && !aot-gap-powerdown
+	# --- Shroud-Mechanik (identisch zu OpenRA RA GAP) ---
+	# Haupt-RevealsShroud deckt NICHT den selbst erzeugten Shroud auf (RevealGeneratedShroud:
+	# False); dafür sorgt der separate @GAPGEN-Instance, damit der Besitzer die eigene Zone
+	# sieht, Gegner aber nicht.
+	# Radien +1/3 ggü. RA-GAP (x4/3): Shroud 6c0->8c0, Reveal-Ranges 5c0->6c683.
+	RevealsShroud:
+		MinRange: 6c683
+		Range: 8c0
+		RevealGeneratedShroud: False
+	RevealsShroud@GAPGEN:
+		Range: 6c683
+	CreatesShroud:
+		Range: 8c0
+		RequiresCondition: !lowpower && !aot-gap-powerdown
+	RenderShroudCircle:
+	# --- Sprite/Animation (RA GAP.ZIP Spin, PauseOnCondition stoppt bei Energiemangel) ---
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: idle
+		SequenceAlpha: 0.65
+	# Fundament statisch (idle/damaged-idle), rotierende Dish als eigener Overlay -> der
+	# Sockel/Mast hüpft nicht mehr, nur die Gabel dreht. PauseOnCondition stoppt bei Strommangel.
+	WithSpriteBody:
+		PauseOnCondition: lowpower || aot-gap-powerdown
+	WithIdleOverlay@DISH:
+		Sequence: dish
+		RequiresCondition: !build-incomplete
+		PauseOnCondition: lowpower || aot-gap-powerdown
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - NUKE: RA POWR vor Age 1, TD danach, GDI-only ===
 # Sprite-Switch: Age 0 → RA POWR.ZIP, Age 1+ → TD NUKE.ZIP, Turbine → RA POWR.ZIP (Platzhalter)
 # Turbine Technology Upgrade (Age 2, GDI): erhöht Energieproduktion 100 → 200.
@@ -3922,6 +4013,9 @@ SILO:
 		Type: OreDeliver
 		DockAngle: 0
 		DockOffset: 0,1c512,0
+	# Silo erweitert die Bauzone wie ein normales Gebaeude (Basis-SILO hatte -GivesBuildableArea).
+	GivesBuildableArea:
+		AreaTypes: building
 	-WithBuildingBib:
 	WithBuildingBib:
 	GrantConditionOnPrerequisite@aotage1:
@@ -4454,6 +4548,110 @@ aot-shrine:
 		CancelledAudio: Cancelled
 	ProductionBar:
 		ProductionType: Infantry.NodElite
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Nod Stealth Generator (aot-sgen) ===
+# TS NASTLH-Import (Sprites in aot-sequences.yaml). Sichtbar ab Age 2 (~aot-age2), baubar ab
+# Age 2 + Secret Shrine (aot-shrine). Funktion (TS-Nachbau): tarnt sich selbst und alle
+# verbuendeten Gebaeude im Umkreis, SOLANGE das Gebaeude gebaut, mit Strom versorgt (PowerState
+# Normal) UND ueber 50% Health ist.
+#
+# Mechanik:
+#  - GrantConditionOnPowerState@POWERED  -> aot-sgen-powered  (nur bei voller Stromversorgung)
+#  - GrantConditionOnHealth@HEALTHY      -> aot-sgen-healthy   (HP >= 50% = 20000/40000)
+#  - ProximityExternalCondition@STEALTH gewaehrt das Feld aot-stealth-field an verbuendete
+#    Gebaeude im Umkreis (AffectsParent: true = auch an sich selbst), aber nur solange BEIDE
+#    Bedingungen erfuellt sind (RequiresCondition). Faellt Strom ODER Health unter 50%, wird
+#    das Feld sofort entzogen -> alle Gebaeude tauchen wieder auf.
+#  - Der eigentliche Cloak-Trait (Cloak@AOTSTEALTH) + ExternalCondition@AOTSTEALTH haengen an
+#    ^Building (overrides.yaml), damit JEDES Gebaeude im Feld tarnbar wird.
+aot-sgen:
+	Inherits: ^BaseBuilding
+	Inherits@IDISABLE: ^DisabledOverlay
+	Inherits@shape: ^3x2Shape
+	# Custom TS-Sprite ohne "dead"-Rubble-Frame -> WithDeathAnimation (von ^BaseBuilding geerbt)
+	# wuerde beim Zerstoeren crashen (siehe building-dead-sequence-crash).
+	-WithDeathAnimation:
+	Tooltip:
+		Name: Stealth Generator
+	Valued:
+		Cost: 2000
+	Health:
+		HP: 40000
+	# Footprint + Smudge-Bib exakt wie LITE (3x2 solide + Bib-Reihe, bib2 = 3-breit/6 Frames).
+	Building:
+		Footprint: xxx xxx ===
+		Dimensions: 3,3
+		LocalCenterOffset: 0,-512,0
+	RevealsShroud:
+		Range: 4c0
+	# Strom nur wenn NICHT per Deploy abgeschaltet (aot-sgen-powerdown).
+	Power:
+		Amount: -150
+		RequiresCondition: !aot-sgen-powerdown
+	WithBuildingBib:
+	RenderSprites:
+		Image: aot-sgen
+	WithSpriteBody:
+		Sequence: idle
+		Name: body
+		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
+		# PlayerColorShift verschiebt jeden Pixel im entsprechenden Farbton zur Spielerfarbe.
+		Palette: effect
+		IsPlayerPalette: false
+	WithIdleOverlay@remap:
+		Sequence: idle-remap
+		Palette: player
+		IsPlayerPalette: True
+	# Elektro-Arc: nur sichtbar solange das Generatorfeld tatsaechlich laeuft (Strom + Health + nicht abgeschaltet).
+	WithIdleOverlay@active:
+		Sequence: active
+		RequiresCondition: aot-sgen-powered && aot-sgen-healthy && !aot-sgen-powerdown && !build-incomplete
+	WithMakeAnimation:
+		Sequence: make
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: place
+		SequenceAlpha: 0.65
+	GrantConditionOnPowerState@POWERED:
+		Condition: aot-sgen-powered
+		ValidPowerStates: Normal
+	GrantConditionOnHealth@HEALTHY:
+		Condition: aot-sgen-healthy
+		MinHP: 20000
+	# Deploy-Toggle (wie ein Gate): Generator an/aus schalten. Startet AKTIV (undeployed); ein
+	# Deploy-Befehl schaltet ab -> Condition aot-sgen-powerdown -> Power-Trait deaktiviert (0 Strom)
+	# + Tarnfeld aus + Arc aus. Erneuter Deploy reaktiviert. SkipMakeAnimation: kein Bauanim-Replay
+	# beim Umschalten. Enttarn-/Tarn-Sound laeuft ueber die Feld-Enable/DisableSound (cloak5.aud).
+	GrantConditionOnDeploy:
+		DeployedCondition: aot-sgen-powerdown
+		SkipMakeAnimation: true
+	ProximityExternalCondition@STEALTH:
+		Condition: aot-stealth-field
+		# Radius um 2/3 vergroessert (5c0 -> 8c341 = 8,33 Zellen).
+		Range: 8c341
+		ValidRelationships: Ally
+		AffectsParent: true
+		RequiresCondition: aot-sgen-powered && aot-sgen-healthy && !aot-sgen-powerdown
+		# TS-Stealth-Sound (cloak5.aud) beim Ein-/Ausschalten des Tarnfeldes (1:1 aus TS NASTLH).
+		EnableSound: cloak5.aud
+		DisableSound: cloak5.aud
+	# Tarn-Radius einzeichnen (bei Selektion + Platzierung), wie Bau-/Sensorbereiche. Range MUSS
+	# mit dem ProximityExternalCondition-Range oben uebereinstimmen. Analog TS NASTLH (Type
+	# cloakgenerator) + Shroud Generator (aot-gap).
+	WithRangeCircle:
+		Type: cloakgenerator
+		Range: 8c341
+		Color: 8844FFB4
+		BorderColor: 20102080
+	ProvidesPrerequisite:
+		Prerequisite: aot-sgen
+	Buildable:
+		Queue: Building.Nod
+		BuildPaletteOrder: 112
+		Prerequisites: ~aot-age2, aot-shrine
+		Icon: icon
+		Description: Cloaks itself and all nearby friendly structures while powered and above 50% health.
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Obelisk of Light (OBLI) ===

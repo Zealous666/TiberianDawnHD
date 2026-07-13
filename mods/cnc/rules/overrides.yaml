@@ -25,6 +25,29 @@ World:
 		Damage: 600
 		DamageInterval: 25
 		DamageTypes: Prone50Percent, TiberiumDeath
+	# === Nod Stealth Generator (aot-sgen) - Stealth Field auch fuer Infanterie ===
+	ExternalCondition@AOTSTEALTH:
+		Condition: aot-stealth-field
+	Cloak@AOTSTEALTH:
+		RequiresCondition: aot-stealth-field
+		CloakType: aot-stealth-field
+		InitialDelay: 0
+		CloakDelay: 50
+		CloakStyle: Alpha
+		CloakedAlpha: 0.35
+		UncloakOn: Attack
+		# Cloak-/Decloak-Sound pro Einheit (wie Stealth Tank STNK): trans1.aud.
+		CloakSound: trans1.aud
+		UncloakSound: trans1.aud
+	# === aotmod - Shroud Generator: Sicht im Gap-Feld auf 2c0 kappen (siehe ^Vehicle) ===
+	ExternalCondition@GAPSUPPRESS:
+		Condition: aot-gap-suppressed
+	RevealsShroud:
+		RequiresCondition: !aot-gap-suppressed
+	RevealsShroud@GAPSUPPRESS:
+		Range: 2c0
+		RequiresCondition: aot-gap-suppressed
+	# === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - SpyInfiltrate TargetType auf allen Gebäuden ===
 ^Building:
@@ -37,6 +60,30 @@ World:
 		Damage: 40
 		DamageInterval: 25
 		DamageTypes: TiberiumDeath
+	# === Nod Stealth Generator (aot-sgen) - Stealth Field ===
+	# Jedes Gebaeude kann getarnt werden, solange es im Feld eines aktiven Stealth Generators
+	# steht (der die External-Condition aot-stealth-field gewaehrt). Ausserhalb des Feldes ist
+	# der Cloak-Trait per RequiresCondition deaktiviert -> keinerlei Effekt im Normalbetrieb.
+	# CloakType/UncloakOn: nur beim Feuern (Verteidigungsanlagen) kurz sichtbar, sonst dauerhaft
+	# getarnt.
+	# WICHTIG: CloakStyle=Alpha (NICHT Palette). Palette-Cloak (wie STNK) wirkt in Cloak.cs NUR auf
+	# IPalettedRenderable = indizierte Sprites. STNK nutzt die klassische indizierte stnk.shp -> dort
+	# klappt Palette. Gebaeude sind aber Truecolor-Remaster-Sprites (+ mein Two-Layer-Body) -> Palette
+	# wuerde NUR das indizierte Player-Color-Overlay tarnen, der Rest bliebe sichtbar. Alpha wirkt via
+	# WithAlpha auf ALLE Renderables (Truecolor + indiziert) -> ganzes Gebaeude wird transparent.
+	ExternalCondition@AOTSTEALTH:
+		Condition: aot-stealth-field
+	Cloak@AOTSTEALTH:
+		RequiresCondition: aot-stealth-field
+		CloakType: aot-stealth-field
+		InitialDelay: 0
+		CloakDelay: 50
+		CloakStyle: Alpha
+		CloakedAlpha: 0.35
+		UncloakOn: Attack
+		# Cloak-/Decloak-Sound pro Einheit (wie Stealth Tank STNK): trans1.aud.
+		CloakSound: trans1.aud
+		UncloakSound: trans1.aud
 
 # NUKE + NUK2: Spy sabotiert Kraftwerk → Stromausfall beim Gegner
 NUKE:
@@ -861,6 +908,37 @@ APC:
 		CaptureTypes: vehicle
 	ExternalCondition@AOTGAS:
 		Condition: aot-tiberium-gassed
+	# === Nod Stealth Generator (aot-sgen) - Stealth Field auch fuer Fahrzeuge ===
+	# Analog zu ^Building: Fahrzeuge im Feld eines aktiven Stealth Generators werden getarnt.
+	# Ausserhalb des Feldes per RequiresCondition deaktiviert. CloakStyle Alpha (Truecolor-Sprites,
+	# wie ^Building — Palette wuerde nur indizierte Teile tarnen). UncloakOn nur Attack -> bleibt
+	# beim Fahren getarnt, taucht nur beim Feuern kurz auf. Eigener CloakType, kollidiert nicht mit
+	# STNK-Eigen-Cloak oder Crate-Cloak.
+	ExternalCondition@AOTSTEALTH:
+		Condition: aot-stealth-field
+	Cloak@AOTSTEALTH:
+		RequiresCondition: aot-stealth-field
+		CloakType: aot-stealth-field
+		InitialDelay: 0
+		CloakDelay: 50
+		CloakStyle: Alpha
+		CloakedAlpha: 0.35
+		UncloakOn: Attack
+		# Cloak-/Decloak-Sound pro Einheit (wie Stealth Tank STNK): trans1.aud.
+		CloakSound: trans1.aud
+		UncloakSound: trans1.aud
+	# === aotmod - Shroud Generator: Sicht im Gap-Feld auf 2c0 kappen ===
+	# Solange die externe Condition aktiv ist (im CreatesShroud-Radius eines feindlichen
+	# Shroud Generators), wird die normale RevealsShroud abgeschaltet und durch eine
+	# 2c0-Instanz ersetzt. Merge: die per-Aktor RevealsShroud erbt RequiresCondition.
+	ExternalCondition@GAPSUPPRESS:
+		Condition: aot-gap-suppressed
+	RevealsShroud:
+		RequiresCondition: !aot-gap-suppressed
+	RevealsShroud@GAPSUPPRESS:
+		Range: 2c0
+		RequiresCondition: aot-gap-suppressed
+	# === Ende aotmod ===
 	AotDamagedByCondition:
 		RequiresCondition: aot-tiberium-gassed
 		Damage: 50
@@ -884,4 +962,83 @@ CYCL:
 # (aot-units.yaml) stellt es nur frei wenn Howitzer-Upgrade gekauft.
 ARTY:
 	-Buildable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Shroud Generator: Sicht-Kappung für Schiffe/Flieger ===
+# Wie bei ^Vehicle/^Infantry: im Gap-Feld eines feindlichen Shroud Generators wird
+# die RevealsShroud abgeschaltet und durch eine 2c0-Instanz ersetzt.
+^Ship:
+	ExternalCondition@GAPSUPPRESS:
+		Condition: aot-gap-suppressed
+	RevealsShroud:
+		RequiresCondition: !aot-gap-suppressed
+	RevealsShroud@GAPSUPPRESS:
+		Range: 2c0
+		RequiresCondition: aot-gap-suppressed
+	# === Nod Stealth Generator (aot-sgen) - Stealth Field auch fuer Schiffe ===
+	ExternalCondition@AOTSTEALTH:
+		Condition: aot-stealth-field
+	Cloak@AOTSTEALTH:
+		RequiresCondition: aot-stealth-field
+		CloakType: aot-stealth-field
+		InitialDelay: 0
+		CloakDelay: 50
+		CloakStyle: Alpha
+		CloakedAlpha: 0.35
+		UncloakOn: Attack
+		# Cloak-/Decloak-Sound pro Einheit (wie Stealth Tank STNK): trans1.aud.
+		CloakSound: trans1.aud
+		UncloakSound: trans1.aud
+
+^Plane:
+	ExternalCondition@GAPSUPPRESS:
+		Condition: aot-gap-suppressed
+	# Type explizit: Flieger haben keine Footprint-Zellen; ohne Type würde die (ggf. neu
+	# angelegte) RevealsShroud auf den Footprint-Default fallen und beim Laden crashen.
+	RevealsShroud:
+		Type: GroundPosition
+		RequiresCondition: !aot-gap-suppressed
+	RevealsShroud@GAPSUPPRESS:
+		Range: 2c0
+		Type: GroundPosition
+		RequiresCondition: aot-gap-suppressed
+	# === Nod Stealth Generator (aot-sgen) - Stealth Field auch fuer Flieger ===
+	ExternalCondition@AOTSTEALTH:
+		Condition: aot-stealth-field
+	Cloak@AOTSTEALTH:
+		RequiresCondition: aot-stealth-field
+		CloakType: aot-stealth-field
+		InitialDelay: 0
+		CloakDelay: 50
+		CloakStyle: Alpha
+		CloakedAlpha: 0.35
+		UncloakOn: Attack
+		# Cloak-/Decloak-Sound pro Einheit (wie Stealth Tank STNK): trans1.aud.
+		CloakSound: trans1.aud
+		UncloakSound: trans1.aud
+
+^Helicopter:
+	ExternalCondition@GAPSUPPRESS:
+		Condition: aot-gap-suppressed
+	RevealsShroud:
+		Type: GroundPosition
+		RequiresCondition: !aot-gap-suppressed
+	RevealsShroud@GAPSUPPRESS:
+		Range: 2c0
+		Type: GroundPosition
+		RequiresCondition: aot-gap-suppressed
+	# === Nod Stealth Generator (aot-sgen) - Stealth Field auch fuer Helikopter ===
+	ExternalCondition@AOTSTEALTH:
+		Condition: aot-stealth-field
+	Cloak@AOTSTEALTH:
+		RequiresCondition: aot-stealth-field
+		CloakType: aot-stealth-field
+		InitialDelay: 0
+		CloakDelay: 50
+		CloakStyle: Alpha
+		CloakedAlpha: 0.35
+		UncloakOn: Attack
+		# Cloak-/Decloak-Sound pro Einheit (wie Stealth Tank STNK): trans1.aud.
+		CloakSound: trans1.aud
+		UncloakSound: trans1.aud
 # === Ende aotmod ===

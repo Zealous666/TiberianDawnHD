@@ -1240,6 +1240,63 @@ weap:
 		Length: 1
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - Shroud Generator (RA Gap Generator, GDI) ===
+# Sprite: RA Remaster GAP.ZIP (64 Frames: 0-31 idle-Spin, 32-63 damaged-Spin) +
+# GAPMAKE.ZIP (13 Frames Bau-Animation). Kein "dead"-Rubble-Frame -> Aktor setzt
+# -WithDeathAnimation (siehe building-dead-sequence-crash Memory).
+# SPLIT in fixes Fundament + rotierende Dish (User-Wunsch): der komplette 32-Frame-Spin
+# aus GAP.ZIP hatte sub-pixel-Jitter (Frame-Anker = crop-top/2, springt Ganz-/Halb-Pixel)
+# -> der Mast/Sockel "hüpfte". Jetzt aus GAP.ZIP gebacken (bake, siehe asset wip/sgen):
+#   gap_found(.._damaged).png = Sockel+Coil+Base OHNE Dish, statisch (Zeilen >=120).
+#   gap_dish.png = nur die rotierende Gabel als 32-Frame-Horizontal-Sheet (Zeilen <=132).
+# Beide 128x256 @ Scale 0.1875 (= 24/128, klassischer Pfad classicUpscaleFactor 128/24)
+# -> identische Größe/Anker wie das Original-Remaster-Sprite, exakt überlagert.
+aot-gap:
+	icon:
+		Filename: aot-gap-icon.png
+		RemasteredFilename:
+		Length: 1
+	idle:
+		Filename: gap_found.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.1875
+	damaged-idle:
+		Filename: gap_found_damaged.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.1875
+	dish:
+		Filename: gap_dish.png
+		RemasteredFilename:
+		Length: 32
+		Scale: 0.1875
+	make:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\GAPMAKE.ZIP
+		RemasteredStart: 0
+		RemasteredLength: 13
+	# 2x2 Concrete-Bib, REMASTERED (wie PYLE/TD-Gebäude, siehe structures-overrides.yaml):
+	# WithBuildingBib zeichnet rows(2) x width(2) = 4 Kacheln -> braucht 4 Frames. Der alte
+	# mbSILO hatte nur 2 Frames (Minibib) UND kein Remaster-Pendant -> "2 zusammengebaute",
+	# low-res. BIB3 = genau 4 Frames, HD, nahtlos.
+	bib:
+		Filename: bib3.tem
+		TilesetFilenames:
+			DESERT: bib3.des
+			WINTER: bib3.win
+			SNOW: bib3.sno
+			TEMPERAT: bib3.tem
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\TEMPERATE\BIB3\BIB3.TEM-{0:D4}.DDS
+			Count: 4
+		RemasteredTilesetFilenamesPattern:
+			WINTER: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\BIB3.WIN\BIB3.WIN-{0:D4}.DDS
+				Count: 4
+			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\BIB3.DES\BIB3.DES-{0:D4}.DDS
+				Count: 4
+		RemasteredPremultiplied: false
+		Length: 4
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - ATEC (Allied Tech Centre) ===
 # Age 0: RA ATEK. Age 1: TD MISS. Age 2+: TS GATECH (GDI Tech Centre).
 atec:
@@ -3760,6 +3817,82 @@ aot-shrine:
 		RemasteredPremultiplied: false
 	icon:
 		Filename: shrin_base.png
+		RemasteredFilename:
+		Length: 1
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Nod Stealth Generator (aot-sgen) Sprites ===
+# TS NASTLH ("Nod Stealth Generator"), Zwei-Layer-Compositing (Body silbergrau + House-Color-Overlay
+# 176-191) wie Radar/STEC. Authentischer TS-Schatten (nastlh Frame 3/4) einkompositiert. Make-Anim aus
+# nastlhmk.shp (Frames 0-18, Schatten 19-37 verworfen). Active-Arc (nastlh_a Frames 0-7) als RGBA-Overlay
+# (Elektro-Effekt des laufenden Generators). Nativer 144x96-Canvas -> Scale 0.5 / Offset 0,10 (Standard-
+# Default fuer neue TS-Gebaeude-Importe, in-game noch nicht feinjustiert).
+aot-sgen:
+	# Scale 0.45 (10% kleiner als 0.5) + Offset nach links-unten (-8,22 statt 0,10), damit das
+	# Gebaeude mittiger auf Footprint/Bib sitzt. Alle Body-Layer teilen Scale/Offset (deckungsgleich).
+	# Startwerte, in-game feinjustieren.
+	idle:
+		Filename: aot-sgen-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.45
+		Offset: -8,22
+	idle-remap:
+		Filename: aot-sgen-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.45
+		Offset: -8,22
+	damaged-idle:
+		Filename: aot-sgen-damaged-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.45
+		Offset: -8,22
+	damaged-idle-remap:
+		Filename: aot-sgen-damaged-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.45
+		Offset: -8,22
+	active:
+		Filename: aot-sgen-active.png
+		RemasteredFilename:
+		Length: 8
+		Tick: 120
+		Scale: 0.45
+		Offset: -8,22
+	make:
+		Filename: aot-sgen-make.png
+		RemasteredFilename:
+		Length: 19
+		Tick: 60
+		Scale: 0.45
+		Offset: -8,22
+	place:
+		Filename: aot-sgen-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.45
+		Offset: -8,22
+	bib:
+		TilesetFilenames:
+			DESERT: bib2.des
+			WINTER: bib2.win
+			SNOW: bib2.sno
+			TEMPERAT: bib2.tem
+			JUNGLE: bib2.jun
+		Length: *
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\TEMPERATE\BIB2\BIB2.TEM-{0:D4}.DDS
+			Count: 6
+		RemasteredTilesetFilenamesPattern:
+			WINTER: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\BIB2.WIN\BIB2.WIN-{0:D4}.DDS
+				Count: 6
+			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\BIB2.DES\BIB2.DES-{0:D4}.DDS
+				Count: 6
+		RemasteredPremultiplied: false
+	icon:
+		Filename: sgen_base.png
 		RemasteredFilename:
 		Length: 1
 # === Ende aotmod ===
