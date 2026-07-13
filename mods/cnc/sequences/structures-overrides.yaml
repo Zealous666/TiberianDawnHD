@@ -278,6 +278,23 @@ aflt:
 		RemasteredPremultiplied: false
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - OREREF: Ore Refinery (RA-Remaster PROC) ===
+# PROC.ZIP enthaelt genau 2 Frames: 0 = idle, 1 = damaged. Keine Make-/Rubble-Frames.
+# damaged-idle wird von der Engine bei niedriger Gesundheit automatisch gewaehlt
+# (NormalizeSequence-Konvention). RemasteredOffset 0,-64 hebt das 3-Zellen-hohe
+# Sprite wie beim AFLT halb nach Norden - Feinjustierung ggf. im Spiel pruefen.
+oreref:
+	Defaults:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\PROC.ZIP
+		RemasteredOffset: 0,-64
+	idle:
+		Start: 0
+		Length: 1
+	damaged-idle:
+		Start: 1
+		Length: 1
+# === Ende aotmod ===
+
 fix:
 	Defaults:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\FIX.ZIP

@@ -5454,8 +5454,44 @@ OILCRATE1000:
 	Tooltip:
 		Name: meta-crate.name
 	GiveCashCrateAction:
-		Amount: 2500
+		Amount: 1000
 		UseCashTick: true
 	RenderSprites:
 		Image: wcrate
+
+# === Ore Refinery (RA-Remaster PROC): nicht-baubares Zivilgebaeude ===
+# - Nur ueber den Karteneditor platzierbar (kein Buildable), erbt ^TechBuilding
+#   -> von einem Engineer einnehmbar (CaptureTypes "building").
+# - Bei Einnahme einmalig 2500 Credits als Pauschale (GivesCashOnCapture) - im
+#   Gegensatz zum Oil Derrick (V19), der per CashTrickler laufend Credits gibt.
+# - Beim Zerstoeren faellt dieselbe aufsammelbare 1000-Credits-Kiste wie bei
+#   Oil Pump/Derrick (AotDropActorOnDeath -> OILCRATE1000).
+# - KEIN Husk/Rubble-Frame im RA-Sprite gebacken -> bewusst kein SpawnActorOnDeath.
+#   ^CivBuilding/^TechBuilding erben KEIN WithDeathAnimation (nur ^BaseBuilding hat
+#   das), daher tritt der "dead"-Sequenz-Crash hier NICHT auf.
+OREREF:
+	Inherits: ^TechBuilding
+	Inherits@shape: ^3x2Shape
+	Selectable:
+		Bounds: 3072, 2560
+	Building:
+		Footprint: xxx xxx
+		Dimensions: 3,2
+	Health:
+		HP: 90000
+	RevealsShroud:
+		Range: 4c0
+	Tooltip:
+		Name: Ore Refinery
+	GivesCashOnCapture:
+		Amount: 2500
+	# Eingenommene Ore Refinery erweitert die Bauzone ihres Besitzers (an aktuellen
+	# Owner gebunden; Neutral baut nicht -> neutrale Refinery gibt keine Zone).
+	GivesBuildableArea:
+		AreaTypes: building
+	AotDropActorOnDeath:
+		Actor: OILCRATE1000
+		Range: 1
+		OwnerType: InternalName
+		InternalOwner: Neutral
 # === Ende aotmod ===
