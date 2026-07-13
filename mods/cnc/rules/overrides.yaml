@@ -28,8 +28,11 @@ World:
 	# === Nod Stealth Generator (aot-sgen) - Stealth Field auch fuer Infanterie ===
 	ExternalCondition@AOTSTEALTH:
 		Condition: aot-stealth-field
+	# Mobile Stealth Generator (aot-mstealth): eigenes Feld, tarnt NUR Einheiten (nicht ^Building).
+	ExternalCondition@AOTSTEALTHMOBILE:
+		Condition: aot-stealth-field-mobile
 	Cloak@AOTSTEALTH:
-		RequiresCondition: aot-stealth-field
+		RequiresCondition: aot-stealth-field || aot-stealth-field-mobile
 		CloakType: aot-stealth-field
 		InitialDelay: 0
 		CloakDelay: 50
@@ -916,8 +919,11 @@ APC:
 	# STNK-Eigen-Cloak oder Crate-Cloak.
 	ExternalCondition@AOTSTEALTH:
 		Condition: aot-stealth-field
+	# Mobile Stealth Generator (aot-mstealth): eigenes Feld, tarnt NUR Einheiten (nicht ^Building).
+	ExternalCondition@AOTSTEALTHMOBILE:
+		Condition: aot-stealth-field-mobile
 	Cloak@AOTSTEALTH:
-		RequiresCondition: aot-stealth-field
+		RequiresCondition: aot-stealth-field || aot-stealth-field-mobile
 		CloakType: aot-stealth-field
 		InitialDelay: 0
 		CloakDelay: 50
@@ -978,8 +984,11 @@ ARTY:
 	# === Nod Stealth Generator (aot-sgen) - Stealth Field auch fuer Schiffe ===
 	ExternalCondition@AOTSTEALTH:
 		Condition: aot-stealth-field
+	# Mobile Stealth Generator (aot-mstealth): eigenes Feld, tarnt NUR Einheiten (nicht ^Building).
+	ExternalCondition@AOTSTEALTHMOBILE:
+		Condition: aot-stealth-field-mobile
 	Cloak@AOTSTEALTH:
-		RequiresCondition: aot-stealth-field
+		RequiresCondition: aot-stealth-field || aot-stealth-field-mobile
 		CloakType: aot-stealth-field
 		InitialDelay: 0
 		CloakDelay: 50
@@ -1005,8 +1014,11 @@ ARTY:
 	# === Nod Stealth Generator (aot-sgen) - Stealth Field auch fuer Flieger ===
 	ExternalCondition@AOTSTEALTH:
 		Condition: aot-stealth-field
+	# Mobile Stealth Generator (aot-mstealth): eigenes Feld, tarnt NUR Einheiten (nicht ^Building).
+	ExternalCondition@AOTSTEALTHMOBILE:
+		Condition: aot-stealth-field-mobile
 	Cloak@AOTSTEALTH:
-		RequiresCondition: aot-stealth-field
+		RequiresCondition: aot-stealth-field || aot-stealth-field-mobile
 		CloakType: aot-stealth-field
 		InitialDelay: 0
 		CloakDelay: 50
@@ -1030,8 +1042,11 @@ ARTY:
 	# === Nod Stealth Generator (aot-sgen) - Stealth Field auch fuer Helikopter ===
 	ExternalCondition@AOTSTEALTH:
 		Condition: aot-stealth-field
+	# Mobile Stealth Generator (aot-mstealth): eigenes Feld, tarnt NUR Einheiten (nicht ^Building).
+	ExternalCondition@AOTSTEALTHMOBILE:
+		Condition: aot-stealth-field-mobile
 	Cloak@AOTSTEALTH:
-		RequiresCondition: aot-stealth-field
+		RequiresCondition: aot-stealth-field || aot-stealth-field-mobile
 		CloakType: aot-stealth-field
 		InitialDelay: 0
 		CloakDelay: 50

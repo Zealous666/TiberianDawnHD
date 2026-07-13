@@ -1388,7 +1388,7 @@ ORET:
 		Resources: Tiberium
 	DockClientManager:
 	OreTransporter:
-		OreLoadAmount: 100
+		OreLoadAmount: 250
 		OreLoadDelay: 25
 	WithStoresResourcesPipsDecoration:
 		Position: BottomLeft
@@ -4515,4 +4515,171 @@ aot-orcatran-husk:
 		MaximumSpinSpeed: 40
 		Explosion: aot-DropshipExplode
 	-MapEditorData:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - GDI Mobile Gap Generator (aot-mgap) ===
+# Mobile Variante des GDI Shroud Generators (aot-gap). Sprites: RA MGG (Frames 0-31 Fahr-Facings,
+# 32-39 Dish-Overlay). Faehrt langsam (Speed 60 = MCV). Deploy-Mechanik wie aot-arty-heavy:
+# Solange DEPLOYED steht die Einheit still und erzeugt einen Shroud-Vorhang (CreatesShroud Range 8c0)
+# und kappt feindliche Sicht im Feld auf 2c0 (ProximityExternalCondition@GAPSUPPRESS ->
+# aot-gap-suppressed, identisch zum stationaeren aot-gap, KEINE overrides-Aenderung noetig).
+# Sichtbar ab Age 3 (~aot-age3), baubar ab Age 3 + WEAP + Science Lab (aot-slab).
+# Queue: Vehicle.GDI (Advanced War Factory). UNDEPLOYED: kein Effekt, normale Einheit.
+aot-mgap:
+	Inherits: ^Vehicle
+	Inherits@selection: ^SelectableSupportUnit
+	Valued:
+		Cost: 1500
+	Tooltip:
+		Name: Mobile Gap Generator
+		RequiresCondition: !aot-mgap-deployed
+	Tooltip@deployed:
+		Name: Mobile Gap Generator (Deployed)
+		RequiresCondition: aot-mgap-deployed
+	Health:
+		HP: 30000
+	Armor:
+		Type: Light
+	# Langsam wie der MCV (Speed 60, heavywheeled). Immobil + pausiert solange deployed.
+	Mobile:
+		Speed: 60
+		Locomotor: heavywheeled
+		ImmovableCondition: aot-mgap-deployed
+		PauseOnCondition: aot-mgap-deployed
+	# Bewegungs-Orders verweigern solange deployed (wie aot-arty-heavy).
+	RejectsOrders:
+		Reject: Move, ForceMove, Stop, AttackMove
+		RemoveOrders: true
+		RequiresCondition: aot-mgap-deployed
+	# Undeployed: normale Fahrzeugsicht. Deployed: Gap-Gen-Sicht (RevealsShroud-Dup wie aot-gap:
+	# Hauptsicht zeigt eigenen Shroud NICHT, separate Instanz fuer Besitzer-Innensicht).
+	RevealsShroud:
+		Range: 5c0
+		RequiresCondition: !aot-mgap-deployed
+	RevealsShroud@GAPGEN_OWN:
+		Range: 5c0
+		RequiresCondition: aot-mgap-deployed
+	RevealsShroud@GAPGEN_MAIN:
+		MinRange: 5c0
+		Range: 6c0
+		RevealGeneratedShroud: False
+		RequiresCondition: aot-mgap-deployed
+	RenderSprites:
+		Image: aot-mgap
+	# Fahr-Body (Facing-basiert). Bleibt auch deployed sichtbar (Fahrzeug bleibt stehen,
+	# Facing eingefroren auf 384 durch GrantConditionOnDeploy). Dish-Overlay legt sich drueber.
+	WithFacingSpriteBody:
+		Sequence: idle
+	WithShadow:
+		Offset: 0,48,0
+		ZOffset: -129
+	# Schuessel (Frames 32-39): immer sichtbar, dreht sich NUR wenn deployed.
+	# Offset -299,0,171 aus dem RA MGG-Aktor (engine/mods/ra/rules/vehicles.yaml).
+	# PauseOnCondition: !aot-mgap-deployed -> eingefroren auf Frame 0 wenn fahrend.
+	WithIdleOverlay@SPINNER:
+		Sequence: spinner
+		Offset: -201,0,171
+		PauseOnCondition: !aot-mgap-deployed
+	# Deploy-Mechanik: Immobil + Facing 384 (Sued) auf Deploy. Startet undeployed (kein Effekt).
+	GrantConditionOnDeploy:
+		DeployedCondition: aot-mgap-deployed
+		UndeployedCondition: aot-mgap-undeployed
+		Facing: 384
+		DeploySounds: place2.aud
+		UndeploySounds: clicky1.aud
+	# Kernfunktion: Shroud-Vorhang NUR solange deployed. Identisch aot-gap (Range 8c0).
+	CreatesShroud:
+		Range: 8c0
+		RequiresCondition: aot-mgap-deployed
+	# Feindliche Einheiten im Feld -> Sicht auf 2c0 kappen. SELBE Condition (aot-gap-suppressed)
+	# wie stationaerer aot-gap -> overrides.yaml bereits fertig verdrahtet, KEINE Aenderung noetig.
+	ProximityExternalCondition@GAPSUPPRESS:
+		Condition: aot-gap-suppressed
+		Range: 8c0
+		ValidRelationships: Enemy, Neutral
+		RequiresCondition: aot-mgap-deployed
+	# Shroud-Radius-Kreis (bei Selektion). Zeigt immer wenn selektiert (kein ConditionalTrait).
+	RenderShroudCircle:
+	Buildable:
+		Queue: Vehicle.GDI
+		BuildPaletteOrder: 90
+		Prerequisites: ~aot-age2, aot-weap, aot-slab
+		Icon: icon
+		Description: Mobile shroud field. Deploy to hide nearby friendly forces from enemies and blind enemy units in the area.
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - NOD Mobile Stealth Generator (aot-mstealth) ===
+# Mobile Variante des Nod Stealth Generators (aot-sgen). Sprites: TD Mobile HQ (MHQ), siehe
+# aot-sequences.yaml. Faehrt langsam (Speed 60 = MCV). Deploy-Mechanik wie aot-arty-heavy:
+# solange DEPLOYED steht die Einheit still (Immovable + PauseOnCondition + RejectsOrders) und
+# vergibt das Tarnfeld aot-stealth-field an sich + alle verbuendeten Einheiten/Gebaeude im
+# Umkreis (ProximityExternalCondition). Der eigentliche Cloak haengt an ^Vehicle/^Building/...
+# (overrides.yaml) und reagiert auf aot-stealth-field - identisch zum stationaeren aot-sgen.
+# Sichtbar ab Age 3 (~aot-age3), baubar ab Age 3 + Secret Shrine (aot-shrine) + Airstrip (afld),
+# Queue Vehicle.Nod (Airstrip). Undeployed hat es keinerlei Effekt.
+aot-mstealth:
+	Inherits: ^Vehicle
+	Inherits@selection: ^SelectableSupportUnit
+	Valued:
+		Cost: 2000
+	Tooltip:
+		Name: Mobile Stealth Generator
+		RequiresCondition: !aot-mstealth-deployed
+	Tooltip@deployed:
+		Name: Mobile Stealth Generator (Deployed - cloaking units)
+		RequiresCondition: aot-mstealth-deployed
+	Health:
+		HP: 30000
+	Armor:
+		Type: Light
+	# Langsam wie der MCV (Speed 60, heavywheeled). Immobil + pausiert solange deployed.
+	Mobile:
+		Speed: 60
+		Locomotor: heavywheeled
+		ImmovableCondition: aot-mstealth-deployed
+		PauseOnCondition: aot-mstealth-deployed
+	# Bewegungs-Orders verweigern solange deployed (wie aot-arty-heavy).
+	RejectsOrders:
+		Reject: Move, ForceMove, Stop, AttackMove
+		RemoveOrders: true
+		RequiresCondition: aot-mstealth-deployed
+	RevealsShroud:
+		Range: 5c0
+	RenderSprites:
+		Image: aot-mstealth
+	# Rotierender Radar-Spinner (MHQ Frames 32-63), immer laufend.
+	WithIdleOverlay@SPINNER:
+		Sequence: spinner
+		Offset: -256,0,256
+	# Deploy schaltet das Tarnfeld an; Undeploy aus. Startet undeployed (mobil, kein Effekt).
+	GrantConditionOnDeploy:
+		DeployedCondition: aot-mstealth-deployed
+		UndeployedCondition: aot-mstealth-undeployed
+		Facing: 384
+		DeploySounds: place2.aud
+		UndeploySounds: clicky1.aud
+	# Kernfunktion: Tarnfeld aot-stealth-field-mobile NUR solange deployed. AffectsParent: true =
+	# tarnt sich selbst mit. ValidRelationships Ally = Besitzer + Verbuendete. EIGENE Condition
+	# (nicht aot-stealth-field wie aot-sgen), auf die nur die Einheiten-Templates reagieren
+	# (^Vehicle/^Infantry/^Ship/^Plane/^Helicopter), NICHT ^Building -> tarnt nur Einheiten.
+	ProximityExternalCondition@STEALTH:
+		Condition: aot-stealth-field-mobile
+		Range: 8c341
+		ValidRelationships: Ally
+		AffectsParent: true
+		RequiresCondition: aot-mstealth-deployed
+		EnableSound: cloak5.aud
+		DisableSound: cloak5.aud
+	# Tarn-Radius einzeichnen (bei Selektion), Range MUSS mit ProximityExternalCondition uebereinstimmen.
+	WithRangeCircle:
+		Type: cloakgenerator
+		Range: 8c341
+		Color: 8844FFB4
+		BorderColor: 20102080
+	Buildable:
+		Queue: Vehicle.Nod
+		BuildPaletteOrder: 90
+		Prerequisites: ~aot-age2, aot-shrine, afld
+		Icon: icon
+		Description: Mobile stealth field. Deploy to cloak itself and all nearby friendly units (not structures).
 # === Ende aotmod ===

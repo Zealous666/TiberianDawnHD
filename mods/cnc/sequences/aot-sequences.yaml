@@ -4493,4 +4493,41 @@ aot-upgrade-heavy-artillery:
 		Filename: artyicnh.tem
 		RemasteredFilename: arty_heavy_adv.png
 		Length: 1
+
+# === GDI Mobile Gap Generator (aot-mgap) ===
+# RA MGG-Sprites: classic mgg.shp + Remaster MGG.ZIP (40 Frames).
+# Frames 0-31: 32 Fahr-Facings. Frames 32-39: Dish-Overlay-Animation (8 Frames).
+aot-mgap:
+	Defaults:
+		Filename: mgg.shp
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\MGG.ZIP
+	idle:
+		Facings: 32
+		UseClassicFacings: True
+	spinner:
+		Start: 32
+		Length: 8
+		Tick: 60
+	icon:
+		Filename: truk_shroud.png
+		RemasteredFilename:
+		Length: 1
+
+# === NOD Mobile Stealth Generator (aot-mstealth) ===
+# TD Mobile HQ (MHQ) Sprites: classic mhq.shp + Remaster MHQ.ZIP (identisches 64-Frame-Layout:
+# 0-31 Fahr-Facings, 32-63 Spinner-Rotation). Kein Bake noetig. Icon = User-PNG truk_stealth.png.
+aot-mstealth:
+	Defaults:
+		Filename: mhq.shp
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\MHQ.ZIP
+	idle:
+		Facings: 32
+		UseClassicFacings: True
+	spinner:
+		Start: 32
+		Length: 32
+	icon:
+		Filename: truk_stealth.png
+		RemasteredFilename:
+		Length: 1
 # === Ende aotmod ===
