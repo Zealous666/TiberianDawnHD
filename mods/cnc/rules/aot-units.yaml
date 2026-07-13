@@ -4792,6 +4792,12 @@ aot-gadpsa:
 	DetectCloaked:
 		Range: 10c0
 
+	WithRangeCircle:
+		Type: detectcloaked
+		Range: 10c0
+		Color: 44DDFFB4
+		BorderColor: 112233A0
+
 	Transforms:
 		IntoActor: aot-aray
 		Facing: 384
