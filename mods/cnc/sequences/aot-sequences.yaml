@@ -4530,4 +4530,37 @@ aot-mstealth:
 		Filename: truk_stealth.png
 		RemasteredFilename:
 		Length: 1
+
+# === GDI/NOD Mobile Sensor Array — Fahrzeug (aot-aray / LPST) ===
+aot-aray:
+	Defaults:
+		RemasteredFilename: aot-aray-test.zip
+	idle:
+		Facings: 32
+		UseClassicFacings: True
+	idle-remap:
+		RemasteredFilename: aot-aray-test-remap.png
+		Facings: 32
+		UseClassicFacings: True
+	icon:
+		Filename: truk_sensor.png
+		RemasteredFilename:
+		Length: 1
+
+# === GDI/NOD Mobile Sensor Array — Deployed (aot-gadpsa / GADPSA) ===
+aot-gadpsa:
+	Defaults:
+		Filename: gadpsa.shp
+		Scale: 0.5
+	idle:
+		Length: 1
+	make:
+		Filename: gadpsamk.shp
+		Length: 36
+		Scale: 0.5
+	active:
+		Filename: gadpsa_a.shp
+		Length: 10
+		Scale: 0.5
+
 # === Ende aotmod ===

@@ -4682,4 +4682,129 @@ aot-mstealth:
 		Prerequisites: ~aot-age2, aot-shrine, afld
 		Icon: icon
 		Description: Mobile stealth field. Deploy to cloak itself and all nearby friendly units (not structures).
+
+# === GDI/NOD Mobile Sensor Array (aot-aray / aot-gadpsa) ===
+# Fahrzeug: LPST-Voxel (baked). Deploy → Transforms in aot-gadpsa (Building mit Mast-Anim).
+# Undeploy: Transforms zurück zu aot-aray (base, kein Buildable nötig).
+aot-aray:
+	Inherits: ^Vehicle
+	Inherits@selection: ^SelectableSupportUnit
+	Valued:
+		Cost: 1000
+	Tooltip:
+		Name: Mobile Sensor Array
+	Health:
+		HP: 25000
+	Armor:
+		Type: Light
+	Mobile:
+		Speed: 60
+		Locomotor: heavywheeled
+	RevealsShroud:
+		Range: 6c0
+	RenderSprites:
+		Image: aot-aray
+	-WithFacingSpriteBody:
+	WithFacingSpriteBody@body:
+		Sequence: idle
+		Name: aray-body
+	WithFacingSpriteBody@body-remap:
+		Sequence: idle-remap
+		Name: aray-body-remap
+		Palette: aot-vxl-player
+		IsPlayerPalette: true
+	WithShadow:
+		Offset: 0,48,0
+		ZOffset: -129
+	Transforms:
+		IntoActor: aot-gadpsa
+		Facing: 384
+		TransformSounds: place2.aud
+	Buildable:
+		Queue: LightVehicle.GDI, LightVehicle.Nod
+		BuildPaletteOrder: 91
+		Prerequisites: ~aot-age2, lite, anyhq
+		Icon: icon
+		Description: Mobile Sensor Array. Deploy to reveal a large area and detect stealth units.
+
+# === Deployed Mobile Sensor Array (aot-gadpsa) ===
+# Building-Aktor, gespawnt per Transforms vom aot-aray. Kein Buildable.
+# WithMakeAnimation spielt gadpsamk.shp (36 Frames, Mast aufrichtet) beim Deployen.
+# WithIdleOverlay zeigt gadpsa_a.shp (Spinner) nach dem Deploy.
+aot-gadpsa:
+	Inherits: ^Building
+
+	Building:
+		Footprint: x
+		Dimensions: 1,1
+		RequiresBaseProvider: false
+		TerrainTypes: Clear,Road,Rough,Dirt,Rock,Water,Beach
+
+	-ActorPreviewPlaceBuildingPreview:
+	-Demolishable:
+	-FrozenUnderFog:
+	-CommandBarBlacklist:
+	-AcceptsDeliveredCash:
+	-Guardable:
+	-ShakeOnDeath:
+
+	ActorLostNotification:
+		Notification: UnitLost
+		TextNotification: notification-unit-lost
+
+	FireWarheadsOnDeath:
+		Type: Footprint
+		Weapon: UnitExplodeSmall
+		EmptyWeapon: UnitExplodeSmall
+
+	RenderSprites:
+		Image: aot-gadpsa
+		PlayerPalette: player
+
+	-WithSpriteBody:
+	WithSpriteBody:
+		Sequence: idle
+		Name: body
+
+	WithMakeAnimation:
+		Sequence: make
+		BodyNames: body
+		Condition: build-incomplete
+
+	WithIdleOverlay@ACTIVE:
+		Sequence: active
+		RequiresCondition: !build-incomplete
+
+	Selectable:
+		Bounds: 1024, 1024
+		Priority: 10
+
+	Targetable:
+		TargetTypes: Ground, Vehicle
+
+	Health:
+		HP: 25000
+
+	Armor:
+		Type: Light
+
+	Tooltip:
+		Name: Mobile Sensor Array (Deployed)
+
+	Valued:
+		Cost: 1000
+
+	MustBeDestroyed:
+
+	RevealsShroud:
+		Range: 10c0
+
+	DetectCloaked:
+		Range: 10c0
+
+	Transforms:
+		IntoActor: aot-aray
+		Facing: 384
+		TransformSounds: clicky1.aud
+
 # === Ende aotmod ===
