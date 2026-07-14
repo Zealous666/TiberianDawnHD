@@ -606,7 +606,7 @@ aot-nod-radar-age1:
 		RemasteredFilename:
 		Length: 1
 	icon:
-		Filename: aot-nod-radar-icon.png
+		Filename: aot-nod-radar-age1-icon.png
 		RemasteredFilename:
 		Length: 1
 	bib:
@@ -4560,5 +4560,60 @@ aot-gadpsa:
 		Filename:
 		RemasteredFilename: aot-gadpsa-remap.png
 		Length: 1
+
+# === Surveyor — mobiles Fahrzeug (aot-surveyor) ===
+# TS Mobile War Factory MWAR_NOD.vxl (aus expand01.mix), 32 Facings.
+aot-surveyor:
+	Defaults:
+		RemasteredFilename: aot-surveyor.zip
+	idle:
+		Facings: 32
+		UseClassicFacings: True
+	idle-remap:
+		RemasteredFilename: aot-surveyor-remap.png
+		Facings: 32
+		UseClassicFacings: True
+	icon:
+		Filename: aot-outpost-icon.png
+		RemasteredFilename:
+		Length: 1
+
+# === Outpost GDI (aot-outpost-gdi) — Gemini-Render, baked 2026-07-14 ===
+aot-outpost-gdi:
+	idle:
+		Filename: aot-outpost-gdi-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.025
+		Offset: 0, 0
+	idle-remap:
+		Filename: aot-outpost-gdi-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.025
+		Offset: 0, 0
+	make:
+		Filename: weapmake.shp
+		RemasteredFilename:
+		Tick: 80
+
+# === Outpost NOD (aot-outpost-nod) — Gemini-Render, baked 2026-07-14 ===
+aot-outpost-nod:
+	idle:
+		Filename: aot-outpost-nod-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.050
+		Offset: 0, 0
+	idle-remap:
+		Filename: aot-outpost-nod-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.050
+		Offset: 0, 0
+	make:
+		Filename: weapmake.shp
+		RemasteredFilename:
+		Tick: 80
 
 # === Ende aotmod ===
