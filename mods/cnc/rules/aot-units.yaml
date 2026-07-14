@@ -4791,17 +4791,17 @@ aot-gadpsa:
 	MustBeDestroyed:
 
 	RevealsShroud:
-		Range: 10c0
+		Range: 17c0
 
 	DetectCloaked:
-		Range: 10c0
+		Range: 17c0
 
 	AotSensorArrayDetection:
 		Notification: CloakedUnitDetected
 
 	WithRangeCircle:
 		Type: detectcloaked
-		Range: 10c0
+		Range: 17c0
 		Color: 44DDFFB4
 		BorderColor: 112233A0
 
