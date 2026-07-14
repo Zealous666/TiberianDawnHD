@@ -695,42 +695,42 @@ fact:
 		RemasteredStart: 27
 		RemasteredLength: 25
 		Scale: 0.85
-		# Age-2: Gemini-Render GDI Construction Yard
+		# Age-2: Gemini-Render GDI Construction Yard v2 (1346x848, 14-Frame-Anim)
 	aot-age2-icon:
-		Filename: aot-gtcnst-gemini-idle.png
+		Filename: aot-gtcnst-gemini-idle-v2.png
 		RemasteredFilename:
 		Length: 1
 	aot-age2-idle:
-		Filename: aot-gtcnst-gemini-idle.png
+		Filename: aot-gtcnst-gemini-idle-v2.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.0723
-		Offset: 0, 0
+		Scale: 0.0527
+		Offset: 0, 228
 	damaged-aot-age2-idle:
-		Filename: aot-gtcnst-gemini-idle.png
+		Filename: aot-gtcnst-gemini-idle-v2.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.0723
-		Offset: 0, 0
+		Scale: 0.0527
+		Offset: 0, 228
 	aot-age2-idle-remap:
-		Filename: aot-gtcnst-gemini-idle-remap.png
+		Filename: aot-gtcnst-gemini-idle-v2-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.0723
-		Offset: 0, 0
+		Scale: 0.0527
+		Offset: 0, 228
 	damaged-aot-age2-idle-remap:
-		Filename: aot-gtcnst-gemini-idle-remap.png
+		Filename: aot-gtcnst-gemini-idle-v2-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.0723
-		Offset: 0, 0
+		Scale: 0.0527
+		Offset: 0, 228
 	aot-age2-lights:
-		Filename: aot-gtcnst-gemini-anim.png
+		Filename: aot-gtcnst-gemini-anim-v2.png
 		RemasteredFilename:
-		Length: 7
-		Scale: 0.0723
-		Offset: 0, 0
-		Tick: 200
+		Length: 28
+		Scale: 0.0527
+		Offset: 0, 228
+		Tick: 100
 	aot-age2-make:
 		Filename: aot-gtcnst-make.png
 		RemasteredFilename:
