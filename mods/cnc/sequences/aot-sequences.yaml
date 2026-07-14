@@ -4535,6 +4535,7 @@ aot-mstealth:
 aot-aray:
 	Defaults:
 		RemasteredFilename: aot-aray-test.zip
+		Scale: 0.9
 	idle:
 		Facings: 32
 		UseClassicFacings: True
@@ -4552,7 +4553,7 @@ aot-aray:
 aot-gadpsa:
 	Defaults:
 		RemasteredFilename: aot-gadpsa.zip
-		Scale: 0.65
+		Scale: 0.81
 	idle:
 		Length: 1
 	idle-remap:
