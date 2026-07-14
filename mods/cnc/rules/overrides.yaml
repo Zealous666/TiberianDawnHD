@@ -362,53 +362,41 @@ TMPL:
 	-WithSupportPowerActivationOverlay:
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - Upgrade-Queue + Age Super Powers auf FACT ===
-# Super Powers: sichtbar sobald FACT steht, HOLD bis Upgrade gekauft,
-#   dann 10 Sek Auto-Countdown, danach auto-fire → spawnt Marker → aot-age1/2/3 aktiv.
-# Upgrade-Queue wurde von FACT zu ATEC (GDI) / STEC (NOD) verschoben (aot-structures.yaml).
-FACT:
-	SupportPowerChargeBar:
-	GrantConditionOnPrerequisite@age1purchased:
-		Condition: aot-age1-purchased-cond
-		Prerequisites: aot-age1-purchased
-	GrantConditionOnPrerequisite@age2purchased:
-		Condition: aot-age2-purchased-cond
-		Prerequisites: aot-age2-purchased
-	GrantConditionOnPrerequisite@age3purchased:
-		Condition: aot-age3-purchased-cond
-		Prerequisites: aot-age3-purchased
-	AotAge1SuperPower:
-		Actor: aot-age1-marker
-		LifeTime: -1
-		OneShot: true
-		PauseOnCondition: !aot-age1-purchased-cond
-		ChargeInterval: 30000
-		Icon: aot-age1
-		Name: 1st Tiberium Age
-		Description: The Tiberium era is emerging. New units and buildings are becoming available. (1st Tiberium Age Upgrade in Tech Centre)
-		SupportPowerPaletteOrder: 50
-	AotAge2SuperPower:
-		Actor: aot-age2-marker
-		LifeTime: -1
-		OneShot: true
-		RequiresCondition: aot-age1-active
-		PauseOnCondition: !aot-age2-purchased-cond
-		ChargeInterval: 30000
-		Icon: aot-age2
-		Name: 2nd Tiberium Age
-		Description: Advanced Tiberium technologies with new upgrades and equipment becoming available. (2nd Tiberium Age Upgrade in Tech Centre)
-		SupportPowerPaletteOrder: 51
-	AotAge3SuperPower:
-		Actor: aot-age3-marker
-		LifeTime: -1
-		OneShot: true
-		RequiresCondition: aot-age2-active
-		PauseOnCondition: !aot-age3-purchased-cond
-		ChargeInterval: 30000
-		Icon: aot-age3
-		Name: 3rd Tiberium Age
-		Description: Peak Tiberium technology is emerging. The most advanced units and buildings are becoming available. (3rd Tiberium Age Upgrade)
-		SupportPowerPaletteOrder: 52
+# === Age of Tiberium (aotmod) - Age-Queue auf Player-Aktor ===
+# Age-Upgrades laufen jetzt als eigene Production-Queue (Age.GDI / Age.Nod) auf dem Player-Aktor.
+# Der Player-Aktor existiert ab Spielstart → Widget ist sofort sichtbar (kein Gebäude nötig).
+# Faction-Split via Factions: gdi / nod — nur die passende Queue ist Enabled.
+# Kosten + 30000-Tick-Bauzeit (20 min) direkt auf den Age-Upgrade-Aktoren in aot-structures.yaml.
+# Nach Abschluss: AotAgeActivationNotification sendet globale Chat-Nachricht an alle Spieler.
+Player:
+	Production@AGEGDI:
+		Produces: Age.GDI
+		MoveIntoWorld: false
+	ProductionQueue@AgeGDI:
+		Type: Age.GDI
+		Factions: gdi
+		Group: Age
+		ReadyAudio: ConstructionComplete
+		ReadyTextNotification: notification-construction-complete
+		BlockedAudio: NoBuild
+		BlockedTextNotification: notification-unable-to-build-more
+		QueuedAudio: Building
+		OnHoldAudio: OnHold
+		CancelledAudio: Cancelled
+	Production@AGENOD:
+		Produces: Age.Nod
+		MoveIntoWorld: false
+	ProductionQueue@AgeNod:
+		Type: Age.Nod
+		Factions: nod
+		Group: Age
+		ReadyAudio: ConstructionComplete
+		ReadyTextNotification: notification-construction-complete
+		BlockedAudio: NoBuild
+		BlockedTextNotification: notification-unable-to-build-more
+		QueuedAudio: Building
+		OnHoldAudio: OnHold
+		CancelledAudio: Cancelled
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - WEAP: Prerequisite + eigener aot-weap-String ===

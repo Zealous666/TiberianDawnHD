@@ -2197,11 +2197,12 @@ aot-tmpl-age2:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Age Upgrades (GDI/NOD Split) ===
-# GDI → Upgrade.GDI, NOD → Upgrade.Nod (Factions auf FACT trennt Tabs).
-# ~aot-ageX-purchased = sichtbar sobald vorheriges Upgrade gekauft (Super Power beginnt zu laden).
-# ~!aot-ageX-purchased = verschwindet nach eigenem Kauf.
-# Age-2: proc (Refinery) + fix (Repair Bay) + weap/afld (Waffenfabrik/Airfield) als harte Pflicht.
-# Age-3: aot-atec (ATEC) als harte Pflicht.
+# GDI → Age.GDI, NOD → Age.Nod (Queue auf Player-Aktor, Faction-Split via Factions: gdi/nod).
+# Sichtbarkeit: Age-1 sofort (grau ohne ATEC/STEC), Age-2/3 per ~aot-ageN-Kette.
+# ATEC (GDI) / STEC (NOD) sind Pflicht-Voraussetzung für ALLE drei Ages.
+# BuildDuration: 30000 Ticks = 20 min Bauzeit (entspricht dem ehemaligen ChargeInterval).
+# Nach Abschluss: AotAgeActivationNotification → globale Chat-Nachricht an alle Spieler.
+# ProvidesPrerequisite: aot-ageN DIREKT (kein -purchased-Zwischenschritt mehr).
 aot-age1-upgrade-gdi:
 	Interactable:
 	Tooltip:
@@ -2210,15 +2211,18 @@ aot-age1-upgrade-gdi:
 		Cost: 5000
 	Buildable:
 		BuildPaletteOrder: 5
-		Prerequisites: ~atec, ~!aot-age1-purchased
-		Queue: Upgrade.GDI
+		Prerequisites: atec, ~!aot-age1
+		Queue: Age.GDI
 		BuildLimit: 1
+		BuildDuration: 30000
 		MoveIntoWorld: false
 		Description: Unlocks the Tiberium era with new units, buildings and the capability to harvest Tiberium.
 	ProvidesPrerequisite:
-		Prerequisite: aot-age1-purchased
+		Prerequisite: aot-age1
 	RenderSprites:
 		Image: aot-age1-upgrade
+	AotAgeActivationNotification:
+		AgeName: 1st Tiberium Age
 
 aot-age1-upgrade-nod:
 	Interactable:
@@ -2228,15 +2232,18 @@ aot-age1-upgrade-nod:
 		Cost: 5000
 	Buildable:
 		BuildPaletteOrder: 5
-		Prerequisites: ~stec, ~!aot-age1-purchased
-		Queue: Upgrade.Nod
+		Prerequisites: stec, ~!aot-age1
+		Queue: Age.Nod
 		BuildLimit: 1
+		BuildDuration: 30000
 		MoveIntoWorld: false
 		Description: Unlocks the Tiberium era with new units, buildings and the capability to harvest Tiberium.
 	ProvidesPrerequisite:
-		Prerequisite: aot-age1-purchased
+		Prerequisite: aot-age1
 	RenderSprites:
 		Image: aot-age1-upgrade
+	AotAgeActivationNotification:
+		AgeName: 1st Tiberium Age
 
 aot-age2-upgrade-gdi:
 	Interactable:
@@ -2246,15 +2253,18 @@ aot-age2-upgrade-gdi:
 		Cost: 10000
 	Buildable:
 		BuildPaletteOrder: 6
-		Prerequisites: ~atec, ~aot-age1-purchased, ~!aot-age2-purchased, aot-age1-purchased, aot-proc-gdi
-		Queue: Upgrade.GDI
+		Prerequisites: ~aot-age1, atec, aot-age1, aot-proc-gdi, ~!aot-age2
+		Queue: Age.GDI
 		BuildLimit: 1
+		BuildDuration: 30000
 		MoveIntoWorld: false
 		Description: Moves forward in the Tiberium technologies with new upgrades and additional equipment.
 	ProvidesPrerequisite:
-		Prerequisite: aot-age2-purchased
+		Prerequisite: aot-age2
 	RenderSprites:
 		Image: aot-age2-upgrade
+	AotAgeActivationNotification:
+		AgeName: 2nd Tiberium Age
 
 aot-age2-upgrade-nod:
 	Interactable:
@@ -2264,15 +2274,18 @@ aot-age2-upgrade-nod:
 		Cost: 10000
 	Buildable:
 		BuildPaletteOrder: 6
-		Prerequisites: ~stec, ~aot-age1-purchased, ~!aot-age2-purchased, aot-age1-purchased, aot-proc-nod
-		Queue: Upgrade.Nod
+		Prerequisites: ~aot-age1, stec, aot-age1, aot-proc-nod, ~!aot-age2
+		Queue: Age.Nod
 		BuildLimit: 1
+		BuildDuration: 30000
 		MoveIntoWorld: false
 		Description: Moves forward in the Tiberium technologies with new upgrades and additional equipment.
 	ProvidesPrerequisite:
-		Prerequisite: aot-age2-purchased
+		Prerequisite: aot-age2
 	RenderSprites:
 		Image: aot-age2-upgrade
+	AotAgeActivationNotification:
+		AgeName: 2nd Tiberium Age
 
 aot-age3-upgrade-gdi:
 	Interactable:
@@ -2282,15 +2295,18 @@ aot-age3-upgrade-gdi:
 		Cost: 15000
 	Buildable:
 		BuildPaletteOrder: 7
-		Prerequisites: ~atec, ~aot-age2-purchased, ~!aot-age3-purchased, aot-age2-purchased, aot-orbc
-		Queue: Upgrade.GDI
+		Prerequisites: ~aot-age2, atec, aot-age2, aot-orbc, ~!aot-age3
+		Queue: Age.GDI
 		BuildLimit: 1
+		BuildDuration: 30000
 		MoveIntoWorld: false
 		Description: Upgrades to the most advanced Tiberium units, buildings and upgrades.
 	ProvidesPrerequisite:
-		Prerequisite: aot-age3-purchased
+		Prerequisite: aot-age3
 	RenderSprites:
 		Image: aot-age3-upgrade
+	AotAgeActivationNotification:
+		AgeName: 3rd Tiberium Age
 
 aot-age3-upgrade-nod:
 	Interactable:
@@ -2300,15 +2316,18 @@ aot-age3-upgrade-nod:
 		Cost: 15000
 	Buildable:
 		BuildPaletteOrder: 7
-		Prerequisites: ~stec, ~aot-age2-purchased, ~!aot-age3-purchased, aot-age2-purchased, aot-shrine
-		Queue: Upgrade.Nod
+		Prerequisites: ~aot-age2, stec, aot-age2, aot-shrine, ~!aot-age3
+		Queue: Age.Nod
 		BuildLimit: 1
+		BuildDuration: 30000
 		MoveIntoWorld: false
 		Description: Upgrades to the most advanced Tiberium units, buildings and upgrades.
 	ProvidesPrerequisite:
-		Prerequisite: aot-age3-purchased
+		Prerequisite: aot-age3
 	RenderSprites:
 		Image: aot-age3-upgrade
+	AotAgeActivationNotification:
+		AgeName: 3rd Tiberium Age
 # === Ende aotmod ===
 
 # Prerequisite display name shim — damit Tooltips "Radar" zeigen statt "gdi-hq".
@@ -2680,7 +2699,7 @@ aot-upgrade-firehawk:
 
 	Buildable:
 		BuildPaletteOrder: 42
-		Prerequisites: ~atec, ~aot-age3-purchased, aot-age3-purchased, aflt, aot-slab
+		Prerequisites: ~aot-age3, atec, aot-age3, aflt, aot-slab
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false

@@ -1932,6 +1932,27 @@ Container@PLAYER_WIDGETS:
 			Y: 299
 			Width: 194
 			Height: 20
+		# === Age of Tiberium (aotmod) - Age-Upgrade-Widget links neben Minimap ===
+		# Standalone ProductionPalette für Age.GDI / Age.Nod Queue (auf Player-Aktor, immer aktiv).
+		# AotAgeProductionLogic verdrahtet die Faction-spezifische Queue ans Widget.
+		# Sidebar startet bei WINDOW_WIDTH - 235; Minimap-Top bei Y=44.
+		Container@AGE_PALETTE_CONTAINER:
+			Logic: AotAgeProductionLogic
+			X: WINDOW_WIDTH - 305
+			Y: 44
+			Width: 66
+			Height: 200
+			Children:
+				ProductionPalette@AGE_PALETTE:
+					Columns: 1
+					IconSize: 64, 48
+					TooltipContainer: TOOLTIP_CONTAINER
+					TooltipTemplate: PRODUCTION_TOOLTIP_FACTIONSUFFIX
+					ReadyText: productionpalette-player-widgets-production-palette.ready
+					HoldText: productionpalette-player-widgets-production-palette.hold
+					MinimumRows: 1
+					MaximumRows: 3
+		# === Ende aotmod ===
 
 Background@FMVPLAYER:
 	Width: WINDOW_WIDTH

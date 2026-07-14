@@ -2012,9 +2012,8 @@ aot-ajet-firehawk:
 		Image: aot-ajet
 	Buildable:
 		BuildPaletteOrder: 20
-		# Sichtbar ab Age 3 (~aot-age3-purchased = tatsächliches Upgrade, NICHT der Superpower-Marker),
-		# baubar erst nach dem Firehawk-Upgrade (non-tilde = ausgegraut bis gekauft).
-		Prerequisites: ~aot-age3-purchased, aflt, aot-firehawk-upgrade
+		# Sichtbar ab Age 3 (~aot-age3), baubar erst nach Firehawk-Upgrade (non-tilde = ausgegraut bis gekauft).
+		Prerequisites: ~aot-age3, aflt, aot-firehawk-upgrade
 		Queue: Aircraft.GDI.AFLT
 		Icon: firehawk-icon
 		Description: Firehawk strike fighter. Fires triple-double rocket salvos, effective against ground and air targets.
