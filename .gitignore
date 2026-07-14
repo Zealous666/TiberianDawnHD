@@ -9,6 +9,9 @@ engine/**
 !engine/OpenRA.Mods.Common/Widgets/Logic/
 !engine/OpenRA.Mods.Common/Widgets/Logic/Ingame/
 !engine/OpenRA.Mods.Common/Widgets/Logic/Ingame/ProductionTabsLogic.cs
+# aotmod: Auto-Wechsel zum Upgrade-Tab beim Selektieren von ATEC/STEC (sonst bei Engine-Neubezug verloren).
+!engine/OpenRA.Mods.Common/Widgets/ProductionTabsWidget.cs
+!engine/OpenRA.Mods.Common/Traits/AotOpensProductionTabOnSelection.cs
 !engine/OpenRA.Mods.Common/Traits/
 !engine/OpenRA.Mods.Common/Traits/SupportPowers/
 !engine/OpenRA.Mods.Common/Traits/SupportPowers/AutoActivateSpawnActorPower.cs

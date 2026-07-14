@@ -1029,6 +1029,8 @@ ATEC:
 	Production@UPGRADEGDI:
 		Produces: Upgrade.GDI
 		MoveIntoWorld: false
+	AotOpensProductionTabOnSelection:
+		Group: Upgrade
 	ProductionQueue@UpgradeGDI:
 		Type: Upgrade.GDI
 		Factions: gdi
@@ -1177,6 +1179,8 @@ STEC:
 	Production@UPGRADENOD:
 		Produces: Upgrade.Nod
 		MoveIntoWorld: false
+	AotOpensProductionTabOnSelection:
+		Group: Upgrade
 	ProductionQueue@UpgradeNod:
 		Type: Upgrade.Nod
 		Factions: nod
