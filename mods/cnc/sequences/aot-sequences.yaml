@@ -4548,11 +4548,16 @@ aot-aray:
 		Length: 1
 
 # === GDI/NOD Mobile Sensor Array — Deployed (aot-gadpsa / GADPSA) ===
+# Scale3x-Bake aus gadpsa.shp frame 0 (288×288px). Zwei Layer: body (RGBA) + remap (Player-Color).
 aot-gadpsa:
 	Defaults:
-		Filename: gadpsa.shp
-		Scale: 0.5
+		RemasteredFilename: aot-gadpsa.zip
+		Scale: 0.65
 	idle:
+		Length: 1
+	idle-remap:
+		Filename:
+		RemasteredFilename: aot-gadpsa-remap.png
 		Length: 1
 
 # === Ende aotmod ===

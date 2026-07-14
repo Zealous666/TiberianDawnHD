@@ -24,8 +24,12 @@ namespace OpenRA.Mods.Cnc.Traits
 	public class AotSensorArrayDetectionInfo : ConditionalTraitInfo
 	{
 		[NotificationReference("Speech")]
-		[Desc("Speech notification key to play when a cloaked enemy unit is detected.")]
+		[Desc("Speech notification key (NOD/neutral faction).")]
 		public readonly string Notification = "CloakedUnitDetected";
+
+		[NotificationReference("Speech")]
+		[Desc("Speech notification key for GDI faction (GDI EVA voice). Falls back to Notification if empty.")]
+		public readonly string GdiNotification = "CloakedUnitDetectedGdi";
 
 		[FluentReference(optional: true)]
 		[Desc("Text notification to display in the message log.")]
@@ -91,8 +95,12 @@ namespace OpenRA.Mods.Cnc.Traits
 					var localPlayer = self.World.LocalPlayer;
 					if (localPlayer != null && !localPlayer.Spectating && self.Owner == localPlayer)
 					{
+						var isGdi = self.Owner.Faction.InternalName == "gdi";
+						var notifKey = isGdi && !string.IsNullOrEmpty(Info.GdiNotification)
+							? Info.GdiNotification
+							: Info.Notification;
 						Game.Sound.PlayNotification(self.World.Map.Rules, self.Owner,
-							"Speech", Info.Notification, self.Owner.Faction.InternalName);
+							"Speech", notifKey, self.Owner.Faction.InternalName);
 
 						TextNotificationsManager.AddTransientLine(self.Owner, Info.TextNotification);
 

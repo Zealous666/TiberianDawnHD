@@ -4,11 +4,12 @@ Speech:
 	# Prefix/Variant deaktiviert, damit kein TDR_SFX_EVA_/_EN-US.WAV drangehängt wird — es wird
 	# direkt bits/aot-eva-spyplane.aud geladen (Sound-Loader erkennt WAV-Inhalt am RIFF-Header,
 	# die .aud-Endung stammt nur vom Default-Variant-Suffix). Sprachunabhängig.
-	DisablePrefixes: SpyPlaneReady, CloakedUnitDetected
-	DisableVariants: SpyPlaneReady, CloakedUnitDetected
+	DisablePrefixes: SpyPlaneReady, CloakedUnitDetected, CloakedUnitDetectedGdi
+	DisableVariants: SpyPlaneReady, CloakedUnitDetected, CloakedUnitDetectedGdi
 	Notifications:
 		SpyPlaneReady: aot-eva-spyplane
 		CloakedUnitDetected: aot-eva-cloaked-detected
+		CloakedUnitDetectedGdi: aot-eva-cloaked-detected-gdi
 		AirstrikeReady: AIRREDY1
 		BaseAttack: BASEATK1
 		Building: BLDGING1
