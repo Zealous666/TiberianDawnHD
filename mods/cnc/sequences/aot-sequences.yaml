@@ -4553,7 +4553,7 @@ aot-aray:
 aot-gadpsa:
 	Defaults:
 		RemasteredFilename: aot-gadpsa.zip
-		Scale: 0.81
+		Scale: 0.97
 	idle:
 		Length: 1
 	idle-remap:
