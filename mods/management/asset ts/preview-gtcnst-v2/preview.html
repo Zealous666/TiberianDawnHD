@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>GDI Construction Yard v2 — Review</title>
+<style>
+  body { background:#1b1d22; color:#d8dae0; font-family:-apple-system,'Segoe UI',sans-serif; margin:0; padding:24px 32px 80px; }
+  h1 { font-size:22px; color:#fff; border-bottom:2px solid #3a63c4; padding-bottom:8px; }
+  h2 { font-size:17px; color:#8fb4ff; margin-top:42px; }
+  p, li { font-size:14px; line-height:1.5; max-width:880px; }
+  .row { display:flex; gap:18px; flex-wrap:wrap; align-items:flex-start; margin:14px 0; }
+  figure { margin:0; }
+  figcaption { font-size:12px; color:#9aa0ab; margin-top:6px; max-width:512px; }
+  img { border:1px solid #33363d; border-radius:4px; display:block; max-width:100%; }
+  .badge { display:inline-block; background:#2a3f6e; color:#bcd2ff; font-size:11px; padding:2px 8px; border-radius:10px; margin-right:6px; }
+  .ok { background:#1e4620; color:#9fe0a4; }
+  .warn { background:#5a4a1a; color:#ffe08a; }
+  code { background:#26282e; padding:1px 5px; border-radius:3px; font-size:12.5px; }
+  .card { background:#22242a; border:1px solid #33363d; border-radius:8px; padding:14px 18px; max-width:880px; margin:12px 0; }
+</style>
+</head>
+<body>
+<h1>GDI Construction Yard — neues v2-Sprite: Review &amp; Vorschläge</h1>
+
+<h2>1. Freistellung korrigiert <span class="badge ok">erledigt</span></h2>
+<p>Gefunden &amp; gefixt an der linken Ecke: <b>69 Streupixel-Komponenten</b> (Reste des weggelöschten Kontaktschattens, alpha≈4),
+<b>weißer Bleed-Saum</b> entlang der Stufen- und Sockelkanten, eine <b>angefressene Kerbe</b> an der unteren Sockelkante
+und die <b>unvollständige Eckspitze</b> (Seitenfläche fehlte). Die Kanten wurden entlang der gefitteten Iso-Linien
+(Steigung ±0.497, Seitenfläche 8&nbsp;px) rekonstruiert und die gesamte Silhouette bekam sauberes Anti-Aliasing
+(das Original hatte harte 0/255-Kanten).</p>
+<div class="row">
+  <figure><img src="cleanup_before.png" width="440"><figcaption>Vorher: Staub unter der Ecke, weißer Saum, Kerbe, harte Treppchen-Kanten</figcaption></figure>
+  <figure><img src="cleanup_after.png" width="440"><figcaption>Nachher: Ecke komplett, Kanten glatt, Staub entfernt</figcaption></figure>
+</div>
+<p>Ergebnis gespeichert als <code>interpolated/gdi-construction-yard-gtcnst-frame0_v2_clean.png</code> — das Original blieb unangetastet.</p>
+
+<h2>2. Player Color — kann man den alten Overlay einfach drüberlegen?</h2>
+<div class="card">
+<b>Kurze Antwort: Nein, nicht 1:1.</b> Das v2-Render hat andere Proportionen als das alte
+(Bounding-Box-Skalierung x&nbsp;1.39 vs. y&nbsp;1.30 — das Dach ist flacher/breiter geworden). Die alte Blau-Maske
+per einfachem Skalieren übergelegt landet sichtbar daneben (links). Mit einer Optical-Flow-Feinausrichtung
+(TV-L1) snappt die alte Maske aber sauber auf die neue Geometrie (rechts) — <b>gleiche Stellen wie zuvor</b>.
+</div>
+<div class="row">
+  <figure><img src="pc_naive_paste.png" width="440"><figcaption>❌ Naiv 1:1 übergelegt: Rippen schweben über dem Dach, Bogen &amp; Kran versetzt</figcaption></figure>
+  <figure><img src="pc_variant_a.png" width="440"><figcaption>✅ Flow-ausgerichtet: sitzt auf Rippen, Bogen, Kran, Lamellen, Frontschürze</figcaption></figure>
+</div>
+
+<h2>3. Vorschläge: Wo Player Color hin soll</h2>
+<p>Referenz alt (blaue Bereiche = bisherige Player-Color-Stellen) und drei Varianten auf dem neuen Sprite:</p>
+<div class="row">
+  <figure><img src="old_reference.png" width="440"><figcaption>Alt: Rippen, Bogen-Fassade, Kran, Lüftungslamellen, Frontschürze</figcaption></figure>
+</div>
+<div class="row">
+  <figure><img src="pc_variant_a.png" width="430"><figcaption><b>Variante A — exakt wie zuvor:</b> Dachrippen + Bogen + Kran + Lamellen + Schürze</figcaption></figure>
+  <figure><img src="pc_variant_b.png" width="430"><figcaption><b>Variante B — ohne Kran:</b> Kran bleibt neutrales Metall (wirkt mechanischer), Rest wie zuvor</figcaption></figure>
+</div>
+<div class="row">
+  <figure><img src="pc_variant_c.png" width="430"><figcaption><b>Variante C — dezent:</b> nur Bogen + Lamellen + Schürze</figcaption></figure>
+  <figure><img src="pc_recolor.png" width="430"><figcaption><b>So sähe Variante A „nativ" aus:</b> Blauton übernimmt die Helligkeit des Monochrom-Sprites (statt Deck-Tint) — so wird auch das finale Remap gebaut</figcaption></figure>
+</div>
+<p class="card">Das finale Remap-PNG (Palette-Indizes, volle 16er-Rampe wie beim Silo) baue ich nach deiner Wahl —
+dann nicht aus der warpten Maske, sondern sauber entlang der Strukturen des neuen Sprites nachgezogen.</p>
+
+<h2>4. Animation: Propeller + Lauflicht <span class="badge ok">gebacken</span></h2>
+<p>7 Frames wie zuvor: die drei Lüfter drehen (90°/7 pro Frame → nahtloser 4-Blatt-Loop, Ellipsen pro Lüfter
+automatisch gefittet), und das Lauflicht wandert wieder über die 7 Messingkugeln entlang der Dachkante
+(Glow-Blob aus der alten Anim übernommen, auf v2-Maßstab skaliert). Sheet:
+<code>interpolated/gdi-construction-yard-gtcnst-anim_v2.png</code> (1346×848/Frame, FrameSize/FrameAmount-Chunks gesetzt).</p>
+<div class="row">
+  <figure><img src="anim_fans.gif" width="560"><figcaption>Detail: Rotoren + Lauflicht</figcaption></figure>
+</div>
+<div class="row">
+  <figure><img src="anim_full.gif" width="560"><figcaption>Ganzes Gebäude</figcaption></figure>
+</div>
+<div class="row">
+  <figure><img src="ingame_4x.gif"><figcaption>Simulierte In-Game-Größe (4× Zoom)</figcaption></figure>
+  <figure><img src="ingame_2x.gif"><figcaption>2× Zoom (typisch)</figcaption></figure>
+</div>
+<p><span class="badge warn">Hinweis</span> Beim Loop-Übergang (Frame 6 → 0) springt die Beleuchtung der Blätter minimal,
+weil die Blätter unterschiedlich beleuchtet sind. Bei In-Game-Größe (~5&nbsp;px pro Lüfter) unsichtbar —
+falls es doch stört, kann ich die Blatt-Beleuchtung symmetrisieren.</p>
+
+<h2>5. Nächste Schritte</h2>
+<ul>
+  <li>Deine Wahl: Variante A, B oder C (oder Mix) → dann baue ich das indizierte Remap-PNG</li>
+  <li>Schatten backen + Scale berechnen + Sequences/Proxy-Verdrahtung (wie beim bisherigen Gemini-Workflow)</li>
+</ul>
+</body>
+</html>

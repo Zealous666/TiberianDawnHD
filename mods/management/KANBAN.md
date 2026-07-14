@@ -7,10 +7,10 @@
   - [x] buggy & laser
   - [x] bike icon & laser upgrade
   - [x] stealthtank & cargo
-  - [ ] MiG & Banshee airstrike
-  - [ ] mobile gap genererator (GDI)
-  - [ ] mobile stealth generator (NOD)
-  - [ ] sensor array (dome hat das!)
+  - [x] gap & stealth generators
+  - [x] mobile gap genererator (GDI)
+  - [x] mobile stealth generator (NOD)
+  - [x] sensor array (dome hat das!)
   - [x] nuke silo & toxic rocket
   - [x] uplink centre & super power
   - [x] titan / juggernaut (heavy mechs)
@@ -21,36 +21,37 @@
   - [x] GDI mine layer (vs. AAPC)
   - [x] dropship routine (2 jeeps, 2 mtnk)
   - [ ] coop archon system
-  - [ ] 1st coop mission
-  - [ ] TS soundtracks
-  - [ ] Sonar ping (nicht anti-stealth!)
-  - [ ] mobile repair drone
-  - [ ] airfield shuttle mechanic
-  - [ ] bridge repair mechanik
-  - [ ] eis schollen
-  - [ ] civilian ts buildings
-  - [ ] laser-tank connect-feature für age 3
-  - [ ] nod hand age 3
-  - [ ] LITE age 3
-  - [ ] barracks age 3
-  - [ ] gdi radar age 3
+  - [ ] coop mission 1 (test)
+  - [ ] 1. upgrade toggle
+  - [ ] 2. airfield shuttle mechanic
+  - [ ] 3. bridge repair mechanik & destruction
+  - [ ] 4. ice grow & destruction
+  - [ ] LITE nod & LITE gdi age 3
+  - [ ] barracks & hand age 3
+  - [ ] gsi & nod radars age 3
+  - [ ] powerplants nod & powerplants gdi age 3
   - [ ] construction yard age 3
-  - [ ] nod shrine age 3?
-  - [ ] a10 -> firehawk sprites
-  - [ ] idle menü screen
+  - [ ] hospital funktion oder crate?
+  - [ ] civilian ts buildings & garrissons
+  - [x] tree destruction
+  - [ ] TS soundtracks
+  - [ ] idle menü map szene
+  - [ ] todo vor ki: upgrade toggle, spaceport system, bridge huts
 - [ ] Fixes
   - [ ] einheiten auf repair facility verkaufen
   - [x] upgrades wenn tec center selektiert
-  - [ ] LITE eigene queue (statt defense?)
+  - [ ] support buildings in support tab (statt defense?)
   - [ ] upgrades nur wenn power
   - [ ] heli & jet start/lande sounds
   - [ ] KI-bau routine
-  - [ ] repair facility nur GDI in 3 stages
-  - [ ] oreT an silo binden
   - [ ] fire position power bedarf entfernen
   - [ ] platzhalter-icons (tiberium wars)
   - [ ] repair facility bib-smudge
-  - [ ] yak recon flug
+  - [ ] super-power impact icons (beacons)
+  - [ ] power shutdown AA & defenses
+  - [x] oil pums spawnen 1000 credits wenn zerstört
+  - [x] aot-age upgrade kosten (5000, 10000, 25000)
+  - [ ] age power toggle / direkt oben links
 
 ## Design / Konzept
 
@@ -84,6 +85,7 @@
   - [ ] Proxy Icons
   - [ ] Damage Models
   - [ ] Make Animations
+  - [ ] Stealth Generator
 - [ ] Defense Ideas
   Garrison types: Gunner, Gren, Rocket, Flame, Toxic, Zone, Cyborg, Commando
   - [x] GDI Pillbox -> Guard Tower (Infantry Garrison)
@@ -92,12 +94,12 @@
   - [x] NOD 0 Flame Turret -> 2 Toxic Turret (Toxic upgrade zusammen mit Flame trooper und Flame tank)
   - [x] GDI Fire Position (vehicle garrison)
 - [ ] Nod Artillery Idea
-  - [ ] V2 -> MLRS / Howitzer (age 1)
-  - [ ] MLRS -> Toxic MLRS (age 3)
-  - [ ] Howitzer -> Heavy Artillery (age 3)
+  - [x] V2 -> MLRS / Howitzer (age 1)
+  - [x] MLRS -> Toxic MLRS (age 3)
+  - [x] Howitzer -> Heavy Artillery (age 3)
 - [ ] GDI Tank & Mech idea
   - [x] Hmvee -> Wolverine
-  - [ ] APC -> AAPC / Mine Layer
+  - [x] APC -> AAPC / Mine Layer
   - [x] MTNK -> Predator / Titan
   - [x] MLRS -> Hover MLRS & Hover AA / Jugg
 
@@ -123,8 +125,14 @@
   - [x] 6 player
   - [ ] test gegen AI
   - [ ] ressource balancing
-- [ ] Desert?
+  - [x] tiberium bäume
+  - [x] ore refineries
+  - [x] + 1 oil derrick pro ausgang
+  - [x] seekisten (testen)
+  - [ ] bridge repair huts
+  - [ ] civilian TS buildings
 - [ ] Snow?
+- [ ] Desert?
 - [ ] Winter?
 - [ ] Jungle?
 

@@ -743,6 +743,10 @@
 		AreaTypes: building
 		# aotmod (2026-07-12): Bauzone 4 -> 2 Zellen fuer alle Gebaeude.
 		Adjacent: 2
+	RequiresBuildableArea@OUTPOST:
+		AreaTypes: outpost
+		# aotmod (2026-07-14): Outpost-Typ erlaubt Bauen 6 Zellen vom Outpost-Gebaeude.
+		Adjacent: 6
 	MustBeDestroyed:
 		RequiredForShortGame: true
 	RepairableBuilding:

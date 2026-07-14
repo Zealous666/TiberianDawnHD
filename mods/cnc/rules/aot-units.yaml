@@ -4810,4 +4810,319 @@ aot-gadpsa:
 		Facing: 384
 		TransformSounds: clicky1.aud
 
+# === Surveyor — Mobiler Vorposten-Aufbauer (aot-surveyor) ===
+# Einmalig deploybar (Transforms ohne Ruecktransformation aus dem Outpost-Gebaeude).
+# GDI baut in WEAP (Vehicle.GDI), NOD in AFLD (Vehicle.Nod).
+# Voraussetzung: sichtbar ab aot-age3, baubar ab aot-age3 + fix.
+# Sprites (placeholder): TS MWAR static single-frame (aot-mwar-idle.png).
+# Phase 2: eigene Gemini-Voxel-Sprites.
+aot-surveyor:
+	Inherits: ^Vehicle
+
+	RenderSprites:
+		Image: aot-surveyor
+
+	-WithFacingSpriteBody:
+	WithFacingSpriteBody@body:
+		Sequence: idle
+		Name: surveyor-body
+	WithFacingSpriteBody@body-remap:
+		Sequence: idle-remap
+		Name: surveyor-body-remap
+		Palette: aot-vxl-player
+		IsPlayerPalette: true
+
+	WithShadow:
+		Offset: 0,48,0
+		ZOffset: -129
+
+	Health:
+		HP: 30000
+
+	Armor:
+		Type: Heavy
+
+	Mobile:
+		Speed: 60
+		Locomotor: heavywheeled
+
+	Tooltip:
+		Name: Surveyor
+
+	Valued:
+		Cost: 1500
+
+	WithRangeCircle:
+		Type: buildablearea
+		Range: 9c0
+		Color: 44CC44B4
+		BorderColor: 112211A0
+
+aot-surveyor-gdi:
+	Inherits: aot-surveyor
+	Transforms:
+		IntoActor: aot-outpost-gdi
+		Facing: 384
+		TransformSounds: place2.aud
+	Buildable:
+		Queue: Vehicle.GDI
+		BuildPaletteOrder: 90
+		Prerequisites: ~aot-age3, fix
+		Icon: icon
+		Description: Mobile forward base. Deploy to create a GDI Outpost — extends construction range by 6 cells, garrisons up to 10 infantry. No power cost when deployed.
+
+aot-surveyor-nod:
+	Inherits: aot-surveyor
+	Transforms:
+		IntoActor: aot-outpost-nod
+		Facing: 384
+		TransformSounds: place2.aud
+	Buildable:
+		Queue: Vehicle.Nod
+		BuildPaletteOrder: 90
+		Prerequisites: ~aot-age3, fix
+		Icon: icon
+		Description: Mobile forward base. Deploy to create a NOD Outpost — extends construction range by 6 cells, cloaks nearby friendly units when stealth field is active. No power cost when deployed.
+
+# === GDI Outpost (deployed Surveyor GDI) ===
+# Garrison 10 Infanterie, Bauzone 6 Zellen, kein Power.
+aot-outpost-gdi:
+	Inherits: ^Building
+	Inherits@IDISABLE: ^DisabledOverlay
+	Inherits@AUTOTARGET: ^AutoTargetAll
+
+	Building:
+		Footprint: x
+		Dimensions: 1,1
+		RequiresBaseProvider: false
+		TerrainTypes: Clear,Road,Rough,Dirt,Rock
+
+	-ActorPreviewPlaceBuildingPreview:
+	-Demolishable:
+	-FrozenUnderFog:
+	-CommandBarBlacklist:
+	-AcceptsDeliveredCash:
+	-Guardable:
+	-ShakeOnDeath:
+
+	ActorLostNotification:
+		Notification: UnitLost
+		TextNotification: notification-unit-lost
+
+	FireWarheadsOnDeath:
+		Type: Footprint
+		Weapon: UnitExplodeSmall
+		EmptyWeapon: UnitExplodeSmall
+
+	RenderSprites:
+		Image: aot-outpost-gdi
+
+	-WithSpriteBody:
+	WithSpriteBody@body:
+		Sequence: idle
+		Name: body
+		Palette: effect
+		IsPlayerPalette: false
+
+	WithIdleOverlay@remap:
+		Sequence: idle-remap
+		Palette: player
+		IsPlayerPalette: true
+		RequiresCondition: !build-incomplete
+
+	WithMakeAnimation@base:
+		BodyNames: body
+		Condition: build-incomplete
+		Sequence: make
+
+	Selectable:
+		Bounds: 1024, 1024
+		Priority: 10
+
+	Targetable:
+		TargetTypes: Ground, Building
+
+	Health:
+		HP: 50000
+
+	Armor:
+		Type: Concrete
+
+	Tooltip:
+		Name: GDI Outpost
+
+	Valued:
+		Cost: 1500
+
+	MustBeDestroyed:
+
+	RevealsShroud:
+		Range: 8c0
+
+	DetectCloaked:
+		Range: 5c0
+
+	# Bauzone: normale 2-Zellen-Kette (building) + 6-Zellen-Radius (outpost, OR-Logik via engine-Patch)
+	GivesBuildableArea:
+		AreaTypes: building
+	GivesBuildableArea@OUTPOST:
+		AreaTypes: outpost
+
+	# Bauradius als Kreis anzeigen (bei Selektion).
+	WithRangeCircle:
+		Type: buildablearea
+		Range: 9c0
+		Color: 44CC44B4
+		BorderColor: 112211A0
+
+	# Garrison: 10 Infanterie (6 Fire-Ports je 60 Grad Konus, wie Pillbox)
+	Cargo:
+		Types: Infantry
+		MaxWeight: 10
+
+	WithCargoPipsDecoration:
+		Position: BottomLeft
+		Margin: 4,3
+		RequiresSelection: true
+
+	AttackGarrisoned:
+		PauseOnCondition: build-incomplete
+		Armaments: garrisoned
+		PortOffsets: 384,0,128, 224,-341,128, -224,-341,128, -384,0,128, -224,341,128, 224,341,128
+		PortYaws: 0, 176, 341, 512, 682, 853
+		PortCones: 88, 88, 88, 88, 88, 88
+
+# === NOD Outpost (deployed Surveyor NOD) ===
+# Kein Garrison. Tarnfeld (wie aot-mstealth) per Deploy/Undeploy toggle.
+# Initial inaktiv — Spieler muss Tarnfeld manuell aktivieren (Deploy-Taste).
+# Kein Mobile/Immovable noetig (ist bereits ein Building).
+aot-outpost-nod:
+	Inherits: ^Building
+	Inherits@IDISABLE: ^DisabledOverlay
+
+	Building:
+		Footprint: x
+		Dimensions: 1,1
+		RequiresBaseProvider: false
+		TerrainTypes: Clear,Road,Rough,Dirt,Rock
+
+	-ActorPreviewPlaceBuildingPreview:
+	-Demolishable:
+	-FrozenUnderFog:
+	-CommandBarBlacklist:
+	-AcceptsDeliveredCash:
+	-Guardable:
+	-ShakeOnDeath:
+
+	ActorLostNotification:
+		Notification: UnitLost
+		TextNotification: notification-unit-lost
+
+	FireWarheadsOnDeath:
+		Type: Footprint
+		Weapon: UnitExplodeSmall
+		EmptyWeapon: UnitExplodeSmall
+
+	RenderSprites:
+		Image: aot-outpost-nod
+
+	-WithSpriteBody:
+	WithSpriteBody@body:
+		Sequence: idle
+		Name: body
+		Palette: effect
+		IsPlayerPalette: false
+
+	WithIdleOverlay@remap:
+		Sequence: idle-remap
+		Palette: player
+		IsPlayerPalette: true
+		RequiresCondition: !build-incomplete
+
+	WithMakeAnimation@base:
+		BodyNames: body
+		Condition: build-incomplete
+		Sequence: make
+
+	Selectable:
+		Bounds: 1024, 1024
+		Priority: 10
+
+	Targetable:
+		TargetTypes: Ground, Building
+
+	Health:
+		HP: 50000
+
+	Armor:
+		Type: Concrete
+
+	Tooltip:
+		Name: NOD Outpost
+		RequiresCondition: !aot-nod-outpost-active
+	Tooltip@active:
+		Name: NOD Outpost (Stealth Field Active)
+		RequiresCondition: aot-nod-outpost-active
+
+	Valued:
+		Cost: 1500
+
+	MustBeDestroyed:
+
+	RevealsShroud:
+		Range: 8c0
+
+	DetectCloaked:
+		Range: 5c0
+
+	# Bauzone: normale 2-Zellen-Kette + 6-Zellen-Radius (outpost-Typ)
+	GivesBuildableArea:
+		AreaTypes: building
+	GivesBuildableArea@OUTPOST:
+		AreaTypes: outpost
+
+	# Bauradius als Kreis (bei Selektion)
+	WithRangeCircle:
+		Type: buildablearea
+		Range: 9c0
+		Color: 44CC44B4
+		BorderColor: 112211A0
+
+	# Tarnfeld-Toggle: Deploy = an, Undeploy = aus. Startet INAKTIV (kein DeployOnCreation).
+	GrantConditionOnDeploy:
+		DeployedCondition: aot-nod-outpost-active
+		DeploySounds: cloak5.aud
+		UndeploySounds: cloak5.aud
+
+	# Selbst-Tarnung: direkt an aot-nod-outpost-active gebunden (^Building reagiert auf
+	# aot-stealth-field, aber ProximityExternalCondition sendet aot-stealth-field-mobile → kein Match).
+	Cloak@SELFCLOAK:
+		RequiresCondition: aot-nod-outpost-active
+		CloakType: aot-stealth-field
+		InitialDelay: 0
+		CloakDelay: 50
+		CloakStyle: Alpha
+		CloakedAlpha: 0.35
+		UncloakOn: Attack
+		CloakSound: trans1.aud
+		UncloakSound: trans1.aud
+
+	# Tarnfeld: tarnt verbuendete Einheiten (nicht Gebaeude) im Umkreis, identisch zu aot-mstealth.
+	ProximityExternalCondition@STEALTH:
+		Condition: aot-stealth-field-mobile
+		Range: 8c341
+		ValidRelationships: Ally
+		AffectsParent: true
+		RequiresCondition: aot-nod-outpost-active
+		EnableSound: cloak5.aud
+		DisableSound: cloak5.aud
+
+	# Tarnfeld-Radius als Kreis (bei Selektion, nur wenn aktiv)
+	WithRangeCircle@stealth:
+		Type: cloakgenerator
+		Range: 8c341
+		Color: 8844FFB4
+		BorderColor: 20102080
+		RequiresCondition: aot-nod-outpost-active
+
 # === Ende aotmod ===

@@ -4584,13 +4584,13 @@ aot-outpost-gdi:
 		Filename: aot-outpost-gdi-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.025
+		Scale: 0.030
 		Offset: 0, 0
 	idle-remap:
 		Filename: aot-outpost-gdi-idle-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.025
+		Scale: 0.030
 		Offset: 0, 0
 	make:
 		Filename: weapmake.shp
@@ -4603,13 +4603,13 @@ aot-outpost-nod:
 		Filename: aot-outpost-nod-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.050
+		Scale: 0.025
 		Offset: 0, 0
 	idle-remap:
 		Filename: aot-outpost-nod-idle-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.050
+		Scale: 0.025
 		Offset: 0, 0
 	make:
 		Filename: weapmake.shp
