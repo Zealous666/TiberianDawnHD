@@ -24,7 +24,7 @@
   - [ ] coop mission 1 (test)
   - [x] 1. upgrade toggle
   - [x] 2. bridge repair mechanik & destruction
-  - [ ] 3. spaceport/shuttle airfield
+  - [x] 3. spaceport/shuttle airfield
   - [ ] 4. ice grow & destruction
   - [ ] 5. support / defense tab
   - [ ] hand of nod & gdi-pyle age 3

@@ -5783,16 +5783,20 @@ aot-iron-dome:
 	Health:
 		HP: 50000
 	Tooltip:
-		Name: Iron Dome
+		Name: actor-aot-iron-dome.name
+	MapEditorData:
+		Categories: Civilians
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral
 	RevealsShroud:
 		Range: 4c0
 	AotIronDomePower:
 		OrderName: AotIronDomePower
-		Description: Iron Dome
-		LongDesc: Makes all friendly units and buildings invulnerable for 60 seconds.
+		Description: actor-aot-iron-dome.description
 		Icon: aot-iron-dome
-		Prerequisites: ~aot-iron-dome
-		ChargeInterval: 36000
+		ChargeInterval: 15000
+		BeginChargeSound: aot-eva-ironcurtain-charging.wav
+		GlobalActivationSound: aot-ironcur9.wav
 		SupportPowerPaletteOrder: 70
 	# ExternalCondition + Overlay/DamageMultiplier fuer den Aktor selbst
 	# (nicht ^TechBuilding, erbt kein ^Building in der Iron-Dome-Version dieser Traits
@@ -5949,4 +5953,43 @@ aot-bridgehut:
 		Bounds: 1024, 1024
 	Selectable:
 		Bounds: 1024, 1024
+
+# === AOT Ice Floes (RA-Snow-Eisschollen als Actors) ===
+^AotIceFloe:
+	Immobile:
+	AotIceGrowth:
+	RenderSprites:
+		Palette: staticterrain
+	WithSpriteBody:
+	HiddenUnderShroud:
+	MapEditorData:
+		Categories: Ice
+		RequireTilesets: AOT_SNOW
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral
+
+aot-ice01:
+	Inherits: ^AotIceFloe
+
+aot-ice02:
+	Inherits: ^AotIceFloe
+
+aot-ice03:
+	Inherits: ^AotIceFloe
+
+aot-ice04:
+	Inherits: ^AotIceFloe
+
+aot-ice05:
+	Inherits: ^AotIceFloe
+
+aot-ice-cell:
+	Immobile:
+	RenderSprites:
+		Palette: staticterrain
+	WithSpriteBody:
+	HiddenUnderShroud:
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral
+
 # === Ende aotmod ===

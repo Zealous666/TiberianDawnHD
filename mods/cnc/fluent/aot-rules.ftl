@@ -192,3 +192,7 @@ actor-aot-upgrade-heavy-artillery =
     Upgrades the Mobile Howitzer with heavy siege artillery.
     Adds deploy capability and devastating firepower vs. structures.
     Requires Age 3 and Howitzer Upgrade.
+
+actor-aot-iron-dome =
+    .name = Iron Dome Experimental Installation
+    .description = Iron Dome

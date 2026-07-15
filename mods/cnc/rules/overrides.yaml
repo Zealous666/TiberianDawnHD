@@ -962,6 +962,16 @@ APC:
 		CargoType: GroundVehicle
 		Weight: 5
 		CustomPipType: green
+MCV:
+	Passenger:
+		CargoType: GroundVehicle
+		Weight: 5
+		CustomPipType: green
+FTNK:
+	Passenger:
+		CargoType: GroundVehicle
+		Weight: 5
+		CustomPipType: green
 
 # === Age of Tiberium (aotmod) - Fahrzeuge capturable für Carjacker ===
 ^Vehicle:

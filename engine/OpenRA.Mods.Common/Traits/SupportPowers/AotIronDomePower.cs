@@ -29,6 +29,9 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Sound beim Aktivieren (UI, nur lokaler Spieler).")]
 		public readonly string ActivationSound = "";
 
+		[Desc("Sound beim Aktivieren (World, global fuer alle Spieler hoerbar).")]
+		public readonly string GlobalActivationSound = "";
+
 		public override object Create(ActorInitializer init) { return new AotIronDomePower(init.Self, this); }
 	}
 
@@ -59,6 +62,9 @@ namespace OpenRA.Mods.Common.Traits
 
 			if (!string.IsNullOrEmpty(info.ActivationSound) && self.Owner == self.World.LocalPlayer)
 				Game.Sound.Play(SoundType.UI, info.ActivationSound);
+
+			if (!string.IsNullOrEmpty(info.GlobalActivationSound))
+				Game.Sound.Play(SoundType.World, info.GlobalActivationSound, self.CenterPosition);
 
 			// Bedingung auf alle lebenden eigenen Aktoren verteilen.
 			foreach (var a in self.World.Actors)
