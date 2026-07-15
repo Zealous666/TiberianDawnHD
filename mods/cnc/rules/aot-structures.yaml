@@ -583,6 +583,56 @@ aot-age3:
 		Name: Age 3
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - Guard Dog Kennel (NOD, Age 0) ===
+# Schaltet den Guard Dog in der Hand of Nod frei (sichtbar aber ausgegraut ohne dieses Upgrade).
+aot-upgrade-guard-dog-kennel:
+	Tooltip:
+		Name: Guard Dog Kennel
+
+	Valued:
+		Cost: 300
+
+	Buildable:
+		BuildPaletteOrder: 1
+		Prerequisites: stec
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Establishes a training kennel. Unlocks Guard Dogs at the Hand of Nod.
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-guard-dog-kennel
+
+	RenderSprites:
+		Image: aot-dog-nod
+
+	Interactable:
+
+# === Age of Tiberium (aotmod) - Spy Quarters (GDI, Age 0) ===
+# Schaltet den Undercover Spy in den GDI Barracks frei (sichtbar aber ausgegraut ohne dieses Upgrade).
+aot-upgrade-spy-quarters:
+	Tooltip:
+		Name: Spy Quarters
+
+	Valued:
+		Cost: 500
+
+	Buildable:
+		BuildPaletteOrder: 1
+		Prerequisites: atec
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Establishes covert training facilities. Unlocks Undercover Spies at the Barracks.
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-spy-quarters
+
+	RenderSprites:
+		Image: aot-spy-gdi
+
+	Interactable:
+
 # === Age of Tiberium (aotmod) - Recon Jeep: HUMVEE Upgrade ===
 # Tier 1 / Entweder-Oder mit APC Upgrade (!aot-apc-upgrade).
 # Schaltet HUMVEE-Sprite + stärkeres MG auf dem JEEP frei.
@@ -5823,7 +5873,10 @@ aot-br3:
 # Sprite: ctbhut.shp (TS conquer.mix via TS-Mod-Utility extrahieren → mods/cnc/bits/ legen).
 aot-bridgehut:
 	Building:
-		Footprint: x
+		# Begehbarer Footprint (_ statt x): der Engineer muss AUF die Hütten-Zelle laufen,
+		# um sie zu betreten (RepairBridge : Enter → MoveIntoTarget). Ein blockierendes x
+		# verhindert das Eintreten. Der Engine-BRIDGEHUT nutzt aus demselben Grund '__ __'.
+		Footprint: _
 		Dimensions: 1,1
 		LocalCenterOffset: 0,0,0
 	# BEWUSST KEIN Health/Armor/HitShape: die Reparaturhütte ist unzerstörbar

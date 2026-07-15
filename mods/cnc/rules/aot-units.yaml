@@ -15,7 +15,7 @@ aot-dog-nod:
 		AddToArmyValue: true
 	Buildable:
 		BuildPaletteOrder: 60
-		Prerequisites: barracks, stec
+		Prerequisites: barracks, aot-guard-dog-kennel
 		Queue: Infantry.Nod
 		Description: Fast anti-infantry unit. Instantly kills enemy soldiers.
 	Health:
@@ -159,7 +159,7 @@ aot-spy-gdi:
 		Voice: Move
 	Buildable:
 		BuildPaletteOrder: 55
-		Prerequisites: barracks, atec
+		Prerequisites: barracks, aot-spy-quarters
 		Queue: Infantry.GDI
 		Description: Disguised agent. Infiltrates enemy buildings to steal credits, reveal the map, or reset support powers.
 	Health:
