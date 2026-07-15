@@ -608,11 +608,11 @@ aot-upgrade-guard-dog-kennel:
 
 	Interactable:
 
-# === Age of Tiberium (aotmod) - Spy Quarters (GDI, Age 0) ===
+# === Age of Tiberium (aotmod) - Intelligence Office (GDI, Age 0) ===
 # Schaltet den Undercover Spy in den GDI Barracks frei (sichtbar aber ausgegraut ohne dieses Upgrade).
-aot-upgrade-spy-quarters:
+aot-upgrade-intelligence-office:
 	Tooltip:
-		Name: Spy Quarters
+		Name: Intelligence Office
 
 	Valued:
 		Cost: 500
@@ -626,7 +626,7 @@ aot-upgrade-spy-quarters:
 		Description: Establishes covert training facilities. Unlocks Undercover Spies at the Barracks.
 
 	ProvidesPrerequisite:
-		Prerequisite: aot-spy-quarters
+		Prerequisite: aot-intelligence-office
 
 	RenderSprites:
 		Image: aot-spy-gdi

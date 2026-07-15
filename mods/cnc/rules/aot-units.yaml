@@ -159,7 +159,7 @@ aot-spy-gdi:
 		Voice: Move
 	Buildable:
 		BuildPaletteOrder: 55
-		Prerequisites: barracks, aot-spy-quarters
+		Prerequisites: barracks, aot-intelligence-office
 		Queue: Infantry.GDI
 		Description: Disguised agent. Infiltrates enemy buildings to steal credits, reveal the map, or reset support powers.
 	Health:
@@ -1417,7 +1417,8 @@ aot-ltnk-base:
 	RenderSprites:
 		Image: ltnk
 	Buildable:
-		Queue: Vehicle.Nod
+		Queue: Starport
+		BuildDuration: 0
 		BuildPaletteOrder: 40
 		Prerequisites: ~aot-age1, aot-age1, afld, ~!aot-ltnk-upgrade, ~!aot-laser-fence-upgrade
 		Description: Fast and agile NOD light tank. Available from Age 1.
@@ -1429,7 +1430,8 @@ aot-ltnk-tick:
 	RenderSprites:
 		Image: ltnk
 	Buildable:
-		Queue: Vehicle.Nod
+		Queue: Starport
+		BuildDuration: 0
 		BuildPaletteOrder: 40
 		Prerequisites: ~aot-age1, aot-age1, afld, ~aot-ltnk-upgrade, ~!aot-laser-fence-upgrade
 		Icon: ltnk-tick-icon
@@ -1442,7 +1444,8 @@ aot-ltnk-laser:
 	RenderSprites:
 		Image: ltnk
 	Buildable:
-		Queue: Vehicle.Nod
+		Queue: Starport
+		BuildDuration: 0
 		BuildPaletteOrder: 40
 		Prerequisites: ~aot-age1, aot-age1, afld, ~aot-laser-fence-upgrade
 		Icon: ltnk-laser-icon
@@ -2348,7 +2351,8 @@ aot-ttnk-flame:
 	Buildable:
 		BuildPaletteOrder: 2
 		Prerequisites: afld, ~aot-ttnk-flame-upgrade, ~!aot-toxic-upgrade
-		Queue: Vehicle.Nod
+		Queue: Starport
+		BuildDuration: 0
 		Icon: aot-flame-icon
 		Description: Upgraded Heavy Tank armed with dual flamethrowers.
 	Tooltip@normal:
@@ -2361,7 +2365,8 @@ aot-ttnk-toxin:
 	Buildable:
 		BuildPaletteOrder: 2
 		Prerequisites: afld, ~aot-ttnk-flame-upgrade, ~aot-toxic-upgrade
-		Queue: Vehicle.Nod
+		Queue: Starport
+		BuildDuration: 0
 		Icon: aot-toxin-icon
 		Description: Flame Tank upgraded with dual toxic tiberian-sprayers.
 	Tooltip@normal:
@@ -2465,7 +2470,8 @@ aot-v2-napalm:
 	Buildable:
 		BuildPaletteOrder: 5
 		Prerequisites: afld, anyhq, ~aot-napalm-upgrade, ~!aot-toxic-upgrade
-		Queue: Vehicle.Nod
+		Queue: Starport
+		BuildDuration: 0
 		Icon: aot-v2-napalm-icon
 		Description: Napalm-upgraded V2. Fires two rockets in rapid succession. Highly effective vs. infantry.
 	-Tooltip:
@@ -2497,7 +2503,8 @@ aot-v2-toxic:
 	Buildable:
 		BuildPaletteOrder: 5
 		Prerequisites: afld, anyhq, ~aot-napalm-upgrade, ~aot-toxic-upgrade
-		Queue: Vehicle.Nod
+		Queue: Starport
+		BuildDuration: 0
 		Icon: aot-v2-toxic-icon
 		Description: Toxic-upgraded V2. Fires two toxic rockets that leave a lingering tiberium gas field at the impact site.
 	# Immer toxic (nur nach Toxic-Upgrade baubar, irreversibel): geerbte konditionale
@@ -2521,7 +2528,8 @@ aot-arty-howitzer:
 	Buildable:
 		BuildPaletteOrder: 5
 		Prerequisites: afld, ~aot-howitzer-upgrade, ~!aot-heavy-artillery-upgrade
-		Queue: Vehicle.Nod
+		Queue: Starport
+		BuildDuration: 0
 		Icon: aot-arty-howitzer-icon
 		Description: Medium-range howitzer artillery. Strong vs. light armor and structures.
 	GrantConditionOnPrerequisite@heavy:
@@ -2623,7 +2631,8 @@ aot-arty-heavy:
 	Buildable:
 		BuildPaletteOrder: 6
 		Prerequisites: ~aot-age3, aot-age3, afld, aot-howitzer-upgrade, ~aot-heavy-artillery-upgrade, aot-heavy-artillery-upgrade
-		Queue: Vehicle.Nod
+		Queue: Starport
+		BuildDuration: 0
 		Icon: aot-arty-heavy-adv-icon
 		Description: Heavy siege artillery. Deploy to fire. Devastating vs. structures and armor.
 	Tooltip:
@@ -3375,7 +3384,8 @@ aot-stnk-base:
 	RenderSprites:
 		Image: stnk
 	Buildable:
-		Queue: Vehicle.Nod
+		Queue: Starport
+		BuildDuration: 0
 		BuildPaletteOrder: 90
 		Prerequisites: ~aot-age1, tmpl, ~!aot-stnk-cargo-upgrade
 		Icon: aot-stnk-icon
@@ -3388,7 +3398,8 @@ aot-stnk-cargo:
 	RenderSprites:
 		Image: stnk
 	Buildable:
-		Queue: Vehicle.Nod
+		Queue: Starport
+		BuildDuration: 0
 		BuildPaletteOrder: 90
 		Prerequisites: ~aot-age1, tmpl, ~aot-stnk-cargo-upgrade
 		Icon: aot-stnk-cargo-icon
@@ -4676,7 +4687,8 @@ aot-mstealth:
 		Color: 8844FFB4
 		BorderColor: 20102080
 	Buildable:
-		Queue: Vehicle.Nod
+		Queue: Starport
+		BuildDuration: 0
 		BuildPaletteOrder: 90
 		Prerequisites: ~aot-age2, aot-shrine, afld
 		Icon: icon
@@ -4877,7 +4889,8 @@ aot-surveyor-nod:
 		Facing: 384
 		TransformSounds: place2.aud
 	Buildable:
-		Queue: Vehicle.Nod
+		Queue: Starport
+		BuildDuration: 0
 		BuildPaletteOrder: 90
 		Prerequisites: ~aot-age3, fix
 		Icon: icon
