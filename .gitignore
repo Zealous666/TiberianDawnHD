@@ -14,6 +14,9 @@ engine/**
 !engine/OpenRA.Mods.Common/Widgets/ProductionTabsWidget.cs
 !engine/OpenRA.Mods.Common/Traits/AotOpensProductionTabOnSelection.cs
 !engine/OpenRA.Mods.Common/Traits/
+!engine/OpenRA.Mods.Common/Traits/Player/
+!engine/OpenRA.Mods.Common/Traits/Player/BulkProductionQueue.cs
+!engine/OpenRA.Mods.Common/Traits/ProductionBulkAirDrop.cs
 !engine/OpenRA.Mods.Common/Traits/SupportPowers/
 !engine/OpenRA.Mods.Common/Traits/SupportPowers/AutoActivateSpawnActorPower.cs
 !engine/OpenRA.Mods.Common/Traits/SupportPowers/AotSatellitePower.cs

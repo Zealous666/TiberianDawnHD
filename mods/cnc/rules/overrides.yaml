@@ -292,6 +292,28 @@ C17:
 	Cloak:
 		CloakStyle: Alpha
 
+# === Age of Tiberium (aotmod) - c17.bulk: Frachtflieger fuer NOD Airstrip Starport ===
+# Klon des C17. Kein VTOL/Hover — Fixed-Wing-Landeanflug (Deceleration wie AJET/Firehawk).
+# LandableTerrainTypes noetig damit Land-Activity greift.
+# Cargo-Trait pflicht fuer DeliverBulkOrder (Ctor-Crash ohne ihn); Einheiten werden per DoProduction gespawnt.
+c17.bulk:
+	Inherits: C17
+	RenderSprites:
+		Image: c17
+	Tooltip:
+		Name: actor-c17-name
+	Aircraft:
+		TurnSpeed: 20
+		Speed: 700
+		Repulsable: False
+		MaximumPitch: 36
+		LandableTerrainTypes: Clear, Rough, Road, Beach, Tiberium, BlueTiberium
+	Cargo:
+		MaxWeight: 20
+		BeforeUnloadDelay: 12
+		BetweenUnloadDelay: 15
+		AfterUnloadDelay: 8
+
 # === Age of Tiberium (aotmod) - HQ: nur GDI + EYE-Sprite nach Ion Cannon Upgrade ===
 # HQ ist jetzt GDI-exklusiv. NOD bekommt eigenen Radar (aot-nod-radar).
 # Age-Powers liegen auf FACT. Ion Cannon Upgrade schaltet EYE-Sprites frei.
@@ -404,6 +426,24 @@ Player:
 		QueuedAudio: Building
 		OnHoldAudio: OnHold
 		CancelledAudio: Cancelled
+	# === Age of Tiberium (aotmod) - NOD Airstrip Starport (Dune 2000 / TS style bulk delivery) ===
+	# Instant-Kauf bis MaxCapacity, dann Purchase-Button -> Frachtflieger liefert alle auf einmal.
+	# Player-Level-Queue (Pflicht: BulkProductionQueue ist [TraitLocation(Player)]).
+	# Group: Vehicle -> erscheint unter dem bestehenden VEHICLE-Tab der NOD.
+	BulkProductionQueue@Starport:
+		Type: Starport
+		Group: Vehicle
+		Factions: nod
+		MaxCapacity: 5
+		QueueLimit: 5
+		PayUpFront: true
+		DeliveryDelay: 500
+		LowPowerModifier: 150
+		BlockedAudio: NoBuild
+		BlockedTextNotification: notification-unable-to-build-more
+		QueuedAudio: Training
+		OnHoldAudio: OnHold
+		CancelledAudio: Cancelled
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - WEAP: Prerequisite + eigener aot-weap-String ===
@@ -419,13 +459,29 @@ WEAP:
 	ProvidesPrerequisite@buildingname:
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - AFLD: Prerequisite auf lite ===
+# === Age of Tiberium (aotmod) - AFLD: Starport-Umbau + Prerequisite ===
 # ProvidesPrerequisite@buildingname: → stellt "afld" bereit (für Tooltip-Lookup in age2-upgrade-nod).
+# -ProductionAirdrop / -ProductionQueue entfernen Engine-Traits (Vehicle.Nod queue entfällt).
+# BulkProductionQueue@Starport (Player-Level in overrides.yaml) wird durch ProductionBulkAirdrop aktiviert.
 AFLD:
 	Buildable:
 		Prerequisites: ~aot-age1, aot-age1, lite
 		Queue: Building.Nod
 	ProvidesPrerequisite@buildingname:
+	-ProductionAirdrop:
+	-ProductionQueue:
+	RallyPoint:
+		ForceSetType: Starport
+	ProductionBulkAirdrop:
+		Produces: Starport
+		ActorType: c17.bulk
+		LandOffset: -1024,0,0
+		Facing: 768
+		ReadyTextNotification: notification-reinforcements-have-arrived
+	PrimaryBuilding:
+		ProductionQueues: Starport
+	ProductionBar:
+		ProductionType: Starport
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - PROC: GDI braucht WEAP, NOD braucht AFLD ===

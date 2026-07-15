@@ -1699,7 +1699,22 @@ aot-harv:
 	Buildable:
 		BuildPaletteOrder: 2
 		Prerequisites: ~aot-age1, proc
-		Queue: Vehicle.GDI, Vehicle.Nod
+		Queue: Vehicle.GDI
+		Description: Harvests Tiberium and returns it to the refinery.
+
+# === Age of Tiberium (aotmod) - NOD Harvester-Variante fuer Starport-Queue ===
+# aot-harv ist dual-faction: GDI baut normal (Vehicle.GDI, WEAP). NOD baut ihn ueber den
+# Airstrip-Starport (instant, BuildDuration 0). Deshalb eigener NOD-Aktor mit Queue: Starport,
+# damit GDIs Harvester seine normale Bauzeit behaelt. Starport-Queue ist Factions: nod -> NOD-only.
+aot-harv-nod:
+	Inherits: HARV
+	RenderSprites:
+		Image: harv
+	Buildable:
+		BuildPaletteOrder: 2
+		Prerequisites: ~aot-age1, proc, afld
+		Queue: Starport
+		BuildDuration: 0
 		Description: Harvests Tiberium and returns it to the refinery.
 
 # === Age of Tiberium (aotmod) - Apache / ORCA Upgrade-System ===

@@ -1932,6 +1932,37 @@ Container@PLAYER_WIDGETS:
 			Y: 299
 			Width: 194
 			Height: 20
+		# === Age of Tiberium (aotmod) - NOD Airstrip Starport: Purchase/Deliver-Button ===
+		# Sichtbar nur wenn die BulkProductionQueue@Starport (NOD) selektiert ist und >=1 Einheit
+		# im Liefer-Slot wartet. Loesst den "PurchaseOrder"-Order aus -> Frachtflieger liefert alle.
+		# Logik: PurchaseWidgetLogic (portiert nach OpenRA.Mods.Mobius).
+		Container@PURCHASE_PANEL:
+			Logic: PurchaseWidgetLogic
+			X: WINDOW_WIDTH - 5 - 18 - 194
+			Y: WINDOW_HEIGHT - 34
+			Width: 194
+			Height: 30
+			Children:
+				Button@PURCHASE_BUTTON:
+					X: 0
+					Y: 0
+					Width: 118
+					Height: 28
+					Font: Bold
+					Background: chrome-button-background
+					Text: button-purchase-label
+					TooltipText: purchase-panel-button-tooltip
+					TooltipContainer: TOOLTIP_CONTAINER
+				Label@DELIVERY_IN:
+					X: 0
+					Y: 0
+					Width: 194
+					Height: 28
+					Align: Center
+					Font: Bold
+					Visible: false
+					TextColor: FFD091
+					Text: purchase-panel-label-delivery
 		# === Age of Tiberium (aotmod) - Age-Upgrade-Widget links neben Minimap ===
 		# Standalone ProductionPalette für Age.GDI / Age.Nod Queue (auf Player-Aktor, immer aktiv).
 		# AotAgeProductionLogic verdrahtet die Faction-spezifische Queue ans Widget.
