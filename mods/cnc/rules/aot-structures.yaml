@@ -5766,6 +5766,48 @@ OREREF:
 		OwnerType: InternalName
 		InternalOwner: Neutral
 
+# === Iron Dome (Soviet RA): neutral-capturable Struktur mit Iron-Dome-Superpower ===
+# Sprite: IRON.ZIP (Remaster, TEXTURES_RA_SRGB.MEG), 8 Idle-Frames.
+# Buildphase: IRONMAKE.ZIP (4 Frames), wird als make-Sequenz verwendet.
+# Kein WithDeathAnimation (kein "dead"-Frame im Sprite) -> -WithDeathAnimation: notwendig.
+# Nur ueber den Karteneditor platzierbar (kein Buildable).
+# Nach Einnahme: AotIronDomePower macht alle eigenen Einheiten+Gebaeude 1 Minute unzerstoerbar.
+aot-iron-dome:
+	Inherits: ^TechBuilding
+	Inherits@shape: ^2x2Shape
+	Selectable:
+		Bounds: 2048, 2048
+	Building:
+		Footprint: xx xx
+		Dimensions: 2,2
+	Health:
+		HP: 50000
+	Tooltip:
+		Name: Iron Dome
+	RevealsShroud:
+		Range: 4c0
+	AotIronDomePower:
+		OrderName: AotIronDomePower
+		Description: Iron Dome
+		LongDesc: Makes all friendly units and buildings invulnerable for 60 seconds.
+		Icon: aot-iron-dome
+		Prerequisites: ~aot-iron-dome
+		ChargeInterval: 36000
+		SupportPowerPaletteOrder: 70
+	# ExternalCondition + Overlay/DamageMultiplier fuer den Aktor selbst
+	# (nicht ^TechBuilding, erbt kein ^Building in der Iron-Dome-Version dieser Traits
+	# da ^TechBuilding -> ^CivBuilding -> ^BaseBuilding, aber NICHT ^Building-override.
+	# Sicherheitshalber direkt am Aktor nochmals definieren.)
+	ExternalCondition@AOTIRONDOME:
+		Condition: aot-iron-dome
+	WithColoredOverlay@AOTIRONDOME:
+		RequiresCondition: aot-iron-dome
+	DamageMultiplier@AOTIRONDOME:
+		RequiresCondition: aot-iron-dome
+		Modifier: 0
+	TimedConditionBar@AOTIRONDOME:
+		Condition: aot-iron-dome
+
 # Bridge-Aktoren für AOT_TEMPERAT: BRIDGE1/2 benutzen Template@165-168 = Cliff-Tiles auf
 # AOT_TEMPERAT. Die richtigen Bridge-Templates liegen hier auf @131-134 / @378-379.
 # BRIDGE3/4 haben keine passenden Templates auf AOT_TEMPERAT → nicht unterstützt.

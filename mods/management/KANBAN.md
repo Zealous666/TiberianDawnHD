@@ -22,21 +22,24 @@
   - [x] dropship routine (2 jeeps, 2 mtnk)
   - [ ] coop archon system
   - [ ] coop mission 1 (test)
-  - [ ] 1. upgrade toggle
-  - [ ] 2. airfield shuttle mechanic
-  - [ ] 3. bridge repair mechanik & destruction
+  - [x] 1. upgrade toggle
+  - [x] 2. bridge repair mechanik & destruction
+  - [ ] 3. spaceport/shuttle airfield
   - [ ] 4. ice grow & destruction
-  - [ ] LITE nod & LITE gdi age 3
-  - [ ] barracks & hand age 3
-  - [ ] gsi & nod radars age 3
-  - [ ] powerplants nod & powerplants gdi age 3
+  - [ ] 5. support / defense tab
+  - [ ] hand of nod & gdi-pyle age 3
+  - [ ] gdi radar & nod dome age 3
+  - [ ] powerplants & turbines age 3
   - [ ] construction yard age 3
-  - [ ] hospital funktion oder crate?
-  - [ ] civilian ts buildings & garrissons
+  - [ ] LITE nod & LITE gdi age 3
+  - [ ] civilian ts streets, buildings & garrissons
   - [x] tree destruction
   - [ ] TS soundtracks
   - [ ] idle menü map szene
-  - [ ] todo vor ki: upgrade toggle, spaceport system, bridge huts
+  - [ ] hospital super-power (heal all) & iron dome super power (invicible all)
+  - [ ] todo vor ki: upgrade toggle, spaceport system, bridge huts, support/defense tab/subterain systems
+  - [ ] TS lightning & ambient sounds
+  - [ ] subterrain upgrade (flametank, apc?) & betonplatten
 - [ ] Fixes
   - [ ] einheiten auf repair facility verkaufen
   - [x] upgrades wenn tec center selektiert
@@ -102,6 +105,11 @@
   - [x] APC -> AAPC / Mine Layer
   - [x] MTNK -> Predator / Titan
   - [x] MLRS -> Hover MLRS & Hover AA / Jugg
+- [ ] Subterrain Systems
+  Age 2 system
+  - [ ] Sub Terrain Flame Tank Upgrade
+  - [ ] Sub Terrain Transport
+  - [ ] Concrete Plates (Grey Smudge?)
 
 ## Rules / Balancing
 
@@ -112,7 +120,7 @@
 - [ ] NOD Building Balancing
 - [ ] GDI Building Balancing
 
-## Maps
+## Skirmish Maps
 
 - [ ] ☑️ Testmap
   Erste Zoomap (klein, 2 Spieler) bauen
@@ -120,21 +128,37 @@
   - [x] 2 ore mines
   - [x] 2 tiberium felder
   - [x] wasser
-- [ ] MP Forest Fires
+- [ ] Forest Fires (6)
   Temperate (RA)
   - [x] 6 player
   - [ ] test gegen AI
   - [ ] ressource balancing
   - [x] tiberium bäume
   - [x] ore refineries
-  - [x] + 1 oil derrick pro ausgang
-  - [x] seekisten (testen)
-  - [ ] bridge repair huts
+  - [x] oil derricks & pumps
+  - [x] bridge repair huts
   - [ ] civilian TS buildings
-- [ ] Snow?
+  - [x] tree-destruction
+  - [ ] Ant valley
+- [ ] Polar Panic (8)
+  Snow (RA)
+  - [x] 8 player
+  - [ ] test gegen AI
+  - [ ] ressource balancing
+  - [x] tiberium bäume
+  - [ ] Iron dome island
+  - [x] oil derricks & pumps
+  - [x] bridge repair huts
+  - [ ] ice system
 - [ ] Desert?
+  - [ ] Critter waves
+  - [ ] hospital island
 - [ ] Winter?
+  - [ ] hq valley (paradrops)
+  - [ ] snow water-cliffs & snow cliffs
 - [ ] Jungle?
+  - [ ] Ion Storm?
+  - [ ] Dinosaur islands & blue tib
 
 ## Campaigns
 

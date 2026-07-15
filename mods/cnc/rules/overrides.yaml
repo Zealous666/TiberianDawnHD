@@ -54,6 +54,16 @@ World:
 	RevealsShroud@GAPSUPPRESS:
 		Range: 2c0
 		RequiresCondition: aot-gap-suppressed
+	# === Iron Dome - Unzerstoerbarkeit fuer Infanterie ===
+	ExternalCondition@AOTIRONDOME:
+		Condition: aot-iron-dome
+	WithColoredOverlay@AOTIRONDOME:
+		RequiresCondition: aot-iron-dome
+	DamageMultiplier@AOTIRONDOME:
+		RequiresCondition: aot-iron-dome
+		Modifier: 0
+	TimedConditionBar@AOTIRONDOME:
+		Condition: aot-iron-dome
 	# === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - SpyInfiltrate TargetType auf allen Gebäuden ===
@@ -91,6 +101,16 @@ World:
 		# Cloak-/Decloak-Sound pro Einheit (wie Stealth Tank STNK): trans1.aud.
 		CloakSound: trans1.aud
 		UncloakSound: trans1.aud
+	# === Iron Dome - Unzerstoerbarkeit fuer Gebaeude ===
+	ExternalCondition@AOTIRONDOME:
+		Condition: aot-iron-dome
+	WithColoredOverlay@AOTIRONDOME:
+		RequiresCondition: aot-iron-dome
+	DamageMultiplier@AOTIRONDOME:
+		RequiresCondition: aot-iron-dome
+		Modifier: 0
+	TimedConditionBar@AOTIRONDOME:
+		Condition: aot-iron-dome
 
 # NUKE + NUK2: Spy sabotiert Kraftwerk → Stromausfall beim Gegner
 NUKE:
@@ -995,6 +1015,16 @@ APC:
 	RevealsShroud@GAPSUPPRESS:
 		Range: 2c0
 		RequiresCondition: aot-gap-suppressed
+	# === Iron Dome - Unzerstoerbarkeit fuer Fahrzeuge ===
+	ExternalCondition@AOTIRONDOME:
+		Condition: aot-iron-dome
+	WithColoredOverlay@AOTIRONDOME:
+		RequiresCondition: aot-iron-dome
+	DamageMultiplier@AOTIRONDOME:
+		RequiresCondition: aot-iron-dome
+		Modifier: 0
+	TimedConditionBar@AOTIRONDOME:
+		Condition: aot-iron-dome
 	# === Ende aotmod ===
 	AotDamagedByCondition:
 		RequiresCondition: aot-tiberium-gassed

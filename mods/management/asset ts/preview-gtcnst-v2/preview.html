@@ -63,9 +63,9 @@ per einfachem Skalieren übergelegt landet sichtbar daneben (links). Mit einer O
 dann nicht aus der warpten Maske, sondern sauber entlang der Strukturen des neuen Sprites nachgezogen.</p>
 
 <h2>4. Animation: Propeller + Lauflicht <span class="badge ok">gebacken</span></h2>
-<p>7 Frames wie zuvor: die drei Lüfter drehen (90°/7 pro Frame → nahtloser 4-Blatt-Loop, Ellipsen pro Lüfter
-automatisch gefittet), und das Lauflicht wandert wieder über die 7 Messingkugeln entlang der Dachkante
-(Glow-Blob aus der alten Anim übernommen, auf v2-Maßstab skaliert). Sheet:
+<p><b>14 Frames:</b> die drei Lüfter machen eine <b>komplette 360°-Umdrehung</b> (25,7°/Frame — Loop schließt exakt),
+das Lauflicht läuft dabei 2× über die 7 Messingkugeln (Timing pro Kugel wie zuvor). Ellipse des mittleren
+Lüfters wurde manuell nachgezogen — kein Kippen mehr. Glow-Blob aus der alten Anim übernommen, auf v2-Maßstab skaliert. Sheet:
 <code>interpolated/gdi-construction-yard-gtcnst-anim_v2.png</code> (1346×848/Frame, FrameSize/FrameAmount-Chunks gesetzt).</p>
 <div class="row">
   <figure><img src="anim_fans.gif" width="560"><figcaption>Detail: Rotoren + Lauflicht</figcaption></figure>
@@ -77,9 +77,7 @@ automatisch gefittet), und das Lauflicht wandert wieder über die 7 Messingkugel
   <figure><img src="ingame_4x.gif"><figcaption>Simulierte In-Game-Größe (4× Zoom)</figcaption></figure>
   <figure><img src="ingame_2x.gif"><figcaption>2× Zoom (typisch)</figcaption></figure>
 </div>
-<p><span class="badge warn">Hinweis</span> Beim Loop-Übergang (Frame 6 → 0) springt die Beleuchtung der Blätter minimal,
-weil die Blätter unterschiedlich beleuchtet sind. Bei In-Game-Größe (~5&nbsp;px pro Lüfter) unsichtbar —
-falls es doch stört, kann ich die Blatt-Beleuchtung symmetrisieren.</p>
+<p><span class="badge ok">Loop</span> Durch die volle 360°-Umdrehung schließt der Loop exakt — kein Beleuchtungssprung mehr am Übergang.</p>
 
 <h2>5. Nächste Schritte</h2>
 <ul>

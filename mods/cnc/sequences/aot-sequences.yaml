@@ -1978,6 +1978,9 @@ icon:
 	aot-zone-drop:
 		Filename: aot-zone-drop-icon.png
 		Length: 1
+	aot-iron-dome:
+		Filename: aot-iron-dome-icon.png
+		Length: 1
 	aot-orcatransport:
 		Filename: aot-orcatransport-icon.png
 		Length: 1
@@ -4626,6 +4629,24 @@ aot-bridgehut:
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.048
+		Offset: 0, 0
+
+# === Iron Dome (RA Remaster) ===
+# IRON.ZIP8: 8 Idle-Frames (Pfad in MEG: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\IRON.ZIP8)
+# IRONMAKE.ZIP4: 4 Build-Frames (Pfad: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\IRONMAKE.ZIP4)
+# Kein klassisches SHP-Fallback -> Filename: leer (Remaster-only Sprite).
+aot-iron-dome:
+	idle:
+		Filename:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\IRON.ZIP8
+		Length: 8
+		Scale: 0.04
+		Offset: 0, 0
+	make:
+		Filename:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\IRONMAKE.ZIP4
+		Length: 4
+		Scale: 0.04
 		Offset: 0, 0
 
 # === Ende aotmod ===

@@ -25,6 +25,7 @@ engine/**
 !engine/OpenRA.Mods.Common/Traits/SupportPowers/AotOrcaTransportPower.cs
 !engine/OpenRA.Mods.Common/Traits/SupportPowers/AotZoneTrooperDropPower.cs
 !engine/OpenRA.Mods.Common/Traits/SupportPowers/AotAirstrikePower.cs
+!engine/OpenRA.Mods.Common/Traits/SupportPowers/AotIronDomePower.cs
 !engine/OpenRA.Mods.Common/Traits/OreTransporter.cs
 !engine/OpenRA.Mods.Common/Traits/OreMineDurability.cs
 !engine/OpenRA.Mods.Common/Traits/Minelayer.cs
@@ -66,6 +67,7 @@ engine/**
 !engine/OpenRA.Mods.Cnc/Traits/AotAgeActivationNotification.cs
 !engine/OpenRA.Mods.Cnc/UtilityCommands/
 !engine/OpenRA.Mods.Cnc/UtilityCommands/VxlToPngCommand.cs
+!engine/OpenRA.Mods.Cnc/UtilityCommands/AotMixToolCommand.cs
 # Weitere gepatchte Standard-Engine-Dateien + neue AOT-Traits (nachgetrackt)
 !engine/OpenRA.Mods.Common/Projectiles/
 !engine/OpenRA.Mods.Common/Projectiles/NukeLaunch.cs
