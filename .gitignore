@@ -77,6 +77,10 @@ engine/**
 !engine/OpenRA.Mods.Common/Traits/Buildings/
 !engine/OpenRA.Mods.Common/Traits/Buildings/Gate.cs
 !engine/OpenRA.Mods.Common/Traits/Buildings/Reservable.cs
+# aotmod: Bridge destruction & repair system (Standalone Bridge Repair Hut + zerstörbare Brücken)
+!engine/OpenRA.Mods.Common/Traits/Buildings/LegacyBridgeHut.cs
+!engine/OpenRA.Mods.Common/Traits/RepairsBridges.cs
+!engine/OpenRA.Mods.Common/Activities/RepairBridge.cs
 !engine/OpenRA.Mods.Common/Traits/Render/WithGateSpriteBody.cs
 !engine/OpenRA.Mods.Common/Traits/Render/WithMoveAnimation.cs
 !engine/OpenRA.Mods.Common/Traits/Render/WithSpriteBody.cs

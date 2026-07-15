@@ -8,6 +8,10 @@
 # NUR auf World (nicht EditorWorld) erlaubt, deshalb eigener Block statt ^BaseWorld.
 World:
 	JumpjetActorLayer:
+	LegacyBridgeLayer:
+		# Originalaktoren (bridge1-4) + AoT-TEMPERAT-Varianten mit korrekten Template-IDs
+		# + zerstörbare Fluss-Brücken (aot-br1/br2/br3, Templates 235-246, AOT_TEMPERAT & AOT_SNOW)
+		Bridges: bridge1, bridge2, bridge3, bridge4, aot-tem-bridge1, aot-tem-bridge2, aot-br1, aot-br2, aot-br3
 
 # === Age of Tiberium (aotmod) - EdibleByLeap + Heal-TargetType für alle Infanterie ===
 ^Infantry:
@@ -131,6 +135,9 @@ E1:
 E6:
 	Buildable:
 		Prerequisites: ~disabled
+	# Bridge Repair Hut: TS-EVA "Bridge repaired." beim Reparieren (aot-e6-gdi/nod erben E6).
+	RepairsBridges:
+		RepairNotification: BridgeRepaired
 
 # === Age of Tiberium (aotmod) - E2 Grenadier: nur noch GDI, eigenes Icon ===
 E2:
@@ -1044,4 +1051,53 @@ ARTY:
 		# Cloak-/Decloak-Sound pro Einheit (wie Stealth Tank STNK): trans1.aud.
 		CloakSound: trans1.aud
 		UncloakSound: trans1.aud
+
+# Brücken: Force-Fire angreifbar + Explosionseffekte bei Schaden/Zerstörung.
+^Bridge:
+	Targetable:
+		TargetTypes: Ground, Water, Bridge
+
+^ExplosiveBridge:
+	ExplosionOnDamageTransition@DAMAGED:
+		DamageState: Heavy
+		Weapon: BridgeExplode
+	ExplosionOnDamageTransition@COLLAPSED:
+		DamageState: Dead
+		Weapon: BridgeExplode
+	SoundOnDamageTransition:
+		DestroyedSounds: crumble.aud
+
+BRIDGE1:
+	Inherits@EXPLOSIVE: ^ExplosiveBridge
+	# Auto-Hütten entfernt: Reparatur NUR über eine im Editor platzierte aot-bridgehut.
+	-FreeActor@north:
+	-FreeActor@south:
+	MapEditorData:
+		RequireTilesets: AOT_SNOW, WINTER
+		Categories: Terrain
+
+BRIDGE2:
+	Inherits@EXPLOSIVE: ^ExplosiveBridge
+	-FreeActor@north:
+	-FreeActor@south:
+	MapEditorData:
+		RequireTilesets: AOT_SNOW, WINTER
+		Categories: Terrain
+
+BRIDGE3:
+	Inherits@EXPLOSIVE: ^ExplosiveBridge
+	-FreeActor@north:
+	-FreeActor@south:
+	MapEditorData:
+		RequireTilesets: DESERT
+		Categories: Terrain
+
+BRIDGE4:
+	Inherits@EXPLOSIVE: ^ExplosiveBridge
+	-FreeActor@north:
+	-FreeActor@south:
+	MapEditorData:
+		RequireTilesets: DESERT
+		Categories: Terrain
+# aot-tem-bridge1/2 erben ^ExplosiveBridge transitiv über BRIDGE1/2.
 # === Ende aotmod ===

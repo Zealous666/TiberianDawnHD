@@ -1370,4 +1370,11 @@ OrcaAGMissiles:
 	Warhead@1Dam:
 		Versus:
 			Tree: 50
+
+BridgeExplode:
+	Warhead@1Eff: CreateEffect
+		Explosions: building, med_frag, poof
+		ImpactSounds: crumble.aud
+		ImpactActors: false
+		ValidTargets: Bridge, Ground, Water
 # === Ende aotmod ===

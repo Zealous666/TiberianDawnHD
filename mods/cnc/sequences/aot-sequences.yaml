@@ -4616,4 +4616,16 @@ aot-outpost-nod:
 		RemasteredFilename:
 		Tick: 80
 
+# Brücken-Reparatur-Hütte — Gemini-Render (TS-Bunker mit rotem Tür-Akzent).
+# Schatten ist ins PNG gebacken (Workflow gemini-building-import §2). Truecolor-Sprite:
+# grau + rote Tür (beides außerhalb des grünen ColorShift-Bereichs) → farbtreu via Palette: effect,
+# KEIN Player-Color-Remap (neutrales Gebäude). Scale/Offset in-game feinjustieren.
+aot-bridgehut:
+	idle:
+		Filename: aot-bridgehut-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.048
+		Offset: 0, 0
+
 # === Ende aotmod ===
