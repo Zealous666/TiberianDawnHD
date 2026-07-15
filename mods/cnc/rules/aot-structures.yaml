@@ -2200,7 +2200,7 @@ aot-tmpl-age2:
 # GDI → Age.GDI, NOD → Age.Nod (Queue auf Player-Aktor, Faction-Split via Factions: gdi/nod).
 # Sichtbarkeit: Age-1 sofort (grau ohne ATEC/STEC), Age-2/3 per ~aot-ageN-Kette.
 # ATEC (GDI) / STEC (NOD) sind Pflicht-Voraussetzung für ALLE drei Ages.
-# BuildDuration: 30000 Ticks = 20 min Bauzeit (entspricht dem ehemaligen ChargeInterval).
+# BuildDuration: 50000 Ticks = 20 min Bauzeit (entspricht dem ehemaligen ChargeInterval).
 # Nach Abschluss: AotAgeActivationNotification → globale Chat-Nachricht an alle Spieler.
 # ProvidesPrerequisite: aot-ageN DIREKT (kein -purchased-Zwischenschritt mehr).
 aot-age1-upgrade-gdi:
@@ -2214,7 +2214,7 @@ aot-age1-upgrade-gdi:
 		Prerequisites: atec, ~!aot-age1
 		Queue: Age.GDI
 		BuildLimit: 1
-		BuildDuration: 30000
+		BuildDuration: 50000
 		MoveIntoWorld: false
 		Description: Unlocks the Tiberium era with new units, buildings and the capability to harvest Tiberium.
 	ProvidesPrerequisite:
@@ -2235,7 +2235,7 @@ aot-age1-upgrade-nod:
 		Prerequisites: stec, ~!aot-age1
 		Queue: Age.Nod
 		BuildLimit: 1
-		BuildDuration: 30000
+		BuildDuration: 50000
 		MoveIntoWorld: false
 		Description: Unlocks the Tiberium era with new units, buildings and the capability to harvest Tiberium.
 	ProvidesPrerequisite:
@@ -2256,7 +2256,7 @@ aot-age2-upgrade-gdi:
 		Prerequisites: ~aot-age1, atec, aot-age1, aot-proc-gdi, ~!aot-age2
 		Queue: Age.GDI
 		BuildLimit: 1
-		BuildDuration: 30000
+		BuildDuration: 50000
 		MoveIntoWorld: false
 		Description: Moves forward in the Tiberium technologies with new upgrades and additional equipment.
 	ProvidesPrerequisite:
@@ -2277,7 +2277,7 @@ aot-age2-upgrade-nod:
 		Prerequisites: ~aot-age1, stec, aot-age1, aot-proc-nod, ~!aot-age2
 		Queue: Age.Nod
 		BuildLimit: 1
-		BuildDuration: 30000
+		BuildDuration: 50000
 		MoveIntoWorld: false
 		Description: Moves forward in the Tiberium technologies with new upgrades and additional equipment.
 	ProvidesPrerequisite:
@@ -2298,7 +2298,7 @@ aot-age3-upgrade-gdi:
 		Prerequisites: ~aot-age2, atec, aot-age2, aot-orbc, ~!aot-age3
 		Queue: Age.GDI
 		BuildLimit: 1
-		BuildDuration: 30000
+		BuildDuration: 50000
 		MoveIntoWorld: false
 		Description: Upgrades to the most advanced Tiberium units, buildings and upgrades.
 	ProvidesPrerequisite:
@@ -2319,7 +2319,7 @@ aot-age3-upgrade-nod:
 		Prerequisites: ~aot-age2, stec, aot-age2, aot-shrine, ~!aot-age3
 		Queue: Age.Nod
 		BuildLimit: 1
-		BuildDuration: 30000
+		BuildDuration: 50000
 		MoveIntoWorld: false
 		Description: Upgrades to the most advanced Tiberium units, buildings and upgrades.
 	ProvidesPrerequisite:
@@ -5715,4 +5715,143 @@ OREREF:
 		Range: 1
 		OwnerType: InternalName
 		InternalOwner: Neutral
+
+# Bridge-Aktoren für AOT_TEMPERAT: BRIDGE1/2 benutzen Template@165-168 = Cliff-Tiles auf
+# AOT_TEMPERAT. Die richtigen Bridge-Templates liegen hier auf @131-134 / @378-379.
+# BRIDGE3/4 haben keine passenden Templates auf AOT_TEMPERAT → nicht unterstützt.
+# Auf AOT_SNOW / WINTER: BRIDGE1/2 (165-168) funktionieren nativ → keine Extra-Aktoren.
+# Auf DESERT: BRIDGE3/4 (169-172 = bridge3/4.des) funktionieren nativ → keine Extra-Aktoren.
+# Exakt übernommen aus RA civilian.yaml BRIDGE1/BRIDGE2 — gleiche Template-IDs,
+# gleiche Footprints (5×3 / 5×2), gleiche FreeActor-Offsets wie in Red Alert.
+# Auf AOT_TEMPERAT ist bridge1.tem = Template@131, bridge1h.tem = @378, bridge1d.tem = @132 etc.
+aot-tem-bridge1:
+	Inherits: ^Bridge
+	Inherits@EXPLOSIVE: ^ExplosiveBridge
+	Bridge:
+		Template: 131
+		DamagedTemplate: 378
+		DestroyedTemplate: 132
+	Building:
+		Footprint: _____ _____ _____
+		Dimensions: 5,3
+	# Keine FreeActor-Auto-Hütte: Reparatur NUR über eine im Editor platzierte aot-bridgehut.
+	Interactable:
+		Bounds: 5120, 3072
+	MapEditorData:
+		RequireTilesets: AOT_TEMPERAT
+		Categories: Terrain
+
+aot-tem-bridge2:
+	Inherits: ^Bridge
+	Inherits@EXPLOSIVE: ^ExplosiveBridge
+	Bridge:
+		Template: 133
+		DamagedTemplate: 379
+		DestroyedTemplate: 134
+	Building:
+		Footprint: _____ _____
+		Dimensions: 5,2
+	# Keine FreeActor-Auto-Hütte: Reparatur NUR über eine im Editor platzierte aot-bridgehut.
+	Interactable:
+		Bounds: 5120, 2048
+	MapEditorData:
+		RequireTilesets: AOT_TEMPERAT
+		Categories: Terrain
+
+# ── Zerstörbare Fluss-Brücken (Steinbogen) ────────────────────────────────────
+# 1:1-Nachbau von RA's BR1/BR2/BR3. Die Tilesets AOT_TEMPERAT und AOT_SNOW teilen
+# sich dieselben Template-IDs (235-246), daher decken diese drei Aktoren BEIDE
+# Tilesets ab. Der LegacyBridgeLayer wandelt beim Kartenladen jedes gemalte
+# br1a/br2a/br3a-Terrain-Tile automatisch in einen dieser Aktoren um → dadurch
+# werden bestehende Fluss-Brücken zerstörbar OHNE Kartenänderung.
+#   br1a=intakt(235) br1b=beschädigt(236) br1c=zerstört(237)
+#   br2a=intakt(238) br2b=beschädigt(239) br2c=zerstört(240)
+#   br3a=intakt(241) … br3f=Teilzerstörungs-Varianten (Long-Bridge-Mittelspann)
+# aot-br1/aot-br2 = Ufer-Stücke (mit Auto-Reparaturhütte), aot-br3 = Long-Mittelteil.
+aot-br1:
+	Inherits: ^Bridge
+	Inherits@EXPLOSIVE: ^ExplosiveBridge
+	Bridge:
+		Template: 235
+		DamagedTemplate: 236
+		DestroyedTemplate: 237
+		SouthOffset: 0,2
+	Building:
+		Footprint: ____ ____ ____
+		Dimensions: 4,3
+	# Keine FreeActor-Auto-Hütte: Reparatur NUR über eine im Editor platzierte aot-bridgehut.
+	Interactable:
+		Bounds: 4096, 3072
+
+aot-br2:
+	Inherits: ^Bridge
+	Inherits@EXPLOSIVE: ^ExplosiveBridge
+	Bridge:
+		Template: 238
+		DamagedTemplate: 239
+		DestroyedTemplate: 240
+		NorthOffset: 3,0
+	Building:
+		Footprint: _____ _____ _____
+		Dimensions: 5,3
+	# Keine FreeActor-Auto-Hütte: Reparatur NUR über eine im Editor platzierte aot-bridgehut.
+	Interactable:
+		Bounds: 5120, 3072
+
+aot-br3:
+	Inherits: ^Bridge
+	Inherits@EXPLOSIVE: ^ExplosiveBridge
+	Bridge:
+		Long: true
+		ShorePieces: aot-br1,aot-br2
+		Template: 241
+		DamagedTemplate: 242
+		DestroyedTemplate: 243
+		DestroyedPlusNorthTemplate: 245
+		DestroyedPlusSouthTemplate: 244
+		DestroyedPlusBothTemplate: 246
+		NorthOffset: 2,0
+		SouthOffset: 0,1
+	Building:
+		Footprint: ____ ____
+		Dimensions: 4,2
+	Interactable:
+		Bounds: 4096, 2048
+
+# Brücken-Reparatur-Hütte: frei im Map-Editor platzierbares 1×1-Gebäude.
+# Wenn ein Engineer/Saboteur eintritt, wird die nächste Brücke im Radius 8 repariert/gesprengt.
+# Sprite: ctbhut.shp (TS conquer.mix via TS-Mod-Utility extrahieren → mods/cnc/bits/ legen).
+aot-bridgehut:
+	Building:
+		Footprint: x
+		Dimensions: 1,1
+		LocalCenterOffset: 0,0,0
+	# BEWUSST KEIN Health/Armor/HitShape: die Reparaturhütte ist unzerstörbar
+	# (wie der Engine-BRIDGEHUT). Health würde zwingend einen HitShape verlangen.
+	RenderSprites:
+		Image: aot-bridgehut
+	WithSpriteBody:
+		Sequence: idle
+		# Truecolor-Body (Gemini-Render): Palette effect + IsPlayerPalette false, damit der
+		# grüne PlayerColorShift NICHT greift und Grau/Rot farbtreu bleiben (Workflow-Muster).
+		Palette: effect
+		IsPlayerPalette: false
+	Tooltip:
+		Name: Bridge Repair Hut
+		GenericName: Bridge Repair Hut
+	# Keine RequireTilesets-Beschränkung: die Hütte ist tileset-agnostisch (findet per
+	# Proximity-Suche jede Brücke) → im Editor auf ALLEN Tilesets sichtbar.
+	MapEditorData:
+		Categories: Civilians
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral
+	LegacyBridgeHut:
+		StandaloneSearchRadius: 8
+	Targetable:
+		TargetTypes: BridgeHut, C4
+		RequiresForceFire: false
+	Interactable:
+		Bounds: 1024, 1024
+	Selectable:
+		Bounds: 1024, 1024
 # === Ende aotmod ===
