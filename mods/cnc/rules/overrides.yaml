@@ -303,6 +303,11 @@ RMBO:
 		BaseName: aot-wolverine-player
 		BasePalette: aot-wolverine-base
 		RemapIndex: 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
+	# TS isosnow.mix Terrain-Palette für TmpTS-Sprites (ishore*.sno, clear01a.sno)
+	PaletteFromFile@aot-isosno:
+		Name: aot-isosno
+		Filename: isosno.pal
+		AllowModifiers: false
 
 STNK:
 	Cloak:
@@ -1072,6 +1077,16 @@ ARTY:
 	RevealsShroud@GAPSUPPRESS:
 		Range: 2c0
 		RequiresCondition: aot-gap-suppressed
+	# === Iron Dome - Unzerstoerbarkeit fuer Schiffe ===
+	ExternalCondition@AOTIRONDOME:
+		Condition: aot-iron-dome
+	WithColoredOverlay@AOTIRONDOME:
+		RequiresCondition: aot-iron-dome
+	DamageMultiplier@AOTIRONDOME:
+		RequiresCondition: aot-iron-dome
+		Modifier: 0
+	TimedConditionBar@AOTIRONDOME:
+		Condition: aot-iron-dome
 	# === Nod Stealth Generator (aot-sgen) - Stealth Field auch fuer Schiffe ===
 	ExternalCondition@AOTSTEALTH:
 		Condition: aot-stealth-field
@@ -1102,6 +1117,16 @@ ARTY:
 		Range: 2c0
 		Type: GroundPosition
 		RequiresCondition: aot-gap-suppressed
+	# === Iron Dome - Unzerstoerbarkeit fuer Flieger ===
+	ExternalCondition@AOTIRONDOME:
+		Condition: aot-iron-dome
+	WithColoredOverlay@AOTIRONDOME:
+		RequiresCondition: aot-iron-dome
+	DamageMultiplier@AOTIRONDOME:
+		RequiresCondition: aot-iron-dome
+		Modifier: 0
+	TimedConditionBar@AOTIRONDOME:
+		Condition: aot-iron-dome
 	# === Nod Stealth Generator (aot-sgen) - Stealth Field auch fuer Flieger ===
 	ExternalCondition@AOTSTEALTH:
 		Condition: aot-stealth-field
@@ -1130,6 +1155,16 @@ ARTY:
 		Range: 2c0
 		Type: GroundPosition
 		RequiresCondition: aot-gap-suppressed
+	# === Iron Dome - Unzerstoerbarkeit fuer Helikopter ===
+	ExternalCondition@AOTIRONDOME:
+		Condition: aot-iron-dome
+	WithColoredOverlay@AOTIRONDOME:
+		RequiresCondition: aot-iron-dome
+	DamageMultiplier@AOTIRONDOME:
+		RequiresCondition: aot-iron-dome
+		Modifier: 0
+	TimedConditionBar@AOTIRONDOME:
+		Condition: aot-iron-dome
 	# === Nod Stealth Generator (aot-sgen) - Stealth Field auch fuer Helikopter ===
 	ExternalCondition@AOTSTEALTH:
 		Condition: aot-stealth-field
