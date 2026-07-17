@@ -8,6 +8,9 @@
 # NUR auf World (nicht EditorWorld) erlaubt, deshalb eigener Block statt ^BaseWorld.
 World:
 	JumpjetActorLayer:
+	# Eis-System: haelt die Menge aller vereisten Zellen (Hosts + gewachsene Zellen).
+	# Die Zellen fragen darueber ihre geteilten Ecken ab -> stetige Kanten.
+	AotIceLayer:
 	LegacyBridgeLayer:
 		# Originalaktoren (bridge1-4) + AoT-TEMPERAT-Varianten mit korrekten Template-IDs
 		# + zerstörbare Fluss-Brücken (aot-br1/br2/br3, Templates 235-246, AOT_TEMPERAT & AOT_SNOW)
@@ -191,18 +194,49 @@ RMBO:
 	# Ohne das kann in diesem (TD-basierten) Mod NIEMAND über eine Mine laufen — die cnc-Loko-Vorlagen
 	# kannten "mine" als CrushClass bisher gar nicht (nur RA's eigene Loko-Vorlagen hatten das).
 	# Folge: Einheiten wichen Minen als unpassierbares Hindernis aus, statt ahnungslos drüberzulaufen.
+	# === Age of Tiberium (aotmod) - Eis (aot-ice-cell, ChangesTerrain: Ice) begehbar/befahrbar ===
+	# Wie in TS: dort sind alle Eis-Templates Terrain "Clear" -> automatisch befahrbar. Hier eigener
+	# TerrainType "Ice" (aot-snow.yaml), damit spaeter Einbrechen/Rutschen daran haengen kann.
+	# Etwas langsamer als Clear (glatt). Ohne diese Eintraege ist Eis fuer alle unpassierbar.
 	Locomotor@FOOT:
 		Crushes: crate, mine
+		TerrainSpeeds:
+			Ice: 85
 	Locomotor@CHEM:
 		Crushes: crate, mine
+		TerrainSpeeds:
+			Ice: 85
 	Locomotor@WHEELED:
 		Crushes: crate, mine
+		TerrainSpeeds:
+			Ice: 90
 	Locomotor@HEAVYWHEELED:
 		Crushes: crate, infantry, mine
+		TerrainSpeeds:
+			Ice: 90
 	Locomotor@TRACKED:
 		Crushes: wall, crate, infantry, mine
+		TerrainSpeeds:
+			Ice: 95
 	Locomotor@HEAVYTRACKED:
 		Crushes: wall, heavywall, crate, infantry, mine
+		TerrainSpeeds:
+			Ice: 95
+	# Hover gleitet ueber Eis wie ueber Wasser.
+	# Land-Malus abgeschwaecht: Engine-Original hat 33 auf Clear/Rough/Road/Tiberium/
+	# BlueTiberium/River -> hier auf 75 angehoben (aot-transport-hover, Speed 115:
+	# 37 -> 86). Water/Beach/Ice bleiben bei 100 (= 115). Einziger Nutzer des
+	# hover-Locomotors ist aot-transport-hover. Siehe [[hover-transport-system]].
+	Locomotor@HOVER:
+		Crushes: crate
+		TerrainSpeeds:
+			Ice: 100
+			Clear: 75
+			Rough: 75
+			Road: 75
+			Tiberium: 75
+			BlueTiberium: 75
+			River: 75
 	# === Age of Tiberium (aotmod) - HVR Locomotor (schnell Land + Wasser) ===
 	Locomotor@AOT_HVR:
 		Name: aot-hvr
@@ -217,6 +251,7 @@ RMBO:
 			Beach: 100
 			Water: 100
 			River: 100
+			Ice: 100
 	# === Age of Tiberium (aotmod) - Amphibious APC Locomotor ===
 	Locomotor@AOT_AMPHIBIOUS:
 		Name: aot-amphibious
@@ -230,6 +265,18 @@ RMBO:
 			BlueTiberium: 88
 			Beach: 100
 			Water: 80
+			# Amphibisch -> darf aufs Eis (wie Hover/LST). Reine Schiffe duerfen das NICHT.
+			Ice: 90
+	# === Age of Tiberium (aotmod) - LST-Locomotor: naval + Eis ===
+	# Das LST (aot-transport) ist amphibisch und soll auf zugefrorene Flaechen koennen.
+	# Es teilte sich bisher "naval" mit den echten Schiffen (aot-gunboat/-sub/-msub/-cruiser),
+	# deshalb ein eigener Locomotor: nur so bleibt "naval" ohne Ice und die Schiffe draussen.
+	Locomotor@AOT_LST:
+		Name: aot-lst
+		Crushes: crate, mine
+		TerrainSpeeds:
+			Water: 100
+			Ice: 80
 	# === Age of Tiberium (aotmod) - Zone Trooper Jumpjet-Locomotor ===
 	# Kann Rock (unpassierbare Klippen/Berge) und River kurz überspringen (JumpjetTransitionTerrainTypes),
 	# aber NICHT Water (Ozean) — bewusst kein Hovercraft-Ersatz, siehe [[orbc-system]].
@@ -303,11 +350,6 @@ RMBO:
 		BaseName: aot-wolverine-player
 		BasePalette: aot-wolverine-base
 		RemapIndex: 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
-	# TS isosnow.mix Terrain-Palette für TmpTS-Sprites (ishore*.sno, clear01a.sno)
-	PaletteFromFile@aot-isosno:
-		Name: aot-isosno
-		Filename: isosno.pal
-		AllowModifiers: false
 
 STNK:
 	Cloak:
@@ -454,10 +496,10 @@ Player:
 	# === Age of Tiberium (aotmod) - NOD Airstrip Starport (Dune 2000 / TS style bulk delivery) ===
 	# Instant-Kauf bis MaxCapacity, dann Purchase-Button -> Frachtflieger liefert alle auf einmal.
 	# Player-Level-Queue (Pflicht: BulkProductionQueue ist [TraitLocation(Player)]).
-	# Group: Vehicle -> erscheint unter dem bestehenden VEHICLE-Tab der NOD.
+	# Group: Support -> erscheint unter dem SPECIAL VEHICLES-Tab.
 	BulkProductionQueue@Starport:
 		Type: Starport
-		Group: Vehicle
+		Group: Support
 		Factions: nod
 		MaxCapacity: 5
 		QueueLimit: 5
@@ -471,6 +513,17 @@ Player:
 		CancelledAudio: Cancelled
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - FACT: Support.GDI/Nod-Queue entfernen ===
+# Kein AOT-Gebaeude nutzt Queue: Support.GDI/Nod mehr (alle nutzen Building.GDI/Nod).
+# Ohne diesen Remove erscheint die leere Support-Queue immer als Sub-Tab #1 im
+# Special-Vehicles-Tab und blockiert die Auto-Selektion der Vehicle.GDI-Queue.
+FACT:
+	ProductionQueue@GDISupport:
+		Group: Hidden
+	ProductionQueue@NodSupport:
+		Group: Hidden
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - WEAP: Prerequisite + eigener aot-weap-String ===
 # vehicleproduction wird auch von AFLD (Nod) bereitgestellt.
 # aot-weap stellt sicher, dass MTNK-Upgrades nur mit GDI-Waffenfabrik sichtbar sind.
@@ -482,6 +535,8 @@ WEAP:
 	ProvidesPrerequisite@aot:
 		Prerequisite: aot-weap
 	ProvidesPrerequisite@buildingname:
+	ProductionQueue:
+		Group: Support
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - AFLD: Starport-Umbau + Prerequisite ===
@@ -646,7 +701,6 @@ MTNK:
 	-Buildable:
 
 
-HTNK:
 
 MSAM:
 	Buildable:
@@ -881,27 +935,81 @@ STNK:
 		UncloakOn: Attack, Unload, Dock, Damage, Heal, Load
 		PauseOnCondition: cloak-force-disabled || aot-stnk-loading
 
-# === Age of Tiberium (aotmod) - Hovercraft Cargo: Fahrzeuge als Passagiere ===
-# Leichte Fahrzeuge können in den Hovercraft Transport (aot-transport-hover) geladen werden.
-# CargoType: GroundVehicle, Weight: 5 füllt MaxWeight: 5 komplett (= 1 Fahrzeug statt 5 Inf).
+# === Age of Tiberium (aotmod) - Garrison-faehige Fahrzeuge (Fire Position) ===
+# CargoType ist ein EINZELNER String, kein Set. "transportierbar" und "garnisonsfaehig"
+# lassen sich daher nur ueber zwei verschiedene Typen trennen:
+#   GroundVehicle   = ^Vehicle-Default, gilt fuer ALLE Bodenfahrzeuge -> Transporter
+#   GarrisonVehicle = nur diese Aktoren hier      -> zusaetzlich Fire Position
+# Die Transporter (Vessel/Hovercraft/Orca) akzeptieren BEIDE Typen, aot-fireposition NUR
+# GarrisonVehicle. Ohne diese Trennung koennte jeder Harvester/V2/Surveyor die Fire Position
+# belegen, ohne feuern zu koennen (kein Armament@garrisoned) -> Stellung blockiert.
+# Wer hier eintraegt, braucht auch ein Armament@garrisoned.
+# Siehe [[vehicle-cargotype-system]] (Architektur) und [[pillbox-garrison-system]] (Fire Position).
 JEEP:
 	Passenger:
-		CargoType: GroundVehicle
+		CargoType: GarrisonVehicle
 		Weight: 5
 		CustomPipType: green
 BGGY:
 	Passenger:
-		CargoType: GroundVehicle
+		CargoType: GarrisonVehicle
 		Weight: 5
 		CustomPipType: green
+MSAM:
+	Passenger:
+		CargoType: GarrisonVehicle
+		Weight: 5
+		CustomPipType: green
+TRUCK:
+	Passenger:
+		CargoType: GarrisonVehicle
+		Weight: 5
+		CustomPipType: green
+LTNK:
+	Passenger:
+		CargoType: GarrisonVehicle
+		Weight: 5
+		CustomPipType: green
+TTNK:
+	Passenger:
+		CargoType: GarrisonVehicle
+		Weight: 5
+		CustomPipType: green
+MTNK:
+	Passenger:
+		CargoType: GarrisonVehicle
+		Weight: 5
+		CustomPipType: green
+HTNK:
+	Passenger:
+		CargoType: GarrisonVehicle
+		Weight: 5
+		CustomPipType: green
+APC:
+	Passenger:
+		CargoType: GarrisonVehicle
+		Weight: 5
+		CustomPipType: green
+MCV:
+	Passenger:
+		CargoType: GarrisonVehicle
+		Weight: 5
+		CustomPipType: green
+FTNK:
+	Passenger:
+		CargoType: GarrisonVehicle
+		Weight: 5
+		CustomPipType: green
+
 # === Age of Tiberium (aotmod) - BIKE Laser Technologies Upgrade ===
 # Waffe auf Ground/Water beschränkt (^MissileWeapon erbt ValidTargets: Ground,Water,Air).
 # Laser-Switch analog BGGY: GrantConditionOnPrerequisite greift auf aot-laser-fence-upgrade.
 # Zwei Laser-Armaments (links/rechts, gleiche Offsets wie Original-Raketen).
 BIKE:
 	-Buildable:
+	# Garrison-faehig (Armament@garrisoned unten) -> GarrisonVehicle statt ^Vehicle-Default.
 	Passenger:
-		CargoType: GroundVehicle
+		CargoType: GarrisonVehicle
 		Weight: 5
 		CustomPipType: green
 	GrantConditionOnPrerequisite@laserupgrade:
@@ -932,54 +1040,22 @@ BIKE:
 		Sequence: aot-bike-laser-pods
 		RequiresCondition: aot-bike-laser
 # === Ende aotmod ===
-MSAM:
-	Passenger:
-		CargoType: GroundVehicle
-		Weight: 5
-		CustomPipType: green
-TRUCK:
-	Passenger:
-		CargoType: GroundVehicle
-		Weight: 5
-		CustomPipType: green
-LTNK:
-	Passenger:
-		CargoType: GroundVehicle
-		Weight: 5
-		CustomPipType: green
-TTNK:
-	Passenger:
-		CargoType: GroundVehicle
-		Weight: 5
-		CustomPipType: green
-MTNK:
-	Passenger:
-		CargoType: GroundVehicle
-		Weight: 5
-		CustomPipType: green
-HTNK:
-	Passenger:
-		CargoType: GroundVehicle
-		Weight: 5
-		CustomPipType: green
-APC:
-	Passenger:
-		CargoType: GroundVehicle
-		Weight: 5
-		CustomPipType: green
-MCV:
-	Passenger:
-		CargoType: GroundVehicle
-		Weight: 5
-		CustomPipType: green
-FTNK:
-	Passenger:
-		CargoType: GroundVehicle
-		Weight: 5
-		CustomPipType: green
 
 # === Age of Tiberium (aotmod) - Fahrzeuge capturable für Carjacker ===
 ^Vehicle:
+	# === Age of Tiberium (aotmod) - Cargo: ALLE Bodenfahrzeuge sind transportierbar ===
+	# Zentral hier statt pro Aktor: der Engine-Default (^Vehicle in cnc|rules/defaults.yaml)
+	# ist CargoType: Vehicle / Weight: 1. Diesen Typ akzeptiert KEIN Cargo im Mod
+	# (alle Types sind Infantry / GroundVehicle) -> ein Fahrzeug ohne Override kann in gar
+	# nichts einsteigen, und es fehlt kommentarlos der Enter-Cursor. Genau so ist es dem V2
+	# passiert. Weight: 5 = MaxWeight von Vessel/Hovercraft -> exakt 1 Fahrzeug pro Transport.
+	# NICHT pro Aktor duplizieren - sonst faellt jedes neue Fahrzeug wieder auf den Default
+	# zurueck. Ausnahme braucht ein explizites Override am Aktor.
+	# VOLLSTAENDIGE ARCHITEKTUR + Diagnose: [[vehicle-cargotype-system]] (PFLICHT vor Cargo-Aenderungen).
+	Passenger:
+		CargoType: GroundVehicle
+		Weight: 5
+		CustomPipType: green
 	Repairable:
 		RepairActors: aot-fix-age0, aot-fix-age1, aot-fix-age2, aot-fix-age1-nod, aot-fix-age2-nod
 	GrantConditionOnDamageState@AOTREPAIR:

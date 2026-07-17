@@ -4654,6 +4654,10 @@ aot-iron-dome:
 
 aot-ice01:
 	Defaults:
+		# DREI Ebenen: Fahrzeuge (0) > Host-Scholle (-1023) > gewachsene Zellen (-2047).
+		# 0 liess die Scholle ueber Panzern liegen, -2047 (wie die Zellen) liess sie darunter
+		# verschwinden. Muss also strikt ZWISCHEN beiden liegen.
+		ZOffset: -1023
 		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\TEMPERATE\ICE01.TEM\ICE01.TEM-0000-{0:D4}.DDS
 			Count: 1
 		RemasteredTilesetFilenamesPattern:
@@ -4665,6 +4669,10 @@ aot-ice01:
 
 aot-ice02:
 	Defaults:
+		# DREI Ebenen: Fahrzeuge (0) > Host-Scholle (-1023) > gewachsene Zellen (-2047).
+		# 0 liess die Scholle ueber Panzern liegen, -2047 (wie die Zellen) liess sie darunter
+		# verschwinden. Muss also strikt ZWISCHEN beiden liegen.
+		ZOffset: -1023
 		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\TEMPERATE\ICE02.TEM\ICE02.TEM-0000-{0:D4}.DDS
 			Count: 1
 		RemasteredTilesetFilenamesPattern:
@@ -4676,6 +4684,10 @@ aot-ice02:
 
 aot-ice03:
 	Defaults:
+		# DREI Ebenen: Fahrzeuge (0) > Host-Scholle (-1023) > gewachsene Zellen (-2047).
+		# 0 liess die Scholle ueber Panzern liegen, -2047 (wie die Zellen) liess sie darunter
+		# verschwinden. Muss also strikt ZWISCHEN beiden liegen.
+		ZOffset: -1023
 		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\TEMPERATE\ICE03.TEM\ICE03.TEM-0000-{0:D4}.DDS
 			Count: 1
 		RemasteredTilesetFilenamesPattern:
@@ -4687,6 +4699,10 @@ aot-ice03:
 
 aot-ice04:
 	Defaults:
+		# DREI Ebenen: Fahrzeuge (0) > Host-Scholle (-1023) > gewachsene Zellen (-2047).
+		# 0 liess die Scholle ueber Panzern liegen, -2047 (wie die Zellen) liess sie darunter
+		# verschwinden. Muss also strikt ZWISCHEN beiden liegen.
+		ZOffset: -1023
 		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\TEMPERATE\ICE04.TEM\ICE04.TEM-0000-{0:D4}.DDS
 			Count: 1
 		RemasteredTilesetFilenamesPattern:
@@ -4698,6 +4714,10 @@ aot-ice04:
 
 aot-ice05:
 	Defaults:
+		# DREI Ebenen: Fahrzeuge (0) > Host-Scholle (-1023) > gewachsene Zellen (-2047).
+		# 0 liess die Scholle ueber Panzern liegen, -2047 (wie die Zellen) liess sie darunter
+		# verschwinden. Muss also strikt ZWISCHEN beiden liegen.
+		ZOffset: -1023
 		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\TEMPERATE\ICE05.TEM\ICE05.TEM-0000-{0:D4}.DDS
 			Count: 1
 		RemasteredTilesetFilenamesPattern:
@@ -4708,14 +4728,112 @@ aot-ice05:
 		Length: 1
 
 aot-ice-cell:
-	Defaults:
-		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\TEMPERATE\ICE04.TEM\ICE04.TEM-0000-{0:D4}.DDS
-			Count: 1
-		RemasteredTilesetFilenamesPattern:
-			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\ICE04.SNO\ICE04.SNO-0000-{0:D4}.DDS
-				Count: 1
-		RemasteredPremultiplied: false
 	idle:
+		RemasteredFilename: aot-ice-cell.zip
+		RemasteredPremultiplied: false
+		Length: 256
+		# DREI Ebenen: Einheiten (0) > Host-Scholle (-1023) > diese Zellen.
+		# ZOffset ist ein KONSTANTER Versatz, der Positionsunterschied waechst aber: eine
+		# Zelle 2 Felder suedlich der Scholle sortierte bei -2047 wieder ueber sie. Der
+		# Abstand muss groesser sein als die Reichweite der Ueberlappung -> 8 Zellen.
+		ZOffset: -8191
+
+# === Age of Tiberium (aotmod) — Ant Spawner Marker ===
+aot-ant-spawner:
+	idle:
+		Filename: aot-ant-spawner-marker.png
 		Length: 1
 
+# === Age of Tiberium (aotmod) — Counter-Strike Ant Sequences ===
+# Remastered: ANT1/2/3.ZIP (112 Frames: stand 0-7, run 8-71, bite 72-103)
+#             ANTDIE1/2/3.ZIP (8 Frames: Todesanim)
+
+ant:
+	Defaults:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\ANT1.ZIP
+	stand:
+		Facings: 8
+		Length: 1
+	run:
+		Start: 8
+		Length: 8
+		Facings: 8
+	bite:
+		Start: 72
+		Length: 4
+		Facings: 8
+	die:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\ANTDIE1.ZIP
+		Length: 8
+		Tick: 300
+	die-crushed:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\ANTDIE1.ZIP
+		Length: 8
+		Tick: 400
+		ZOffset: -511
+
+fireant:
+	Defaults:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\ANT2.ZIP
+	stand:
+		Facings: 8
+		Length: 1
+	run:
+		Start: 8
+		Length: 8
+		Facings: 8
+	bite:
+		Start: 72
+		Length: 4
+		Facings: 8
+	die:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\ANTDIE2.ZIP
+		Length: 8
+		Tick: 300
+	die-crushed:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\ANTDIE2.ZIP
+		Length: 8
+		Tick: 400
+		ZOffset: -511
+
+scoutant:
+	Defaults:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\ANT3.ZIP
+	stand:
+		Facings: 8
+		Length: 1
+	run:
+		Start: 8
+		Length: 8
+		Facings: 8
+	bite:
+		Start: 72
+		Length: 4
+		Facings: 8
+	die:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\ANTDIE3.ZIP
+		Length: 8
+		Tick: 300
+	die-crushed:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\ANTDIE3.ZIP
+		Length: 8
+		Tick: 400
+		ZOffset: -511
+
 # === Ende aotmod ===
+# === Wassereinschlag (RA Remaster VFX) — Eis-Einbruch ===
+# Derselbe Splash, den RA beim Schuss ins Wasser zeigt. Ersetzt die normale
+# Fahrzeug-Explosion, wenn eine Einheit im Eis einbricht (siehe [[ice-growth-system]]).
+# WICHTIG: CreateEffect.Explosions erwartet SEQUENZ-Namen auf dem Image "explosion"
+# (Default von CreateEffect.Image), NICHT eigene Image-Namen -- sonst:
+# "Image `explosion` does not have a sequence named `...`".
+explosion:
+	aot-h2o-splash:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\VFX\H2O_EXP1.ZIP
+		Length: *
+	aot-h2o-splash2:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\VFX\H2O_EXP2.ZIP
+		Length: *
+	aot-h2o-splash3:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\VFX\H2O_EXP3.ZIP
+		Length: *

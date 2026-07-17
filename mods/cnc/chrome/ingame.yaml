@@ -1774,31 +1774,9 @@ Container@PLAYER_WIDGETS:
 									Y: 2
 									ImageCollection: chrome-button
 									ImageName: separator
-						ProductionTypeButton@SUPPORT:
-							Logic: AddFactionSuffixLogic
-							X: 28
-							Width: 26
-							Height: 26
-							Background: chrome-button-background
-							TooltipText: button-production-types-support-tooltip
-							TooltipContainer: TOOLTIP_CONTAINER
-							TooltipTemplate: BUTTON_TOOLTIP_FACTIONSUFFIX
-							ProductionGroup: Support
-							Key: ProductionTypeDefense
-							Children:
-								Image@ICON:
-									X: 5
-									Y: 5
-									ImageCollection: production-icons
-								Image@SEPARATOR:
-									Logic: AddFactionSuffixLogic
-									X: 26
-									Y: 2
-									ImageCollection: chrome-button
-									ImageName: separator
 						ProductionTypeButton@INFANTRY:
 							Logic: AddFactionSuffixLogic
-							X: 56
+							X: 28
 							Width: 26
 							Height: 26
 							Background: chrome-button-background
@@ -1820,7 +1798,7 @@ Container@PLAYER_WIDGETS:
 									ImageName: separator
 						ProductionTypeButton@VEHICLE:
 							Logic: AddFactionSuffixLogic
-							X: 84
+							X: 56
 							Width: 26
 							Height: 26
 							Background: chrome-button-background
@@ -1834,6 +1812,28 @@ Container@PLAYER_WIDGETS:
 									X: 5
 									Y: 5
 									ImageCollection: production-icons
+								Image@SEPARATOR:
+									Logic: AddFactionSuffixLogic
+									X: 26
+									Y: 2
+									ImageCollection: chrome-button
+									ImageName: separator
+						ProductionTypeButton@SUPPORT:
+							Logic: AddFactionSuffixLogic
+							X: 84
+							Width: 26
+							Height: 26
+							Background: chrome-button-background
+							TooltipText: button-production-types-support-tooltip
+							TooltipContainer: TOOLTIP_CONTAINER
+							TooltipTemplate: BUTTON_TOOLTIP_FACTIONSUFFIX
+							ProductionGroup: Support
+							Key: ProductionTypeDefense
+							Children:
+								Image@ICON:
+									X: 5
+									Y: 5
+									ImageCollection: aot-production-special
 								Image@SEPARATOR:
 									Logic: AddFactionSuffixLogic
 									X: 26
@@ -1949,7 +1949,8 @@ Container@PLAYER_WIDGETS:
 					Width: 118
 					Height: 28
 					Font: Bold
-					Background: chrome-button-background
+					Background: button-nod-highlighted
+					TextColor: FFD091
 					Text: button-purchase-label
 					TooltipText: purchase-panel-button-tooltip
 					TooltipContainer: TOOLTIP_CONTAINER

@@ -2,6 +2,7 @@
 
 button-production-types-upgrade-tooltip = Upgrades
 button-production-types-navy-tooltip = Navy
+button-production-types-support-tooltip = Special Units
 
 # === NOD Airstrip Starport (Bulk-Lieferung) ===
 label-deliver-in-timer = DELIVERY IN: { $time }

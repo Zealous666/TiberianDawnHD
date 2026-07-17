@@ -25,19 +25,19 @@
   - [x] 1. upgrade toggle
   - [x] 2. bridge repair mechanik & destruction
   - [x] 3. spaceport/shuttle airfield
-  - [ ] 4. ice grow & destruction
-  - [ ] 5. support / defense tab
-  - [ ] hand of nod & gdi-pyle age 3
+  - [x] 4. ice grow & destruction
+  - [x] 5. special unit tab
+  - [ ] 6. subterrain upgrade (flametank, apc?) & betonplatten
   - [ ] gdi radar & nod dome age 3
   - [ ] powerplants & turbines age 3
   - [ ] construction yard age 3
   - [ ] LITE nod & LITE gdi age 3
-  - [ ] civilian ts streets, buildings & garrissons
-  - [x] tree destruction
-  - [ ] TS soundtracks
+  - [ ] hand of nod & gdi-pyle age 3
+  - [x] civilian ts streets, buildings & garrissons
+  - [ ] TS & RA soundtracks
   - [ ] idle menü map szene
   - [ ] hospital super-power (heal all) & iron dome super power (invicible all)
-  - [ ] todo vor ki: upgrade toggle, spaceport system, bridge huts, support/defense tab/subterain systems
+  - [ ] todo vor ki: upgrade toggle, spaceport system, bridge huts, special unit tab/subterain systems
   - [ ] TS lightning & ambient sounds
   - [ ] subterrain upgrade (flametank, apc?) & betonplatten
 - [ ] Fixes
@@ -55,6 +55,7 @@
   - [x] oil pums spawnen 1000 credits wenn zerstört
   - [x] aot-age upgrade kosten (5000, 10000, 25000)
   - [ ] age power toggle / direkt oben links
+  - [ ] NOD transport vessel cargo ändern
 
 ## Design / Konzept
 
@@ -139,7 +140,7 @@
   - [x] bridge repair huts
   - [ ] civilian TS buildings
   - [x] tree-destruction
-  - [ ] Ant valley
+  - [x] Ant valley
 - [ ] Polar Panic (8)
   Snow (RA)
   - [x] 8 player
@@ -149,16 +150,20 @@
   - [ ] Iron dome island
   - [x] oil derricks & pumps
   - [x] bridge repair huts
-  - [ ] ice system
+  - [x] ice system
 - [ ] Desert?
-  - [ ] Critter waves
-  - [ ] hospital island
+  - [ ] Critter waves (spawner wie ants, random base attack order)
+  - [ ] toxic tiberium
+  - [ ] toxic tiberium refinery ruin
 - [ ] Winter?
-  - [ ] hq valley (paradrops)
+  - [ ] hq island (paradrops) im norden
   - [ ] snow water-cliffs & snow cliffs
+  - [ ] ice system
 - [ ] Jungle?
   - [ ] Ion Storm?
-  - [ ] Dinosaur islands & blue tib
+  - [ ] Dinosaur valley
+  - [ ] hospital in valley
+  - [ ] destructable cliff
 
 ## Campaigns
 

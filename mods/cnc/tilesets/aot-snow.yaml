@@ -69,6 +69,12 @@ Terrain:
 		TargetTypes: Water
 		Color: 5C74A4
 		RestrictPlayerColor: true
+	# Eis (aot-ice-cell via ChangesTerrain). Wie in TS befahrbar; Farbe = TS-Volleis (AFCBED).
+	TerrainType@Ice:
+		Type: Ice
+		TargetTypes: Ground
+		AcceptsSmudgeType: Crater, Scorch
+		Color: AFCBED
 
 
 Templates:

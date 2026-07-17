@@ -93,11 +93,11 @@ actor-weap =
 
 actor-aot-transport =
     .name = Transport Vessel
-    .description = Landing craft. Carries up to 5 infantry. Can beach on shore to deploy troops.
+    .description = Naval transport. Carries up to 5 infantry or 1 vehicle. Can beach on shore to deploy troops.
 
 actor-aot-transport-gun =
     .name = Armed Transport Vessel
-    .description = Landing craft with machine gun turret. Carries up to 5 infantry.
+    .description = Naval transport with machine gun turret. Carries up to 5 infantry or 1 vehicle.
 
 actor-aot-upgrade-transport-gun =
     .name = Vessel Gun Upgrade
@@ -196,3 +196,17 @@ actor-aot-upgrade-heavy-artillery =
 actor-aot-iron-dome =
     .name = Iron Dome Experimental Installation
     .description = Iron Dome
+
+meta-ant-generic-name = Ant
+
+actor-aot-ant =
+    .name = Worker Ant
+
+actor-aot-fireant =
+    .name = Fire Ant
+
+actor-aot-scoutant =
+    .name = Scout Ant
+
+actor-aot-ant-spawner =
+    .name = Ant Nest

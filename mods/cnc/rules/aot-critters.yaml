@@ -1,0 +1,138 @@
+# === Age of Tiberium (aotmod) — Counter-Strike Ants ===
+# Drei Varianten: Worker Ant (aot-ant), Fire Ant (aot-fireant), Scout Ant (aot-scoutant).
+# Sprites: ant1.shp / ant2.shp / ant3.shp aus dem RA-Content-Package.
+# Spawner: aot-ant-spawner (unsichtbar, im Editor konfigurierbar).
+
+^AotAnt:
+	Inherits: ^Infantry
+	-Passenger:
+	Tooltip:
+		GenericName: meta-ant-generic-name
+	# AttackMove wird von AotAntWander gebraucht (AttackMoveActivity greift unterwegs an).
+	AttackMove:
+	# Patrouille im Nest-Umkreis. Radius kommt vom Nest-Regler (AotAntSpawner) beim Spawn.
+	# Laeuft NUR im Idle -> unterbricht keinen Angriff (das tat die alte Spawner-Patrouille).
+	AotAntWander:
+		DefaultPatrolRadius: 5
+		MinMoveDelay: 25
+		MaxMoveDelay: 100
+		AvoidTerrainTypes: Water
+	AutoTarget:
+		InitialStance: AttackAnything
+		InitialStanceAI: AttackAnything
+		ScanOnIdle: true
+		# PFLICHT: ohne ScanRadius nimmt AutoTarget die Waffenreichweite (aot-*AntBite = 1c256,
+		# also 1.25 Zellen) als Suchradius -> die Ameise ist praktisch blind und reagiert nur auf
+		# etwas, das direkt in sie hineinlaeuft. 8 Zellen = Aggro-Radius, in dem sie jagt.
+		ScanRadius: 8
+	# ValidTargets: echte TD-TargetTypes (^Infantry=Ground,Infantry / ^Vehicle=Ground,Vehicle /
+	# ^Building=Ground,C4,Structure). RA's "GroundActor" gibt es hier nicht.
+	AutoTargetPriority@DEFAULT:
+		ValidTargets: Infantry, Vehicle, Structure
+		InvalidTargets: NoAutoTarget
+	AttackFrontal:
+		FacingTolerance: 0
+	WithInfantryBody:
+		MoveSequence: run
+		StandSequences: stand
+		DefaultAttackSequence: bite
+	WithDeathAnimation:
+		UseDeathTypeSuffix: false
+		DeathSequence: die
+		CrushedSequence: die-crushed
+	Voiced:
+		VoiceSet: AntVoice
+	-DeathSounds@NORMAL:
+	-DeathSounds@BURNED:
+	-DeathSounds@POISONED:
+	DeathSounds:
+	# Tiberium-Immunitaet. ACHTUNG: es gibt ZWEI Schadensquellen, beide muessen weg.
+	# 1) DamagedByTerrain (^Infantry, defaults.yaml): Schaden beim Laufen auf Tiberium-Feldern.
+	#    Das ist die eigentliche Quelle - sie zu vergessen war der Grund, warum Tiberium
+	#    den Ameisen trotz der Entfernung von (2) weiter geschadet hat.
+	-DamagedByTerrain:
+	# 2) Tiberium-Gaswolke (aot-gascloud, z.B. Atomschlag) via ExternalCondition + DoT.
+	-ExternalCondition@AOTGAS:
+	-AotDamagedByCondition:
+
+# --- Worker Ant ---
+aot-ant:
+	Inherits: ^AotAnt
+	RenderSprites:
+		Image: ant
+	Health:
+		HP: 10000
+	Mobile:
+		Speed: 50
+		Locomotor: foot
+		AlwaysTurnInPlace: true
+	Armament:
+		Weapon: aot-AntBite
+	Tooltip:
+		Name: actor-aot-ant.name
+	MapEditorData:
+		Categories: Critter
+
+# --- Fire Ant ---
+aot-fireant:
+	Inherits: ^AotAnt
+	RenderSprites:
+		Image: fireant
+	Health:
+		HP: 32000
+	Armor:
+		Type: Heavy
+	Mobile:
+		Speed: 40
+		Locomotor: foot
+		AlwaysTurnInPlace: true
+	Armament:
+		Weapon: aot-FireAntBite
+	Tooltip:
+		Name: actor-aot-fireant.name
+	MapEditorData:
+		Categories: Critter
+
+# --- Scout Ant ---
+aot-scoutant:
+	Inherits: ^AotAnt
+	RenderSprites:
+		Image: scoutant
+	Health:
+		HP: 16000
+	Armor:
+		Type: Light
+	Mobile:
+		Speed: 85
+		Locomotor: foot
+		AlwaysTurnInPlace: true
+	Armament:
+		Weapon: aot-ScoutAntBite
+	Tooltip:
+		Name: actor-aot-scoutant.name
+	MapEditorData:
+		Categories: Critter
+
+# --- Ant Spawner (Editor-Marker, nur im Editor sichtbar) ---
+aot-ant-spawner:
+	Inherits@1: ^ExistsInWorld
+	Tooltip:
+		Name: actor-aot-ant-spawner.name
+	Selectable:
+		Bounds: 512, 512
+	MapEditorData:
+		Categories: Critter
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral, Creeps
+	Immobile:
+		OccupiesSpace: false
+	RenderSpritesEditorOnly:
+	WithSpriteBody:
+	BodyOrientation:
+		QuantizedFacings: 1
+	AotAntSpawner:
+		AntActors: aot-ant, aot-fireant, aot-scoutant
+		DefaultAntType: random
+		DefaultMaxAnts: 3
+		DefaultPatrolRadius: 5
+		SpawnInterval: 150

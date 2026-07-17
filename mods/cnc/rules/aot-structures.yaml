@@ -1948,7 +1948,7 @@ aot-gascloud-v2:
 aot-gascloud-parabomb:
 	Inherits: aot-gascloud
 	KillsSelf:
-		Delay: 250
+		Delay: 150
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - HQ Build-Menu Icons (Proxy-Aktoren) ===
@@ -5144,10 +5144,15 @@ aot-fireposition:
 		Sequence: idle
 	WithBuildingBib:
 	Cargo:
-		Types: GroundVehicle
+		# NUR GarrisonVehicle: sonst koennte jeder Harvester/V2 die Stellung
+		# belegen ohne feuern zu koennen. Siehe overrides.yaml ^Vehicle.
+		Types: GarrisonVehicle
 		MaxWeight: 5
 	WithCargo:
-		DisplayTypes: GroundVehicle
+		# BEIDE Typen: sonst rendert WithCargo den Passagier-Preview NICHT und das
+		# Fahrzeug ist unsichtbar (WithCargo.cs:302 matcht DisplayTypes gegen
+		# Passenger.CargoType). Siehe [[vehicle-cargotype-system]].
+		DisplayTypes: GroundVehicle, GarrisonVehicle
 		PassengerZOffset: -256
 		PassengerTurretZOffset: 512
 	WithCargoPipsDecoration:
@@ -5958,6 +5963,14 @@ aot-bridgehut:
 ^AotIceFloe:
 	Immobile:
 	AotIceGrowth:
+		# === REGLER 1: Ausbreitungs-Groesse (1-x) ===
+		# Radius in Zellen, ab dem die Gefrierchance 0 erreicht -> das Eis erschoepft hier.
+		# 14 friert den Polar-Panic-See groesstenteils zu (Ausl aeufer bleiben offen).
+		MaxRadius: 14
+		# === REGLER 2: Gefrier-Geschwindigkeit (1-100) ===
+		# 100 = schnellster (getunter) Wert, kleiner = langsamer. Skaliert das Intervall
+		# zwischen den Wachstums-Paessen: effektiv = Interval * 100 / GrowthSpeed.
+		GrowthSpeed: 100
 	RenderSprites:
 		Palette: staticterrain
 	WithSpriteBody:
@@ -5983,12 +5996,49 @@ aot-ice04:
 aot-ice05:
 	Inherits: ^AotIceFloe
 
+# Eiszelle: Sprite wird aus den 4 geteilten Ecken + (x%4,y%4) gewaehlt (256 gebackene Frames).
+# Truecolor-RGBA aus dem ZIP -> KEINE Palette (aot-isosno galt nur fuer die alte .sno-Kachel).
 aot-ice-cell:
+	# OccupiesSpace MUSS false sein: sonst belegt die Eiszelle ihre eigene Zelle und blockiert
+	# damit genau die Einheiten, die aufs Eis sollen (Movecursor da, Einheit kommt nicht hin).
+	# ChangesTerrain braucht nur Immobile als Trait, nicht dessen Platzbelegung.
 	Immobile:
+		OccupiesSpace: false
 	RenderSprites:
-		Palette: staticterrain
-	WithSpriteBody:
+	AotIceCellBody:
+		Period: 4
+	# Macht die Wasserzelle zu begehbarem Eis (Speeds siehe Locomotors in overrides.yaml).
+	ChangesTerrain:
+		TerrainType: Ice
+	# PFLICHT bei OccupiesSpace: false! Der Default ist Type: Footprint, und der prueft
+	# Shroud.AnyExplored(OccupiesSpace.OccupiedCells()) -- ohne belegte Zellen ist die Liste
+	# leer, AnyExplored liefert false, und HiddenUnderShroud (IRenderModifier) rendert GAR
+	# NICHTS. Das Eis wuchs dann unsichtbar weiter. CenterPosition nutzt Immobile.CenterPosition,
+	# die auch ohne Platzbelegung gesetzt ist.
 	HiddenUnderShroud:
+		Type: CenterPosition
+	# === Eis ist sehr leicht zerstoerbar: HP wie E1 (5000) ===
+	# Stirbt die Zelle, meldet AotIceCellBody.RemovedFromWorld sie aus dem AotIceLayer ab
+	# -> Version++ -> alle Nachbarn waehlen ihr Sprite neu und kurven um das Loch.
+	Health:
+		HP: 5000
+	Armor:
+		Type: None
+	# BodyOrientation ist PFLICHT fuer HitShape (Requires<BodyOrientationInfo>). Fehlt es,
+	# crasht die Zelle beim Erzeugen ("Unresolved: HitShapeInfo") -- check-yaml faengt das NICHT.
+	# QuantizedFacings MUSS gesetzt sein, sobald ein Sprite-Body da ist, sonst:
+	# "has a sprite body but no facing quantization". 1 = dreht sich nie (statische Kachel).
+	BodyOrientation:
+		QuantizedFacings: 1
+	HitShape:
+	Targetable:
+		TargetTypes: Ground
+	# === Einbrechen unter Bodenfahrzeugen ===
+	# Crack ertoent sofort beim Auffahren (Warnung), Splash erst beim Durchbrechen nach Delay.
+	# Es zaehlen NUR Ticks im Stand (StationaryOnly): Durchfahren ist immer sicher, auch fuer
+	# langsame Fahrzeuge -- aber kurzes Anhalten genuegt zum Einbrechen.
+	AotIceBreaks:
+		Delay: 15
 	RequiresSpecificOwners:
 		ValidOwnerNames: Neutral
 

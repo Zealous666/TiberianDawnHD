@@ -2747,8 +2747,6 @@ aot-arty-heavy:
 		Facing: 384
 		DeploySounds: place2.aud
 		UndeploySounds: clicky1.aud
-	UpdatesPlayerStatistics:
-		AddToArmyValue: true
 	-Voiced:
 	Voiced:
 		VoiceSet: VehicleVoice
@@ -3706,12 +3704,15 @@ aot-transport-hover:
 		OpenTerrainTypes: Clear, Rough, Road, Beach, Tiberium, BlueTiberium
 		Body: body
 	Cargo:
-		Types: GroundVehicle
+		Types: GroundVehicle, GarrisonVehicle
 		MaxWeight: 5
 		PassengerFacing: 0
 		LoadingCondition: notmobile
 	WithCargo:
-		DisplayTypes: GroundVehicle
+		# BEIDE Typen: sonst rendert WithCargo den Passagier-Preview NICHT und das
+		# Fahrzeug ist unsichtbar (WithCargo.cs:302 matcht DisplayTypes gegen
+		# Passenger.CargoType). Siehe [[vehicle-cargotype-system]].
+		DisplayTypes: GroundVehicle, GarrisonVehicle
 		LocalOffset: 0,0,0
 	WithCargoPipsDecoration:
 		Position: BottomLeft
@@ -3749,7 +3750,9 @@ aot-transport:
 	Armor:
 		Type: Heavy
 	Mobile:
-		Locomotor: lcraft
+		# aot-lst = naval + Ice: das LST ist amphibisch und darf auf zugefrorene Flaechen,
+		# die reinen Schiffe (naval) nicht. Siehe [[ice-growth-system]].
+		Locomotor: aot-lst
 		Speed: 115
 		TurnSpeed: 20
 		PauseOnCondition: notmobile
@@ -3762,7 +3765,7 @@ aot-transport:
 		OpenTerrainTypes: Clear, Rough, Road, Beach, Tiberium, BlueTiberium
 		Body: body
 	Cargo:
-		Types: Infantry
+		Types: Infantry, GroundVehicle, GarrisonVehicle
 		MaxWeight: 5
 		PassengerFacing: 0
 		LoadingCondition: notmobile
@@ -4499,7 +4502,7 @@ aot-orcatran:
 		TakeoffSounds: orcaup1.aud
 		LandingSounds: orcadwn1.aud
 	Cargo:
-		Types: GroundVehicle
+		Types: GroundVehicle, GarrisonVehicle
 		MaxWeight: 20
 		BeforeUnloadDelay: 15
 		AfterUnloadDelay: 40

@@ -107,6 +107,25 @@ engine/**
 !engine/mods/cnc/
 !engine/mods/cnc/audio/
 !engine/mods/cnc/audio/notifications.yaml
+# === Age of Tiberium (aotmod) - Engine-Patches Sammel-Sync 2026-07-17 ===
+# Eis-System (AotIceLayer/Growth/Breaks + Render), Ants, Creeps-Setup, Building.cs-Patch
+!engine/OpenRA.Mods.Cnc/Traits/AotCreepsSetup.cs
+!engine/OpenRA.Mods.Cnc/Traits/AotIceBreaks.cs
+!engine/OpenRA.Mods.Cnc/Traits/AotIceGrowth.cs
+!engine/OpenRA.Mods.Cnc/Traits/AotIceLayer.cs
+!engine/OpenRA.Mods.Cnc/Traits/Render/AotIceCellBody.cs
+!engine/OpenRA.Mods.Common/Traits/AotAntSpawner.cs
+!engine/OpenRA.Mods.Common/Traits/AotAntWander.cs
+!engine/OpenRA.Mods.Common/Traits/Buildings/Building.cs
+# Engine-Regel-Patches (AOT-Paletten, BuildPaletteOrder, HTNK, hover/mine-Loko, DroneExplode)
+!engine/mods/cnc/rules/
+!engine/mods/cnc/rules/defaults.yaml
+!engine/mods/cnc/rules/palettes.yaml
+!engine/mods/cnc/rules/structures.yaml
+!engine/mods/cnc/rules/vehicles.yaml
+!engine/mods/cnc/rules/world.yaml
+!engine/mods/cnc/weapons/
+!engine/mods/cnc/weapons/explosions.yaml
 
 # Visual Studio
 Release

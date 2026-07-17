@@ -1377,4 +1377,80 @@ BridgeExplode:
 		ImpactSounds: crumble.aud
 		ImpactActors: false
 		ValidTargets: Bridge, Ground, Water
+
+# === Age of Tiberium (aotmod) — Counter-Strike Ant Weapons ===
+# ACHTUNG ValidTargets: "Ground", NICHT RA's "GroundActor" (siehe aot-ATMine oben) — in diesem
+# TD-basierten Mod tragen ^Infantry/^Vehicle/^Building alle den TargetType "Ground". "GroundActor"
+# existiert hier gar nicht -> die Waffe haette NIE ein gueltiges Ziel und die Ameise greift nichts an.
+# Worker Ant: Mittlerer Biss, effektiv gegen Infanterie.
+aot-AntBite:
+	ValidTargets: Ground
+	ReloadDelay: 10
+	Burst: 2
+	BurstDelays: 14
+	Range: 1c512
+	Report: aot-antbite.wav
+	TargetActorCenter: true
+	Projectile: InstantHit
+	Warhead@DAMAGE: TargetDamage
+		Damage: 6000
+		Versus:
+			None: 90
+			Wood: 10
+			Light: 30
+			Heavy: 10
+			Concrete: 10
+		DamageTypes: Small_Arms
+
+# Fire Ant: Feuerball-Fernkampf (Range 4c0, wie RA AntFireball).
+aot-FireAntBite:
+	ValidTargets: Ground
+	ReloadDelay: 50
+	Burst: 2
+	BurstDelays: 20
+	Range: 4c0
+	Report: aot-antbite.wav
+	TargetActorCenter: true
+	Projectile: InstantHit
+	Warhead@DAMAGE: SpreadDamage
+		Spread: 213
+		Damage: 4000
+		Versus:
+			None: 80
+			Wood: 85
+			Light: 45
+			Heavy: 20
+			Concrete: 15
+		DamageTypes: FireDeath
+
+# Scout Ant: Schneller Doppelbiss wie Mandible (RA ScoutAnt nutzt dieselbe Waffe).
+aot-ScoutAntBite:
+	ValidTargets: Ground
+	ReloadDelay: 10
+	Burst: 2
+	BurstDelays: 14
+	Range: 1c512
+	Report: aot-antbite.wav
+	TargetActorCenter: true
+	Projectile: InstantHit
+	Warhead@DAMAGE: TargetDamage
+		Damage: 6000
+		Versus:
+			None: 90
+			Wood: 10
+			Light: 30
+			Heavy: 10
+			Concrete: 10
+		DamageTypes: Small_Arms
+
 # === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Eis-Einbruch-Splash ===
+# Nur Optik: das Fahrzeug wird von AotIceBreaks per Dispose() entfernt (KEIN Kill),
+# damit seine normale FireWarheadsOnDeath-Explosion nicht feuert. Dieser Effekt
+# ersetzt sie durch den RA-Remaster-Wassereinschlag.
+AotIceSplash:
+	ValidTargets: Ground, Water
+	Warhead@Eff: CreateEffect
+		Explosions: aot-h2o-splash, aot-h2o-splash2, aot-h2o-splash3
+		ImpactActors: false

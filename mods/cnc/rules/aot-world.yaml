@@ -1,4 +1,8 @@
 World:
+	# === Age of Tiberium (aotmod) - Creeps-Player automatisch feindlich zu allen Spielern ===
+	AotCreepsSetup:
+		CreepsPlayerName: Creeps
+	# === Ende aotmod ===
 	StartingUnits@defaultgdia:
 		Class: light
 		ClassName: options-starting-units.light-support

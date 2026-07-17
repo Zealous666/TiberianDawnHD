@@ -191,3 +191,15 @@ CarjackerVoice:
 		Burned: dedman10
 		Zapped: dedman6
 		Poisoned: dedman1, dedman3, dedman4, dedman5
+
+# === Age of Tiberium (aotmod) - Ant Voice ===
+# Select/Action sind Pflicht (Selectable/Mobile/AttackMove/AttackFrontal fordern sie an).
+# Ameisen gehoeren Creeps/Neutral und werden nie vom Spieler selektiert oder befehligt,
+# d.h. praktisch feuert nur Die. Alle drei nutzen die Ant-Sounds, nie Menschenstimmen.
+AntVoice:
+	DefaultVariant: .wav
+	Voices:
+		Select: aot-antbite
+		Action: aot-antbite
+		Attack: aot-antbite
+		Die: aot-antdie
