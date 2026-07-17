@@ -295,6 +295,11 @@ aot-upgrade-ttnk:
 # beide Aktoren geloescht, Toxin kommt jetzt ueber das konsolidierte
 # aot-upgrade-e4-toxic, Stealth-Tank-Upgrade komplett entfernt.
 
+aot-upgrade-ttnk-subterrain:
+	icon:
+		Filename: ttnk_devil.png
+		RemasteredFilename:
+
 aot-upgrade-ltnk-tick:
 	icon:
 		RemasteredFilename: ltnk_tick.png

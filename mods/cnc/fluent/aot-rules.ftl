@@ -46,6 +46,15 @@ actor-ttnk-toxin =
 actor-ttnk-cloak =
     .name = Stealth Flame Tank
 
+actor-aot-ttnk-devil =
+    .name = Devil's Tongue
+
+actor-aot-ttnk-devil-toxin =
+    .name = Devil's Tongue (Toxin)
+
+actor-aot-subapc =
+    .name = Subterranean APC
+
 actor-aot-sub =
     .name = Attack Submarine
     .description = Stealthy torpedo submarine. Auto-submerges after surfacing. Surfaces when damaged critically.

@@ -2348,6 +2348,13 @@ TTNK:
 		EffectiveOwnerFromOwner: true
 	Selectable:
 		DecorationBounds: 1194, 1194
+	# Feld-Transform zur Devil's Tongue, sobald Subterrain-Upgrade UND Flame-Upgrade aktiv sind.
+	# RequiresCondition: aot-ttnk-flame -> Base-Panzer (kein Flammen-Upgrade) verwandeln sich NIE.
+	# Der Transform greift auch wenn zus. das Toxic-Upgrade aktiv ist (Condition bleibt aot-ttnk-flame).
+	AotTransformOnPrerequisite:
+		IntoActor: aot-ttnk-devil-base
+		Prerequisites: aot-subterrain-upgrade, aot-ttnk-flame-upgrade
+		RequiresCondition: aot-ttnk-flame
 
 aot-ttnk-base:
 	Inherits: TTNK
@@ -2365,7 +2372,7 @@ aot-ttnk-flame:
 		Image: ttnk
 	Buildable:
 		BuildPaletteOrder: 2
-		Prerequisites: afld, ~aot-ttnk-flame-upgrade, ~!aot-toxic-upgrade
+		Prerequisites: afld, ~aot-ttnk-flame-upgrade, ~!aot-toxic-upgrade, ~!aot-subterrain-upgrade
 		Queue: Starport
 		BuildDuration: 0
 		Icon: aot-flame-icon
@@ -2379,13 +2386,196 @@ aot-ttnk-toxin:
 		Image: ttnk
 	Buildable:
 		BuildPaletteOrder: 2
-		Prerequisites: afld, ~aot-ttnk-flame-upgrade, ~aot-toxic-upgrade
+		Prerequisites: afld, ~aot-ttnk-flame-upgrade, ~aot-toxic-upgrade, ~!aot-subterrain-upgrade
 		Queue: Starport
 		BuildDuration: 0
 		Icon: aot-toxin-icon
 		Description: Flame Tank upgraded with dual toxic tiberian-sprayers.
 	Tooltip@normal:
 		Name: actor-ttnk-toxin.name
+
+# === Age of Tiberium (aotmod) - Devil's Tongue Subterranean Flame Tank ===
+# Erbt TTNK (alle Conditions/Waffen/Turret-Traits) aber ersetzt den Locomotor durch den
+# Subterranean-Locomotor und fuegt Dig-In/Dig-Out-Mechanik hinzu.
+# Baubar nach aot-subterrain-upgrade + aot-ttnk-flame-upgrade im Starport (analog aot-ttnk-flame).
+# Separate Proxies fuer Flame und Toxin (nach Toxic-Upgrade), analog zum TTNK-Muster.
+aot-ttnk-devil-base:
+	Inherits: TTNK
+	RenderSprites:
+		Image: ttnk
+	Mobile:
+		Locomotor: aot-subterranean
+	# PFLICHT: AotTransformOnPrerequisite von TTNK erbt auf diesen Aktor mit →
+	# nach Transform sind beide Prereqs aktiv und aot-ttnk-flame wird re-granted →
+	# endlos-Transform-auf-sich-selbst blockiert Activity-Queue (keine Bewegung).
+	-AotTransformOnPrerequisite:
+	-WithSpriteTurret@normal:
+	-WithFacingSpriteBody@normal:
+	-WithFacingSpriteBody@flame:
+	-WithFacingSpriteBody@toxin:
+	# Subterranean body: normaler Sprite bei !submerged && !digging; Tilt bei Übergangsphase.
+	WithFacingSpriteBody@sub:
+		Sequence: aot-subtank-idle
+		Name: body
+		RequiresCondition: !submerged && !digging
+	WithFacingSpriteBody@subremap:
+		Sequence: aot-subtank-remap
+		Name: body-remap
+		Palette: aot-vxl-player
+		IsPlayerPalette: True
+		RequiresCondition: !submerged && !digging
+	WithFacingSpriteBody@dig:
+		Sequence: aot-subtank-tilt
+		Name: body
+		RequiresCondition: digging
+	WithFacingSpriteBody@digremap:
+		Sequence: aot-subtank-tilt-remap
+		Name: body-remap
+		Palette: aot-vxl-player
+		IsPlayerPalette: True
+		RequiresCondition: digging
+	WithShadow:
+		Offset: 0, 48, 0
+		ZOffset: -129
+	RevealsShroud:
+		RequiresCondition: !submerged
+	Targetable:
+		RequiresCondition: !submerged
+	Targetable@UNDERGROUND:
+		TargetTypes: Underground
+		RequiresCondition: submerged
+	GrantConditionOnSubterraneanLayer:
+		Condition: submerged
+		TransitionCondition: digging
+		SubterraneanTransitionImage: aot-dig
+		SubterraneanTransitionSequence: idle
+		SubterraneanTransitionPalette: effect
+		SubterraneanTransitionSound: subdril1.aud
+	# AttackTurreted erbt RequiresCondition: !aot-ttnk-flame -> feuert nie (devil hat immer flame).
+	# AttackFrontal: Waffe via erbte Conditions (flame/toxin), submerged-Pause.
+	AttackFrontal:
+		PauseOnCondition: submerged || digging
+	Cloak@UNDERGROUND:
+		InitialDelay: 0
+		CloakDelay: 0
+		CloakType: Underground
+		RequiresCondition: submerged
+		UncloakSound:
+		CloakSound:
+
+aot-ttnk-devil:
+	Inherits: aot-ttnk-devil-base
+	Buildable:
+		BuildPaletteOrder: 2
+		Prerequisites: ~afld, ~aot-age2, aot-ttnk-flame-upgrade, aot-subterrain-upgrade, ~!aot-toxic-upgrade
+		Queue: Starport
+		BuildDuration: 0
+		Icon: aot-devil-icon
+		Description: Flame Tank upgraded with subterranean movement. Can tunnel underground to ambush enemies.
+	Tooltip@normal:
+		Name: actor-aot-ttnk-devil.name
+
+aot-ttnk-devil-toxin:
+	Inherits: aot-ttnk-devil-base
+	Buildable:
+		BuildPaletteOrder: 2
+		Prerequisites: ~afld, ~aot-age2, aot-ttnk-flame-upgrade, aot-subterrain-upgrade, ~aot-toxic-upgrade
+		Queue: Starport
+		BuildDuration: 0
+		Icon: aot-devil-icon
+		Description: Toxin Tank upgraded with subterranean movement. Can tunnel underground to ambush enemies.
+	Tooltip@normal:
+		Name: actor-aot-ttnk-devil-toxin.name
+
+# === Age of Tiberium (aotmod) - Subterranean APC (NOD) ===
+# Unbewaffneter Infanterie-Transport mit Subterranean-Mechanik (TS SAPC).
+# Baubar im Starport (afld) nach Subterrain-Upgrade + Hand of Nod.
+aot-subapc:
+	Inherits: ^Vehicle
+	Inherits@EXPERIENCE: ^GainsExperience
+	Valued:
+		Cost: 800
+	-Tooltip:
+	Tooltip:
+		Name: actor-aot-subapc.name
+		GenericName: meta-vehicle-generic-name
+	UpdatesPlayerStatistics:
+		AddToArmyValue: true
+	Buildable:
+		BuildPaletteOrder: 3
+		Prerequisites: ~afld, ~aot-age2, hand, aot-subterrain-upgrade
+		Queue: Starport
+		BuildDuration: 0
+		Icon: icon
+		Description: Subterranean infantry transport. Can tunnel underground while carrying up to 5 infantry.
+	Mobile:
+		TurnSpeed: 20
+		Speed: 71
+		Locomotor: aot-subterranean
+	Health:
+		HP: 17500
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-subapc
+	-WithFacingSpriteBody:
+	WithFacingSpriteBody@sub:
+		Sequence: idle
+		Name: body
+		RequiresCondition: !submerged && !digging
+	WithFacingSpriteBody@subremap:
+		Sequence: idle-remap
+		Name: body-remap
+		Palette: aot-vxl-player
+		IsPlayerPalette: True
+		RequiresCondition: !submerged && !digging
+	WithFacingSpriteBody@dig:
+		Sequence: tilt
+		Name: body
+		RequiresCondition: digging
+	WithFacingSpriteBody@digremap:
+		Sequence: tilt-remap
+		Name: body-remap
+		Palette: aot-vxl-player
+		IsPlayerPalette: True
+		RequiresCondition: digging
+	WithShadow:
+		Offset: 0, 48, 0
+		ZOffset: -129
+	RevealsShroud:
+		RequiresCondition: !submerged
+		Range: 5c0
+	Cargo:
+		Types: Infantry
+		MaxWeight: 5
+		UnloadVoice: Unload
+		EjectOnDeath: true
+		PauseOnCondition: submerged
+	Targetable:
+		RequiresCondition: !submerged
+	Targetable@UNDERGROUND:
+		TargetTypes: Underground
+		RequiresCondition: submerged
+	GrantConditionOnSubterraneanLayer:
+		Condition: submerged
+		TransitionCondition: digging
+		SubterraneanTransitionImage: aot-dig
+		SubterraneanTransitionSequence: idle
+		SubterraneanTransitionPalette: effect
+		SubterraneanTransitionSound: subdril1.aud
+	Cloak@UNDERGROUND:
+		InitialDelay: 0
+		CloakDelay: 0
+		CloakType: Underground
+		RequiresCondition: submerged
+		UncloakSound:
+		CloakSound:
+	SpawnActorOnDeath:
+		Actor: LTNK.Husk
+		OwnerType: InternalName
+		EffectiveOwnerFromOwner: true
+	Selectable:
+		DecorationBounds: 1024, 1024
 
 # === Age of Tiberium (aotmod) - V2 Rocket Launcher NOD (Age 0, Doppel-Aktor-Pattern) ===
 # aot-v2-base: sofort in LITE (NOD) baubar, verschwindet nach Napalm- ODER Howitzer-Upgrade.
@@ -4827,6 +5017,7 @@ aot-gadpsa:
 
 	AotSensorArrayDetection:
 		Notification: CloakedUnitDetected
+		SubterraneanNotification: SubterraneanUnitDetected
 
 	WithRangeCircle:
 		Type: detectcloaked

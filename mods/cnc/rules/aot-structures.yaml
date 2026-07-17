@@ -873,6 +873,33 @@ aot-upgrade-ltnk-tick:
 # aot-laser-fence-upgrade.
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - Subterranean Upgrade (NOD, Age 2) ===
+# Sichtbar ab Age 2 (kein Flame-Tank-Prereq!). Transform im Feld via AotTransformOnPrerequisite
+# (auf TTNK-Aktor) nur wenn BEIDE Upgrades aktiv sind (aot-subterrain-upgrade +
+# aot-ttnk-flame-upgrade) -> Base-Panzer ohne Flammen verwandeln sich NIE.
+aot-upgrade-ttnk-subterrain:
+	Tooltip:
+		Name: Subterranean Upgrade
+
+	Buildable:
+		BuildPaletteOrder: 11
+		Prerequisites: ~stec, ~aot-age2, aot-age2, stec, ~!aot-subterrain-upgrade
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Upgrades the Flame Tank and Toxin Tank to subterranean variants that can tunnel underground. Also unlocks the Subterranean Infantry Transport.
+
+	Valued:
+		Cost: 1500
+
+	RenderSprites:
+		Image: aot-upgrade-ttnk-subterrain
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-subterrain-upgrade
+
+	Interactable:
+
 # === Age of Tiberium (aotmod) - Toxic Upgrade (konsolidiert, 2026-07-04) ===
 # Ersetzt die vorherigen 3 Einzel-Upgrades (Toxic Trooper / Toxin Tank / Stealth
 # Tank) durch EIN gemeinsames Upgrade, das alle Flammen-Einheiten gleichzeitig auf

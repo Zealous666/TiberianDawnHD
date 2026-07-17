@@ -329,6 +329,8 @@ RMBO:
 		SubterraneanTransitionTerrainTypes: Clear, Road, Rough, Tiberium, BlueTiberium
 		SubterraneanTransitionCost: 100
 		SubterraneanTransitionOnRamps: false
+		# ~3x schnellere Unsichtbarkeit vs Default -1024 (setzt submerged-Condition früher).
+		SubterraneanTransitionDepth: -341
 	# === Age of Tiberium (aotmod) - TS-Infanterie-Palette ===
 	# unittem.pal (TS Unit-Palette) als Basis + Player-Color-Remap auf House-Color-Indizes 16-31.
 	# Für direkt referenzierte TS-Infanterie-SHPs (z.B. cyborg.shp). Wiederverwendbar.

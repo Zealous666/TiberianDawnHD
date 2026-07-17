@@ -3108,6 +3108,37 @@ ttnk:
 		Length: 1
 	# aot-cloak-icon entfernt (2026-07-04) - aot-ttnk-cloak-Aktor geloescht,
 	# Stealth-Tank-Upgrade komplett entfernt (nicht migriert).
+	aot-devil-icon:
+		Filename: ttnk_devil.png
+		RemasteredFilename:
+		Length: 1
+	# Subterranean body + remap (aot-subtank.zip: 32 Facings, 215x215, TS SUBTANK.VXL)
+	# Scale 0.75: 25% verkleinert. Unter ttnk:-Image (Muzzle-Sequenzen erbt devil-base davon).
+	aot-subtank-idle:
+		RemasteredFilename: aot-subtank.zip
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 0.75
+	aot-subtank-remap:
+		RemasteredFilename: aot-subtank-remap.png
+		Facings: 32
+		UseClassicFacings: True
+		RemasteredPremultiplied: False
+		Scale: 0.75
+	# Tilt-Animation: 4 progressive Kompressionen (15%..60% von unten) für Übergangsphase.
+	aot-subtank-tilt:
+		RemasteredFilename: aot-subtank-tilt.zip
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 0.75
+		Length: 4
+	aot-subtank-tilt-remap:
+		RemasteredFilename: aot-subtank-tilt-remap.png
+		Facings: 32
+		UseClassicFacings: True
+		RemasteredPremultiplied: False
+		Scale: 0.75
+		Length: 4
 
 ttnk.destroyed:
 	idle:
@@ -4563,6 +4594,49 @@ aot-gadpsa:
 		Filename:
 		RemasteredFilename: aot-gadpsa-remap.png
 		Length: 1
+
+# === Subterranean APC (aot-subapc) — TS SAPC.VXL, 32 Facings ===
+aot-subapc:
+	Defaults:
+		RemasteredFilename: aot-sapc.zip
+	idle:
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 0.80
+	idle-remap:
+		RemasteredFilename: aot-sapc-remap.png
+		Facings: 32
+		UseClassicFacings: True
+		RemasteredPremultiplied: False
+		Scale: 0.80
+	# Tilt-Animation: 4 progressive Kompressionen (15%..60% von unten) für Übergangsphase.
+	tilt:
+		RemasteredFilename: aot-sapc-tilt.zip
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 0.80
+		Length: 4
+	tilt-remap:
+		RemasteredFilename: aot-sapc-tilt-remap.png
+		Facings: 32
+		UseClassicFacings: True
+		RemasteredPremultiplied: False
+		Scale: 0.80
+		Length: 4
+	icon:
+		Filename: sub_apc.png
+		RemasteredFilename:
+		Length: 1
+
+# === Dig-Animation (aot-dig) — TS DIG.SHP, Erdaufwirbel beim Ein-/Ausgraben ===
+aot-dig:
+	idle:
+		Filename: dig.shp
+		RemasteredFilename:
+		Length: *
+		Scale: 0.75
+		ZOffset: 511
+		Offset: 0, 0, 24
 
 # === Surveyor — mobiles Fahrzeug (aot-surveyor) ===
 # TS Mobile War Factory MWAR_NOD.vxl (aus expand01.mix), 32 Facings.

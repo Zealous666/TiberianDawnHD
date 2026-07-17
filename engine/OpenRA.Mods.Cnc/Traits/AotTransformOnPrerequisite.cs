@@ -17,6 +17,7 @@
 #endregion
 
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using OpenRA.Mods.Common.Activities;
 using OpenRA.Mods.Common.Traits;
 using OpenRA.Traits;
@@ -59,14 +60,14 @@ namespace OpenRA.Mods.Cnc.Traits
 		{
 			base.Created(self);
 			techTree = self.Owner.PlayerActor.Trait<TechTree>();
-			techTree.Add(this, Info.Prerequisites, 0, false);
+			techTree.Add(self.ActorID.ToString(), Info.Prerequisites.ToImmutableArray(), 0, this);
 		}
 
 		void INotifyOwnerChanged.OnOwnerChanged(Actor self, Player oldOwner, Player newOwner)
 		{
 			techTree.Remove(this);
 			techTree = newOwner.PlayerActor.Trait<TechTree>();
-			techTree.Add(this, Info.Prerequisites, 0, false);
+			techTree.Add(self.ActorID.ToString(), Info.Prerequisites.ToImmutableArray(), 0, this);
 		}
 
 		void TryTransform()
@@ -91,5 +92,6 @@ namespace OpenRA.Mods.Cnc.Traits
 
 		void ITechTreeElement.PrerequisitesUnavailable(string key) { prerequisitesMet = false; }
 		void ITechTreeElement.PrerequisitesItemHidden(string key) { }
+		void ITechTreeElement.PrerequisitesItemVisible(string key) { }
 	}
 }
