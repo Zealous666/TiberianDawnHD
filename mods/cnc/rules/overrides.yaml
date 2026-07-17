@@ -8,6 +8,11 @@
 # NUR auf World (nicht EditorWorld) erlaubt, deshalb eigener Block statt ^BaseWorld.
 World:
 	JumpjetActorLayer:
+	# === Age of Tiberium (aotmod) - SubterraneanActorLayer: PFLICHT-World-Trait fuer SubterraneanLocomotor ===
+	# Analog zu JumpjetActorLayer. Ohne diesen World-Trait wird der Subterranean-Movement-Layer nie
+	# betreten -> GrantConditionOnSubterraneanLayer feuert nie -> Ein-/Ausgraben funktioniert nicht.
+	# NUR auf World (nicht EditorWorld) erlaubt, deshalb eigener Block statt ^BaseWorld.
+	SubterraneanActorLayer:
 	# Eis-System: haelt die Menge aller vereisten Zellen (Hosts + gewachsene Zellen).
 	# Die Zellen fragen darueber ihre geteilten Ecken ab -> stetige Kanten.
 	AotIceLayer:
@@ -305,6 +310,25 @@ RMBO:
 			Beach: 89
 			Rock: 106
 			River: 106
+	# === Age of Tiberium (aotmod) - Subterranean Locomotor (Devil's Tongue + Sub APC) ===
+	# SubterraneanTransitionTerrainTypes: nur Clear, Road, Rough, Tiberium, BlueTiberium erlaubt.
+	# Beach, Rock (Klippen), Water, River, Bridge geblockt -> kein Ein-/Ausgraben dort.
+	# Gebaeude-Footprints/Bibs geblockt via Engine-Patch (SubterraneanActorLayer.ValidTransitionCell
+	# + BuildingInfluence-Check). SubterraneanTransitionOnRamps: false (TS-Default).
+	# Crasht ohne TerrainType@Subterranean in allen Tilesets.
+	SubterraneanLocomotor@AOT_SUBTERRANEAN:
+		Name: aot-subterranean
+		Crushes: crate, mine
+		TerrainSpeeds:
+			Clear: 80
+			Road: 100
+			Rough: 65
+			Tiberium: 70
+			BlueTiberium: 70
+			Subterranean: 120
+		SubterraneanTransitionTerrainTypes: Clear, Road, Rough, Tiberium, BlueTiberium
+		SubterraneanTransitionCost: 100
+		SubterraneanTransitionOnRamps: false
 	# === Age of Tiberium (aotmod) - TS-Infanterie-Palette ===
 	# unittem.pal (TS Unit-Palette) als Basis + Player-Color-Remap auf House-Color-Indizes 16-31.
 	# Für direkt referenzierte TS-Infanterie-SHPs (z.B. cyborg.shp). Wiederverwendbar.
@@ -532,6 +556,7 @@ WEAP:
 	Buildable:
 		Prerequisites: ~aot-age1, aot-age1, lite
 		Queue: Building.GDI
+		BuildLimit: 1
 	ProvidesPrerequisite@aot:
 		Prerequisite: aot-weap
 	ProvidesPrerequisite@buildingname:
@@ -547,6 +572,7 @@ AFLD:
 	Buildable:
 		Prerequisites: ~aot-age1, aot-age1, lite
 		Queue: Building.Nod
+		BuildLimit: 1
 	ProvidesPrerequisite@buildingname:
 	-ProductionAirdrop:
 	-ProductionQueue:

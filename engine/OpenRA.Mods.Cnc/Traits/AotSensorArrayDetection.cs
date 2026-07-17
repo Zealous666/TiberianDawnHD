@@ -19,17 +19,29 @@ using OpenRA.Traits;
 
 namespace OpenRA.Mods.Cnc.Traits
 {
-	[Desc("Plays a speech notification and shows a radar ping when this actor detects a cloaked enemy unit. " +
-		"Requires DetectCloaked on the same actor.")]
+	[Desc("Plays a speech notification and shows a radar ping when this actor detects a cloaked " +
+		"or subterranean enemy unit. Requires DetectCloaked on the same actor. " +
+		"Underground units (CloakType: Underground) use a separate notification.")]
 	public class AotSensorArrayDetectionInfo : ConditionalTraitInfo
 	{
 		[NotificationReference("Speech")]
-		[Desc("Speech notification key (NOD/neutral faction).")]
+		[Desc("Speech notification key (NOD/neutral faction) for cloaked unit detection.")]
 		public readonly string Notification = "CloakedUnitDetected";
 
 		[NotificationReference("Speech")]
 		[Desc("Speech notification key for GDI faction (GDI EVA voice). Falls back to Notification if empty.")]
 		public readonly string GdiNotification = "CloakedUnitDetectedGdi";
+
+		[NotificationReference("Speech")]
+		[Desc("Speech notification key for subterranean unit detection (NOD/neutral).")]
+		public readonly string SubterraneanNotification = "SubterraneanUnitDetected";
+
+		[NotificationReference("Speech")]
+		[Desc("Speech notification key for subterranean unit detection (GDI EVA voice). Falls back to SubterraneanNotification if empty.")]
+		public readonly string SubterraneanGdiNotification = "SubterraneanUnitDetectedGdi";
+
+		[Desc("CloakType value that identifies subterranean units (must match Cloak@UNDERGROUND.CloakType).")]
+		public readonly string SubterraneanCloakType = "Underground";
 
 		[FluentReference(optional: true)]
 		[Desc("Text notification to display in the message log.")]
@@ -67,6 +79,12 @@ namespace OpenRA.Mods.Cnc.Traits
 			base.Created(self);
 		}
 
+		bool IsSubterranean(Actor a)
+		{
+			return a.TraitsImplementing<Cloak>()
+				.Any(c => !c.IsTraitDisabled && c.Info.CloakType == Info.SubterraneanCloakType);
+		}
+
 		void ITick.Tick(Actor self)
 		{
 			if (cooldownTicks > 0)
@@ -96,16 +114,35 @@ namespace OpenRA.Mods.Cnc.Traits
 					if (localPlayer != null && !localPlayer.Spectating && self.Owner == localPlayer)
 					{
 						var isGdi = self.Owner.Faction.InternalName == "gdi";
-						var notifKey = isGdi && !string.IsNullOrEmpty(Info.GdiNotification)
-							? Info.GdiNotification
-							: Info.Notification;
-						Game.Sound.PlayNotification(self.World.Map.Rules, self.Owner,
-							"Speech", notifKey, self.Owner.Faction.InternalName);
+						var firstSub = newlyDetected.FirstOrDefault(IsSubterranean);
+						var firstCloaked = newlyDetected.FirstOrDefault(a => !IsSubterranean(a));
 
-						TextNotificationsManager.AddTransientLine(self.Owner, Info.TextNotification);
+						if (firstSub != null)
+						{
+							var notifKey = isGdi && !string.IsNullOrEmpty(Info.SubterraneanGdiNotification)
+								? Info.SubterraneanGdiNotification
+								: Info.SubterraneanNotification;
+							if (!string.IsNullOrEmpty(notifKey))
+								Game.Sound.PlayNotification(self.World.Map.Rules, self.Owner,
+									"Speech", notifKey, self.Owner.Faction.InternalName);
 
-						var pingPos = newlyDetected[0].CenterPosition;
-						radarPings.Value?.Add(() => true, pingPos, Info.RadarPingColor, Info.RadarPingDuration);
+							var pingPos = firstSub.CenterPosition;
+							radarPings.Value?.Add(() => true, pingPos, Info.RadarPingColor, Info.RadarPingDuration);
+						}
+
+						if (firstCloaked != null)
+						{
+							var notifKey = isGdi && !string.IsNullOrEmpty(Info.GdiNotification)
+								? Info.GdiNotification
+								: Info.Notification;
+							Game.Sound.PlayNotification(self.World.Map.Rules, self.Owner,
+								"Speech", notifKey, self.Owner.Faction.InternalName);
+
+							TextNotificationsManager.AddTransientLine(self.Owner, Info.TextNotification);
+
+							var pingPos = firstCloaked.CenterPosition;
+							radarPings.Value?.Add(() => true, pingPos, Info.RadarPingColor, Info.RadarPingDuration);
+						}
 					}
 
 					cooldownTicks = Info.NotificationCooldown;
