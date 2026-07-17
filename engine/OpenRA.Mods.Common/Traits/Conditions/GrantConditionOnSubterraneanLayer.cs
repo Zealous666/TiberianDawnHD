@@ -84,13 +84,13 @@ namespace OpenRA.Mods.Common.Traits
 				if (transitionConditionToken != Actor.InvalidConditionToken)
 					transitionConditionToken = self.RevokeCondition(transitionConditionToken);
 			}
-			// Revoke submerged when depth crosses threshold during dig-out; grant transition condition.
+			// Revoke submerged when depth crosses threshold during dig-out.
+			// TransitionCondition is NOT granted here: UpdateConditions (CustomLayerChanged) fires before
+			// CenterPositionChanged at layer-change time, so granting here would leave it stranded forever.
 			else if (newLayer != ValidLayerType && depth > transitionDepth && conditionToken != Actor.InvalidConditionToken)
 			{
 				conditionToken = self.RevokeCondition(conditionToken);
 				PlayTransitionAudioVisuals(self, self.Location);
-				if (!string.IsNullOrEmpty(Info.TransitionCondition) && transitionConditionToken == Actor.InvalidConditionToken)
-					transitionConditionToken = self.GrantCondition(Info.TransitionCondition);
 			}
 		}
 
