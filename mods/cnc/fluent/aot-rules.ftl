@@ -219,3 +219,7 @@ actor-aot-scoutant =
 
 actor-aot-ant-spawner =
     .name = Ant Nest
+
+actor-aot-foundation =
+    .name = Fortified Foundation
+    .description = Reinforced concrete pad. Provides buildable area and blocks enemy movement. Cannot be destroyed or sold.

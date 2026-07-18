@@ -61,7 +61,7 @@ aot-lite-gdi:
 	RenderSprites:
 		Image: lite-gdi
 	Buildable:
-		BuildPaletteOrder: 30
+		BuildPaletteOrder: 60
 		Prerequisites: anypower
 		Queue: Building.GDI
 		Description: Basic vehicle production facility. Requires only a Power Plant.
@@ -77,6 +77,7 @@ aot-lite-gdi:
 		DisplayOrder: 3
 		Factions: gdi
 		Group: Vehicle
+		ShowLockedItems: True
 		LowPowerModifier: 150
 		ReadyAudio: UnitReady
 		ReadyTextNotification: notification-unit-ready
@@ -128,7 +129,7 @@ aot-lite-nod:
 	RenderSprites:
 		Image: lite-nod
 	Buildable:
-		BuildPaletteOrder: 30
+		BuildPaletteOrder: 60
 		Prerequisites: anypower
 		Queue: Building.Nod
 		Description: Basic vehicle production facility. Requires only a Power Plant.
@@ -144,6 +145,7 @@ aot-lite-nod:
 		DisplayOrder: 3
 		Factions: nod
 		Group: Vehicle
+		ShowLockedItems: True
 		LowPowerModifier: 150
 		ReadyAudio: UnitReady
 		ReadyTextNotification: notification-unit-ready
@@ -371,8 +373,9 @@ aot-pyle-age0:
 		Sequence: aot-ra-idle
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-pyle
 		Queue: Building.GDI
-		BuildPaletteOrder: 20
+		BuildPaletteOrder: 50
 		Prerequisites: ~!aot-age1, anypower
 		Icon: aot-ra-icon
 		Description: Trains infantry.
@@ -390,8 +393,9 @@ aot-pyle-age1:
 		Sequence: idle
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-pyle
 		Queue: Building.GDI
-		BuildPaletteOrder: 20
+		BuildPaletteOrder: 50
 		Prerequisites: ~aot-age1, ~!aot-age2, anypower
 		Icon: aot-td-icon
 		Description: Trains infantry.
@@ -409,8 +413,9 @@ aot-pyle-age2:
 		Sequence: aot-age2-idle
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-pyle
 		Queue: Building.GDI
-		BuildPaletteOrder: 20
+		BuildPaletteOrder: 50
 		Prerequisites: ~aot-age2, anypower
 		Icon: aot-age2-icon
 		Description: Trains infantry.
@@ -490,8 +495,9 @@ aot-hand-age0:
 		Sequence: aot-ra-idle
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-hand
 		Queue: Building.Nod
-		BuildPaletteOrder: 20
+		BuildPaletteOrder: 50
 		Prerequisites: ~!aot-age1, anypower
 		Icon: aot-ra-icon
 		Description: Trains infantry.
@@ -509,8 +515,9 @@ aot-hand-age1:
 		Sequence: idle
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-hand
 		Queue: Building.Nod
-		BuildPaletteOrder: 20
+		BuildPaletteOrder: 50
 		Prerequisites: ~aot-age1, ~!aot-age2, anypower
 		Icon: aot-td-icon
 		Description: Trains infantry.
@@ -528,8 +535,9 @@ aot-hand-age2:
 		Sequence: aot-age2-idle
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-hand
 		Queue: Building.Nod
-		BuildPaletteOrder: 20
+		BuildPaletteOrder: 50
 		Prerequisites: ~aot-age2, anypower
 		Icon: aot-age2-icon
 		Description: Trains infantry.
@@ -593,7 +601,7 @@ aot-upgrade-guard-dog-kennel:
 		Cost: 300
 
 	Buildable:
-		BuildPaletteOrder: 1
+		BuildPaletteOrder: 10
 		Prerequisites: stec
 		Queue: Upgrade.Nod
 		BuildLimit: 1
@@ -618,7 +626,7 @@ aot-upgrade-intelligence-office:
 		Cost: 500
 
 	Buildable:
-		BuildPaletteOrder: 1
+		BuildPaletteOrder: 10
 		Prerequisites: atec
 		Queue: Upgrade.GDI
 		BuildLimit: 1
@@ -641,7 +649,7 @@ aot-upgrade-humvee:
 		Name: HUMVEE Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 30
+		BuildPaletteOrder: 20
 		Prerequisites: ~lite, ~aot-age1, aot-age1, lite, pyle, fix, ~!aot-apc-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
@@ -667,7 +675,7 @@ aot-upgrade-apc:
 		Name: APC Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 31
+		BuildPaletteOrder: 21
 		Prerequisites: ~lite, ~aot-age1, aot-age1, lite, pyle, fix, ~!aot-humvee-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
@@ -690,7 +698,8 @@ aot-upgrade-apc2:
 		Name: Amphibious APC Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 32
+		LockedGroup: aot-grp-up-apcbranch
+		BuildPaletteOrder: 55
 		Prerequisites: ~atec, lite, ~pyle, ~aot-age2, aot-age2, aot-apc-upgrade, ~!aot-humvee-upgrade, ~!aot-minelayer-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
@@ -717,7 +726,8 @@ aot-upgrade-minelayer:
 		Name: Mine Layer Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 34
+		LockedGroup: aot-grp-up-apcbranch
+		BuildPaletteOrder: 55
 		Prerequisites: ~aot-weap, weap, ~aot-age2, aot-age2, aot-apc-upgrade, ~aot-apc-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
@@ -743,7 +753,8 @@ aot-upgrade-wolverine:
 		Name: Wolverine Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 33
+		LockedGroup: aot-grp-up-apcbranch
+		BuildPaletteOrder: 55
 		Prerequisites: lite, ~pyle, ~aot-age2, aot-age2, ~!aot-apc-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
@@ -768,7 +779,7 @@ aot-upgrade-hover-mlrs:
 		Name: Hover MLRS Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 51
+		BuildPaletteOrder: 70
 		Prerequisites: anyhq, ~aot-age2, aot-age2, ~!aot-hover-aa-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
@@ -793,7 +804,7 @@ aot-upgrade-hover-aa:
 		Name: Hover AA Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 52
+		BuildPaletteOrder: 71
 		Prerequisites: anyhq, ~aot-age2, aot-age2, ~!aot-hover-mlrs-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
@@ -818,7 +829,7 @@ aot-upgrade-ttnk:
 		Name: Flame Tank Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 10
+		BuildPaletteOrder: 20
 		Prerequisites: ~stec, ~aot-age1, aot-age1, stec, afld
 		Queue: Upgrade.Nod
 		BuildLimit: 1
@@ -845,7 +856,7 @@ aot-upgrade-ltnk-tick:
 		Name: Tick Tank Chassis
 
 	Buildable:
-		BuildPaletteOrder: 10
+		BuildPaletteOrder: 45
 		Prerequisites: ~stec, ~aot-age2, aot-age2, ~afld, fix
 		Queue: Upgrade.Nod
 		BuildLimit: 1
@@ -882,7 +893,7 @@ aot-upgrade-ttnk-subterrain:
 		Name: Subterranean Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 11
+		BuildPaletteOrder: 50
 		Prerequisites: ~stec, ~aot-age2, aot-age2, stec, ~!aot-subterrain-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
@@ -914,7 +925,7 @@ aot-upgrade-e4-toxic:
 		Name: Toxic Weapons Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 12
+		BuildPaletteOrder: 80
 		Prerequisites: ~aot-age3, tmpl, stec, aot-shrine
 		Queue: Upgrade.Nod
 		BuildLimit: 1
@@ -944,7 +955,7 @@ aot-upgrade-v2-napalm:
 		Name: actor-aot-upgrade-v2-napalm.name
 
 	Buildable:
-		BuildPaletteOrder: 11
+		BuildPaletteOrder: 35
 		Prerequisites: ~aot-age1, aot-age1, afld, tmpl, ~!aot-howitzer-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
@@ -967,7 +978,7 @@ aot-upgrade-v2-howitzer:
 		Name: actor-aot-upgrade-v2-howitzer.name
 
 	Buildable:
-		BuildPaletteOrder: 12
+		BuildPaletteOrder: 36
 		Prerequisites: ~aot-age1, aot-age1, afld, tmpl, ~!aot-napalm-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
@@ -990,7 +1001,7 @@ aot-upgrade-heavy-artillery:
 		Name: actor-aot-upgrade-heavy-artillery.name
 
 	Buildable:
-		BuildPaletteOrder: 13
+		BuildPaletteOrder: 85
 		Prerequisites: ~aot-age3, aot-age3, aot-howitzer-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
@@ -1017,7 +1028,7 @@ aot-upgrade-ion-cannon:
 		Name: Ion Cannon Strike Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 5
+		BuildPaletteOrder: 75
 		Prerequisites: ~atec, ~aot-orbc, ~aot-age2, aot-age2
 		Queue: Upgrade.GDI
 		BuildLimit: 1
@@ -1046,7 +1057,7 @@ aot-upgrade-infantry-railgun:
 		Name: Infantry Railguns
 
 	Buildable:
-		BuildPaletteOrder: 5
+		BuildPaletteOrder: 80
 		Prerequisites: ~aot-age3, aot-age3, pyle, atec
 		Queue: Upgrade.GDI
 		BuildLimit: 1
@@ -1072,7 +1083,7 @@ aot-upgrade-zonetrooper-drop:
 		Name: Zone Trooper Drop Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 6
+		BuildPaletteOrder: 85
 		Prerequisites: ~atec, ~aot-orbc, ~aot-age3, aot-age3, aot-infantry-railgun-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
@@ -1112,6 +1123,7 @@ ATEC:
 		Type: Upgrade.GDI
 		Factions: gdi
 		Group: Upgrade
+		ShowLockedItems: True
 		ReadyAudio: ConstructionComplete
 		ReadyTextNotification: notification-construction-complete
 		BlockedAudio: NoBuild
@@ -1204,8 +1216,9 @@ aot-atec-age0:
 		Sequence: place
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-atec
 		Queue: Building.GDI
-		BuildPaletteOrder: 100
+		BuildPaletteOrder: 120
 		Prerequisites: anypower, gdi-hq, ~!aot-age1
 		BuildLimit: 1
 		Icon: icon
@@ -1220,8 +1233,9 @@ aot-atec-age1:
 		Sequence: aot-td-place
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-atec
 		Queue: Building.GDI
-		BuildPaletteOrder: 100
+		BuildPaletteOrder: 120
 		Prerequisites: anypower, gdi-hq, ~aot-age1, ~!aot-age2, !aot-atec
 		BuildLimit: 1
 		Icon: aot-age1-icon
@@ -1236,8 +1250,9 @@ aot-atec-age2:
 		Sequence: atec-ts-place
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-atec
 		Queue: Building.GDI
-		BuildPaletteOrder: 100
+		BuildPaletteOrder: 120
 		Prerequisites: anypower, gdi-hq, ~aot-age2, !aot-atec
 		BuildLimit: 1
 		Icon: aot-age2-icon
@@ -1262,6 +1277,7 @@ STEC:
 		Type: Upgrade.Nod
 		Factions: nod
 		Group: Upgrade
+		ShowLockedItems: True
 		ReadyAudio: ConstructionComplete
 		ReadyTextNotification: notification-construction-complete
 		BlockedAudio: NoBuild
@@ -1523,8 +1539,9 @@ aot-stec-age0:
 		Sequence: place
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-stec
 		Queue: Building.Nod
-		BuildPaletteOrder: 101
+		BuildPaletteOrder: 120
 		Prerequisites: anypower, anyhq, ~!aot-age1
 		BuildLimit: 1
 		Icon: icon
@@ -1539,8 +1556,9 @@ aot-stec-age1:
 		Sequence: aot-td-place
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-stec
 		Queue: Building.Nod
-		BuildPaletteOrder: 101
+		BuildPaletteOrder: 120
 		Prerequisites: anypower, anyhq, ~aot-age1, ~!aot-age2, !aot-stec
 		BuildLimit: 1
 		Icon: aot-age1-icon
@@ -1555,8 +1573,9 @@ aot-stec-age2:
 		Sequence: stec-ts-place
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-stec
 		Queue: Building.Nod
-		BuildPaletteOrder: 101
+		BuildPaletteOrder: 120
 		Prerequisites: anypower, anyhq, ~aot-age2, !aot-stec
 		BuildLimit: 1
 		Icon: aot-age2-icon
@@ -1785,8 +1804,9 @@ aot-mslo-age1:
 		Sequence: place
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-mslo
 		Queue: Building.Nod
-		BuildPaletteOrder: 105
+		BuildPaletteOrder: 150
 		Prerequisites: ~aot-age1, stec, anyhq, ~!aot-age2
 		BuildLimit: 1
 		Icon: icon
@@ -1801,8 +1821,9 @@ aot-mslo-age2:
 		Sequence: aot-ts-place
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-mslo
 		Queue: Building.Nod
-		BuildPaletteOrder: 105
+		BuildPaletteOrder: 150
 		Prerequisites: ~aot-age1, stec, anyhq, ~aot-age2, !aot-mslo
 		BuildLimit: 1
 		Icon: aot-age2-icon
@@ -1818,7 +1839,7 @@ aot-upgrade-tiberium-missile:
 		Cost: 1000
 	Buildable:
 		Queue: Upgrade.Nod
-		BuildPaletteOrder: 40
+		BuildPaletteOrder: 61
 		Prerequisites: ~stec, ~aot-mslo, ~aot-age2, aot-age2, ~!aot-mine-cluster-enhancement
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -1837,7 +1858,7 @@ aot-upgrade-atom-bomb:
 		Cost: 2000
 	Buildable:
 		Queue: Upgrade.Nod
-		BuildPaletteOrder: 41
+		BuildPaletteOrder: 90
 		Prerequisites: ~stec, ~aot-mslo, ~aot-age3, aot-age3
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -1856,7 +1877,7 @@ aot-upgrade-mine-cluster-enhancement:
 		Cost: 1200
 	Buildable:
 		Queue: Upgrade.Nod
-		BuildPaletteOrder: 39
+		BuildPaletteOrder: 60
 		Prerequisites: ~stec, ~aot-mslo, ~aot-age2, aot-age2, ~!aot-tiberium-missile-upgrade
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -1987,8 +2008,9 @@ aot-hq-base:
 	RenderSprites:
 		Image: hq
 	Buildable:
+		LockedGroup: aot-grp-hq
 		Queue: Building.GDI
-		BuildPaletteOrder: 50
+		BuildPaletteOrder: 110
 		Prerequisites: vehicleproduction, ~techlevel.medium, ~!aot-age2, ~!aot-ion-cannon-upgrade
 		Icon: aot-base-icon
 
@@ -1997,8 +2019,9 @@ aot-hq-ion:
 	RenderSprites:
 		Image: hq
 	Buildable:
+		LockedGroup: aot-grp-hq
 		Queue: Building.GDI
-		BuildPaletteOrder: 50
+		BuildPaletteOrder: 110
 		Prerequisites: vehicleproduction, ~techlevel.medium, ~!aot-age2, ~aot-ion-cannon-upgrade
 		Icon: aot-ion-icon
 
@@ -2007,8 +2030,9 @@ aot-hq-base-age2:
 	RenderSprites:
 		Image: hq
 	Buildable:
+		LockedGroup: aot-grp-hq
 		Queue: Building.GDI
-		BuildPaletteOrder: 50
+		BuildPaletteOrder: 110
 		Prerequisites: vehicleproduction, ~aot-age2, ~!aot-ion-cannon-upgrade
 		Icon: aot-age2-icon
 
@@ -2017,8 +2041,9 @@ aot-hq-ion-age2:
 	RenderSprites:
 		Image: hq
 	Buildable:
+		LockedGroup: aot-grp-hq
 		Queue: Building.GDI
-		BuildPaletteOrder: 50
+		BuildPaletteOrder: 110
 		Prerequisites: vehicleproduction, ~aot-age2, ~aot-ion-cannon-upgrade
 		Icon: aot-ion-icon
 # === Ende aotmod ===
@@ -2143,7 +2168,8 @@ aot-nod-radar-age0:
 	RenderSprites:
 		Image: aot-nod-radar
 	Buildable:
-		BuildPaletteOrder: 50
+		LockedGroup: aot-grp-nodradar
+		BuildPaletteOrder: 110
 		Prerequisites: vehicleproduction, ~techlevel.medium, ~!aot-age1
 		Queue: Building.Nod
 		Icon: icon
@@ -2156,7 +2182,8 @@ aot-nod-radar-age1:
 	RenderSprites:
 		Image: aot-nod-radar-age1
 	Buildable:
-		BuildPaletteOrder: 50
+		LockedGroup: aot-grp-nodradar
+		BuildPaletteOrder: 110
 		Prerequisites: vehicleproduction, ~techlevel.medium, ~aot-age1, ~!aot-age2
 		Queue: Building.Nod
 		Icon: icon
@@ -2172,7 +2199,8 @@ aot-nod-radar-age2:
 	SequencePlaceBuildingPreview:
 		Sequence: aot-age2-idle
 	Buildable:
-		BuildPaletteOrder: 50
+		LockedGroup: aot-grp-nodradar
+		BuildPaletteOrder: 110
 		Prerequisites: vehicleproduction, ~techlevel.medium, ~aot-age2
 		Queue: Building.Nod
 		Icon: aot-age2-icon
@@ -2246,7 +2274,8 @@ aot-tmpl-age1:
 	RenderSprites:
 		Image: tmpl
 	Buildable:
-		BuildPaletteOrder: 100
+		LockedGroup: aot-grp-tmpl
+		BuildPaletteOrder: 160
 		Prerequisites: anyhq, proc, ~techlevel.high, ~aot-age1, ~!aot-age2
 		BuildLimit: 1
 		Queue: Building.Nod
@@ -2263,7 +2292,8 @@ aot-tmpl-age2:
 	SequencePlaceBuildingPreview:
 		Sequence: aot-age2-idle
 	Buildable:
-		BuildPaletteOrder: 100
+		LockedGroup: aot-grp-tmpl
+		BuildPaletteOrder: 160
 		Prerequisites: anyhq, proc, ~techlevel.high, ~aot-age1, ~aot-age2, !aot-tmpl
 		BuildLimit: 1
 		Queue: Building.Nod
@@ -2418,7 +2448,7 @@ aot-upgrade-mtnk-predator:
 		Name: Predator Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 20
+		BuildPaletteOrder: 45
 		Prerequisites: ~atec, ~lite, ~techlevel.medium, ~aot-age2, aot-age2, ~!aot-mtnk-titan-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
@@ -2444,7 +2474,8 @@ aot-upgrade-mtnk-railgun:
 		Name: Tank Railguns
 
 	Buildable:
-		BuildPaletteOrder: 21
+		LockedGroup: aot-grp-up-tank2
+		BuildPaletteOrder: 90
 		Prerequisites: ~atec, ~lite, ~techlevel.medium, ~aot-mtnk-predator-upgrade, ~aot-age3, aot-mtnk-predator-upgrade, aot-age3
 		Queue: Upgrade.GDI
 		BuildLimit: 1
@@ -2468,7 +2499,7 @@ aot-upgrade-mtnk-titan:
 		Name: Titan Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 22
+		BuildPaletteOrder: 46
 		Prerequisites: ~atec, ~lite, ~techlevel.medium, ~aot-age2, aot-age2, ~!aot-mtnk-predator-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
@@ -2492,7 +2523,8 @@ aot-upgrade-mtnk-titan-railgun:
 		Name: Titan Railgun Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 23
+		LockedGroup: aot-grp-up-tank2
+		BuildPaletteOrder: 90
 		Prerequisites: ~atec, ~lite, ~techlevel.medium, ~aot-mtnk-titan-upgrade, ~aot-age3, aot-mtnk-titan-upgrade, aot-age3
 		Queue: Upgrade.GDI
 		BuildLimit: 1
@@ -2517,7 +2549,7 @@ aot-upgrade-htnk-rocket:
 		Name: Rocket Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 7
+		BuildPaletteOrder: 50
 		Prerequisites: ~aot-weap, ~aot-age2, aot-age2, atec
 		Queue: Upgrade.GDI
 		BuildLimit: 1
@@ -2577,7 +2609,7 @@ aot-hpad-gdi:
 		LandingOffset: -1024,1024,0
 		ReservedCondition: aot-hpad-gdi-sw-reserved
 	Buildable:
-		BuildPaletteOrder: 60
+		BuildPaletteOrder: 113
 		Prerequisites: anyhq
 		Queue: Building.GDI
 		Icon: hpad-blue-icon
@@ -2590,7 +2622,7 @@ aot-hpad-nod:
 	RenderSprites:
 		Image: hpad
 	Buildable:
-		BuildPaletteOrder: 60
+		BuildPaletteOrder: 113
 		Prerequisites: anyhq
 		Queue: Building.Nod
 		Icon: hpad-red-icon
@@ -2610,7 +2642,7 @@ aot-upgrade-nod-airstrike:
 		Name: Airstrike
 
 	Buildable:
-		BuildPaletteOrder: 45
+		BuildPaletteOrder: 30
 		Prerequisites: ~stec, ~aot-age1, aot-age1, afld, ~!aot-nod-spyplane-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
@@ -2637,7 +2669,7 @@ aot-upgrade-nod-spyplane:
 		Name: Spy Plane Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 46
+		BuildPaletteOrder: 31
 		Prerequisites: ~stec, ~aot-age1, aot-age1, afld, ~!aot-nod-airstrike-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
@@ -2667,7 +2699,8 @@ aot-upgrade-nod-parabombs:
 		Name: Parabombs
 
 	Buildable:
-		BuildPaletteOrder: 47
+		LockedGroup: aot-grp-up-air3
+		BuildPaletteOrder: 95
 		Prerequisites: ~stec, ~aot-age3, ~aot-nod-spyplane-upgrade, ~!aot-nod-airstrike-upgrade, aot-age3, aot-nod-spyplane-upgrade, aot-toxic-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
@@ -2696,7 +2729,8 @@ aot-upgrade-nod-banshee:
 		Name: Banshee Airstrike Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 48
+		LockedGroup: aot-grp-up-air3
+		BuildPaletteOrder: 95
 		Prerequisites: ~stec, ~aot-age3, ~aot-nod-airstrike-upgrade, aot-age3, tmpl
 		Queue: Upgrade.Nod
 		BuildLimit: 1
@@ -2722,7 +2756,7 @@ aot-upgrade-harpy:
 		Name: Harpy Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 40
+		BuildPaletteOrder: 55
 		Prerequisites: ~stec, anyhq, ~hpad, hpad, ~aot-age2, aot-age2
 		Queue: Upgrade.Nod
 		BuildLimit: 1
@@ -2747,7 +2781,7 @@ aot-upgrade-orca:
 		Name: ORCA Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 40
+		BuildPaletteOrder: 30
 		Prerequisites: ~atec, anyhq, ~hpad, hpad, ~aot-age1, aot-age1
 		Queue: Upgrade.GDI
 		BuildLimit: 1
@@ -2775,7 +2809,7 @@ aot-upgrade-firehawk:
 		Name: Firehawk Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 42
+		BuildPaletteOrder: 100
 		Prerequisites: ~aot-age3, atec, aot-age3, aflt, aot-slab
 		Queue: Upgrade.GDI
 		BuildLimit: 1
@@ -2813,7 +2847,7 @@ AFLT:
 	Tooltip:
 		Name: Air Field
 	Buildable:
-		BuildPaletteOrder: 70
+		BuildPaletteOrder: 135
 		Prerequisites: ~aot-age1, anyhq
 		Queue: Building.GDI
 		Icon: aflt-gdi-icon
@@ -2847,6 +2881,7 @@ AFLT:
 		DisplayOrder: 4
 		Factions: gdi
 		Group: Aircraft
+		ShowLockedItems: True
 		LowPowerModifier: 150
 		ReadyAudio: UnitReady
 		ReadyTextNotification: notification-unit-ready
@@ -2928,8 +2963,9 @@ aot-fix-age0:
 		Sequence: aot-ra-idle
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-fix
 		Queue: Building.GDI, Building.Nod
-		BuildPaletteOrder: 40
+		BuildPaletteOrder: 70
 		Prerequisites: ~!aot-age1, vehicleproduction
 		Icon: aot-ra-icon
 		Description: Repairs vehicles.
@@ -2947,8 +2983,9 @@ aot-fix-age1:
 		Sequence: idle
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-fix
 		Queue: Building.GDI
-		BuildPaletteOrder: 40
+		BuildPaletteOrder: 70
 		Prerequisites: ~aot-age1, ~!aot-age2, vehicleproduction
 		Icon: aot-td-icon
 		Description: Repairs vehicles.
@@ -2966,8 +3003,9 @@ aot-fix-age2:
 		Sequence: aot-age2-nod-idle
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-fix
 		Queue: Building.GDI
-		BuildPaletteOrder: 40
+		BuildPaletteOrder: 70
 		Prerequisites: ~aot-age2, vehicleproduction
 		Icon: aot-td-icon
 		Description: Repairs vehicles.
@@ -2985,8 +3023,9 @@ aot-fix-age1-nod:
 		Sequence: idle
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-fix
 		Queue: Building.Nod
-		BuildPaletteOrder: 40
+		BuildPaletteOrder: 70
 		Prerequisites: ~aot-age1, ~!aot-age2, vehicleproduction
 		Icon: aot-td-icon
 		Description: Repairs vehicles.
@@ -3004,8 +3043,9 @@ aot-fix-age2-nod:
 		Sequence: aot-age2-nod-idle
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-fix
 		Queue: Building.Nod
-		BuildPaletteOrder: 40
+		BuildPaletteOrder: 70
 		Prerequisites: ~aot-age2, vehicleproduction
 		Icon: aot-td-icon
 		Description: Repairs vehicles.
@@ -3056,7 +3096,7 @@ aot-gap:
 	WithBuildingBib:
 	Buildable:
 		Queue: Building.GDI
-		BuildPaletteOrder: 65
+		BuildPaletteOrder: 160
 		# Sichtbar ab Age 1 (~aot-age1), baubar ab Age 1 + Science Lab (aot-slab von SLAB).
 		Prerequisites: ~aot-age1, aot-slab
 		Icon: icon
@@ -3237,6 +3277,7 @@ aot-nuke-age0:
 		Sequence: aot-ra-idle
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-nuke
 		Queue: Building.GDI, Building.Nod
 		BuildPaletteOrder: 10
 		Prerequisites: ~!aot-age1, fact
@@ -3254,6 +3295,7 @@ aot-nuke-age1:
 		Sequence: idle
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-nuke
 		Queue: Building.GDI, Building.Nod
 		BuildPaletteOrder: 10
 		Prerequisites: ~aot-age1, ~!aot-age2, ~!aot-nuke-turbine-upgrade, fact
@@ -3271,6 +3313,7 @@ aot-nuke-turbine:
 		Sequence: aot-turbine-idle
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-nuke
 		Queue: Building.GDI
 		BuildPaletteOrder: 10
 		Prerequisites: ~aot-age1, ~!aot-age2, ~aot-nuke-turbine-upgrade, fact
@@ -3288,6 +3331,7 @@ aot-nuke-age2:
 		Sequence: aot-age2-idle
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-nuke
 		Queue: Building.GDI
 		BuildPaletteOrder: 10
 		Prerequisites: ~aot-age2, ~!aot-nuke-turbine-upgrade, fact
@@ -3307,6 +3351,7 @@ aot-nuke-age2-nod:
 		Sequence: aot-age2-nod-idle
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-nuke
 		Queue: Building.Nod
 		BuildPaletteOrder: 10
 		Prerequisites: ~aot-age2, ~!aot-nuke-turbine-upgrade, fact
@@ -3324,6 +3369,7 @@ aot-nuke-turbine-age2:
 		Sequence: aot-age2-turbine-idle
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-nuke
 		Queue: Building.GDI
 		BuildPaletteOrder: 10
 		Prerequisites: ~aot-age2, ~aot-nuke-turbine-upgrade, fact
@@ -3404,8 +3450,9 @@ aot-nuk2-age0:
 		Sequence: aot-ra-idle
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-nuk2
 		Queue: Building.Nod
-		BuildPaletteOrder: 70
+		BuildPaletteOrder: 40
 		Prerequisites: ~!aot-age1, nuke
 		Icon: aot-ra-icon
 		Description: Generates more power than the standard Power Plant.
@@ -3421,8 +3468,9 @@ aot-nuk2-age1:
 		Sequence: idle
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-nuk2
 		Queue: Building.Nod
-		BuildPaletteOrder: 70
+		BuildPaletteOrder: 40
 		Prerequisites: ~aot-age1, ~!aot-age2, nuke, anyhq
 		Icon: aot-td-icon
 		Description: Generates more power than the standard Power Plant.
@@ -3438,8 +3486,9 @@ aot-nuk2-age2:
 		Sequence: aot-age2-idle
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-nuk2
 		Queue: Building.Nod
-		BuildPaletteOrder: 70
+		BuildPaletteOrder: 40
 		Prerequisites: ~aot-age2, nuke, anyhq
 		Icon: aot-age2-icon
 		Description: Generates more power than the standard Power Plant.
@@ -3455,7 +3504,7 @@ aot-upgrade-nuke-turbine:
 		Name: Turbine Technology Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 15
+		BuildPaletteOrder: 40
 		Prerequisites: ~atec, ~anypower, ~aot-age2, anypower, aot-age2
 		Queue: Upgrade.GDI
 		BuildLimit: 1
@@ -3485,7 +3534,7 @@ aot-upgrade-cruiser-railgun:
 		Name: Cruiser Railguns
 
 	Buildable:
-		BuildPaletteOrder: 21
+		BuildPaletteOrder: 95
 		Prerequisites: ~aot-age3, aot-age3, aot-shipyard, atec, ~!aot-cruiser-carrier-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
@@ -3511,7 +3560,7 @@ aot-upgrade-cruiser-carrier:
 		Name: Heli Carrier
 
 	Buildable:
-		BuildPaletteOrder: 22
+		BuildPaletteOrder: 96
 		Prerequisites: ~aot-age3, aot-age3, aot-shipyard, atec, ~!aot-cruiser-railgun-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
@@ -3534,7 +3583,7 @@ aot-upgrade-gunboat-frigate:
 		Name: Frigate Enhancement
 
 	Buildable:
-		BuildPaletteOrder: 31
+		BuildPaletteOrder: 25
 		Prerequisites: ~aot-age1, aot-age1, aot-shipyard, fix, ~!aot-gunboat-frigate-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
@@ -3557,7 +3606,7 @@ aot-upgrade-gunboat-destroyer:
 		Name: Destroyer Enhancement
 
 	Buildable:
-		BuildPaletteOrder: 32
+		BuildPaletteOrder: 60
 		Prerequisites: ~aot-age2, aot-age2, aot-shipyard, fix, aot-gunboat-frigate-upgrade, ~!aot-gunboat-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
@@ -3691,7 +3740,8 @@ aot-gun-base:
 	RenderSprites:
 		Image: gun
 	Buildable:
-		BuildPaletteOrder: 45
+		LockedGroup: aot-grp-gun
+		BuildPaletteOrder: 130
 		# Voraussetzung von "barracks" (Infanterie-Produktion) auf "lite"
 		# (Fahrzeug-Produktion) geaendert (User-Wunsch 2026-07-05).
 		Prerequisites: ~aot-age1, lite, ~!aot-laser-fence-upgrade
@@ -3704,7 +3754,8 @@ aot-gun-laser:
 	RenderSprites:
 		Image: gun
 	Buildable:
-		BuildPaletteOrder: 45
+		LockedGroup: aot-grp-gun
+		BuildPaletteOrder: 130
 		Prerequisites: ~aot-age1, lite, ~aot-laser-fence-upgrade
 		Queue: Building.Nod
 		BuildDuration: 960
@@ -3728,7 +3779,7 @@ aot-shipyard:
 	Health:
 		HP: 80000
 	Buildable:
-		BuildPaletteOrder: 35
+		BuildPaletteOrder: 115
 		Prerequisites: lite
 		Queue: Building.GDI
 		Icon: aot-shipyard-icon
@@ -3779,6 +3830,7 @@ aot-shipyard:
 		Type: Naval.GDI
 		Group: Naval
 		DisplayOrder: 5
+		ShowLockedItems: True
 		LowPowerModifier: 150
 		ReadyAudio: UnitReady
 		ReadyTextNotification: notification-unit-ready
@@ -3817,7 +3869,7 @@ aot-subpen:
 	Health:
 		HP: 80000
 	Buildable:
-		BuildPaletteOrder: 35
+		BuildPaletteOrder: 115
 		Prerequisites: lite
 		Queue: Building.Nod
 		Icon: aot-subpen-icon
@@ -3869,6 +3921,7 @@ aot-subpen:
 		Type: Naval.Nod
 		Group: Naval
 		DisplayOrder: 5
+		ShowLockedItems: True
 		LowPowerModifier: 150
 		ReadyAudio: UnitReady
 		ReadyTextNotification: notification-unit-ready
@@ -3900,7 +3953,7 @@ aot-upgrade-sub-cargo:
 		Name: actor-aot-upgrade-sub-cargo.name
 
 	Buildable:
-		BuildPaletteOrder: 45
+		BuildPaletteOrder: 75
 		Prerequisites: aot-subpen, hand, ~aot-age2, ~!aot-sub-cargo-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
@@ -3929,7 +3982,7 @@ aot-upgrade-stnk-cargo:
 		Name: actor-aot-upgrade-stnk-cargo.name
 
 	Buildable:
-		BuildPaletteOrder: 47
+		BuildPaletteOrder: 100
 		Prerequisites: ~aot-age3, aot-shrine, tmpl, ~!aot-stnk-cargo-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
@@ -3957,7 +4010,7 @@ aot-upgrade-transport-gun:
 		Name: actor-aot-upgrade-transport-gun.name
 
 	Buildable:
-		BuildPaletteOrder: 46
+		BuildPaletteOrder: 40
 		Prerequisites: aot-age1, fix, aot-subpen, ~aot-age1, ~aot-subpen, ~!aot-transport-gun-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
@@ -3985,7 +4038,7 @@ aot-upgrade-msub-mine:
 		Name: actor-aot-upgrade-msub-mine.name
 
 	Buildable:
-		BuildPaletteOrder: 50
+		BuildPaletteOrder: 105
 		Prerequisites: aot-subpen, stec, fix, anyhq, ~aot-age3, ~!aot-msub-drone-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
@@ -4012,7 +4065,7 @@ aot-upgrade-msub-drone:
 		Name: actor-aot-upgrade-msub-drone.name
 
 	Buildable:
-		BuildPaletteOrder: 55
+		BuildPaletteOrder: 106
 		Prerequisites: aot-subpen, stec, fix, anyhq, ~aot-age3, ~!aot-msub-mine-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
@@ -4185,7 +4238,8 @@ aot-silo-age0:
 		Sequence: aot-ra-idle
 		SequenceAlpha: 0.65
 	Buildable:
-		BuildPaletteOrder: 35
+		LockedGroup: aot-grp-silo
+		BuildPaletteOrder: 20
 		Prerequisites: anypower, ~!aot-age1
 		Queue: Building.GDI, Building.Nod
 		Description: actor-silo.description
@@ -4202,7 +4256,8 @@ aot-silo-age1:
 		Sequence: idle
 		SequenceAlpha: 0.65
 	Buildable:
-		BuildPaletteOrder: 35
+		LockedGroup: aot-grp-silo
+		BuildPaletteOrder: 20
 		Prerequisites: anypower, ~aot-age1, ~!aot-age2
 		Queue: Building.GDI, Building.Nod
 		Description: actor-silo.description
@@ -4219,7 +4274,8 @@ aot-silo-age2:
 		Sequence: aot-ts-idle
 		SequenceAlpha: 0.65
 	Buildable:
-		BuildPaletteOrder: 35
+		LockedGroup: aot-grp-silo
+		BuildPaletteOrder: 20
 		Prerequisites: anypower, ~aot-age2
 		Queue: Building.GDI, Building.Nod
 		Description: actor-silo.description
@@ -4375,7 +4431,7 @@ ORBC:
 		SequenceAlpha: 0.65
 	Buildable:
 		Queue: Building.GDI
-		BuildPaletteOrder: 102
+		BuildPaletteOrder: 170
 		Prerequisites: ~aot-age2, atec, aot-slab
 		BuildLimit: 1
 		Icon: icon
@@ -4521,8 +4577,9 @@ aot-slab-age1:
 		Sequence: place
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-slab
 		Queue: Building.GDI
-		BuildPaletteOrder: 101
+		BuildPaletteOrder: 150
 		Prerequisites: ~aot-age1, atec, aot-proc-gdi, ~!aot-age2
 		BuildLimit: 1
 		Icon: icon
@@ -4537,8 +4594,9 @@ aot-slab-age2:
 		Sequence: aot-ts-place
 		SequenceAlpha: 0.65
 	Buildable:
+		LockedGroup: aot-grp-slab
 		Queue: Building.GDI
-		BuildPaletteOrder: 101
+		BuildPaletteOrder: 150
 		Prerequisites: ~aot-age1, atec, aot-proc-gdi, ~aot-age2, !aot-slab
 		BuildLimit: 1
 		Icon: aot-age2-icon
@@ -4621,7 +4679,7 @@ aot-shrine:
 		SequenceAlpha: 0.65
 	Buildable:
 		Queue: Building.Nod
-		BuildPaletteOrder: 110
+		BuildPaletteOrder: 170
 		Prerequisites: ~aot-age2, stec, tmpl
 		BuildLimit: 1
 		Icon: icon
@@ -4636,6 +4694,7 @@ aot-shrine:
 		Type: Infantry.NodElite
 		DisplayOrder: 3
 		Group: Infantry
+		ShowLockedItems: True
 		LowPowerModifier: 150
 		ReadyAudio: UnitReady
 		ReadyTextNotification: notification-unit-ready
@@ -4748,7 +4807,7 @@ aot-sgen:
 		Prerequisite: aot-sgen
 	Buildable:
 		Queue: Building.Nod
-		BuildPaletteOrder: 112
+		BuildPaletteOrder: 180
 		Prerequisites: ~aot-age2, aot-shrine
 		Icon: icon
 		Description: Cloaks itself and all nearby friendly structures while powered and above 50% health.
@@ -4762,6 +4821,7 @@ aot-sgen:
 # structures-overrides.yaml (aot-obli-icon.png, User-Icon).
 OBLI:
 	Buildable:
+		BuildPaletteOrder: 200
 		Prerequisites: ~aot-age3, aot-shrine, aot-laser-fence-upgrade
 		Queue: Building.Nod
 # === Ende aotmod ===
@@ -4778,6 +4838,7 @@ OBLI:
 # (siehe sub-system.md), pausiert bei Angriff/Beschaedigung/Low-Power.
 SAM:
 	Buildable:
+		BuildPaletteOrder: 90
 		Queue: Building.Nod
 		# Voraussetzung von "hand" (Hand of Nod) auf Energieversorgung + Radar
 		# Dome geaendert (User-Wunsch 2026-07-05). "anypower" = generischer
@@ -4880,7 +4941,7 @@ aot-upgrade-sam-bunkered:
 		Name: Bunkered SAM
 
 	Buildable:
-		BuildPaletteOrder: 56
+		BuildPaletteOrder: 25
 		Prerequisites: ~aot-age1, aot-age1
 		Queue: Upgrade.Nod
 		BuildLimit: 1
@@ -4903,7 +4964,7 @@ aot-upgrade-sam-cloak:
 		Name: Cloaked SAM
 
 	Buildable:
-		BuildPaletteOrder: 57
+		BuildPaletteOrder: 70
 		Prerequisites: ~aot-age2, aot-age2, aot-sam-bunkered-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
@@ -4932,7 +4993,7 @@ aot-upgrade-avatar-laser:
 		Name: Avatar Laser Cannon
 
 	Buildable:
-		BuildPaletteOrder: 58
+		BuildPaletteOrder: 110
 		Prerequisites: ~aot-age3, aot-shrine
 		Queue: Upgrade.Nod
 		BuildLimit: 1
@@ -5098,7 +5159,8 @@ aot-pillbox-base:
 		Sequence: idle
 		SequenceAlpha: 0.65
 	Buildable:
-		BuildPaletteOrder: 45
+		LockedGroup: aot-grp-pillbox
+		BuildPaletteOrder: 40
 		Prerequisites: barracks, ~!aot-guard-tower-upgrade
 		Queue: Building.GDI
 		Description: Garrisonable defense structure. Holds up to 5 infantry, who fire out through the pillbox using their own weapons.
@@ -5112,7 +5174,8 @@ aot-pillbox-guard:
 		Sequence: guard-idle
 		SequenceAlpha: 0.65
 	Buildable:
-		BuildPaletteOrder: 45
+		LockedGroup: aot-grp-pillbox
+		BuildPaletteOrder: 40
 		Prerequisites: barracks, ~aot-guard-tower-upgrade
 		Queue: Building.GDI
 		Icon: guard-icon
@@ -5124,7 +5187,7 @@ aot-upgrade-guard-tower:
 		Name: Guard Tower Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 46
+		BuildPaletteOrder: 35
 		Prerequisites: ~aot-age1, aot-age1, aot-slab
 		Queue: Upgrade.GDI
 		BuildLimit: 1
@@ -5197,7 +5260,7 @@ aot-fireposition:
 	DetectCloaked:
 		Range: 5c0
 	Buildable:
-		BuildPaletteOrder: 46
+		BuildPaletteOrder: 130
 		Prerequisites: ~aot-age1, aot-age1, lite
 		Queue: Building.GDI
 		Icon: icon
@@ -5219,6 +5282,7 @@ aot-wall-gdi:
 	Tooltip:
 		Name: Fortified Wall
 	Buildable:
+		LockedGroup: aot-grp-wall-gdi
 		BuildPaletteOrder: 30
 		Prerequisites: anypower, fact, ~!aot-firestorm-defense-upgrade
 		Queue: Building.GDI
@@ -5275,6 +5339,7 @@ aot-wall-gdi-fs:
 	RenderSprites:
 		Image: aot-wall-gdi
 	Buildable:
+		LockedGroup: aot-grp-wall-gdi
 		Prerequisites: anypower, fact, ~aot-firestorm-defense-upgrade
 		Icon: icon-fs
 		Description: Reinforced walls with sandbags and Firestorm-powergrid.
@@ -5289,7 +5354,7 @@ aot-upgrade-firestorm-defense:
 		Name: Firestorm Defense Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 45
+		BuildPaletteOrder: 65
 		Prerequisites: ~aot-age2, aot-age2, aot-slab
 		Queue: Upgrade.GDI
 		BuildLimit: 1
@@ -5323,6 +5388,7 @@ aot-wall-nod:
 	Tooltip:
 		Name: Barbwire Fence
 	Buildable:
+		LockedGroup: aot-grp-wall-nod
 		BuildPaletteOrder: 30
 		Prerequisites: anypower, fact, ~!aot-laser-fence-upgrade
 		Queue: Building.Nod
@@ -5363,10 +5429,46 @@ aot-wall-nod-laser:
 	RenderSprites:
 		Image: aot-wall-nod
 	Buildable:
+		LockedGroup: aot-grp-wall-nod
 		Prerequisites: anypower, fact, ~aot-laser-fence-upgrade
 		Icon: icon-laser
 		Description: Laser fence - stops all ground units and blocks most projectiles.
 	-Crushable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Fortified Foundation ===
+# Betonpflaster als eigenstaendiges Gebäude — beide Fraktionen, Building-Queue.
+# Verbindet dynamisch mit angrenzenden Foundation-Tiles (WithWallSpriteBody Type: aot-foundation).
+# 16 Sprite-Frames (Nachbarschafts-Bitmaske N=1,O=2,S=4,W=8), generiert via bake-foundation.py.
+# Unzerstoerbar (HP: 1 Mio), nicht verkaufbar, kein Projektilblock, kein Crush.
+aot-foundation:
+	Inherits: ^Wall
+	Valued:
+		Cost: 75
+	Tooltip:
+		Name: actor-aot-foundation.name
+	Buildable:
+		BuildPaletteOrder: 8
+		Prerequisites: fact
+		Queue: Building.GDI, Building.Nod
+		BuildDuration: 80
+		Description: actor-aot-foundation.description
+	RenderSprites:
+		Image: aot-foundation
+		Palette: staticterrain
+	Health:
+		HP: 1000000
+	Armor:
+		Type: Concrete
+	-Sellable:
+	-Crushable:
+	LineBuild:
+		NodeTypes: aot-foundation
+	LineBuildNode:
+		Types: aot-foundation
+	-WithWallSpriteBody:
+	WithWallSpriteBody:
+		Type: aot-foundation
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Laser Fences Upgrade ===
@@ -5383,7 +5485,7 @@ aot-upgrade-laser-fence:
 		Name: Laser Technologies
 
 	Buildable:
-		BuildPaletteOrder: 45
+		BuildPaletteOrder: 65
 		# Sichtbar ab Age 2, baubar sobald Age 2 + Secret Shrine (aot-shrine) stehen
 		# (User-Wunsch 2026-07-05, ersetzt die vorherige Age1+TMPL-Gate).
 		Prerequisites: ~aot-age2, aot-shrine
@@ -5469,7 +5571,7 @@ aot-gate-gdi:
 	Armor:
 		Type: Concrete
 	Buildable:
-		BuildPaletteOrder: 31
+		BuildPaletteOrder: 133
 		# Sichtbar UND baubar ab Age 1 (User-Wunsch 2026-07-04): kein separates
 		# Ausgrau-Prerequisite noetig, ~ versteckt bis Age 1, danach sofort baubar.
 		Prerequisites: ~aot-age1
@@ -5560,7 +5662,7 @@ aot-gate-nod:
 	Armor:
 		Type: Concrete
 	Buildable:
-		BuildPaletteOrder: 31
+		BuildPaletteOrder: 190
 		# Sichtbar ab Age 1, aber ausgegraut bis das Laser Defense Systems Upgrade
 		# steht (User-Wunsch 2026-07-04) - passt thematisch, da das Tor selbst eine
 		# Laser-Barriere ist. aot-laser-fence-upgrade = ProvidesPrerequisite-String
@@ -5703,7 +5805,8 @@ aot-ftur-flame:
 	RenderSprites:
 		Image: aot-ftur
 	Buildable:
-		BuildPaletteOrder: 44
+		LockedGroup: aot-grp-ftur
+		BuildPaletteOrder: 80
 		Prerequisites: barracks, ~!aot-toxic-upgrade
 		Queue: Building.Nod
 		Description: RA Flame Tower. Short-range anti-infantry/vehicle defense.
@@ -5719,7 +5822,8 @@ aot-ftur-toxic:
 	RenderSprites:
 		Image: aot-ftur
 	Buildable:
-		BuildPaletteOrder: 44
+		LockedGroup: aot-grp-ftur
+		BuildPaletteOrder: 80
 		Prerequisites: barracks, ~aot-toxic-upgrade
 		Queue: Building.Nod
 		Icon: toxic-icon
