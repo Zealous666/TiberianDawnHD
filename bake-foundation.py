@@ -30,9 +30,19 @@ def load_tile(idx: int) -> np.ndarray:
 # BIB2 Layout (3×2):  tile0(TL) tile1(TC) tile2(TR)
 #                     tile3(BL) tile4(BC) tile5(BR)
 tile0 = load_tile(0)  # TL outer corner: N+W edge
+tile1 = load_tile(1)  # TC oben: nur N-Kante verschneit, untere ~2/3 sauberer Dreck
 tile2 = load_tile(2)  # TR outer corner: N+E edge
 tile3 = load_tile(3)  # BL outer corner: S+W edge
+tile4 = load_tile(4)  # BC unten: nur S-Kante verschneit, obere ~2/3 sauberer Dreck
 tile5 = load_tile(5)  # BR outer corner: S+E edge
+
+# Saubere Interior-Quadranten (KEIN Schnee): aus den Mittelkacheln TC (unten) + BC (oben).
+# Die Innenecken der ECK-Kacheln (tile0/2/3/5) tragen noch Schnee -> im Kern sichtbare Flecken.
+# tile1[64:128] (TC unten) und tile4[0:64] (BC oben) sind reiner Dreck -> nahtloser Kern.
+INT_TL = tile1[64:128, 0:64]     # oben-links des Interior = TC unten-links
+INT_TR = tile1[64:128, 64:128]   # oben-rechts            = TC unten-rechts
+INT_BL = tile4[0:64,   0:64]     # unten-links            = BC oben-links
+INT_BR = tile4[0:64,   64:128]   # unten-rechts           = BC oben-rechts
 
 # Jede Kachel wird in 4×64×64 Quadranten aufgeteilt.
 # NW quadrant = rows[0:64], cols[0:64]; NE = rows[0:64], cols[64:128]; usw.
@@ -63,29 +73,30 @@ tile5 = load_tile(5)  # BR outer corner: S+E edge
 #   S=1, E=0  → E-Kante         = tile5[0:64, 64:128]
 #   S=1, E=1  → Interior        = tile5[0:64, 0:64]
 
+# (1,1) = beide Nachbarn da = Interior -> saubere Mittelkachel-Quadranten (kein Schnee).
 NW_PIECES = {
     (0, 0): tile0[0:64,   0:64],
     (0, 1): tile0[0:64,   64:128],
     (1, 0): tile0[64:128, 0:64],
-    (1, 1): tile0[64:128, 64:128],
+    (1, 1): INT_TL,
 }
 NE_PIECES = {
     (0, 0): tile2[0:64,   64:128],
     (0, 1): tile2[0:64,   0:64],
     (1, 0): tile2[64:128, 64:128],
-    (1, 1): tile2[64:128, 0:64],
+    (1, 1): INT_TR,
 }
 SW_PIECES = {
     (0, 0): tile3[64:128, 0:64],
     (0, 1): tile3[64:128, 64:128],
     (1, 0): tile3[0:64,   0:64],
-    (1, 1): tile3[0:64,   64:128],
+    (1, 1): INT_BL,
 }
 SE_PIECES = {
     (0, 0): tile5[64:128, 64:128],
     (0, 1): tile5[64:128, 0:64],
     (1, 0): tile5[0:64,   64:128],
-    (1, 1): tile5[0:64,   0:64],
+    (1, 1): INT_BR,
 }
 
 

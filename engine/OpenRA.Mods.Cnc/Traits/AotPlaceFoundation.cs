@@ -37,18 +37,24 @@ namespace OpenRA.Mods.Cnc.Traits
 
 		void INotifyAddedToWorld.AddedToWorld(Actor self)
 		{
-			var layer = self.World.WorldActor.TraitOrDefault<AotFoundationLayer>();
+			var world = self.World;
+			var layer = world.WorldActor.TraitOrDefault<AotFoundationLayer>();
 			var buildingInfo = self.Info.TraitInfo<BuildingInfo>();
-			var neutral = self.World.Players.First(p => p.NonCombatant);
+			var neutral = world.Players.First(p => p.NonCombatant);
 
 			var toSpawn = new List<CPos>();
 			foreach (var cell in buildingInfo.Tiles(self.Location))
 			{
-				if (!self.World.Map.Contains(cell)) continue;
+				if (!world.Map.Contains(cell)) continue;
 				if (layer != null && layer.Contains(cell)) continue;
 
+				// Skip invalid terrain (ramps / non-buildable types) so we match the red placement
+				// preview and never lay foundation on water or cliffs.
+				if (world.Map.Ramp[cell] != 0) continue;
+				if (!buildingInfo.TerrainTypes.Contains(world.Map.GetTerrainInfo(cell).Type)) continue;
+
 				// Skip cells occupied by any Building other than this placer itself.
-				if (self.World.ActorMap.GetActorsAt(cell)
+				if (world.ActorMap.GetActorsAt(cell)
 					.Where(a => a != self)
 					.Any(a => a.Info.HasTraitInfo<BuildingInfo>()))
 					continue;

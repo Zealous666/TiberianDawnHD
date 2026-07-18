@@ -5455,6 +5455,10 @@ aot-foundation:
 		Dimensions: 3, 3
 		TerrainTypes: Clear, Road
 		BuildSounds: constru2.aud, hvydoor1.aud
+		# Teil-Platzierung: erlaubt Bauen auch wenn nicht alle 9 Zellen frei sind. Belegte Zellen
+		# werden rot angezeigt, freie weiss; CanPlaceBuilding gibt trotzdem true. IsCloseEnoughToBase
+		# (Basis-Naehe) bleibt aktiv. AotPlaceFoundation ueberspringt danach die belegten Zellen.
+		AllowInvalidPlacement: true
 	# Gleiche Bauzone wie andere Gebaeude (2 Zellen Naehe zu GivesBuildableArea). Ohne diesen
 	# Trait waere es zwar ueberall baubar, aber der User will Basis-Naehe wie normale Gebaeude.
 	RequiresBuildableArea:
