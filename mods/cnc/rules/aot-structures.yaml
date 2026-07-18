@@ -5445,14 +5445,21 @@ aot-wall-nod-laser:
 #   Besitzer: Neutral (unzerstoerbar, keiner kann angreifen).
 aot-foundation:
 	# Erbt ^Building fuer die komplette Platzierungs-Maschinerie (ActorPreviewPlaceBuildingPreview,
-	# WithSpriteBody, Placement-Cursor). Ohne diese Traits gibt es keinen Platzierungs-Cursor.
-	# Footprint bleibt 1×1 (nur die Zentrumszelle muss frei sein) -> passt auch in kleine Luecken;
-	# AotPlaceFoundation fuellt danach alle freien Zellen im 3×3-Bereich.
+	# WithSpriteBody, Placement-Cursor). 3×3-Footprint -> weisses 3×3-Preview-Raster.
+	# AotPlaceFoundation spawnt danach eine aot-foundation-cell auf jeder Footprint-Zelle.
 	Inherits: ^Building
 	Building:
-		Footprint: x
-		Dimensions: 1, 1
-		# Kein Adjacent-Zwang: Foundation darf ueberall (auch abseits der Basis) platziert werden.
+		# 3×3 Footprint: Preview zeigt 3×3 weiss/rot. TerrainTypes noetig sonst ist NICHTS baubar
+		# (^Building-Default TerrainTypes = leer -> IsCellBuildable immer false -> ueberall rot).
+		Footprint: xxx xxx xxx
+		Dimensions: 3, 3
+		TerrainTypes: Clear, Road
+		BuildSounds: constru2.aud, hvydoor1.aud
+	# Gleiche Bauzone wie andere Gebaeude (2 Zellen Naehe zu GivesBuildableArea). Ohne diesen
+	# Trait waere es zwar ueberall baubar, aber der User will Basis-Naehe wie normale Gebaeude.
+	RequiresBuildableArea:
+		AreaTypes: building
+		Adjacent: 2
 	Buildable:
 		BuildPaletteOrder: 8
 		Prerequisites: fact

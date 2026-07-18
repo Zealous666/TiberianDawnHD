@@ -4031,8 +4031,11 @@ aot-orcatran-test:
 # Fortified Foundation Cell (aot-foundation-cell): 16 Frames, Frame-Index = N|E<<1|S<<2|W<<3 (face-adj).
 # Generiert via bake-foundation.py aus TD-Remaster-BIB2-Kacheln (TiberianDawnHD).
 aot-foundation:
+	# Placement-Preview: 3×3-Composite (384×384) als RemasteredFilename -> 1:1 HD-Scale (3 Zellen).
+	# Klassisches Filename wuerde um ~5.3 hochskaliert -> riesiger unscharfer Klotz.
 	idle:
-		Filename: aot-foundation-idle.png
+		RemasteredFilename: aot-foundation-idle.zip
+		RemasteredPremultiplied: false
 		Length: 1
 	icon:
 		Filename: aot-foundation-icon.png

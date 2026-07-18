@@ -17,14 +17,11 @@ using OpenRA.Traits;
 
 namespace OpenRA.Mods.Cnc.Traits
 {
-	[Desc("When placed, fills a (2*Radius+1)² area with foundation cell actors.",
-		"Skips cells that already have foundation or contain a Building actor.",
-		"The placer actor disposes itself after spawning — attach to a 1×1 Building actor.")]
-	sealed class AotPlaceFoundationInfo : TraitInfo
+	[Desc("When placed, spawns a foundation cell actor on every tile of this actor's",
+		"Building footprint, then disposes the placer. Skips tiles that already have",
+		"foundation or contain another Building. Attach to a buildable Building actor.")]
+	sealed class AotPlaceFoundationInfo : TraitInfo, Requires<BuildingInfo>
 	{
-		[Desc("Half-side of the area to fill. 1 = 3×3, 0 = 1×1.")]
-		public readonly int Radius = 1;
-
 		[ActorReference]
 		[Desc("Actor type to spawn for each foundation cell.")]
 		public readonly string CellActor = "aot-foundation-cell";
@@ -41,28 +38,22 @@ namespace OpenRA.Mods.Cnc.Traits
 		void INotifyAddedToWorld.AddedToWorld(Actor self)
 		{
 			var layer = self.World.WorldActor.TraitOrDefault<AotFoundationLayer>();
-			var loc = self.Location;
-			var r = info.Radius;
-			var owner = self.Owner;
+			var buildingInfo = self.Info.TraitInfo<BuildingInfo>();
 			var neutral = self.World.Players.First(p => p.NonCombatant);
 
 			var toSpawn = new List<CPos>();
-			for (var dy = -r; dy <= r; dy++)
+			foreach (var cell in buildingInfo.Tiles(self.Location))
 			{
-				for (var dx = -r; dx <= r; dx++)
-				{
-					var cell = new CPos(loc.X + dx, loc.Y + dy);
-					if (!self.World.Map.Contains(cell)) continue;
-					if (layer != null && layer.Contains(cell)) continue;
+				if (!self.World.Map.Contains(cell)) continue;
+				if (layer != null && layer.Contains(cell)) continue;
 
-					// Skip cells occupied by any Building other than this placer itself.
-					if (self.World.ActorMap.GetActorsAt(cell)
-						.Where(a => a != self)
-						.Any(a => a.Info.HasTraitInfo<BuildingInfo>()))
-						continue;
+				// Skip cells occupied by any Building other than this placer itself.
+				if (self.World.ActorMap.GetActorsAt(cell)
+					.Where(a => a != self)
+					.Any(a => a.Info.HasTraitInfo<BuildingInfo>()))
+					continue;
 
-					toSpawn.Add(cell);
-				}
+				toSpawn.Add(cell);
 			}
 
 			self.World.AddFrameEndTask(w =>

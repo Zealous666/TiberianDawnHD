@@ -126,11 +126,34 @@ with zipfile.ZipFile(out_zip, "w", zipfile.ZIP_DEFLATED) as zf:
         zf.writestr(f"{ZIPNAME}-{i:04d}.meta", meta_str)
 print(f"aot-foundation-cell.zip: {NFRAMES} Frames à {FSIZE}×{FSIZE} TGA")
 
-# --- Placement-Preview (128×128): Frame 15 = vollständig Interior (keine Kanten sichtbar) ---
-# Eigene Datei notwendig: OpenRA lädt jede PNG-Referenz als eigenständige Sprite-Datei,
-# Start: 15 auf dem 16-Frame-Sheet würde deshalb scheitern (kein Frame 15 in 1-Frame-PNG).
-Image.fromarray(bake_frame(15), "RGBA").save(BITS / "aot-foundation-idle.png")
-print("aot-foundation-idle.png: 128×128 (1 Frame, Interior = Placement-Preview)")
+# --- Placement-Preview: aot-foundation-idle.zip (384×384, 1 Frame, RemasteredFilename) ---
+# Zeigt das fertige 3×3-Ergebnis mit korrekten Kanten. MUSS RemasteredFilename (ZIP) sein:
+# ueber classic Filename wuerde OpenRA das PNG um Faktor ~5.3 hochskalieren (klassisch->HD)
+# -> riesiger, unscharfer Klotz. RemasteredFilename rendert 1:1 (128px = 1 Zelle) -> 384px = 3 Zellen.
+#
+# 3×3-Layout: jede Zelle bekommt die Config, die sie im vollen 3×3-Block haette (N|E<<1|S<<2|W<<3):
+#   NW=6(E+S)   N=14(E+S+W)  NE=12(S+W)
+#   W=7(N+E+S)  C=15(alle)   E=13(N+S+W)
+#   SW=3(N+E)   S=11(N+E+W)  SE=9(N+W)
+PREVIEW_CONFIGS = [
+    [6, 14, 12],
+    [7, 15, 13],
+    [3, 11, 9],
+]
+preview3x3 = np.zeros((3 * FSIZE, 3 * FSIZE, 4), dtype=np.uint8)
+for row in range(3):
+    for col in range(3):
+        preview3x3[row*FSIZE:(row+1)*FSIZE, col*FSIZE:(col+1)*FSIZE] = bake_frame(PREVIEW_CONFIGS[row][col])
+
+PSIZE = 3 * FSIZE
+preview_meta = json.dumps({"size": [PSIZE, PSIZE], "crop": [0, 0, PSIZE, PSIZE]},
+                          separators=(",", ":"))
+with zipfile.ZipFile(BITS / "aot-foundation-idle.zip", "w", zipfile.ZIP_DEFLATED) as zf:
+    buf = io.BytesIO()
+    Image.fromarray(preview3x3, "RGBA").save(buf, format="TGA")
+    zf.writestr("foundationidle-0000.tga", buf.getvalue())
+    zf.writestr("foundationidle-0000.meta", preview_meta)
+print(f"aot-foundation-idle.zip: 1 Frame {PSIZE}×{PSIZE} (3×3-Composite)")
 
 # --- Icon: aot-foundation-icon.png wird NICHT mehr hier generiert ---
 # Der User setzt manuell mods/management/asset wip/base_smudge.png (64×48) als Baupaletten-Icon.
