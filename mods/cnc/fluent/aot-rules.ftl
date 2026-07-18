@@ -222,4 +222,4 @@ actor-aot-ant-spawner =
 
 actor-aot-foundation =
     .name = Fortified Foundation
-    .description = Reinforced concrete pad. Provides buildable area and blocks enemy movement. Cannot be destroyed or sold.
+    .description = Reinforced foundation plating. Prevents subterranean units from burrowing in or surfacing on it. Cannot be destroyed or sold.
