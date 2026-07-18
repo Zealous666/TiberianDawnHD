@@ -27,7 +27,7 @@
   - [x] 3. spaceport/shuttle airfield
   - [x] 4. ice grow & destruction
   - [x] 5. special unit tab
-  - [ ] 6. subterrain upgrade (flametank, apc?) & betonplatten
+  - [x] 6. subterrain upgrade (flametank, apc?) & betonplatten
   - [ ] gdi radar & nod dome age 3
   - [ ] powerplants & turbines age 3
   - [ ] construction yard age 3
@@ -36,17 +36,15 @@
   - [x] civilian ts streets, buildings & garrissons
   - [ ] TS & RA soundtracks
   - [ ] idle menü map szene
-  - [ ] hospital super-power (heal all) & iron dome super power (invicible all)
+  - [ ] heal all superport (hospital) & paradrop (hq)
   - [ ] todo vor ki: upgrade toggle, spaceport system, bridge huts, special unit tab/subterain systems
   - [ ] TS lightning & ambient sounds
-  - [ ] subterrain upgrade (flametank, apc?) & betonplatten
+  - [ ] construction crane (age 3)
 - [ ] Fixes
   - [ ] einheiten auf repair facility verkaufen
   - [x] upgrades wenn tec center selektiert
-  - [ ] support buildings in support tab (statt defense?)
   - [ ] upgrades nur wenn power
   - [ ] heli & jet start/lande sounds
-  - [ ] KI-bau routine
   - [ ] fire position power bedarf entfernen
   - [ ] platzhalter-icons (tiberium wars)
   - [ ] repair facility bib-smudge
@@ -54,8 +52,6 @@
   - [ ] power shutdown AA & defenses
   - [x] oil pums spawnen 1000 credits wenn zerstört
   - [x] aot-age upgrade kosten (5000, 10000, 25000)
-  - [ ] age power toggle / direkt oben links
-  - [ ] NOD transport vessel cargo ändern
 
 ## Design / Konzept
 
@@ -147,13 +143,13 @@
   - [ ] test gegen AI
   - [ ] ressource balancing
   - [x] tiberium bäume
-  - [ ] Iron dome island
+  - [x] Iron dome island
   - [x] oil derricks & pumps
   - [x] bridge repair huts
   - [x] ice system
 - [ ] Desert?
   - [ ] Critter waves (spawner wie ants, random base attack order)
-  - [ ] toxic tiberium
+  - [ ] toxic tiberium (wead)
   - [ ] toxic tiberium refinery ruin
 - [ ] Winter?
   - [ ] hq island (paradrops) im norden
