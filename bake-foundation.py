@@ -94,61 +94,105 @@ INT_BR = INTERIOR[64:128, 64:128]
 #   S=1, E=0  → E-Kante         = tile5[0:64, 64:128]
 #   S=1, E=1  → Interior        = tile5[0:64, 0:64]
 
-# === CORNER-BASED (Dual-Grid Marching Squares) ===
-# Face-basiert (4 orthogonale Nachbarn) kann KEINE Innenkurven (Hohlkehle) darstellen: eine Zelle
-# mit allen 4 Nachbarn, aber fehlender Diagonale, rendert als voller Kern -> harte Ecke am Gras.
-# Corner-basiert löst das: config = nw|ne|sw|se, wobei eine Ecke "solide" ist, wenn ALLE 4 Zellen
-# um den Eckpunkt Foundation sind (== 4). Analog AotIceCellBody. Jeder Quadrant hängt von seiner
-# Ecke + den 2 kanten-benachbarten Ecken ab -> 5 Fälle inkl. CONCAVE (Innenkurve).
+# === CORNER-BASED (Dual-Grid Marching Squares) mit DURCHGEHENDEN Kantenzuegen ===
+# Face-basiert (4 orthogonale Nachbarn) kann KEINE Innenkurven (Hohlkehle) darstellen -> corner-
+# basiert: config = nw|ne<<1|sw<<2|se<<3, Ecke solide wenn alle 4 Zellen am Eckpunkt Foundation.
+#
+# Kanten-Problem der ersten Fassung: jede Rand-Zelle wiederholte identische 64px-Stuecke aus 4
+# VERSCHIEDENEN Quellkacheln -> Franse brach an jeder Naht ab ("wie Puzzle-Stuecke").
+# Loesung: EIN durchgehender, seamless-gemachter Kantenstreifen pro Richtung. Alle Rand-Zellen
+# derselben Richtung samplen denselben Streifen -> die Franse laeuft fugenlos durch.
 
-def make_concave(interior_quad, outer_quad, lo=25, hi=115):
-    """Interior mit kleiner Gras-Kerbe an der Außenspitze (Innenkurve).
-    Nutzt die Alpha der Außenecke, steilt sie aber auf: nur die EXTREME Spitze (alpha<lo)
-    bleibt transparent -> kleine Kerbe statt großer Ecke. RGB bleibt Interior-Dreck."""
+def wrap_blend_axis(img, axis):
+    """Wrap-Blend NUR entlang einer Achse: Dreieck-Gewicht 1 Mitte -> 0 Rand, Gegenstueck ist
+    die halb-gerollte Kopie. Ergebnis kachelt nahtlos in dieser Achse."""
+    f = img.astype(np.float32)
+    n = f.shape[axis]
+    rolled = np.roll(f, n // 2, axis=axis)
+    t = (1.0 - np.abs(2.0 * np.arange(n) / (n - 1) - 1.0))
+    shape = [1, 1, 1]; shape[axis] = n
+    w = t.reshape(shape)
+    return np.clip(f * w + rolled * (1.0 - w), 0, 255).astype(np.uint8)
+
+def blend_into(piece, target, axis, side, width=24):
+    """Blendet den Rand von `piece` (an `side` der Achse) in die `target`-Werte, damit der
+    Anschluss an den Nachbar-Quadranten pixel-kontinuierlich wird. ramp 0 (innen) -> 1 (Randpixel)."""
+    out = piece.astype(np.float32)
+    tgt = target.astype(np.float32)
+    n = piece.shape[axis]
+    idx = np.arange(n, dtype=np.float32)
+    ramp = np.clip((idx - (n - width)) / (width - 1), 0, 1) if side == 'high' else \
+           np.clip(((width - 1) - idx) / (width - 1), 0, 1)
+    shape = [1, 1, 1]; shape[axis] = n
+    r = ramp.reshape(shape)
+    return np.clip(out * (1 - r) + tgt * r, 0, 255).astype(np.uint8)
+
+# --- Durchgehende Kantenstreifen (Zellhaelften), seamless in Laufrichtung ---
+# N: TC-Nordhaelfte (64h x 128w), x-seamless. S: BC-Suedhaelfte.
+# W: tile0-SW ueber tile3-NW (im Original vertikal benachbart -> kontinuierlich), y-seamless.
+# E: tile2-SE ueber tile5-NE, y-seamless.
+EDGE_N = wrap_blend_axis(tile1[0:64].copy(),    axis=1)
+EDGE_S = wrap_blend_axis(tile4[64:128].copy(),  axis=1)
+EDGE_W = wrap_blend_axis(np.vstack([tile0[64:128, 0:64],   tile3[0:64, 0:64]]).copy(),   axis=0)
+EDGE_E = wrap_blend_axis(np.vstack([tile2[64:128, 64:128], tile5[0:64, 64:128]]).copy(), axis=0)
+
+# --- Interior-Anschluss: Kanten-Innenraender in die INTERIOR-Werte ueberblenden ---
+# Naht N-Kante(y=63) -> Interior(y=64):  EDGE_N rows 40..63 -> INTERIOR rows 40..63.
+EDGE_N = blend_into(EDGE_N, INTERIOR[0:64],    axis=0, side='high')
+EDGE_S = blend_into(EDGE_S, INTERIOR[64:128],  axis=0, side='low')
+EDGE_W = blend_into(EDGE_W, INTERIOR[:, 0:64], axis=1, side='high')
+EDGE_E = blend_into(EDGE_E, INTERIOR[:, 64:128], axis=1, side='low')
+
+# --- Konvexe Ecken: Original-Eckquadranten, Anschlussraender in die Kantenstreifen geblendet ---
+# Naht liegt IN der Eckzelle (Ecke|Kante als Nachbar-Quadranten) -> Raender angleichen:
+# z.B. CORNER_NW[:,63] soll EDGE_N[:,63] entsprechen (rechts schliesst EDGE_N[:,64:] an).
+CORNER_NW = blend_into(blend_into(tile0[0:64, 0:64].copy(),     EDGE_N[:, 0:64],   axis=1, side='high'),
+                       EDGE_W[0:64],    axis=0, side='high')
+CORNER_NE = blend_into(blend_into(tile2[0:64, 64:128].copy(),   EDGE_N[:, 64:128], axis=1, side='low'),
+                       EDGE_E[0:64],    axis=0, side='high')
+CORNER_SW = blend_into(blend_into(tile3[64:128, 0:64].copy(),   EDGE_S[:, 0:64],   axis=1, side='high'),
+                       EDGE_W[64:128],  axis=0, side='low')
+CORNER_SE = blend_into(blend_into(tile5[64:128, 64:128].copy(), EDGE_S[:, 64:128], axis=1, side='low'),
+                       EDGE_E[64:128],  axis=0, side='low')
+
+# --- Konkav (Innenkurve): Interior mit kleiner Gras-Kerbe an der Aussenspitze ---
+# Radialer Falloff zur Quadrant-Aussenecke: Kerbe endet VOR den Quadrant-Naehten (sonst Spruenge).
+def make_concave(interior_quad, outer_alpha_quad, corner_xy, lo=25, hi=115, full_r=40, zero_r=60):
     out = interior_quad.copy()
-    a = outer_quad[..., 3].astype(np.float32)
-    na = np.clip((a - lo) / (hi - lo), 0.0, 1.0) * 255.0
-    out[..., 3] = np.minimum(out[..., 3], na.astype(np.uint8))
+    a = outer_alpha_quad[..., 3].astype(np.float32)
+    na = np.clip((a - lo) / (hi - lo), 0.0, 1.0) * 255.0     # aufgesteilte Ecken-Alpha (Kerbe)
+    yy, xx = np.mgrid[0:64, 0:64].astype(np.float32)
+    dist = np.hypot(xx - corner_xy[0], yy - corner_xy[1])
+    w = np.clip((zero_r - dist) / (zero_r - full_r), 0.0, 1.0)  # 1 nahe Ecke, 0 ab zero_r
+    alpha = 255.0 - (255.0 - na) * w
+    out[..., 3] = np.minimum(out[..., 3], alpha.astype(np.uint8))
     return out
 
-CC_NW = make_concave(INT_TL, tile0[0:64,   0:64])
-CC_NE = make_concave(INT_TR, tile2[0:64,   64:128])
-CC_SW = make_concave(INT_BL, tile3[64:128, 0:64])
-CC_SE = make_concave(INT_BR, tile5[64:128, 64:128])
+CC_NW = make_concave(INT_TL, tile0[0:64,   0:64],   (0, 0))
+CC_NE = make_concave(INT_TR, tile2[0:64,   64:128], (63, 0))
+CC_SW = make_concave(INT_BL, tile3[64:128, 0:64],   (0, 63))
+CC_SE = make_concave(INT_BR, tile5[64:128, 64:128], (63, 63))
 
 # Pro Quadrant: (corner, h_adjacent, v_adjacent) -> 64×64 Piece.
-# h_adjacent = Ecke entlang der einen Zellkante, v_adjacent = Ecke entlang der anderen.
-# c=1: interior. c=0: h&v -> concave; h&!v -> "h-Kante zu"/Gras auf v-Seite; !h&v -> Gras h-Seite; sonst outer.
-def _pick(interior, concave, outer, edge_hclosed, edge_vclosed, c, h, v):
+# c=1: interior. c=0: h&v -> concave; nur h -> W/E-Rand; nur v -> N/S-Rand; sonst Aussenecke.
+def _pick(interior, concave, outer, edge_h, edge_v, c, h, v):
     if c:               return interior
     if h and v:         return concave
-    if h and not v:     return edge_hclosed   # h-Kante solide -> Gras auf v-Seite
-    if v and not h:     return edge_vclosed   # v-Kante solide -> Gras auf h-Seite
+    if h and not v:     return edge_h
+    if v and not h:     return edge_v
     return outer
 
-def q_nw(nw, ne, sw):  # top edge shares NE, left edge shares SW
-    return _pick(INT_TL, CC_NW, tile0[0:64,0:64],
-                 tile0[64:128,0:64],   # ne solide (top zu) -> Gras West -> W-Kante
-                 tile0[0:64,64:128],   # sw solide (left zu) -> Gras Nord -> N-Kante
-                 nw, ne, sw)
+def q_nw(nw, ne, sw):
+    return _pick(INT_TL, CC_NW, CORNER_NW, EDGE_W[0:64],   EDGE_N[:, 0:64],   nw, ne, sw)
 
-def q_ne(ne, nw, se):  # top edge shares NW, right edge shares SE
-    return _pick(INT_TR, CC_NE, tile2[0:64,64:128],
-                 tile2[64:128,64:128], # nw solide (top zu) -> Gras Ost -> E-Kante
-                 tile2[0:64,0:64],     # se solide (right zu) -> Gras Nord -> N-Kante
-                 ne, nw, se)
+def q_ne(ne, nw, se):
+    return _pick(INT_TR, CC_NE, CORNER_NE, EDGE_E[0:64],   EDGE_N[:, 64:128], ne, nw, se)
 
-def q_sw(sw, se, nw):  # bottom edge shares SE, left edge shares NW
-    return _pick(INT_BL, CC_SW, tile3[64:128,0:64],
-                 tile3[0:64,0:64],     # se solide (bottom zu) -> Gras West -> W-Kante
-                 tile3[64:128,64:128], # nw solide (left zu) -> Gras Süd -> S-Kante
-                 sw, se, nw)
+def q_sw(sw, se, nw):
+    return _pick(INT_BL, CC_SW, CORNER_SW, EDGE_W[64:128], EDGE_S[:, 0:64],   sw, se, nw)
 
-def q_se(se, sw, ne):  # bottom edge shares SW, right edge shares NE
-    return _pick(INT_BR, CC_SE, tile5[64:128,64:128],
-                 tile5[0:64,64:128],   # sw solide (bottom zu) -> Gras Ost -> E-Kante
-                 tile5[64:128,0:64],   # ne solide (right zu) -> Gras Süd -> S-Kante
-                 se, sw, ne)
+def q_se(se, sw, ne):
+    return _pick(INT_BR, CC_SE, CORNER_SE, EDGE_E[64:128], EDGE_S[:, 64:128], se, sw, ne)
 
 
 def bake_frame(config: int) -> np.ndarray:

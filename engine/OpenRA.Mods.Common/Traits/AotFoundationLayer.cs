@@ -28,17 +28,25 @@ namespace OpenRA.Mods.Common.Traits
 		/// <summary>Incremented whenever the set changes, so cells can refresh their sprite.</summary>
 		public int Version { get; private set; }
 
-		public bool Contains(CPos c) { return cells.Contains(c); }
+		/// <summary>
+		/// CPos.Equals compares the full Bits field INCLUDING the movement-layer byte. Callers like
+		/// the pathfinder pass cells with a custom-layer byte set (e.g. EntryMovementCost receives
+		/// new CPos(x, y, Subterranean)), which would never match ground-layer entries in the set.
+		/// Normalizing every query/mutation to layer 0 makes the set layer-agnostic by construction.
+		/// </summary>
+		static CPos Ground(CPos c) { return new CPos(c.X, c.Y); }
+
+		public bool Contains(CPos c) { return cells.Contains(Ground(c)); }
 
 		public void Add(CPos c)
 		{
-			if (cells.Add(c))
+			if (cells.Add(Ground(c)))
 				Version++;
 		}
 
 		public void Remove(CPos c)
 		{
-			if (cells.Remove(c))
+			if (cells.Remove(Ground(c)))
 				Version++;
 		}
 
@@ -49,6 +57,7 @@ namespace OpenRA.Mods.Common.Traits
 		/// </summary>
 		public int CornerCount(CPos corner)
 		{
+			// The new CPos(x, y) constructions are already layer-0, so no normalization needed here.
 			var n = 0;
 			if (cells.Contains(new CPos(corner.X - 1, corner.Y - 1))) n++;
 			if (cells.Contains(new CPos(corner.X, corner.Y - 1))) n++;
