@@ -4040,7 +4040,8 @@ aot-foundation:
 
 aot-foundation-cell:
 	idle:
-		Filename: aot-foundation-cell.png
+		RemasteredFilename: aot-foundation-cell.zip
+		RemasteredPremultiplied: false
 		Length: 16
 
 # 48-Frame-Sheets (Layout wie BRIK): 0-15 idle, 16-31 scratched, 32-47 damaged.

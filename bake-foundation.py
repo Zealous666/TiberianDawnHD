@@ -2,9 +2,16 @@
 # Bäckt den Fortified Foundation (aot-foundation-cell) Sprite aus den TD-Remaster-BIB2-Kacheln.
 # Algorithmus: 4-Seiten-Adjacenz-Bitmask (N=1, E=2, S=4, W=8) → 16 Frames.
 # Jede Zelle (128×128) wird aus 4 Quadranten (64×64) aus den 4 BIB2-Eck-Kacheln komponiert.
-# Ausgabe: aot-foundation-cell.png (128×2048, 16 Frames vertikal) + aot-foundation-icon.png.
+# Ausgabe:
+#   aot-foundation-cell.zip  — 16 TGA-Frames + .meta (OpenRA RemasteredFilename-Format)
+#   aot-foundation-idle.png  — 1-Frame-PNG für Placer-Preview (Frame 15 = Interior)
+#   aot-foundation-icon.png  — 64×48 Baupaletten-Icon
 
+import io
+import json
+import zipfile
 from pathlib import Path
+
 import numpy as np
 from PIL import Image
 
@@ -97,16 +104,23 @@ def bake_frame(adj: int) -> np.ndarray:
     return frame
 
 
-# --- Haupt-Sprite: 128×2048 (16 Frames vertikal, Frame 0 oben) ---
+# --- Haupt-Sprite: aot-foundation-cell.zip (16 TGA-Frames + .meta, OpenRA-RemasteredFilename-Format) ---
+# Format identisch zu aot-ice-cell.zip, aot-subtank-tilt.zip etc.
+# Jeder Frame: <name>-{N:04d}.tga + <name>-{N:04d}.meta (JSON {"size":[w,h],"crop":[x,y,w,h]})
 NFRAMES = 16
 FSIZE   = 128
-sheet = np.zeros((NFRAMES * FSIZE, FSIZE, 4), dtype=np.uint8)
-for i in range(NFRAMES):
-    sheet[i * FSIZE:(i + 1) * FSIZE] = bake_frame(i)
+ZIPNAME = "foundation"
+meta_str = json.dumps({"size": [FSIZE, FSIZE], "crop": [0, 0, FSIZE, FSIZE]})
 
-out_sheet = BITS / "aot-foundation-cell.png"
-Image.fromarray(sheet, "RGBA").save(out_sheet)
-print(f"aot-foundation-cell.png: {FSIZE}×{NFRAMES * FSIZE} ({NFRAMES} Frames)")
+out_zip = BITS / "aot-foundation-cell.zip"
+with zipfile.ZipFile(out_zip, "w", zipfile.ZIP_DEFLATED) as zf:
+    for i in range(NFRAMES):
+        frame_img = Image.fromarray(bake_frame(i), "RGBA")
+        buf = io.BytesIO()
+        frame_img.save(buf, format="TGA")
+        zf.writestr(f"{ZIPNAME}-{i:04d}.tga", buf.getvalue())
+        zf.writestr(f"{ZIPNAME}-{i:04d}.meta", meta_str)
+print(f"aot-foundation-cell.zip: {NFRAMES} Frames à {FSIZE}×{FSIZE} TGA")
 
 # --- Placement-Preview (128×128): Frame 15 = vollständig Interior (keine Kanten sichtbar) ---
 # Eigene Datei notwendig: OpenRA lädt jede PNG-Referenz als eigenständige Sprite-Datei,
