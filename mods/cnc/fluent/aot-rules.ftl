@@ -223,3 +223,6 @@ actor-aot-ant-spawner =
 actor-aot-foundation =
     .name = Fortified Foundation
     .description = Reinforced foundation plating. Prevents subterranean units from burrowing in or surfacing on it. Cannot be destroyed or sold.
+
+actor-aot-upgrade-foundation =
+    .description = Unlocks construction of the Fortified Foundation: reinforced plating that keeps subterranean units from burrowing in or surfacing.

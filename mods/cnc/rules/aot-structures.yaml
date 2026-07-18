@@ -1541,7 +1541,7 @@ aot-stec-age0:
 	Buildable:
 		LockedGroup: aot-grp-stec
 		Queue: Building.Nod
-		BuildPaletteOrder: 120
+		BuildPaletteOrder: 140
 		Prerequisites: anypower, anyhq, ~!aot-age1
 		BuildLimit: 1
 		Icon: icon
@@ -1558,7 +1558,7 @@ aot-stec-age1:
 	Buildable:
 		LockedGroup: aot-grp-stec
 		Queue: Building.Nod
-		BuildPaletteOrder: 120
+		BuildPaletteOrder: 140
 		Prerequisites: anypower, anyhq, ~aot-age1, ~!aot-age2, !aot-stec
 		BuildLimit: 1
 		Icon: aot-age1-icon
@@ -1575,7 +1575,7 @@ aot-stec-age2:
 	Buildable:
 		LockedGroup: aot-grp-stec
 		Queue: Building.Nod
-		BuildPaletteOrder: 120
+		BuildPaletteOrder: 140
 		Prerequisites: anypower, anyhq, ~aot-age2, !aot-stec
 		BuildLimit: 1
 		Icon: aot-age2-icon
@@ -1806,7 +1806,7 @@ aot-mslo-age1:
 	Buildable:
 		LockedGroup: aot-grp-mslo
 		Queue: Building.Nod
-		BuildPaletteOrder: 150
+		BuildPaletteOrder: 180
 		Prerequisites: ~aot-age1, stec, anyhq, ~!aot-age2
 		BuildLimit: 1
 		Icon: icon
@@ -1823,7 +1823,7 @@ aot-mslo-age2:
 	Buildable:
 		LockedGroup: aot-grp-mslo
 		Queue: Building.Nod
-		BuildPaletteOrder: 150
+		BuildPaletteOrder: 180
 		Prerequisites: ~aot-age1, stec, anyhq, ~aot-age2, !aot-mslo
 		BuildLimit: 1
 		Icon: aot-age2-icon
@@ -2169,7 +2169,7 @@ aot-nod-radar-age0:
 		Image: aot-nod-radar
 	Buildable:
 		LockedGroup: aot-grp-nodradar
-		BuildPaletteOrder: 110
+		BuildPaletteOrder: 90
 		Prerequisites: vehicleproduction, ~techlevel.medium, ~!aot-age1
 		Queue: Building.Nod
 		Icon: icon
@@ -2183,7 +2183,7 @@ aot-nod-radar-age1:
 		Image: aot-nod-radar-age1
 	Buildable:
 		LockedGroup: aot-grp-nodradar
-		BuildPaletteOrder: 110
+		BuildPaletteOrder: 90
 		Prerequisites: vehicleproduction, ~techlevel.medium, ~aot-age1, ~!aot-age2
 		Queue: Building.Nod
 		Icon: icon
@@ -2200,7 +2200,7 @@ aot-nod-radar-age2:
 		Sequence: aot-age2-idle
 	Buildable:
 		LockedGroup: aot-grp-nodradar
-		BuildPaletteOrder: 110
+		BuildPaletteOrder: 90
 		Prerequisites: vehicleproduction, ~techlevel.medium, ~aot-age2
 		Queue: Building.Nod
 		Icon: aot-age2-icon
@@ -2275,7 +2275,7 @@ aot-tmpl-age1:
 		Image: tmpl
 	Buildable:
 		LockedGroup: aot-grp-tmpl
-		BuildPaletteOrder: 160
+		BuildPaletteOrder: 190
 		Prerequisites: anyhq, proc, ~techlevel.high, ~aot-age1, ~!aot-age2
 		BuildLimit: 1
 		Queue: Building.Nod
@@ -2293,7 +2293,7 @@ aot-tmpl-age2:
 		Sequence: aot-age2-idle
 	Buildable:
 		LockedGroup: aot-grp-tmpl
-		BuildPaletteOrder: 160
+		BuildPaletteOrder: 190
 		Prerequisites: anyhq, proc, ~techlevel.high, ~aot-age1, ~aot-age2, !aot-tmpl
 		BuildLimit: 1
 		Queue: Building.Nod
@@ -2622,7 +2622,7 @@ aot-hpad-nod:
 	RenderSprites:
 		Image: hpad
 	Buildable:
-		BuildPaletteOrder: 113
+		BuildPaletteOrder: 130
 		Prerequisites: anyhq
 		Queue: Building.Nod
 		Icon: hpad-red-icon
@@ -2965,7 +2965,7 @@ aot-fix-age0:
 	Buildable:
 		LockedGroup: aot-grp-fix
 		Queue: Building.GDI, Building.Nod
-		BuildPaletteOrder: 70
+		BuildPaletteOrder: 80
 		Prerequisites: ~!aot-age1, vehicleproduction
 		Icon: aot-ra-icon
 		Description: Repairs vehicles.
@@ -2985,7 +2985,7 @@ aot-fix-age1:
 	Buildable:
 		LockedGroup: aot-grp-fix
 		Queue: Building.GDI
-		BuildPaletteOrder: 70
+		BuildPaletteOrder: 80
 		Prerequisites: ~aot-age1, ~!aot-age2, vehicleproduction
 		Icon: aot-td-icon
 		Description: Repairs vehicles.
@@ -3005,7 +3005,7 @@ aot-fix-age2:
 	Buildable:
 		LockedGroup: aot-grp-fix
 		Queue: Building.GDI
-		BuildPaletteOrder: 70
+		BuildPaletteOrder: 80
 		Prerequisites: ~aot-age2, vehicleproduction
 		Icon: aot-td-icon
 		Description: Repairs vehicles.
@@ -3025,7 +3025,7 @@ aot-fix-age1-nod:
 	Buildable:
 		LockedGroup: aot-grp-fix
 		Queue: Building.Nod
-		BuildPaletteOrder: 70
+		BuildPaletteOrder: 80
 		Prerequisites: ~aot-age1, ~!aot-age2, vehicleproduction
 		Icon: aot-td-icon
 		Description: Repairs vehicles.
@@ -3045,7 +3045,7 @@ aot-fix-age2-nod:
 	Buildable:
 		LockedGroup: aot-grp-fix
 		Queue: Building.Nod
-		BuildPaletteOrder: 70
+		BuildPaletteOrder: 80
 		Prerequisites: ~aot-age2, vehicleproduction
 		Icon: aot-td-icon
 		Description: Repairs vehicles.
@@ -3279,7 +3279,7 @@ aot-nuke-age0:
 	Buildable:
 		LockedGroup: aot-grp-nuke
 		Queue: Building.GDI, Building.Nod
-		BuildPaletteOrder: 10
+		BuildPaletteOrder: 40
 		Prerequisites: ~!aot-age1, fact
 		Icon: aot-ra-icon
 		Description: Generates power.
@@ -3297,7 +3297,7 @@ aot-nuke-age1:
 	Buildable:
 		LockedGroup: aot-grp-nuke
 		Queue: Building.GDI, Building.Nod
-		BuildPaletteOrder: 10
+		BuildPaletteOrder: 40
 		Prerequisites: ~aot-age1, ~!aot-age2, ~!aot-nuke-turbine-upgrade, fact
 		Icon: aot-td-icon
 		Description: Generates power.
@@ -3315,7 +3315,7 @@ aot-nuke-turbine:
 	Buildable:
 		LockedGroup: aot-grp-nuke
 		Queue: Building.GDI
-		BuildPaletteOrder: 10
+		BuildPaletteOrder: 40
 		Prerequisites: ~aot-age1, ~!aot-age2, ~aot-nuke-turbine-upgrade, fact
 		Icon: aot-turbine-icon
 		Description: Generates power.
@@ -3333,7 +3333,7 @@ aot-nuke-age2:
 	Buildable:
 		LockedGroup: aot-grp-nuke
 		Queue: Building.GDI
-		BuildPaletteOrder: 10
+		BuildPaletteOrder: 40
 		Prerequisites: ~aot-age2, ~!aot-nuke-turbine-upgrade, fact
 		Icon: aot-age2-icon
 		Description: Generates power.
@@ -3353,7 +3353,7 @@ aot-nuke-age2-nod:
 	Buildable:
 		LockedGroup: aot-grp-nuke
 		Queue: Building.Nod
-		BuildPaletteOrder: 10
+		BuildPaletteOrder: 40
 		Prerequisites: ~aot-age2, ~!aot-nuke-turbine-upgrade, fact
 		Icon: aot-age2-nod-icon
 		Description: Generates power.
@@ -3371,7 +3371,7 @@ aot-nuke-turbine-age2:
 	Buildable:
 		LockedGroup: aot-grp-nuke
 		Queue: Building.GDI
-		BuildPaletteOrder: 10
+		BuildPaletteOrder: 40
 		Prerequisites: ~aot-age2, ~aot-nuke-turbine-upgrade, fact
 		Icon: aot-turbine-icon
 		Description: Generates power.
@@ -3452,7 +3452,7 @@ aot-nuk2-age0:
 	Buildable:
 		LockedGroup: aot-grp-nuk2
 		Queue: Building.Nod
-		BuildPaletteOrder: 40
+		BuildPaletteOrder: 70
 		Prerequisites: ~!aot-age1, nuke
 		Icon: aot-ra-icon
 		Description: Generates more power than the standard Power Plant.
@@ -3470,7 +3470,7 @@ aot-nuk2-age1:
 	Buildable:
 		LockedGroup: aot-grp-nuk2
 		Queue: Building.Nod
-		BuildPaletteOrder: 40
+		BuildPaletteOrder: 70
 		Prerequisites: ~aot-age1, ~!aot-age2, nuke, anyhq
 		Icon: aot-td-icon
 		Description: Generates more power than the standard Power Plant.
@@ -3488,7 +3488,7 @@ aot-nuk2-age2:
 	Buildable:
 		LockedGroup: aot-grp-nuk2
 		Queue: Building.Nod
-		BuildPaletteOrder: 40
+		BuildPaletteOrder: 70
 		Prerequisites: ~aot-age2, nuke, anyhq
 		Icon: aot-age2-icon
 		Description: Generates more power than the standard Power Plant.
@@ -3741,7 +3741,7 @@ aot-gun-base:
 		Image: gun
 	Buildable:
 		LockedGroup: aot-grp-gun
-		BuildPaletteOrder: 130
+		BuildPaletteOrder: 170
 		# Voraussetzung von "barracks" (Infanterie-Produktion) auf "lite"
 		# (Fahrzeug-Produktion) geaendert (User-Wunsch 2026-07-05).
 		Prerequisites: ~aot-age1, lite, ~!aot-laser-fence-upgrade
@@ -3755,7 +3755,7 @@ aot-gun-laser:
 		Image: gun
 	Buildable:
 		LockedGroup: aot-grp-gun
-		BuildPaletteOrder: 130
+		BuildPaletteOrder: 170
 		Prerequisites: ~aot-age1, lite, ~aot-laser-fence-upgrade
 		Queue: Building.Nod
 		BuildDuration: 960
@@ -3869,7 +3869,7 @@ aot-subpen:
 	Health:
 		HP: 80000
 	Buildable:
-		BuildPaletteOrder: 115
+		BuildPaletteOrder: 120
 		Prerequisites: lite
 		Queue: Building.Nod
 		Icon: aot-subpen-icon
@@ -4239,7 +4239,7 @@ aot-silo-age0:
 		SequenceAlpha: 0.65
 	Buildable:
 		LockedGroup: aot-grp-silo
-		BuildPaletteOrder: 20
+		BuildPaletteOrder: 30
 		Prerequisites: anypower, ~!aot-age1
 		Queue: Building.GDI, Building.Nod
 		Description: actor-silo.description
@@ -4257,7 +4257,7 @@ aot-silo-age1:
 		SequenceAlpha: 0.65
 	Buildable:
 		LockedGroup: aot-grp-silo
-		BuildPaletteOrder: 20
+		BuildPaletteOrder: 30
 		Prerequisites: anypower, ~aot-age1, ~!aot-age2
 		Queue: Building.GDI, Building.Nod
 		Description: actor-silo.description
@@ -4275,7 +4275,7 @@ aot-silo-age2:
 		SequenceAlpha: 0.65
 	Buildable:
 		LockedGroup: aot-grp-silo
-		BuildPaletteOrder: 20
+		BuildPaletteOrder: 30
 		Prerequisites: anypower, ~aot-age2
 		Queue: Building.GDI, Building.Nod
 		Description: actor-silo.description
@@ -4679,7 +4679,7 @@ aot-shrine:
 		SequenceAlpha: 0.65
 	Buildable:
 		Queue: Building.Nod
-		BuildPaletteOrder: 170
+		BuildPaletteOrder: 200
 		Prerequisites: ~aot-age2, stec, tmpl
 		BuildLimit: 1
 		Icon: icon
@@ -4807,7 +4807,7 @@ aot-sgen:
 		Prerequisite: aot-sgen
 	Buildable:
 		Queue: Building.Nod
-		BuildPaletteOrder: 180
+		BuildPaletteOrder: 210
 		Prerequisites: ~aot-age2, aot-shrine
 		Icon: icon
 		Description: Cloaks itself and all nearby friendly structures while powered and above 50% health.
@@ -4821,7 +4821,7 @@ aot-sgen:
 # structures-overrides.yaml (aot-obli-icon.png, User-Icon).
 OBLI:
 	Buildable:
-		BuildPaletteOrder: 200
+		BuildPaletteOrder: 230
 		Prerequisites: ~aot-age3, aot-shrine, aot-laser-fence-upgrade
 		Queue: Building.Nod
 # === Ende aotmod ===
@@ -4838,7 +4838,7 @@ OBLI:
 # (siehe sub-system.md), pausiert bei Angriff/Beschaedigung/Low-Power.
 SAM:
 	Buildable:
-		BuildPaletteOrder: 90
+		BuildPaletteOrder: 110
 		Queue: Building.Nod
 		# Voraussetzung von "hand" (Hand of Nod) auf Energieversorgung + Radar
 		# Dome geaendert (User-Wunsch 2026-07-05). "anypower" = generischer
@@ -5389,7 +5389,7 @@ aot-wall-nod:
 		Name: Barbwire Fence
 	Buildable:
 		LockedGroup: aot-grp-wall-nod
-		BuildPaletteOrder: 30
+		BuildPaletteOrder: 20
 		Prerequisites: anypower, fact, ~!aot-laser-fence-upgrade
 		Queue: Building.Nod
 		BuildDuration: 150
@@ -5436,6 +5436,46 @@ aot-wall-nod-laser:
 	-Crushable:
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - Fortified Foundation Upgrade ===
+# Schaltet den Fortified-Foundation-Bau frei (aot-foundation-upgrade). Gleicher Name +
+# gleiches Icon wie der Bau-Eintrag (Image: aot-foundation -> icon-Sequence).
+# Sichtbar ab Age 0 (keine Age-Prereqs), baubar nur mit ATEC (GDI) bzw. STEC (NOD).
+# GDI/NOD-Split PFLICHT (Upgrade-Queue-Typen, siehe upgrade-system Bughistorie 7).
+aot-upgrade-foundation-gdi:
+	Tooltip:
+		Name: actor-aot-foundation.name
+	Buildable:
+		BuildPaletteOrder: 5
+		Prerequisites: ~atec, atec, ~!aot-foundation-upgrade
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		Description: actor-aot-upgrade-foundation.description
+	Valued:
+		Cost: 1000
+	RenderSprites:
+		Image: aot-foundation
+	ProvidesPrerequisite:
+		Prerequisite: aot-foundation-upgrade
+	Interactable:
+
+aot-upgrade-foundation-nod:
+	Tooltip:
+		Name: actor-aot-foundation.name
+	Buildable:
+		BuildPaletteOrder: 5
+		Prerequisites: ~stec, stec, ~!aot-foundation-upgrade
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		Description: actor-aot-upgrade-foundation.description
+	Valued:
+		Cost: 1000
+	RenderSprites:
+		Image: aot-foundation
+	ProvidesPrerequisite:
+		Prerequisite: aot-foundation-upgrade
+	Interactable:
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - Fortified Foundation ===
 # aot-foundation: buildbare Platzierer-Aktor (1×1, beide Fraktionen, Building-Queue).
 #   Spawnt bei Platzierung ein 3×3-Feld aus aot-foundation-cell-Aktoren und loescht sich selbst.
@@ -5465,8 +5505,10 @@ aot-foundation:
 		AreaTypes: building
 		Adjacent: 2
 	Buildable:
-		BuildPaletteOrder: 8
-		Prerequisites: fact
+		BuildPaletteOrder: 10
+		# ~aot-foundation-upgrade: versteckt (Locked-Platzhalter) bis das Foundation-Upgrade
+		# (ATEC/STEC-Upgrade-Tab, 1000 Cr.) gekauft wurde.
+		Prerequisites: fact, ~aot-foundation-upgrade
 		Queue: Building.GDI, Building.Nod
 		BuildDuration: 80
 		Description: actor-aot-foundation.description
@@ -5691,7 +5733,7 @@ aot-gate-nod:
 	Armor:
 		Type: Concrete
 	Buildable:
-		BuildPaletteOrder: 190
+		BuildPaletteOrder: 220
 		# Sichtbar ab Age 1, aber ausgegraut bis das Laser Defense Systems Upgrade
 		# steht (User-Wunsch 2026-07-04) - passt thematisch, da das Tor selbst eine
 		# Laser-Barriere ist. aot-laser-fence-upgrade = ProvidesPrerequisite-String
@@ -5835,7 +5877,7 @@ aot-ftur-flame:
 		Image: aot-ftur
 	Buildable:
 		LockedGroup: aot-grp-ftur
-		BuildPaletteOrder: 80
+		BuildPaletteOrder: 100
 		Prerequisites: barracks, ~!aot-toxic-upgrade
 		Queue: Building.Nod
 		Description: RA Flame Tower. Short-range anti-infantry/vehicle defense.
@@ -5852,7 +5894,7 @@ aot-ftur-toxic:
 		Image: aot-ftur
 	Buildable:
 		LockedGroup: aot-grp-ftur
-		BuildPaletteOrder: 80
+		BuildPaletteOrder: 100
 		Prerequisites: barracks, ~aot-toxic-upgrade
 		Queue: Building.Nod
 		Icon: toxic-icon
