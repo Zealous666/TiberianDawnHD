@@ -581,6 +581,16 @@ aot-locked-icon:
 	Image: base_none.png
 	Regions:
 		locked: 0, 0, 64, 48
+# Fraktions-Varianten: ProductionPaletteWidget sucht "<LockedIconCollection>-<faction>"
+# und faellt auf aot-locked-icon (base_none.png) zurueck (Observer, fremde Fraktionen).
+aot-locked-icon-gdi:
+	Image: base_gdi.png
+	Regions:
+		locked: 0, 0, 64, 48
+aot-locked-icon-nod:
+	Image: base_nod.png
+	Regions:
+		locked: 0, 0, 64, 48
 # === Ende aotmod ===
 
 order-icons:

@@ -894,7 +894,7 @@ aot-upgrade-ttnk-subterrain:
 
 	Buildable:
 		BuildPaletteOrder: 50
-		Prerequisites: ~stec, ~aot-age2, aot-age2, stec, ~!aot-subterrain-upgrade
+		Prerequisites: ~stec, ~aot-age2, aot-age2, stec
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -1121,6 +1121,7 @@ ATEC:
 		Group: Upgrade
 	ProductionQueue@UpgradeGDI:
 		Type: Upgrade.GDI
+		ShowUpgradedOverlay: True
 		Factions: gdi
 		Group: Upgrade
 		ShowLockedItems: True
@@ -1275,6 +1276,7 @@ STEC:
 		Group: Upgrade
 	ProductionQueue@UpgradeNod:
 		Type: Upgrade.Nod
+		ShowUpgradedOverlay: True
 		Factions: nod
 		Group: Upgrade
 		ShowLockedItems: True
@@ -3584,7 +3586,7 @@ aot-upgrade-gunboat-frigate:
 
 	Buildable:
 		BuildPaletteOrder: 25
-		Prerequisites: ~aot-age1, aot-age1, aot-shipyard, fix, ~!aot-gunboat-frigate-upgrade
+		Prerequisites: ~aot-age1, aot-age1, aot-shipyard, fix
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -3607,7 +3609,7 @@ aot-upgrade-gunboat-destroyer:
 
 	Buildable:
 		BuildPaletteOrder: 60
-		Prerequisites: ~aot-age2, aot-age2, aot-shipyard, fix, aot-gunboat-frigate-upgrade, ~!aot-gunboat-upgrade
+		Prerequisites: ~aot-age2, aot-age2, aot-shipyard, fix, aot-gunboat-frigate-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -3954,7 +3956,7 @@ aot-upgrade-sub-cargo:
 
 	Buildable:
 		BuildPaletteOrder: 75
-		Prerequisites: aot-subpen, hand, ~aot-age2, ~!aot-sub-cargo-upgrade
+		Prerequisites: aot-subpen, hand, ~aot-age2
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -3983,7 +3985,7 @@ aot-upgrade-stnk-cargo:
 
 	Buildable:
 		BuildPaletteOrder: 100
-		Prerequisites: ~aot-age3, aot-shrine, tmpl, ~!aot-stnk-cargo-upgrade
+		Prerequisites: ~aot-age3, aot-shrine, tmpl
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -4011,7 +4013,7 @@ aot-upgrade-transport-gun:
 
 	Buildable:
 		BuildPaletteOrder: 40
-		Prerequisites: aot-age1, fix, aot-subpen, ~aot-age1, ~aot-subpen, ~!aot-transport-gun-upgrade
+		Prerequisites: aot-age1, fix, aot-subpen, ~aot-age1, ~aot-subpen
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -5446,7 +5448,7 @@ aot-upgrade-foundation-gdi:
 		Name: actor-aot-foundation.name
 	Buildable:
 		BuildPaletteOrder: 5
-		Prerequisites: ~atec, atec, ~!aot-foundation-upgrade
+		Prerequisites: ~atec, atec
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		Description: actor-aot-upgrade-foundation.description
@@ -5463,7 +5465,7 @@ aot-upgrade-foundation-nod:
 		Name: actor-aot-foundation.name
 	Buildable:
 		BuildPaletteOrder: 5
-		Prerequisites: ~stec, stec, ~!aot-foundation-upgrade
+		Prerequisites: ~stec, stec
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		Description: actor-aot-upgrade-foundation.description
