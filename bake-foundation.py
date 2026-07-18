@@ -245,23 +245,28 @@ print(f"aot-foundation-cell.zip: {NFRAMES} Frames à {FSIZE}×{FSIZE} TGA")
 # ueber classic Filename wuerde OpenRA das PNG um Faktor ~5.3 hochskalieren (klassisch->HD)
 # -> riesiger, unscharfer Klotz. RemasteredFilename rendert 1:1 (128px = 1 Zelle) -> 384px = 3 Zellen.
 #
-# 3×3-Layout: Config je Zelle runtime-identisch via corner_config über das volle 3×3-Present-Set.
-PREVIEW_PRESENT = {(x, y) for x in range(3) for y in range(3)}
-preview3x3 = np.zeros((3 * FSIZE, 3 * FSIZE, 4), dtype=np.uint8)
-for row in range(3):
-    for col in range(3):
-        cfg = corner_config(PREVIEW_PRESENT, col, row)
-        preview3x3[row*FSIZE:(row+1)*FSIZE, col*FSIZE:(col+1)*FSIZE] = bake_frame(cfg)
+# N×N-Layout: Config je Zelle runtime-identisch via corner_config über das volle Present-Set.
+# 3×3 = Upgrade-Variante (aot-foundation), 2×2 = Standard-Variante (aot-foundation-2x2).
+def bake_preview(n, zip_name, entry_prefix):
+    present = {(x, y) for x in range(n) for y in range(n)}
+    comp = np.zeros((n * FSIZE, n * FSIZE, 4), dtype=np.uint8)
+    for row in range(n):
+        for col in range(n):
+            cfg = corner_config(present, col, row)
+            comp[row*FSIZE:(row+1)*FSIZE, col*FSIZE:(col+1)*FSIZE] = bake_frame(cfg)
 
-PSIZE = 3 * FSIZE
-preview_meta = json.dumps({"size": [PSIZE, PSIZE], "crop": [0, 0, PSIZE, PSIZE]},
-                          separators=(",", ":"))
-with zipfile.ZipFile(BITS / "aot-foundation-idle.zip", "w", zipfile.ZIP_DEFLATED) as zf:
-    buf = io.BytesIO()
-    Image.fromarray(preview3x3, "RGBA").save(buf, format="TGA")
-    zf.writestr("foundationidle-0000.tga", buf.getvalue())
-    zf.writestr("foundationidle-0000.meta", preview_meta)
-print(f"aot-foundation-idle.zip: 1 Frame {PSIZE}×{PSIZE} (3×3-Composite)")
+    psize = n * FSIZE
+    meta = json.dumps({"size": [psize, psize], "crop": [0, 0, psize, psize]},
+                      separators=(",", ":"))
+    with zipfile.ZipFile(BITS / zip_name, "w", zipfile.ZIP_DEFLATED) as zf:
+        buf = io.BytesIO()
+        Image.fromarray(comp, "RGBA").save(buf, format="TGA")
+        zf.writestr(f"{entry_prefix}-0000.tga", buf.getvalue())
+        zf.writestr(f"{entry_prefix}-0000.meta", meta)
+    print(f"{zip_name}: 1 Frame {psize}×{psize} ({n}×{n}-Composite)")
+
+bake_preview(3, "aot-foundation-idle.zip",  "foundationidle")
+bake_preview(2, "aot-foundation-idle2.zip", "foundationidle2")
 
 # --- Icon: aot-foundation-icon.png wird NICHT mehr hier generiert ---
 # Der User setzt manuell mods/management/asset wip/base_smudge.png (64×48) als Baupaletten-Icon.

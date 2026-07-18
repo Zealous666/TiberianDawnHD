@@ -225,4 +225,4 @@ actor-aot-foundation =
     .description = Reinforced foundation plating. Prevents subterranean units from burrowing in or surfacing on it. Cannot be destroyed or sold.
 
 actor-aot-upgrade-foundation =
-    .description = Unlocks construction of the Fortified Foundation: reinforced plating that keeps subterranean units from burrowing in or surfacing.
+    .description = Expands the Fortified Foundation from a 2x2 to a 3x3 plate at the same build cost.

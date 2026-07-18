@@ -5437,8 +5437,8 @@ aot-wall-nod-laser:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Fortified Foundation Upgrade ===
-# Schaltet den Fortified-Foundation-Bau frei (aot-foundation-upgrade). Gleicher Name +
-# gleiches Icon wie der Bau-Eintrag (Image: aot-foundation -> icon-Sequence).
+# Erweitert die Standard-2×2-Foundation zur 3×3-Variante (gleicher Baupreis 75).
+# Gleicher Name + gleiches Icon wie der Bau-Eintrag (Image: aot-foundation -> icon-Sequence).
 # Sichtbar ab Age 0 (keine Age-Prereqs), baubar nur mit ATEC (GDI) bzw. STEC (NOD).
 # GDI/NOD-Split PFLICHT (Upgrade-Queue-Typen, siehe upgrade-system Bughistorie 7).
 aot-upgrade-foundation-gdi:
@@ -5477,11 +5477,13 @@ aot-upgrade-foundation-nod:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Fortified Foundation ===
-# aot-foundation: buildbare Platzierer-Aktor (1×1, beide Fraktionen, Building-Queue).
-#   Spawnt bei Platzierung ein 3×3-Feld aus aot-foundation-cell-Aktoren und loescht sich selbst.
-#   Zellen werden uebersprungen wenn eine Foundation oder ein Gebaeude bereits dort steht.
+# Varianten-Kette (LockedGroup aot-grp-foundation, genau EIN Palette-Slot):
+#   aot-foundation-2x2: Standard ab FACT (2×2), versteckt sich nach dem Upgrade.
+#   aot-foundation:     3×3-Variante, sichtbar erst mit aot-foundation-upgrade (gleicher Preis).
+# Beide spawnen via AotPlaceFoundation eine aot-foundation-cell pro Footprint-Zelle und
+# disposen sich selbst. Zellen mit Foundation/ungueltigem Terrain werden uebersprungen.
 # aot-foundation-cell: sichtbare BIB-Boden-Zelle (kein Building, unverstörbar).
-#   16 Frames aus bake-foundation.py, Frame-Index = N|E<<1|S<<2|W<<3 (face-adjacency).
+#   16 Frames aus bake-foundation.py, corner-based Dual-Grid (nw|ne<<1|sw<<2|se<<3).
 #   Besitzer: Neutral (unzerstoerbar, keiner kann angreifen).
 aot-foundation:
 	# Erbt ^Building fuer die komplette Platzierungs-Maschinerie (ActorPreviewPlaceBuildingPreview,
@@ -5505,9 +5507,10 @@ aot-foundation:
 		AreaTypes: building
 		Adjacent: 2
 	Buildable:
+		LockedGroup: aot-grp-foundation
 		BuildPaletteOrder: 10
-		# ~aot-foundation-upgrade: versteckt (Locked-Platzhalter) bis das Foundation-Upgrade
-		# (ATEC/STEC-Upgrade-Tab, 1000 Cr.) gekauft wurde.
+		# ~aot-foundation-upgrade: versteckt bis das Foundation-Upgrade (ATEC/STEC-Upgrade-Tab,
+		# 1000 Cr.) gekauft wurde -- bis dahin ist die 2×2-Standard-Variante sichtbar.
 		Prerequisites: fact, ~aot-foundation-upgrade
 		Queue: Building.GDI, Building.Nod
 		BuildDuration: 80
@@ -5523,6 +5526,19 @@ aot-foundation:
 	-SoundOnDamageTransition:
 	-ShakeOnDeath:
 	AotPlaceFoundation:
+
+# Standard-Variante ab FACT: 2×2, kein Upgrade noetig. Verschwindet mit dem Upgrade
+# (~!aot-foundation-upgrade), dann uebernimmt die geerbte 3×3-Variante den Slot.
+aot-foundation-2x2:
+	Inherits: aot-foundation
+	Building:
+		Footprint: xx xx
+		Dimensions: 2, 2
+	Buildable:
+		Prerequisites: fact, ~!aot-foundation-upgrade
+	# Preview-Sprite: 2×2-Composite (256×256) statt des geerbten 3×3-idle.
+	WithSpriteBody:
+		Sequence: idle2x2
 
 aot-foundation-cell:
 	# OccupiesSpace: false = blockiert keine Bewegung (Bib ist reiner Boden-Overlay).
