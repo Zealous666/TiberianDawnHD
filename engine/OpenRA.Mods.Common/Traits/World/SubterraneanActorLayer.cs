@@ -40,16 +40,34 @@ namespace OpenRA.Mods.Common.Traits
 		readonly BuildingInfluence buildingInfluence;
 
 		// AOT patch: also block dig-in/dig-out on Fortified Foundation cells (the whole point of
-		// the foundation smudge is to keep subterranean units out). May be null if the layer trait
-		// is not present on the world.
-		readonly AotFoundationLayer foundationLayer;
+		// the foundation smudge is to keep subterranean units out). Resolved lazily: the foundation
+		// layer trait may be constructed AFTER this one on the world actor, so a constructor-time
+		// TraitOrDefault would return null. ValidTransitionCell only runs after world init, when the
+		// trait is guaranteed to exist.
+		readonly Actor worldActor;
+		AotFoundationLayer foundationLayer;
+		bool foundationLayerResolved;
+
+		AotFoundationLayer FoundationLayer
+		{
+			get
+			{
+				if (!foundationLayerResolved)
+				{
+					foundationLayer = worldActor.TraitOrDefault<AotFoundationLayer>();
+					foundationLayerResolved = true;
+				}
+
+				return foundationLayer;
+			}
+		}
 
 		public SubterraneanActorLayer(Actor self, SubterraneanActorLayerInfo info)
 		{
 			map = self.World.Map;
 			terrainIndex = self.World.Map.Rules.TerrainInfo.GetTerrainIndex(info.TerrainType);
 			buildingInfluence = self.Trait<BuildingInfluence>();
-			foundationLayer = self.TraitOrDefault<AotFoundationLayer>();
+			worldActor = self;
 			height = new CellLayer<int>(map);
 			foreach (var c in map.AllCells)
 			{
@@ -94,7 +112,8 @@ namespace OpenRA.Mods.Common.Traits
 				return false;
 
 			// AOT patch: block transition on Fortified Foundation cells.
-			if (foundationLayer != null && foundationLayer.Contains(cell))
+			var fl = FoundationLayer;
+			if (fl != null && fl.Contains(cell))
 				return false;
 
 			if (sli.SubterraneanTransitionOnRamps)
