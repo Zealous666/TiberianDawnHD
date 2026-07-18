@@ -36,13 +36,34 @@ tile3 = load_tile(3)  # BL outer corner: S+W edge
 tile4 = load_tile(4)  # BC unten: nur S-Kante verschneit, obere ~2/3 sauberer Dreck
 tile5 = load_tile(5)  # BR outer corner: S+E edge
 
-# Saubere Interior-Quadranten (KEIN Schnee): aus den Mittelkacheln TC (unten) + BC (oben).
-# Die Innenecken der ECK-Kacheln (tile0/2/3/5) tragen noch Schnee -> im Kern sichtbare Flecken.
-# tile1[64:128] (TC unten) und tile4[0:64] (BC oben) sind reiner Dreck -> nahtloser Kern.
-INT_TL = tile1[64:128, 0:64]     # oben-links des Interior = TC unten-links
-INT_TR = tile1[64:128, 64:128]   # oben-rechts            = TC unten-rechts
-INT_BL = tile4[0:64,   0:64]     # unten-links            = BC oben-links
-INT_BR = tile4[0:64,   64:128]   # unten-rechts           = BC oben-rechts
+# Sauberer, NAHTLOS KACHELBARER Interior (KEIN Schnee, keine sichtbaren Zell-Grenzen im Kern).
+# Problem vorher: benachbarte Interior-Zellen sampleten aus verschiedenen Quell-Kacheln
+# (tile1 vs tile4) -> an den Zell-Grenzen Diskontinuität -> "Kanten im Kern".
+# Loesung: EINE saubere 128×128-Dreckflaeche bauen und seamless machen. Alle Interior-Zellen
+# nutzen dieselbe nahtlose Kachel -> Kern kachelt perfekt, keine Grenzen sichtbar.
+def make_seamless(img):
+    """Center-weighted blend mit halb-gerollter Kopie -> Raender wrappen nahtlos."""
+    f = img.astype(np.float32)
+    h, w = f.shape[:2]
+    rolled = np.roll(np.roll(f, h // 2, axis=0), w // 2, axis=1)
+    # Dreieck-Gewicht: 1 in der Mitte, 0 an den Raendern (pro Achse).
+    tri_y = (1.0 - np.abs(2.0 * np.arange(h) / (h - 1) - 1.0)).reshape(h, 1, 1)
+    tri_x = (1.0 - np.abs(2.0 * np.arange(w) / (w - 1) - 1.0)).reshape(1, w, 1)
+    weight = tri_y * tri_x  # 1 Mitte -> Original, 0 Rand -> gerollt (= Original-Mitte, matcht Gegenkante)
+    out = f * weight + rolled * (1.0 - weight)
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+# Reiner Dreck: TC-untere Haelfte (128×64) ueber BC-obere Haelfte (128×64) = 128×128 sauber.
+clean_dirt = np.zeros((128, 128, 4), dtype=np.uint8)
+clean_dirt[0:64]   = tile1[64:128]   # TC unten (sauber)
+clean_dirt[64:128] = tile4[0:64]     # BC oben (sauber)
+INTERIOR = make_seamless(clean_dirt)
+# Voll-deckend: seamless-Dreck hat i.d.R. Alpha 255, aber sicherstellen.
+INTERIOR[..., 3] = 255
+INT_TL = INTERIOR[0:64,   0:64]
+INT_TR = INTERIOR[0:64,   64:128]
+INT_BL = INTERIOR[64:128, 0:64]
+INT_BR = INTERIOR[64:128, 64:128]
 
 # Jede Kachel wird in 4×64×64 Quadranten aufgeteilt.
 # NW quadrant = rows[0:64], cols[0:64]; NE = rows[0:64], cols[64:128]; usw.
