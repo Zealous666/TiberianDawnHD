@@ -5444,10 +5444,15 @@ aot-wall-nod-laser:
 #   16 Frames aus bake-foundation.py, Frame-Index = N|E<<1|S<<2|W<<3 (face-adjacency).
 #   Besitzer: Neutral (unzerstoerbar, keiner kann angreifen).
 aot-foundation:
+	# Erbt ^Building fuer die komplette Platzierungs-Maschinerie (ActorPreviewPlaceBuildingPreview,
+	# WithSpriteBody, Placement-Cursor). Ohne diese Traits gibt es keinen Platzierungs-Cursor.
+	# Footprint bleibt 1×1 (nur die Zentrumszelle muss frei sein) -> passt auch in kleine Luecken;
+	# AotPlaceFoundation fuellt danach alle freien Zellen im 3×3-Bereich.
+	Inherits: ^Building
 	Building:
 		Footprint: x
 		Dimensions: 1, 1
-		LocalCenterOffset: 512, 512, 0
+		# Kein Adjacent-Zwang: Foundation darf ueberall (auch abseits der Basis) platziert werden.
 	Buildable:
 		BuildPaletteOrder: 8
 		Prerequisites: fact
@@ -5458,12 +5463,12 @@ aot-foundation:
 		Cost: 75
 	Tooltip:
 		Name: actor-aot-foundation.name
-	Interactable:
-	BodyOrientation:
-		QuantizedFacings: 1
-	HitShape:
 	RenderSprites:
 		Image: aot-foundation
+	# Kein Todes-Effekt: der Placer disposed sich sofort nach dem Spawnen der Zellen (kein Kill).
+	-FireWarheadsOnDeath:
+	-SoundOnDamageTransition:
+	-ShakeOnDeath:
 	AotPlaceFoundation:
 
 aot-foundation-cell:

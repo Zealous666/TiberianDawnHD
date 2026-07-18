@@ -132,12 +132,9 @@ print(f"aot-foundation-cell.zip: {NFRAMES} Frames à {FSIZE}×{FSIZE} TGA")
 Image.fromarray(bake_frame(15), "RGBA").save(BITS / "aot-foundation-idle.png")
 print("aot-foundation-idle.png: 128×128 (1 Frame, Interior = Placement-Preview)")
 
-# --- Icon (64×48): Frame 0 = isolierte Zelle (alle Außenecken) ---
-icon_src = Image.fromarray(bake_frame(0), "RGBA").resize((64, 64), Image.LANCZOS)
-icon = Image.new("RGBA", (64, 48), (0, 0, 0, 0))
-icon.paste(icon_src.crop((0, 8, 64, 56)), (0, 0))
-icon.save(BITS / "aot-foundation-icon.png")
-print("aot-foundation-icon.png: 64×48")
+# --- Icon: aot-foundation-icon.png wird NICHT mehr hier generiert ---
+# Der User setzt manuell mods/management/asset wip/base_smudge.png (64×48) als Baupaletten-Icon.
+# Frueher wurde hier ein Icon aus Frame 0 gebacken -> wuerde die manuelle Wahl ueberschreiben.
 
 # --- Preview: alle 16 Frames als 4×4-Grid ---
 preview = np.zeros((4 * FSIZE, 4 * FSIZE, 4), dtype=np.uint8)
