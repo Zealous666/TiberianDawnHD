@@ -94,46 +94,88 @@ INT_BR = INTERIOR[64:128, 64:128]
 #   S=1, E=0  → E-Kante         = tile5[0:64, 64:128]
 #   S=1, E=1  → Interior        = tile5[0:64, 0:64]
 
-# (1,1) = beide Nachbarn da = Interior -> saubere Mittelkachel-Quadranten (kein Schnee).
-NW_PIECES = {
-    (0, 0): tile0[0:64,   0:64],
-    (0, 1): tile0[0:64,   64:128],
-    (1, 0): tile0[64:128, 0:64],
-    (1, 1): INT_TL,
-}
-NE_PIECES = {
-    (0, 0): tile2[0:64,   64:128],
-    (0, 1): tile2[0:64,   0:64],
-    (1, 0): tile2[64:128, 64:128],
-    (1, 1): INT_TR,
-}
-SW_PIECES = {
-    (0, 0): tile3[64:128, 0:64],
-    (0, 1): tile3[64:128, 64:128],
-    (1, 0): tile3[0:64,   0:64],
-    (1, 1): INT_BL,
-}
-SE_PIECES = {
-    (0, 0): tile5[64:128, 64:128],
-    (0, 1): tile5[64:128, 0:64],
-    (1, 0): tile5[0:64,   64:128],
-    (1, 1): INT_BR,
-}
+# === CORNER-BASED (Dual-Grid Marching Squares) ===
+# Face-basiert (4 orthogonale Nachbarn) kann KEINE Innenkurven (Hohlkehle) darstellen: eine Zelle
+# mit allen 4 Nachbarn, aber fehlender Diagonale, rendert als voller Kern -> harte Ecke am Gras.
+# Corner-basiert löst das: config = nw|ne|sw|se, wobei eine Ecke "solide" ist, wenn ALLE 4 Zellen
+# um den Eckpunkt Foundation sind (== 4). Analog AotIceCellBody. Jeder Quadrant hängt von seiner
+# Ecke + den 2 kanten-benachbarten Ecken ab -> 5 Fälle inkl. CONCAVE (Innenkurve).
+
+def make_concave(interior_quad, outer_quad, lo=25, hi=115):
+    """Interior mit kleiner Gras-Kerbe an der Außenspitze (Innenkurve).
+    Nutzt die Alpha der Außenecke, steilt sie aber auf: nur die EXTREME Spitze (alpha<lo)
+    bleibt transparent -> kleine Kerbe statt großer Ecke. RGB bleibt Interior-Dreck."""
+    out = interior_quad.copy()
+    a = outer_quad[..., 3].astype(np.float32)
+    na = np.clip((a - lo) / (hi - lo), 0.0, 1.0) * 255.0
+    out[..., 3] = np.minimum(out[..., 3], na.astype(np.uint8))
+    return out
+
+CC_NW = make_concave(INT_TL, tile0[0:64,   0:64])
+CC_NE = make_concave(INT_TR, tile2[0:64,   64:128])
+CC_SW = make_concave(INT_BL, tile3[64:128, 0:64])
+CC_SE = make_concave(INT_BR, tile5[64:128, 64:128])
+
+# Pro Quadrant: (corner, h_adjacent, v_adjacent) -> 64×64 Piece.
+# h_adjacent = Ecke entlang der einen Zellkante, v_adjacent = Ecke entlang der anderen.
+# c=1: interior. c=0: h&v -> concave; h&!v -> "h-Kante zu"/Gras auf v-Seite; !h&v -> Gras h-Seite; sonst outer.
+def _pick(interior, concave, outer, edge_hclosed, edge_vclosed, c, h, v):
+    if c:               return interior
+    if h and v:         return concave
+    if h and not v:     return edge_hclosed   # h-Kante solide -> Gras auf v-Seite
+    if v and not h:     return edge_vclosed   # v-Kante solide -> Gras auf h-Seite
+    return outer
+
+def q_nw(nw, ne, sw):  # top edge shares NE, left edge shares SW
+    return _pick(INT_TL, CC_NW, tile0[0:64,0:64],
+                 tile0[64:128,0:64],   # ne solide (top zu) -> Gras West -> W-Kante
+                 tile0[0:64,64:128],   # sw solide (left zu) -> Gras Nord -> N-Kante
+                 nw, ne, sw)
+
+def q_ne(ne, nw, se):  # top edge shares NW, right edge shares SE
+    return _pick(INT_TR, CC_NE, tile2[0:64,64:128],
+                 tile2[64:128,64:128], # nw solide (top zu) -> Gras Ost -> E-Kante
+                 tile2[0:64,0:64],     # se solide (right zu) -> Gras Nord -> N-Kante
+                 ne, nw, se)
+
+def q_sw(sw, se, nw):  # bottom edge shares SE, left edge shares NW
+    return _pick(INT_BL, CC_SW, tile3[64:128,0:64],
+                 tile3[0:64,0:64],     # se solide (bottom zu) -> Gras West -> W-Kante
+                 tile3[64:128,64:128], # nw solide (left zu) -> Gras Süd -> S-Kante
+                 sw, se, nw)
+
+def q_se(se, sw, ne):  # bottom edge shares SW, right edge shares NE
+    return _pick(INT_BR, CC_SE, tile5[64:128,64:128],
+                 tile5[0:64,64:128],   # sw solide (bottom zu) -> Gras Ost -> E-Kante
+                 tile5[64:128,0:64],   # ne solide (right zu) -> Gras Süd -> S-Kante
+                 se, sw, ne)
 
 
-def bake_frame(adj: int) -> np.ndarray:
-    """adj = N|E<<1|S<<2|W<<3. Composites 4 quadrants into a 128×128 RGBA frame."""
-    n = (adj >> 0) & 1
-    e = (adj >> 1) & 1
-    s = (adj >> 2) & 1
-    w = (adj >> 3) & 1
+def bake_frame(config: int) -> np.ndarray:
+    """config = nw|ne<<1|sw<<2|se<<3 (Ecken-Solidität). Komponiert 4 Quadranten."""
+    nw = (config >> 0) & 1
+    ne = (config >> 1) & 1
+    sw = (config >> 2) & 1
+    se = (config >> 3) & 1
 
     frame = np.zeros((128, 128, 4), dtype=np.uint8)
-    frame[0:64,   0:64]   = NW_PIECES[(n, w)]
-    frame[0:64,   64:128] = NE_PIECES[(n, e)]
-    frame[64:128, 0:64]   = SW_PIECES[(s, w)]
-    frame[64:128, 64:128] = SE_PIECES[(s, e)]
+    frame[0:64,   0:64]   = q_nw(nw, ne, sw)
+    frame[0:64,   64:128] = q_ne(ne, nw, se)
+    frame[64:128, 0:64]   = q_sw(sw, se, nw)
+    frame[64:128, 64:128] = q_se(se, sw, ne)
     return frame
+
+
+def corner_config(present, x, y):
+    """Runtime-identische Ecken-Config für Zelle (x,y): Ecke solide wenn alle 4 Zellen um den
+    Eckpunkt in `present` sind. Ecke nw=Punkt(x,y), ne=(x+1,y), sw=(x,y+1), se=(x+1,y+1)."""
+    def solid(cx, cy):
+        return all((cx+dx, cy+dy) in present for dx in (-1, 0) for dy in (-1, 0))
+    nw = 1 if solid(x,   y  ) else 0
+    ne = 2 if solid(x+1, y  ) else 0
+    sw = 4 if solid(x,   y+1) else 0
+    se = 8 if solid(x+1, y+1) else 0
+    return nw | ne | sw | se
 
 
 # --- Haupt-Sprite: aot-foundation-cell.zip (16 TGA-Frames + .meta, OpenRA-RemasteredFilename-Format) ---
@@ -163,19 +205,13 @@ print(f"aot-foundation-cell.zip: {NFRAMES} Frames à {FSIZE}×{FSIZE} TGA")
 # ueber classic Filename wuerde OpenRA das PNG um Faktor ~5.3 hochskalieren (klassisch->HD)
 # -> riesiger, unscharfer Klotz. RemasteredFilename rendert 1:1 (128px = 1 Zelle) -> 384px = 3 Zellen.
 #
-# 3×3-Layout: jede Zelle bekommt die Config, die sie im vollen 3×3-Block haette (N|E<<1|S<<2|W<<3):
-#   NW=6(E+S)   N=14(E+S+W)  NE=12(S+W)
-#   W=7(N+E+S)  C=15(alle)   E=13(N+S+W)
-#   SW=3(N+E)   S=11(N+E+W)  SE=9(N+W)
-PREVIEW_CONFIGS = [
-    [6, 14, 12],
-    [7, 15, 13],
-    [3, 11, 9],
-]
+# 3×3-Layout: Config je Zelle runtime-identisch via corner_config über das volle 3×3-Present-Set.
+PREVIEW_PRESENT = {(x, y) for x in range(3) for y in range(3)}
 preview3x3 = np.zeros((3 * FSIZE, 3 * FSIZE, 4), dtype=np.uint8)
 for row in range(3):
     for col in range(3):
-        preview3x3[row*FSIZE:(row+1)*FSIZE, col*FSIZE:(col+1)*FSIZE] = bake_frame(PREVIEW_CONFIGS[row][col])
+        cfg = corner_config(PREVIEW_PRESENT, col, row)
+        preview3x3[row*FSIZE:(row+1)*FSIZE, col*FSIZE:(col+1)*FSIZE] = bake_frame(cfg)
 
 PSIZE = 3 * FSIZE
 preview_meta = json.dumps({"size": [PSIZE, PSIZE], "crop": [0, 0, PSIZE, PSIZE]},

@@ -41,5 +41,20 @@ namespace OpenRA.Mods.Common.Traits
 			if (cells.Remove(c))
 				Version++;
 		}
+
+		/// <summary>
+		/// A corner point is shared by the four cells around it. Returns how many of them are
+		/// foundation. Neighbouring cells query the same corner and therefore always agree — this is
+		/// what makes concave/convex corners render continuously across cell borders (dual grid).
+		/// </summary>
+		public int CornerCount(CPos corner)
+		{
+			var n = 0;
+			if (cells.Contains(new CPos(corner.X - 1, corner.Y - 1))) n++;
+			if (cells.Contains(new CPos(corner.X, corner.Y - 1))) n++;
+			if (cells.Contains(new CPos(corner.X - 1, corner.Y))) n++;
+			if (cells.Contains(new CPos(corner.X, corner.Y))) n++;
+			return n;
+		}
 	}
 }

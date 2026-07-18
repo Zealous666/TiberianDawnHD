@@ -15,10 +15,11 @@ using OpenRA.Traits;
 
 namespace OpenRA.Mods.Cnc.Traits.Render
 {
-	[Desc("Picks the foundation bib sprite from the four cardinal neighbours.",
-		"Frame index = N|E<<1|S<<2|W<<3 (0-15), where a bit is set when a foundation cell",
-		"exists directly adjacent in that direction. Re-picks whenever the foundation set",
-		"changes, so seams disappear as adjacent tiles are placed.")]
+	[Desc("Picks the foundation bib sprite from the four shared corners of this cell (dual grid).",
+		"Frame index = nw|ne<<1|sw<<2|se<<3 (0-15); a corner counts as solid when all four cells",
+		"around that corner point are foundation. This distinguishes concave corners (inner curves)",
+		"from full interior, so seams and inner corners render continuously across cell borders.",
+		"Re-picks whenever the foundation set changes.")]
 	sealed class AotFoundationCellBodyInfo : WithSpriteBodyInfo
 	{
 		public override object Create(ActorInitializer init) { return new AotFoundationCellBody(init, this); }
@@ -52,11 +53,15 @@ namespace OpenRA.Mods.Cnc.Traits.Render
 		{
 			lastVersion = layer.Version;
 			var loc = self.Location;
-			var n = layer.Contains(new CPos(loc.X,     loc.Y - 1)) ? 1 : 0;
-			var e = layer.Contains(new CPos(loc.X + 1, loc.Y    )) ? 2 : 0;
-			var s = layer.Contains(new CPos(loc.X,     loc.Y + 1)) ? 4 : 0;
-			var w = layer.Contains(new CPos(loc.X - 1, loc.Y    )) ? 8 : 0;
-			frame = n | e | s | w;
+
+			// The four corners of this cell, each shared with the neighbouring cells. A corner is
+			// solid only when all four cells around it are foundation, so a missing diagonal leaves
+			// the corner non-solid -> concave (inner) curve instead of a hard square.
+			var nw = layer.CornerCount(loc) == 4 ? 1 : 0;
+			var ne = layer.CornerCount(new CPos(loc.X + 1, loc.Y)) == 4 ? 2 : 0;
+			var sw = layer.CornerCount(new CPos(loc.X, loc.Y + 1)) == 4 ? 4 : 0;
+			var se = layer.CornerCount(new CPos(loc.X + 1, loc.Y + 1)) == 4 ? 8 : 0;
+			frame = nw | ne | sw | se;
 		}
 
 		void ITick.Tick(Actor self)
