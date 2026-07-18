@@ -144,6 +144,8 @@ Container@PRODUCTION_BACKGROUND:
 ProductionPalette@PRODUCTION_PALETTE:
 	X: WINDOW_WIDTH - 5 - 17 - 194
 	Y: 346
+	LockedIconCollection: aot-locked-icon
+	LockedIconRegion: locked
 
 ProductionTabs@PRODUCTION_TABS:
 	X: WINDOW_WIDTH - 5 - 18 - 194

@@ -568,13 +568,19 @@ production-icons:
 		naval-alert: 955, 102, 16, 16
 		# === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - Stern-Icon fuer Special Vehicles Tab ===
+# === Age of Tiberium (aotmod) - Stern-Icon fuer Special Units Tab ===
 aot-production-special:
 	Image: aot-star-icon.png
 	Regions:
 		support: 0, 0, 16, 16
 		support-disabled: 0, 16, 16, 16
 		support-alert: 0, 32, 16, 16
+
+# === Age of Tiberium (aotmod) - Platzhalter-Icon fuer gesperrte Queue-Eintraege (C&C3-Stil) ===
+aot-locked-icon:
+	Image: base_none.png
+	Regions:
+		locked: 0, 0, 64, 48
 # === Ende aotmod ===
 
 order-icons:

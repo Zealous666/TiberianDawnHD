@@ -1921,6 +1921,8 @@ Container@PLAYER_WIDGETS:
 			HotkeyPrefix: Production
 			HotkeyCount: 24
 			SelectProductionBuildingHotkey: SelectProductionBuilding
+			LockedIconCollection: aot-locked-icon
+			LockedIconRegion: locked
 		ProductionTabs@PRODUCTION_TABS:
 			Logic: AddFactionSuffixLogic, ProductionTabsLogic
 			PaletteWidget: PRODUCTION_PALETTE
