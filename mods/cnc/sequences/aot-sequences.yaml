@@ -4046,6 +4046,9 @@ aot-foundation-cell:
 		RemasteredFilename: aot-foundation-cell.zip
 		RemasteredPremultiplied: false
 		Length: 16
+		# Foundation ist reiner Boden-Smudge -> MUSS ganz unten rendern (unter Gebäuden/Einheiten).
+		# Grosser negativer ZOffset (wie aot-ice-cell) sortiert die Zelle unter alles andere.
+		ZOffset: -8191
 
 # 48-Frame-Sheets (Layout wie BRIK): 0-15 idle, 16-31 scratched, 32-47 damaged.
 # Frame-Index = Nachbarschafts-Bitmaske (N=1,O=2,S=4,W=8), gebaked aus den

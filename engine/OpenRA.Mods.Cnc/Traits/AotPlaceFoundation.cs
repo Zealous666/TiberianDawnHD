@@ -53,12 +53,8 @@ namespace OpenRA.Mods.Cnc.Traits
 				if (world.Map.Ramp[cell] != 0) continue;
 				if (!buildingInfo.TerrainTypes.Contains(world.Map.GetTerrainInfo(cell).Type)) continue;
 
-				// Skip cells occupied by any Building other than this placer itself.
-				if (world.ActorMap.GetActorsAt(cell)
-					.Where(a => a != self)
-					.Any(a => a.Info.HasTraitInfo<BuildingInfo>()))
-					continue;
-
+				// NOTE: cells occupied by buildings are NOT skipped. Foundation is a pure ground
+				// smudge that renders below everything, so it slides under buildings to close gaps.
 				toSpawn.Add(cell);
 			}
 

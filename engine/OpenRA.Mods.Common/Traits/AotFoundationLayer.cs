@@ -12,15 +12,16 @@
 using System.Collections.Generic;
 using OpenRA.Traits;
 
-namespace OpenRA.Mods.Cnc.Traits
+namespace OpenRA.Mods.Common.Traits
 {
-	[Desc("Tracks every cell covered by a Fortified Foundation tile. Attach to World.")]
-	sealed class AotFoundationLayerInfo : TraitInfo
+	[Desc("Tracks every cell covered by a Fortified Foundation tile. Attach to World.",
+		"Lives in Common (not Cnc) so SubterraneanActorLayer can block dig transitions on it.")]
+	public sealed class AotFoundationLayerInfo : TraitInfo
 	{
 		public override object Create(ActorInitializer init) { return new AotFoundationLayer(); }
 	}
 
-	sealed class AotFoundationLayer
+	public sealed class AotFoundationLayer
 	{
 		readonly HashSet<CPos> cells = [];
 

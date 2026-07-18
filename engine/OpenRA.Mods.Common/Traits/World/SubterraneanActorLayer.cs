@@ -39,11 +39,17 @@ namespace OpenRA.Mods.Common.Traits
 		// AOT patch: block dig-in/dig-out on building footprints and bibs.
 		readonly BuildingInfluence buildingInfluence;
 
+		// AOT patch: also block dig-in/dig-out on Fortified Foundation cells (the whole point of
+		// the foundation smudge is to keep subterranean units out). May be null if the layer trait
+		// is not present on the world.
+		readonly AotFoundationLayer foundationLayer;
+
 		public SubterraneanActorLayer(Actor self, SubterraneanActorLayerInfo info)
 		{
 			map = self.World.Map;
 			terrainIndex = self.World.Map.Rules.TerrainInfo.GetTerrainIndex(info.TerrainType);
 			buildingInfluence = self.Trait<BuildingInfluence>();
+			foundationLayer = self.TraitOrDefault<AotFoundationLayer>();
 			height = new CellLayer<int>(map);
 			foreach (var c in map.AllCells)
 			{
@@ -85,6 +91,10 @@ namespace OpenRA.Mods.Common.Traits
 
 			// AOT patch: block transition on any building footprint cell (including bib = cells).
 			if (buildingInfluence.AnyBuildingAt(cell))
+				return false;
+
+			// AOT patch: block transition on Fortified Foundation cells.
+			if (foundationLayer != null && foundationLayer.Contains(cell))
 				return false;
 
 			if (sli.SubterraneanTransitionOnRamps)

@@ -79,6 +79,9 @@ World:
 
 # === Age of Tiberium (aotmod) - SpyInfiltrate TargetType auf allen Gebäuden ===
 ^Building:
+	# Fortified Foundation: wird ein Gebaeude direkt an bestehende Foundation gebaut, schiebt sich
+	# die Foundation unter sein Footprint -> schliesst die Luecke, Kanten werden buendig.
+	AotFoundationUnderfill:
 	Targetable:
 		TargetTypes: Ground, C4, Structure, SpyInfiltrate
 	ExternalCondition@AOTGAS:
