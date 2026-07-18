@@ -14,7 +14,7 @@ aot-dog-nod:
 	UpdatesPlayerStatistics:
 		AddToArmyValue: true
 	Buildable:
-		BuildPaletteOrder: 60
+		BuildPaletteOrder: 50
 		Prerequisites: barracks, aot-guard-dog-kennel
 		Queue: Infantry.Nod
 		Description: Fast anti-infantry unit. Instantly kills enemy soldiers.
@@ -95,7 +95,7 @@ aot-spy-nod:
 		CustomPipType: blue
 		Voice: Move
 	Buildable:
-		BuildPaletteOrder: 55
+		BuildPaletteOrder: 60
 		Prerequisites: ~aot-age1, hand, anyhq
 		Queue: Infantry.Nod
 		Description: Cloaked infiltrator. Infiltrates enemy structures to steal credits, reveal their vision, reset support powers, or cut power.
@@ -158,7 +158,7 @@ aot-spy-gdi:
 		CustomPipType: blue
 		Voice: Move
 	Buildable:
-		BuildPaletteOrder: 55
+		BuildPaletteOrder: 60
 		Prerequisites: barracks, aot-intelligence-office
 		Queue: Infantry.GDI
 		Description: Disguised agent. Infiltrates enemy buildings to steal credits, reveal the map, or reset support powers.
@@ -215,7 +215,8 @@ aot-rmbo-gdi-base:
 	RenderSprites:
 		Image: aot-rmbo-gdi
 	Buildable:
-		BuildPaletteOrder: 50
+		LockedGroup: aot-grp-rmbo
+		BuildPaletteOrder: 80
 		Prerequisites: barracks, ~aot-age3, ~!aot-infantry-railgun-upgrade
 		Queue: Infantry.GDI
 		Icon: icon
@@ -226,7 +227,8 @@ aot-rmbo-gdi-rail:
 	RenderSprites:
 		Image: aot-rmbo-gdi
 	Buildable:
-		BuildPaletteOrder: 50
+		LockedGroup: aot-grp-rmbo
+		BuildPaletteOrder: 80
 		Prerequisites: barracks, ~aot-age3, ~aot-infantry-railgun-upgrade
 		Queue: Infantry.GDI
 		Icon: icon-rail
@@ -317,7 +319,7 @@ aot-medi-gdi:
 	AutoTargetPriority@DEFAULT:
 		ValidTargets: Heal
 	Buildable:
-		BuildPaletteOrder: 45
+		BuildPaletteOrder: 50
 			Prerequisites: barracks, aot-age1
 		Queue: Infantry.GDI
 		Description: Unarmed medic. Heals friendly infantry in the field.
@@ -363,7 +365,7 @@ aot-mech-gdi:
 	AutoTargetPriority@DEFAULT:
 		ValidTargets: Repair
 	Buildable:
-		BuildPaletteOrder: 46
+		BuildPaletteOrder: 70
 		Prerequisites: barracks, ~aot-age2, fix
 		Queue: Infantry.GDI
 		Description: Unarmed mechanic. Repairs friendly vehicles in the field.
@@ -431,7 +433,7 @@ aot-cark-nod:
 		CustomPipType: blue
 		Voice: Move
 	Buildable:
-		BuildPaletteOrder: 60
+		BuildPaletteOrder: 70
 		Prerequisites: ~aot-age2, hand, stec
 		Queue: Infantry.Nod
 		Icon: icon
@@ -517,7 +519,7 @@ aot-e3-gdi:
 	RenderSprites:
 		Image: aot-e3-gdi
 	Buildable:
-		BuildPaletteOrder: 21
+		BuildPaletteOrder: 20
 		Prerequisites: barracks
 		Queue: Infantry.GDI
 		Description: actor-e3.description
@@ -570,6 +572,7 @@ aot-e4-nod-flame:
 	Tooltip:
 		Name: Flamethrower
 	Buildable:
+		LockedGroup: aot-grp-e4
 		BuildPaletteOrder: 40
 		Prerequisites: anyhq, ~techlevel.medium, ~!aot-age3
 		Queue: Infantry.Nod
@@ -583,6 +586,7 @@ aot-e4-nod-toxic:
 	Tooltip:
 		Name: Toxic Trooper
 	Buildable:
+		LockedGroup: aot-grp-e4
 		BuildPaletteOrder: 40
 		Prerequisites: anyhq, ~techlevel.medium, ~aot-age3
 		Queue: Infantry.Nod
@@ -635,6 +639,7 @@ aot-mcv-age0:
 	RenderSprites:
 		Image: mcv
 	Buildable:
+		LockedGroup: aot-grp-mcv
 		Queue: LightVehicle.GDI, LightVehicle.Nod
 		BuildPaletteOrder: 6
 		Prerequisites: ~!aot-age1, lite, fix
@@ -648,6 +653,7 @@ aot-mcv-age1:
 	RenderSprites:
 		Image: mcv
 	Buildable:
+		LockedGroup: aot-grp-mcv
 		Queue: LightVehicle.GDI, LightVehicle.Nod
 		BuildPaletteOrder: 6
 		Prerequisites: ~aot-age1, lite, fix
@@ -774,6 +780,7 @@ aot-mtnk-base:
 	RenderSprites:
 		Image: mtnk
 	Buildable:
+		ShowWhenLocked: False
 		Queue: LightVehicle.GDI
 		BuildPaletteOrder: 5
 		Prerequisites: ~lite, gdi-hq, ~!aot-mtnk-predator-upgrade, ~!aot-mtnk-titan-upgrade
@@ -786,6 +793,7 @@ aot-mtnk-pred:
 	RenderSprites:
 		Image: mtnk
 	Buildable:
+		ShowWhenLocked: False
 		Queue: LightVehicle.GDI
 		BuildPaletteOrder: 5
 		Prerequisites: ~lite, gdi-hq, ~aot-mtnk-predator-upgrade, ~!aot-mtnk-railgun-upgrade, ~!aot-mtnk-titan-upgrade
@@ -799,6 +807,7 @@ aot-mtnk-rail:
 	RenderSprites:
 		Image: mtnk
 	Buildable:
+		ShowWhenLocked: False
 		Queue: LightVehicle.GDI
 		BuildPaletteOrder: 5
 		Prerequisites: ~lite, gdi-hq, ~aot-mtnk-railgun-upgrade, ~!aot-mtnk-titan-upgrade
@@ -812,8 +821,9 @@ aot-mtnk-titn:
 	RenderSprites:
 		Image: mtnk
 	Buildable:
+		ShowWhenLocked: False
 		Queue: Vehicle.GDI
-		BuildPaletteOrder: 5
+		BuildPaletteOrder: 40
 		Prerequisites: ~aot-weap, gdi-hq, ~aot-mtnk-titan-upgrade, ~!aot-mtnk-titan-railgun-upgrade
 		Icon: aot-mtnk-titn-icon
 		Description: GDI Titan Mech — upgraded Medium Tank chassis with independent turret.
@@ -825,8 +835,9 @@ aot-mtnk-titn-rail:
 	RenderSprites:
 		Image: mtnk
 	Buildable:
+		ShowWhenLocked: False
 		Queue: Vehicle.GDI
-		BuildPaletteOrder: 5
+		BuildPaletteOrder: 40
 		Prerequisites: ~aot-weap, gdi-hq, ~aot-mtnk-titan-railgun-upgrade
 		Icon: aot-mtnk-titn-rail-icon
 		Description: GDI Titan Mech with Railgun.
@@ -1023,8 +1034,9 @@ aot-htnk-base:
 	RenderSprites:
 		Image: htnk
 	Buildable:
+		LockedGroup: aot-grp-htnk
 		Queue: Vehicle.GDI
-		BuildPaletteOrder: 60
+		BuildPaletteOrder: 30
 		Prerequisites: ~aot-weap, ~aot-age1, aot-age1, weap, atec, ~!aot-htnk-rocket-upgrade, ~!aot-mtnk-railgun-upgrade
 		Description: Heavily armored GDI battle tank with dual 120mm cannons.
 	Tooltip:
@@ -1035,8 +1047,9 @@ aot-htnk-rocket:
 	RenderSprites:
 		Image: htnk
 	Buildable:
+		LockedGroup: aot-grp-htnk
 		Queue: Vehicle.GDI
-		BuildPaletteOrder: 60
+		BuildPaletteOrder: 30
 		Prerequisites: ~aot-age1, aot-age1, ~aot-htnk-rocket-upgrade, ~!aot-mtnk-railgun-upgrade
 		Icon: aot-htnk-rocket-icon
 		Description: Mammoth Tank equipped with dual rocket launchers for additional anti-air and ground firepower.
@@ -1048,8 +1061,9 @@ aot-htnk-laser:
 	RenderSprites:
 		Image: htnk
 	Buildable:
+		LockedGroup: aot-grp-htnk
 		Queue: Vehicle.GDI
-		BuildPaletteOrder: 60
+		BuildPaletteOrder: 30
 		Prerequisites: ~aot-age1, aot-age1, ~aot-mtnk-railgun-upgrade
 		Icon: aot-htnk-laser-icon
 		Description: Mammoth Tank with dual high-powered railguns. Requires the Tank Railguns upgrade (Predator path).
@@ -1200,6 +1214,7 @@ aot-jeep-base:
 	RenderSprites:
 		Image: jeep
 	Buildable:
+		ShowWhenLocked: False
 		Queue: LightVehicle.GDI
 		BuildPaletteOrder: 3
 		Prerequisites: lite, pyle, ~!aot-humvee-upgrade, ~!aot-wolverine-upgrade, ~!aot-apc-upgrade
@@ -1212,6 +1227,7 @@ aot-jeep-humvee:
 	RenderSprites:
 		Image: jeep
 	Buildable:
+		ShowWhenLocked: False
 		Queue: LightVehicle.GDI
 		BuildPaletteOrder: 3
 		Prerequisites: lite, pyle, ~aot-humvee-upgrade, ~!aot-apc-upgrade, ~!aot-wolverine-upgrade
@@ -1225,6 +1241,7 @@ aot-jeep-wolverine:
 	RenderSprites:
 		Image: jeep
 	Buildable:
+		ShowWhenLocked: False
 		Queue: LightVehicle.GDI
 		BuildPaletteOrder: 3
 		Prerequisites: lite, pyle, ~!aot-apc-upgrade, ~aot-wolverine-upgrade
@@ -1268,6 +1285,7 @@ aot-apc-amphibious:
 		IsPlayerPalette: true
 		RequiresCondition: aot-in-water
 	Buildable:
+		ShowWhenLocked: False
 		Queue: LightVehicle.GDI
 		BuildPaletteOrder: 4
 		Prerequisites: lite, ~aot-apc-upgrade, ~aot-amphibious-upgrade, ~!aot-humvee-upgrade
@@ -1349,8 +1367,9 @@ aot-minelayer:
 	FireWarheadsOnDeath:
 		Weapon: aot-ATMine
 	Buildable:
+		ShowWhenLocked: False
 		Queue: Vehicle.GDI
-		BuildPaletteOrder: 62
+		BuildPaletteOrder: 60
 		Prerequisites: ~aot-weap, weap, ~aot-minelayer-upgrade
 		Icon: icon
 		Description: Deploys 5 anti-vehicle mines. Rearms at the Repair Facility. Unarmed, no transport.
@@ -1417,9 +1436,10 @@ aot-ltnk-base:
 	RenderSprites:
 		Image: ltnk
 	Buildable:
+		LockedGroup: aot-grp-ltnk
 		Queue: Starport
 		BuildDuration: 0
-		BuildPaletteOrder: 40
+		BuildPaletteOrder: 20
 		Prerequisites: ~aot-age1, aot-age1, afld, ~!aot-ltnk-upgrade, ~!aot-laser-fence-upgrade
 		Description: Fast and agile NOD light tank. Available from Age 1.
 	Tooltip:
@@ -1430,9 +1450,10 @@ aot-ltnk-tick:
 	RenderSprites:
 		Image: ltnk
 	Buildable:
+		LockedGroup: aot-grp-ltnk
 		Queue: Starport
 		BuildDuration: 0
-		BuildPaletteOrder: 40
+		BuildPaletteOrder: 20
 		Prerequisites: ~aot-age1, aot-age1, afld, ~aot-ltnk-upgrade, ~!aot-laser-fence-upgrade
 		Icon: ltnk-tick-icon
 		Description: Light Tank upgraded with Tick Tank chassis. Enables dig-in siege mode. Requires FIX facility.
@@ -1444,9 +1465,10 @@ aot-ltnk-laser:
 	RenderSprites:
 		Image: ltnk
 	Buildable:
+		LockedGroup: aot-grp-ltnk
 		Queue: Starport
 		BuildDuration: 0
-		BuildPaletteOrder: 40
+		BuildPaletteOrder: 20
 		Prerequisites: ~aot-age1, aot-age1, afld, ~aot-laser-fence-upgrade
 		Icon: ltnk-laser-icon
 		Description: Light Tank (Tick Chassis) with experimental laser turret. Remains deployed after upgrade.
@@ -1697,7 +1719,7 @@ aot-harv:
 	RenderSprites:
 		Image: harv
 	Buildable:
-		BuildPaletteOrder: 2
+		BuildPaletteOrder: 10
 		Prerequisites: ~aot-age1, proc
 		Queue: Vehicle.GDI
 		Description: Harvests Tiberium and returns it to the refinery.
@@ -1711,7 +1733,7 @@ aot-harv-nod:
 	RenderSprites:
 		Image: harv
 	Buildable:
-		BuildPaletteOrder: 2
+		BuildPaletteOrder: 10
 		Prerequisites: ~aot-age1, proc, afld
 		Queue: Starport
 		BuildDuration: 0
@@ -1742,8 +1764,9 @@ aot-apache-base:
 	AmmoPool:
 		Ammo: 5
 	Buildable:
+		LockedGroup: aot-grp-orca
 		Queue: Aircraft.GDI
-		BuildPaletteOrder: 20
+		BuildPaletteOrder: 10
 		Prerequisites: anyhq, ~!aot-orca-upgrade
 		Description: Light attack helicopter. Armed with anti-ground-rockets.
 	Tooltip:
@@ -1754,8 +1777,9 @@ aot-orca-upgraded:
 	AmmoPool:
 		Ammo: 5
 	Buildable:
+		LockedGroup: aot-grp-orca
 		Queue: Aircraft.GDI
-		BuildPaletteOrder: 20
+		BuildPaletteOrder: 10
 		Prerequisites: anyhq, ~aot-orca-upgrade
 		Icon: aot-orca-icon
 		Description: Advanced gunship. Carries anti-ground and anti-air missiles. Returns to base when ammo is depleted.
@@ -1776,8 +1800,9 @@ aot-hind-base:
 		Delay: 100
 		Count: 2
 	Buildable:
+		LockedGroup: aot-grp-hind
 		Queue: Aircraft.Nod
-		BuildPaletteOrder: 20
+		BuildPaletteOrder: 10
 		Prerequisites: anyhq, ~!aot-harpy-upgrade
 		Description: Soviet attack helicopter. Armed with chain guns. Reloads ammunition automatically while airborne.
 	Tooltip:
@@ -1830,8 +1855,9 @@ aot-harpy-upgraded:
 		Delay: 30
 		Count: 2
 	Buildable:
+		LockedGroup: aot-grp-hind
 		Queue: Aircraft.Nod
-		BuildPaletteOrder: 20
+		BuildPaletteOrder: 10
 		Prerequisites: anyhq, ~aot-harpy-upgrade, ~!aot-laser-fence-upgrade
 		Icon: aot-harpy-icon
 		Description: Upgraded attack helicopter. Deals increased damage with a higher fire rate. Reloads ammunition automatically while airborne. Cloaks when not engaged.
@@ -1846,8 +1872,9 @@ aot-harpy-upgraded-laser:
 		Delay: 30
 		Count: 2
 	Buildable:
+		LockedGroup: aot-grp-hind
 		Queue: Aircraft.Nod
-		BuildPaletteOrder: 20
+		BuildPaletteOrder: 10
 		Prerequisites: anyhq, ~aot-harpy-upgrade, ~aot-laser-fence-upgrade
 		Icon: aot-harpy-laser-icon
 		Description: Upgraded attack helicopter with laser cannon. High single-target damage at medium range. Reloads ammunition automatically while airborne. Cloaks when not engaged.
@@ -1878,7 +1905,8 @@ AJET:
 	UpdatesPlayerStatistics:
 		AddToArmyValue: true
 	Buildable:
-		BuildPaletteOrder: 20
+		LockedGroup: aot-grp-ajet
+		BuildPaletteOrder: 10
 		Prerequisites: ~aot-age1, aflt, ~!aot-firehawk-upgrade
 		Queue: Aircraft.GDI.AFLT
 		Description: Ground attack jet. Armed with Vulcan cannons and napalm bombs.
@@ -2029,7 +2057,8 @@ aot-ajet-firehawk:
 	RenderSprites:
 		Image: aot-ajet
 	Buildable:
-		BuildPaletteOrder: 20
+		LockedGroup: aot-grp-ajet
+		BuildPaletteOrder: 10
 		# Sichtbar ab Age 3 (~aot-age3), baubar erst nach Firehawk-Upgrade (non-tilde = ausgegraut bis gekauft).
 		Prerequisites: ~aot-age3, aflt, aot-firehawk-upgrade
 		Queue: Aircraft.GDI.AFLT
@@ -2361,7 +2390,8 @@ aot-ttnk-base:
 	RenderSprites:
 		Image: ttnk
 	Buildable:
-		BuildPaletteOrder: 2
+		ShowWhenLocked: False
+		BuildPaletteOrder: 3
 		Prerequisites: lite, ~!aot-ttnk-flame-upgrade
 		Queue: LightVehicle.Nod
 		Description: NOD main battle tank with a dual-fire cannon.
@@ -2371,7 +2401,8 @@ aot-ttnk-flame:
 	RenderSprites:
 		Image: ttnk
 	Buildable:
-		BuildPaletteOrder: 2
+		LockedGroup: aot-grp-ttnk
+		BuildPaletteOrder: 30
 		Prerequisites: afld, ~aot-ttnk-flame-upgrade, ~!aot-toxic-upgrade, ~!aot-subterrain-upgrade
 		Queue: Starport
 		BuildDuration: 0
@@ -2385,7 +2416,8 @@ aot-ttnk-toxin:
 	RenderSprites:
 		Image: ttnk
 	Buildable:
-		BuildPaletteOrder: 2
+		LockedGroup: aot-grp-ttnk
+		BuildPaletteOrder: 30
 		Prerequisites: afld, ~aot-ttnk-flame-upgrade, ~aot-toxic-upgrade, ~!aot-subterrain-upgrade
 		Queue: Starport
 		BuildDuration: 0
@@ -2466,7 +2498,8 @@ aot-ttnk-devil-base:
 aot-ttnk-devil:
 	Inherits: aot-ttnk-devil-base
 	Buildable:
-		BuildPaletteOrder: 2
+		LockedGroup: aot-grp-ttnk
+		BuildPaletteOrder: 30
 		Prerequisites: ~afld, ~aot-age2, aot-ttnk-flame-upgrade, aot-subterrain-upgrade, ~!aot-toxic-upgrade
 		Queue: Starport
 		BuildDuration: 0
@@ -2478,7 +2511,8 @@ aot-ttnk-devil:
 aot-ttnk-devil-toxin:
 	Inherits: aot-ttnk-devil-base
 	Buildable:
-		BuildPaletteOrder: 2
+		LockedGroup: aot-grp-ttnk
+		BuildPaletteOrder: 30
 		Prerequisites: ~afld, ~aot-age2, aot-ttnk-flame-upgrade, aot-subterrain-upgrade, ~aot-toxic-upgrade
 		Queue: Starport
 		BuildDuration: 0
@@ -2502,7 +2536,7 @@ aot-subapc:
 	UpdatesPlayerStatistics:
 		AddToArmyValue: true
 	Buildable:
-		BuildPaletteOrder: 3
+		BuildPaletteOrder: 70
 		Prerequisites: ~afld, ~aot-age2, hand, aot-subterrain-upgrade
 		Queue: Starport
 		BuildDuration: 0
@@ -2591,6 +2625,7 @@ aot-v2-base:
 	UpdatesPlayerStatistics:
 		AddToArmyValue: true
 	Buildable:
+		ShowWhenLocked: False
 		BuildPaletteOrder: 5
 		Prerequisites: lite, anyhq, ~!aot-napalm-upgrade, ~!aot-howitzer-upgrade
 		Queue: LightVehicle.Nod
@@ -2673,7 +2708,8 @@ aot-v2-base:
 aot-v2-napalm:
 	Inherits: aot-v2-base
 	Buildable:
-		BuildPaletteOrder: 5
+		LockedGroup: aot-grp-v2
+		BuildPaletteOrder: 40
 		Prerequisites: afld, anyhq, ~aot-napalm-upgrade, ~!aot-toxic-upgrade
 		Queue: Starport
 		BuildDuration: 0
@@ -2706,7 +2742,8 @@ aot-v2-napalm:
 aot-v2-toxic:
 	Inherits: aot-v2-napalm
 	Buildable:
-		BuildPaletteOrder: 5
+		LockedGroup: aot-grp-v2
+		BuildPaletteOrder: 40
 		Prerequisites: afld, anyhq, ~aot-napalm-upgrade, ~aot-toxic-upgrade
 		Queue: Starport
 		BuildDuration: 0
@@ -2731,7 +2768,8 @@ aot-arty-howitzer:
 	RenderSprites:
 		Image: arty
 	Buildable:
-		BuildPaletteOrder: 5
+		LockedGroup: aot-grp-v2
+		BuildPaletteOrder: 40
 		Prerequisites: afld, ~aot-howitzer-upgrade, ~!aot-heavy-artillery-upgrade
 		Queue: Starport
 		BuildDuration: 0
@@ -2834,7 +2872,8 @@ aot-arty-heavy:
 	UpdatesPlayerStatistics:
 		AddToArmyValue: true
 	Buildable:
-		BuildPaletteOrder: 6
+		LockedGroup: aot-grp-v2
+		BuildPaletteOrder: 40
 		Prerequisites: ~aot-age3, aot-age3, afld, aot-howitzer-upgrade, ~aot-heavy-artillery-upgrade, aot-heavy-artillery-upgrade
 		Queue: Starport
 		BuildDuration: 0
@@ -2953,8 +2992,9 @@ aot-bike-base:
 	RenderSprites:
 		Image: bike
 	Buildable:
+		LockedGroup: aot-grp-bike
 		Queue: LightVehicle.Nod
-		BuildPaletteOrder: 2
+		BuildPaletteOrder: 8
 		Prerequisites: ~aot-age1, lite, hand, ~!aot-laser-fence-upgrade
 		Icon: aot-bike-icon
 		Description: Fast NOD recon bike armed with twin rocket launchers. Ground targets only.
@@ -2966,8 +3006,9 @@ aot-bike-laser:
 	RenderSprites:
 		Image: bike
 	Buildable:
+		LockedGroup: aot-grp-bike
 		Queue: LightVehicle.Nod
-		BuildPaletteOrder: 2
+		BuildPaletteOrder: 8
 		Prerequisites: ~aot-age1, lite, hand, ~aot-laser-fence-upgrade
 		Icon: aot-bike-laser-icon
 		Description: NOD recon bike upgraded with dual laser cannons.
@@ -2985,8 +3026,9 @@ aot-bggy-base:
 	RenderSprites:
 		Image: bggy
 	Buildable:
+		LockedGroup: aot-grp-bggy
 		Queue: LightVehicle.Nod
-		BuildPaletteOrder: 1
+		BuildPaletteOrder: 7
 		Prerequisites: ~aot-age1, lite, hand, ~!aot-laser-fence-upgrade
 		Icon: aot-bggy-icon
 		Description: Fast NOD scout buggy armed with a machine gun.
@@ -2998,8 +3040,9 @@ aot-bggy-laser:
 	RenderSprites:
 		Image: bggy
 	Buildable:
+		LockedGroup: aot-grp-bggy
 		Queue: LightVehicle.Nod
-		BuildPaletteOrder: 1
+		BuildPaletteOrder: 7
 		Prerequisites: ~aot-age1, lite, hand, ~aot-laser-fence-upgrade
 		Icon: aot-bggy-laser-icon
 		Description: NOD scout buggy upgraded with a laser cannon.
@@ -3065,7 +3108,7 @@ aot-cyborg:
 		Weapon: aot-CyborgChainGun
 	Buildable:
 		Queue: Infantry.NodElite
-		BuildPaletteOrder: 70
+		BuildPaletteOrder: 10
 		Prerequisites: ~aot-age2, aot-shrine
 		Icon: icon
 		Description: Cybernetic NOD soldier. Enters crippled mode at critical HP.
@@ -3108,7 +3151,7 @@ aot-cyc2:
 		Weapon: aot-CyCannon
 	Buildable:
 		Queue: Infantry.NodElite
-		BuildPaletteOrder: 71
+		BuildPaletteOrder: 20
 		Prerequisites: ~aot-age3, aot-shrine
 		Icon: icon
 		Description: Elite NOD cyborg with plasma cannon. Devastating vs. all targets. Limit: 1.
@@ -3177,8 +3220,9 @@ aot-avatar:
 		Bounds: 1536, 1536, 0, -512
 		DecorationBounds: 1024, 1450, 0, -512
 	Buildable:
+		LockedGroup: aot-grp-avatar
 		Queue: Infantry.NodElite
-		BuildPaletteOrder: 72
+		BuildPaletteOrder: 30
 		Prerequisites: ~aot-age3, afld, aot-shrine, ~!aot-avatar-laser-upgrade
 		Icon: icon
 		Description: Massive NOD cyborg walker armed with a chaingun and flamethrower. CABAL's ultimate war machine.
@@ -3189,8 +3233,9 @@ aot-avatar:
 aot-avatar-laser:
 	Inherits: aot-avatar
 	Buildable:
+		LockedGroup: aot-grp-avatar
 		Queue: Infantry.NodElite
-		BuildPaletteOrder: 72
+		BuildPaletteOrder: 30
 		Prerequisites: ~aot-age3, afld, aot-shrine, ~aot-avatar-laser-upgrade
 		Icon: icon-laser
 		Description: Massive NOD cyborg walker armed with a laser cannon and flamethrower. CABAL's ultimate war machine.
@@ -3400,6 +3445,7 @@ aot-gunboat:
 aot-gunboat-base:
 	Inherits: aot-gunboat
 	Buildable:
+		LockedGroup: aot-grp-gunboat
 		Queue: Naval.GDI
 		BuildPaletteOrder: 10
 		Prerequisites: lite, aot-shipyard, ~!aot-gunboat-frigate-upgrade
@@ -3409,6 +3455,7 @@ aot-gunboat-base:
 aot-gunboat-frigate:
 	Inherits: aot-gunboat
 	Buildable:
+		LockedGroup: aot-grp-gunboat
 		Queue: Naval.GDI
 		BuildPaletteOrder: 10
 		Prerequisites: lite, aot-shipyard, ~aot-gunboat-frigate-upgrade, ~!aot-gunboat-upgrade
@@ -3421,6 +3468,7 @@ aot-gunboat-destroyer:
 		Name: Destroyer
 		RequiresCondition: !aot-gunboat-upgrade
 	Buildable:
+		LockedGroup: aot-grp-gunboat
 		Queue: Naval.GDI
 		BuildPaletteOrder: 10
 		Prerequisites: lite, aot-shipyard, ~aot-gunboat-upgrade
@@ -3556,6 +3604,7 @@ aot-sub-base:
 	RenderSprites:
 		Image: aot-sub
 	Buildable:
+		LockedGroup: aot-grp-sub
 		Queue: Naval.Nod
 		BuildPaletteOrder: 10
 		Prerequisites: aot-subpen, ~!aot-sub-cargo-upgrade
@@ -3570,6 +3619,7 @@ aot-sub-cargo-proxy:
 	RenderSprites:
 		Image: aot-sub
 	Buildable:
+		LockedGroup: aot-grp-sub
 		Queue: Naval.Nod
 		BuildPaletteOrder: 10
 		Prerequisites: aot-subpen, ~aot-age2, ~aot-sub-cargo-upgrade
@@ -3587,9 +3637,10 @@ aot-stnk-base:
 	RenderSprites:
 		Image: stnk
 	Buildable:
+		LockedGroup: aot-grp-stnk
 		Queue: Starport
 		BuildDuration: 0
-		BuildPaletteOrder: 90
+		BuildPaletteOrder: 50
 		Prerequisites: ~aot-age1, tmpl, ~!aot-stnk-cargo-upgrade
 		Icon: aot-stnk-icon
 		Description: actor-stnk.description
@@ -3601,9 +3652,10 @@ aot-stnk-cargo:
 	RenderSprites:
 		Image: stnk
 	Buildable:
+		LockedGroup: aot-grp-stnk
 		Queue: Starport
 		BuildDuration: 0
-		BuildPaletteOrder: 90
+		BuildPaletteOrder: 50
 		Prerequisites: ~aot-age1, tmpl, ~aot-stnk-cargo-upgrade
 		Icon: aot-stnk-cargo-icon
 		Description: actor-stnk.description
@@ -3725,8 +3777,9 @@ aot-msub-base:
 	RenderSprites:
 		Image: aot-msub
 	Buildable:
+		LockedGroup: aot-grp-msub
 		Queue: Naval.Nod
-		BuildPaletteOrder: 20
+		BuildPaletteOrder: 30
 		Prerequisites: aot-subpen, stec, ~aot-age1, ~!aot-msub-mine-upgrade, ~!aot-msub-drone-upgrade
 		Icon: icon
 		Description: actor-aot-msub.description
@@ -3739,8 +3792,9 @@ aot-msub-mine-proxy:
 	RenderSprites:
 		Image: aot-msub
 	Buildable:
+		LockedGroup: aot-grp-msub
 		Queue: Naval.Nod
-		BuildPaletteOrder: 20
+		BuildPaletteOrder: 30
 		Prerequisites: aot-subpen, stec, fix, anyhq, ~aot-age3, ~aot-msub-mine-upgrade, ~!aot-msub-drone-upgrade
 		Icon: mine-icon
 		Description: actor-aot-msub.description
@@ -3753,8 +3807,9 @@ aot-msub-drone-proxy:
 	RenderSprites:
 		Image: aot-msub
 	Buildable:
+		LockedGroup: aot-grp-msub
 		Queue: Naval.Nod
-		BuildPaletteOrder: 20
+		BuildPaletteOrder: 30
 		Prerequisites: aot-subpen, stec, fix, anyhq, ~aot-age3, ~aot-msub-drone-upgrade, ~!aot-msub-mine-upgrade
 		Icon: drone-icon
 		Description: actor-aot-msub-drone.description
@@ -3822,6 +3877,7 @@ aot-transport-base:
 	RenderSprites:
 		Image: aot-transport
 	Buildable:
+		LockedGroup: aot-grp-transport
 		Queue: Naval.Nod
 		BuildPaletteOrder: 20
 		Prerequisites: ~!aot-transport-gun-upgrade
@@ -3835,6 +3891,7 @@ aot-transport-gun-proxy:
 	RenderSprites:
 		Image: aot-transport
 	Buildable:
+		LockedGroup: aot-grp-transport
 		Queue: Naval.Nod
 		BuildPaletteOrder: 20
 		Prerequisites: ~aot-transport-gun-upgrade
@@ -4004,8 +4061,9 @@ aot-cruiser:
 	UpdatesPlayerStatistics:
 		AddToArmyValue: true
 	Buildable:
+		LockedGroup: aot-grp-cruiser
 		Queue: Naval.GDI
-		BuildPaletteOrder: 20
+		BuildPaletteOrder: 30
 		Prerequisites: ~aot-age2, aot-age2, aot-shipyard, atec, ~!aot-cruiser-railgun-upgrade, ~!aot-cruiser-carrier-upgrade
 		Icon: icon
 		Description: Heavy naval fire support. Two 8-inch gun turrets.
@@ -4138,8 +4196,9 @@ aot-cruiser-railgun-proxy:
 	RenderSprites:
 		Image: aot-cruiser-railgun
 	Buildable:
+		LockedGroup: aot-grp-cruiser
 		Queue: Naval.GDI
-		BuildPaletteOrder: 20
+		BuildPaletteOrder: 30
 		Prerequisites: ~aot-age2, aot-age2, aot-shipyard, atec, ~aot-cruiser-railgun-upgrade, ~!aot-cruiser-carrier-upgrade
 		Icon: railgun-icon
 		Description: Battle Cruiser with Railgun turrets. Shorter range but highly precise with no minimum distance.
@@ -4152,8 +4211,9 @@ aot-cruiser-carrier-proxy:
 	RenderSprites:
 		Image: aot-cruiser
 	Buildable:
+		LockedGroup: aot-grp-cruiser
 		Queue: Naval.GDI
-		BuildPaletteOrder: 20
+		BuildPaletteOrder: 30
 		Prerequisites: ~aot-age2, aot-age2, aot-shipyard, atec, ~aot-cruiser-carrier-upgrade
 		Icon: carrier-icon
 		Description: Battle Cruiser converted to Heli Carrier. Deploy to activate landing bays for aircraft resupply.
@@ -4201,7 +4261,8 @@ aot-msam-hover-mlrs:
 		ValidTargets: Air
 		Priority: 2
 	Buildable:
-		BuildPaletteOrder: 4
+		LockedGroup: aot-grp-msam
+		BuildPaletteOrder: 20
 		Prerequisites: anyhq, ~aot-hover-mlrs-upgrade, ~!aot-hover-aa-upgrade
 		Queue: Vehicle.GDI
 		Icon: aot-hvr-mlrs-icon
@@ -4277,7 +4338,8 @@ aot-msam-hover-aa:
 	AutoTarget:
 		InitialStanceAI: AttackAnything
 	Buildable:
-		BuildPaletteOrder: 4
+		LockedGroup: aot-grp-msam
+		BuildPaletteOrder: 20
 		Prerequisites: anyhq, ~aot-hover-aa-upgrade, ~!aot-hover-mlrs-upgrade
 		Queue: Vehicle.GDI
 		Icon: aot-hvr-aa-icon
@@ -4313,8 +4375,9 @@ aot-jugg:
 		Range: 10c0
 		MaxHeightDelta: 3
 	Buildable:
+		ShowWhenLocked: False
 		Queue: Vehicle.GDI
-		BuildPaletteOrder: 75
+		BuildPaletteOrder: 50
 		Prerequisites: ~aot-weap, ~aot-age2, aot-age2, ~aot-mtnk-titan-upgrade, aot-mtnk-titan-upgrade, ~!aot-mtnk-predator-upgrade
 		Icon: aot-jugg-icon
 		Description: GDI Juggernaut. Siege artillery mech. Deploy to fire. Devastating vs. structures.
@@ -4820,7 +4883,7 @@ aot-mgap:
 	RenderShroudCircle:
 	Buildable:
 		Queue: Vehicle.GDI
-		BuildPaletteOrder: 90
+		BuildPaletteOrder: 70
 		Prerequisites: ~aot-age2, aot-weap, aot-slab
 		Icon: icon
 		Description: Mobile shroud field. Deploy to hide nearby friendly forces from enemies and blind enemy units in the area.
@@ -4897,7 +4960,7 @@ aot-mstealth:
 	Buildable:
 		Queue: Starport
 		BuildDuration: 0
-		BuildPaletteOrder: 90
+		BuildPaletteOrder: 60
 		Prerequisites: ~aot-age2, aot-shrine, afld
 		Icon: icon
 		Description: Mobile stealth field. Deploy to cloak itself and all nearby friendly units (not structures).
@@ -5086,7 +5149,7 @@ aot-surveyor-gdi:
 		TransformSounds: place2.aud
 	Buildable:
 		Queue: Vehicle.GDI
-		BuildPaletteOrder: 90
+		BuildPaletteOrder: 80
 		Prerequisites: ~aot-age3, fix
 		Icon: icon
 		Description: Mobile forward base. Deploy to create a GDI Outpost — extends construction range by 6 cells, garrisons up to 10 infantry. No power cost when deployed.
@@ -5100,7 +5163,7 @@ aot-surveyor-nod:
 	Buildable:
 		Queue: Starport
 		BuildDuration: 0
-		BuildPaletteOrder: 90
+		BuildPaletteOrder: 80
 		Prerequisites: ~aot-age3, fix
 		Icon: icon
 		Description: Mobile forward base. Deploy to create a NOD Outpost — extends construction range by 6 cells, cloaks nearby friendly units when stealth field is active. No power cost when deployed.

@@ -593,7 +593,7 @@ HPAD:
 # ProvidesPrerequisite@buildingname: → stellt "weap" bereit (für Tooltip-Lookup in age2-upgrade-gdi).
 WEAP:
 	Buildable:
-		BuildPaletteOrder: 125
+		BuildPaletteOrder: 150
 		Prerequisites: ~aot-age1, aot-age1, lite
 		Queue: Building.GDI
 		BuildLimit: 1
@@ -611,7 +611,7 @@ WEAP:
 # BulkProductionQueue@Starport (Player-Level in overrides.yaml) wird durch ProductionBulkAirdrop aktiviert.
 AFLD:
 	Buildable:
-		BuildPaletteOrder: 125
+		BuildPaletteOrder: 150
 		Prerequisites: ~aot-age1, aot-age1, lite
 		Queue: Building.Nod
 		BuildLimit: 1
@@ -654,7 +654,7 @@ aot-proc-gdi:
 	ProvidesPrerequisite@aotid:
 		Prerequisite: aot-proc-gdi
 	Buildable:
-		BuildPaletteOrder: 140
+		BuildPaletteOrder: 160
 		LockedGroup: aot-grp-proc
 		Prerequisites: ~aot-age1, aot-age1, ~!aot-age2, aot-weap, silo
 		Queue: Building.GDI
@@ -680,7 +680,7 @@ aot-proc-gdi-age2:
 	ProvidesPrerequisite@aotid:
 		Prerequisite: aot-proc-gdi
 	Buildable:
-		BuildPaletteOrder: 140
+		BuildPaletteOrder: 160
 		LockedGroup: aot-grp-proc
 		Prerequisites: ~aot-age2, aot-age2, aot-weap, silo
 		Queue: Building.GDI
@@ -711,7 +711,7 @@ aot-proc-nod:
 	ProvidesPrerequisite@aotid:
 		Prerequisite: aot-proc-nod
 	Buildable:
-		BuildPaletteOrder: 140
+		BuildPaletteOrder: 160
 		LockedGroup: aot-grp-proc
 		Prerequisites: ~aot-age1, aot-age1, ~!aot-age2, afld, silo
 		Queue: Building.Nod
@@ -737,7 +737,7 @@ aot-proc-nod-age2:
 	ProvidesPrerequisite@aotid:
 		Prerequisite: aot-proc-nod
 	Buildable:
-		BuildPaletteOrder: 140
+		BuildPaletteOrder: 160
 		LockedGroup: aot-grp-proc
 		Prerequisites: ~aot-age2, aot-age2, afld, silo
 		Queue: Building.Nod
