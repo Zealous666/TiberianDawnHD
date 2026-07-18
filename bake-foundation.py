@@ -110,7 +110,11 @@ def bake_frame(adj: int) -> np.ndarray:
 NFRAMES = 16
 FSIZE   = 128
 ZIPNAME = "foundation"
-meta_str = json.dumps({"size": [FSIZE, FSIZE], "crop": [0, 0, FSIZE, FSIZE]})
+# WICHTIG: MetaRegex in ShpRemasteredLoader.cs verlangt KOMPAKTES JSON ohne Leerzeichen
+# (^\{"size":\[w,h\],"crop":\[l,t,r,b\]\}$). json.dumps mit separators=(",",":") -> keine Spaces.
+# crop = LTRB (Rectangle.FromLTRB): left,top,right,bottom = 0,0,FSIZE,FSIZE.
+meta_str = json.dumps({"size": [FSIZE, FSIZE], "crop": [0, 0, FSIZE, FSIZE]},
+                      separators=(",", ":"))
 
 out_zip = BITS / "aot-foundation-cell.zip"
 with zipfile.ZipFile(out_zip, "w", zipfile.ZIP_DEFLATED) as zf:
