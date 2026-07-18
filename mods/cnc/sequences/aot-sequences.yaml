@@ -4032,8 +4032,7 @@ aot-orcatran-test:
 # Generiert via bake-foundation.py aus TD-Remaster-BIB2-Kacheln (TiberianDawnHD).
 aot-foundation:
 	idle:
-		Filename: aot-foundation-cell.png
-		Start: 15
+		Filename: aot-foundation-idle.png
 		Length: 1
 	icon:
 		Filename: aot-foundation-icon.png

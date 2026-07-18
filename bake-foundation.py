@@ -108,6 +108,12 @@ out_sheet = BITS / "aot-foundation-cell.png"
 Image.fromarray(sheet, "RGBA").save(out_sheet)
 print(f"aot-foundation-cell.png: {FSIZE}×{NFRAMES * FSIZE} ({NFRAMES} Frames)")
 
+# --- Placement-Preview (128×128): Frame 15 = vollständig Interior (keine Kanten sichtbar) ---
+# Eigene Datei notwendig: OpenRA lädt jede PNG-Referenz als eigenständige Sprite-Datei,
+# Start: 15 auf dem 16-Frame-Sheet würde deshalb scheitern (kein Frame 15 in 1-Frame-PNG).
+Image.fromarray(bake_frame(15), "RGBA").save(BITS / "aot-foundation-idle.png")
+print("aot-foundation-idle.png: 128×128 (1 Frame, Interior = Placement-Preview)")
+
 # --- Icon (64×48): Frame 0 = isolierte Zelle (alle Außenecken) ---
 icon_src = Image.fromarray(bake_frame(0), "RGBA").resize((64, 64), Image.LANCZOS)
 icon = Image.new("RGBA", (64, 48), (0, 0, 0, 0))
