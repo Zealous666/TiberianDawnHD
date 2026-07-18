@@ -1218,7 +1218,7 @@ aot-atec-age0:
 	Buildable:
 		LockedGroup: aot-grp-atec
 		Queue: Building.GDI
-		BuildPaletteOrder: 120
+		BuildPaletteOrder: 110
 		Prerequisites: anypower, gdi-hq, ~!aot-age1
 		BuildLimit: 1
 		Icon: icon
@@ -1235,7 +1235,7 @@ aot-atec-age1:
 	Buildable:
 		LockedGroup: aot-grp-atec
 		Queue: Building.GDI
-		BuildPaletteOrder: 120
+		BuildPaletteOrder: 110
 		Prerequisites: anypower, gdi-hq, ~aot-age1, ~!aot-age2, !aot-atec
 		BuildLimit: 1
 		Icon: aot-age1-icon
@@ -1252,7 +1252,7 @@ aot-atec-age2:
 	Buildable:
 		LockedGroup: aot-grp-atec
 		Queue: Building.GDI
-		BuildPaletteOrder: 120
+		BuildPaletteOrder: 110
 		Prerequisites: anypower, gdi-hq, ~aot-age2, !aot-atec
 		BuildLimit: 1
 		Icon: aot-age2-icon
@@ -2010,7 +2010,7 @@ aot-hq-base:
 	Buildable:
 		LockedGroup: aot-grp-hq
 		Queue: Building.GDI
-		BuildPaletteOrder: 110
+		BuildPaletteOrder: 90
 		Prerequisites: vehicleproduction, ~techlevel.medium, ~!aot-age2, ~!aot-ion-cannon-upgrade
 		Icon: aot-base-icon
 
@@ -2021,7 +2021,7 @@ aot-hq-ion:
 	Buildable:
 		LockedGroup: aot-grp-hq
 		Queue: Building.GDI
-		BuildPaletteOrder: 110
+		BuildPaletteOrder: 90
 		Prerequisites: vehicleproduction, ~techlevel.medium, ~!aot-age2, ~aot-ion-cannon-upgrade
 		Icon: aot-ion-icon
 
@@ -2032,7 +2032,7 @@ aot-hq-base-age2:
 	Buildable:
 		LockedGroup: aot-grp-hq
 		Queue: Building.GDI
-		BuildPaletteOrder: 110
+		BuildPaletteOrder: 90
 		Prerequisites: vehicleproduction, ~aot-age2, ~!aot-ion-cannon-upgrade
 		Icon: aot-age2-icon
 
@@ -2043,7 +2043,7 @@ aot-hq-ion-age2:
 	Buildable:
 		LockedGroup: aot-grp-hq
 		Queue: Building.GDI
-		BuildPaletteOrder: 110
+		BuildPaletteOrder: 90
 		Prerequisites: vehicleproduction, ~aot-age2, ~aot-ion-cannon-upgrade
 		Icon: aot-ion-icon
 # === Ende aotmod ===
@@ -2609,7 +2609,7 @@ aot-hpad-gdi:
 		LandingOffset: -1024,1024,0
 		ReservedCondition: aot-hpad-gdi-sw-reserved
 	Buildable:
-		BuildPaletteOrder: 113
+		BuildPaletteOrder: 100
 		Prerequisites: anyhq
 		Queue: Building.GDI
 		Icon: hpad-blue-icon
@@ -2847,7 +2847,7 @@ AFLT:
 	Tooltip:
 		Name: Air Field
 	Buildable:
-		BuildPaletteOrder: 135
+		BuildPaletteOrder: 140
 		Prerequisites: ~aot-age1, anyhq
 		Queue: Building.GDI
 		Icon: aflt-gdi-icon
@@ -3096,7 +3096,7 @@ aot-gap:
 	WithBuildingBib:
 	Buildable:
 		Queue: Building.GDI
-		BuildPaletteOrder: 160
+		BuildPaletteOrder: 170
 		# Sichtbar ab Age 1 (~aot-age1), baubar ab Age 1 + Science Lab (aot-slab von SLAB).
 		Prerequisites: ~aot-age1, aot-slab
 		Icon: icon
@@ -3779,7 +3779,7 @@ aot-shipyard:
 	Health:
 		HP: 80000
 	Buildable:
-		BuildPaletteOrder: 115
+		BuildPaletteOrder: 120
 		Prerequisites: lite
 		Queue: Building.GDI
 		Icon: aot-shipyard-icon
@@ -4431,7 +4431,7 @@ ORBC:
 		SequenceAlpha: 0.65
 	Buildable:
 		Queue: Building.GDI
-		BuildPaletteOrder: 170
+		BuildPaletteOrder: 200
 		Prerequisites: ~aot-age2, atec, aot-slab
 		BuildLimit: 1
 		Icon: icon
@@ -4579,7 +4579,7 @@ aot-slab-age1:
 	Buildable:
 		LockedGroup: aot-grp-slab
 		Queue: Building.GDI
-		BuildPaletteOrder: 150
+		BuildPaletteOrder: 180
 		Prerequisites: ~aot-age1, atec, aot-proc-gdi, ~!aot-age2
 		BuildLimit: 1
 		Icon: icon
@@ -4596,7 +4596,7 @@ aot-slab-age2:
 	Buildable:
 		LockedGroup: aot-grp-slab
 		Queue: Building.GDI
-		BuildPaletteOrder: 150
+		BuildPaletteOrder: 180
 		Prerequisites: ~aot-age1, atec, aot-proc-gdi, ~aot-age2, !aot-slab
 		BuildLimit: 1
 		Icon: aot-age2-icon
@@ -5160,7 +5160,7 @@ aot-pillbox-base:
 		SequenceAlpha: 0.65
 	Buildable:
 		LockedGroup: aot-grp-pillbox
-		BuildPaletteOrder: 40
+		BuildPaletteOrder: 70
 		Prerequisites: barracks, ~!aot-guard-tower-upgrade
 		Queue: Building.GDI
 		Description: Garrisonable defense structure. Holds up to 5 infantry, who fire out through the pillbox using their own weapons.
@@ -5175,7 +5175,7 @@ aot-pillbox-guard:
 		SequenceAlpha: 0.65
 	Buildable:
 		LockedGroup: aot-grp-pillbox
-		BuildPaletteOrder: 40
+		BuildPaletteOrder: 70
 		Prerequisites: barracks, ~aot-guard-tower-upgrade
 		Queue: Building.GDI
 		Icon: guard-icon
@@ -5283,7 +5283,7 @@ aot-wall-gdi:
 		Name: Fortified Wall
 	Buildable:
 		LockedGroup: aot-grp-wall-gdi
-		BuildPaletteOrder: 30
+		BuildPaletteOrder: 20
 		Prerequisites: anypower, fact, ~!aot-firestorm-defense-upgrade
 		Queue: Building.GDI
 		BuildDuration: 230
@@ -5658,7 +5658,7 @@ aot-gate-gdi:
 	Armor:
 		Type: Concrete
 	Buildable:
-		BuildPaletteOrder: 133
+		BuildPaletteOrder: 190
 		# Sichtbar UND baubar ab Age 1 (User-Wunsch 2026-07-04): kein separates
 		# Ausgrau-Prerequisite noetig, ~ versteckt bis Age 1, danach sofort baubar.
 		Prerequisites: ~aot-age1
