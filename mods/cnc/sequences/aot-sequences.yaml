@@ -4027,15 +4027,22 @@ aot-orcatran-test:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - GDI Fortified Wall (Brick+Sandbag-Kombiwall) ===
-# Fortified Foundation: 16 Frames, Frame-Index = Nachbarschafts-Bitmaske (N=1,O=2,S=4,W=8).
-# Unverstörbar, beide Fraktionen, WithWallSpriteBody Type: aot-foundation.
+# Fortified Foundation Placer (aot-foundation): Baupaletten-Icon + Placement-Preview (Frame 15 = Interior).
+# Fortified Foundation Cell (aot-foundation-cell): 16 Frames, Frame-Index = N|E<<1|S<<2|W<<3 (face-adj).
+# Generiert via bake-foundation.py aus TD-Remaster-BIB2-Kacheln (TiberianDawnHD).
 aot-foundation:
 	idle:
-		Filename: aot-foundation.png
-		Length: 16
+		Filename: aot-foundation-cell.png
+		Start: 15
+		Length: 1
 	icon:
 		Filename: aot-foundation-icon.png
 		Length: 1
+
+aot-foundation-cell:
+	idle:
+		Filename: aot-foundation-cell.png
+		Length: 16
 
 # 48-Frame-Sheets (Layout wie BRIK): 0-15 idle, 16-31 scratched, 32-47 damaged.
 # Frame-Index = Nachbarschafts-Bitmaske (N=1,O=2,S=4,W=8), gebaked aus den

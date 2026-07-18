@@ -5437,38 +5437,51 @@ aot-wall-nod-laser:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Fortified Foundation ===
-# Betonpflaster als eigenstaendiges Gebäude — beide Fraktionen, Building-Queue.
-# Verbindet dynamisch mit angrenzenden Foundation-Tiles (WithWallSpriteBody Type: aot-foundation).
-# 16 Sprite-Frames (Nachbarschafts-Bitmaske N=1,O=2,S=4,W=8), generiert via bake-foundation.py.
-# Unzerstoerbar (HP: 1 Mio), nicht verkaufbar, kein Projektilblock, kein Crush.
+# aot-foundation: buildbare Platzierer-Aktor (1×1, beide Fraktionen, Building-Queue).
+#   Spawnt bei Platzierung ein 3×3-Feld aus aot-foundation-cell-Aktoren und loescht sich selbst.
+#   Zellen werden uebersprungen wenn eine Foundation oder ein Gebaeude bereits dort steht.
+# aot-foundation-cell: sichtbare BIB-Boden-Zelle (kein Building, unverstörbar).
+#   16 Frames aus bake-foundation.py, Frame-Index = N|E<<1|S<<2|W<<3 (face-adjacency).
+#   Besitzer: Neutral (unzerstoerbar, keiner kann angreifen).
 aot-foundation:
-	Inherits: ^Wall
-	Valued:
-		Cost: 75
-	Tooltip:
-		Name: actor-aot-foundation.name
+	Building:
+		Footprint: x
+		Dimensions: 1, 1
+		LocalCenterOffset: 512, 512, 0
 	Buildable:
 		BuildPaletteOrder: 8
 		Prerequisites: fact
 		Queue: Building.GDI, Building.Nod
 		BuildDuration: 80
 		Description: actor-aot-foundation.description
+	Valued:
+		Cost: 75
+	Tooltip:
+		Name: actor-aot-foundation.name
+	Interactable:
+	BodyOrientation:
+		QuantizedFacings: 1
+	HitShape:
 	RenderSprites:
 		Image: aot-foundation
+	AotPlaceFoundation:
+
+aot-foundation-cell:
+	# OccupiesSpace: false = blockiert keine Bewegung (Bib ist reiner Boden-Overlay).
+	Immobile:
+		OccupiesSpace: false
+	RenderSprites:
 		Palette: staticterrain
-	Health:
-		HP: 1000000
-	Armor:
-		Type: Concrete
-	-Sellable:
-	-Crushable:
-	LineBuild:
-		NodeTypes: aot-foundation
-	LineBuildNode:
-		Types: aot-foundation
-	-WithWallSpriteBody:
-	WithWallSpriteBody:
-		Type: aot-foundation
+	AotFoundationCellBody:
+	# HiddenUnderShroud: CenterPosition weil OccupiesSpace false (Footprint-Liste waere leer
+	# -> AnyExplored false -> Zelle bleibt unsichtbar). CenterPosition nutzt Immobile.CenterPosition.
+	HiddenUnderShroud:
+		Type: CenterPosition
+	BodyOrientation:
+		QuantizedFacings: 1
+	HitShape:
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Laser Fences Upgrade ===

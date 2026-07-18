@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-# Bäckt den Fortified Foundation (aot-foundation) Sprite.
-# 16 Frames (4-direktionale Wandverbindung: N=bit0, E=bit1, S=bit2, W=bit3).
-# Frame-Index = adjacency-Bitmask (0=isoliert, 15=Kreuzung).
-# Ausgabe: aot-foundation.png (128×2048, RGBA) + aot-foundation-icon.png (64×48, RGBA).
+# Bäckt den Fortified Foundation (aot-foundation-cell) Sprite aus den TD-Remaster-BIB2-Kacheln.
+# Algorithmus: 4-Seiten-Adjacenz-Bitmask (N=1, E=2, S=4, W=8) → 16 Frames.
+# Jede Zelle (128×128) wird aus 4 Quadranten (64×64) aus den 4 BIB2-Eck-Kacheln komponiert.
+# Ausgabe: aot-foundation-cell.png (128×2048, 16 Frames vertikal) + aot-foundation-icon.png.
 
 from pathlib import Path
 import numpy as np
@@ -10,89 +10,115 @@ from PIL import Image
 
 PROJ = Path("/Users/moritzgiuliani/Documents/openRA Projekte/TiberianDawnHD")
 BITS = PROJ / "mods/cnc/bits"
-FRAME = 128      # Pixel pro Frame-Seite
-BORDER = 6       # Randbreite für unverbundene Seiten (in Pixeln)
-NFRAMES = 16
+TMP  = Path("/private/tmp")
 
-# Farben (warm-grau Beton, ähnlich TD-Bibs)
-C_BASE   = np.array([148, 144, 136, 255], dtype=np.uint8)   # Betonfläche
-C_EDGE   = np.array([ 80,  76,  70, 255], dtype=np.uint8)   # offene Kante
-C_SEAM   = np.array([110, 106,  98, 255], dtype=np.uint8)   # Verbindungsnaht (subtil)
-C_CRACK  = np.array([115, 110, 102, 255], dtype=np.uint8)   # Risslinien
-rng = np.random.default_rng(42)
+BIB_BASE = r"bib-DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\TEMPERATE\BIB2\BIB2.TEM"
 
+def load_tile(idx: int) -> np.ndarray:
+    path = TMP / f"{BIB_BASE}-{idx:04d}.png"
+    img = Image.open(path).convert("RGBA")
+    assert img.size == (128, 128), f"Unexpected size: {img.size} for {path}"
+    return np.array(img)
 
-def base_texture(size):
-    """Erzeugt Beton-Grundtextur mit subtiler Körnung."""
-    tex = np.empty((size, size, 4), dtype=np.uint8)
-    tex[:] = C_BASE
-    noise = rng.integers(-12, 13, (size, size), dtype=np.int16)
-    for c in range(3):
-        tex[:, :, c] = np.clip(tex[:, :, c].astype(np.int16) + noise, 0, 255).astype(np.uint8)
-    # Feine Risslinien (1px, alle ~20px)
-    for y in range(0, size, 21):
-        tex[y, :, :3] = np.clip(tex[y, :, :3].astype(np.int16) - 15, 0, 255).astype(np.uint8)
-    for x in range(0, size, 23):
-        tex[:, x, :3] = np.clip(tex[:, x, :3].astype(np.int16) - 10, 0, 255).astype(np.uint8)
-    return tex
+# BIB2 Layout (3×2):  tile0(TL) tile1(TC) tile2(TR)
+#                     tile3(BL) tile4(BC) tile5(BR)
+tile0 = load_tile(0)  # TL outer corner: N+W edge
+tile2 = load_tile(2)  # TR outer corner: N+E edge
+tile3 = load_tile(3)  # BL outer corner: S+W edge
+tile5 = load_tile(5)  # BR outer corner: S+E edge
+
+# Jede Kachel wird in 4×64×64 Quadranten aufgeteilt.
+# NW quadrant = rows[0:64], cols[0:64]; NE = rows[0:64], cols[64:128]; usw.
+#
+# Kompositions-Tabelle (face-based, 2 Bits pro Quadrant):
+#
+# NW-Quadrant — N-Bit & W-Bit:
+#   N=0, W=0  → Außenecke NW   = tile0[0:64, 0:64]
+#   N=0, W=1  → N-Kante         = tile0[0:64, 64:128]
+#   N=1, W=0  → W-Kante         = tile0[64:128, 0:64]
+#   N=1, W=1  → Interior        = tile0[64:128, 64:128]
+#
+# NE-Quadrant — N-Bit & E-Bit:
+#   N=0, E=0  → Außenecke NE   = tile2[0:64, 64:128]
+#   N=0, E=1  → N-Kante         = tile2[0:64, 0:64]
+#   N=1, E=0  → E-Kante         = tile2[64:128, 64:128]
+#   N=1, E=1  → Interior        = tile2[64:128, 0:64]
+#
+# SW-Quadrant — S-Bit & W-Bit:
+#   S=0, W=0  → Außenecke SW   = tile3[64:128, 0:64]
+#   S=0, W=1  → S-Kante         = tile3[64:128, 64:128]
+#   S=1, W=0  → W-Kante         = tile3[0:64, 0:64]
+#   S=1, W=1  → Interior        = tile3[0:64, 64:128]
+#
+# SE-Quadrant — S-Bit & E-Bit:
+#   S=0, E=0  → Außenecke SE   = tile5[64:128, 64:128]
+#   S=0, E=1  → S-Kante         = tile5[64:128, 0:64]
+#   S=1, E=0  → E-Kante         = tile5[0:64, 64:128]
+#   S=1, E=1  → Interior        = tile5[0:64, 0:64]
+
+NW_PIECES = {
+    (0, 0): tile0[0:64,   0:64],
+    (0, 1): tile0[0:64,   64:128],
+    (1, 0): tile0[64:128, 0:64],
+    (1, 1): tile0[64:128, 64:128],
+}
+NE_PIECES = {
+    (0, 0): tile2[0:64,   64:128],
+    (0, 1): tile2[0:64,   0:64],
+    (1, 0): tile2[64:128, 64:128],
+    (1, 1): tile2[64:128, 0:64],
+}
+SW_PIECES = {
+    (0, 0): tile3[64:128, 0:64],
+    (0, 1): tile3[64:128, 64:128],
+    (1, 0): tile3[0:64,   0:64],
+    (1, 1): tile3[0:64,   64:128],
+}
+SE_PIECES = {
+    (0, 0): tile5[64:128, 64:128],
+    (0, 1): tile5[64:128, 0:64],
+    (1, 0): tile5[0:64,   64:128],
+    (1, 1): tile5[0:64,   0:64],
+}
 
 
 def bake_frame(adj: int) -> np.ndarray:
-    """
-    adj = 4-bit Bitmask: bit0=N, bit1=E, bit2=S, bit3=W.
-    Rendert die 128×128 Foundation-Fläche mit offenen Rändern wo kein Nachbar.
-    """
-    f = base_texture(FRAME)
-    n_open = not (adj & 0x1)   # Norden frei
-    e_open = not (adj & 0x2)   # Osten frei
-    s_open = not (adj & 0x4)   # Süden frei
-    w_open = not (adj & 0x8)   # Westen frei
+    """adj = N|E<<1|S<<2|W<<3. Composites 4 quadrants into a 128×128 RGBA frame."""
+    n = (adj >> 0) & 1
+    e = (adj >> 1) & 1
+    s = (adj >> 2) & 1
+    w = (adj >> 3) & 1
 
-    # Offene Seiten: dunkle Randzone (Betonkante sichtbar)
-    if n_open:
-        f[:BORDER, :] = C_EDGE
-    if s_open:
-        f[FRAME-BORDER:, :] = C_EDGE
-    if w_open:
-        f[:, :BORDER] = C_EDGE
-    if e_open:
-        f[:, FRAME-BORDER:] = C_EDGE
-
-    # Verbindungsnaht: 1px-Linie wo eine Seite verbunden ist (wirkt subtil)
-    if not n_open:
-        f[0, :] = C_SEAM
-    if not s_open:
-        f[FRAME-1, :] = C_SEAM
-    if not w_open:
-        f[:, 0] = C_SEAM
-    if not e_open:
-        f[:, FRAME-1] = C_SEAM
-
-    # Ecken: wenn beide angrenzenden Seiten offen → volle Ecke abdunkeln
-    if n_open and w_open:
-        f[:BORDER, :BORDER] = C_EDGE
-    if n_open and e_open:
-        f[:BORDER, FRAME-BORDER:] = C_EDGE
-    if s_open and w_open:
-        f[FRAME-BORDER:, :BORDER] = C_EDGE
-    if s_open and e_open:
-        f[FRAME-BORDER:, FRAME-BORDER:] = C_EDGE
-
-    return f
+    frame = np.zeros((128, 128, 4), dtype=np.uint8)
+    frame[0:64,   0:64]   = NW_PIECES[(n, w)]
+    frame[0:64,   64:128] = NE_PIECES[(n, e)]
+    frame[64:128, 0:64]   = SW_PIECES[(s, w)]
+    frame[64:128, 64:128] = SE_PIECES[(s, e)]
+    return frame
 
 
-# --- Haupt-Sprite: 128×2048 (16 Frames vertikal) ---
-sheet = np.zeros((NFRAMES * FRAME, FRAME, 4), dtype=np.uint8)
+# --- Haupt-Sprite: 128×2048 (16 Frames vertikal, Frame 0 oben) ---
+NFRAMES = 16
+FSIZE   = 128
+sheet = np.zeros((NFRAMES * FSIZE, FSIZE, 4), dtype=np.uint8)
 for i in range(NFRAMES):
-    sheet[i * FRAME:(i + 1) * FRAME, :, :] = bake_frame(i)
+    sheet[i * FSIZE:(i + 1) * FSIZE] = bake_frame(i)
 
-Image.fromarray(sheet, 'RGBA').save(BITS / "aot-foundation.png")
-print(f"aot-foundation.png: {FRAME}×{NFRAMES * FRAME} ({NFRAMES} Frames)")
+out_sheet = BITS / "aot-foundation-cell.png"
+Image.fromarray(sheet, "RGBA").save(out_sheet)
+print(f"aot-foundation-cell.png: {FSIZE}×{NFRAMES * FSIZE} ({NFRAMES} Frames)")
 
-# --- Icon: 64×48 — zentrierter Foundation-Ausschnitt ---
-base_frame = bake_frame(0)   # isoliert = alle 4 Seiten sichtbar
-icon_src = Image.fromarray(base_frame, 'RGBA').resize((64, 64), Image.LANCZOS)
-icon = Image.new('RGBA', (64, 48), (0, 0, 0, 0))
+# --- Icon (64×48): Frame 0 = isolierte Zelle (alle Außenecken) ---
+icon_src = Image.fromarray(bake_frame(0), "RGBA").resize((64, 64), Image.LANCZOS)
+icon = Image.new("RGBA", (64, 48), (0, 0, 0, 0))
 icon.paste(icon_src.crop((0, 8, 64, 56)), (0, 0))
 icon.save(BITS / "aot-foundation-icon.png")
 print("aot-foundation-icon.png: 64×48")
+
+# --- Preview: alle 16 Frames als 4×4-Grid ---
+preview = np.zeros((4 * FSIZE, 4 * FSIZE, 4), dtype=np.uint8)
+for i in range(NFRAMES):
+    row, col = divmod(i, 4)
+    preview[row * FSIZE:(row + 1) * FSIZE, col * FSIZE:(col + 1) * FSIZE] = bake_frame(i)
+Image.fromarray(preview, "RGBA").save(TMP / "foundation_preview.png")
+print(f"foundation_preview.png: {4*FSIZE}×{4*FSIZE} (4×4-Grid, i=adj-Bitmask)")

@@ -16,6 +16,9 @@ World:
 	# Eis-System: haelt die Menge aller vereisten Zellen (Hosts + gewachsene Zellen).
 	# Die Zellen fragen darueber ihre geteilten Ecken ab -> stetige Kanten.
 	AotIceLayer:
+	# Foundation-System: haelt die Menge aller platzierten BIB-Boden-Zellen.
+	# Die Zellen fragen ihre 4 Nachbarn ab -> stetiger Kantenübergang (face-adjacency).
+	AotFoundationLayer:
 	LegacyBridgeLayer:
 		# Originalaktoren (bridge1-4) + AoT-TEMPERAT-Varianten mit korrekten Template-IDs
 		# + zerstörbare Fluss-Brücken (aot-br1/br2/br3, Templates 235-246, AOT_TEMPERAT & AOT_SNOW)
@@ -157,11 +160,13 @@ EYE:
 # === Age of Tiberium (aotmod) - E1 Split: GDI + NOD erhalten eigene Aktoren mit eigenen Icons ===
 E1:
 	Buildable:
+		ShowWhenLocked: False
 		Prerequisites: ~disabled
 
 # === Age of Tiberium (aotmod) - E6 Split: GDI Engineer + NOD Saboteur erhalten eigene Aktoren mit eigenen Icons ===
 E6:
 	Buildable:
+		ShowWhenLocked: False
 		Prerequisites: ~disabled
 	# Bridge Repair Hut: TS-EVA "Bridge repaired." beim Reparieren (aot-e6-gdi/nod erben E6).
 	RepairsBridges:
@@ -170,26 +175,31 @@ E6:
 # === Age of Tiberium (aotmod) - E2 Grenadier: nur noch GDI, eigenes Icon ===
 E2:
 	Buildable:
+		ShowWhenLocked: False
 		Prerequisites: ~disabled
 
 # === Age of Tiberium (aotmod) - E3 Rocket Soldier (Bazooka): nur noch NOD, eigenes Icon ===
 E3:
 	Buildable:
+		ShowWhenLocked: False
 		Prerequisites: ~disabled
 
 # === Age of Tiberium (aotmod) - E4 Flamethrower → Toxic Trooper Upgrade (NOD only, Age 3) ===
 E4:
 	Buildable:
+		ShowWhenLocked: False
 		Prerequisites: ~disabled
 
 # === Age of Tiberium (aotmod) - E5 Chemical Warrior: via E4-Upgrade ersetzt, nicht mehr direkt baubar ===
 E5:
 	Buildable:
+		ShowWhenLocked: False
 		Prerequisites: ~disabled
 
 # === Age of Tiberium (aotmod) - RMBO Commando: GDI-exklusiv ab Age 3 ===
 RMBO:
 	Buildable:
+		ShowWhenLocked: False
 		Prerequisites: ~disabled
 
 ^BaseWorld:
@@ -412,6 +422,7 @@ c17.bulk:
 # Age-Powers liegen auf FACT. Ion Cannon Upgrade schaltet EYE-Sprites frei.
 HQ:
 	Buildable:
+		ShowWhenLocked: False
 		Queue: Building.GDI
 		Prerequisites: vehicleproduction, barracks, ~techlevel.medium, ~aot-hq-never
 	-AirstrikePower:
@@ -527,6 +538,7 @@ Player:
 		Type: Starport
 		Group: Support
 		Factions: nod
+		ShowLockedItems: True
 		MaxCapacity: 5
 		QueueLimit: 5
 		PayUpFront: true
@@ -544,10 +556,32 @@ Player:
 # Ohne diesen Remove erscheint die leere Support-Queue immer als Sub-Tab #1 im
 # Special-Vehicles-Tab und blockiert die Auto-Selektion der Vehicle.GDI-Queue.
 FACT:
+	ProductionQueue@GDIBuilding:
+		ShowLockedItems: True
+	ProductionQueue@NodBuilding:
+		ShowLockedItems: True
 	ProductionQueue@GDISupport:
 		Group: Hidden
 	ProductionQueue@NodSupport:
 		Group: Hidden
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - PYLE/HAND: ShowLockedItems fuer Infantry-Queues ===
+PYLE:
+	ProductionQueue:
+		ShowLockedItems: True
+
+HAND:
+	ProductionQueue:
+		ShowLockedItems: True
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - HPAD: ShowLockedItems fuer Aircraft-Queues ===
+HPAD:
+	ProductionQueue@GDI:
+		ShowLockedItems: True
+	ProductionQueue@Nod:
+		ShowLockedItems: True
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - WEAP: Prerequisite + eigener aot-weap-String ===
@@ -556,6 +590,7 @@ FACT:
 # ProvidesPrerequisite@buildingname: → stellt "weap" bereit (für Tooltip-Lookup in age2-upgrade-gdi).
 WEAP:
 	Buildable:
+		BuildPaletteOrder: 125
 		Prerequisites: ~aot-age1, aot-age1, lite
 		Queue: Building.GDI
 		BuildLimit: 1
@@ -564,6 +599,7 @@ WEAP:
 	ProvidesPrerequisite@buildingname:
 	ProductionQueue:
 		Group: Support
+		ShowLockedItems: True
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - AFLD: Starport-Umbau + Prerequisite ===
@@ -572,6 +608,7 @@ WEAP:
 # BulkProductionQueue@Starport (Player-Level in overrides.yaml) wird durch ProductionBulkAirdrop aktiviert.
 AFLD:
 	Buildable:
+		BuildPaletteOrder: 125
 		Prerequisites: ~aot-age1, aot-age1, lite
 		Queue: Building.Nod
 		BuildLimit: 1
@@ -614,6 +651,8 @@ aot-proc-gdi:
 	ProvidesPrerequisite@aotid:
 		Prerequisite: aot-proc-gdi
 	Buildable:
+		BuildPaletteOrder: 140
+		LockedGroup: aot-grp-proc
 		Prerequisites: ~aot-age1, aot-age1, ~!aot-age2, aot-weap, silo
 		Queue: Building.GDI
 	WithSpriteBody@ts:
@@ -638,6 +677,8 @@ aot-proc-gdi-age2:
 	ProvidesPrerequisite@aotid:
 		Prerequisite: aot-proc-gdi
 	Buildable:
+		BuildPaletteOrder: 140
+		LockedGroup: aot-grp-proc
 		Prerequisites: ~aot-age2, aot-age2, aot-weap, silo
 		Queue: Building.GDI
 	WithSpriteBody@ts:
@@ -667,6 +708,8 @@ aot-proc-nod:
 	ProvidesPrerequisite@aotid:
 		Prerequisite: aot-proc-nod
 	Buildable:
+		BuildPaletteOrder: 140
+		LockedGroup: aot-grp-proc
 		Prerequisites: ~aot-age1, aot-age1, ~!aot-age2, afld, silo
 		Queue: Building.Nod
 	WithSpriteBody@ts:
@@ -691,6 +734,8 @@ aot-proc-nod-age2:
 	ProvidesPrerequisite@aotid:
 		Prerequisite: aot-proc-nod
 	Buildable:
+		BuildPaletteOrder: 140
+		LockedGroup: aot-grp-proc
 		Prerequisites: ~aot-age2, aot-age2, afld, silo
 		Queue: Building.Nod
 	WithSpriteBody@ts:
@@ -714,6 +759,7 @@ aot-proc-nod-age2:
 # Verhindert APC-Produktion bis der Spieler das APC Upgrade (Entweder/Oder) kauft.
 APC:
 	Buildable:
+		ShowWhenLocked: False
 		Prerequisites: lite, ~aot-apc-upgrade, ~!aot-humvee-upgrade, ~!aot-amphibious-upgrade, ~!aot-minelayer-upgrade
 		Queue: LightVehicle.GDI
 		Description: Armored Personnel Carrier. Can carry 5 soldiers.
@@ -732,9 +778,10 @@ MTNK:
 
 MSAM:
 	Buildable:
+		LockedGroup: aot-grp-msam
 		Prerequisites: anyhq, ~techlevel.medium, ~aot-age1, aot-age1, weap, ~!aot-hover-mlrs-upgrade, ~!aot-hover-aa-upgrade
 		Queue: Vehicle.GDI
-		BuildPaletteOrder: 4
+		BuildPaletteOrder: 20
 	GrantConditionOnPrerequisite@HOVER_MLRS:
 		Condition: aot-hover-mlrs-upgrade
 		Prerequisites: aot-hover-mlrs-upgrade
@@ -1335,4 +1382,27 @@ BRIDGE4:
 		RequireTilesets: DESERT
 		Categories: Terrain
 # aot-tem-bridge1/2 erben ^ExplosiveBridge transitiv über BRIDGE1/2.
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Permanent versteckte Engine-Aktoren (~disabled):
+# nie als Locked-Platzhalter zeigen. ^DINO deckt STEG/TREX/TRIC/RAPT per Vererbung ab.
+FACT.GDI:
+	Buildable:
+		ShowWhenLocked: False
+
+FACT.NOD:
+	Buildable:
+		ShowWhenLocked: False
+
+^DINO:
+	Buildable:
+		ShowWhenLocked: False
+
+PVICE:
+	Buildable:
+		ShowWhenLocked: False
+
+MISS:
+	Buildable:
+		ShowWhenLocked: False
 # === Ende aotmod ===
