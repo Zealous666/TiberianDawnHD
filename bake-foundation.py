@@ -41,17 +41,24 @@ tile5 = load_tile(5)  # BR outer corner: S+E edge
 # (tile1 vs tile4) -> an den Zell-Grenzen Diskontinuität -> "Kanten im Kern".
 # Loesung: EINE saubere 128×128-Dreckflaeche bauen und seamless machen. Alle Interior-Zellen
 # nutzen dieselbe nahtlose Kachel -> Kern kachelt perfekt, keine Grenzen sichtbar.
-def make_seamless(img):
-    """Center-weighted blend mit halb-gerollter Kopie -> Raender wrappen nahtlos."""
+def make_tileable(img, axis, band=24):
+    """Macht eine Achse kachelbar, indem NUR ein schmales Band um die Wrap-Naht geblendet wird.
+    Trick: um n/2 rollen (Naht liegt dann in der Mitte), dort das nahtfreie ORIGINAL einblenden,
+    zurueckrollen. 90% der Flaeche bleibt unangetastete Original-Textur -- der alte Vollflaechen-
+    Dreieck-Blend mittelte die ganze Kachel (Rand heller/matschiger als Mitte) und erzeugte damit
+    das sichtbare Zellraster im Kern."""
     f = img.astype(np.float32)
-    h, w = f.shape[:2]
-    rolled = np.roll(np.roll(f, h // 2, axis=0), w // 2, axis=1)
-    # Dreieck-Gewicht: 1 in der Mitte, 0 an den Raendern (pro Achse).
-    tri_y = (1.0 - np.abs(2.0 * np.arange(h) / (h - 1) - 1.0)).reshape(h, 1, 1)
-    tri_x = (1.0 - np.abs(2.0 * np.arange(w) / (w - 1) - 1.0)).reshape(1, w, 1)
-    weight = tri_y * tri_x  # 1 Mitte -> Original, 0 Rand -> gerollt (= Original-Mitte, matcht Gegenkante)
-    out = f * weight + rolled * (1.0 - weight)
-    return np.clip(out, 0, 255).astype(np.uint8)
+    n = f.shape[axis]
+    r = np.roll(f, n // 2, axis=axis)
+    idx = np.arange(n, dtype=np.float32)
+    w = np.clip(1.0 - np.abs(idx - n / 2) / band, 0.0, 1.0)   # 1 an der Naht, 0 ausserhalb des Bands
+    shape = [1, 1, 1]; shape[axis] = n
+    out = r * (1.0 - w.reshape(shape)) + f * w.reshape(shape)
+    return np.clip(np.roll(out, -(n // 2), axis=axis), 0, 255).astype(np.uint8)
+
+def make_seamless(img):
+    """Beide Achsen kachelbar machen (schmale Naht-Baender, Flaeche bleibt Original)."""
+    return make_tileable(make_tileable(img, axis=0), axis=1)
 
 # Reiner Dreck: TC-untere Haelfte (128×64) ueber BC-obere Haelfte (128×64) = 128×128 sauber.
 clean_dirt = np.zeros((128, 128, 4), dtype=np.uint8)
@@ -103,17 +110,6 @@ INT_BR = INTERIOR[64:128, 64:128]
 # Loesung: EIN durchgehender, seamless-gemachter Kantenstreifen pro Richtung. Alle Rand-Zellen
 # derselben Richtung samplen denselben Streifen -> die Franse laeuft fugenlos durch.
 
-def wrap_blend_axis(img, axis):
-    """Wrap-Blend NUR entlang einer Achse: Dreieck-Gewicht 1 Mitte -> 0 Rand, Gegenstueck ist
-    die halb-gerollte Kopie. Ergebnis kachelt nahtlos in dieser Achse."""
-    f = img.astype(np.float32)
-    n = f.shape[axis]
-    rolled = np.roll(f, n // 2, axis=axis)
-    t = (1.0 - np.abs(2.0 * np.arange(n) / (n - 1) - 1.0))
-    shape = [1, 1, 1]; shape[axis] = n
-    w = t.reshape(shape)
-    return np.clip(f * w + rolled * (1.0 - w), 0, 255).astype(np.uint8)
-
 def blend_into(piece, target, axis, side, width=24):
     """Blendet den Rand von `piece` (an `side` der Achse) in die `target`-Werte, damit der
     Anschluss an den Nachbar-Quadranten pixel-kontinuierlich wird. ramp 0 (innen) -> 1 (Randpixel)."""
@@ -131,10 +127,10 @@ def blend_into(piece, target, axis, side, width=24):
 # N: TC-Nordhaelfte (64h x 128w), x-seamless. S: BC-Suedhaelfte.
 # W: tile0-SW ueber tile3-NW (im Original vertikal benachbart -> kontinuierlich), y-seamless.
 # E: tile2-SE ueber tile5-NE, y-seamless.
-EDGE_N = wrap_blend_axis(tile1[0:64].copy(),    axis=1)
-EDGE_S = wrap_blend_axis(tile4[64:128].copy(),  axis=1)
-EDGE_W = wrap_blend_axis(np.vstack([tile0[64:128, 0:64],   tile3[0:64, 0:64]]).copy(),   axis=0)
-EDGE_E = wrap_blend_axis(np.vstack([tile2[64:128, 64:128], tile5[0:64, 64:128]]).copy(), axis=0)
+EDGE_N = make_tileable(tile1[0:64].copy(),    axis=1)
+EDGE_S = make_tileable(tile4[64:128].copy(),  axis=1)
+EDGE_W = make_tileable(np.vstack([tile0[64:128, 0:64],   tile3[0:64, 0:64]]).copy(),   axis=0)
+EDGE_E = make_tileable(np.vstack([tile2[64:128, 64:128], tile5[0:64, 64:128]]).copy(), axis=0)
 
 # --- Interior-Anschluss: Kanten-Innenraender in die INTERIOR-Werte ueberblenden ---
 # Naht N-Kante(y=63) -> Interior(y=64):  EDGE_N rows 40..63 -> INTERIOR rows 40..63.
