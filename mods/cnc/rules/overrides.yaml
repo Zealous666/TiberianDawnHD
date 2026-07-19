@@ -26,6 +26,22 @@ World:
 
 # === Age of Tiberium (aotmod) - EdibleByLeap + Heal-TargetType für alle Infanterie ===
 ^Infantry:
+	Parachutable:
+		FallRate: 26
+		KilledOnImpassableTerrain: true
+		ParachutingCondition: parachute
+		GroundImpactSound: squishy2.aud
+		WaterImpactSound: splash9.aud
+	WithParachute:
+		RequiresCondition: parachute
+		ShadowImage: parach-shadow
+		ShadowSequence: idle
+		Image: parach
+		Sequence: idle
+		OpeningSequence: open
+		Offset: 0,0,200
+		Palette: effect
+		IsPlayerPalette: false
 	EdibleByLeap:
 	GrantConditionOnDamageState@AOTHEAL:
 		Condition: aot-infantry-damaged
@@ -986,10 +1002,133 @@ BGGY:
 		Weapon: aot-HarpyLaser
 		RequiresCondition: aot-bggy-laser
 
+# === Age of Tiberium (aotmod) - TRAN Transport Helo: beide Fraktionen, ab Age 0, 5 Infanteristen ===
+# GDI-exklusive Age-2-Upgrades (gegenseitig exklusiv):
+#   aot-upgrade-tran-doorgunner: Infanterie schießt durch Türen (AttackGarrisoned)
+#   aot-upgrade-tran-carryall:  Wandelt TRAN in Carryall um (1 Fahrzeug drunter hängend, TS-Sprites Platzhalter)
+# Beide Upgrades erteilen eine Condition via GrantConditionOnPrerequisite; TRAN reagiert darauf.
+TRAN:
+	-Buildable:
+	# Cargo: MaxWeight auf 5 reduziert (Engine-Default: 10). Trait komplett deaktiviert wenn Carryall aktiv
+	# (Cargo ist ConditionalTrait → CanLoad() prüft IsTraitDisabled → kein Boarding mehr möglich).
+	Cargo:
+		Types: Infantry
+		MaxWeight: 5
+		UnloadVoice: Unload
+		AfterUnloadDelay: 40
+		RequiresCondition: !aot-tran-carryall-upgrade
+		# Parachute Bay: Unload-Button ausblenden wenn Parachute-Upgrade aktiv (AotParachuteDropCargo übernimmt)
+		BlockDeployCondition: aot-tran-parachute-upgrade
+	# Eject bereits geladene Passagiere sofort wenn Carryall-Upgrade greift.
+	# Cargo.Unload() prüft NICHT IsTraitDisabled → funktioniert auch wenn Cargo gleichzeitig disabled wird.
+	AotEjectCargoOnCondition:
+		Condition: aot-tran-carryall-upgrade
+	# NOD Parachute Bay Upgrade: Passagiere springen mit Fallschirmen raus statt normaler Entladung
+	GrantConditionOnPrerequisite@parachute:
+		Condition: aot-tran-parachute-upgrade
+		Prerequisites: aot-tran-parachute-upgrade
+	AotParachuteDropCargo:
+		RequiresCondition: aot-tran-parachute-upgrade
+		DropSound: aot-chute1.aud
+	WithCargoPipsDecoration:
+		RequiresCondition: !aot-tran-carryall-upgrade
+		Position: BottomLeft
+		Margin: 4, 3
+		RequiresSelection: true
+		CustomPipSequences:
+			gray: pip-gray
+			yellow: pip-yellow
+			red: pip-red
+	Repairable:
+		RepairActors: aot-hpad-gdi, aot-hpad-nod
+	# GDI-Upgrade-Conditions
+	GrantConditionOnPrerequisite@doorgunner:
+		Condition: aot-tran-doorgunner-upgrade
+		Prerequisites: aot-tran-doorgunner-upgrade
+	GrantConditionOnPrerequisite@carryall:
+		Condition: aot-tran-carryall-upgrade
+		Prerequisites: aot-tran-carryall-upgrade
+	# Carryall-Trait: inaktiv bis Carryall-Upgrade. Fahrzeug hängt mit LocalOffset Z=-512 unter dem Heli.
+	Carryall:
+		RequiresCondition: aot-tran-carryall-upgrade
+		LocalOffset: 0, 0, -512
+		AllowDropOff: true
+	# Rotoren nur im Chinook-Modus sichtbar (nicht beim TS-Carryall VXL, das hat Rotoren eingebakt)
+	WithIdleOverlay@ROTOR1AIR:
+		RequiresCondition: airborne && !aot-tran-carryall-upgrade
+	WithIdleOverlay@ROTOR1GROUND:
+		RequiresCondition: !airborne && !aot-tran-carryall-upgrade
+	WithIdleOverlay@ROTOR2AIR:
+		RequiresCondition: airborne && !aot-tran-carryall-upgrade
+	WithIdleOverlay@ROTOR2GROUND:
+		RequiresCondition: !airborne && !aot-tran-carryall-upgrade
+	# Sprite-Switch: Chinook-Sprites (Default) ↔ TS-Carryall VXL
+	RenderSprites:
+		Image: aot-tran-cary
+	-WithFacingSpriteBody:
+	WithFacingSpriteBody@tran:
+		Sequence: idle
+		Name: body
+		RequiresCondition: !aot-tran-carryall-upgrade
+	WithFacingSpriteBody@cary:
+		Sequence: idle-cary
+		Name: body-cary
+		RequiresCondition: aot-tran-carryall-upgrade
+	WithFacingSpriteBody@caryremap:
+		Sequence: idle-cary-remap
+		Name: body-cary-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-tran-carryall-upgrade
+	# Doorgunner: 2 Fire-Ports (links + rechts), Infanterie schießt durch Türen
+	AttackGarrisoned:
+		RequiresCondition: aot-tran-doorgunner-upgrade
+		Armaments: garrisoned
+		PortOffsets: 0,512,128, 0,-512,128
+		PortYaws: 256, 768
+		PortCones: 256, 256
+		Cursor: attack
+		OutsideRangeCursor: attackoutsiderange
+	Armament@garrisoned:
+		Name: garrisoned
+		Weapon: aot-MachineGunGarrisoned
+		RequiresCondition: aot-tran-doorgunner-upgrade
+	AutoTarget:
+		RequiresCondition: aot-tran-doorgunner-upgrade
+		ScanRadius: 8
+
 # === Age of Tiberium (aotmod) - NOD Stealth Tank: Age-Gate + Cargo Upgrade ===
 # Baubar/sichtbar ab Age 1 statt techlevel.high (siehe Proxy-Aktoren aot-stnk-base/aot-stnk-cargo
 # in aot-units.yaml). Cargo Upgrade gibt 5 Infanterie-Slots, gilt sofort fuer bereits gebaute
 # Stealth Tanks (GrantConditionOnPrerequisite reagiert auf alle existierenden Aktoren).
+TRAN.Husk:
+	# Im Carryall-Modus muss der Husk (fallender Heli) den Carryall-Sprite zeigen.
+	# GrantConditionOnPrerequisite reagiert auf alle existierenden Aktoren im World.
+	GrantConditionOnPrerequisite@carryall:
+		Condition: aot-tran-carryall-upgrade
+		Prerequisites: aot-tran-carryall-upgrade
+	RenderSprites:
+		Image: aot-tran-cary
+	-WithFacingSpriteBody:
+	WithFacingSpriteBody@tran:
+		Sequence: idle
+		Name: body
+		RequiresCondition: !aot-tran-carryall-upgrade
+	WithFacingSpriteBody@cary:
+		Sequence: idle-cary
+		Name: body-cary
+		RequiresCondition: aot-tran-carryall-upgrade
+	WithFacingSpriteBody@caryremap:
+		Sequence: idle-cary-remap
+		Name: body-cary-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-tran-carryall-upgrade
+	WithIdleOverlay@ROTOR1:
+		RequiresCondition: !aot-tran-carryall-upgrade
+	WithIdleOverlay@ROTOR2:
+		RequiresCondition: !aot-tran-carryall-upgrade
+
 # Enttarnen beim Ein-/Aussteigen mit Delay, analog aot-sub (siehe sub-cargo-system): "Load" zu
 # UncloakOn ergaenzt, Cargo.LoadingCondition pausiert das Cloak waehrend des Ladevorgangs selbst,
 # CloakDelay (85 = ~3.4s, aus Engine-Default uebernommen) startet danach ueber UncloakOn neu.
@@ -1194,6 +1333,8 @@ BIKE:
 		Modifier: 0
 	TimedConditionBar@AOTIRONDOME:
 		Condition: aot-iron-dome
+	# Carryable: Fahrzeuge können vom GDI Carryall-TRAN aufgenommen werden (manuelle PickupUnit-Order)
+	Carryable:
 	# === Ende aotmod ===
 	AotDamagedByCondition:
 		RequiresCondition: aot-tiberium-gassed

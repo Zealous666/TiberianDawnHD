@@ -89,6 +89,10 @@ namespace OpenRA.Mods.Common.Traits
 		[GrantedConditionReference]
 		public IEnumerable<string> LinterPassengerConditions => PassengerConditions.Values;
 
+		[ConsumedConditionReference]
+		[Desc("Hide the Unload deploy button when this condition is active (e.g. when another trait takes over unloading).")]
+		public readonly string BlockDeployCondition = null;
+
 		public override object Create(ActorInitializer init) { return new Cargo(init, this); }
 	}
 
@@ -110,6 +114,7 @@ namespace OpenRA.Mods.Common.Traits
 		readonly Stack<int> loadedTokens = [];
 		bool takeOffAfterLoad;
 		bool initialised;
+		bool deployBlocked;
 
 		public IEnumerable<Actor> Passengers => cargo;
 		public int PassengerCount => cargo.Count;
@@ -218,7 +223,18 @@ namespace OpenRA.Mods.Common.Traits
 			return new Order("Unload", self, queued);
 		}
 
-		bool IIssueDeployOrder.CanIssueDeployOrder(Actor self, bool queued) { return true; }
+		bool IIssueDeployOrder.CanIssueDeployOrder(Actor self, bool queued) { return !deployBlocked; }
+
+		public override IEnumerable<VariableObserver> GetVariableObservers()
+		{
+			foreach (var vo in base.GetVariableObservers())
+				yield return vo;
+
+			if (Info.BlockDeployCondition != null)
+				yield return new VariableObserver(
+					(self, vars) => deployBlocked = vars.GetValueOrDefault(Info.BlockDeployCondition) > 0,
+					new[] { Info.BlockDeployCondition });
+		}
 
 		public void ResolveOrder(Actor self, Order order)
 		{

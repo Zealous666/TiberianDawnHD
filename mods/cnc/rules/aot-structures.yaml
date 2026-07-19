@@ -2802,6 +2802,95 @@ aot-upgrade-orca:
 	Interactable:
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - aot-upgrade-tran-doorgunner: Transport Helo Doorgunner (GDI, Age 2) ===
+# Gibt allen TRAN (bereits gebauten + neuen) die Condition aot-tran-doorgunner-upgrade.
+# Daraufhin werden AttackGarrisoned + Armament@garrisoned aktiv (overrides.yaml).
+# Gegenseitig exklusiv mit Carryall-Upgrade: nur eines der beiden kaufbar.
+aot-upgrade-tran-doorgunner:
+	Tooltip:
+		Name: actor-aot-upgrade-tran-doorgunner.name
+
+	Buildable:
+		BuildPaletteOrder: 31
+		Prerequisites: anyhq, ~anyhq, ~hpad, hpad, ~aot-age2, aot-age2, ~!aot-tran-carryall-upgrade
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Icon: icon
+		Description: actor-aot-upgrade-tran-doorgunner.description
+
+	Valued:
+		Cost: 400
+
+	RenderSprites:
+		Image: aot-upgrade-tran-doorgunner
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-tran-doorgunner-upgrade
+
+	Interactable:
+
+# === Age of Tiberium (aotmod) - aot-upgrade-tran-carryall: Transport Helo Carryall Upgrade (GDI, Age 2) ===
+# Gibt allen TRAN die Condition aot-tran-carryall-upgrade:
+#   - Cargo.LoadingCondition gesetzt → kein Infanterie-Boarding mehr
+#   - Carryall-Trait aktiv → manuelle PickupUnit-Order auf Fahrzeuge möglich
+#   - WithFacingSpriteBody@cary aktiv → TS-Carryall-Sprites (Platzhalter bis VXL gebacken)
+#   - Queue-Proxy aot-tran-gdi-cary zeigt cary_all.png Icon
+# Gegenseitig exklusiv mit Doorgunner-Upgrade.
+aot-upgrade-tran-carryall:
+	Tooltip:
+		Name: actor-aot-upgrade-tran-carryall.name
+
+	Buildable:
+		BuildPaletteOrder: 32
+		Prerequisites: anyhq, ~anyhq, ~hpad, hpad, ~aot-age2, aot-age2, ~!aot-tran-doorgunner-upgrade
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Icon: icon
+		Description: actor-aot-upgrade-tran-carryall.description
+
+	Valued:
+		Cost: 600
+
+	RenderSprites:
+		Image: aot-upgrade-tran-carryall
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-tran-carryall-upgrade
+
+	Interactable:
+
+# === Age of Tiberium (aotmod) - aot-upgrade-tran-parachute: Parachute Bay Upgrade (NOD, Age 2) ===
+# Gibt allen NOD-TRANs die Condition aot-tran-parachute-upgrade:
+#   - AotParachuteDropCargo aktiv → Deploy-Button wirft Insassen mit Fallschirmen ab
+#   - ForceMove (Ctrl+Klick) → Heli fliegt hin, wirft ab, kehrt zurück
+#   - Cargo.BlockDeployCondition unterdrückt Standard-Unload-Button
+aot-upgrade-tran-parachute:
+	Tooltip:
+		Name: actor-aot-upgrade-tran-parachute.name
+
+	Buildable:
+		BuildPaletteOrder: 31
+		Prerequisites: anyhq, ~anyhq, ~hpad, hpad, ~aot-age2, aot-age2
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Icon: icon
+		Description: actor-aot-upgrade-tran-parachute.description
+
+	Valued:
+		Cost: 400
+
+	RenderSprites:
+		Image: aot-upgrade-tran-parachute
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-tran-parachute-upgrade
+
+	Interactable:
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - aot-upgrade-firehawk: Firehawk-Upgrade (GDI, Age 3) ===
 # Ersetzt alle AJET (A-10) durch Firehawk: neue Sprites, Raketen statt Vulcan/Napalm, Anti-Air.
 # Wirkt auf bereits gebaute UND neue AJET via GrantConditionOnPrerequisite@firehawk (aot-units.yaml).

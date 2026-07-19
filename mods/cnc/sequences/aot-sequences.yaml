@@ -2107,6 +2107,89 @@ aot-upgrade-harpy:
 		Length: 1
 		RemasteredFilename:
 
+# === Age of Tiberium (aotmod) - aot-tran-cary: Transport Helo (TRAN) + Carryall-Upgrade ===
+# Gemeinsamer Image-Block: normale Chinook-Sprites + Carryall-Zustand (TS-VXL-Bake, Platzhalter bis Sprites gebacken).
+# Beide Fraktionen, ab Age 0. GDI-Upgrades ab Age 2: Doorgunner ODER Carryall.
+aot-tran-cary:
+	Defaults:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\TRAN.ZIP
+	idle:
+		Filename: tran.shp
+		Facings: 32
+		UseClassicFacings: True
+	rotor:
+		Filename: lrotor.shp
+		Length: 4
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\COMMON\VFX\LROTOR.ZIP
+		RemasteredAlpha: 0.5
+	rotor2:
+		Filename: rrotor.shp
+		Length: 4
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\COMMON\VFX\RROTOR.ZIP
+		RemasteredAlpha: 0.5
+	slow-rotor:
+		Filename: lrotor.shp
+		Start: 4
+		Length: 8
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\COMMON\VFX\LROTOR.ZIP
+	slow-rotor2:
+		Filename: rrotor.shp
+		Start: 4
+		Length: 8
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\COMMON\VFX\RROTOR.ZIP
+	# Carryall-Zustand: TS Carryall VXL (trnsport.vxl), gebacken als aot-carryall-test.zip
+	idle-cary:
+		RemasteredFilename: aot-carryall-test.zip
+		Facings: 32
+		UseClassicFacings: True
+	idle-cary-remap:
+		RemasteredFilename: aot-carryall-test-remap.png
+		RemasteredPremultiplied: False
+		Facings: 32
+		UseClassicFacings: True
+	icon:
+		Filename: cary_base.png
+		Length: 1
+		RemasteredFilename:
+	icon-cary:
+		Filename: cary_all.png
+		Length: 1
+		RemasteredFilename:
+
+aot-upgrade-tran-doorgunner:
+	icon:
+		Filename: cary_base.png
+		Length: 1
+		RemasteredFilename:
+
+aot-upgrade-tran-carryall:
+	icon:
+		Filename: cary_all.png
+		Length: 1
+		RemasteredFilename:
+
+aot-upgrade-tran-parachute:
+	icon:
+		Filename: cary_base.png
+		Length: 1
+		RemasteredFilename:
+
+# Parachute sprites (from RA classic content: allies.mix / russian.mix)
+parach:
+	Defaults:
+		Filename: parach.shp
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\VFX\PARACH.ZIP
+	open:
+		Length: 5
+	idle:
+		Start: 5
+		Length: 11
+
+parach-shadow:
+	idle:
+		Filename: parach-shadow.shp
+		Length: *
+
 # === Age of Tiberium (aotmod) - aot-ajet: AJET Fighter Sprites (A10-Sprites kopiert) ===
 # Sprites identisch zu A10 — A10-Aktor selbst bleibt unverändert.
 aot-ajet:

@@ -1739,6 +1739,69 @@ aot-harv-nod:
 		BuildDuration: 0
 		Description: Harvests Tiberium and returns it to the refinery.
 
+# === Age of Tiberium (aotmod) - TRAN Transport Helo: Proxy-Aktoren (beide Fraktionen) ===
+# GDI: 2 Proxies → Basis-Icon (kein Carryall) ODER Carryall-Icon (Carryall-Upgrade aktiv)
+# NOD: 1 Proxy ohne Upgrade-Abhängigkeit
+# Proxies erben von TRAN, das in overrides.yaml die Buildable-Logik + Carryall/Doorgunner trägt.
+
+aot-tran-nod:
+	Inherits: TRAN
+	RenderSprites:
+		Image: aot-tran-cary
+	Buildable:
+		Queue: Aircraft.Nod
+		BuildPaletteOrder: 10
+		Prerequisites: anyhq
+		Icon: icon
+		Description: actor-tran.description
+	Tooltip:
+		Name: actor-tran.name
+
+aot-tran-gdi-base:
+	Inherits: TRAN
+	RenderSprites:
+		Image: aot-tran-cary
+	Buildable:
+		Queue: Aircraft.GDI
+		BuildPaletteOrder: 10
+		Prerequisites: anyhq, ~!aot-tran-carryall-upgrade, ~!aot-tran-doorgunner-upgrade
+		Icon: icon
+		Description: actor-tran.description
+	-Tooltip:
+	Tooltip@base:
+		Name: actor-tran.name
+		RequiresCondition: !aot-tran-doorgunner-upgrade
+	Tooltip@gunship:
+		Name: actor-tran-gunship.name
+		RequiresCondition: aot-tran-doorgunner-upgrade
+
+aot-tran-gdi-gunship:
+	Inherits: TRAN
+	RenderSprites:
+		Image: aot-tran-cary
+	Buildable:
+		Queue: Aircraft.GDI
+		BuildPaletteOrder: 10
+		Prerequisites: anyhq, ~!aot-tran-carryall-upgrade, ~aot-tran-doorgunner-upgrade
+		Icon: icon
+		Description: actor-tran.description
+	-Tooltip:
+	Tooltip:
+		Name: actor-tran-gunship.name
+
+aot-tran-gdi-cary:
+	Inherits: TRAN
+	RenderSprites:
+		Image: aot-tran-cary
+	Buildable:
+		Queue: Aircraft.GDI
+		BuildPaletteOrder: 10
+		Prerequisites: anyhq, ~aot-tran-carryall-upgrade
+		Icon: icon-cary
+		Description: actor-aot-tran-carryall.description
+	Tooltip:
+		Name: actor-aot-tran-carryall.name
+
 # === Age of Tiberium (aotmod) - Apache / ORCA Upgrade-System ===
 # Doppel-Aktor-Pattern analog zu Jeep/HUMVEE.
 # Apache (Tier 0): sofort nach HPAD baubar, RA Longbow Sprites, reduzierter Schaden, nur AG.
@@ -3296,6 +3359,7 @@ aot-zonetrooper:
 		FallTicks: 8
 	# Kein WithParachute (kein Fallschirm-Sprite) — beim Absprung aus dem Dropship nutzt der
 	# Zone Trooper stattdessen die TS-Jetpack-Hover-Animation (siehe WithInfantryBody@flying).
+	-WithParachute:
 	Parachutable:
 		ParachutingCondition: aot-zonetrooper-descending
 	-Crushable:

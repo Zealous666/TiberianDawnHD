@@ -1105,6 +1105,7 @@ aot-JeepHumveeGarrisoned:
 
 aot-MachineGunGarrisoned:
 	Inherits: MachineGun
+	Range: 8c0
 	Projectile: Bullet
 		Blockable: false
 

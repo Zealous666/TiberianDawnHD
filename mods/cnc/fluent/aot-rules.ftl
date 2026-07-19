@@ -120,6 +120,40 @@ actor-aot-upgrade-transport-hover =
     .name = Hovercraft Upgrade
     .description = Converts the Transport Vessel into an amphibious hovercraft. Can cross any terrain. Carries infantry or vehicles.
 
+actor-aot-tran-carryall =
+    .name = Carryall
+    .description =
+    Heavy lift helicopter. Flies to a ground vehicle, picks it up,
+    and delivers it to any location.
+      Carries 1 vehicle (hung below)
+      Cannot transport infantry
+
+actor-tran-gunship =
+    .name = Chinook Gunship
+
+actor-aot-upgrade-tran-doorgunner =
+    .name = Transport Helo Doorgunner
+    .description =
+    Equips all Transport Helicopters with door gunners.
+    Garrisoned infantry can fire through the side doors.
+      Mutually exclusive with Carryall Upgrade
+
+actor-aot-upgrade-tran-carryall =
+    .name = Carryall Upgrade
+    .description =
+    Converts all Transport Helicopters into Carryalls.
+    Can pick up and carry any ground vehicle.
+      Disables infantry transport
+      Mutually exclusive with Doorgunner Upgrade
+
+actor-aot-upgrade-tran-parachute =
+    .name = Parachute Bay Upgrade
+    .description =
+    Equips all NOD Transport Helicopters with parachute bays.
+    Passengers can be dropped from altitude via parachute.
+      Deploy: drops passengers at current position
+      Alt+click: flies to target, drops passengers, returns to origin
+
 actor-hq =
     .name = Radar
     .description = Provides radar and map overview for GDI.

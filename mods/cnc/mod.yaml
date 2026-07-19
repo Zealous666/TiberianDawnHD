@@ -258,6 +258,7 @@ Rules:
 	cnchd|rules/aot-units.yaml
 	cnchd|rules/aot-critters.yaml
 	cnchd|rules/aot-world.yaml
+	cnchd|rules/aot-ai.yaml
 	# === Ende aotmod ===
 
 Sequences:
