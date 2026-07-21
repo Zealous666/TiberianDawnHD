@@ -440,6 +440,29 @@ namespace OpenRA.Mods.Common.Traits
 			return Intel.IsPassable(cell) ? cell : null;
 		}
 
+		// The current rally cell of the first infantry-producing building found (its RallyPoint
+		// once EnsureInfantryRallyPoints has set one, else the building itself). Missions use this
+		// to actively gather ALL their units there during Forming -- not just freshly produced
+		// ones (which the barracks rally point already handles), but also POOL-REUSED units,
+		// which can be standing anywhere on the map wherever an earlier mission left them.
+		public CPos? PrimaryInfantryRallyCell()
+		{
+			foreach (var building in World.Actors)
+			{
+				if (building.Owner != Player || building.IsDead || !building.IsInWorld
+					|| !Info.InfantryRallyTypes.Contains(building.Info.Name))
+					continue;
+
+				var rp = building.TraitOrDefault<RallyPoint>();
+				if (rp != null && rp.Path.Count > 0)
+					return rp.Path[0];
+
+				return building.Location;
+			}
+
+			return null;
+		}
+
 		public bool CannotOrder(Actor a) => unitCannotBeOrdered(a);
 
 		void IBotTick.BotTick(IBot bot)

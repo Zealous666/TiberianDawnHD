@@ -934,6 +934,17 @@ namespace OpenRA.Mods.Common.Traits
 			switch (phase)
 			{
 				case Phase.Forming:
+					// Actively gather every unit at the barracks rally cell each tick -- the
+					// passive engine rally point only carries a unit as far as the exit; if that
+					// single cell is already occupied it silently reroutes to whatever nearby cell
+					// is free (production collision), and pool-reused units (left over from an
+					// earlier mission) never walked there in the first place.
+					var rally = Ops.PrimaryInfantryRallyCell();
+					if (rally.HasValue)
+						foreach (var a in Units)
+							if (a.IsIdle && (a.Location - rally.Value).LengthSquared > 4)
+								MoveUnit(bot, a, rally.Value, false);
+
 					if (Units.Count >= groupTarget)
 					{
 						phase = Phase.Touring;
@@ -1101,6 +1112,16 @@ namespace OpenRA.Mods.Common.Traits
 		void TickForming(IBot bot)
 		{
 			formingTicks += Ops.Info.MissionInterval;
+
+			// Actively gather every unit at the barracks rally cell each tick -- the passive engine
+			// rally point only carries a unit as far as the exit; if that single cell is already
+			// occupied it silently reroutes to whatever nearby cell is free (production collision),
+			// and pool-reused units (left over from an earlier mission) never walked there at all.
+			var rally = Ops.PrimaryInfantryRallyCell();
+			if (rally.HasValue)
+				foreach (var a in Units)
+					if (a.IsIdle && (a.Location - rally.Value).LengthSquared > 4)
+						MoveUnit(bot, a, rally.Value, false);
 
 			// Wait for the full 5-man squad at the barracks rally point; the engineer is mandatory.
 			// The timeout is a last-resort safety net only (shared actor types with other missions,
