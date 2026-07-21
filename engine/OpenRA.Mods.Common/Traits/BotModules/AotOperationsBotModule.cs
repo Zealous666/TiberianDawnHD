@@ -262,6 +262,16 @@ namespace OpenRA.Mods.Common.Traits
 			"and alive (the scout mission's whole purpose is feeding the radar/minimap).")]
 		public readonly HashSet<string> RadarTypes = [];
 
+		[ActorReference]
+		[Desc("Infantry-producing building types (Barracks/Hand). Without a rally point these have",
+			"multiple Exit cells and the engine picks one at RANDOM per unit, scattering freshly",
+			"produced infantry across the base. A fixed rally point near the building keeps every",
+			"exit consistent and holds new units there until a mission claims them.")]
+		public readonly HashSet<string> InfantryRallyTypes = [];
+
+		[Desc("Ticks between checks for infantry-producing buildings that still need a rally point.")]
+		public readonly int RallyCheckInterval = 50;
+
 		// ---- Module 4: Derrick Engineer Squads ----
 		[ActorReference]
 		public readonly string[] EngineerTypes = [];
@@ -326,6 +336,7 @@ namespace OpenRA.Mods.Common.Traits
 		int productionTicks;
 		int starportTicks;
 		int missionTicks;
+		int rallyCheckTicks;
 		readonly Dictionary<int, int> scoutRespawnTicks = [];
 		readonly Dictionary<int, List<CPos>> scoutAssignments = [];
 
@@ -354,6 +365,7 @@ namespace OpenRA.Mods.Common.Traits
 			productionTicks = World.LocalRandom.Next(0, Info.ProductionInterval);
 			starportTicks = World.LocalRandom.Next(0, Info.StarportFlushInterval);
 			missionTicks = World.LocalRandom.Next(0, Info.MissionInterval);
+			rallyCheckTicks = World.LocalRandom.Next(0, Info.RallyCheckInterval);
 		}
 
 		public CPos BaseCentre()
@@ -376,6 +388,44 @@ namespace OpenRA.Mods.Common.Traits
 
 		public bool HasRadar() =>
 			World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld && Info.RadarTypes.Contains(a.Info.Name));
+
+		// Barracks/Hand have multiple Exit cells and no rally point by default -- the engine then
+		// picks an exit at RANDOM per unit (Production.SelectExit), scattering fresh infantry
+		// across the base. Setting a fixed rally point near the building makes exit selection
+		// deterministic and holds new units there (single-point path -> they stop and wait).
+		void EnsureInfantryRallyPoints(IBot bot)
+		{
+			if (Info.InfantryRallyTypes.Count == 0)
+				return;
+
+			foreach (var building in World.Actors)
+			{
+				if (building.Owner != Player || building.IsDead || !building.IsInWorld
+					|| !Info.InfantryRallyTypes.Contains(building.Info.Name))
+					continue;
+
+				var rp = building.TraitOrDefault<RallyPoint>();
+				if (rp == null || rp.Path.Count > 0)
+					continue;
+
+				var cell = FindRallyCellNear(building.Location);
+				if (cell == null)
+					continue;
+
+				bot.QueueOrder(new Order("SetRallyPoint", building, Target.FromCell(World, cell.Value), false));
+				Log($"rally point set for {building.Info.Name}@{building.Location} -> {cell.Value}");
+			}
+		}
+
+		CPos? FindRallyCellNear(CPos buildingLocation)
+		{
+			for (var r = 1; r <= 4; r++)
+				foreach (var c in AotOpsUtils.Ring(buildingLocation, r))
+					if (Intel.IsPassable(c) && Intel.IsReachable(c))
+						return c;
+
+			return null;
+		}
 
 		public bool CannotOrder(Actor a) => unitCannotBeOrdered(a);
 
@@ -407,6 +457,12 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				starportTicks = Info.StarportFlushInterval;
 				FlushStarport(bot);
+			}
+
+			if (--rallyCheckTicks <= 0)
+			{
+				rallyCheckTicks = Info.RallyCheckInterval;
+				EnsureInfantryRallyPoints(bot);
 			}
 
 			Schedule(bot);

@@ -203,7 +203,9 @@
   <p>Combat AI built from the "OpenRA AoT AI Operations Framework v2" briefing. Fully replaces the stock
     SquadManager (2026-07-21). Modules 1–4 implemented and built (0 errors), still untested in-game.
     Faction-split instances of <code>AotOperationsBotModule</code> (@nod / @gdi) produce their own mission
-    units; <code>AotMapIntelBotModule</code> provides the shared map analysis.</p>
+    units; <code>AotMapIntelBotModule</code> provides the shared map analysis. A fixed rally point is set on
+    every Barracks/Hand (which otherwise pick a random Exit cell per unit) so fresh infantry converge and
+    hold at one spot near the building instead of scattering across the base while a mission fills up.</p>
 </header>
 
 <div class="status-line">Source: <strong>mods/cnc/rules/aot-ai.yaml</strong> · <strong>engine/OpenRA.Mods.Common/Traits/BotModules/AotOperationsBotModule.cs</strong> · <strong>AotOpsMissions.cs</strong> · Normal speed = 40 ms/tick.</div>
