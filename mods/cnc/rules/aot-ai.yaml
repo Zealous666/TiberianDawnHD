@@ -535,6 +535,12 @@ Player:
 		AntiInfantryTypes: aot-jeep-wolverine, aot-jeep-humvee, aot-jeep-base
 		AntiTankTypes: aot-htnk-laser, aot-htnk-rocket, aot-htnk-base, aot-mtnk-rail, aot-mtnk-pred, aot-mtnk-base
 		AntiAirTypes: aot-msam-hover-aa
+		# Naval ferry (User 2026-07-21): if there is no ground route to the enemy, a wave builds/
+		# reuses 2 Hovercraft once the Shipyard exists, ferries itself across water in batches
+		# (1 vehicle per transport), regroups on the far shore, then continues the attack.
+		NavalProductionTypes: aot-shipyard
+		FerryTypes: aot-transport-hover-proxy
+		FerryCount: 2
 		ScoutTypes: aot-jeep-base, aot-jeep-humvee, aot-jeep-wolverine, aot-apc-amphibious
 		DerrickMaxTargets: 2
 		EngineerTypes: aot-e6-gdi
@@ -559,6 +565,12 @@ Player:
 		WaveRetreatLossPercent: 0
 		AntiInfantryTypes: aot-ttnk-flame, aot-v2-napalm, aot-bggy-laser, aot-bggy-base
 		AntiTankTypes: aot-ltnk-tick, aot-ltnk-laser, aot-ltnk-base, aot-ttnk-base
+		# Naval ferry (User 2026-07-21): if there is no ground route to the enemy, a wave builds/
+		# reuses 2 Transport Vessels once the Sub Pen exists, ferries itself across water in
+		# batches (1 vehicle per transport), regroups on the far shore, then continues the attack.
+		NavalProductionTypes: aot-subpen
+		FerryTypes: aot-transport-base, aot-transport-gun-proxy
+		FerryCount: 2
 		# Bike/Buggy need ~aot-age1 -> not buildable in Age 0. Scout squad is a 3-man
 		# infantry mix instead (User 2026-07-21): 1 MG (Role A) + 1 Rocket (Role B) +
 		# 1 Flame Trooper (Role C, falls back to the toxic variant post-Age3).

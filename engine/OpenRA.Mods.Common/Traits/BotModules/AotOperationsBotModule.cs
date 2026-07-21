@@ -201,6 +201,26 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Forming timeout; the wave launches with what it has (if at least half).")]
 		public readonly int WaveFormingTimeout = 4500;
 
+		[ActorReference]
+		[Desc("Shipyard/Sub Pen actor types. A wave only switches to naval ferrying once one of",
+			"these is owned and alive.")]
+		public readonly HashSet<string> NavalProductionTypes = [];
+
+		[ActorReference]
+		[Desc("Transport Vessel / Hovercraft variant chain (all exclusive branches) used to ferry",
+			"a wave across water when no ground route to the enemy exists.")]
+		public readonly string[] FerryTypes = [];
+
+		[Desc("Number of transports built (and reused across waves) to ferry a wave across water.")]
+		public readonly int FerryCount = 2;
+
+		[Desc("Radius in cells to search for a coastal embark/landing cell around the reference point.")]
+		public readonly int FerrySearchRadius = 14;
+
+		[Desc("Ferry phase timeout; proceeds with whoever made it ashore, or cancels the wave if",
+			"nobody did.")]
+		public readonly int FerryTimeout = 9000;
+
 		// ---- Module 3: Scout Expeditions ----
 		[ActorReference]
 		[Desc("Scout role A variant chain (all exclusive branches). When roles B/C are empty,",
@@ -333,6 +353,9 @@ namespace OpenRA.Mods.Common.Traits
 
 			return 0;
 		}
+
+		public bool HasNavalProduction() =>
+			World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld && Info.NavalProductionTypes.Contains(a.Info.Name));
 
 		public bool CannotOrder(Actor a) => unitCannotBeOrdered(a);
 

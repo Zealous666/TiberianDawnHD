@@ -399,7 +399,7 @@ namespace OpenRA.Mods.Common.Traits
 	// ======================================================================
 	public sealed class AotRegularWaveMission : AotMissionWithOrders
 	{
-		enum Phase { Forming, Executing, Retreating }
+		enum Phase { Forming, Ferrying, Executing, Retreating }
 
 		Phase phase = Phase.Forming;
 		readonly int index;
@@ -410,10 +410,39 @@ namespace OpenRA.Mods.Common.Traits
 		bool ecoWave;
 		bool composed;
 
+		// Naval ferry (no land route to the enemy): transports are tracked separately from the
+		// combat Units they carry, reused across waves via the pool.
+		readonly List<Actor> ferries = [];
+		readonly HashSet<Actor> inTransit = [];
+		readonly HashSet<Actor> ferriedAshore = [];
+		CPos? embarkCell;
+		CPos? ferryLandingCell;
+		int ferryTicks;
+		bool ashore;
+
 		public AotRegularWaveMission(AotOperationsBotModule ops, int index)
 			: base(ops, $"wave-{index}")
 		{
 			this.index = index;
+		}
+
+		public override void OnUnitAssigned(Actor a)
+		{
+			if (Ops.Info.FerryTypes.Contains(a.Info.Name))
+				ferries.Add(a);
+			else
+				base.OnUnitAssigned(a);
+		}
+
+		void FinishWave()
+		{
+			if (ferries.Count > 0)
+			{
+				Ops.ReleaseToPool(this, ferries.ToList());
+				ferries.Clear();
+			}
+
+			Finish();
 		}
 
 		public override void Tick(IBot bot)
@@ -430,6 +459,7 @@ namespace OpenRA.Mods.Common.Traits
 			switch (phase)
 			{
 				case Phase.Forming: TickForming(bot); break;
+				case Phase.Ferrying: TickFerrying(bot); break;
 				case Phase.Executing: TickExecuting(bot); break;
 				case Phase.Retreating: TickRetreating(bot); break;
 			}
@@ -465,7 +495,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (roles.Count == 0)
 			{
 				Log("no wave role buildable yet -> wave skipped");
-				Finish();
+				FinishWave();
 				return;
 			}
 
@@ -580,7 +610,7 @@ namespace OpenRA.Mods.Common.Traits
 				else
 				{
 					Log("forming dead end -> wave cancelled");
-					Finish();
+					FinishWave();
 					return;
 				}
 			}
@@ -590,8 +620,18 @@ namespace OpenRA.Mods.Common.Traits
 
 			initialCount = Units.Count;
 			ChooseTarget();
-			phase = Phase.Executing;
-			Log($"launch: {initialCount} unit(s), eco={ecoWave}, target={DescribeTarget()}");
+
+			if (targetActor == null && targetCell == null && TryStartFerry())
+			{
+				phase = Phase.Ferrying;
+				Log($"launch: {initialCount} unit(s), eco={ecoWave}, no ground route to the enemy -> " +
+					$"ferrying via embark={embarkCell} landing={ferryLandingCell}");
+			}
+			else
+			{
+				phase = Phase.Executing;
+				Log($"launch: {initialCount} unit(s), eco={ecoWave}, target={DescribeTarget()}");
+			}
 		}
 
 		string DescribeTarget() =>
@@ -603,17 +643,146 @@ namespace OpenRA.Mods.Common.Traits
 			targetActor = null;
 			targetCell = null;
 
+			// Once the wave has ferried across water it stands on the far shore, outside the AI's
+			// own base-side ground-reachability set -- stop requiring reachability from there on.
+			var requireReachable = !ashore;
+
 			if (ecoWave)
 			{
 				// Economy pressure: visible enemy harvesters first (outposts fall back to the main path).
-				targetActor = Ops.Intel.NearestVisibleEnemyHarvester(centre);
+				targetActor = Ops.Intel.NearestVisibleEnemyHarvester(centre, requireReachable);
 				if (targetActor != null)
 					return;
 			}
 
-			targetActor = Ops.Intel.NearestEnemyYard(centre);
+			targetActor = Ops.Intel.NearestEnemyYard(centre, requireReachable);
 			if (targetActor == null)
-				targetCell = Ops.Intel.NearestEnemySpawn(centre);
+				targetCell = Ops.Intel.NearestEnemySpawn(centre, requireReachable);
+		}
+
+		// No ground path to the enemy: build/reuse FerryCount transports and ferry the wave across
+		// water instead of giving up. Returns false (wave proceeds/ends normally) if ferrying isn't
+		// possible (no naval production yet, no ferry chain configured, or no coastal cells found).
+		bool TryStartFerry()
+		{
+			if (Ops.Info.FerryTypes.Length == 0 || !Ops.HasNavalProduction())
+				return false;
+
+			if (Ops.Intel.EnemySpawns.Count == 0)
+				return false;
+
+			var enemyRef = Ops.Intel.EnemySpawns.MinBy(s => (s - Ops.BaseCentre()).LengthSquared);
+			ferryLandingCell = Ops.Intel.FindCoastalCellNear(enemyRef, Ops.Info.FerrySearchRadius, requireOwnReachable: false);
+			embarkCell = Ops.Intel.FindCoastalCellNear(Ops.BaseCentre(), Ops.Info.FerrySearchRadius, requireOwnReachable: true);
+
+			if (ferryLandingCell == null || embarkCell == null)
+			{
+				Log("naval ferry unavailable: no coastal embark/landing cell found nearby");
+				return false;
+			}
+
+			// Reuse transports released by an earlier wave first, only produce the shortfall.
+			var fromPool = Ops.TakeFromPool(Ops.Info.FerryTypes, Ops.Info.FerryCount);
+			Ops.AssignFromPool(this, fromPool);
+			if (Ops.Info.FerryCount - fromPool.Count > 0)
+				Ops.QueueRequest(this, "ferry", Ops.Info.FerryTypes, Ops.Info.FerryCount - fromPool.Count);
+
+			return true;
+		}
+
+		void TickFerrying(IBot bot)
+		{
+			ferryTicks += Ops.Info.MissionInterval;
+			ferries.RemoveAll(Ops.CannotOrder);
+			ferriedAshore.RemoveWhere(Ops.CannotOrder);
+			inTransit.RemoveWhere(Ops.CannotOrder);
+
+			if (ferries.Count == 0 && Ops.OpenRequests(this) == 0 && ferriedAshore.Count == 0)
+			{
+				Log("no transports available -> ferry cancelled, wave dissolved");
+				FinishWave();
+				return;
+			}
+
+			var pending = Units.Where(a => !Ops.CannotOrder(a) && !ferriedAshore.Contains(a) && !inTransit.Contains(a)).ToList();
+
+			// Walk not-yet-embarked units to the coast.
+			foreach (var u in pending)
+				if (u.IsIdle && (u.Location - embarkCell.Value).LengthSquared > 9)
+					bot.QueueOrder(new Order("AttackMove", u, Target.FromCell(Ops.World, embarkCell.Value), false));
+
+			foreach (var ship in ferries)
+			{
+				var cargo = ship.TraitOrDefault<Cargo>();
+				if (cargo == null)
+					continue;
+
+				if (cargo.IsEmpty())
+				{
+					if ((ship.Location - embarkCell.Value).LengthSquared <= 9)
+					{
+						var unit = pending.FirstOrDefault(u => u.IsIdle && (u.Location - embarkCell.Value).LengthSquared <= 9);
+						if (unit != null)
+						{
+							bot.QueueOrder(new Order("EnterTransport", unit, Target.FromActor(ship), false));
+							inTransit.Add(unit);
+							pending.Remove(unit);
+						}
+					}
+					else if (ship.IsIdle && (pending.Count > 0 || inTransit.Count > 0))
+						bot.QueueOrder(new Order("Move", ship, Target.FromCell(Ops.World, embarkCell.Value), false));
+				}
+				else
+				{
+					if ((ship.Location - ferryLandingCell.Value).LengthSquared <= 9)
+						bot.QueueOrder(new Order("Unload", ship, false));
+					else if (ship.IsIdle)
+						bot.QueueOrder(new Order("Move", ship, Target.FromCell(Ops.World, ferryLandingCell.Value), false));
+				}
+			}
+
+			// Detect disembarked units: still tracked as in-transit but no longer aboard any ferry.
+			foreach (var u in inTransit.ToList())
+			{
+				if (!ferries.Any(s => s.TraitOrDefault<Cargo>()?.Passengers.Contains(u) == true))
+				{
+					inTransit.Remove(u);
+					ferriedAshore.Add(u);
+				}
+			}
+
+			var stillToGo = Units.Count(a => !Ops.CannotOrder(a) && !ferriedAshore.Contains(a));
+			if (stillToGo == 0)
+			{
+				if (ferriedAshore.Count == 0)
+				{
+					Log("everyone lost during the crossing -> wave lost");
+					FinishWave();
+					return;
+				}
+
+				ashore = true;
+				ChooseTarget();
+				phase = Phase.Executing;
+				Log($"ferry complete: {ferriedAshore.Count} unit(s) landed near the enemy, target={DescribeTarget()}");
+				return;
+			}
+
+			if (ferryTicks >= Ops.Info.FerryTimeout)
+			{
+				if (ferriedAshore.Count > 0)
+				{
+					ashore = true;
+					ChooseTarget();
+					phase = Phase.Executing;
+					Log($"ferry timeout -> proceeding with {ferriedAshore.Count} unit(s) already ashore");
+				}
+				else
+				{
+					Log("ferry timeout, nobody made it across -> wave cancelled");
+					FinishWave();
+				}
+			}
 		}
 
 		void TickExecuting(IBot bot)
@@ -621,7 +790,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (Units.Count == 0)
 			{
 				Log("wave wiped out");
-				Finish();
+				FinishWave();
 				return;
 			}
 
@@ -643,7 +812,7 @@ namespace OpenRA.Mods.Common.Traits
 				if (targetActor == null && targetCell == null)
 				{
 					Log("no target left -> wave done");
-					Finish();
+					FinishWave();
 					return;
 				}
 			}
@@ -673,7 +842,7 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			if (Units.Count == 0)
 			{
-				Finish();
+				FinishWave();
 				return;
 			}
 
@@ -682,7 +851,7 @@ namespace OpenRA.Mods.Common.Traits
 			if ((centre - home).LengthSquared <= 64)
 			{
 				Log("retreat complete -> units to pool");
-				Finish();
+				FinishWave();
 				return;
 			}
 

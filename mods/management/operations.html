@@ -244,11 +244,11 @@ const nodOps = [
   {
     badge: "Module 2",
     title: "Regular Attack Waves",
-    desc: "Autonomous standard offensive: 50% tank core, 30% light vehicles, 20% artillery — a fixed faction identity plus a 25% adaptive share against the observed enemy army. Nod fights to complete annihilation.",
+    desc: "Autonomous standard offensive: 50% tank core, 30% light vehicles, 20% artillery — a fixed faction identity plus a 25% adaptive share against the observed enemy army. Nod fights to complete annihilation. If no ground route to the enemy exists, the wave ferries itself across water instead of giving up.",
     meta: [
-      { label: "Cost", value: "Base budget for n=6/8/10/12 vehicles (Age 0–3) × role costs (TTNK/LTNK ~750–900, BGGY/BIKE ~300–500, artillery ~600–1200), +25% per wave (capped at 300% of base), max. 20 units." },
-      { label: "Timing", value: "First wave ~3000 ticks (≈2 min) after activation; then a 1500-tick (≈1 min) cooldown after each wave ends." },
-      { label: "Prerequisite", value: "At least one role (tank/light/support) currently buildable; chains contain all exclusive branches (e.g. LTNK-laser OR LTNK-tick), first buildable variant wins." },
+      { label: "Cost", value: "Base budget for n=6/8/10/12 vehicles (Age 0–3) × role costs (TTNK/LTNK ~750–900, BGGY/BIKE ~300–500, artillery ~600–1200), +25% per wave (capped at 300% of base), max. 20 units. Naval ferry: 2 Transport Vessels (~900 each), built once and reused across waves." },
+      { label: "Timing", value: "First wave ~3000 ticks (≈2 min) after activation; then a 1500-tick (≈1 min) cooldown after each wave ends. Ferry phase timeout ~9000 ticks (≈6 min) before giving up on stragglers." },
+      { label: "Prerequisite", value: "At least one role (tank/light/support) currently buildable; chains contain all exclusive branches (e.g. LTNK-laser OR LTNK-tick), first buildable variant wins. Naval ferry additionally needs an owned Sub Pen and a coastal cell near both the own base and the enemy." },
       { label: "Why / Frequency", value: "Backbone of the offensive, runs independently of scouts/engineers/superweapons. Exactly one active wave at a time; the next wave only starts once the previous one is done." },
     ],
     routine: [
@@ -256,9 +256,10 @@ const nodOps = [
       "Fill missing units from the mission pool first (leftovers from earlier waves), otherwise produce them",
       "Forming phase: rally point halfway between base and chokepoint, until production is complete or timeout (≈3 min) with at least half strength assembled",
       "Choose a target: 75% main base (construction yard, falling back to enemy spawn), 25% visible enemy harvester (economic pressure)",
+      "No ground route found and a Sub Pen exists: build/reuse 2 Transport Vessels, walk the wave to the nearest own coastal cell, ferry it across in batches of 1 vehicle per transport, regroup on the far shore, then choose a target there and continue",
       "AttackMove to the target; stragglers regroup on the unit closest to the group's centroid",
       "0% loss threshold: no retreat — the wave fights until wiped out",
-      "Wave ends (wiped out or target destroyed): survivors return to the pool, next wave launches with a higher budget",
+      "Wave ends (wiped out or target destroyed): survivors return to the pool, transports return to the pool for reuse, next wave launches with a higher budget",
     ],
   },
   {
@@ -323,11 +324,11 @@ const gdiOps = [
   {
     badge: "Module 2",
     title: "Regular Attack Waves",
-    desc: "60% battle tanks, 25% light vehicles, 15% support/AA plus a 25% adaptive share. GDI retreats once it has lost 75% of the wave's original unit count, instead of fighting to the last unit.",
+    desc: "60% battle tanks, 25% light vehicles, 15% support/AA plus a 25% adaptive share. GDI retreats once it has lost 75% of the wave's original unit count, instead of fighting to the last unit. If no ground route to the enemy exists, the wave ferries itself across water instead of giving up.",
     meta: [
-      { label: "Cost", value: "Base budget for n=6/8/10/12 vehicles (Age 0–3) × role costs (MTNK ~900, Jeep variants ~400–600, Juggernaut/MSAM higher), +25% per wave (capped at 300% of base), max. 20 units." },
-      { label: "Timing", value: "First wave ~3000 ticks (≈2 min) after activation; then a 1500-tick (≈1 min) cooldown after each wave ends." },
-      { label: "Prerequisite", value: "At least one role currently buildable; chains contain all exclusive branches (Jeep→HUMVEE OR Wolverine OR APC→AAPC), first buildable variant wins." },
+      { label: "Cost", value: "Base budget for n=6/8/10/12 vehicles (Age 0–3) × role costs (MTNK ~900, Jeep variants ~400–600, Juggernaut/MSAM higher), +25% per wave (capped at 300% of base), max. 20 units. Naval ferry: 2 Hovercraft (~900 each), built once and reused across waves." },
+      { label: "Timing", value: "First wave ~3000 ticks (≈2 min) after activation; then a 1500-tick (≈1 min) cooldown after each wave ends. Ferry phase timeout ~9000 ticks (≈6 min) before giving up on stragglers." },
+      { label: "Prerequisite", value: "At least one role currently buildable; chains contain all exclusive branches (Jeep→HUMVEE OR Wolverine OR APC→AAPC), first buildable variant wins. Naval ferry additionally needs an owned Shipyard and a coastal cell near both the own base and the enemy." },
       { label: "Why / Frequency", value: "Backbone of the offensive. Exactly one active wave at a time; the next only starts after the previous one ends (victory, retreat, or wipe)." },
     ],
     routine: [
@@ -335,9 +336,10 @@ const gdiOps = [
       "Fill missing units from the mission pool first, otherwise produce them",
       "Forming phase: rally point halfway between base and chokepoint, until production is complete or timeout (≈3 min)",
       "Choose a target: 75% main base, 25% visible enemy harvester",
+      "No ground route found and a Shipyard exists: build/reuse 2 Hovercraft, walk the wave to the nearest own coastal cell, ferry it across in batches of 1 vehicle per transport, regroup on the far shore, then choose a target there and continue",
       "AttackMove to the target; stragglers regroup on the unit closest to the group's centroid",
       "75% loss (by unit count) reached: retreat to the own construction yard, survivors return to the pool",
-      "Otherwise wave ends (wiped out or target destroyed): survivors return to the pool, next wave launches with a higher budget",
+      "Otherwise wave ends (wiped out or target destroyed): survivors return to the pool, transports return to the pool for reuse, next wave launches with a higher budget",
     ],
   },
   {

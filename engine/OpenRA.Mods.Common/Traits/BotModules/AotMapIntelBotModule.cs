@@ -220,31 +220,87 @@ namespace OpenRA.Mods.Common.Traits
 				.FirstOrDefault(a => !a.IsDead && a.IsInWorld && Info.CrateTypes.Contains(a.Info.Name));
 		}
 
-		public Actor NearestEnemyYard(CPos from)
+		// requireReachable=false: used once a wave has ferried across water and is standing on the
+		// far shore, where the AI's own (base-side) ground-reachability set no longer applies.
+		public Actor NearestEnemyYard(CPos from, bool requireReachable = true)
 		{
 			return constructionYards.Actors
 				.Where(a => !a.IsDead && a.IsInWorld
 					&& Player.RelationshipWith(a.Owner) == PlayerRelationship.Enemy
-					&& IsReachable(a.Location))
+					&& (!requireReachable || IsReachable(a.Location)))
 				.MinByOrDefault(a => (a.Location - from).LengthSquared);
 		}
 
-		public CPos? NearestEnemySpawn(CPos from)
+		public CPos? NearestEnemySpawn(CPos from, bool requireReachable = true)
 		{
-			var candidates = EnemySpawns.Where(IsReachable).ToList();
+			var candidates = requireReachable ? EnemySpawns.Where(IsReachable).ToList() : EnemySpawns;
 			if (candidates.Count == 0)
 				return null;
 			return candidates.MinBy(s => (s - from).LengthSquared);
 		}
 
-		public Actor NearestVisibleEnemyHarvester(CPos from)
+		public Actor NearestVisibleEnemyHarvester(CPos from, bool requireReachable = true)
 		{
 			return World.ActorsHavingTrait<Harvester>()
 				.Where(a => !a.IsDead && a.IsInWorld
 					&& Player.RelationshipWith(a.Owner) == PlayerRelationship.Enemy
 					&& a.CanBeViewedByPlayer(Player)
-					&& IsReachable(a.Location))
+					&& (!requireReachable || IsReachable(a.Location)))
 				.MinByOrDefault(a => (a.Location - from).LengthSquared);
+		}
+
+		// ---- Coastal cells (naval ferry support) ---------------------------------
+
+		public bool IsCoastal(CPos c)
+		{
+			if (World.Map.GetTerrainInfo(c).Type == "Beach")
+				return true;
+
+			foreach (var d in CVec.Directions)
+			{
+				var n = c + d;
+				if (!World.Map.Contains(n))
+					continue;
+
+				var t = World.Map.GetTerrainInfo(n).Type;
+				if (t == "Water" || t == "River")
+					return true;
+			}
+
+			return false;
+		}
+
+		// Nearest walkable coastal cell to `target` within `radius`. requireOwnReachable restricts
+		// to the AI's own (base-side) ground-reachable set — use true for the embark point on home
+		// soil, false for a landing cell near the enemy (by definition outside that set).
+		public CPos? FindCoastalCellNear(CPos target, int radius, bool requireOwnReachable)
+		{
+			CPos? best = null;
+			var bestDist = int.MaxValue;
+			for (var dy = -radius; dy <= radius; dy++)
+			{
+				for (var dx = -radius; dx <= radius; dx++)
+				{
+					var c = new CPos(target.X + dx, target.Y + dy);
+					if (!World.Map.Contains(c) || !IsPassable(c))
+						continue;
+
+					if (requireOwnReachable && !IsReachable(c))
+						continue;
+
+					if (!IsCoastal(c))
+						continue;
+
+					var d = (c - target).LengthSquared;
+					if (d < bestDist)
+					{
+						bestDist = d;
+						best = c;
+					}
+				}
+			}
+
+			return best;
 		}
 
 		void INotifyActorDisposing.Disposing(Actor self)
