@@ -88,6 +88,9 @@ Player:
 		# Blossom-Tree-Actors (Tiberium-Wachstumsquellen, ^TibTree in defaults.yaml) — Plan hält
 		# GrowthSourceMargin Zellen Abstand, damit nachwachsendes Erz die Base-Zellen nicht überwuchert.
 		GrowthSourceTypes: split2, split3, splitblue
+		# Sub Pen: nur wenn die Base-Tasche selbst an Beach/Water-Cliff grenzt (User-Spec) — sonst
+		# Outpost-Ops-Thema, kein Base-Rhythmus-Schritt. Prereq nur `lite` -> Age-0-baubar direkt nach FIX.
+		SubpenTypes: aot-subpen
 
 	# GDI bekommt später eine EIGENE Instanz (@gdi) mit eigener Build-Order.
 	# Executor: baut den gespeicherten Plan im Rhythmus des Planners — ein Bau zur

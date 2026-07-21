@@ -94,6 +94,12 @@ namespace OpenRA.Mods.Common.Traits
 		[ActorReference] public readonly string[] FturTypes = [];
 		[ActorReference] public readonly string[] WallTypes = [];
 
+		[ActorReference]
+		[Desc("Sub Pen / naval production. Only planned when the base POCKET itself touches a beach or",
+			"water cliff (a coastal cell reachable within the base's own flooded area) — an inland base",
+			"without water at its own edge is not the base manager's job (later: Outpost Operations).")]
+		public readonly string[] SubpenTypes = [];
+
 		public override object Create(ActorInitializer init) { return new AotBasePlannerBotModule(init.Self, this); }
 	}
 
@@ -456,6 +462,7 @@ namespace OpenRA.Mods.Common.Traits
 			"SHRN" => Info.ShrineTypes,
 			"SGEN" => Info.SgenTypes,
 			"AFLD" => Info.AfldTypes,
+			"SUBPEN" => Info.SubpenTypes,
 			_ => [],
 		};
 
@@ -467,7 +474,7 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			roleCells = [];
 			roleDims = [];
-			foreach (var role in new[] { "NUKE", "NUK2", "SILO", "LITE", "HAND", "DOME", "STEC", "FIX", "HPAD", "PROC", "TMPL", "MSLO", "SHRN", "SGEN", "AFLD" })
+			foreach (var role in new[] { "NUKE", "NUK2", "SILO", "LITE", "HAND", "DOME", "STEC", "FIX", "HPAD", "PROC", "TMPL", "MSLO", "SHRN", "SGEN", "AFLD", "SUBPEN" })
 			{
 				var variants = RoleVariants(role);
 				if (variants.Length == 0)
@@ -743,6 +750,24 @@ namespace OpenRA.Mods.Common.Traits
 			var pTech = Place("TECH", PairVariants("DOME", "STEC"), c => -0.5 * Dist(c, yard));
 			var pNuk2b = Place("NUK2b", QuadVariants("NUK2"), GateBias);
 			var pFix = Place("FIX", SingleVariants("FIX"), c => -2 * Dist(c, mainGateBias));
+
+			// Sub Pen: ONLY when the base's own POCKET touches a beach or water-cliff (a coastal cell
+			// reachable within the base's flooded area) — user spec. An inland base with no water at its
+			// own edge is not the base manager's job; overseas naval production is a later Outpost
+			// Operations concern, not a base-rhythm step.
+			Placement pSubpen = null;
+			if (Info.SubpenTypes.Length > 0 && roleDims.ContainsKey("SUBPEN"))
+			{
+				var coastal = Pocket.Where(Beachy).ToList();
+				if (coastal.Count > 0)
+				{
+					var nearestCoast = coastal.OrderBy(c => Dist((yard.X, yard.Y), c)).First();
+					pSubpen = Place("SUBPEN", SingleVariants("SUBPEN"), c => -2 * Dist(c, nearestCoast));
+				}
+				else
+					Log.Write("debug", "[AotPlan] Sub Pen skipped: pocket has no coastal cell (no beach/water-cliff at base edge)");
+			}
+
 			var pProc = Place("PROC", SingleVariants("PROC"), c => -1.5 * Dist(c, tib));
 			var pAfld = Place("AFLD", SingleVariants("AFLD"), _ => 0);
 			var pTmpl = Place("TMPL", SingleVariants("TMPL"), _ => 0);
@@ -753,7 +778,7 @@ namespace OpenRA.Mods.Common.Traits
 			var sg1 = centres[^1];
 			var pSgen2 = Place("SGEN2", SingleVariants("SGEN"), c => 1.5 * DistC(c, sg1));
 
-			BuildRhythm(pNuke, pSilo, pProd, pNuk2a, pTech, pNuk2b, pFix, pProc, pAfld, pTmpl, pHpad, pShrn, pMslo, pSgen1, pSgen2);
+			BuildRhythm(pNuke, pSilo, pProd, pNuk2a, pTech, pNuk2b, pFix, pProc, pAfld, pTmpl, pHpad, pShrn, pMslo, pSgen1, pSgen2, pSubpen);
 
 			Log.Write("debug", $"[AotPlan] yard={yard} pocket={Pocket.Count} gates=[{string.Join(" ", gates)}] main={MainGate} " +
 				$"placed={placements.Count}/15 rhythm={Rhythm.Count} steps");
@@ -818,7 +843,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		void BuildRhythm(Placement nuke, Placement silo, Placement prod, Placement nuk2a, Placement tech,
 			Placement nuk2b, Placement fix, Placement proc, Placement afld, Placement tmpl, Placement hpad,
-			Placement shrn, Placement mslo, Placement sgen1, Placement sgen2)
+			Placement shrn, Placement mslo, Placement sgen1, Placement sgen2, Placement subpen)
 		{
 			// AGE 0 — mixed power cluster (2×NUK2 + 2×NUKE, columns): the first NUKE comes first (NUK2
 			// requires an existing nuke), the NUK2s interleave with the tech pair, the second NUKE closes
@@ -836,6 +861,11 @@ namespace OpenRA.Mods.Common.Traits
 			AddFenceFor(nuke, "PowerFence");
 			AddBuilding(hpad, 0, "HPAD");
 			AddBuilding(fix, 0, "FIX");
+
+			// Sub Pen (user spec): only when the pocket is coastal (Place() left `subpen` null otherwise —
+			// see the coastal check above). Prerequisites only need `lite`, so this is Age-0-buildable.
+			AddBuilding(subpen, 0, "SUBPEN");
+
 			if (MainGate != null && Info.FturTypes.Length > 0)
 			{
 				Rhythm.Add(new AotPlanStep { Kind = AotStepKind.Turret, Role = "FTUR", Variants = Info.FturTypes, TopLeft = MainGate.Value });
