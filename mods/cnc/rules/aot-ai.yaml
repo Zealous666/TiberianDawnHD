@@ -434,118 +434,24 @@ Player:
 	UnitBuilderBotModule@aot:
 		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
 		ProductionMinCashRequirement: 300
-		UnitQueues: Vehicle.GDI, LightVehicle.GDI, LightVehicle.Nod, Starport, Infantry.GDI, Infantry.Nod, Infantry.NodElite, Aircraft.GDI, Aircraft.Nod, Aircraft.GDI.AFLT, Naval.GDI, Naval.Nod
+		# NUR NOCH ÖKONOMIE (2026-07-21): Kampfeinheiten produziert das
+		# AotOperationsBotModule EXKLUSIV für seine Missionen (User-Entscheidung;
+		# verhindert Idle-Stau auf den Bau-Slots). Diese Instanz baut nur noch
+		# Harvester + Erz-Transporter und bedient weiter IBotRequestUnitProduction
+		# (MCV-Expansion). Luft/Marine ruhen bis Modul 9/13 des Ops-Frameworks.
+		UnitQueues: Vehicle.GDI, Starport, LightVehicle.GDI, LightVehicle.Nod
 		UnitLimits:
 			aot-harv: 6
 			aot-harv-nod: 6
 			aot-mcv-age0: 1
 			aot-mcv-age1: 1
-			aot-surveyor-gdi: 2
-			aot-surveyor-nod: 2
 			aot-oret-lite: 4
-			aot-minelayer: 2
-			aot-aray: 2
-			aot-mgap: 1
-			aot-mstealth: 1
 		UnitsToBuild:
 			# --- Tiberium-Harvester (niedrig; Hauptsteuerung via HarvesterBotModule) ---
 			aot-harv: 8
 			aot-harv-nod: 8
-			# --- Erz-Transporter (oret): 2. Ökonomie-Standbein, äußerst wichtig.
-			#     Fährt Ore Mine -> silo. 1 Stück spawnt gratis mit dem ersten fact.
-			#     Kein Harvester-Trait -> NICHT via HarvesterBotModule, nur hier. ---
+			# --- Erz-Transporter (oret): 2. Ökonomie-Standbein. 1 Stück gratis mit fact. ---
 			aot-oret-lite: 30
-			# --- GDI Infanterie ---
-			aot-e1-gdi: 50
-			aot-e2-gdi: 20
-			aot-e3-gdi: 35
-			aot-e6-gdi: 10
-			aot-medi-gdi: 8
-			aot-mech-gdi: 8
-			aot-rmbo-gdi-base: 5
-			aot-rmbo-gdi-rail: 5
-			# --- NOD Infanterie ---
-			aot-e1-nod: 50
-			aot-e3-nod: 35
-			aot-e4-nod-flame: 25
-			aot-e4-nod-toxic: 25
-			aot-e6-nod: 10
-			aot-dog-nod: 8
-			aot-cark-nod: 5
-			# --- NOD Elite (Cyborg/Avatar) ---
-			aot-cyborg: 25
-			aot-cyc2: 20
-			aot-avatar: 15
-			aot-avatar-laser: 15
-			# --- GDI leichte Fahrzeuge (lite) ---
-			aot-jeep-base: 8
-			aot-jeep-humvee: 10
-			aot-jeep-wolverine: 10
-			aot-apc-amphibious: 8
-			aot-mtnk-base: 30
-			aot-mtnk-pred: 30
-			aot-mtnk-rail: 30
-			# --- GDI schwere Fahrzeuge (weap) ---
-			aot-htnk-base: 40
-			aot-htnk-rocket: 40
-			aot-htnk-laser: 40
-			aot-jugg: 25
-			aot-mtnk-titn: 25
-			aot-mtnk-titn-rail: 25
-			aot-msam-hover-aa: 15
-			aot-msam-hover-mlrs: 20
-			aot-minelayer: 5
-			# --- NOD leichte Fahrzeuge (lite) ---
-			aot-bggy-base: 15
-			aot-bggy-laser: 15
-			aot-bike-base: 20
-			aot-bike-laser: 20
-			aot-ttnk-base: 30
-			aot-v2-base: 15
-			# --- NOD Starport (Panzer/Artillerie/Spezial) ---
-			aot-ltnk-base: 35
-			aot-ltnk-laser: 35
-			aot-ltnk-tick: 30
-			aot-stnk-base: 25
-			aot-stnk-cargo: 20
-			aot-arty-howitzer: 20
-			aot-arty-heavy: 20
-			aot-ttnk-flame: 25
-			aot-ttnk-toxin: 25
-			aot-ttnk-devil: 20
-			aot-ttnk-devil-toxin: 20
-			aot-v2-toxic: 15
-			aot-v2-napalm: 15
-			aot-mstealth: 5
-			aot-subapc: 8
-			# --- Mobile Sensor Array (beide Fraktionen) ---
-			aot-aray: 5
-			# --- Mobile Gap (GDI) ---
-			aot-mgap: 3
-			# --- GDI Luft ---
-			aot-apache-base: 12
-			aot-orca-upgraded: 12
-			ajet: 10
-			aot-ajet-firehawk: 12
-			# --- NOD Luft ---
-			aot-hind-base: 12
-			aot-harpy-upgraded: 12
-			aot-harpy-upgraded-laser: 12
-			# --- GDI Marine ---
-			aot-gunboat-base: 10
-			aot-gunboat-destroyer: 12
-			aot-gunboat-frigate: 12
-			aot-cruiser: 8
-			aot-cruiser-carrier-proxy: 8
-			aot-cruiser-railgun-proxy: 8
-			# --- NOD Marine ---
-			aot-sub-base: 10
-			aot-sub-cargo-proxy: 8
-			aot-msub-base: 10
-			aot-msub-mine-proxy: 8
-			aot-msub-drone-proxy: 8
-			aot-transport-base: 3
-			aot-transport-gun-proxy: 5
 
 	# =========================================================================
 	# EXPANSION (klassische mcv)
@@ -566,27 +472,104 @@ Player:
 	# =========================================================================
 	# MILITÄR (Squads)
 	# =========================================================================
-	SquadManagerBotModule@aot:
+	# DEAKTIVIERT 2026-07-21 (User-Entscheidung): komplett ersetzt durch das
+	# AoT Operations Framework unten (AotMapIntel + AotOperations). Das
+	# ABGENOMMENE Choke-Reserve-Verhalten (UpdateChokeReserve) wurde 1:1 in
+	# die Starting-Units-Mission portiert. Block bleibt als Referenz stehen.
+	#SquadManagerBotModule@aot:
+	#	RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
+	#	ChokepointReserveSize: 4
+	#	ChokepointHoldRadius: 4
+	#	ChokeClearRadius: 5
+	#	# Ore Mine, Oil Pump, Oil Derrick werden nie beim Chokepoint-Clearing angegriffen
+	#	ChokeClearExcludeTypes: aot-ore-mine, arco, v19
+	#	SquadSize: 8
+	#	SquadSizeRandomBonus: 20
+	#	# oret = Basis-Actor, den der FACT gratis spawnt (SpawnActor: ORET); aot-oret-lite = baubar.
+	#	# BEIDE ausschließen, sonst zieht der SquadManager den unbewaffneten Erz-Transporter in Angriffe.
+	#	ExcludeFromSquadsTypes: aot-harv, aot-harv-nod, aot-mcv-age0, aot-mcv-age1, aot-surveyor-gdi, aot-surveyor-nod, oret, aot-oret-lite, aot-minelayer, aot-aray, aot-mgap, aot-mstealth, truck, mcv
+	#	ConstructionYardTypes: fact, fact.gdi, fact.nod
+	#	AirUnitsTypes: aot-apache-base, aot-orca-upgraded, aot-hind-base, aot-harpy-upgraded, aot-harpy-upgraded-laser, ajet, aot-ajet-firehawk, orca, heli
+	#	NavalUnitsTypes: aot-gunboat-base, aot-gunboat-destroyer, aot-gunboat-frigate, aot-cruiser, aot-cruiser-carrier-proxy, aot-cruiser-railgun-proxy, aot-sub-base, aot-sub-cargo-proxy, aot-msub-base, aot-msub-mine-proxy, aot-msub-drone-proxy
+	#	ProtectionTypes: fact, fact.gdi, fact.nod, aot-lite-gdi, aot-lite-nod, weap, afld, aot-pyle-age0, aot-pyle-age1, aot-pyle-age2, aot-hand-age0, aot-hand-age1, aot-hand-age2, aot-atec-age0, aot-atec-age1, aot-atec-age2, aot-stec-age0, aot-stec-age1, aot-stec-age2, orbc, aot-slab-age1, aot-slab-age2, aot-tmpl-age1, aot-tmpl-age2, aot-shrine, aot-mslo-age1, aot-mslo-age2, proc, aot-proc-gdi, aot-proc-gdi-age2, aot-proc-nod, aot-proc-nod-age2, aot-harv, aot-harv-nod, oret, aot-oret-lite, aot-hq-base, aot-hq-ion, aot-nod-radar-age0, aot-nod-radar-age1
+	#	IgnoredEnemyTargetTypes: Air
+	#	RushInterval: 1200
+	#	MinimumAttackForceDelay: 1000
+	#	ProtectUnitScanRadius: 20
+	#	ProtectionScanRadius: 12
+
+	# =========================================================================
+	# AoT OPERATIONS FRAMEWORK (2026-07-21) — Militär/Missionen
+	# Modul 1 Starting Units (1:1-Port des ABGENOMMENEN Choke-Verhaltens + ARCO-
+	# Raid; Choke bleibt nach Abmarsch LEER — User-Entscheidung), Modul 2 Regular
+	# Waves (75% Kern / 25% adaptiv, Budget +25%/Welle, GDI-Rückzug 75% Stückzahl),
+	# Modul 3 Scouts (2 leichte Fahrzeuge, 50% Spawn-Abdeckung), Modul 4 Derrick-
+	# Engineer-Squads (v19 einnehmen, 10-min-Check, permanente Wache).
+	# Varianten-Ketten enthalten ALLE Ausschluss-Zweige (beste zuerst) —
+	# die erste AKTUELL BAUBARE Variante gewinnt.
+	# =========================================================================
+	AotMapIntelBotModule@aot:
 		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
+		ConstructionYardTypes: fact, fact.gdi, fact.nod
+		GroundLocomotor: foot
+		ArcoTypes: arco
+		DerrickTypes: v19
+		CrateTypes: oilcrate1000
+
+	AotOperationsBotModule@gdi:
+		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
+		Faction: gdi
+		ConstructionYardTypes: fact, fact.gdi, fact.nod
+		ExcludeFromOpsTypes: aot-harv, aot-harv-nod, aot-mcv-age0, aot-mcv-age1, aot-surveyor-gdi, aot-surveyor-nod, oret, aot-oret-lite, aot-minelayer, aot-aray, aot-mgap, aot-mstealth, aot-subapc, truck, mcv
 		ChokepointReserveSize: 4
 		ChokepointHoldRadius: 4
 		ChokeClearRadius: 5
-		# Ore Mine, Oil Pump, Oil Derrick werden nie beim Chokepoint-Clearing angegriffen
 		ChokeClearExcludeTypes: aot-ore-mine, arco, v19
-		SquadSize: 8
-		SquadSizeRandomBonus: 20
-		# oret = Basis-Actor, den der FACT gratis spawnt (SpawnActor: ORET); aot-oret-lite = baubar.
-		# BEIDE ausschließen, sonst zieht der SquadManager den unbewaffneten Erz-Transporter in Angriffe.
-		ExcludeFromSquadsTypes: aot-harv, aot-harv-nod, aot-mcv-age0, aot-mcv-age1, aot-surveyor-gdi, aot-surveyor-nod, oret, aot-oret-lite, aot-minelayer, aot-aray, aot-mgap, aot-mstealth, truck, mcv
+		WaveTankTypes: aot-mtnk-titn-rail, aot-mtnk-titn, aot-mtnk-rail, aot-mtnk-pred, aot-mtnk-base
+		WaveLightTypes: aot-jeep-wolverine, aot-jeep-humvee, aot-apc-amphibious, aot-jeep-base
+		WaveSupportTypes: aot-jugg, aot-msam-hover-mlrs, aot-msam-hover-aa
+		WaveTankShare: 60
+		WaveLightShare: 25
+		WaveSupportShare: 15
+		WaveRetreatLossPercent: 75
+		AntiInfantryTypes: aot-jeep-wolverine, aot-jeep-humvee, aot-jeep-base
+		AntiTankTypes: aot-htnk-laser, aot-htnk-rocket, aot-htnk-base, aot-mtnk-rail, aot-mtnk-pred, aot-mtnk-base
+		AntiAirTypes: aot-msam-hover-aa
+		ScoutTypes: aot-jeep-base, aot-jeep-humvee, aot-jeep-wolverine, aot-apc-amphibious
+		DerrickMaxTargets: 2
+		EngineerTypes: aot-e6-gdi
+		RocketInfantryTypes: aot-e3-gdi
+		MgInfantryTypes: aot-e1-gdi
+
+	AotOperationsBotModule@nod:
+		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
+		Faction: nod
 		ConstructionYardTypes: fact, fact.gdi, fact.nod
-		AirUnitsTypes: aot-apache-base, aot-orca-upgraded, aot-hind-base, aot-harpy-upgraded, aot-harpy-upgraded-laser, ajet, aot-ajet-firehawk, orca, heli
-		NavalUnitsTypes: aot-gunboat-base, aot-gunboat-destroyer, aot-gunboat-frigate, aot-cruiser, aot-cruiser-carrier-proxy, aot-cruiser-railgun-proxy, aot-sub-base, aot-sub-cargo-proxy, aot-msub-base, aot-msub-mine-proxy, aot-msub-drone-proxy
-		ProtectionTypes: fact, fact.gdi, fact.nod, aot-lite-gdi, aot-lite-nod, weap, afld, aot-pyle-age0, aot-pyle-age1, aot-pyle-age2, aot-hand-age0, aot-hand-age1, aot-hand-age2, aot-atec-age0, aot-atec-age1, aot-atec-age2, aot-stec-age0, aot-stec-age1, aot-stec-age2, orbc, aot-slab-age1, aot-slab-age2, aot-tmpl-age1, aot-tmpl-age2, aot-shrine, aot-mslo-age1, aot-mslo-age2, proc, aot-proc-gdi, aot-proc-gdi-age2, aot-proc-nod, aot-proc-nod-age2, aot-harv, aot-harv-nod, oret, aot-oret-lite, aot-hq-base, aot-hq-ion, aot-nod-radar-age0, aot-nod-radar-age1
-		IgnoredEnemyTargetTypes: Air
-		RushInterval: 1200
-		MinimumAttackForceDelay: 1000
-		ProtectUnitScanRadius: 20
-		ProtectionScanRadius: 12
+		ExcludeFromOpsTypes: aot-harv, aot-harv-nod, aot-mcv-age0, aot-mcv-age1, aot-surveyor-gdi, aot-surveyor-nod, oret, aot-oret-lite, aot-minelayer, aot-aray, aot-mgap, aot-mstealth, aot-subapc, truck, mcv
+		ChokepointReserveSize: 4
+		ChokepointHoldRadius: 4
+		ChokeClearRadius: 5
+		ChokeClearExcludeTypes: aot-ore-mine, arco, v19
+		WaveTankTypes: aot-ttnk-toxin, aot-ttnk-flame, aot-ltnk-tick, aot-ltnk-laser, aot-ttnk-base, aot-ltnk-base
+		WaveLightTypes: aot-bike-laser, aot-bggy-laser, aot-bike-base, aot-bggy-base
+		WaveSupportTypes: aot-arty-heavy, aot-arty-howitzer, aot-v2-napalm, aot-v2-toxic, aot-v2-base
+		WaveTankShare: 50
+		WaveLightShare: 30
+		WaveSupportShare: 20
+		WaveRetreatLossPercent: 0
+		AntiInfantryTypes: aot-ttnk-flame, aot-v2-napalm, aot-bggy-laser, aot-bggy-base
+		AntiTankTypes: aot-ltnk-tick, aot-ltnk-laser, aot-ltnk-base, aot-ttnk-base
+		# Bike/Buggy need ~aot-age1 -> not buildable in Age 0. Scout squad is a 3-man
+		# infantry mix instead (User 2026-07-21): 1 MG (Role A) + 1 Rocket (Role B) +
+		# 1 Flame Trooper (Role C, falls back to the toxic variant post-Age3).
+		ScoutTypes: aot-e1-nod
+		ScoutRoleBTypes: aot-e3-nod
+		ScoutRoleCTypes: aot-e4-nod-flame, aot-e4-nod-toxic
+		DerrickMaxTargets: 2
+		EngineerTypes: aot-e6-nod
+		RocketInfantryTypes: aot-e3-nod
+		MgInfantryTypes: aot-e1-nod
+
 
 	# =========================================================================
 	# SUPERWAFFEN (offensive, ziel-suchend). Defensiv/Self-Cast (Firestorm,

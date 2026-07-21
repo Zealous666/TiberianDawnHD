@@ -106,6 +106,12 @@ engine/**
 !engine/OpenRA.Mods.Cnc/Traits/Render/WithCargo.cs
 !engine/OpenRA.Mods.Common/Traits/Cargo.cs
 
+# aotmod: AI Operations Framework (Army/Kampf-KI, 2026-07-21)
+!engine/OpenRA.Mods.Common/Traits/BotModules/
+!engine/OpenRA.Mods.Common/Traits/BotModules/AotMapIntelBotModule.cs
+!engine/OpenRA.Mods.Common/Traits/BotModules/AotOperationsBotModule.cs
+!engine/OpenRA.Mods.Common/Traits/BotModules/AotOpsMissions.cs
+
 # Gepatchte Base-cnc-Notifications (SpyPlaneReady für die NOD-Spy-Plane-Superpower)
 !engine/mods/
 !engine/mods/cnc/
