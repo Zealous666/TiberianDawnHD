@@ -431,21 +431,26 @@ namespace OpenRA.Mods.Common.Traits
 			}
 		}
 
-		// Use the building's own highest-priority Exit cell (exactly where the mod's art places
-		// the production apron/smudge) instead of an arbitrary nearby cell -- deterministic, and
-		// doesn't depend on the (separately refreshed) base-wide reachability set.
+		// Cell directly in front of / below the building footprint, horizontally centered --
+		// independent of Exit trait priority/ordering (which proved unreliable to read back:
+		// multiple Exit@ definitions with equal priority make "the highest priority one" an
+		// ambiguous, declaration-order-dependent guess). This is unambiguous geometry: the
+		// building's own Dimensions plus one row, centred.
 		CPos? FindRallyCellNear(Actor building)
 		{
-			var exit = building.TraitsImplementing<Exit>()
-				.Where(e => !e.IsTraitDisabled)
-				.OrderByDescending(e => e.Info.Priority)
-				.FirstOrDefault();
+			var dims = building.Info.TraitInfoOrDefault<BuildingInfo>()?.Dimensions ?? new CVec(1, 1);
+			var candidate = building.Location + new CVec(dims.X / 2, dims.Y);
+			if (Intel.IsPassable(candidate))
+				return candidate;
 
-			if (exit == null)
-				return null;
+			for (var dx = -1; dx <= dims.X; dx++)
+			{
+				var c = building.Location + new CVec(dx, dims.Y);
+				if (Intel.IsPassable(c))
+					return c;
+			}
 
-			var cell = building.Location + exit.Info.ExitCell;
-			return Intel.IsPassable(cell) ? cell : null;
+			return null;
 		}
 
 		// The current rally cell of the first infantry-producing building found (its RallyPoint
