@@ -171,17 +171,34 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				clearChecks = 0;
 
-				// Stronger units (vehicles/tanks) fill the main-choke reserve first;
-				// everyone else guards the secondary approach.
-				static bool IsStrong(Actor a) =>
-					a.Info.TraitInfos<TargetableInfo>().Any(t => t.TargetTypes.Contains("Vehicle") || t.TargetTypes.Contains("Tank"));
+				// Only split into a distinct secondary/beach guard if there actually IS a distinct
+				// secondary approach to defend. If SecondaryTarget() falls back to the choke itself
+				// (no beach/other approach found), there's nothing separate to guard -- everyone
+				// simply joins the main group and does everything together from here on (User
+				// 2026-07-22; previously they were split off into a secondaryReserve that never
+				// cleared obstacles and never followed the main group's later phases, so they just
+				// stood at the choke forever without a real purpose).
+				var hasDistinctSecondary = SecondaryTarget() is CPos sc && sc != choke.Value;
 
-				foreach (var unit in Units.OrderByDescending(IsStrong))
+				if (!hasDistinctSecondary)
 				{
-					if (chokeReserve.Count < Ops.Info.ChokepointReserveSize)
+					foreach (var unit in Units)
 						chokeReserve.Add(unit);
-					else
-						secondaryReserve.Add(unit);
+				}
+				else
+				{
+					// Stronger units (vehicles/tanks) fill the main-choke reserve first;
+					// everyone else guards the secondary approach.
+					static bool IsStrong(Actor a) =>
+						a.Info.TraitInfos<TargetableInfo>().Any(t => t.TargetTypes.Contains("Vehicle") || t.TargetTypes.Contains("Tank"));
+
+					foreach (var unit in Units.OrderByDescending(IsStrong))
+					{
+						if (chokeReserve.Count < Ops.Info.ChokepointReserveSize)
+							chokeReserve.Add(unit);
+						else
+							secondaryReserve.Add(unit);
+					}
 				}
 
 				reserveAssigned = true;
@@ -193,6 +210,9 @@ namespace OpenRA.Mods.Common.Traits
 
 			var holdR2 = Ops.Info.ChokepointHoldRadius * Ops.Info.ChokepointHoldRadius;
 
+			// A genuine secondary/beach post stays purely defensive -- holds position, does not
+			// clear obstacles there. (secondaryReserve is simply empty when there's no distinct
+			// secondary approach; see the merge above.)
 			var secTarget = secondary ?? choke.Value;
 			var secOut = secondaryReserve.Where(a => !Ops.CannotOrder(a) && (a.Location - secTarget).LengthSquared > holdR2).ToList();
 			if (secOut.Count > 0)
@@ -201,10 +221,6 @@ namespace OpenRA.Mods.Common.Traits
 			var readyUnits = chokeReserve.Where(a => !Ops.CannotOrder(a)).ToList();
 			if (readyUnits.Count == 0)
 				return;
-
-			foreach (var a in readyUnits)
-				Log($"[AotChokeDiag] {a.Info.Name}@{a.Location}#{a.ActorID} dist²={(a.Location - choke.Value).LengthSquared} " +
-					$"holdR²={holdR2} armament={string.Join(",", a.TraitsImplementing<Armament>().Select(arm => arm.Info.Name))}");
 
 			var inPosition = readyUnits.Where(a => (a.Location - choke.Value).LengthSquared <= holdR2).ToList();
 			var outOfPosition = readyUnits.Where(a => (a.Location - choke.Value).LengthSquared > holdR2).ToList();
@@ -215,34 +231,10 @@ namespace OpenRA.Mods.Common.Traits
 			if (inPosition.Count == 0)
 				return;
 
-			var chokeW = Ops.World.Map.CenterOfCell(choke.Value);
-			var obstacles = Ops.World.FindActorsInCircle(chokeW, WDist.FromCells(Ops.Info.ChokeClearRadius))
-				.Where(a => !a.IsDead && a.IsInWorld
-					&& a.Info.HasTraitInfo<HealthInfo>()
-					&& a.Owner.NonCombatant
-					&& Ops.Player.RelationshipWith(a.Owner) != PlayerRelationship.Ally
-					&& !Ops.Info.ChokeClearExcludeTypes.Contains(a.Info.Name)
-					&& !a.Info.HasTraitInfo<BridgeInfo>()
-					&& !a.Info.HasTraitInfo<GroundLevelBridgeInfo>()
-					&& !a.Info.HasTraitInfo<LegacyBridgeHutInfo>())
-				.OrderBy(a => (a.Location - choke.Value).LengthSquared)
-				.ToList();
-
+			var obstacles = ClearNearbyObstacles(bot, choke.Value, inPosition);
 			if (obstacles.Count > 0)
 			{
 				clearChecks = 0;
-				Log($"clearing {obstacles.Count} obstacle(s), nearest={obstacles[0].Info.Name}@{obstacles[0].Location}");
-
-				var targets = obstacles.Take(2).ToList();
-				for (var i = 0; i < inPosition.Count; i++)
-				{
-					var a = inPosition[i];
-					var target = targets[i % targets.Count];
-					Log($"[AotChokeDiag] ForceAttack: {a.Info.Name}#{a.ActorID} -> {target.Info.Name}@{target.Location} " +
-						$"(HasTraitInfo<AttackBaseInfo>={a.Info.HasTraitInfo<AttackBaseInfo>()})");
-					ForceAttack(bot, a, target);
-				}
-
 				return;
 			}
 
@@ -254,6 +246,36 @@ namespace OpenRA.Mods.Common.Traits
 				phase = arcoTargets.Count > 0 ? Phase.ArcoRaid : Phase.FinalAttack;
 				Log($"choke cleared -> {phase} ({arcoTargets.Count} arco target(s)); choke stays empty (user decision)");
 			}
+		}
+
+		// Force-fires the up-to-2 nearest destructible neutral obstacles (trees, civ buildings)
+		// near `target` using the given in-position units. Returns the obstacle list found (empty
+		// if none), so callers can react to "still clearing" vs "area clean".
+		List<Actor> ClearNearbyObstacles(IBot bot, CPos target, List<Actor> inPosition)
+		{
+			var targetW = Ops.World.Map.CenterOfCell(target);
+			var obstacles = Ops.World.FindActorsInCircle(targetW, WDist.FromCells(Ops.Info.ChokeClearRadius))
+				.Where(a => !a.IsDead && a.IsInWorld
+					&& a.Info.HasTraitInfo<HealthInfo>()
+					&& a.Owner.NonCombatant
+					&& Ops.Player.RelationshipWith(a.Owner) != PlayerRelationship.Ally
+					&& !Ops.Info.ChokeClearExcludeTypes.Contains(a.Info.Name)
+					&& !a.Info.HasTraitInfo<BridgeInfo>()
+					&& !a.Info.HasTraitInfo<GroundLevelBridgeInfo>()
+					&& !a.Info.HasTraitInfo<LegacyBridgeHutInfo>())
+				.OrderBy(a => (a.Location - target).LengthSquared)
+				.ToList();
+
+			if (obstacles.Count == 0)
+				return obstacles;
+
+			Log($"clearing {obstacles.Count} obstacle(s) near {target}, nearest={obstacles[0].Info.Name}@{obstacles[0].Location}");
+
+			var targets = obstacles.Take(2).ToList();
+			for (var i = 0; i < inPosition.Count; i++)
+				ForceAttack(bot, inPosition[i], targets[i % targets.Count]);
+
+			return obstacles;
 		}
 
 		List<Actor> RaidGroup() => chokeReserve.Where(a => !Ops.CannotOrder(a)).ToList();
