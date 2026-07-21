@@ -399,24 +399,32 @@ namespace OpenRA.Mods.Common.Traits
 		// picks an exit at RANDOM per unit (Production.SelectExit), scattering fresh infantry
 		// across the base. Setting a fixed rally point near the building makes exit selection
 		// deterministic and holds new units there (single-point path -> they stop and wait).
+		//
+		// Tracked ourselves (rallySet) rather than re-reading RallyPoint.Path back off the trait --
+		// this must fire exactly ONCE per building instance, at construction, never again per unit
+		// built afterwards. A destroyed-and-rebuilt building is a new Actor and correctly gets its
+		// own rally point.
+		readonly HashSet<Actor> rallySet = [];
+
 		void EnsureInfantryRallyPoints(IBot bot)
 		{
 			if (Info.InfantryRallyTypes.Count == 0)
 				return;
 
+			rallySet.RemoveWhere(unitCannotBeOrdered);
+
 			foreach (var building in World.Actors)
 			{
 				if (building.Owner != Player || building.IsDead || !building.IsInWorld
-					|| !Info.InfantryRallyTypes.Contains(building.Info.Name))
-					continue;
-
-				var rp = building.TraitOrDefault<RallyPoint>();
-				if (rp == null || rp.Path.Count > 0)
+					|| !Info.InfantryRallyTypes.Contains(building.Info.Name)
+					|| rallySet.Contains(building))
 					continue;
 
 				var cell = FindRallyCellNear(building);
 				if (cell == null)
 					continue;
+
+				rallySet.Add(building);
 
 				bot.QueueOrder(new Order("SetRallyPoint", building, Target.FromCell(World, cell.Value), false));
 				Log($"rally point set for {building.Info.Name}@{building.Location} -> {cell.Value}");
