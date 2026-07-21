@@ -202,6 +202,10 @@ namespace OpenRA.Mods.Common.Traits
 			if (readyUnits.Count == 0)
 				return;
 
+			foreach (var a in readyUnits)
+				Log($"[AotChokeDiag] {a.Info.Name}@{a.Location}#{a.ActorID} dist²={(a.Location - choke.Value).LengthSquared} " +
+					$"holdR²={holdR2} armament={string.Join(",", a.TraitsImplementing<Armament>().Select(arm => arm.Info.Name))}");
+
 			var inPosition = readyUnits.Where(a => (a.Location - choke.Value).LengthSquared <= holdR2).ToList();
 			var outOfPosition = readyUnits.Where(a => (a.Location - choke.Value).LengthSquared > holdR2).ToList();
 
@@ -231,7 +235,14 @@ namespace OpenRA.Mods.Common.Traits
 
 				var targets = obstacles.Take(2).ToList();
 				for (var i = 0; i < inPosition.Count; i++)
-					ForceAttack(bot, inPosition[i], targets[i % targets.Count]);
+				{
+					var a = inPosition[i];
+					var target = targets[i % targets.Count];
+					Log($"[AotChokeDiag] ForceAttack: {a.Info.Name}#{a.ActorID} -> {target.Info.Name}@{target.Location} " +
+						$"(HasTraitInfo<AttackBaseInfo>={a.Info.HasTraitInfo<AttackBaseInfo>()})");
+					ForceAttack(bot, a, target);
+				}
+
 				return;
 			}
 
