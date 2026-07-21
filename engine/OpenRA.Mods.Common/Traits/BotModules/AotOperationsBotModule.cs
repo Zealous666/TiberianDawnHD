@@ -395,48 +395,41 @@ namespace OpenRA.Mods.Common.Traits
 		public bool HasRadar() =>
 			World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld && Info.RadarTypes.Contains(a.Info.Name));
 
-		// Barracks/Hand have multiple Exit cells and no rally point by default -- the engine then
-		// picks an exit at RANDOM per unit (Production.SelectExit), scattering fresh infantry
-		// across the base. Setting a fixed rally point near the building makes exit selection
-		// deterministic and holds new units there (single-point path -> they stop and wait).
+		// ROOT CAUSE FOUND (debug.log evidence): stock BaseBuilderBotModule (still active on @aot for
+		// its PauseUnitProduction economy service) has its OWN unconditional rally-point assignment
+		// (AssignRallyPointsInterval, BaseBuilderBotModule.cs:277-293) that periodically re-asserts a
+		// SetRallyPoint order on EVERY actor the player owns with a RallyPoint trait -- no allow/deny
+		// list, no way to exclude HAND/PYLE via YAML. It kept overwriting our order within seconds
+		// (confirmed: our cell landed correctly, then flipped to BaseBuilderBotModule's own defensive
+		// location on the very next check and stayed there).
 		//
-		// Tracked ourselves (rallySet) rather than re-reading RallyPoint.Path back off the trait --
-		// this must fire exactly ONCE per building instance, at construction, never again per unit
-		// built afterwards. A destroyed-and-rebuilt building is a new Actor and correctly gets its
-		// own rally point.
-		readonly HashSet<Actor> rallySet = [];
+		// Fix: stop touching/reading the engine RallyPoint trait for this at all -- remember our own
+		// intended cell per building internally instead. TickForming's active per-tick gathering
+		// (Ops.PrimaryInfantryRallyCell()) then converges every unit there regardless of whatever the
+		// engine's contested RallyPoint.Path currently says.
+		readonly Dictionary<Actor, CPos> infantryRallyCells = [];
 
-		void EnsureInfantryRallyPoints(IBot bot)
+		void EnsureInfantryRallyPoints()
 		{
 			if (Info.InfantryRallyTypes.Count == 0)
 				return;
 
-			rallySet.RemoveWhere(unitCannotBeOrdered);
+			foreach (var stale in infantryRallyCells.Keys.Where(a => unitCannotBeOrdered(a)).ToList())
+				infantryRallyCells.Remove(stale);
 
 			foreach (var building in World.Actors)
 			{
 				if (building.Owner != Player || building.IsDead || !building.IsInWorld
-					|| !Info.InfantryRallyTypes.Contains(building.Info.Name))
-					continue;
-
-				// Diagnostic: report the ENGINE's actual current RallyPoint.Path on every check,
-				// not just when we (re-)issue the order, so debug.log shows whether our order ever
-				// actually lands and sticks -- rather than guessing from external symptoms.
-				var rp = building.TraitOrDefault<RallyPoint>();
-				Log($"[AotRally] check {building.Info.Name}@{building.Location}#{building.ActorID} " +
-					$"tracked={rallySet.Contains(building)} enginePath=[{(rp == null ? "NO-TRAIT" : string.Join(";", rp.Path))}]");
-
-				if (rallySet.Contains(building))
+					|| !Info.InfantryRallyTypes.Contains(building.Info.Name)
+					|| infantryRallyCells.ContainsKey(building))
 					continue;
 
 				var cell = FindRallyCellNear(building);
 				if (cell == null)
 					continue;
 
-				rallySet.Add(building);
-
-				bot.QueueOrder(new Order("SetRallyPoint", building, Target.FromCell(World, cell.Value), false));
-				Log($"[AotRally] QUEUED SetRallyPoint for {building.Info.Name}@{building.Location}#{building.ActorID} -> {cell.Value}");
+				infantryRallyCells[building] = cell.Value;
+				Log($"[AotRally] cell for {building.Info.Name}@{building.Location}#{building.ActorID} -> {cell.Value}");
 			}
 		}
 
@@ -471,10 +464,10 @@ namespace OpenRA.Mods.Common.Traits
 			return null;
 		}
 
-		// The current rally cell of the first infantry-producing building found (its RallyPoint
-		// once EnsureInfantryRallyPoints has set one, else the building itself). Missions use this
-		// to actively gather ALL their units there during Forming -- not just freshly produced
-		// ones (which the barracks rally point already handles), but also POOL-REUSED units,
+		// The rally cell of the first infantry-producing building found -- OUR OWN computed cell
+		// (infantryRallyCells), never the engine RallyPoint.Path (see EnsureInfantryRallyPoints for
+		// why: BaseBuilderBotModule fights over that). Missions use this to actively gather ALL their
+		// units there during Forming -- not just freshly produced ones, but also POOL-REUSED units,
 		// which can be standing anywhere on the map wherever an earlier mission left them.
 		public CPos? PrimaryInfantryRallyCell()
 		{
@@ -484,9 +477,8 @@ namespace OpenRA.Mods.Common.Traits
 					|| !Info.InfantryRallyTypes.Contains(building.Info.Name))
 					continue;
 
-				var rp = building.TraitOrDefault<RallyPoint>();
-				if (rp != null && rp.Path.Count > 0)
-					return rp.Path[0];
+				if (infantryRallyCells.TryGetValue(building, out var cell))
+					return cell;
 
 				return building.Location;
 			}
@@ -529,7 +521,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (--rallyCheckTicks <= 0)
 			{
 				rallyCheckTicks = Info.RallyCheckInterval;
-				EnsureInfantryRallyPoints(bot);
+				EnsureInfantryRallyPoints();
 			}
 
 			Schedule(bot);
