@@ -25,6 +25,12 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Tells the AI what building types are considered construction yards.")]
 		public readonly FrozenSet<string> ConstructionYardTypes = FrozenSet<string>.Empty;
 
+		[Desc("Actor types to exclude from this module's automatic rally point assignment/validation",
+			"(AssignRallyPointsInterval). Use for buildings whose rally point is deliberately managed",
+			"elsewhere and is expected to sit right at the production apron, which normally fails the",
+			"IsCellBuildable validity check here and gets continuously reassigned.")]
+		public readonly FrozenSet<string> RallyPointExcludeTypes = FrozenSet<string>.Empty;
+
 		[Desc("Tells the AI what building types are considered refineries.")]
 		public readonly FrozenSet<string> RefineryTypes = FrozenSet<string>.Empty;
 
@@ -277,7 +283,8 @@ namespace OpenRA.Mods.Common.Traits
 			if (--assignRallyPointsTicks <= 0)
 			{
 				assignRallyPointsTicks = Math.Max(2, Info.AssignRallyPointsInterval);
-				foreach (var rp in world.ActorsWithTrait<RallyPoint>().Where(rp => rp.Actor.Owner == player))
+				foreach (var rp in world.ActorsWithTrait<RallyPoint>()
+					.Where(rp => rp.Actor.Owner == player && !Info.RallyPointExcludeTypes.Contains(rp.Actor.Info.Name)))
 					rallyPoints.Push(rp);
 			}
 			else

@@ -888,6 +888,7 @@ namespace OpenRA.Mods.Common.Traits
 		public readonly int GroupIndex;
 		readonly List<CPos> spawns;
 		readonly int groupTarget;
+		readonly CPos? stagingCell;
 		Phase phase = Phase.Forming;
 		int spawnCursor;
 		List<CPos> currentWaypoints;
@@ -899,6 +900,10 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			GroupIndex = groupIndex;
 			this.spawns = spawns;
+
+			// Allocated ONCE per mission (not re-queried every tick) so concurrent missions don't
+			// all pile onto the same single cell -- see AllocateInfantryStagingCell.
+			stagingCell = ops.AllocateInfantryStagingCell();
 
 			// Role B/C set -> mixed composition (e.g. an early-tier infantry scout squad where no
 			// vehicle scout chain is buildable yet; all roles MUST share the same move speed or the
@@ -934,16 +939,14 @@ namespace OpenRA.Mods.Common.Traits
 			switch (phase)
 			{
 				case Phase.Forming:
-					// Actively gather every unit at the barracks rally cell each tick -- the
-					// passive engine rally point only carries a unit as far as the exit; if that
-					// single cell is already occupied it silently reroutes to whatever nearby cell
-					// is free (production collision), and pool-reused units (left over from an
-					// earlier mission) never walked there in the first place.
-					var rally = Ops.PrimaryInfantryRallyCell();
-					if (rally.HasValue)
+					// Actively gather every unit at this mission's OWN staging cell each tick --
+					// pool-reused units (left over from an earlier mission) never walked there in
+					// the first place, and this mission's cell is distinct from other concurrently
+					// forming missions' cells (see AllocateInfantryStagingCell).
+					if (stagingCell.HasValue)
 						foreach (var a in Units)
-							if (a.IsIdle && (a.Location - rally.Value).LengthSquared > 4)
-								MoveUnit(bot, a, rally.Value, false);
+							if (a.IsIdle && (a.Location - stagingCell.Value).LengthSquared > 4)
+								MoveUnit(bot, a, stagingCell.Value, false);
 
 					if (Units.Count >= groupTarget)
 					{
@@ -1055,6 +1058,7 @@ namespace OpenRA.Mods.Common.Traits
 		enum Phase { Forming, Moving, Capturing, Holding }
 
 		public readonly Actor Derrick;
+		readonly CPos? stagingCell;
 		Phase phase = Phase.Forming;
 		int formingTicks;
 
@@ -1062,6 +1066,12 @@ namespace OpenRA.Mods.Common.Traits
 			: base(ops, $"derrick-{derrick.ActorID}")
 		{
 			Derrick = derrick;
+
+			// Allocated ONCE per mission (not re-queried every tick) so concurrent missions (up to
+			// DerrickMaxTargets derrick squads plus scout groups) don't all pile onto the same
+			// single cell -- see AllocateInfantryStagingCell.
+			stagingCell = ops.AllocateInfantryStagingCell();
+
 			ops.QueueRequest(this, "engineer", ops.Info.EngineerTypes, 1);
 			ops.QueueRequest(this, "rocket", ops.Info.RocketInfantryTypes, 2);
 			ops.QueueRequest(this, "mg", ops.Info.MgInfantryTypes, 2);
@@ -1113,15 +1123,14 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			formingTicks += Ops.Info.MissionInterval;
 
-			// Actively gather every unit at the barracks rally cell each tick -- the passive engine
-			// rally point only carries a unit as far as the exit; if that single cell is already
-			// occupied it silently reroutes to whatever nearby cell is free (production collision),
-			// and pool-reused units (left over from an earlier mission) never walked there at all.
-			var rally = Ops.PrimaryInfantryRallyCell();
-			if (rally.HasValue)
+			// Actively gather every unit at this mission's OWN staging cell each tick -- pool-reused
+			// units (left over from an earlier mission) never walked there in the first place, and
+			// this mission's cell is distinct from other concurrently forming missions' cells (see
+			// AllocateInfantryStagingCell).
+			if (stagingCell.HasValue)
 				foreach (var a in Units)
-					if (a.IsIdle && (a.Location - rally.Value).LengthSquared > 4)
-						MoveUnit(bot, a, rally.Value, false);
+					if (a.IsIdle && (a.Location - stagingCell.Value).LengthSquared > 4)
+						MoveUnit(bot, a, stagingCell.Value, false);
 
 			// Wait for the full 5-man squad at the barracks rally point; the engineer is mandatory.
 			// The timeout is a last-resort safety net only (shared actor types with other missions,

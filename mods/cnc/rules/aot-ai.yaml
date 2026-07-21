@@ -122,6 +122,11 @@ Player:
 		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
 		BuildingQueues:
 		DefenseQueues:
+		# HAND/PYLE rally points are managed exclusively by AotOperationsBotModule (User 2026-07-21):
+		# this module's own AssignRallyPointsInterval logic re-validates every RallyPoint-trait
+		# actor via IsCellBuildable, which a rally cell right at the production apron/smudge
+		# essentially never passes -- it kept overwriting our rally point every cycle.
+		RallyPointExcludeTypes: aot-hand-age0, aot-hand-age1, aot-hand-age2, aot-pyle-age0, aot-pyle-age1, aot-pyle-age2
 		ConstructionYardTypes: fact, fact.gdi, fact.nod
 		MinimumExcessPower: 20
 		MaximumExcessPower: 250

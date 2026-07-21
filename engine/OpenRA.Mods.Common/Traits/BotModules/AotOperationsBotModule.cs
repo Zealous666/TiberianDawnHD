@@ -396,40 +396,51 @@ namespace OpenRA.Mods.Common.Traits
 			World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld && Info.RadarTypes.Contains(a.Info.Name));
 
 		// ROOT CAUSE FOUND (debug.log evidence): stock BaseBuilderBotModule (still active on @aot for
-		// its PauseUnitProduction economy service) has its OWN unconditional rally-point assignment
-		// (AssignRallyPointsInterval, BaseBuilderBotModule.cs:277-293) that periodically re-asserts a
-		// SetRallyPoint order on EVERY actor the player owns with a RallyPoint trait -- no allow/deny
-		// list, no way to exclude HAND/PYLE via YAML. It kept overwriting our order within seconds
-		// (confirmed: our cell landed correctly, then flipped to BaseBuilderBotModule's own defensive
-		// location on the very next check and stayed there).
-		//
-		// Fix: stop touching/reading the engine RallyPoint trait for this at all -- remember our own
-		// intended cell per building internally instead. TickForming's active per-tick gathering
-		// (Ops.PrimaryInfantryRallyCell()) then converges every unit there regardless of whatever the
-		// engine's contested RallyPoint.Path currently says.
+		// its PauseUnitProduction economy service) has its OWN rally-point assignment
+		// (AssignRallyPointsInterval) that re-validates every RallyPoint-trait actor the player owns
+		// via IsRallyPointValid -- which calls world.IsCellBuildable on the rally cell. A cell right
+		// at the production apron/smudge (exactly where we want it) essentially NEVER passes that
+		// check, so BaseBuilderBotModule perpetually considered our rally point "invalid" and
+		// overwrote it with its own (distant) ChooseRallyLocationNear location every cycle.
+		// Real fix: BaseBuilderBotModule.cs patched with a RallyPointExcludeTypes list
+		// (RallyPointExcludeTypes: InfantryRallyTypes in aot-ai.yaml) so it never touches HAND/PYLE
+		// at all. With that conflict gone, we set the engine RallyPoint ourselves (once per building)
+		// so fresh exits walk straight to the smudge -- and additionally cache the cell ourselves so
+		// TickForming's active gathering (pool-reused stragglers, multiple missions) doesn't depend
+		// on re-reading the (still generally reassignable-by-us-only) RallyPoint.Path.
 		readonly Dictionary<Actor, CPos> infantryRallyCells = [];
+		readonly HashSet<Actor> rallySet = [];
 
-		void EnsureInfantryRallyPoints()
+		void EnsureInfantryRallyPoints(IBot bot)
 		{
 			if (Info.InfantryRallyTypes.Count == 0)
 				return;
 
 			foreach (var stale in infantryRallyCells.Keys.Where(a => unitCannotBeOrdered(a)).ToList())
 				infantryRallyCells.Remove(stale);
+			rallySet.RemoveWhere(a => unitCannotBeOrdered(a));
 
 			foreach (var building in World.Actors)
 			{
 				if (building.Owner != Player || building.IsDead || !building.IsInWorld
-					|| !Info.InfantryRallyTypes.Contains(building.Info.Name)
-					|| infantryRallyCells.ContainsKey(building))
+					|| !Info.InfantryRallyTypes.Contains(building.Info.Name))
 					continue;
 
-				var cell = FindRallyCellNear(building);
-				if (cell == null)
-					continue;
+				if (!infantryRallyCells.ContainsKey(building))
+				{
+					var cell = FindRallyCellNear(building);
+					if (cell != null)
+					{
+						infantryRallyCells[building] = cell.Value;
+						Log($"[AotRally] cell for {building.Info.Name}@{building.Location}#{building.ActorID} -> {cell.Value}");
+					}
+				}
 
-				infantryRallyCells[building] = cell.Value;
-				Log($"[AotRally] cell for {building.Info.Name}@{building.Location}#{building.ActorID} -> {cell.Value}");
+				if (infantryRallyCells.TryGetValue(building, out var rallyCell) && rallySet.Add(building))
+				{
+					bot.QueueOrder(new Order("SetRallyPoint", building, Target.FromCell(World, rallyCell), false));
+					Log($"[AotRally] QUEUED SetRallyPoint for {building.Info.Name}@{building.Location}#{building.ActorID} -> {rallyCell}");
+				}
 			}
 		}
 
@@ -486,6 +497,35 @@ namespace OpenRA.Mods.Common.Traits
 			return null;
 		}
 
+		// Concurrent missions (e.g. 2 derrick squads + 2 scout groups at once) must NOT all target
+		// the exact same rally cell -- a cell only fits ~5 infantry via subcell stacking, so with
+		// more than that constantly waiting, the engine keeps bumping the overflow to a free
+		// neighbour, and our own active gathering (Forming) kept sending them straight back to the
+		// same single point every tick -- a permanent tug-of-war that looked like nobody ever
+		// settling. Each mission gets its OWN nearby staging cell instead, allocated once and cached
+		// by the mission, cycling through a small spiral so several missions stay close together
+		// without competing for one cell.
+		static readonly CVec[] StagingOffsets =
+		[
+			new(0, 0), new(1, 0), new(-1, 0), new(0, 1), new(0, -1),
+			new(1, 1), new(-1, 1), new(1, -1), new(-1, -1),
+			new(2, 0), new(-2, 0), new(0, 2), new(0, -2),
+		];
+
+		int stagingCellCursor;
+
+		public CPos? AllocateInfantryStagingCell()
+		{
+			var baseCell = PrimaryInfantryRallyCell();
+			if (baseCell == null)
+				return null;
+
+			var offset = StagingOffsets[stagingCellCursor % StagingOffsets.Length];
+			stagingCellCursor++;
+			var cell = baseCell.Value + offset;
+			return Intel.IsPassable(cell) ? cell : baseCell.Value;
+		}
+
 		public bool CannotOrder(Actor a) => unitCannotBeOrdered(a);
 
 		void IBotTick.BotTick(IBot bot)
@@ -521,7 +561,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (--rallyCheckTicks <= 0)
 			{
 				rallyCheckTicks = Info.RallyCheckInterval;
-				EnsureInfantryRallyPoints();
+				EnsureInfantryRallyPoints(bot);
 			}
 
 			Schedule(bot);
