@@ -55,6 +55,17 @@ namespace OpenRA.Mods.Common.Traits
 		public readonly int PocketBudget = 1400;
 		public readonly int MinWallComponent = 12;
 
+		[ActorReference]
+		[Desc("Resource-spreading actors (blossom trees). Buildings keep GrowthSourceMargin cells away —",
+			"tiberium GROWS onto planned cells otherwise and deadlocks the build plan.")]
+		public readonly HashSet<string> GrowthSourceTypes = [];
+
+		[Desc("Building/fence cells keep this margin to resource-spreading actors.")]
+		public readonly int GrowthSourceMargin = 4;
+
+		[Desc("Building/fence cells keep this margin to already-grown resource cells.")]
+		public readonly int ResourceMargin = 2;
+
 		[Desc("Chokepoint (for defence, NOT base packing): the two-sided terrain neck on the cheapest enemy",
 			"path — the validated, user-approved detection. Config below is that detector.")]
 		public readonly int ChokeMaxCorridor = 8;
@@ -605,6 +616,35 @@ namespace OpenRA.Mods.Common.Traits
 					}
 			}
 
+			// Tiberium GROWS during the match: keep buildings away from current resource cells and (wider)
+			// from the spreader actors, or the plan's cells get overgrown and the executor deadlocks.
+			var growthHazard = new HashSet<CPos>();
+			if (resourceLayer != null)
+			{
+				var b1 = world.Map.Bounds;
+				for (var y = b1.Top; y < b1.Bottom; y++)
+					for (var x = b1.Left; x < b1.Right; x++)
+					{
+						var c = new CPos(x, y);
+						if (resourceLayer.GetResource(c).Type == null)
+							continue;
+
+						for (var dx = -Info.ResourceMargin; dx <= Info.ResourceMargin; dx++)
+							for (var dy = -Info.ResourceMargin; dy <= Info.ResourceMargin; dy++)
+								growthHazard.Add(c + new CVec(dx, dy));
+					}
+			}
+
+			foreach (var a in world.Actors)
+			{
+				if (a.IsDead || !a.IsInWorld || !Info.GrowthSourceTypes.Contains(a.Info.Name))
+					continue;
+
+				for (var dx = -Info.GrowthSourceMargin; dx <= Info.GrowthSourceMargin; dx++)
+					for (var dy = -Info.GrowthSourceMargin; dy <= Info.GrowthSourceMargin; dy++)
+						growthHazard.Add(a.Location + new CVec(dx, dy));
+			}
+
 			// ---- packer state (exact port: shared lanes, strict buildable for buildings + fence rings) ----
 			var bruttoCells = new HashSet<CPos>();
 			var builtCells = new HashSet<CPos>();
@@ -639,7 +679,7 @@ namespace OpenRA.Mods.Common.Traits
 							return false;
 
 						var onRing = cx == pos.X || cy == pos.Y || cx == pos.X + v.W - 1 || cy == pos.Y + v.H - 1;
-						if ((bcells.Contains(c) || (v.Fenced && onRing)) && !Buildable(c))
+						if ((bcells.Contains(c) || (v.Fenced && onRing)) && (!Buildable(c) || growthHazard.Contains(c)))
 							return false;
 
 						if (bcells.Contains(c) && bruttoCells.Contains(c))

@@ -214,7 +214,14 @@ namespace OpenRA.Mods.Common.Traits
 					return;
 
 				if (step.Kind == AotStepKind.Building)
+				{
 					NudgeBlockers(type, step.TopLeft);
+
+					// PERMANENT blocker: tiberium grew onto the planned cells (a unit would be nudged and
+					// clear). Re-site the single building nearby instead of deadlocking the whole plan.
+					if (BlockedByResources(type, step.TopLeft) && TryResite(step, type))
+						return;
+				}
 
 				if (++waitLog % 8 == 0)
 					Log.Write("debug", $"[AotBuild] Waiting (target blocked): {step.Role} at {step.TopLeft}");
@@ -305,6 +312,78 @@ namespace OpenRA.Mods.Common.Traits
 
 			notifier.NotifyBlocker(blockers);
 			Log.Write("debug", $"[AotBuild] Nudging {blockers.Count} own unit(s) off {type} site at {cell}");
+		}
+
+		bool BlockedByResources(string type, CPos cell)
+		{
+			var resourceLayer = world.WorldActor.TraitOrDefault<IResourceLayer>();
+			var bi = world.Map.Rules.Actors[type].TraitInfoOrDefault<BuildingInfo>();
+			if (resourceLayer == null || bi == null)
+				return false;
+
+			return bi.Tiles(cell).Any(t => resourceLayer.GetResource(t).Type != null);
+		}
+
+		// Move a single plan building to the nearest valid cell (spiral, r <= 8): placeable-or-out-of-reach
+		// (a bridge handles reach), clear of resources, and not colliding with any OTHER planned footprint
+		// (plus a 1-cell lane). The step's TopLeft is updated permanently — the plan adapts, once, locally.
+		bool TryResite(AotPlanStep step, string type)
+		{
+			var ai = world.Map.Rules.Actors[type];
+			var bi = ai.TraitInfoOrDefault<BuildingInfo>();
+			var resourceLayer = world.WorldActor.TraitOrDefault<IResourceLayer>();
+			if (bi == null)
+				return false;
+
+			// Cells claimed by every other plan step (footprints + 1-cell margin) and fence nodes.
+			var claimed = new HashSet<CPos>();
+			foreach (var other in planner.Rhythm)
+			{
+				if (other == step)
+					continue;
+
+				if (other.Kind == AotStepKind.Building && other.Variants.Length > 0
+					&& world.Map.Rules.Actors.TryGetValue(other.Variants[0], out var oai))
+				{
+					var obi = oai.TraitInfoOrDefault<BuildingInfo>();
+					if (obi == null)
+						continue;
+
+					foreach (var t in obi.Tiles(other.TopLeft))
+						for (var dx = -1; dx <= 1; dx++)
+							for (var dy = -1; dy <= 1; dy++)
+								claimed.Add(t + new CVec(dx, dy));
+				}
+				else if (other.Kind == AotStepKind.Fence)
+					foreach (var n in other.FenceNodes)
+						claimed.Add(n);
+			}
+
+			for (var r = 1; r <= 8; r++)
+				for (var dx = -r; dx <= r; dx++)
+					for (var dy = -r; dy <= r; dy++)
+					{
+						if (Math.Max(Math.Abs(dx), Math.Abs(dy)) != r)
+							continue;
+
+						var c = step.TopLeft + new CVec(dx, dy);
+						var tiles = bi.Tiles(c).ToList();
+						if (tiles.Any(t => !planner.Pocket.Contains(t) || claimed.Contains(t)))
+							continue;
+
+						if (resourceLayer != null && tiles.Any(t => resourceLayer.GetResource(t).Type != null))
+							continue;
+
+						if (!world.CanPlaceBuilding(c, ai, bi, null))
+							continue;
+
+						Log.Write("debug", $"[AotBuild] Re-sited {step.Role}: {step.TopLeft} -> {c} (resources grew onto plan)");
+						step.TopLeft = c;
+						return true;
+					}
+
+			Log.Write("debug", $"[AotBuild] Re-site FAILED for {step.Role} at {step.TopLeft}");
+			return false;
 		}
 
 		// True when the step's target fails ONLY the buildable-area check (bridge it), not occupancy.
