@@ -418,6 +418,7 @@ namespace OpenRA.Mods.Common.Traits
 		CPos? embarkCell;
 		CPos? ferryLandingCell;
 		int ferryTicks;
+		bool ferryRequested;
 		bool ashore;
 
 		public AotRegularWaveMission(AotOperationsBotModule ops, int index)
@@ -625,7 +626,8 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				phase = Phase.Ferrying;
 				Log($"launch: {initialCount} unit(s), eco={ecoWave}, no ground route to the enemy -> " +
-					$"ferrying via embark={embarkCell} landing={ferryLandingCell}");
+					$"staging at embark={embarkCell} (landing={ferryLandingCell}), " +
+					$"{(Ops.HasNavalProduction() ? "requesting transports" : "waiting for naval production")}");
 			}
 			else
 			{
@@ -660,12 +662,13 @@ namespace OpenRA.Mods.Common.Traits
 				targetCell = Ops.Intel.NearestEnemySpawn(centre, requireReachable);
 		}
 
-		// No ground path to the enemy: build/reuse FerryCount transports and ferry the wave across
-		// water instead of giving up. Returns false (wave proceeds/ends normally) if ferrying isn't
-		// possible (no naval production yet, no ferry chain configured, or no coastal cells found).
+		// No ground path to the enemy: find a coastal embark/landing cell so the wave can stage at
+		// the coast. Transports are requested lazily in TickFerrying once naval production exists --
+		// until then the wave just waits at the beach (user spec). Returns false (wave proceeds/ends
+		// normally) only if ferrying could never work at all (no chain configured, no coast found).
 		bool TryStartFerry()
 		{
-			if (Ops.Info.FerryTypes.Length == 0 || !Ops.HasNavalProduction())
+			if (Ops.Info.FerryTypes.Length == 0)
 				return false;
 
 			if (Ops.Intel.EnemySpawns.Count == 0)
@@ -681,23 +684,37 @@ namespace OpenRA.Mods.Common.Traits
 				return false;
 			}
 
-			// Reuse transports released by an earlier wave first, only produce the shortfall.
-			var fromPool = Ops.TakeFromPool(Ops.Info.FerryTypes, Ops.Info.FerryCount);
-			Ops.AssignFromPool(this, fromPool);
-			if (Ops.Info.FerryCount - fromPool.Count > 0)
-				Ops.QueueRequest(this, "ferry", Ops.Info.FerryTypes, Ops.Info.FerryCount - fromPool.Count);
-
 			return true;
 		}
 
 		void TickFerrying(IBot bot)
 		{
-			ferryTicks += Ops.Info.MissionInterval;
 			ferries.RemoveAll(Ops.CannotOrder);
 			ferriedAshore.RemoveWhere(Ops.CannotOrder);
 			inTransit.RemoveWhere(Ops.CannotOrder);
 
-			if (ferries.Count == 0 && Ops.OpenRequests(this) == 0 && ferriedAshore.Count == 0)
+			if (!ferryRequested)
+			{
+				if (Ops.HasNavalProduction())
+				{
+					// Reuse transports released by an earlier wave first, only produce the shortfall.
+					var fromPool = Ops.TakeFromPool(Ops.Info.FerryTypes, Ops.Info.FerryCount);
+					Ops.AssignFromPool(this, fromPool);
+					if (Ops.Info.FerryCount - fromPool.Count > 0)
+						Ops.QueueRequest(this, "ferry", Ops.Info.FerryTypes, Ops.Info.FerryCount - fromPool.Count);
+
+					ferryRequested = true;
+					Log("naval production ready -> transports requested");
+				}
+
+				// Else: no Sub Pen/Shipyard yet. No timeout here -- the wave just holds at the coast
+				// (see the walk-to-embark loop below) until one is eventually built.
+			}
+
+			if (ferryRequested)
+				ferryTicks += Ops.Info.MissionInterval;
+
+			if (ferryRequested && ferries.Count == 0 && Ops.OpenRequests(this) == 0 && ferriedAshore.Count == 0)
 			{
 				Log("no transports available -> ferry cancelled, wave dissolved");
 				FinishWave();
@@ -756,7 +773,7 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				if (ferriedAshore.Count == 0)
 				{
-					Log("everyone lost during the crossing -> wave lost");
+					Log("wave lost (wiped out crossing, or while waiting for naval production)");
 					FinishWave();
 					return;
 				}
@@ -768,7 +785,7 @@ namespace OpenRA.Mods.Common.Traits
 				return;
 			}
 
-			if (ferryTicks >= Ops.Info.FerryTimeout)
+			if (ferryRequested && ferryTicks >= Ops.Info.FerryTimeout)
 			{
 				if (ferriedAshore.Count > 0)
 				{
