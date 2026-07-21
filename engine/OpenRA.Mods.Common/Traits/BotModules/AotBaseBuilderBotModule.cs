@@ -208,9 +208,13 @@ namespace OpenRA.Mods.Common.Traits
 			var cell = ResolveCell(step, type);
 			if (cell == null)
 			{
-				// Out of buildable-area reach? Bridge along the actual path. Transient blockers just wait.
+				// Out of buildable-area reach? Bridge along the actual path. Transient blockers are asked
+				// to step aside (own units on the site), then we wait.
 				if (OutOfReachOnly(step, type) && TryBridgeStep(bot, step))
 					return;
+
+				if (step.Kind == AotStepKind.Building)
+					NudgeBlockers(type, step.TopLeft);
 
 				if (++waitLog % 8 == 0)
 					Log.Write("debug", $"[AotBuild] Waiting (target blocked): {step.Role} at {step.TopLeft}");
@@ -275,6 +279,32 @@ namespace OpenRA.Mods.Common.Traits
 				default:
 					return null;
 			}
+		}
+
+		// Own units standing on the footprint are asked to step aside (the engine's own nudge routine:
+		// NotifyBlocker -> INotifyBlockingMove -> idle friendly Mobile units queue a Nudge activity).
+		void NudgeBlockers(string type, CPos cell)
+		{
+			var ai = world.Map.Rules.Actors[type];
+			var bi = ai.TraitInfoOrDefault<BuildingInfo>();
+			if (bi == null)
+				return;
+
+			var notifier = world.ActorsHavingTrait<Building>()
+				.FirstOrDefault(a => a.Owner == player && !a.IsDead && a.IsInWorld);
+			if (notifier == null)
+				return;
+
+			var blockers = bi.Tiles(cell)
+				.SelectMany(world.ActorMap.GetActorsAt)
+				.Where(a => a.Owner == player && !a.IsDead && a.Info.HasTraitInfo<MobileInfo>())
+				.Distinct()
+				.ToList();
+			if (blockers.Count == 0)
+				return;
+
+			notifier.NotifyBlocker(blockers);
+			Log.Write("debug", $"[AotBuild] Nudging {blockers.Count} own unit(s) off {type} site at {cell}");
 		}
 
 		// True when the step's target fails ONLY the buildable-area check (bridge it), not occupancy.
@@ -475,6 +505,9 @@ namespace OpenRA.Mods.Common.Traits
 			var bi = ai.TraitInfoOrDefault<BuildingInfo>();
 			if (bi != null && !world.CanPlaceBuilding(pendingCell, ai, bi, null))
 			{
+				// Ask own units on the site to step aside before waiting.
+				NudgeBlockers(pendingType, pendingCell);
+
 				if (pendingIsBridgeWall)
 					return;   // frontier re-evaluated next bridge step
 
