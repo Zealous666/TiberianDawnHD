@@ -408,7 +408,7 @@ namespace OpenRA.Mods.Common.Traits
 				if (rp == null || rp.Path.Count > 0)
 					continue;
 
-				var cell = FindRallyCellNear(building.Location);
+				var cell = FindRallyCellNear(building);
 				if (cell == null)
 					continue;
 
@@ -417,14 +417,21 @@ namespace OpenRA.Mods.Common.Traits
 			}
 		}
 
-		CPos? FindRallyCellNear(CPos buildingLocation)
+		// Use the building's own highest-priority Exit cell (exactly where the mod's art places
+		// the production apron/smudge) instead of an arbitrary nearby cell -- deterministic, and
+		// doesn't depend on the (separately refreshed) base-wide reachability set.
+		CPos? FindRallyCellNear(Actor building)
 		{
-			for (var r = 1; r <= 4; r++)
-				foreach (var c in AotOpsUtils.Ring(buildingLocation, r))
-					if (Intel.IsPassable(c) && Intel.IsReachable(c))
-						return c;
+			var exit = building.TraitsImplementing<Exit>()
+				.Where(e => !e.IsTraitDisabled)
+				.OrderByDescending(e => e.Info.Priority)
+				.FirstOrDefault();
 
-			return null;
+			if (exit == null)
+				return null;
+
+			var cell = building.Location + exit.Info.ExitCell;
+			return Intel.IsPassable(cell) ? cell : null;
 		}
 
 		public bool CannotOrder(Actor a) => unitCannotBeOrdered(a);
@@ -542,7 +549,16 @@ namespace OpenRA.Mods.Common.Traits
 				if (!IsEligibleCombatUnit(a))
 					continue;
 
-				var request = requests.FirstOrDefault(r => r.Remaining > 0 && r.Chain.Contains(a.Info.Name));
+				// Multiple concurrent missions can share an actor type (e.g. Scout's Role A and
+				// Derrick's MG escort both use the same infantry). Prefer a request that actually
+				// has a production order in flight (Ordered > 0) over one that's merely stalled
+				// waiting its turn on a busy queue -- otherwise a stalled mission "steals" a unit
+				// another mission's order actually paid for, and the stolen unit immediately walks
+				// off toward the stalled mission's (unrelated) destination the moment it exits.
+				var request = requests
+					.Where(r => r.Remaining > 0 && r.Chain.Contains(a.Info.Name))
+					.OrderByDescending(r => r.Ordered > 0)
+					.FirstOrDefault();
 				if (request != null)
 				{
 					request.Remaining--;
