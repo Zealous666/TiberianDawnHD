@@ -257,6 +257,11 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Cooldown before a destroyed scout group is rebuilt.")]
 		public readonly int ScoutRespawnCooldown = 1500;
 
+		[ActorReference]
+		[Desc("Radar/HQ actor types. Scout expeditions only start once one of these is owned",
+			"and alive (the scout mission's whole purpose is feeding the radar/minimap).")]
+		public readonly HashSet<string> RadarTypes = [];
+
 		// ---- Module 4: Derrick Engineer Squads ----
 		[ActorReference]
 		public readonly string[] EngineerTypes = [];
@@ -368,6 +373,9 @@ namespace OpenRA.Mods.Common.Traits
 
 		public bool HasNavalProduction() =>
 			World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld && Info.NavalProductionTypes.Contains(a.Info.Name));
+
+		public bool HasRadar() =>
+			World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld && Info.RadarTypes.Contains(a.Info.Name));
 
 		public bool CannotOrder(Actor a) => unitCannotBeOrdered(a);
 
@@ -656,8 +664,9 @@ namespace OpenRA.Mods.Common.Traits
 				}
 			}
 
-			// Module 3: scout expeditions (50% spawn coverage, self-regenerating).
-			if (Info.EnableScouts && Intel.AllSpawns.Count > 1)
+			// Module 3: scout expeditions (50% spawn coverage, self-regenerating). Gated on Radar/HQ:
+			// no point scouting before there's a radar/minimap to show the results on.
+			if (Info.EnableScouts && Intel.AllSpawns.Count > 1 && HasRadar())
 			{
 				if (scoutAssignments.Count == 0)
 					BuildScoutAssignments();

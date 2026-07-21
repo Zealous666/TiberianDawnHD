@@ -548,6 +548,8 @@ Player:
 		FerryTypes: aot-transport-hover-proxy
 		FerryCount: 2
 		ScoutTypes: aot-jeep-base, aot-jeep-humvee, aot-jeep-wolverine, aot-apc-amphibious
+		# Scouts only start once Radar/HQ exists (User 2026-07-21).
+		RadarTypes: aot-hq-base, aot-hq-base-age2, aot-hq-ion, aot-hq-ion-age2
 		DerrickMaxTargets: 2
 		EngineerTypes: aot-e6-gdi
 		RocketInfantryTypes: aot-e3-gdi
@@ -586,6 +588,8 @@ Player:
 		ScoutRoleACount: 3
 		ScoutRoleBTypes: aot-e4-nod-flame, aot-e4-nod-toxic
 		ScoutRoleBCount: 2
+		# Scouts only start once Radar/HQ exists (User 2026-07-21).
+		RadarTypes: aot-nod-radar-age0, aot-nod-radar-age1, aot-nod-radar-age2
 		DerrickMaxTargets: 2
 		EngineerTypes: aot-e6-nod
 		RocketInfantryTypes: aot-e3-nod

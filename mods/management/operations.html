@@ -270,7 +270,7 @@ const nodOps = [
     meta: [
       { label: "Cost", value: "3× gunner (~100 each) + 2× flame trooper (~?) ≈ low-cost Age-0 squad, no vehicle production required." },
       { label: "Timing", value: "As soon as AotMapIntel is ready; number of groups = ceil(spawn count / 2)." },
-      { label: "Prerequisite", value: "Map has more than one spawn point; Barracks (Role A: gunner) and anyhq (Role B: flame trooper) built." },
+      { label: "Prerequisite", value: "Radar/HQ built (scouting only starts once there's a minimap to show the results on); map has more than one spawn point; Barracks (Role A: gunner) and anyhq (Role B: flame trooper) built." },
       { label: "Why / Frequency", value: "Constant reconnaissance coverage of 50% of all spawns. Destroyed groups are automatically rebuilt after a ~1500-tick (≈1 min) cooldown and sent out again." },
     ],
     caveat: "Role B (Flame Trooper) needs anyhq, same as the Regular Waves' V2 support role — if anyhq isn't built yet when the group forms, it launches short-handed with just the 3 gunners after the forming timeout.",
@@ -351,7 +351,7 @@ const gdiOps = [
     meta: [
       { label: "Cost", value: "2× jeep role (~400 credits each, ≈800 credits per group)." },
       { label: "Timing", value: "As soon as AotMapIntel is ready; number of groups = ceil(spawn count / 2)." },
-      { label: "Prerequisite", value: "Map has more than one spawn point; scout variant chain currently buildable." },
+      { label: "Prerequisite", value: "Radar/HQ built (scouting only starts once there's a minimap to show the results on); map has more than one spawn point; scout variant chain currently buildable." },
       { label: "Why / Frequency", value: "Constant reconnaissance coverage of 50% of all spawns. Destroyed groups are automatically rebuilt after a ~1500-tick (≈1 min) cooldown." },
     ],
     routine: [
