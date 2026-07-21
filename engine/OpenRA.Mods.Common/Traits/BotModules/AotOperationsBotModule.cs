@@ -440,24 +440,33 @@ namespace OpenRA.Mods.Common.Traits
 			}
 		}
 
-		// Cell directly in front of / below the building footprint, horizontally centered --
-		// independent of Exit trait priority/ordering (which proved unreliable to read back:
-		// multiple Exit@ definitions with equal priority make "the highest priority one" an
-		// ambiguous, declaration-order-dependent guess). This is unambiguous geometry: the
-		// building's own Dimensions plus one row, centred.
+		// Use the building's own highest-priority Exit cell -- verified against the actually-loaded
+		// ruleset (engine/mods/cnc/rules/structures.yaml): HAND's Exit@1 has an EXPLICIT Priority:2,
+		// the inherited Exit@fallback1 has none (defaults to 1) -> NOT a tie, RandomExitOrDefault
+		// always picks Exit@1 deterministically even without any rally point. Reading the live
+		// Exit trait also automatically reflects the mod's aot-structures.yaml ExitCell override
+		// (which merges into the base Priority, not replacing it), landing exactly on the "=="
+		// (OccupiedPassable) footprint row -- the actual smudge -- without us having to duplicate
+		// that footprint-row math ourselves. Geometry (Dimensions.Y - 1 = the smudge row, NOT
+		// Dimensions.Y) is only a defensive fallback for a building with no Exit trait at all.
 		CPos? FindRallyCellNear(Actor building)
 		{
-			var dims = building.Info.TraitInfoOrDefault<BuildingInfo>()?.Dimensions ?? new CVec(1, 1);
-			var candidate = building.Location + new CVec(dims.X / 2, dims.Y);
+			var exit = building.TraitsImplementing<Exit>()
+				.Where(e => !e.IsTraitDisabled)
+				.OrderByDescending(e => e.Info.Priority)
+				.FirstOrDefault();
+
+			CPos candidate;
+			if (exit != null)
+				candidate = building.Location + exit.Info.ExitCell;
+			else
+			{
+				var dims = building.Info.TraitInfoOrDefault<BuildingInfo>()?.Dimensions ?? new CVec(1, 1);
+				candidate = building.Location + new CVec(dims.X / 2, dims.Y - 1);
+			}
+
 			if (Intel.IsPassable(candidate))
 				return candidate;
-
-			for (var dx = -1; dx <= dims.X; dx++)
-			{
-				var c = building.Location + new CVec(dx, dims.Y);
-				if (Intel.IsPassable(c))
-					return c;
-			}
 
 			return null;
 		}
