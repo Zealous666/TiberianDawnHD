@@ -945,8 +945,19 @@ namespace OpenRA.Mods.Common.Traits
 					// forming missions' cells (see AllocateInfantryStagingCell).
 					if (stagingCell.HasValue)
 						foreach (var a in Units)
-							if (a.IsIdle && (a.Location - stagingCell.Value).LengthSquared > 4)
+						{
+							var d2 = (a.Location - stagingCell.Value).LengthSquared;
+							Log($"[AotGather] {a.Info.Name}@{a.Location}#{a.ActorID} idle={a.IsIdle} " +
+								$"activity={a.CurrentActivity?.GetType().Name ?? "none"} staging={stagingCell.Value} dist²={d2}");
+
+							if (!a.IsIdle)
+								continue;
+							if (d2 > 4)
+							{
+								Log($"[AotGather] -> re-issuing Move for #{a.ActorID}");
 								MoveUnit(bot, a, stagingCell.Value, false);
+							}
+						}
 
 					if (Units.Count >= groupTarget)
 					{
@@ -1129,8 +1140,19 @@ namespace OpenRA.Mods.Common.Traits
 			// AllocateInfantryStagingCell).
 			if (stagingCell.HasValue)
 				foreach (var a in Units)
-					if (a.IsIdle && (a.Location - stagingCell.Value).LengthSquared > 4)
+				{
+					var d2 = (a.Location - stagingCell.Value).LengthSquared;
+					Log($"[AotGather] {a.Info.Name}@{a.Location}#{a.ActorID} idle={a.IsIdle} " +
+						$"activity={a.CurrentActivity?.GetType().Name ?? "none"} staging={stagingCell.Value} dist²={d2}");
+
+					if (!a.IsIdle)
+						continue;
+					if (d2 > 4)
+					{
+						Log($"[AotGather] -> re-issuing Move for #{a.ActorID}");
 						MoveUnit(bot, a, stagingCell.Value, false);
+					}
+				}
 
 			// Wait for the full 5-man squad at the barracks rally point; the engineer is mandatory.
 			// The timeout is a last-resort safety net only (shared actor types with other missions,
