@@ -72,12 +72,18 @@ namespace OpenRA.Mods.Common.Traits
 		public int LastOrderTick;
 	}
 
+	// Reported by wave/air-raid missions on completion so AotOperationsBotModule can drive the
+	// escalation ladder (secondary route after N failures, air raid after more). Unknown = the
+	// mission never really got going (e.g. nothing buildable) and shouldn't move the streak either way.
+	public enum AotMissionOutcome { Unknown, Success, Failure }
+
 	public abstract class AotMission
 	{
 		protected readonly AotOperationsBotModule Ops;
 		public readonly HashSet<Actor> Units = [];
 		public readonly string Name;
 		public bool Done { get; protected set; }
+		public AotMissionOutcome Outcome { get; protected set; } = AotMissionOutcome.Unknown;
 
 		protected AotMission(AotOperationsBotModule ops, string name)
 		{
@@ -200,6 +206,31 @@ namespace OpenRA.Mods.Common.Traits
 
 		[Desc("Forming timeout; the wave launches with what it has (if at least half).")]
 		public readonly int WaveFormingTimeout = 4500;
+
+		[Desc("Consecutive FAILED waves (wiped out, or GDI retreat) at the primary route before the",
+			"next wave routes via a secondary approach instead (User 2026-07-22). If no distinct",
+			"secondary approach exists, the wave still launches normally via the primary route.")]
+		public readonly int WaveSecondaryRouteAfterFailures = 2;
+
+		[Desc("Consecutive failed waves (primary + secondary route attempts) before switching to an",
+			"air raid instead of another ground wave. Only triggers once HelipadTypes exists; while",
+			"it doesn't, ground waves keep escalating on the same counter.")]
+		public readonly int WaveAirRaidAfterFailures = 3;
+
+		[ActorReference]
+		[Desc("Helipad actor types. The air-raid escalation tier only triggers once one is owned.")]
+		public readonly HashSet<string> HelipadTypes = [];
+
+		[ActorReference]
+		[Desc("Attack helicopter variant chain (all exclusive branches) used for the air-raid",
+			"escalation tier.")]
+		public readonly string[] AirRaidHelicopterTypes = [];
+
+		[Desc("Number of helicopters built for an air raid.")]
+		public readonly int AirRaidCount = 4;
+
+		[Desc("Air raid forming timeout; launches short-handed if hit.")]
+		public readonly int AirRaidFormingTimeout = 9000;
 
 		[ActorReference]
 		[Desc("Shipyard/Sub Pen actor types. A wave only switches to naval ferrying once one of",
@@ -338,6 +369,7 @@ namespace OpenRA.Mods.Common.Traits
 		bool initialClaimDone;
 		int waveIndex;
 		int waveCooldownTicks;
+		int waveFailureStreak;
 		int derrickTicks;
 		int productionTicks;
 		int starportTicks;
@@ -394,6 +426,9 @@ namespace OpenRA.Mods.Common.Traits
 
 		public bool HasRadar() =>
 			World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld && Info.RadarTypes.Contains(a.Info.Name));
+
+		public bool HasHelipad() =>
+			World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld && Info.HelipadTypes.Contains(a.Info.Name));
 
 		// ROOT CAUSE FOUND (debug.log evidence): stock BaseBuilderBotModule (still active on @aot for
 		// its PauseUnitProduction economy service) has its OWN rally-point assignment
@@ -576,6 +611,29 @@ namespace OpenRA.Mods.Common.Traits
 
 					if (m.Done)
 					{
+						// Drives the wave escalation ladder (secondary route, then air raid) --
+						// only wave/air-raid missions report an Outcome; other mission types stay
+						// Unknown and don't touch the streak.
+						if (m is AotAirRaidMission)
+						{
+							// Air raid is a one-shot escalation tier: succeed or fail, the loop
+							// restarts from ground waves afterwards (User 2026-07-22), it never
+							// chains into a second air raid.
+							Log($"escalation: air raid finished ({m.Outcome}) -> streak reset, back to ground waves");
+							waveFailureStreak = 0;
+						}
+						else if (m.Outcome == AotMissionOutcome.Failure)
+						{
+							waveFailureStreak++;
+							Log($"escalation: {m.Name} failed -> streak={waveFailureStreak}");
+						}
+						else if (m.Outcome == AotMissionOutcome.Success)
+						{
+							if (waveFailureStreak > 0)
+								Log($"escalation: {m.Name} succeeded -> streak reset (was {waveFailureStreak})");
+							waveFailureStreak = 0;
+						}
+
 						CancelRequests(m);
 						Missions.Remove(m);
 					}
@@ -815,16 +873,33 @@ namespace OpenRA.Mods.Common.Traits
 
 		void Schedule(IBot bot)
 		{
-			// Module 2: regular attack waves.
-			if (Info.EnableWaves && !Missions.OfType<AotRegularWaveMission>().Any())
+			// Module 2: regular attack waves, with an escalation ladder driven by
+			// waveFailureStreak (User 2026-07-22): after WaveSecondaryRouteAfterFailures (2)
+			// consecutive failures the next wave routes via a secondary approach instead of the
+			// primary one; after WaveAirRaidAfterFailures (3) -- and only once a helipad exists --
+			// an air raid replaces the ground wave entirely. The air raid always resets the streak
+			// (see the mission-outcome handling above), so the loop restarts from ground waves
+			// afterwards regardless of how it went. Composition/upgrades still scale with AgeTier()
+			// as before; only which mission type runs is new.
+			if (Info.EnableWaves && !Missions.OfType<AotRegularWaveMission>().Any() && !Missions.OfType<AotAirRaidMission>().Any())
 			{
 				if (--waveCooldownTicks <= 0)
 				{
-					waveIndex++;
-					var wave = new AotRegularWaveMission(this, waveIndex);
-					Missions.Add(wave);
 					waveCooldownTicks = Info.WaveCooldown;
-					Log($"wave {waveIndex} scheduled (tier {AgeTier()})");
+
+					if (waveFailureStreak >= Info.WaveAirRaidAfterFailures && Info.AirRaidHelicopterTypes.Length > 0 && HasHelipad())
+					{
+						Missions.Add(new AotAirRaidMission(this));
+						Log($"air raid scheduled (streak={waveFailureStreak})");
+					}
+					else
+					{
+						waveIndex++;
+						var useSecondaryRoute = waveFailureStreak >= Info.WaveSecondaryRouteAfterFailures;
+						var wave = new AotRegularWaveMission(this, waveIndex, useSecondaryRoute);
+						Missions.Add(wave);
+						Log($"wave {waveIndex} scheduled (tier {AgeTier()}, secondaryRoute={useSecondaryRoute}, streak={waveFailureStreak})");
+					}
 				}
 			}
 

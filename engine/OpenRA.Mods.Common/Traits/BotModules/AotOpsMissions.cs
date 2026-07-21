@@ -436,12 +436,19 @@ namespace OpenRA.Mods.Common.Traits
 
 		Phase phase = Phase.Forming;
 		readonly int index;
+		readonly bool useSecondaryRoute;
 		int formingTicks;
 		int initialCount;
 		Actor targetActor;
 		CPos? targetCell;
 		bool ecoWave;
 		bool composed;
+
+		// Secondary-route escalation (User 2026-07-22): after enough consecutive failures, route
+		// through a distinct secondary approach before continuing to the actual target, instead of
+		// letting normal pathfinding default back to the (already-failing) primary route.
+		CPos? routeWaypoint;
+		bool waypointReached;
 
 		// Naval ferry (no land route to the enemy): transports are tracked separately from the
 		// combat Units they carry, reused across waves via the pool.
@@ -454,10 +461,11 @@ namespace OpenRA.Mods.Common.Traits
 		bool ferryRequested;
 		bool ashore;
 
-		public AotRegularWaveMission(AotOperationsBotModule ops, int index)
+		public AotRegularWaveMission(AotOperationsBotModule ops, int index, bool useSecondaryRoute)
 			: base(ops, $"wave-{index}")
 		{
 			this.index = index;
+			this.useSecondaryRoute = useSecondaryRoute;
 		}
 
 		public override void OnUnitAssigned(Actor a)
@@ -665,8 +673,34 @@ namespace OpenRA.Mods.Common.Traits
 			else
 			{
 				phase = Phase.Executing;
-				Log($"launch: {initialCount} unit(s), eco={ecoWave}, target={DescribeTarget()}");
+
+				if (useSecondaryRoute)
+				{
+					routeWaypoint = FindSecondaryApproachGate();
+					Log($"launch: {initialCount} unit(s), eco={ecoWave}, target={DescribeTarget()}, " +
+						$"secondary route via {(routeWaypoint.HasValue ? routeWaypoint.Value.ToString() : "none found -> primary route")}");
+				}
+				else
+					Log($"launch: {initialCount} unit(s), eco={ecoWave}, target={DescribeTarget()}");
 			}
+		}
+
+		// The highest-scored approach that ISN'T the primary chokepoint. Normal pathfinding always
+		// picks the cheapest route (the primary choke, since that's what makes it primary), so
+		// routing a wave through a genuinely different gate requires an explicit waypoint leg.
+		// Returns null if no distinct approach exists (e.g. single-entrance map) -- the wave then
+		// just launches via the primary route as usual (User 2026-07-22 spec).
+		CPos? FindSecondaryApproachGate()
+		{
+			var choke = Ops.ChokeProvider?.Chokepoint;
+			if (Ops.ApproachProvider == null || !choke.HasValue)
+				return null;
+
+			return Ops.ApproachProvider.BaseApproaches
+				.Where(a => a.Gate != choke.Value)
+				.OrderByDescending(a => (int)a.Type)
+				.Select(a => (CPos?)a.Gate)
+				.FirstOrDefault();
 		}
 
 		string DescribeTarget() =>
@@ -750,6 +784,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (ferryRequested && ferries.Count == 0 && Ops.OpenRequests(this) == 0 && ferriedAshore.Count == 0)
 			{
 				Log("no transports available -> ferry cancelled, wave dissolved");
+				Outcome = AotMissionOutcome.Failure;
 				FinishWave();
 				return;
 			}
@@ -807,6 +842,7 @@ namespace OpenRA.Mods.Common.Traits
 				if (ferriedAshore.Count == 0)
 				{
 					Log("wave lost (wiped out crossing, or while waiting for naval production)");
+					Outcome = AotMissionOutcome.Failure;
 					FinishWave();
 					return;
 				}
@@ -830,6 +866,7 @@ namespace OpenRA.Mods.Common.Traits
 				else
 				{
 					Log("ferry timeout, nobody made it across -> wave cancelled");
+					Outcome = AotMissionOutcome.Failure;
 					FinishWave();
 				}
 			}
@@ -840,6 +877,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (Units.Count == 0)
 			{
 				Log("wave wiped out");
+				Outcome = AotMissionOutcome.Failure;
 				FinishWave();
 				return;
 			}
@@ -849,6 +887,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (retreat > 0 && initialCount > 0 && (initialCount - Units.Count) * 100 / initialCount >= retreat)
 			{
 				Log($"loss threshold reached ({Units.Count}/{initialCount}) -> retreating");
+				Outcome = AotMissionOutcome.Failure;
 				phase = Phase.Retreating;
 				return;
 			}
@@ -862,6 +901,7 @@ namespace OpenRA.Mods.Common.Traits
 				if (targetActor == null && targetCell == null)
 				{
 					Log("no target left -> wave done");
+					Outcome = AotMissionOutcome.Success;
 					FinishWave();
 					return;
 				}
@@ -882,7 +922,13 @@ namespace OpenRA.Mods.Common.Traits
 				return;
 			}
 
-			var goal = targetActor?.Location ?? targetCell.Value;
+			if (routeWaypoint.HasValue && !waypointReached && (centre - routeWaypoint.Value).LengthSquared <= 25)
+			{
+				waypointReached = true;
+				Log("secondary route waypoint reached -> continuing to target");
+			}
+
+			var goal = routeWaypoint.HasValue && !waypointReached ? routeWaypoint.Value : targetActor?.Location ?? targetCell.Value;
 			foreach (var a in Units)
 				if (a.IsIdle)
 					bot.QueueOrder(new Order("AttackMove", a, Target.FromCell(Ops.World, goal), false));
@@ -1252,6 +1298,126 @@ namespace OpenRA.Mods.Common.Traits
 
 			if (engineer.IsIdle)
 				bot.QueueOrder(new Order("CaptureActor", engineer, Target.FromActor(Derrick), true));
+		}
+	}
+
+	// ======================================================================
+	// Air Raid (escalation tier, User 2026-07-22): once ground waves have failed
+	// WaveAirRaidAfterFailures times in a row (primary + secondary route attempts) and a helipad
+	// is owned, build AirRaidCount helicopters and send them straight at the enemy construction
+	// yard, ignoring ground reachability. Success/failure feeds back into the same streak that
+	// picked this tier, so the escalation loop resets to ground waves either way (see
+	// AotOperationsBotModule's mission-completion handling).
+	// ======================================================================
+	public sealed class AotAirRaidMission : AotMissionWithOrders
+	{
+		enum Phase { Forming, Executing }
+
+		Phase phase = Phase.Forming;
+		int formingTicks;
+		Actor targetActor;
+		CPos? targetCell;
+
+		public AotAirRaidMission(AotOperationsBotModule ops)
+			: base(ops, "air-raid")
+		{
+			var variant = ops.FirstBuildable(ops.Info.AirRaidHelicopterTypes);
+			if (variant == null)
+			{
+				Log("no air-raid helicopter buildable -> raid cancelled");
+				Outcome = AotMissionOutcome.Failure;
+				Done = true;
+				return;
+			}
+
+			var fromPool = ops.TakeFromPool(ops.Info.AirRaidHelicopterTypes, ops.Info.AirRaidCount);
+			ops.AssignFromPool(this, fromPool);
+			if (ops.Info.AirRaidCount - fromPool.Count > 0)
+				ops.QueueRequest(this, "airraid", ops.Info.AirRaidHelicopterTypes, ops.Info.AirRaidCount - fromPool.Count);
+		}
+
+		public override void Tick(IBot bot)
+		{
+			if (Done)
+				return;
+
+			switch (phase)
+			{
+				case Phase.Forming: TickForming(bot); break;
+				case Phase.Executing: TickExecuting(bot); break;
+			}
+		}
+
+		void TickForming(IBot bot)
+		{
+			formingTicks += Ops.Info.MissionInterval;
+
+			var open = Ops.OpenRequests(this);
+			var launch = open == 0 && Units.Count > 0;
+			if (!launch && formingTicks >= Ops.Info.AirRaidFormingTimeout)
+				launch = Units.Count >= open;
+
+			if (!launch && formingTicks >= Ops.Info.AirRaidFormingTimeout * 2)
+			{
+				if (Units.Count > 0)
+					launch = true;
+				else
+				{
+					Log("air-raid forming dead end -> raid cancelled");
+					Outcome = AotMissionOutcome.Failure;
+					Finish();
+					return;
+				}
+			}
+
+			if (!launch)
+				return;
+
+			ChooseTarget();
+			phase = Phase.Executing;
+			Log($"air raid launch: {Units.Count} helicopter(s), target={DescribeTarget()}");
+		}
+
+		string DescribeTarget() =>
+			targetActor != null ? $"{targetActor.Info.Name}@{targetActor.Location}" : targetCell?.ToString() ?? "none";
+
+		void ChooseTarget()
+		{
+			var centre = Centroid(Units);
+			targetActor = Ops.Intel.NearestEnemyYard(centre, requireReachable: false);
+			if (targetActor == null)
+				targetCell = Ops.Intel.NearestEnemySpawn(centre, requireReachable: false);
+		}
+
+		void TickExecuting(IBot bot)
+		{
+			if (Units.Count == 0)
+			{
+				Log("air raid wiped out");
+				Outcome = AotMissionOutcome.Failure;
+				Finish();
+				return;
+			}
+
+			if (targetActor != null && (targetActor.IsDead || !targetActor.IsInWorld))
+				targetActor = null;
+
+			if (targetActor == null && targetCell == null)
+			{
+				ChooseTarget();
+				if (targetActor == null && targetCell == null)
+				{
+					Log("air raid: no target left -> raid done");
+					Outcome = AotMissionOutcome.Success;
+					Finish();
+					return;
+				}
+			}
+
+			var goal = targetActor?.Location ?? targetCell.Value;
+			foreach (var a in Units)
+				if (a.IsIdle)
+					bot.QueueOrder(new Order("AttackMove", a, Target.FromCell(Ops.World, goal), false));
 		}
 	}
 }

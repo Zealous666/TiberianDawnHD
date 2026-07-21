@@ -562,6 +562,12 @@ Player:
 		EngineerTypes: aot-e6-gdi
 		RocketInfantryTypes: aot-e3-gdi
 		MgInfantryTypes: aot-e1-gdi
+		# Escalation (User 2026-07-22): after 2 failed waves at the primary choke, the next wave
+		# routes via a secondary approach instead (if one exists); after 3 failed waves total (with
+		# a Helipad built) 4 helicopters raid the enemy construction yard directly, then the loop
+		# resets to ground waves regardless of the raid's outcome.
+		HelipadTypes: aot-hpad-gdi
+		AirRaidHelicopterTypes: aot-apache-base, aot-orca-upgraded
 
 	AotOperationsBotModule@nod:
 		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
@@ -605,6 +611,12 @@ Player:
 		EngineerTypes: aot-e6-nod
 		RocketInfantryTypes: aot-e3-nod
 		MgInfantryTypes: aot-e1-nod
+		# Escalation (User 2026-07-22): after 2 failed waves at the primary choke, the next wave
+		# routes via a secondary approach instead (if one exists); after 3 failed waves total (with
+		# a Helipad built) 4 Hinds raid the enemy construction yard directly, then the loop resets
+		# to ground waves regardless of the raid's outcome.
+		HelipadTypes: aot-hpad-nod
+		AirRaidHelicopterTypes: aot-hind-base, aot-harpy-upgraded, aot-harpy-upgraded-laser
 
 
 	# =========================================================================
