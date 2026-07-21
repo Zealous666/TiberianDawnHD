@@ -226,7 +226,10 @@ namespace OpenRA.Mods.Common.Traits
 					return;
 
 				if (++waitLog % 8 == 0)
+				{
 					Log.Write("debug", $"[AotBuild] Waiting (target blocked): {step.Role} at {step.TopLeft}");
+					DiagnoseBlock(step, type);
+				}
 
 				return;
 			}
@@ -314,6 +317,36 @@ namespace OpenRA.Mods.Common.Traits
 
 			notifier.NotifyBlocker(blockers);
 			Log.Write("debug", $"[AotBuild] Nudging {blockers.Count} own unit(s) off {type} site at {cell}");
+		}
+
+		// Prints every fact needed to conclusively identify why a step's target is stuck, instead of
+		// guessing: CanPlaceBuilding/IsCloseEnoughToBase results, per-tile terrain/resource/actors, whether
+		// the target is still inside the frozen Pocket, and the bridge frontier's own diagnosis.
+		void DiagnoseBlock(AotPlanStep step, string type)
+		{
+			var ai = world.Map.Rules.Actors[type];
+			var bi = ai.TraitInfoOrDefault<BuildingInfo>();
+			if (bi == null)
+				return;
+
+			var target = step.TopLeft;
+			var canPlace = world.CanPlaceBuilding(target, ai, bi, null);
+			var closeEnough = bi.IsCloseEnoughToBase(world, player, ai, target);
+			Log.Write("debug", $"[AotBuild] Diag {step.Role}@{target}: CanPlaceBuilding={canPlace} IsCloseEnoughToBase={closeEnough} inPocket={planner.Pocket.Contains(target)}");
+
+			foreach (var t in bi.Tiles(target))
+			{
+				var terrain = world.Map.GetTerrainInfo(t).Type;
+				var res = world.WorldActor.TraitOrDefault<IResourceLayer>()?.GetResource(t).Type;
+				var actors = world.ActorMap.GetActorsAt(t).Select(a => $"{a.Info.Name}(owner={a.Owner.ResolvedPlayerName},mobile={a.Info.HasTraitInfo<MobileInfo>()})").ToList();
+				Log.Write("debug", $"[AotBuild] Diag tile {t}: terrain={terrain} resource={res ?? "none"} inPocket={planner.Pocket.Contains(t)} actors=[{string.Join(",", actors)}]");
+			}
+
+			diagBridge = true;
+			var frontier = BridgeFrontier(target);
+			diagBridge = false;
+			var ownCount = world.ActorsHavingTrait<Building>().Count(a => a.Owner == player && !a.IsDead);
+			Log.Write("debug", $"[AotBuild] Diag bridge: ownBuildings={ownCount} frontier={(frontier.HasValue ? frontier.Value.ToString() : "NULL")}");
 		}
 
 		// PERMANENT block: something on the footprint that NudgeBlockers cannot clear — either a resource
@@ -465,7 +498,16 @@ namespace OpenRA.Mods.Common.Traits
 			if (own.Count == 0)
 				return null;
 
-			// BFS from the target back to any own cell, constrained to the pocket (plus own cells).
+			// A resource (tiberium/ore) OVERRIDES the cell's reported terrain type to its own type
+			// (ResourceLayer.cs sets Map.CustomTerrain), and walls' TerrainTypes is "Clear, Road" only —
+			// NO building can EVER stand on a resource cell, growth or no growth. Route AROUND resource
+			// fields, not through them: excluded from the BFS just like an impassable wall, so the search
+			// naturally finds the buildable perimeter instead of beelining into a field and dead-ending.
+			var resourceLayer = world.WorldActor.TraitOrDefault<IResourceLayer>();
+			bool ResourceFree(CPos c) => resourceLayer == null || resourceLayer.GetResource(c).Type == null;
+
+			// BFS from the target back to any own cell, constrained to the pocket (plus own cells) and
+			// clear of resources (own cells are always allowed through — they're already built there).
 			var pocket = planner.Pocket;
 			var pred = new Dictionary<CPos, CPos>();
 			var q = new Queue<CPos>();
@@ -488,7 +530,7 @@ namespace OpenRA.Mods.Common.Traits
 						break;
 					}
 
-					if (!pocket.Contains(n))
+					if (!pocket.Contains(n) || !ResourceFree(n))
 						continue;
 
 					pred[n] = c;
@@ -512,12 +554,35 @@ namespace OpenRA.Mods.Common.Traits
 			CPos? best = null;
 			foreach (var c in path)
 			{
-				if (world.CanPlaceBuilding(c, wai, wbi, null) && wbi.IsCloseEnoughToBase(world, player, wai, c))
+				if (!wbi.IsCloseEnoughToBase(world, player, wai, c))
+					continue;
+
+				if (world.CanPlaceBuilding(c, wai, wbi, null))
+				{
 					best = c;
+					continue;
+				}
+
+				// In reach but not placeable — almost certainly an own idle unit wandering through the
+				// base (terrain/resources were already ruled out for this area). Ask it to step aside so
+				// a LATER bridge attempt (a few ticks on, once the Nudge activity resolves) can use this
+				// cell — without this, units parked on the path deadlock the whole bridge forever.
+				NudgeBlockers(Info.WallType, c);
+
+				if (diagBridge)
+				{
+					var actors = world.ActorMap.GetActorsAt(c).Select(a => $"{a.Info.Name}(owner={a.Owner.ResolvedPlayerName},mobile={a.Info.HasTraitInfo<MobileInfo>()})");
+					Log.Write("debug", $"[AotBuild] Diag frontier blocked cell {c}: actors=[{string.Join(",", actors)}]");
+				}
 			}
+
+			if (best == null && diagBridge)
+				Log.Write("debug", $"[AotBuild] Diag frontier: target={target} met={met} pathLen={path.Count} (nudged blockers along path, see above)");
 
 			return best;
 		}
+
+		bool diagBridge;
 
 		void SellBridge(IBot bot)
 		{
