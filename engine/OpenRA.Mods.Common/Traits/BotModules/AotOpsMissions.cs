@@ -1102,8 +1102,11 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			formingTicks += Ops.Info.MissionInterval;
 
-			// The engineer is mandatory; escorts may launch short-handed after a timeout.
-			if (Engineer() != null && (Ops.OpenRequests(this) == 0 || formingTicks >= 4500))
+			// Wait for the full 5-man squad at the barracks rally point; the engineer is mandatory.
+			// The timeout is a last-resort safety net only (shared actor types with other missions,
+			// e.g. Scout, can genuinely delay production well past a short timeout) -- escorts may
+			// launch short-handed if it's ever hit.
+			if (Engineer() != null && (Ops.OpenRequests(this) == 0 || formingTicks >= Ops.Info.DerrickFormingTimeout))
 			{
 				phase = Phase.Moving;
 				Log($"moving to derrick @ {Derrick.Location} with {Units.Count} unit(s)");
@@ -1121,13 +1124,12 @@ namespace OpenRA.Mods.Common.Traits
 				return;
 			}
 
-			var escorts = Escorts();
-			foreach (var a in escorts)
-				if (a.IsIdle)
-					bot.QueueOrder(new Order("AttackMove", a, Target.FromCell(Ops.World, Derrick.Location), false));
-
-			if (engineer.IsIdle)
-				MoveUnit(bot, engineer, Derrick.Location, false);
+			// Move as one grouped order (engineer + escorts together), not per-unit chains -- a
+			// straggler that joins mid-move (e.g. a delayed MG escort finally produced) simply
+			// waits at the rally point until the group is idle again, then joins the next leg.
+			var group = Escorts().Append(engineer).Where(a => !Ops.CannotOrder(a)).ToList();
+			if (group.Count > 0 && group.All(a => a.IsIdle))
+				AttackMoveGroup(bot, group, Derrick.Location);
 
 			if ((Centroid(Units) - Derrick.Location).LengthSquared <= 36)
 			{

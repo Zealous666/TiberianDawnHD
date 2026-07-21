@@ -294,6 +294,12 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Guard leash radius around held positions (derricks, posts).")]
 		public readonly int GuardLeashRadius = 6;
 
+		[Desc("Last-resort timeout before a derrick squad departs short-handed. Kept generous:",
+			"EngineerTypes/RocketInfantryTypes/MgInfantryTypes can share an actor type with",
+			"other missions (e.g. Scout), which can genuinely delay production well past a",
+			"short timeout while the shared production queue works through other requests first.")]
+		public readonly int DerrickFormingTimeout = 9000;
+
 		// ---- Production ----
 		[Desc("Only order production above this cash level.")]
 		public readonly int ProductionMinCash = 300;
