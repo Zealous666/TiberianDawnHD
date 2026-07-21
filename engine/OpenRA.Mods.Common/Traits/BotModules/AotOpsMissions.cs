@@ -890,7 +890,8 @@ namespace OpenRA.Mods.Common.Traits
 		readonly int groupTarget;
 		Phase phase = Phase.Forming;
 		int spawnCursor;
-		bool routeIssued;
+		List<CPos> currentWaypoints;
+		int waypointCursor;
 		CPos post;
 
 		public AotScoutMission(AotOperationsBotModule ops, int groupIndex, List<CPos> spawns)
@@ -899,33 +900,26 @@ namespace OpenRA.Mods.Common.Traits
 			GroupIndex = groupIndex;
 			this.spawns = spawns;
 
-			// Role B/C set -> mixed composition, exactly one unit per defined role (e.g. an
-			// early-tier infantry scout squad where no vehicle scout chain is buildable yet).
-			// Otherwise: a homogeneous ScoutTypes group of ScoutGroupSize.
-			var roles = new List<string[]> { ops.Info.ScoutTypes };
+			// Role B/C set -> mixed composition (e.g. an early-tier infantry scout squad where no
+			// vehicle scout chain is buildable yet; all roles MUST share the same move speed or the
+			// group spreads out). Otherwise: a homogeneous ScoutTypes group of ScoutGroupSize.
+			var mixed = ops.Info.ScoutRoleBTypes.Length > 0 || ops.Info.ScoutRoleCTypes.Length > 0;
+			var roles = new List<(string[] Chain, int Count)> { (ops.Info.ScoutTypes, mixed ? ops.Info.ScoutRoleACount : ops.Info.ScoutGroupSize) };
 			if (ops.Info.ScoutRoleBTypes.Length > 0)
-				roles.Add(ops.Info.ScoutRoleBTypes);
+				roles.Add((ops.Info.ScoutRoleBTypes, ops.Info.ScoutRoleBCount));
 			if (ops.Info.ScoutRoleCTypes.Length > 0)
-				roles.Add(ops.Info.ScoutRoleCTypes);
+				roles.Add((ops.Info.ScoutRoleCTypes, ops.Info.ScoutRoleCCount));
 
-			if (roles.Count == 1)
+			groupTarget = roles.Sum(r => r.Count);
+			foreach (var (chain, count) in roles)
 			{
-				groupTarget = ops.Info.ScoutGroupSize;
-				var fromPool = ops.TakeFromPool(roles[0], groupTarget);
+				if (count <= 0)
+					continue;
+
+				var fromPool = ops.TakeFromPool(chain, count);
 				ops.AssignFromPool(this, fromPool);
-				if (groupTarget - fromPool.Count > 0)
-					ops.QueueRequest(this, "scout", roles[0], groupTarget - fromPool.Count);
-			}
-			else
-			{
-				groupTarget = roles.Count;
-				for (var i = 0; i < roles.Count; i++)
-				{
-					var fromPool = ops.TakeFromPool(roles[i], 1);
-					ops.AssignFromPool(this, fromPool);
-					if (fromPool.Count == 0)
-						ops.QueueRequest(this, $"scout-{i}", roles[i], 1);
-				}
+				if (count - fromPool.Count > 0)
+					ops.QueueRequest(this, $"scout-{chain[0]}", chain, count - fromPool.Count);
 			}
 		}
 
@@ -964,7 +958,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		void TickTouring(IBot bot)
 		{
-			if (!routeIssued)
+			if (currentWaypoints == null)
 			{
 				if (spawnCursor >= spawns.Count)
 				{
@@ -972,28 +966,40 @@ namespace OpenRA.Mods.Common.Traits
 					return;
 				}
 
-				var waypoints = RouteAround(spawns[spawnCursor]);
-				foreach (var a in Units)
-				{
-					var first = true;
-					foreach (var w in waypoints)
-					{
-						MoveUnit(bot, a, w, !first);
-						first = false;
-					}
-				}
+				currentWaypoints = RouteAround(spawns[spawnCursor]);
+				waypointCursor = 0;
+				Log($"sweep spawn {spawnCursor + 1}/{spawns.Count} @ {spawns[spawnCursor]} ({currentWaypoints.Count} waypoint(s))");
 
-				routeIssued = true;
-				Log($"sweep spawn {spawnCursor + 1}/{spawns.Count} @ {spawns[spawnCursor]} ({waypoints.Count} waypoint(s))");
+				if (currentWaypoints.Count == 0)
+				{
+					spawnCursor++;
+					currentWaypoints = null;
+					return;
+				}
+			}
+
+			var live = Units.Where(a => !Ops.CannotOrder(a)).ToList();
+			if (live.Count == 0)
+				return;
+
+			if (waypointCursor >= currentWaypoints.Count)
+			{
+				spawnCursor++;
+				currentWaypoints = null;
 				return;
 			}
 
-			// Route done when everyone is idle again.
-			if (Units.All(a => Ops.CannotOrder(a) || a.IsIdle))
+			// Move as one grouped order per waypoint (not per-unit chains) so the squad stays
+			// together instead of spreading out; advance once the group's centroid arrives.
+			var target = currentWaypoints[waypointCursor];
+			if ((Centroid(live) - target).LengthSquared <= 9)
 			{
-				spawnCursor++;
-				routeIssued = false;
+				waypointCursor++;
+				return;
 			}
+
+			if (live.All(a => a.IsIdle))
+				AttackMoveGroup(bot, live, target);
 		}
 
 		List<CPos> RouteAround(CPos spawn)

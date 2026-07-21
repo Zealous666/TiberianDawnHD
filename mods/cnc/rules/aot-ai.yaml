@@ -574,12 +574,15 @@ Player:
 		NavalProductionTypes: aot-subpen
 		FerryTypes: aot-transport-base, aot-transport-gun-proxy
 		FerryCount: 2
-		# Bike/Buggy need ~aot-age1 -> not buildable in Age 0. Scout squad is a 3-man
-		# infantry mix instead (User 2026-07-21): 1 MG (Role A) + 1 Rocket (Role B) +
-		# 1 Flame Trooper (Role C, falls back to the toxic variant post-Age3).
+		# Bike/Buggy need ~aot-age1 -> not buildable in Age 0. Scout squad is a 5-man
+		# infantry mix instead (User 2026-07-21, corrected 2026-07-21b): 3x Gunner (Role A) +
+		# 2x Flame Trooper (Role B, falls back to the toxic variant post-Age3). Rocket
+		# Infantry (Speed 39) dropped -- Gunner/Flame are both Speed 54 (verified in base
+		# infantry.yaml), a mixed-speed squad spread out badly on the move.
 		ScoutTypes: aot-e1-nod
-		ScoutRoleBTypes: aot-e3-nod
-		ScoutRoleCTypes: aot-e4-nod-flame, aot-e4-nod-toxic
+		ScoutRoleACount: 3
+		ScoutRoleBTypes: aot-e4-nod-flame, aot-e4-nod-toxic
+		ScoutRoleBCount: 2
 		DerrickMaxTargets: 2
 		EngineerTypes: aot-e6-nod
 		RocketInfantryTypes: aot-e3-nod

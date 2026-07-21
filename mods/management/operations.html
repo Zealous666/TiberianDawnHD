@@ -266,18 +266,18 @@ const nodOps = [
   {
     badge: "Module 3",
     title: "Scout Expeditions",
-    desc: "A 3-man infantry mix — Bike/Buggy need Age 1 and aren't buildable in Age 0, so the scout squad substitutes 1 MG trooper + 1 rocket trooper + 1 flame trooper instead. Systematically covers half of all map spawns, sweeps map edges, then holds an observation post.",
+    desc: "A 5-man infantry mix — Bike/Buggy need Age 1 and aren't buildable in Age 0, so the scout squad substitutes 3 gunners + 2 flame troopers instead (same move speed, so the group doesn't spread out — Rocket Infantry was dropped for being slower). Systematically covers half of all map spawns, sweeps map edges as one grouped formation, then holds an observation post.",
     meta: [
-      { label: "Cost", value: "1 MG trooper (~100) + 1 rocket trooper (~300) + 1 flame trooper (~?) ≈ low-cost Age-0 squad, no vehicle production required." },
+      { label: "Cost", value: "3× gunner (~100 each) + 2× flame trooper (~?) ≈ low-cost Age-0 squad, no vehicle production required." },
       { label: "Timing", value: "As soon as AotMapIntel is ready; number of groups = ceil(spawn count / 2)." },
-      { label: "Prerequisite", value: "Map has more than one spawn point; Barracks (Role A/B: MG/Rocket) and anyhq (Role C: Flame Trooper) built." },
+      { label: "Prerequisite", value: "Map has more than one spawn point; Barracks (Role A: gunner) and anyhq (Role B: flame trooper) built." },
       { label: "Why / Frequency", value: "Constant reconnaissance coverage of 50% of all spawns. Destroyed groups are automatically rebuilt after a ~1500-tick (≈1 min) cooldown and sent out again." },
     ],
-    caveat: "Role C (Flame Trooper) needs anyhq, same as the Regular Waves' V2 support role — if anyhq isn't built yet when the group forms, it launches short-handed with just MG + Rocket after the forming timeout.",
+    caveat: "Role B (Flame Trooper) needs anyhq, same as the Regular Waves' V2 support role — if anyhq isn't built yet when the group forms, it launches short-handed with just the 3 gunners after the forming timeout.",
     routine: [
       "Visit up to 2 assigned spawn points per group, one after another",
       "Per spawn: ring waypoints at radius 8 around the spawn (map/cliff edges), reachable cells only, sorted angularly for maximum fog-of-war reveal",
-      "Move to the next spawn only once every group member is idle again",
+      "Move to each waypoint as one grouped order (not per-unit chains) so the squad stays together; advance once the group's centroid arrives",
       "After at most 2 spawn areas: take up an observation post (nearest bridge hut, otherwise map centre)",
       "Hold the post permanently (leash radius 6); no active flee behaviour in v1 — reacts only via standard AutoTarget",
     ],

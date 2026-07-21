@@ -225,8 +225,10 @@ namespace OpenRA.Mods.Common.Traits
 		[ActorReference]
 		[Desc("Scout role A variant chain (all exclusive branches). When roles B/C are empty,",
 			"this role alone is duplicated ScoutGroupSize times (homogeneous vehicle group).",
-			"When B and/or C are set, exactly one unit per defined role forms the group instead",
-			"(mixed composition, e.g. an early-tier infantry scout squad).")]
+			"When B and/or C are set, ScoutRoleACount/B/C units of each defined role form the",
+			"group instead (mixed composition, e.g. an early-tier infantry scout squad).",
+			"All roles in a mixed squad MUST have the same move speed -- mixed speeds make the",
+			"group spread out badly, since they still path and move together as one unit.")]
 		public readonly string[] ScoutTypes = [];
 
 		[ActorReference]
@@ -237,7 +239,17 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Scout role C variant chain. Leave empty for a homogeneous ScoutTypes group.")]
 		public readonly string[] ScoutRoleCTypes = [];
 
+		[Desc("Group size for a homogeneous ScoutTypes group (Role B/C empty).")]
 		public readonly int ScoutGroupSize = 2;
+
+		[Desc("Role A unit count when Role B and/or C are set (mixed composition).")]
+		public readonly int ScoutRoleACount = 1;
+
+		[Desc("Role B unit count when set.")]
+		public readonly int ScoutRoleBCount = 1;
+
+		[Desc("Role C unit count when set.")]
+		public readonly int ScoutRoleCCount = 1;
 
 		[Desc("Waypoint ring radius around scouted spawns.")]
 		public readonly int ScoutRingRadius = 8;
