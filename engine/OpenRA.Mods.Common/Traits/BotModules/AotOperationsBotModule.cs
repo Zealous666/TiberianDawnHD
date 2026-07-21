@@ -416,8 +416,17 @@ namespace OpenRA.Mods.Common.Traits
 			foreach (var building in World.Actors)
 			{
 				if (building.Owner != Player || building.IsDead || !building.IsInWorld
-					|| !Info.InfantryRallyTypes.Contains(building.Info.Name)
-					|| rallySet.Contains(building))
+					|| !Info.InfantryRallyTypes.Contains(building.Info.Name))
+					continue;
+
+				// Diagnostic: report the ENGINE's actual current RallyPoint.Path on every check,
+				// not just when we (re-)issue the order, so debug.log shows whether our order ever
+				// actually lands and sticks -- rather than guessing from external symptoms.
+				var rp = building.TraitOrDefault<RallyPoint>();
+				Log($"[AotRally] check {building.Info.Name}@{building.Location}#{building.ActorID} " +
+					$"tracked={rallySet.Contains(building)} enginePath=[{(rp == null ? "NO-TRAIT" : string.Join(";", rp.Path))}]");
+
+				if (rallySet.Contains(building))
 					continue;
 
 				var cell = FindRallyCellNear(building);
@@ -427,7 +436,7 @@ namespace OpenRA.Mods.Common.Traits
 				rallySet.Add(building);
 
 				bot.QueueOrder(new Order("SetRallyPoint", building, Target.FromCell(World, cell.Value), false));
-				Log($"rally point set for {building.Info.Name}@{building.Location} -> {cell.Value}");
+				Log($"[AotRally] QUEUED SetRallyPoint for {building.Info.Name}@{building.Location}#{building.ActorID} -> {cell.Value}");
 			}
 		}
 
@@ -608,12 +617,12 @@ namespace OpenRA.Mods.Common.Traits
 						request.Ordered--;
 					owned[a] = request.Mission;
 					request.Mission.OnUnitAssigned(a);
-					Log($"claim {a.Info.Name} -> {request.Mission.Name} ({request.Role}, {request.Remaining} open)");
+					Log($"claim {a.Info.Name}@{a.Location} -> {request.Mission.Name} ({request.Role}, {request.Remaining} open)");
 				}
 				else
 				{
 					pool.Add(a);
-					Log($"claim {a.Info.Name} -> pool ({pool.Count})");
+					Log($"claim {a.Info.Name}@{a.Location} -> pool ({pool.Count})");
 				}
 			}
 
