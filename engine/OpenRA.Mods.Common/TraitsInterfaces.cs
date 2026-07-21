@@ -624,6 +624,35 @@ namespace OpenRA.Mods.Common.Traits
 		void UpdatedIdleBaseUnits(List<Actor> idleUnits);
 	}
 
+	// Supplies the bot's main defensive chokepoint (e.g. from a base-layout survey), so the
+	// SquadManager can hold a reserve contingent there. Null = no chokepoint (open/water map).
+	[RequireExplicitImplementation]
+	public interface IBotChokepointProvider
+	{
+		CPos? Chokepoint { get; }
+	}
+
+	// How an enemy can reach the base, in decreasing defence priority. Land gaps must be fortified
+	// hardest; intact bridges also fortified; destroyed bridges get troops first (fortify later once
+	// rebuilt); beach landings only warrant a mobile reserve, never fixed defences facing the water.
+	public enum BaseApproachType { Land = 3, Bridge = 2, BridgeDestroyed = 1, Beach = 0 }
+
+	// One scored way into the base: the gate cell an enemy passes through and how it should be held.
+	// Score is BaseApproachType's numeric value (higher = fortify harder).
+	public readonly record struct BaseApproach(CPos Gate, BaseApproachType Type)
+	{
+		public int Score => (int)Type;
+	}
+
+	// Supplies every scored approach to the bot's base (land / bridge / destroyed bridge / beach), so
+	// the base builder and squad manager can fortify or garrison each one per its type. See
+	// AotBaseLayoutManager; classification is validated in memory/ai-ground-defense.md.
+	[RequireExplicitImplementation]
+	public interface IBotBaseApproachProvider
+	{
+		IReadOnlyList<BaseApproach> BaseApproaches { get; }
+	}
+
 	[RequireExplicitImplementation]
 	public interface IBotRequestUnitProduction
 	{

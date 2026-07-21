@@ -56,12 +56,66 @@ Player:
 		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
 
 	# =========================================================================
+	# BASE-PLANNER (2026-07-20, User-Masterkonzept): flutet die Base-TASCHE (Yard
+	# bis Gates, begrenzt durch Klippen/Wasser/Actors, Pfad-Cap), versiegelt die
+	# Gates, packt das KOMPLETTE Base-Layout hinein (eingezäunte Power-Cluster,
+	# Paare, Lückenfüller, Stealth-Spread) und speichert Plan + Bau-RHYTHMUS für
+	# das ganze Match. Main-Gate = Chokepoint (Squads), alle Gates = Approaches.
+	# Varianten-Listen sind AGE-GEORDNET: der Builder nimmt die aktuell baubare.
+	# =========================================================================
+	AotBasePlannerBotModule@nod:
+		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
+		Faction: nod
+		ConstructionYardTypes: fact, fact.gdi, fact.nod
+		OreMineTypes: aot-ore-mine
+		NukeTypes: aot-nuke-age0, aot-nuke-age1, aot-nuke-age2-nod
+		Nuk2Types: aot-nuk2-age0, aot-nuk2-age1, aot-nuk2-age2
+		SiloTypes: aot-silo-age0, aot-silo-age1, aot-silo-age2
+		LiteTypes: aot-lite-nod
+		HandTypes: aot-hand-age0, aot-hand-age1, aot-hand-age2
+		RadarTypes: aot-nod-radar-age0, aot-nod-radar-age1, aot-nod-radar-age2
+		StecTypes: aot-stec-age0, aot-stec-age1, aot-stec-age2
+		FixTypes: aot-fix-age0, aot-fix-age1-nod, aot-fix-age2-nod
+		HpadTypes: aot-hpad-nod
+		ProcTypes: aot-proc-nod, aot-proc-nod-age2
+		TmplTypes: aot-tmpl-age1, aot-tmpl-age2
+		MsloTypes: aot-mslo-age1, aot-mslo-age2
+		ShrineTypes: aot-shrine
+		SgenTypes: aot-sgen
+		AfldTypes: afld
+		FturTypes: aot-ftur-flame, aot-ftur-toxic
+		WallTypes: aot-wall-nod
+
+	# GDI bekommt später eine EIGENE Instanz (@gdi) mit eigener Build-Order.
+	# Executor: baut den gespeicherten Plan im Rhythmus des Planners — ein Bau zur
+	# Zeit, Wall-Bridge entlang des PFADS bei Unerreichbarkeit (danach Verkauf),
+	# Age-Gates warten natürlich, zerstörte Plan-Gebäude werden periodisch erkannt
+	# und in Rhythmus-Reihenfolge neu gebaut.
+	AotBaseBuilderBotModule@nod:
+		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
+		Faction: nod
+		BuildingQueues: Building.Nod
+		WallType: aot-wall-nod
+		MinimumExcessPower: 10
+
+	# CHOKEPOINT-FORTIFIER: für V1 DEAKTIVIERT (baute Streu-Zäune, konkurrierte um
+	# die Building-Queue). Kommt als V2 zurück, integriert mit AotBaseBuilder.
+	# AotChokeFortifierBotModule@aot:
+	#	RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
+	#	ConstructionYardTypes: fact, fact.gdi, fact.nod
+	#	WallTypes: aot-wall-nod, aot-wall-gdi
+	#	RepairTypes: aot-fix-age0, aot-fix-age1, aot-fix-age2, aot-fix-age1-nod, aot-fix-age2-nod
+
+	# =========================================================================
 	# BASISBAU (Gebäude + Verteidigung) — Building.GDI/Nod + Support.GDI/Nod
 	# =========================================================================
+	# Gebäude-Queues ENTZOGEN (2026-07-20): AotBaseBuilderBotModule besitzt Building.GDI/Nod
+	# jetzt exklusiv. Diese Instanz bleibt nur für ihre Ökonomie-Dienste (z.B. Pause der
+	# Einheitenproduktion bis Raffinerie existiert); Fractions/Delays unten sind damit inert.
 	BaseBuilderBotModule@aot:
 		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
-		BuildingQueues: Building.GDI, Building.Nod
-		DefenseQueues: Support.GDI, Support.Nod
+		BuildingQueues:
+		DefenseQueues:
 		ConstructionYardTypes: fact, fact.gdi, fact.nod
 		MinimumExcessPower: 20
 		MaximumExcessPower: 250
@@ -72,10 +126,17 @@ Player:
 		RefineryTypes: proc, aot-proc-gdi, aot-proc-gdi-age2, aot-proc-nod, aot-proc-nod-age2
 		PowerTypes: aot-nuke-age0, aot-nuke-age1, aot-nuke-age2, aot-nuke-age2-nod, aot-nuke-turbine, aot-nuke-turbine-age2, aot-nuk2-age0, aot-nuk2-age1, aot-nuk2-age2
 		SiloTypes: aot-silo-age0, aot-silo-age1, aot-silo-age2
+		# Erz-Ökonomie: garantiere 1 Silo ganz früh (direkt nach Power, vor Raffinerie),
+		# platziert an der zum nächsten Ore-Mine-Aktor nächstgelegenen baubaren Zelle
+		# (Custom-Engine-Erweiterung BaseBuilderBotModule.SilosNearOreMines). Damit kann
+		# der ORET sofort abliefern. Siehe memory/ai-system.md.
+		SilosNearOreMines: 1
 		ProductionTypes: aot-lite-gdi, aot-lite-nod, weap, afld, aot-pyle-age0, aot-pyle-age1, aot-pyle-age2, aot-hand-age0, aot-hand-age1, aot-hand-age2, aflt, aot-hpad-gdi, aot-hpad-nod, hpad
 		NavalProductionTypes: aot-shipyard, aot-subpen
 		TechTypes: aot-atec-age0, aot-atec-age1, aot-atec-age2, aot-stec-age0, aot-stec-age1, aot-stec-age2, aot-hq-base, aot-hq-base-age2, aot-hq-ion, aot-hq-ion-age2, aot-nod-radar-age0, aot-nod-radar-age1, aot-nod-radar-age2, aot-tmpl-age1, aot-tmpl-age2, aot-shrine, orbc, aot-slab-age1, aot-slab-age2, aot-mslo-age1, aot-mslo-age2, eye
-		DefenseTypes: aot-pillbox-base, aot-pillbox-guard, aot-gun-base, aot-gun-laser, aot-ftur-flame, aot-ftur-toxic, sam, obli, aot-fireposition, aot-wall-gdi, aot-wall-nod, atwr, gtwr, sbag, cycl, brik
+		# Mauern (aot-wall-gdi/nod, sbag/cycl/brik) NICHT hier — der AotChokeFortifierBotModule verwaltet
+		# Mauern exklusiv (Wall-Bridge zum Chokepoint + späteres Umzäunen), sonst Queue-Konflikt.
+		DefenseTypes: aot-pillbox-base, aot-pillbox-guard, aot-gun-base, aot-gun-laser, aot-ftur-flame, aot-ftur-toxic, sam, obli, aot-fireposition, atwr, gtwr
 		ExpansionTolerate: 0
 		ForceExpansionTolerate: 1
 		# BuildingDelays = Sperre bis Welt-Tick N (25 Ticks/Sek). Das ist der EINZIGE
@@ -135,17 +196,18 @@ Player:
 			orbc: 6500
 			aot-mslo-age1: 6500
 		BuildingLimits:
-			# Con-Yard-Kern
+			# Produktion: max 1 pro Typ pro Mainbase (Age-Varianten sind eigene Aktoren,
+			# koexistieren -> je Variante 1). Verhindert die Barracks-/Factory-Häufung.
 			aot-lite-gdi: 1
 			aot-lite-nod: 1
-			weap: 2
-			afld: 2
-			aot-pyle-age0: 2
-			aot-pyle-age1: 2
-			aot-pyle-age2: 2
-			aot-hand-age0: 2
-			aot-hand-age1: 2
-			aot-hand-age2: 2
+			weap: 1
+			afld: 1
+			aot-pyle-age0: 1
+			aot-pyle-age1: 1
+			aot-pyle-age2: 1
+			aot-hand-age0: 1
+			aot-hand-age1: 1
+			aot-hand-age2: 1
 			# hq / Radar (Fraktions-/Age-Varianten teilen faktisch das Limit via Prereqs)
 			aot-hq-base: 1
 			aot-hq-base-age2: 1
@@ -176,9 +238,9 @@ Player:
 			aot-fix-age2: 1
 			aot-fix-age1-nod: 1
 			aot-fix-age2-nod: 1
-			aot-hpad-gdi: 2
-			aot-hpad-nod: 2
-			hpad: 2
+			aot-hpad-gdi: 1
+			aot-hpad-nod: 1
+			hpad: 1
 			aflt: 1
 			aot-shipyard: 1
 			aot-subpen: 1
@@ -272,14 +334,10 @@ Player:
 			sam: 7
 			obli: 8
 			aot-fireposition: 3
-			aot-wall-gdi: 2
-			aot-wall-nod: 2
+			# aot-wall-gdi/nod + sbag/cycl/brik: vom AotChokeFortifierBotModule verwaltet, nicht hier.
 			# --- Verteidigung (in Support-Queue) ---
 			atwr: 6
 			gtwr: 5
-			sbag: 2
-			cycl: 2
-			brik: 2
 
 	# =========================================================================
 	# AGE-PROGRESSION + UPGRADES  (eigene BaseBuilder-Instanz)
@@ -500,6 +558,8 @@ Player:
 		McvTypes: mcv, aot-mcv-age0, aot-mcv-age1
 		ConstructionYardTypes: fact, fact.gdi, fact.nod
 		McvFactoryTypes: aot-lite-gdi, aot-lite-nod
+		# Con-Yard NIE wieder einpacken/umziehen (verursachte Folgeprobleme). -1 = aus.
+		MoveConyardTick: -1
 		MinimumConstructionYardCount: 1
 		AdditionalConstructionYardCount: 1
 
@@ -508,13 +568,20 @@ Player:
 	# =========================================================================
 	SquadManagerBotModule@aot:
 		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
+		ChokepointReserveSize: 4
+		ChokepointHoldRadius: 4
+		ChokeClearRadius: 5
+		# Ore Mine, Oil Pump, Oil Derrick werden nie beim Chokepoint-Clearing angegriffen
+		ChokeClearExcludeTypes: aot-ore-mine, arco, v19
 		SquadSize: 8
 		SquadSizeRandomBonus: 20
-		ExcludeFromSquadsTypes: aot-harv, aot-harv-nod, aot-mcv-age0, aot-mcv-age1, aot-surveyor-gdi, aot-surveyor-nod, aot-oret-lite, aot-minelayer, aot-aray, aot-mgap, aot-mstealth, truck, mcv
+		# oret = Basis-Actor, den der FACT gratis spawnt (SpawnActor: ORET); aot-oret-lite = baubar.
+		# BEIDE ausschließen, sonst zieht der SquadManager den unbewaffneten Erz-Transporter in Angriffe.
+		ExcludeFromSquadsTypes: aot-harv, aot-harv-nod, aot-mcv-age0, aot-mcv-age1, aot-surveyor-gdi, aot-surveyor-nod, oret, aot-oret-lite, aot-minelayer, aot-aray, aot-mgap, aot-mstealth, truck, mcv
 		ConstructionYardTypes: fact, fact.gdi, fact.nod
 		AirUnitsTypes: aot-apache-base, aot-orca-upgraded, aot-hind-base, aot-harpy-upgraded, aot-harpy-upgraded-laser, ajet, aot-ajet-firehawk, orca, heli
 		NavalUnitsTypes: aot-gunboat-base, aot-gunboat-destroyer, aot-gunboat-frigate, aot-cruiser, aot-cruiser-carrier-proxy, aot-cruiser-railgun-proxy, aot-sub-base, aot-sub-cargo-proxy, aot-msub-base, aot-msub-mine-proxy, aot-msub-drone-proxy
-		ProtectionTypes: fact, fact.gdi, fact.nod, aot-lite-gdi, aot-lite-nod, weap, afld, aot-pyle-age0, aot-pyle-age1, aot-pyle-age2, aot-hand-age0, aot-hand-age1, aot-hand-age2, aot-atec-age0, aot-atec-age1, aot-atec-age2, aot-stec-age0, aot-stec-age1, aot-stec-age2, orbc, aot-slab-age1, aot-slab-age2, aot-tmpl-age1, aot-tmpl-age2, aot-shrine, aot-mslo-age1, aot-mslo-age2, proc, aot-proc-gdi, aot-proc-gdi-age2, aot-proc-nod, aot-proc-nod-age2, aot-harv, aot-harv-nod, aot-hq-base, aot-hq-ion, aot-nod-radar-age0, aot-nod-radar-age1
+		ProtectionTypes: fact, fact.gdi, fact.nod, aot-lite-gdi, aot-lite-nod, weap, afld, aot-pyle-age0, aot-pyle-age1, aot-pyle-age2, aot-hand-age0, aot-hand-age1, aot-hand-age2, aot-atec-age0, aot-atec-age1, aot-atec-age2, aot-stec-age0, aot-stec-age1, aot-stec-age2, orbc, aot-slab-age1, aot-slab-age2, aot-tmpl-age1, aot-tmpl-age2, aot-shrine, aot-mslo-age1, aot-mslo-age2, proc, aot-proc-gdi, aot-proc-gdi-age2, aot-proc-nod, aot-proc-nod-age2, aot-harv, aot-harv-nod, oret, aot-oret-lite, aot-hq-base, aot-hq-ion, aot-nod-radar-age0, aot-nod-radar-age1
 		IgnoredEnemyTargetTypes: Air
 		RushInterval: 1200
 		MinimumAttackForceDelay: 1000

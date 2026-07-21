@@ -1199,7 +1199,10 @@
 	Inherits@selection: ^SelectableCombatBuilding
 	RenderRangeCircle:
 	RenderDetectionCircle:
-	-GivesBuildableArea:
+	# AOT (2026-07-19, User-Wunsch): Verteidigung stellt jetzt AUCH Bauzone bereit (wie ^BaseBuilding),
+	# damit man Türme neben einen Flammenturm etc. am Chokepoint setzen kann. Vorher -GivesBuildableArea.
+	GivesBuildableArea:
+		AreaTypes: building
 	MustBeDestroyed:
 		RequiredForShortGame: false
 	Targetable:

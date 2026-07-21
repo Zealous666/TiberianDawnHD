@@ -3351,12 +3351,20 @@ NUKE:
 		Condition: build-incomplete
 		Sequence: aot-turbine-make
 	-Power:
-	Power@base:
-		Amount: 100
-		RequiresCondition: !aot-turbine-active
-	Power@turbine:
+	# Faction-abhaengige Power (User 2026-07-19): NOD Nuke 150, GDI Nuke 200, GDI Turbine-Upgrade 300.
+	# Der geteilte age0/age1-Nuke wird von BEIDEN Fraktionen gebaut -> per Faction-Condition getrennt.
+	GrantConditionOnFaction@nod:
+		Condition: aot-nod-faction
+		Factions: nod
+	Power@nod:
+		Amount: 150
+		RequiresCondition: aot-nod-faction
+	Power@gdi:
 		Amount: 200
-		RequiresCondition: aot-turbine-active
+		RequiresCondition: !aot-nod-faction && !aot-turbine-active
+	Power@turbine:
+		Amount: 300
+		RequiresCondition: !aot-nod-faction && aot-turbine-active
 	ScalePowerWithHealth:
 
 aot-nuke-age0:
@@ -3474,6 +3482,9 @@ aot-nuke-turbine-age2:
 # Sprite-Switch: Age 0 → RA Soviet Advanced Power Plant (APWR.ZIP), Age 1+ → TD NUK2.ZIP
 # NOD-Spieler benötigen ab Age 1 zusätzlich den NOD Radar Dome (anyhq).
 NUK2:
+	# NOD-exklusiv (nur Building.Nod). Power 300 (User 2026-07-19).
+	Power:
+		Amount: 300
 	Building:
 		Footprint: xxx xxx ===
 		Dimensions: 3,3
@@ -5304,7 +5315,6 @@ aot-upgrade-guard-tower:
 # on-top rendert statt sie komplett aus der Welt zu entfernen).
 aot-fireposition:
 	Inherits: ^Support
-	Inherits@IDISABLE: ^DisabledOverlay
 	Inherits@AUTOTARGET: ^AutoTargetAll
 	Tooltip:
 		Name: Fire Position
@@ -5341,13 +5351,14 @@ aot-fireposition:
 		Margin: 4, 3
 		RequiresSelection: true
 	AttackGarrisoned:
-		PauseOnCondition: lowpower || build-incomplete
+		# Fire Position braucht KEINE Power und feuert auch bei Low-Power weiter (User 2026-07-19).
+		PauseOnCondition: build-incomplete
 		Armaments: garrisoned
 		PortOffsets: 0,0,150, 0,0,150, 0,0,150, 0,0,150, 0,0,150, 0,0,150
 		PortYaws: 0, 170, 341, 512, 682, 853
 		PortCones: 88, 88, 88, 88, 88, 88
 	Power:
-		Amount: -30
+		Amount: 0
 	DetectCloaked:
 		Range: 5c0
 	Buildable:
@@ -5375,7 +5386,7 @@ aot-wall-gdi:
 	Buildable:
 		LockedGroup: aot-grp-wall-gdi
 		BuildPaletteOrder: 20
-		Prerequisites: anypower, fact, ~!aot-firestorm-defense-upgrade
+		Prerequisites: fact, ~!aot-firestorm-defense-upgrade
 		Queue: Building.GDI
 		BuildDuration: 230
 		Description: Concrete Wall reinforced with sandbags - stops infantry and vehicles and blocks most projectiles.
@@ -5481,7 +5492,7 @@ aot-wall-nod:
 	Buildable:
 		LockedGroup: aot-grp-wall-nod
 		BuildPaletteOrder: 20
-		Prerequisites: anypower, fact, ~!aot-laser-fence-upgrade
+		Prerequisites: fact, ~!aot-laser-fence-upgrade
 		Queue: Building.Nod
 		BuildDuration: 150
 		Description: Barbed wire fence - stops infantry. Vehicles can drive through.
