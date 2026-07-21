@@ -208,20 +208,22 @@ namespace OpenRA.Mods.Common.Traits
 			var cell = ResolveCell(step, type);
 			if (cell == null)
 			{
-				// Out of buildable-area reach? Bridge along the actual path. Transient blockers are asked
-				// to step aside (own units on the site), then we wait.
-				if (OutOfReachOnly(step, type) && TryBridgeStep(bot, step))
-					return;
-
 				if (step.Kind == AotStepKind.Building)
 				{
 					NudgeBlockers(type, step.TopLeft);
 
-					// PERMANENT blocker: tiberium grew onto the planned cells (a unit would be nudged and
-					// clear). Re-site the single building nearby instead of deadlocking the whole plan.
-					if (BlockedByResources(type, step.TopLeft) && TryResite(step, type))
+					// PERMANENT blocker (resource grew there, or a static foreign actor sits on it — a
+					// blossom tree is not Mobile and will never be nudged away). Re-site the single
+					// building nearby instead of deadlocking the whole plan; this ALSO clears the reason
+					// bridging gave up (CanPlaceBuilding was false at the target), so re-try bridging next.
+					if (PermanentlyBlocked(type, step.TopLeft) && TryResite(step, type))
 						return;
 				}
+
+				// Out of buildable-area reach? Bridge along the actual path. Transient blockers are asked
+				// to step aside (own units on the site), then we wait.
+				if (OutOfReachOnly(step, type) && TryBridgeStep(bot, step))
+					return;
 
 				if (++waitLog % 8 == 0)
 					Log.Write("debug", $"[AotBuild] Waiting (target blocked): {step.Role} at {step.TopLeft}");
@@ -314,14 +316,27 @@ namespace OpenRA.Mods.Common.Traits
 			Log.Write("debug", $"[AotBuild] Nudging {blockers.Count} own unit(s) off {type} site at {cell}");
 		}
 
-		bool BlockedByResources(string type, CPos cell)
+		// PERMANENT block: something on the footprint that NudgeBlockers cannot clear — either a resource
+		// (tiberium grew there; CanPlaceBuilding doesn't even check the resource layer, so a building could
+		// otherwise be dropped ON TOP of it) or a foreign, non-owned actor (a blossom tree/SPLIT2 etc. is
+		// STATIC — no MobileInfo — so it never queues a Nudge activity and blocks CanPlaceBuilding forever).
+		bool PermanentlyBlocked(string type, CPos cell)
 		{
 			var resourceLayer = world.WorldActor.TraitOrDefault<IResourceLayer>();
 			var bi = world.Map.Rules.Actors[type].TraitInfoOrDefault<BuildingInfo>();
-			if (resourceLayer == null || bi == null)
+			if (bi == null)
 				return false;
 
-			return bi.Tiles(cell).Any(t => resourceLayer.GetResource(t).Type != null);
+			foreach (var t in bi.Tiles(cell))
+			{
+				if (resourceLayer != null && resourceLayer.GetResource(t).Type != null)
+					return true;
+
+				if (world.ActorMap.GetActorsAt(t).Any(a => a.Owner != player))
+					return true;
+			}
+
+			return false;
 		}
 
 		// Move a single plan building to the nearest valid cell (spiral, r <= 8): placeable-or-out-of-reach
