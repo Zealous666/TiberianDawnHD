@@ -659,11 +659,13 @@ namespace OpenRA.Mods.Common.Traits
 			if (Info.ExcludeFromOpsTypes.Contains(a.Info.Name))
 				return false;
 
-			// Ground combat units only: mobile, not a harvester/transporter, not aircraft.
-			if (a.TraitOrDefault<Mobile>() == null)
+			// Ground/naval combat units: mobile, not a harvester. Aircraft (Mobile == null) are
+			// claimable too -- AotAirRaidMission requests helicopters -- but only via a genuine
+			// pending request; see the AircraftInfo branch below.
+			if (a.Info.HasTraitInfo<HarvesterInfo>())
 				return false;
 
-			if (a.Info.HasTraitInfo<HarvesterInfo>() || a.Info.HasTraitInfo<AircraftInfo>())
+			if (a.TraitOrDefault<Mobile>() == null && !a.Info.HasTraitInfo<AircraftInfo>())
 				return false;
 
 			return true;
