@@ -61,6 +61,39 @@ namespace OpenRA.Mods.Common.Traits
 			if (stray.Count > 0)
 				bot.QueueOrder(new Order("AttackMove", null, Target.FromCell(Ops.World, anchor), false, groupedActors: stray.ToArray()));
 		}
+
+		// Force-fires the up-to-2 nearest destructible neutral obstacles (trees, civ buildings)
+		// near `target` using the given in-position units. Returns the obstacle list found (empty
+		// if none), so callers can react to "still clearing" vs "area clean". Shared (User
+		// 2026-07-22): originally only the starting-units choke reserve had this -- plain
+		// AttackMove orders never destroy a blocking tree/wall on their own, so any other mission
+		// routing through the same choke (e.g. regular waves) could get stuck there forever too.
+		protected List<Actor> ClearNearbyObstacles(IBot bot, CPos target, List<Actor> inPosition)
+		{
+			var targetW = Ops.World.Map.CenterOfCell(target);
+			var obstacles = Ops.World.FindActorsInCircle(targetW, WDist.FromCells(Ops.Info.ChokeClearRadius))
+				.Where(a => !a.IsDead && a.IsInWorld
+					&& a.Info.HasTraitInfo<HealthInfo>()
+					&& a.Owner.NonCombatant
+					&& Ops.Player.RelationshipWith(a.Owner) != PlayerRelationship.Ally
+					&& !Ops.Info.ChokeClearExcludeTypes.Contains(a.Info.Name)
+					&& !a.Info.HasTraitInfo<BridgeInfo>()
+					&& !a.Info.HasTraitInfo<GroundLevelBridgeInfo>()
+					&& !a.Info.HasTraitInfo<LegacyBridgeHutInfo>())
+				.OrderBy(a => (a.Location - target).LengthSquared)
+				.ToList();
+
+			if (obstacles.Count == 0)
+				return obstacles;
+
+			Log($"clearing {obstacles.Count} obstacle(s) near {target}, nearest={obstacles[0].Info.Name}@{obstacles[0].Location}");
+
+			var targets = obstacles.Take(2).ToList();
+			for (var i = 0; i < inPosition.Count; i++)
+				ForceAttack(bot, inPosition[i], targets[i % targets.Count]);
+
+			return obstacles;
+		}
 	}
 
 	// ======================================================================
@@ -246,36 +279,6 @@ namespace OpenRA.Mods.Common.Traits
 				phase = arcoTargets.Count > 0 ? Phase.ArcoRaid : Phase.FinalAttack;
 				Log($"choke cleared -> {phase} ({arcoTargets.Count} arco target(s)); choke stays empty (user decision)");
 			}
-		}
-
-		// Force-fires the up-to-2 nearest destructible neutral obstacles (trees, civ buildings)
-		// near `target` using the given in-position units. Returns the obstacle list found (empty
-		// if none), so callers can react to "still clearing" vs "area clean".
-		List<Actor> ClearNearbyObstacles(IBot bot, CPos target, List<Actor> inPosition)
-		{
-			var targetW = Ops.World.Map.CenterOfCell(target);
-			var obstacles = Ops.World.FindActorsInCircle(targetW, WDist.FromCells(Ops.Info.ChokeClearRadius))
-				.Where(a => !a.IsDead && a.IsInWorld
-					&& a.Info.HasTraitInfo<HealthInfo>()
-					&& a.Owner.NonCombatant
-					&& Ops.Player.RelationshipWith(a.Owner) != PlayerRelationship.Ally
-					&& !Ops.Info.ChokeClearExcludeTypes.Contains(a.Info.Name)
-					&& !a.Info.HasTraitInfo<BridgeInfo>()
-					&& !a.Info.HasTraitInfo<GroundLevelBridgeInfo>()
-					&& !a.Info.HasTraitInfo<LegacyBridgeHutInfo>())
-				.OrderBy(a => (a.Location - target).LengthSquared)
-				.ToList();
-
-			if (obstacles.Count == 0)
-				return obstacles;
-
-			Log($"clearing {obstacles.Count} obstacle(s) near {target}, nearest={obstacles[0].Info.Name}@{obstacles[0].Location}");
-
-			var targets = obstacles.Take(2).ToList();
-			for (var i = 0; i < inPosition.Count; i++)
-				ForceAttack(bot, inPosition[i], targets[i % targets.Count]);
-
-			return obstacles;
 		}
 
 		List<Actor> RaidGroup() => chokeReserve.Where(a => !Ops.CannotOrder(a)).ToList();
@@ -919,6 +922,20 @@ namespace OpenRA.Mods.Common.Traits
 					FinishWave();
 					return;
 				}
+			}
+
+			// Clear obstacles blocking the wave's own choke exit (User 2026-07-22): a plain
+			// AttackMove order never destroys a blocking tree/wall on its own -- only the starting-
+			// units choke reserve had that logic until now, so a wave routing through the same
+			// choke could get stuck there indefinitely (eventually caught by the stall timeout
+			// above, but that just abandons the wave rather than letting it actually leave).
+			var choke = Ops.ChokeProvider?.Chokepoint;
+			if (choke.HasValue)
+			{
+				var holdR2 = Ops.Info.ChokepointHoldRadius * Ops.Info.ChokepointHoldRadius;
+				var atChoke = Units.Where(a => !Ops.CannotOrder(a) && (a.Location - choke.Value).LengthSquared <= holdR2).ToList();
+				if (atChoke.Count > 0 && ClearNearbyObstacles(bot, choke.Value, atChoke).Count > 0)
+					return;
 			}
 
 			// Keep the wave together: stragglers regroup on the unit closest to the centroid.
