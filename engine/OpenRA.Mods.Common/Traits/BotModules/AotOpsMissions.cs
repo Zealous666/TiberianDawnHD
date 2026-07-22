@@ -1466,8 +1466,13 @@ namespace OpenRA.Mods.Common.Traits
 
 			var goal = targetActor?.Location ?? targetCell.Value;
 			foreach (var a in Units)
+			{
+				Log($"[AotAirDiag] {a.Info.Name}@{a.Location}#{a.ActorID} idle={a.IsIdle} " +
+					$"activity={a.CurrentActivity?.GetType().Name ?? "none"} goal={goal}");
+
 				if (a.IsIdle)
 					bot.QueueOrder(new Order("AttackMove", a, Target.FromCell(Ops.World, goal), false));
+			}
 		}
 	}
 }
