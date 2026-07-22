@@ -207,15 +207,25 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Forming timeout; the wave launches with what it has (if at least half).")]
 		public readonly int WaveFormingTimeout = 4500;
 
-		[Desc("Consecutive FAILED waves (wiped out, or GDI retreat) at the primary route before the",
-			"next wave routes via a secondary approach instead (User 2026-07-22). If no distinct",
-			"secondary approach exists, the wave still launches normally via the primary route.")]
-		public readonly int WaveSecondaryRouteAfterFailures = 2;
+		[Desc("Executing-phase stall safety net: if a launched wave neither wipes out, retreats nor",
+			"reaches/loses its target within this many ticks (e.g. stuck on an unreachable waypoint",
+			"or unclearable obstacle), it is abandoned as a failure so the escalation ladder and the",
+			"wave scheduler are never blocked indefinitely by a single stuck wave (User 2026-07-22).")]
+		public readonly int WaveExecutingTimeout = 9000;
+
+		[Desc("Consecutive FAILED waves (wiped out, GDI retreat, or stall timeout) at the primary route",
+			"before the next wave routes via a secondary approach instead (User 2026-07-22, reduced",
+			"from 2). If no distinct secondary approach exists, the wave still launches via the",
+			"primary route.")]
+		public readonly int WaveSecondaryRouteAfterFailures = 1;
 
 		[Desc("Consecutive failed waves (primary + secondary route attempts) before switching to an",
-			"air raid instead of another ground wave. Only triggers once HelipadTypes exists; while",
-			"it doesn't, ground waves keep escalating on the same counter.")]
-		public readonly int WaveAirRaidAfterFailures = 3;
+			"air raid instead of another ground wave (User 2026-07-22, reduced from 3). Only triggers",
+			"once HelipadTypes exists; while it doesn't, ground waves keep escalating on the same",
+			"counter. Once the first air raid has fired, every later escalation decision (4th attempt",
+			"onward) is instead chosen at random each time -- primary choke, secondary choke, or",
+			"another air raid -- rather than following this fixed ladder again (User 2026-07-22).")]
+		public readonly int WaveAirRaidAfterFailures = 2;
 
 		[ActorReference]
 		[Desc("Helipad actor types. The air-raid escalation tier only triggers once one is owned.")]
@@ -231,6 +241,9 @@ namespace OpenRA.Mods.Common.Traits
 
 		[Desc("Air raid forming timeout; launches short-handed if hit.")]
 		public readonly int AirRaidFormingTimeout = 9000;
+
+		[Desc("Air raid executing-phase stall safety net; same purpose as WaveExecutingTimeout.")]
+		public readonly int AirRaidExecutingTimeout = 9000;
 
 		[ActorReference]
 		[Desc("Shipyard/Sub Pen actor types. A wave only switches to naval ferrying once one of",
@@ -367,6 +380,12 @@ namespace OpenRA.Mods.Common.Traits
 		int waveIndex;
 		int waveCooldownTicks;
 		int waveFailureStreak;
+
+		// Once the fixed 3-attempt ladder (primary -> secondary -> air raid) has fired its first
+		// air raid, every later escalation decision is instead chosen at random each time (User
+		// 2026-07-22) -- this flips permanently and never reverts to the deterministic ladder.
+		bool randomEscalationPhase;
+
 		int derrickTicks;
 		int productionTicks;
 		int starportTicks;
@@ -613,10 +632,7 @@ namespace OpenRA.Mods.Common.Traits
 						// Unknown and don't touch the streak.
 						if (m is AotAirRaidMission)
 						{
-							// Air raid is a one-shot escalation tier: succeed or fail, the loop
-							// restarts from ground waves afterwards (User 2026-07-22), it never
-							// chains into a second air raid.
-							Log($"escalation: air raid finished ({m.Outcome}) -> streak reset, back to ground waves");
+							Log($"escalation: air raid finished ({m.Outcome}) -> streak reset, further attacks now random (secondary/primary/air raid)");
 							waveFailureStreak = 0;
 						}
 						else if (m.Outcome == AotMissionOutcome.Failure)
@@ -872,32 +888,46 @@ namespace OpenRA.Mods.Common.Traits
 
 		void Schedule(IBot bot)
 		{
-			// Module 2: regular attack waves, with an escalation ladder driven by
-			// waveFailureStreak (User 2026-07-22): after WaveSecondaryRouteAfterFailures (2)
-			// consecutive failures the next wave routes via a secondary approach instead of the
-			// primary one; after WaveAirRaidAfterFailures (3) -- and only once a helipad exists --
-			// an air raid replaces the ground wave entirely. The air raid always resets the streak
-			// (see the mission-outcome handling above), so the loop restarts from ground waves
-			// afterwards regardless of how it went. Composition/upgrades still scale with AgeTier()
-			// as before; only which mission type runs is new.
+			// Module 2: regular attack waves, with an escalation ladder (User 2026-07-22, reduced):
+			// attempt 1 = primary choke; if it fails, attempt 2 = secondary choke (Wave-
+			// SecondaryRouteAfterFailures=1); if that also fails, attempt 3 = an air raid instead of
+			// a ground wave (WaveAirRaidAfterFailures=2, only once a helipad exists). From then on
+			// (attempt 4 onward) the fixed ladder is abandoned for good -- randomEscalationPhase
+			// picks, each time, at random between a ground wave via a random choke and another air
+			// raid, so the enemy stops being predictable once it has escalated once already.
 			if (Info.EnableWaves && !Missions.OfType<AotRegularWaveMission>().Any() && !Missions.OfType<AotAirRaidMission>().Any())
 			{
 				if (--waveCooldownTicks <= 0)
 				{
 					waveCooldownTicks = Info.WaveCooldown;
 
-					if (waveFailureStreak >= Info.WaveAirRaidAfterFailures && Info.AirRaidHelicopterTypes.Length > 0 && HasHelipad())
+					var canAirRaid = Info.AirRaidHelicopterTypes.Length > 0 && HasHelipad();
+					bool doAirRaid;
+					bool useSecondaryRoute;
+
+					if (randomEscalationPhase)
+					{
+						doAirRaid = canAirRaid && World.LocalRandom.Next(2) == 0;
+						useSecondaryRoute = !doAirRaid && World.LocalRandom.Next(2) == 0;
+					}
+					else
+					{
+						doAirRaid = waveFailureStreak >= Info.WaveAirRaidAfterFailures && canAirRaid;
+						useSecondaryRoute = !doAirRaid && waveFailureStreak >= Info.WaveSecondaryRouteAfterFailures;
+					}
+
+					if (doAirRaid)
 					{
 						Missions.Add(new AotAirRaidMission(this));
-						Log($"air raid scheduled (streak={waveFailureStreak})");
+						randomEscalationPhase = true;
+						Log($"air raid scheduled (streak={waveFailureStreak}, random={randomEscalationPhase})");
 					}
 					else
 					{
 						waveIndex++;
-						var useSecondaryRoute = waveFailureStreak >= Info.WaveSecondaryRouteAfterFailures;
 						var wave = new AotRegularWaveMission(this, waveIndex, useSecondaryRoute);
 						Missions.Add(wave);
-						Log($"wave {waveIndex} scheduled (tier {AgeTier()}, secondaryRoute={useSecondaryRoute}, streak={waveFailureStreak})");
+						Log($"wave {waveIndex} scheduled (tier {AgeTier()}, secondaryRoute={useSecondaryRoute}, streak={waveFailureStreak}, random={randomEscalationPhase})");
 					}
 				}
 			}

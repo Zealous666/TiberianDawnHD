@@ -438,6 +438,7 @@ namespace OpenRA.Mods.Common.Traits
 		readonly int index;
 		readonly bool useSecondaryRoute;
 		int formingTicks;
+		int executingTicks;
 		int initialCount;
 		Actor targetActor;
 		CPos? targetCell;
@@ -882,6 +883,19 @@ namespace OpenRA.Mods.Common.Traits
 				return;
 			}
 
+			// Stall safety net (User 2026-07-22): a wave that neither wipes out, retreats, nor
+			// reaches/loses its target (e.g. stuck on an unreachable secondary waypoint) would
+			// otherwise sit here forever, permanently blocking the scheduler from ever creating
+			// another wave or air raid.
+			executingTicks += Ops.Info.MissionInterval;
+			if (executingTicks >= Ops.Info.WaveExecutingTimeout)
+			{
+				Log($"executing timed out ({Units.Count} unit(s) stuck) -> wave abandoned");
+				Outcome = AotMissionOutcome.Failure;
+				FinishWave();
+				return;
+			}
+
 			// GDI: retreat at the configured loss percentage (by unit count). Nod: 0 = never.
 			var retreat = Ops.Info.WaveRetreatLossPercent;
 			if (retreat > 0 && initialCount > 0 && (initialCount - Units.Count) * 100 / initialCount >= retreat)
@@ -1315,6 +1329,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		Phase phase = Phase.Forming;
 		int formingTicks;
+		int executingTicks;
 		Actor targetActor;
 		CPos? targetCell;
 
@@ -1394,6 +1409,15 @@ namespace OpenRA.Mods.Common.Traits
 			if (Units.Count == 0)
 			{
 				Log("air raid wiped out");
+				Outcome = AotMissionOutcome.Failure;
+				Finish();
+				return;
+			}
+
+			executingTicks += Ops.Info.MissionInterval;
+			if (executingTicks >= Ops.Info.AirRaidExecutingTimeout)
+			{
+				Log($"air raid executing timed out ({Units.Count} unit(s) stuck) -> raid abandoned");
 				Outcome = AotMissionOutcome.Failure;
 				Finish();
 				return;
