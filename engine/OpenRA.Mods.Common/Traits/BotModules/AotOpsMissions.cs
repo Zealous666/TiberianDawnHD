@@ -961,11 +961,37 @@ namespace OpenRA.Mods.Common.Traits
 			if ((centre - home).LengthSquared <= 64)
 			{
 				Log("retreat complete -> units to pool");
+				SendDamagedToRepair(bot);
 				FinishWave();
 				return;
 			}
 
 			AttackMoveGroup(bot, Units, home);
+		}
+
+		// User 2026-07-22: retreating survivors that are damaged and have a repair facility
+		// available are sent there before rejoining the pool. Issuing the order here and then
+		// releasing to the pool right after is fine -- ReleaseToPool only updates our own
+		// ownership bookkeeping, it doesn't touch the unit's current activity, so the Repair
+		// order keeps running on its own once the unit is pool-owned.
+		void SendDamagedToRepair(IBot bot)
+		{
+			if (Ops.Info.RepairTypes.Count == 0)
+				return;
+
+			foreach (var a in Units)
+			{
+				if (Ops.CannotOrder(a))
+					continue;
+
+				var health = a.TraitOrDefault<Health>();
+				if (health == null || health.HP >= health.MaxHP)
+					continue;
+
+				var fix = Ops.NearestOwnRepairFacility(a.Location);
+				if (fix != null)
+					bot.QueueOrder(new Order("Repair", a, Target.FromActor(fix), false));
+			}
 		}
 	}
 

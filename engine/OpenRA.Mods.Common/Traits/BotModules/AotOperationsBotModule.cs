@@ -232,6 +232,12 @@ namespace OpenRA.Mods.Common.Traits
 		public readonly HashSet<string> HelipadTypes = [];
 
 		[ActorReference]
+		[Desc("Repair facility (FIX) actor types. A retreating wave sends damaged survivors here to",
+			"repair before releasing them back to the pool (User 2026-07-22). No effect if empty",
+			"or none owned/alive.")]
+		public readonly HashSet<string> RepairTypes = [];
+
+		[ActorReference]
 		[Desc("Attack helicopter variant chain (all exclusive branches) used for the air-raid",
 			"escalation tier.")]
 		public readonly string[] AirRaidHelicopterTypes = [];
@@ -445,6 +451,11 @@ namespace OpenRA.Mods.Common.Traits
 
 		public bool HasHelipad() =>
 			World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld && Info.HelipadTypes.Contains(a.Info.Name));
+
+		public Actor NearestOwnRepairFacility(CPos near) =>
+			World.Actors
+				.Where(a => a.Owner == Player && !a.IsDead && a.IsInWorld && Info.RepairTypes.Contains(a.Info.Name))
+				.MinByOrDefault(a => (a.Location - near).LengthSquared);
 
 		// ROOT CAUSE FOUND (debug.log evidence): stock BaseBuilderBotModule (still active on @aot for
 		// its PauseUnitProduction economy service) has its OWN rally-point assignment

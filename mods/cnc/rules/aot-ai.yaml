@@ -84,6 +84,9 @@ Player:
 		SgenTypes: aot-sgen
 		AfldTypes: afld
 		FturTypes: aot-ftur-flame, aot-ftur-toxic
+		GunTypes: aot-gun-base, aot-gun-laser
+		SamTypes: sam
+		ObeliskTypes: obli
 		WallTypes: aot-wall-nod
 		# Blossom-Tree-Actors (Tiberium-Wachstumsquellen, ^TibTree in defaults.yaml) — Plan hält
 		# GrowthSourceMargin Zellen Abstand, damit nachwachsendes Erz die Base-Zellen nicht überwuchert.
@@ -364,7 +367,10 @@ Player:
 		MinimumExcessPower: -9999
 		MaximumExcessPower: 999999
 		MaxBaseRadius: 22
-		NewProductionCashThreshold: 0
+		# Priority tier below base building (User 2026-07-22): base building has no cash reserve
+		# at all (spends immediately), so upgrades only start once at least 500 credits of headroom
+		# exist -- base building gets first claim on freshly-earned cash.
+		NewProductionCashThreshold: 500
 		BuildingLimits:
 			aot-age1-upgrade-gdi: 1
 			aot-age2-upgrade-gdi: 1
@@ -373,13 +379,18 @@ Player:
 			aot-age2-upgrade-nod: 1
 			aot-age3-upgrade-nod: 1
 		BuildingFractions:
-			# === AGE-UPGRADES — höchste Priorität (schalten den ganzen Techtree) ===
-			aot-age1-upgrade-gdi: 100
-			aot-age2-upgrade-gdi: 100
-			aot-age3-upgrade-gdi: 100
-			aot-age1-upgrade-nod: 100
-			aot-age2-upgrade-nod: 100
-			aot-age3-upgrade-nod: 100
+			# === AGE-UPGRADES — User 2026-07-22: NIEDRIGSTE Priorität innerhalb dieser Queue (unter
+			# jedem anderen Upgrade, Wert < der niedrigste Kampf-Upgrade-Wert unten) — alle sonst
+			# verfügbaren Upgrades der aktuellen Age sollen zuerst dran sein, ehe der Age-Sprung
+			# selbst gekauft wird. BuildingFractions ist gewichtete Zufallsauswahl, keine strikte
+			# Reihenfolge — mit diesem Gewicht wird das Age-Upgrade nur noch selten gezogen,
+			# solange andere Kandidaten in der Queue verfügbar sind, aber keine harte Garantie.
+			aot-age1-upgrade-gdi: 3
+			aot-age2-upgrade-gdi: 3
+			aot-age3-upgrade-gdi: 3
+			aot-age1-upgrade-nod: 3
+			aot-age2-upgrade-nod: 3
+			aot-age3-upgrade-nod: 3
 			# === Superwaffen-Enabler (hohe Prio — sonst existiert die Power nie) ===
 			aot-upgrade-ion-cannon: 40
 			aot-upgrade-zonetrooper-drop: 30
@@ -568,10 +579,16 @@ Player:
 		# resets to ground waves regardless of the raid's outcome.
 		HelipadTypes: aot-hpad-gdi
 		AirRaidHelicopterTypes: aot-apache-base, aot-orca-upgraded
+		# Retreating survivors that are damaged head to the repair bay before rejoining the pool
+		# (User 2026-07-22).
+		RepairTypes: aot-fix-age0, aot-fix-age1, aot-fix-age2
 
 	AotOperationsBotModule@nod:
 		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
 		Faction: nod
+		# Priority tier below base building AND upgrades (User 2026-07-22): base building 0, upgrades
+		# 500 -- army production waits for 1000 credits of headroom before spending, lowest of the 3.
+		ProductionMinCash: 1000
 		ConstructionYardTypes: fact, fact.gdi, fact.nod
 		ExcludeFromOpsTypes: aot-harv, aot-harv-nod, aot-mcv-age0, aot-mcv-age1, aot-surveyor-gdi, aot-surveyor-nod, oret, aot-oret-lite, aot-minelayer, aot-aray, aot-mgap, aot-mstealth, aot-subapc, truck, mcv
 		ChokepointReserveSize: 4
@@ -617,6 +634,9 @@ Player:
 		# to ground waves regardless of the raid's outcome.
 		HelipadTypes: aot-hpad-nod
 		AirRaidHelicopterTypes: aot-hind-base, aot-harpy-upgraded, aot-harpy-upgraded-laser
+		# Retreating survivors that are damaged head to the repair bay before rejoining the pool
+		# (User 2026-07-22).
+		RepairTypes: aot-fix-age0, aot-fix-age1-nod, aot-fix-age2-nod
 
 
 	# =========================================================================
