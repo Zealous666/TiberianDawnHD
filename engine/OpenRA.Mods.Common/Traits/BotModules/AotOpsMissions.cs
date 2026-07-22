@@ -12,6 +12,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenRA.Mods.Common.Activities;
 using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Traits
@@ -1481,15 +1482,15 @@ namespace OpenRA.Mods.Common.Traits
 				}
 			}
 
+			// Aircraft rest in a perpetual FlyIdle activity (not a null CurrentActivity) whenever
+			// they have nothing to do -- unlike ground Mobile actors, IsIdle (CurrentActivity ==
+			// null) is therefore structurally always false for them, so gating the AttackMove order
+			// on IsIdle alone (as the ground wave logic does) means it is NEVER issued (User
+			// 2026-07-22 root cause: the raid launches but the helicopters just hover forever).
 			var goal = targetActor?.Location ?? targetCell.Value;
 			foreach (var a in Units)
-			{
-				Log($"[AotAirDiag] {a.Info.Name}@{a.Location}#{a.ActorID} idle={a.IsIdle} " +
-					$"activity={a.CurrentActivity?.GetType().Name ?? "none"} goal={goal}");
-
-				if (a.IsIdle)
+				if (a.IsIdle || a.CurrentActivity is FlyIdle)
 					bot.QueueOrder(new Order("AttackMove", a, Target.FromCell(Ops.World, goal), false));
-			}
 		}
 	}
 }
