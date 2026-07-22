@@ -1501,6 +1501,7 @@ namespace OpenRA.Mods.Common.Traits
 	{
 		readonly HashSet<Actor> responding = [];
 		int scanTicks;
+		bool reserveRequested;
 
 		public AotBaseDefenseMission(AotOperationsBotModule ops)
 			: base(ops, "base-defense") { }
@@ -1549,6 +1550,19 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				var fromPool = Ops.TakeAnyFromPool(shortfall);
 				Ops.AssignFromPool(this, fromPool);
+			}
+
+			// User 2026-07-22: additionally hold back one full wave-composition group as a
+			// standing reserve, requested once between wave 1 and wave 2 -- ProtectionFloorTypes
+			// alone was observed to leave Age 0 without any defenders at all (its chain can lag
+			// behind what's actually buildable that early), whereas WaveTankTypes is proven
+			// buildable from Age 0 by wave 1 itself succeeding.
+			if (!reserveRequested && Ops.FirstWaveScheduled())
+			{
+				reserveRequested = true;
+				var chain = Ops.Info.WaveTankTypes.Length > 0 ? Ops.Info.WaveTankTypes : Ops.Info.ProtectionFloorTypes;
+				if (chain.Length > 0)
+					Ops.QueueRequest(this, "reserve", chain, target);
 			}
 		}
 

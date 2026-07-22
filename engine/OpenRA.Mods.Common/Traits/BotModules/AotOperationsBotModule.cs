@@ -367,8 +367,10 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Radius (cells) around each protected building that is scanned for enemies.")]
 		public readonly int ProtectionScanRadius = 10;
 
-		[Desc("Ticks between threat scans.")]
-		public readonly int ProtectionScanInterval = 250;
+		[Desc("Ticks between threat scans. Kept short (User 2026-07-22: react immediately, even to a",
+			"single infantry attacker anywhere near the base) -- this runs a cheap circle query per",
+			"protected building, not per unit, so a short interval is not expensive.")]
+		public readonly int ProtectionScanInterval = 25;
 
 		[Desc("Responders sent per detected enemy (rounded up), so a lone scout doesn't empty the",
 			"whole garrison. Always at least ProtectionMinResponse, never more than available.")]
@@ -498,6 +500,12 @@ namespace OpenRA.Mods.Common.Traits
 
 			return new CPos((baseCentre.X + choke.Value.X) / 2, (baseCentre.Y + choke.Value.Y) / 2);
 		}
+
+		// User 2026-07-22: the base defense garrison holds back a full wave-composition reserve
+		// once wave 1 has been scheduled (i.e. "between wave 1 and wave 2") rather than at game
+		// start, since the very first wave slot already establishes that the tank chain is
+		// buildable -- see AotBaseDefenseMission.
+		public bool FirstWaveScheduled() => waveIndex >= 1;
 
 		// ROOT CAUSE FOUND (debug.log evidence): stock BaseBuilderBotModule (still active on @aot for
 		// its PauseUnitProduction economy service) has its OWN rally-point assignment
