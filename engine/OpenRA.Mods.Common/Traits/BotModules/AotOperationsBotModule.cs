@@ -285,9 +285,6 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Waypoint ring radius around scouted spawns.")]
 		public readonly int ScoutRingRadius = 8;
 
-		[Desc("Cooldown before a destroyed scout group is rebuilt.")]
-		public readonly int ScoutRespawnCooldown = 1500;
-
 		[ActorReference]
 		[Desc("Radar/HQ actor types. Scout expeditions only start once one of these is owned",
 			"and alive (the scout mission's whole purpose is feeding the radar/minimap).")]
@@ -375,7 +372,7 @@ namespace OpenRA.Mods.Common.Traits
 		int starportTicks;
 		int missionTicks;
 		int rallyCheckTicks;
-		readonly Dictionary<int, int> scoutRespawnTicks = [];
+		readonly HashSet<int> scoutGroupsLaunched = [];
 		readonly Dictionary<int, List<CPos>> scoutAssignments = [];
 
 		public AotOperationsBotModule(Actor self, AotOperationsBotModuleInfo info)
@@ -905,8 +902,10 @@ namespace OpenRA.Mods.Common.Traits
 				}
 			}
 
-			// Module 3: scout expeditions (50% spawn coverage, self-regenerating). Gated on Radar/HQ:
-			// no point scouting before there's a radar/minimap to show the results on.
+			// Module 3: scout expeditions (50% spawn coverage). Gated on Radar/HQ: no point
+			// scouting before there's a radar/minimap to show the results on. One-shot per group
+			// (User 2026-07-22): each group launches exactly once and is never rebuilt, even if
+			// wiped out en route -- scouting is a single initial sweep, not a standing patrol.
 			if (Info.EnableScouts && Intel.AllSpawns.Count > 1 && HasRadar())
 			{
 				if (scoutAssignments.Count == 0)
@@ -914,18 +913,11 @@ namespace OpenRA.Mods.Common.Traits
 
 				foreach (var (index, spawns) in scoutAssignments)
 				{
-					if (Missions.OfType<AotScoutMission>().Any(m => m.GroupIndex == index))
+					if (scoutGroupsLaunched.Contains(index))
 						continue;
 
-					scoutRespawnTicks.TryGetValue(index, out var cooldown);
-					if (cooldown > 0)
-					{
-						scoutRespawnTicks[index] = cooldown - 1;
-						continue;
-					}
-
+					scoutGroupsLaunched.Add(index);
 					Missions.Add(new AotScoutMission(this, index, spawns));
-					scoutRespawnTicks[index] = Info.ScoutRespawnCooldown;
 					Log($"scout group {index} scheduled ({spawns.Count} spawn(s))");
 				}
 			}
