@@ -50,6 +50,18 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Minimum Chebyshev spacing between the two gate turrets.")]
 		public readonly int TurretSpacing = 3;
 
+		[ActorReference]
+		[Desc("Naval production building (Sub Pen / Shipyard). Built ON DEMAND, outside the fixed Rhythm --",
+			"triggered by RequestNavalProduction(), called by any Operations mission that actually needs",
+			"ships/subs/vessels (user spec 2026-07-22: naval production is an Operations concern, not a",
+			"base-rhythm step). Age-ordered variants; the first buildable one is used. Reuses the same",
+			"wall-bridge machinery as every other out-of-reach plan step to reach a coastal site.")]
+		public readonly string[] NavalPenTypes = [];
+
+		[Desc("Radius (cells) around the base centre searched for a coastal site for the on-demand naval",
+			"building. Kept close to MaxBridgeLength so the wall-bridge machinery can actually reach it.")]
+		public readonly int NavalSiteSearchRadius = 20;
+
 		public override object Create(ActorInitializer init) { return new AotBaseBuilderBotModule(init.Self, this); }
 	}
 
@@ -59,11 +71,20 @@ namespace OpenRA.Mods.Common.Traits
 		readonly Player player;
 
 		AotBasePlannerBotModule planner;
+		AotMapIntelBotModule intel;
 		PowerManager playerPower;
 
 		int ticks;
 		int rebuildTicks;
 		int waitLog;
+		int pendingWaitLog;
+
+		// On-demand naval production (Sub Pen / Shipyard): NOT part of the Rhythm. Requested by any
+		// Operations mission that needs ships/subs/vessels; sticky (never cleared) so a later loss of the
+		// building triggers an automatic rebuild the next time HasNavalProduction() is checked.
+		bool navalRequested;
+		AotPlanStep navalStep;
+		int navalWaitLog;
 
 		// The single in-flight production: the step it serves, the cell it will be placed at, and
 		// whether the produced item is a bridge wall rather than the step's own building.
@@ -93,6 +114,72 @@ namespace OpenRA.Mods.Common.Traits
 			var planners = self.Owner.PlayerActor.TraitsImplementing<AotBasePlannerBotModule>().ToList();
 			planner = planners.FirstOrDefault(p => p.Info.Faction == Info.Faction) ?? planners.FirstOrDefault();
 			playerPower = self.Owner.PlayerActor.TraitOrDefault<PowerManager>();
+
+			// Faction-agnostic, one instance per player -- same resolution AotOperationsBotModule uses.
+			intel = self.Owner.PlayerActor.TraitsImplementing<AotMapIntelBotModule>().FirstOrDefault();
+		}
+
+		// ---------------------------------------------------------------- on-demand naval production
+
+		public bool HasNavalProduction() =>
+			Info.NavalPenTypes.Length > 0
+			&& world.Actors.Any(a => a.Owner == player && !a.IsDead && a.IsInWorld && Info.NavalPenTypes.Contains(a.Info.Name));
+
+		// Sticky: once any Operations mission has ever needed naval production, keep guaranteeing it exists
+		// for the rest of the match (a later loss triggers an automatic rebuild -- see BotTick).
+		public void RequestNavalProduction() => navalRequested = true;
+
+		AotPlanStep BuildNavalStep()
+		{
+			if (Info.NavalPenTypes.Length == 0 || intel == null || !intel.Ready)
+				return null;
+
+			var site = FindNavalSite();
+			if (site == null)
+			{
+				if (++navalWaitLog % 8 == 0)
+					Log.Write("debug", "[AotBuild] Naval production requested but no coastal site found near the base yet");
+
+				return null;
+			}
+
+			Log.Write("debug", $"[AotBuild] Naval production requested -> site {site.Value}");
+			return new AotPlanStep { Kind = AotStepKind.Building, Role = "NAVAL", Variants = Info.NavalPenTypes, TopLeft = site.Value };
+		}
+
+		// Anchor on the nearest coastal cell reachable by land from the base (same concept as a wave's
+		// ferry embark point), then spiral out from there for the first cell the actor's actual footprint
+		// can occupy (the anchor itself is a 1x1 shoreline cell, rarely a match for a multi-tile building).
+		// Reach (buildable area) is NOT checked here -- that is what TryBridgeStep is for.
+		CPos? FindNavalSite()
+		{
+			var variant = Info.NavalPenTypes.FirstOrDefault(v => world.Map.Rules.Actors.ContainsKey(v));
+			if (variant == null)
+				return null;
+
+			var ai = world.Map.Rules.Actors[variant];
+			var bi = ai.TraitInfoOrDefault<BuildingInfo>();
+			if (bi == null)
+				return null;
+
+			var anchor = intel.FindCoastalCellNear(intel.BaseCentre, Info.NavalSiteSearchRadius, requireOwnReachable: true)
+				?? intel.FindCoastalCellNear(intel.BaseCentre, Info.NavalSiteSearchRadius, requireOwnReachable: false);
+			if (anchor == null)
+				return null;
+
+			for (var r = 0; r <= 6; r++)
+				for (var dx = -r; dx <= r; dx++)
+					for (var dy = -r; dy <= r; dy++)
+					{
+						if (Math.Max(Math.Abs(dx), Math.Abs(dy)) != r)
+							continue;
+
+						var c = anchor.Value + new CVec(dx, dy);
+						if (world.CanPlaceBuilding(c, ai, bi, null))
+							return c;
+					}
+
+			return null;
 		}
 
 		ProductionQueue QueueFor(string actorType)
@@ -141,12 +228,33 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				rebuildTicks = Info.RebuildScanInterval / Info.Interval;
 				RebuildScan();
+				PruneStrayFenceSegments(bot);
 			}
 
 			if (pending != null)
 			{
 				TickPending(bot);
 				return;
+			}
+
+			// On-demand naval production takes priority over the Rhythm: an Operations mission is blocked
+			// waiting for it. Re-evaluated every tick against HasNavalProduction(), so a destroyed pen is
+			// picked back up automatically (navalStep is dropped once satisfied, forcing a fresh site
+			// search -- the old building's site may no longer be valid, e.g. terrain changed).
+			if (navalRequested)
+			{
+				if (HasNavalProduction())
+					navalStep = null;
+				else
+				{
+					navalStep ??= BuildNavalStep();
+					if (navalStep != null)
+					{
+						StartStep(bot, navalStep);
+						if (pending != null)
+							return;
+					}
+				}
 			}
 
 			var step = ChooseStep();
@@ -157,6 +265,14 @@ namespace OpenRA.Mods.Common.Traits
 		}
 
 		// Destroyed plan buildings reopen their steps; the rhythm order then rebuilds them first.
+		//
+		// Checks the actor's own recorded Location, NOT ActorMap occupancy at step.TopLeft: some
+		// footprints (FIX is "_+_ +++ _+_" -- a plus shape) leave their own registered top-left corner
+		// cell OUTSIDE the actual footprint, so ActorMap never reports an actor there even while the
+		// building is alive right next to it. That false "not alive" reopened the step on every scan,
+		// permanently blocking StartStep (the target cell is unbuildable -- the real building already
+		// occupies its neighbours) and, since ChooseStep is strict first-open-step, starved every later
+		// step in the Rhythm forever.
 		void RebuildScan()
 		{
 			foreach (var step in planner.Rhythm)
@@ -164,13 +280,46 @@ namespace OpenRA.Mods.Common.Traits
 				if (!step.Done || step.Kind != AotStepKind.Building)
 					continue;
 
-				var alive = world.ActorMap.GetActorsAt(step.TopLeft)
-					.Any(a => a.Owner == player && !a.IsDead && step.Variants.Contains(a.Info.Name));
+				var alive = world.ActorsHavingTrait<Building>()
+					.Any(a => a.Owner == player && !a.IsDead && a.Location == step.TopLeft && step.Variants.Contains(a.Info.Name));
 				if (!alive)
 				{
 					step.Done = false;
 					Log.Write("debug", $"[AotBuild] Plan building {step.Role} at {step.TopLeft} lost -> rebuild");
 				}
+			}
+		}
+
+		// LineBuild (used for fences, see TickPending) auto-connects a placed node to the NEAREST own
+		// wall segment of the same actor type, regardless of which ring it belongs to. When two fences
+		// (e.g. YardFence and PowerFence) end up close together, the engine can silently splice a
+		// connector segment between the two independent rings. Each fence step's FencePerimeter is the
+		// full set of cells its OWN ring is allowed to occupy; any owned wall actor outside the union of
+		// every fence's perimeter is such a stray inter-ring segment (or leftover from a sold/relocated
+		// ring) and gets sold.
+		void PruneStrayFenceSegments(IBot bot)
+		{
+			if (Info.WallType == null)
+				return;
+
+			var allowed = new HashSet<CPos>();
+			foreach (var step in planner.Rhythm)
+				if (step.Kind == AotStepKind.Fence)
+					foreach (var c in step.FencePerimeter)
+						allowed.Add(c);
+
+			if (allowed.Count == 0)
+				return;
+
+			var stray = world.ActorsHavingTrait<Building>()
+				.Where(a => a.Owner == player && !a.IsDead && a.Info.Name == Info.WallType
+					&& !bridgeWallCells.Contains(a.Location) && !allowed.Contains(a.Location))
+				.ToList();
+
+			foreach (var a in stray)
+			{
+				Log.Write("debug", $"[AotBuild] Selling stray fence segment at {a.Location} (outside every ring's perimeter)");
+				bot.QueueOrder(new Order("Sell", a, Target.FromActor(a), false));
 			}
 		}
 
@@ -208,10 +357,13 @@ namespace OpenRA.Mods.Common.Traits
 			var cell = ResolveCell(step, type);
 			if (cell == null)
 			{
+				// Own idle units standing on the site block CanPlaceBuilding same as for a plain Building --
+				// ask them to step aside regardless of step kind (this used to be Building-only, silently
+				// leaving a unit parked on a turret's target cell forever unresolved).
+				NudgeBlockers(type, step.TopLeft);
+
 				if (step.Kind == AotStepKind.Building)
 				{
-					NudgeBlockers(type, step.TopLeft);
-
 					// PERMANENT blocker (resource grew there, or a static foreign actor sits on it — a
 					// blossom tree is not Mobile and will never be nudged away). Re-site the single
 					// building nearby instead of deadlocking the whole plan; this ALSO clears the reason
@@ -367,6 +519,15 @@ namespace OpenRA.Mods.Common.Traits
 
 				if (world.ActorMap.GetActorsAt(t).Any(a => a.Owner != player))
 					return true;
+
+				// An own STATIC actor (a wall or another building) sitting on the target is just as
+				// permanent as a foreign one: NudgeBlockers only moves idle Mobile units out of the way, so
+				// a wall segment left over there (e.g. a fence ring that ended up overlapping a plan step's
+				// footprint -- confirmed in-game: a fence's own wall sat directly on a Refinery's planned
+				// site, CanPlaceBuilding=False forever, nothing else in the Rhythm after it ever got a
+				// turn) would otherwise wait here permanently with no recovery path at all.
+				if (world.ActorMap.GetActorsAt(t).Any(a => a.Owner == player && a.TraitOrDefault<Mobile>() == null))
+					return true;
 			}
 
 			return false;
@@ -420,6 +581,17 @@ namespace OpenRA.Mods.Common.Traits
 							continue;
 
 						if (resourceLayer != null && tiles.Any(t => resourceLayer.GetResource(t).Type != null))
+							continue;
+
+						// Currently resource-free is not the same as safe -- a spot right next to a still-
+						// alive growth source (blossom tree) is very likely to be overgrown again shortly
+						// after, triggering another PermanentlyBlocked/resite cycle for the same reason.
+						// Re-scans LIVE actors here (not the one-time Plan()-time growthHazard snapshot,
+						// which only covers trees that already existed when the match started) so a tree
+						// that appeared or spread since then is accounted for too.
+						if (planner.Info.GrowthSourceTypes.Count > 0 && world.ActorsHavingTrait<Building>()
+							.Any(a => !a.IsDead && planner.Info.GrowthSourceTypes.Contains(a.Info.Name)
+								&& Math.Max(Math.Abs(a.Location.X - c.X), Math.Abs(a.Location.Y - c.Y)) <= planner.Info.GrowthSourceMargin))
 							continue;
 
 						if (!world.CanPlaceBuilding(c, ai, bi, null))
@@ -508,7 +680,25 @@ namespace OpenRA.Mods.Common.Traits
 
 			// BFS from the target back to any own cell, constrained to the pocket (plus own cells) and
 			// clear of resources (own cells are always allowed through — they're already built there).
+			//
+			// The defence chokepoint is deliberately allowed to sit just OUTSIDE the Pocket: DetectGates
+			// (which bounds the Pocket) blocks a small patch around every gate specifically so the base
+			// PACKER doesn't spill past it -- but that is exactly the neighbourhood a defence turret needs
+			// to stand in. A target out there could never be bridged to (confirmed via debug.log: target
+			// inPocket=False, frontier=NULL every time) since the BFS's neighbour filter rejected every
+			// cell outside Pocket, including the target's own immediate surroundings. When the target
+			// itself is outside the Pocket, also allow a bounded ring of non-Pocket cells around it --
+			// capped at MaxBridgeLength (matches how far a bridge can ever actually reach anyway, so this
+			// is never a wider licence to wander than the wall chain itself permits). Normal in-Pocket
+			// targets (ordinary buildings/fences) are unaffected: their neighbourhood is already inside
+			// Pocket, so this extra allowance never triggers for them. A coastal on-demand naval site
+			// (user spec 2026-07-22) can sit considerably further out than a chokepoint turret, hence the
+			// switch from a fixed 12-cell ring to the full bridge length.
 			var pocket = planner.Pocket;
+			var targetOutsidePocket = !pocket.Contains(target);
+			var ringRadius = Info.MaxBridgeLength;
+			bool InBounds(CPos c) => pocket.Contains(c) || (targetOutsidePocket && (c - target).LengthSquared <= ringRadius * ringRadius);
+
 			var pred = new Dictionary<CPos, CPos>();
 			var q = new Queue<CPos>();
 			q.Enqueue(target);
@@ -530,7 +720,7 @@ namespace OpenRA.Mods.Common.Traits
 						break;
 					}
 
-					if (!pocket.Contains(n) || !ResourceFree(n))
+					if (!InBounds(n) || !ResourceFree(n))
 						continue;
 
 					pred[n] = c;
@@ -611,6 +801,8 @@ namespace OpenRA.Mods.Common.Traits
 					fenceQueue.Enqueue(n);
 			}
 
+			var resourceLayer = world.WorldActor.TraitOrDefault<IResourceLayer>();
+
 			while (fenceQueue.Count > 0)
 			{
 				var c = fenceQueue.Peek();
@@ -622,7 +814,16 @@ namespace OpenRA.Mods.Common.Traits
 
 				// Occupied by a building (own wall segment, own structure)? That node is covered — skip.
 				var blockedByBuilding = bi.Tiles(c).Any(t => world.ActorMap.GetActorsAt(t).Any(a => a.TraitOrDefault<Building>() != null));
-				if (blockedByBuilding)
+
+				// Grown over by Tiberium/Ore since the plan was made? A resource-covered cell can NEVER
+				// become buildable on its own (nothing in this AI harvests a specific tile just to clear a
+				// fence node, and resources don't retreat) -- waiting here is a PERMANENT deadlock, exactly
+				// like the own-wall-blocks-a-building case, just for a fence node instead of a whole
+				// building. Skip it too: the ring just has a gap where that one node would have connected,
+				// same as skipping a building-blocked node.
+				var blockedByResource = resourceLayer != null && bi.Tiles(c).Any(t => resourceLayer.GetResource(t).Type != null);
+
+				if (blockedByBuilding || blockedByResource)
 				{
 					fenceQueue.Dequeue();
 					continue;
@@ -658,7 +859,25 @@ namespace OpenRA.Mods.Common.Traits
 			}
 
 			if (!queued.Any(i => i.Done))
+			{
+				// This branch used to be entirely silent regardless of how long production sat here --
+				// indistinguishable from a genuinely fine, still-building step, so a real stall (paused
+				// queue, insufficient power/cash stalling progress, or anything else on the engine side
+				// that never sets Done) was invisible until a user noticed nothing was happening in-game
+				// (confirmed 2026-07-22: FTUR sat here for 5+ minutes -- far past any normal build time --
+				// with zero log output either way). Throttled diagnostic: exact production state (Started/
+				// Paused/RemainingTime/RemainingCost) every ~8 waiting ticks, so a genuine stall is visible
+				// immediately instead of requiring guesswork after the fact.
+				if (++pendingWaitLog % 8 == 0)
+				{
+					var item = queued.FirstOrDefault();
+					Log.Write("debug", $"[AotBuild] Still building {pending.Role} ({pendingType}): " +
+						$"started={item?.Started} paused={item?.Paused} remainingTime={item?.RemainingTime}/{item?.TotalTime} " +
+						$"remainingCost={item?.RemainingCost} excessPower={playerPower?.ExcessPower}");
+				}
+
 				return;
+			}
 
 			var ai = world.Map.Rules.Actors[pendingType];
 			var bi = ai.TraitInfoOrDefault<BuildingInfo>();

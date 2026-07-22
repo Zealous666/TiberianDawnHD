@@ -44,6 +44,19 @@ Player:
 		RefineryTypes: proc, aot-proc-gdi, aot-proc-gdi-age2, aot-proc-nod, aot-proc-nod-age2
 		InitialHarvesters: 2
 
+	# ORET (Ore Transporter): mirrors HarvesterBotModule's own count-vs-reference-building replacement
+	# logic (User 2026-07-22: "genau wie bei HARV, nur zerstoerte nachkaufen, an FACT-Anzahl gekoppelt")
+	# -- but ORET has no Harvester trait (OreTransporter/DockClientManager instead), so it can't just be a
+	# second HarvesterBotModule instance (that indexes actors by the Harvester trait specifically, would
+	# match zero ORET). AotReplacementUnitBotModule is the same pattern generalised: 1 ORET per alive FACT,
+	# requested ONLY when the current count drops below that (i.e. one was actually destroyed) -- MCVs are
+	# unbounded in this mod (age variants are just a sprite/proxy swap, not a hard cap), so a static
+	# UnitLimits number can never track the true FACT count; this ties to it directly instead.
+	AotReplacementUnitBotModule@oret:
+		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
+		UnitTypes: aot-oret-lite
+		ReferenceBuildingTypes: fact, fact.gdi, fact.nod
+
 	ResourceMapBotModule@aot:
 		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
 		ResourceCreatorTypes: split2, split3, splitblue
@@ -91,9 +104,10 @@ Player:
 		# Blossom-Tree-Actors (Tiberium-Wachstumsquellen, ^TibTree in defaults.yaml) — Plan hält
 		# GrowthSourceMargin Zellen Abstand, damit nachwachsendes Erz die Base-Zellen nicht überwuchert.
 		GrowthSourceTypes: split2, split3, splitblue
-		# Sub Pen: nur wenn die Base-Tasche selbst an Beach/Water-Cliff grenzt (User-Spec) — sonst
-		# Outpost-Ops-Thema, kein Base-Rhythmus-Schritt. Prereq nur `lite` -> Age-0-baubar direkt nach FIX.
-		SubpenTypes: aot-subpen
+		# Sub Pen: KEIN Rhythmus-Schritt mehr (User-Spec 2026-07-22) — wird jetzt on-demand vom
+		# AotBaseBuilderBotModule gebaut, sobald eine Operation sie via RequestNavalProduction()
+		# anfordert (siehe NavalPenTypes unten). Funktioniert dadurch auch, wenn die Base-Tasche
+		# selbst nicht an Wasser grenzt (Wall-Bridge zur nächsten erreichbaren Küste).
 
 	# GDI bekommt später eine EIGENE Instanz (@gdi) mit eigener Build-Order.
 	# Executor: baut den gespeicherten Plan im Rhythmus des Planners — ein Bau zur
@@ -106,6 +120,11 @@ Player:
 		BuildingQueues: Building.Nod
 		WallType: aot-wall-nod
 		MinimumExcessPower: 10
+		# On-demand naval production (User-Spec 2026-07-22): NICHT Teil des Rhythmus. Wird nur gebaut,
+		# wenn eine Operation sie via Ops.RequestNavalProduction() anfordert (z.B. ein Wave-Ferry ohne
+		# Landweg zum Gegner) -- Wall-Bridge zur nächsten erreichbaren Küste, exakt wie jeder andere
+		# unerreichbare Rhythmus-Schritt.
+		NavalPenTypes: aot-subpen
 
 	# CHOKEPOINT-FORTIFIER: für V1 DEAKTIVIERT (baute Streu-Zäune, konkurrierte um
 	# die Building-Queue). Kommt als V2 zurück, integriert mit AotBaseBuilder.
@@ -456,31 +475,27 @@ Player:
 	UnitBuilderBotModule@aot:
 		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
 		ProductionMinCashRequirement: 300
-		# NUR NOCH ÖKONOMIE (2026-07-21): Kampfeinheiten produziert das
-		# AotOperationsBotModule EXKLUSIV für seine Missionen (User-Entscheidung;
-		# verhindert Idle-Stau auf den Bau-Slots). Diese Instanz baut nur noch
-		# Harvester + Erz-Transporter und bedient weiter IBotRequestUnitProduction
-		# (MCV-Expansion). Luft/Marine ruhen bis Modul 9/13 des Ops-Frameworks.
+		# NUR NOCH IBotRequestUnitProduction-KANAL (2026-07-22): Kampfeinheiten produziert das
+		# AotOperationsBotModule EXKLUSIV für seine Missionen (User-Entscheidung; verhindert
+		# Idle-Stau auf den Bau-Slots). Harvester (HarvesterBotModule@aot) und Ore-Transporter
+		# (AotReplacementUnitBotModule@oret) haben eigene dynamische Ersatz-Module und wurden
+		# aus UnitLimits/UnitsToBuild unten entfernt, um Doppel-Produktion zu vermeiden — diese
+		# Instanz bedient nur noch deren IBotRequestUnitProduction-Anfragen + MCV-Expansion.
+		# Luft/Marine ruhen bis Modul 9/13 des Ops-Frameworks.
 		UnitQueues: Vehicle.GDI, Starport, LightVehicle.GDI, LightVehicle.Nod
 		UnitLimits:
-			aot-harv: 6
-			aot-harv-nod: 6
 			aot-mcv-age0: 1
 			aot-mcv-age1: 1
-			# User 2026-07-22: 1 spawnt schon gratis mit FACT (OretSpawnStateCarrier) -- Limit 1 heisst,
-			# die KI kauft NIE proaktiv einen zweiten dazu, sondern baut nur nach, wenn der bestehende
-			# zerstoert wurde (Count faellt unter 1). Vorher Limit 4 + Gewicht 30 (siehe unten) liess die
-			# KI bis zu 3 zusaetzliche ORET aggressiv nachkaufen, sobald Cash uebrig war.
-			aot-oret-lite: 1
+			# aot-harv/aot-harv-nod and aot-oret-lite REMOVED (User 2026-07-22): both are now handled
+			# EXCLUSIVELY by their own dedicated, dynamic replacement modules (HarvesterBotModule@aot for
+			# HARV -- ties count to alive Refineries, already correct and was silently duplicated by this
+			# static entry; AotReplacementUnitBotModule@oret for ORET -- ties count to alive FACTs, since
+			# MCVs are unbounded in this mod so no static number here could ever track that correctly).
+			# Both request production through the SAME IBotRequestUnitProduction channel this queue serves,
+			# entirely independent of these UnitLimits/UnitsToBuild entries -- leaving them here just let
+			# this module ALSO proactively over-build both units on top of the correct dynamic replacement,
+			# via a completely separate, refinery/FACT-count-unaware static ceiling.
 		UnitsToBuild:
-			# --- Tiberium-Harvester (niedrig; Hauptsteuerung via HarvesterBotModule) ---
-			aot-harv: 8
-			aot-harv-nod: 8
-			# --- Erz-Transporter (oret): 1 Stueck gratis mit fact, Rest nur Ersatz bei Verlust (User
-			# 2026-07-22) -- Gewicht war vorher 30 (fast 4x hoeher als der Harvester!), liess die KI ORET
-			# gegenueber praktisch allem anderen in dieser Queue bevorzugen. Jetzt niedrig, da ohnehin nur
-			# 1 Slot (UnitLimit oben) je erreicht werden kann.
-			aot-oret-lite: 3
 
 	# =========================================================================
 	# EXPANSION (klassische mcv)
@@ -496,7 +511,12 @@ Player:
 		# Con-Yard NIE wieder einpacken/umziehen (verursachte Folgeprobleme). -1 = aus.
 		MoveConyardTick: -1
 		MinimumConstructionYardCount: 1
-		AdditionalConstructionYardCount: 1
+		# 0 (User 2026-07-22): eine zweite FACT wird von AotBasePlannerBotModule/AotBaseBuilderBotModule
+		# nicht mitgeplant -- die haben nur EINEN Rhythmus fuer die Start-Yard. Eine unerwartete zweite
+		# FACT ausserhalb dieser Planung fuehrte u.a. zu einem Folgebug beim ORET-Ersatzmodul (mehrere
+		# Ore Transporter kurz hintereinander). Basis-Expansion ist ein spaeteres, eigenes Thema -- bis
+		# dahin bleibt es bei der einen Start-Yard.
+		AdditionalConstructionYardCount: 0
 
 	# =========================================================================
 	# MILITÄR (Squads)

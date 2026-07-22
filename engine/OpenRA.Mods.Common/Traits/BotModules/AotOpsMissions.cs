@@ -747,6 +747,11 @@ namespace OpenRA.Mods.Common.Traits
 				return false;
 			}
 
+			// This mission needs naval production to exist -- ask the base builder to guarantee it (built
+			// on demand, outside the fixed Rhythm; user spec 2026-07-22). Idempotent/cheap to call every
+			// time a wave starts ferrying.
+			Ops.RequestNavalProduction();
+
 			return true;
 		}
 

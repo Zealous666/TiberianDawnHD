@@ -402,6 +402,7 @@ namespace OpenRA.Mods.Common.Traits
 		public AotMapIntelBotModule Intel { get; private set; }
 		public IBotChokepointProvider ChokeProvider { get; private set; }
 		public IBotBaseApproachProvider ApproachProvider { get; private set; }
+		AotBaseBuilderBotModule builder;
 
 		public readonly List<AotMission> Missions = [];
 		readonly Dictionary<Actor, AotMission> owned = [];
@@ -448,7 +449,17 @@ namespace OpenRA.Mods.Common.Traits
 			ApproachProvider = self.Owner.PlayerActor.TraitsImplementing<IBotBaseApproachProvider>().FirstOrDefault();
 			playerResources = self.Owner.PlayerActor.Trait<PlayerResources>();
 			techTree = self.Owner.PlayerActor.Trait<TechTree>();
+
+			// Match by faction so the right builder is picked once multiple faction instances exist
+			// (same pattern AotBaseBuilderBotModule itself uses to resolve its planner).
+			var builders = self.Owner.PlayerActor.TraitsImplementing<AotBaseBuilderBotModule>().ToList();
+			builder = builders.FirstOrDefault(b => b.Info.Faction == Info.Faction) ?? builders.FirstOrDefault();
 		}
+
+		// Any mission that needs ships/subs/vessels calls this once it knows it needs them (e.g. a wave
+		// switching to naval ferrying). Sticky on the builder side: guarantees naval production exists for
+		// the rest of the match, rebuilding it if lost.
+		public void RequestNavalProduction() => builder?.RequestNavalProduction();
 
 		protected override void TraitEnabled(Actor self)
 		{
