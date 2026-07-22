@@ -1501,7 +1501,6 @@ namespace OpenRA.Mods.Common.Traits
 	{
 		readonly HashSet<Actor> responding = [];
 		int scanTicks;
-		bool reserveRequested;
 
 		public AotBaseDefenseMission(AotOperationsBotModule ops)
 			: base(ops, "base-defense") { }
@@ -1534,14 +1533,25 @@ namespace OpenRA.Mods.Common.Traits
 		void MaintainGarrison()
 		{
 			var target = TargetSize();
-			var floor = Math.Min(Ops.Info.ProtectionMinProduced, target);
 
-			// Guaranteed floor via dedicated production, one outstanding request at a time.
-			if (Units.Count < floor && Ops.OpenRequests(this) == 0)
+			// Before wave 1 has ever been scheduled, keep it cheap/simple (ProtectionFloorTypes)
+			// while vehicle production is still uncertain. Once wave 1 proves the full tank/light/
+			// support role mix is buildable, maintain the ENTIRE garrison that way instead (User
+			// 2026-07-22: "gemischt mit V2 etc", not just tanks) -- and since this re-evaluates
+			// every tick against the current Units count, a destroyed defender is automatically
+			// replaced, not just produced once.
+			var floor = Ops.FirstWaveScheduled() ? target : Math.Min(Ops.Info.ProtectionMinProduced, target);
+			var pending = Units.Count + Ops.OpenRequests(this);
+			if (pending < floor)
 			{
-				var chain = Ops.Info.ProtectionFloorTypes.Length > 0 ? Ops.Info.ProtectionFloorTypes : Ops.Info.WaveLightTypes;
-				if (chain.Length > 0)
-					Ops.QueueRequest(this, "floor", chain, floor - Units.Count);
+				if (Ops.FirstWaveScheduled())
+					RequestMixedRoles(floor - pending);
+				else
+				{
+					var chain = Ops.Info.ProtectionFloorTypes.Length > 0 ? Ops.Info.ProtectionFloorTypes : Ops.Info.WaveLightTypes;
+					if (chain.Length > 0)
+						Ops.QueueRequest(this, "floor", chain, floor - pending);
+				}
 			}
 
 			// Opportunistic top-up from the shared pool, no production cost.
@@ -1551,19 +1561,41 @@ namespace OpenRA.Mods.Common.Traits
 				var fromPool = Ops.TakeAnyFromPool(shortfall);
 				Ops.AssignFromPool(this, fromPool);
 			}
+		}
 
-			// User 2026-07-22: additionally hold back one full wave-composition group as a
-			// standing reserve, requested once between wave 1 and wave 2 -- ProtectionFloorTypes
-			// alone was observed to leave Age 0 without any defenders at all (its chain can lag
-			// behind what's actually buildable that early), whereas WaveTankTypes is proven
-			// buildable from Age 0 by wave 1 itself succeeding.
-			if (!reserveRequested && Ops.FirstWaveScheduled())
+		// Splits `count` across the tank/light/support role chains by the same share percentages
+		// regular waves use, so the garrison ends up mixed (e.g. NOD gets V2 artillery via
+		// WaveSupportTypes) rather than a single unit type.
+		void RequestMixedRoles(int count)
+		{
+			if (count <= 0)
+				return;
+
+			var roles = new List<(string[] Chain, int Share)>
 			{
-				reserveRequested = true;
-				var chain = Ops.Info.WaveTankTypes.Length > 0 ? Ops.Info.WaveTankTypes : Ops.Info.ProtectionFloorTypes;
-				if (chain.Length > 0)
-					Ops.QueueRequest(this, "reserve", chain, target);
+				(Ops.Info.WaveTankTypes, Ops.Info.WaveTankShare),
+				(Ops.Info.WaveLightTypes, Ops.Info.WaveLightShare),
+				(Ops.Info.WaveSupportTypes, Ops.Info.WaveSupportShare),
+			}.Where(r => r.Chain.Length > 0).ToList();
+
+			if (roles.Count == 0)
+				return;
+
+			var totalShare = roles.Sum(r => r.Share);
+			var remaining = count;
+			foreach (var r in roles)
+			{
+				var n = Math.Min(remaining, Math.Max(0, count * r.Share / Math.Max(1, totalShare)));
+				if (n <= 0)
+					continue;
+
+				Ops.QueueRequest(this, "reserve", r.Chain, n);
+				remaining -= n;
 			}
+
+			// Rounding leftover goes to the first (highest-share) role.
+			if (remaining > 0)
+				Ops.QueueRequest(this, "reserve", roles[0].Chain, remaining);
 		}
 
 		void ScanAndRespond(IBot bot)
