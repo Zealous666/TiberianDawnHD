@@ -390,6 +390,7 @@ namespace OpenRA.Mods.Common.Traits
 			pendingType = type;
 			pendingCell = cell.Value;
 			pendingIsBridgeWall = false;
+			pendingWaitLog = 0;
 			bot.QueueOrder(Order.StartProduction(queue.Actor, type, 1));
 			Log.Write("debug", $"[AotBuild] Start {step.Role} ({type}) -> {pendingCell}");
 		}
@@ -645,6 +646,7 @@ namespace OpenRA.Mods.Common.Traits
 			pendingType = Info.WallType;
 			pendingCell = frontier.Value;
 			pendingIsBridgeWall = true;
+			pendingWaitLog = 0;
 			bot.QueueOrder(Order.StartProduction(wallQueue.Actor, Info.WallType, 1));
 			Log.Write("debug", $"[AotBuild] Bridge wall #{bridgeWallCells.Count + 1} -> {pendingCell} (toward {target} for {step.Role})");
 			return true;
@@ -860,20 +862,37 @@ namespace OpenRA.Mods.Common.Traits
 
 			if (!queued.Any(i => i.Done))
 			{
-				// This branch used to be entirely silent regardless of how long production sat here --
-				// indistinguishable from a genuinely fine, still-building step, so a real stall (paused
-				// queue, insufficient power/cash stalling progress, or anything else on the engine side
-				// that never sets Done) was invisible until a user noticed nothing was happening in-game
-				// (confirmed 2026-07-22: FTUR sat here for 5+ minutes -- far past any normal build time --
-				// with zero log output either way). Throttled diagnostic: exact production state (Started/
-				// Paused/RemainingTime/RemainingCost) every ~8 waiting ticks, so a genuine stall is visible
-				// immediately instead of requiring guesswork after the fact.
+				// ProductionQueue.TickInner only ever ticks Queue[0] of the ENGINE's own list for this
+				// queue instance -- AllQueued() exposes that whole list, not just our own item. Confirmed
+				// 2026-07-22 (FTUR stall): our item sat with Started=False forever despite plenty of power/
+				// cash, which only happens if it is NOT at index 0 -- i.e. something else already sitting
+				// in that same queue is wedged (Done but never placed, or otherwise orphaned) and silently
+				// blocks everything queued behind it for the rest of the match, with zero recovery path on
+				// the engine side. allItems/ourIndex below identify the real blocker; a stall long past any
+				// normal build time (100 waiting ticks * Interval(25) = 2500 ticks, well beyond FTUR's own
+				// ~600-tick build) triggers cancelling every item ahead of ours so this module can re-request
+				// cleanly next tick instead of waiting forever.
+				var allItems = queue.AllQueued().ToList();
+				var ourIndex = allItems.FindIndex(i => i.Item == pendingType);
+
 				if (++pendingWaitLog % 8 == 0)
 				{
 					var item = queued.FirstOrDefault();
 					Log.Write("debug", $"[AotBuild] Still building {pending.Role} ({pendingType}): " +
 						$"started={item?.Started} paused={item?.Paused} remainingTime={item?.RemainingTime}/{item?.TotalTime} " +
-						$"remainingCost={item?.RemainingCost} excessPower={playerPower?.ExcessPower}");
+						$"remainingCost={item?.RemainingCost} excessPower={playerPower?.ExcessPower} " +
+						$"queuePos={ourIndex}/{allItems.Count} queueItems=[{string.Join(",", allItems.Select(i => $"{i.Item}(done={i.Done},started={i.Started})"))}]");
+				}
+
+				if (ourIndex > 0 && pendingWaitLog > 100)
+				{
+					for (var i = 0; i < ourIndex; i++)
+					{
+						Log.Write("debug", $"[AotBuild] Cancelling stuck queue blocker ahead of {pendingType}: {allItems[i].Item}");
+						bot.QueueOrder(Order.CancelProduction(queue.Actor, allItems[i].Item, 1));
+					}
+
+					pendingWaitLog = 0;
 				}
 
 				return;

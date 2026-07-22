@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AoT – Building &amp; Economy</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --col-bg: #1a1d27;
+    --card-bg: #252938;
+    --card-bg-hover: #2d3142;
+    --accent: #d9a82e;
+    --text: #e6e8ee;
+    --text-dim: #9aa0ad;
+    --border: #2f3340;
+    --nod-accent: #d9542e;
+    --nod-border: #4a2a20;
+    --nod-bg: #1f1613;
+    --gdi-accent: #4a90d9;
+    --gdi-border: #203a4a;
+    --gdi-bg: #131c1f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding-top: 42px;
+  }
+  .top-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; gap: 2px; padding: 6px 16px; background: rgba(15,17,23,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
+  .top-nav a { padding: 5px 14px; border-radius: 5px; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; color: var(--text-dim); text-decoration: none; transition: color .15s, background .15s; }
+  .top-nav a:hover { color: var(--text); background: var(--card-bg); }
+  .top-nav a.active { color: var(--text); background: var(--card-bg); }
+  header {
+    padding: 24px 32px 8px;
+  }
+  header h1 {
+    font-size: 20px;
+    margin: 0 0 4px;
+    font-weight: 600;
+  }
+  header p {
+    color: var(--text-dim);
+    font-size: 13px;
+    margin: 0;
+    max-width: 900px;
+    line-height: 1.5;
+  }
+  .status-line {
+    padding: 8px 32px 0;
+    font-size: 11.5px;
+    color: var(--text-dim);
+  }
+  .status-line strong { color: var(--accent); }
+
+  .split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    margin-top: 20px;
+    min-height: calc(100vh - 160px);
+  }
+  .side {
+    padding: 0 24px 40px;
+    border-top: 3px solid transparent;
+  }
+  .side.nod { border-top-color: var(--nod-accent); border-right: 1px solid var(--border); }
+  .side.gdi { border-top-color: var(--gdi-accent); }
+
+  .side-header {
+    position: sticky;
+    top: 42px;
+    z-index: 50;
+    background: var(--bg);
+    padding: 16px 8px 12px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .side-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+  }
+  .side.nod .side-header h2 { color: var(--nod-accent); }
+  .side.gdi .side-header h2 { color: var(--gdi-accent); }
+  .side-header .sub { font-size: 11.5px; color: var(--text-dim); }
+
+  .tier-block { margin: 0 8px 28px; }
+  .tier-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--border);
+  }
+  .side.nod .tier-head { border-color: var(--nod-border); }
+  .side.gdi .tier-head { border-color: var(--gdi-border); }
+  .tier-num {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    padding: 3px 10px;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+  .side.nod .tier-num { background: rgba(217,84,46,0.15); color: var(--nod-accent); border: 1px solid rgba(217,84,46,0.3); }
+  .side.gdi .tier-num { background: rgba(74,144,217,0.15); color: var(--gdi-accent); border: 1px solid rgba(74,144,217,0.3); }
+  .tier-title { font-size: 13.5px; font-weight: 700; }
+  .tier-cost { margin-left: auto; font-size: 11px; color: var(--text-dim); }
+
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 8px 14px;
+  }
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 11px;
+    font-size: 12px;
+  }
+  .side.nod .step { background: var(--nod-bg); border-color: var(--nod-border); }
+  .side.gdi .step { background: var(--gdi-bg); border-color: var(--gdi-border); }
+  .step .name { font-weight: 600; }
+  .step .tag {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    background: rgba(255,255,255,0.05);
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+  .step.fence { border-style: dashed; }
+  .step.turret .tag { color: var(--accent); }
+  .arrow { color: var(--text-dim); font-size: 13px; align-self: center; }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin: 0 8px 16px;
+  }
+  .side.nod .card { background: var(--nod-bg); border-color: var(--nod-border); }
+  .side.gdi .card { background: var(--gdi-bg); border-color: var(--gdi-border); }
+  .card p { font-size: 12.5px; color: var(--text-dim); line-height: 1.55; margin: 0; }
+  .card p + p { margin-top: 8px; }
+  .card strong { color: var(--text); }
+
+  .caveat {
+    margin: 0 8px 16px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    line-height: 1.5;
+    background: rgba(217,168,46,0.1);
+    border: 1px solid rgba(217,168,46,0.25);
+    color: #e0c37a;
+  }
+
+  .econ-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 16px;
+    font-size: 11.5px;
+    margin: 0 8px 20px;
+  }
+  .econ-row {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .side.nod .econ-row { background: var(--nod-bg); border-color: var(--nod-border); }
+  .side.gdi .econ-row { background: var(--gdi-bg); border-color: var(--gdi-border); }
+  .econ-row .label { font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; font-size: 10px; color: var(--text-dim); margin-bottom: 4px; }
+  .econ-row .value { color: var(--text); line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <a href="kanban-board.html">Planning</a>
+  <a href="techtree.html">Techtree</a>
+  <a href="buildorder.html">Build Order</a>
+  <a href="tilesets.html">Tilesets</a>
+  <a href="operations.html">Operation</a>
+  <a href="building-economy.html" class="active">Building &amp; Economy</a>
+</nav>
+
+<header>
+  <h1>AoT – Building &amp; Economy</h1>
+  <p>How each faction's base grows from deploy to Age 3: which building goes down when, why, and what runs the
+    economy behind it. Nod's tiers reflect the actual AI base-planner rhythm (deterministic, one build order per
+    match). GDI has no base-planner AI yet — its tiers reflect the designed/manual build order from the production
+    palette instead, marked accordingly.</p>
+</header>
+
+<div class="status-line">Source: <strong>engine/.../AotBasePlannerBotModule.cs (BuildRhythm, Nod)</strong> · <strong>mods/cnc/rules/aot-ai.yaml</strong> · <strong>buildorder.html (GDI palette order)</strong> · Ages unlock via aot-age1/2/3-upgrade-* on the Construction Yard (5k / 10k / 15k credits).</div>
+
+<div class="split">
+  <div class="side nod">
+    <div class="side-header"><h2>NOD</h2><span class="sub">AotBasePlannerBotModule@nod — deterministic Rhythm, AI-driven</span></div>
+
+    <div class="card">
+      <p><strong>Concept.</strong> On yard-deploy the planner floods a reachable "Pocket" around the Construction
+      Yard once, finds the enemy-facing gate, packs every building into that pocket, and freezes the whole match's
+      build order as one ordered <strong>Rhythm</strong> list. The builder module then executes it strictly one item
+      at a time — no bulk/grid guessing at runtime. A step whose actor isn't unlocked yet (age gate) simply blocks
+      the rhythm until the age upgrade finishes; steps needing an out-of-reach cell get a temporary wall bridge
+      (sold again once the real building stands).</p>
+    </div>
+
+    <div class="tier-block">
+      <div class="tier-head"><span class="tier-num">AGE 0</span><span class="tier-title">Power, production, defense — everything needed to survive the opening</span></div>
+      <div class="flow">
+        <div class="step"><span class="name">Power Plant</span><span class="tag">aot-nuke</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Tiberium Silo</span><span class="tag">aot-silo</span></div>
+        <span class="arrow">→</span>
+        <div class="step fence"><span class="name">Yard Fence</span><span class="tag">ring</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Light Factory</span><span class="tag">aot-lite</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Hand of Nod</span><span class="tag">aot-hand</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Radar Dome</span><span class="tag">aot-nod-radar</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Adv. Power Plant</span><span class="tag">aot-nuk2</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Adv. Power Plant</span><span class="tag">aot-nuk2</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Power Plant</span><span class="tag">aot-nuke</span></div>
+        <span class="arrow">→</span>
+        <div class="step fence"><span class="name">Power Fence</span><span class="tag">ring</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Repair Facility</span><span class="tag">aot-fix</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Sub Pen</span><span class="tag">coastal only</span></div>
+        <span class="arrow">→</span>
+        <div class="step turret"><span class="name">Flame Turret</span><span class="tag">gate cluster, middle slot</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">SAM Site ×2</span><span class="tag">scattered</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Helipad</span><span class="tag">aot-hpad-nod</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Satellite/Tech (STEC)</span><span class="tag">moved to end</span></div>
+      </div>
+      <div class="card">
+        <p><strong>Why this order.</strong> Power comes first (Silo and everything else needs it), the yard gets its
+        own defensive ring immediately after the first two buildings so the base core is never briefly unfenced. Sub
+        Pen is <strong>gated on coastal terrain</strong>: the planner only queues it if the base's own reachable
+        pocket actually touches a beach or water-cliff cell — an inland base never gets one (overseas naval
+        production is a later Outpost Operations concern, not a base-rhythm step). STEC (the tech pair's second
+        building) is deliberately moved to the very end of Age 0 (user spec) — Radar Dome still comes early with
+        the power cluster.</p>
+        <p><strong>Gate defence, staged across ages (user spec).</strong> The gate cluster — Turret-FlameTurret-
+        Turret in a single row or column, fenced as one ring, exactly like the power cluster — is fully planned NOW
+        (one Placement, found via a local packer search around the chokepoint), but only the middle slot (Flame
+        Turret) is actually queued in Age 0; the 2 flanking Turrets + the fence ring follow in Age 1. Two SAM Sites
+        are unrelated to the choke — scattered through the base via the ordinary Pocket-wide packer, biased toward
+        the yard so they land within the developed base rather than at the Pocket's edge. Helipad is deliberately
+        last in Age 0, built only once the gate defence's core piece is up.</p>
+      </div>
+    </div>
+
+    <div class="tier-block">
+      <div class="tier-head"><span class="tier-num">AGE 1</span><span class="tier-title">Refinery first, gate cluster completed, superweapon track opens</span></div>
+      <div class="flow">
+        <div class="step"><span class="name">Airfield</span><span class="tag">afld</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Tiberium Refinery</span><span class="tag">aot-proc-nod</span></div>
+        <span class="arrow">→</span>
+        <div class="step turret"><span class="name">Turret ×2</span><span class="tag">beside Flame Turret</span></div>
+        <span class="arrow">→</span>
+        <div class="step fence"><span class="name">Gate Fence</span><span class="tag">ring around all 3</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Adv. Power Plant ×4</span><span class="tag">aot-nuk2</span></div>
+        <span class="arrow">→</span>
+        <div class="step fence"><span class="name">Nuk2a Fence</span><span class="tag">ring</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Temple of Nod</span><span class="tag">superweapon</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Missile Silo</span><span class="tag">superweapon</span></div>
+      </div>
+      <div class="card">
+        <p><strong>Why this order.</strong> Refinery gets top priority (user spec) — but <code>aot-proc-nod</code>'s
+        own Buildable.Prerequisites requires <code>afld</code> to already exist, so it literally cannot go before
+        Airfield: that would deadlock the strict rhythm forever (Refinery waits on a prerequisite that Airfield,
+        stuck behind it in the list, never gets a turn to satisfy). Airfield first is the earliest the Refinery can
+        possibly follow; it's placed immediately next, ahead of everything else in the age.</p>
+        <p>The two Turrets attach directly beside the already-standing Flame Turret — left/right for a horizontal
+        corridor, above/below for a vertical one — and only once all 3 exist does the fence ring go up around the
+        whole cluster. A power-plant quad funds the superweapon track: Temple of Nod (Ion-Cannon-equivalent) and
+        Missile Silo (nuke superweapon) both come online this age — a full age earlier than GDI's Ion Cannon Uplink
+        (Age 3), the classic Nod glass-cannon identity.</p>
+      </div>
+    </div>
+
+    <div class="tier-block">
+      <div class="tier-head"><span class="tier-num">AGE 2</span><span class="tier-title">Second refinery, stealth economy — no third power block</span></div>
+      <div class="flow">
+        <div class="step"><span class="name">Tiberium Refinery</span><span class="tag">2nd, optional</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">SAM Site ×3</span><span class="tag">scattered</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Nod Shrine</span><span class="tag">aot-shrine</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Stealth Generator</span><span class="tag">aot-sgen</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Stealth Generator</span><span class="tag">aot-sgen</span></div>
+      </div>
+      <div class="card">
+        <p><strong>Why this order.</strong> A second Refinery gets first priority in the age, but only if the base
+        still has room for one — the packer's own placement search simply returns nothing and the step no-ops when
+        it doesn't fit, no separate space check needed (user spec: "optional, wenn genug Platz"). There is
+        deliberately <strong>no third power-plant block</strong> anymore — Age 0's mixed cluster plus Age 1's
+        Adv. Power Plant quad are enough (user spec); the old third quad + its fence were removed outright. The 3
+        remaining SAM Sites round out anti-air coverage. Shrine moved to almost the very end of the age (user spec)
+        — still directly ahead of the Stealth Generators, since their own Buildable.Prerequisites requires it.</p>
+      </div>
+    </div>
+
+    <div class="tier-block">
+      <div class="tier-head"><span class="tier-num">AGE 3</span><span class="tier-title">Obelisk + secondary-approach defence blocks; everything else is upgrades</span></div>
+      <div class="flow">
+        <div class="step turret"><span class="name">Obelisk of Light</span><span class="tag">behind gate cluster</span></div>
+        <span class="arrow">→</span>
+        <div class="step turret"><span class="name">Flame Turret + Turret ×2 + Fence</span><span class="tag">per secondary approach</span></div>
+      </div>
+      <div class="card">
+        <p>The base-planner Rhythm is otherwise upgrade-only at Age 3 (15,000 credits on the Construction Yard) —
+        Toxic Trooper conversion, Battle Tank Tick-Tank upgrade, Stealth Tank cargo module, and the rest of the
+        per-unit upgrade tree, handled by the separate upgrade-tab system, not the base builder. Two structural
+        exceptions: a single Obelisk of Light placed directly behind the gate cluster, i.e. towards the yard —
+        <code>Cardinal(yard − choke)</code> gives the direction back from the chokepoint into the base, so the
+        Obelisk faces out through the defended gate instead of pointing the wrong way — and a small defence block
+        (1 Flame Turret + 2 Turrets + fence, same shape as the main gate) at every OTHER classified approach into
+        the base (<code>IBotBaseApproachProvider</code>), including Beach-type ones that previously got no fixed
+        defence at all (mobile reserve only). Geometry is decided now, at plan time, like everything else — but
+        every secondary block is placed right after the Obelisk step, so the strict rhythm genuinely can't reach
+        them before Age 3 has begun. Each gets its own local flanking axis (ray-cast at that specific cell, not
+        reused from the main choke — a different gate can face a completely different direction).</p>
+        <p><strong>Known gap:</strong> <code>aot-gate-nod</code> (an actual openable Gate piece for the wall system)
+        exists fully in the ruleset but isn't wired into any fence the AI builds yet — every fence ring the planner
+        builds (Yard/Power/Nuk2a/Gate/secondary) is a fully closed loop with no opening for own units. On a wide
+        corridor units can route around a ring; on a narrow one, a fence built right across the only passable width
+        could seal the base's own chokepoint shut. Not yet addressed.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="side gdi">
+    <div class="side-header"><h2>GDI</h2><span class="sub">Manual production-palette order — no AotBasePlannerBotModule@gdi yet</span></div>
+
+    <div class="caveat">GDI currently has no base-planner AI (confirmed in Operation → Module 1: "GDI currently has
+      no AotBasePlannerBotModule instance"). The tiers below are the <strong>designed</strong> build order from the
+      production palette (buildorder.html), not an executed AI rhythm — GDI base-building is still an open item.</div>
+
+    <div class="card">
+      <p><strong>Concept.</strong> GDI's identity is defensive-economic rather than glass-cannon: tougher armor,
+      later but stronger superweapon (Ion Cannon at Age 3 instead of Nod's Age 1 Temple/Missile Silo), and its own
+      War Factory track for heavier vehicles instead of Nod's Airfield-first air rush.</p>
+    </div>
+
+    <div class="tier-block">
+      <div class="tier-head"><span class="tier-num">AGE 0</span><span class="tier-title">Power, production, defense</span></div>
+      <div class="flow">
+        <div class="step"><span class="name">Power Plant</span><span class="tag">aot-nuke-age0</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Barracks</span><span class="tag">aot-pyle-age0</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Light Factory</span><span class="tag">LITE</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Helipad</span><span class="tag">aot-hpad-gdi</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Repair Bay</span><span class="tag">aot-fix-age0</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Radar</span><span class="tag">aot-hq-base</span></div>
+      </div>
+      <div class="card">
+        <p><strong>Concept.</strong> Same opening shape as Nod (power → production → repair/tech), but GDI's Radar
+        (HQ) building is a single track that later upgrades in place to the Ion Cannon Uplink at Age 3, rather than
+        Nod's separate Radar Dome + Temple of Nod split.</p>
+      </div>
+    </div>
+
+    <div class="tier-block">
+      <div class="tier-head"><span class="tier-num">AGE 1</span><span class="tier-title">Heavy vehicle track + economy</span></div>
+      <div class="flow">
+        <div class="step"><span class="name">Power Plant (Age 1)</span><span class="tag">aot-nuke-age1</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Turbine Upgrade</span><span class="tag">power boost</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Tiberium Refinery</span><span class="tag">PROC</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Barracks (Age 1+)</span><span class="tag">aot-pyle-age1</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">War Factory</span><span class="tag">WEAP</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Air Field</span><span class="tag">AFLT</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Repair Bay (Age 1+)</span><span class="tag">aot-fix-age1</span></div>
+      </div>
+      <div class="card">
+        <p><strong>Concept.</strong> The War Factory (WEAP) is GDI's Age-1 heavy-vehicle unlock — the equivalent step
+        to Nod's Airfield-first push, except GDI's own Air Field (fighter jets) comes right alongside it rather than
+        being the sole Age-1 addition. This is the age where GDI's tank-heavy identity starts to diverge from Nod's
+        speed/stealth identity.</p>
+      </div>
+    </div>
+
+    <div class="tier-block">
+      <div class="tier-head"><span class="tier-num">AGE 2</span><span class="tier-title">Tech centre + orbital track</span></div>
+      <div class="flow">
+        <div class="step"><span class="name">Allied Tech Centre</span><span class="tag">ATEC</span></div>
+        <span class="arrow">→</span>
+        <div class="step"><span class="name">Orbital Command</span><span class="tag">ORBC</span></div>
+      </div>
+      <div class="card">
+        <p><strong>Concept.</strong> ATEC is GDI's counterpart to Nod's Shrine/Stealth-Gen pair — the tech
+        prerequisite building for its Age-2 specialty. Orbital Command is the tech step toward the Zone Trooper drop
+        and Ion Cannon path rather than a stealth-economy investment.</p>
+      </div>
+    </div>
+
+    <div class="tier-block">
+      <div class="tier-head"><span class="tier-num">AGE 3</span><span class="tier-title">Ion Cannon superweapon</span></div>
+      <div class="flow">
+        <div class="step"><span class="name">Radar → Ion Cannon Uplink</span><span class="tag">aot-hq-ion</span></div>
+      </div>
+      <div class="card">
+        <p><strong>Concept.</strong> Where Nod front-loads its superweapons into Age 1, GDI's single superweapon
+        (Ion Cannon) only comes online at Age 3 alongside the rest of the unit-upgrade tree (Predator/Railgun,
+        HUMVEE/APC upgrades, Dual Railgun) — the deliberate late-game payoff for GDI's more defensive early game.</p>
+      </div>
+    </div>
+
+    <div class="tier-block">
+      <div class="tier-head"><span class="tier-num">ECONOMY</span><span class="tier-title">Shared income model (both factions)</span></div>
+      <div class="econ-grid">
+        <div class="econ-row"><div class="label">Primary income</div><div class="value">Harvesters mine Tiberium fields, deliver to the Tiberium Silo / Refinery dock.</div></div>
+        <div class="econ-row"><div class="label">Secondary income</div><div class="value">Oil Derricks (V19, capturable) trickle cash once held; contested map-wide, capped at 2 pursued/held at once (Army-Ops Module 4).</div></div>
+        <div class="econ-row"><div class="label">Power</div><div class="value">Nuke/Nuk2 (Nod), Power Plant + Turbine (GDI) — production buildings brown out without excess power; the AI pulls a power step forward whenever excess power drops below its threshold.</div></div>
+        <div class="econ-row"><div class="label">Age gates</div><div class="value">aot-age1/2/3-upgrade-{nod,gdi} on the Construction Yard: 5,000 / 10,000 / 15,000 credits. Every age-gated building/unit waits at its Rhythm entry until the corresponding age finishes.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

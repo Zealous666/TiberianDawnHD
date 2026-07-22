@@ -251,12 +251,19 @@ namespace OpenRA.Mods.Common.Traits
 
 		// ---- Coastal cells (naval ferry support) ---------------------------------
 
+		static readonly CVec[] OrthogonalDirections = { new(1, 0), new(-1, 0), new(0, 1), new(0, -1) };
+
+		// Orthogonal-only Water/River check: a diagonal-only sighting means the direct approach is
+		// blocked by a corner (usually Rock) -- a water-CLIFF, not a boardable shore. On a real cliff
+		// Rock always sits directly (orthogonally) between land and water; a Clear cell only ever
+		// diagonally "sees" the water there by peeking past the Rock corner, never a legitimate
+		// embark/disembark point for transport vessels.
 		public bool IsCoastal(CPos c)
 		{
 			if (World.Map.GetTerrainInfo(c).Type == "Beach")
 				return true;
 
-			foreach (var d in CVec.Directions)
+			foreach (var d in OrthogonalDirections)
 			{
 				var n = c + d;
 				if (!World.Map.Contains(n))
