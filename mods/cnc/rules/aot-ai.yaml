@@ -467,13 +467,20 @@ Player:
 			aot-harv-nod: 6
 			aot-mcv-age0: 1
 			aot-mcv-age1: 1
-			aot-oret-lite: 4
+			# User 2026-07-22: 1 spawnt schon gratis mit FACT (OretSpawnStateCarrier) -- Limit 1 heisst,
+			# die KI kauft NIE proaktiv einen zweiten dazu, sondern baut nur nach, wenn der bestehende
+			# zerstoert wurde (Count faellt unter 1). Vorher Limit 4 + Gewicht 30 (siehe unten) liess die
+			# KI bis zu 3 zusaetzliche ORET aggressiv nachkaufen, sobald Cash uebrig war.
+			aot-oret-lite: 1
 		UnitsToBuild:
 			# --- Tiberium-Harvester (niedrig; Hauptsteuerung via HarvesterBotModule) ---
 			aot-harv: 8
 			aot-harv-nod: 8
-			# --- Erz-Transporter (oret): 2. Ökonomie-Standbein. 1 Stück gratis mit fact. ---
-			aot-oret-lite: 30
+			# --- Erz-Transporter (oret): 1 Stueck gratis mit fact, Rest nur Ersatz bei Verlust (User
+			# 2026-07-22) -- Gewicht war vorher 30 (fast 4x hoeher als der Harvester!), liess die KI ORET
+			# gegenueber praktisch allem anderen in dieser Queue bevorzugen. Jetzt niedrig, da ohnehin nur
+			# 1 Slot (UnitLimit oben) je erreicht werden kann.
+			aot-oret-lite: 3
 
 	# =========================================================================
 	# EXPANSION (klassische mcv)
@@ -582,6 +589,13 @@ Player:
 		# Retreating survivors that are damaged head to the repair bay before rejoining the pool
 		# (User 2026-07-22).
 		RepairTypes: aot-fix-age0, aot-fix-age1, aot-fix-age2
+		# Module 5 Base Defense (User 2026-07-22): standing garrison ~= one regular wave in size,
+		# ProtectionMinProduced guaranteed via production, rest opportunistic from the pool.
+		ProtectionFloorTypes: aot-jeep-wolverine, aot-jeep-humvee, aot-apc-amphibious, aot-jeep-base
+		ProtectionMinProduced: 3
+		ProtectionScanRadius: 10
+		ProtectionResponseRatio: 2
+		ProtectionMinResponse: 2
 
 	AotOperationsBotModule@nod:
 		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
@@ -637,6 +651,13 @@ Player:
 		# Retreating survivors that are damaged head to the repair bay before rejoining the pool
 		# (User 2026-07-22).
 		RepairTypes: aot-fix-age0, aot-fix-age1-nod, aot-fix-age2-nod
+		# Module 5 Base Defense (User 2026-07-22): standing garrison ~= one regular wave in size,
+		# ProtectionMinProduced guaranteed via production, rest opportunistic from the pool.
+		ProtectionFloorTypes: aot-bike-laser, aot-bggy-laser, aot-bike-base, aot-bggy-base
+		ProtectionMinProduced: 3
+		ProtectionScanRadius: 10
+		ProtectionResponseRatio: 2
+		ProtectionMinResponse: 2
 
 
 	# =========================================================================

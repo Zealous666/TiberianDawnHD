@@ -347,6 +347,36 @@ namespace OpenRA.Mods.Common.Traits
 			"short timeout while the shared production queue works through other requests first.")]
 		public readonly int DerrickFormingTimeout = 9000;
 
+		// ---- Module 5: Base Defense (User 2026-07-22) ----
+		public readonly bool EnableBaseDefense = true;
+
+		[Desc("Minimum garrison size guaranteed via dedicated production (the floor). The rest of",
+			"the garrison, up to ProtectionTargetIsWaveSize, is opportunistically filled from the",
+			"shared unit pool (idle survivors from finished missions) at no extra production cost.")]
+		public readonly int ProtectionMinProduced = 3;
+
+		[ActorReference]
+		[Desc("Variant chain used for the guaranteed production floor (fast, cheap responders).",
+			"Falls back to WaveLightTypes when empty.")]
+		public readonly string[] ProtectionFloorTypes = [];
+
+		[ActorReference]
+		[Desc("Buildings the garrison watches over. Empty = every owned building.")]
+		public readonly HashSet<string> ProtectionTypes = [];
+
+		[Desc("Radius (cells) around each protected building that is scanned for enemies.")]
+		public readonly int ProtectionScanRadius = 10;
+
+		[Desc("Ticks between threat scans.")]
+		public readonly int ProtectionScanInterval = 250;
+
+		[Desc("Responders sent per detected enemy (rounded up), so a lone scout doesn't empty the",
+			"whole garrison. Always at least ProtectionMinResponse, never more than available.")]
+		public readonly int ProtectionResponseRatio = 2;
+
+		[Desc("Minimum responders dispatched once any threat is detected at all.")]
+		public readonly int ProtectionMinResponse = 2;
+
 		// ---- Production ----
 		[Desc("Only order production above this cash level.")]
 		public readonly int ProductionMinCash = 300;
@@ -456,6 +486,18 @@ namespace OpenRA.Mods.Common.Traits
 			World.Actors
 				.Where(a => a.Owner == Player && !a.IsDead && a.IsInWorld && Info.RepairTypes.Contains(a.Info.Name))
 				.MinByOrDefault(a => (a.Location - near).LengthSquared);
+
+		// Halfway between base and primary choke: out of the builders' way, on the way out. Shared
+		// (User 2026-07-22) by both regular wave staging and the base defense garrison muster point.
+		public CPos GarrisonMusterPoint()
+		{
+			var baseCentre = BaseCentre();
+			var choke = ChokeProvider?.Chokepoint;
+			if (!choke.HasValue)
+				return baseCentre;
+
+			return new CPos((baseCentre.X + choke.Value.X) / 2, (baseCentre.Y + choke.Value.Y) / 2);
+		}
 
 		// ROOT CAUSE FOUND (debug.log evidence): stock BaseBuilderBotModule (still active on @aot for
 		// its PauseUnitProduction economy service) has its OWN rally-point assignment
@@ -604,6 +646,9 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				InitialClaim(bot);
 				initialClaimDone = true;
+
+				if (Info.EnableBaseDefense)
+					Missions.Add(new AotBaseDefenseMission(this));
 			}
 
 			ClaimNewUnits(bot);
@@ -881,6 +926,17 @@ namespace OpenRA.Mods.Common.Traits
 		public List<Actor> TakeFromPool(string[] chain, int count)
 		{
 			var taken = pool.Where(a => chain.Contains(a.Info.Name)).Take(count).ToList();
+			foreach (var a in taken)
+				pool.Remove(a);
+			return taken;
+		}
+
+		// Base Defense (User 2026-07-22): opportunistically adopts ANY idle pool unit regardless of
+		// type, unlike TakeFromPool's chain filter -- the garrison isn't picky about composition,
+		// it just wants bodies that are otherwise sitting around doing nothing.
+		public List<Actor> TakeAnyFromPool(int count)
+		{
+			var taken = pool.Take(count).ToList();
 			foreach (var a in taken)
 				pool.Remove(a);
 			return taken;

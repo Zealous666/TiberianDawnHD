@@ -624,16 +624,7 @@ namespace OpenRA.Mods.Common.Traits
 			return info.WaveTankTypes;
 		}
 
-		CPos RallyPoint()
-		{
-			var baseCentre = Ops.BaseCentre();
-			var choke = Ops.ChokeProvider?.Chokepoint;
-			if (!choke.HasValue)
-				return baseCentre;
-
-			// Halfway between base and choke: out of the builders' way, on the way out.
-			return new CPos((baseCentre.X + choke.Value.X) / 2, (baseCentre.Y + choke.Value.Y) / 2);
-		}
+		CPos RallyPoint() => Ops.GarrisonMusterPoint();
 
 		void TickForming(IBot bot)
 		{
@@ -1491,6 +1482,123 @@ namespace OpenRA.Mods.Common.Traits
 			foreach (var a in Units)
 				if (a.IsIdle || a.CurrentActivity is FlyIdle)
 					bot.QueueOrder(new Order("AttackMove", a, Target.FromCell(Ops.World, goal), false));
+		}
+	}
+
+	// ======================================================================
+	// Module 5: Base Defense (User 2026-07-22). Permanent standing garrison, created once at game
+	// start and never finishes. Sized roughly to one regular attack wave (WaveVehiclesPerAge
+	// [AgeTier()]); ProtectionMinProduced of that is guaranteed via dedicated production, the rest
+	// opportunistically adopted from the shared pool (idle survivors from finished missions) at no
+	// extra cost. Idle garrison waits at the shared muster point outside the buildable area
+	// (Ops.GarrisonMusterPoint -- the same "halfway to choke" spot regular waves stage at) so it
+	// never blocks construction. Periodically scans a radius around every protected building for
+	// enemies; on detection, a threat-proportional slice of the garrison (never the whole thing
+	// for a lone scout) is dispatched to engage while the rest keeps holding the muster point --
+	// this covers flanking/rear attacks too, since detection isn't tied to the front chokepoint.
+	// ======================================================================
+	public sealed class AotBaseDefenseMission : AotMissionWithOrders
+	{
+		readonly HashSet<Actor> responding = [];
+		int scanTicks;
+
+		public AotBaseDefenseMission(AotOperationsBotModule ops)
+			: base(ops, "base-defense") { }
+
+		int TargetSize()
+		{
+			var perAge = Ops.Info.WaveVehiclesPerAge;
+			return perAge.Length > 0 ? perAge[Math.Min(Ops.AgeTier(), perAge.Length - 1)] : Ops.Info.ProtectionMinProduced;
+		}
+
+		public override void Tick(IBot bot)
+		{
+			responding.RemoveWhere(Ops.CannotOrder);
+
+			MaintainGarrison();
+
+			scanTicks += Ops.Info.MissionInterval;
+			if (scanTicks >= Ops.Info.ProtectionScanInterval)
+			{
+				scanTicks = 0;
+				ScanAndRespond(bot);
+			}
+
+			// Everyone not currently dispatched holds the muster point, out of the builders' way.
+			var holding = Units.Where(a => !responding.Contains(a)).ToList();
+			if (holding.Count > 0)
+				HoldAt(bot, holding, Ops.GarrisonMusterPoint(), Ops.Info.GuardLeashRadius);
+		}
+
+		void MaintainGarrison()
+		{
+			var target = TargetSize();
+			var floor = Math.Min(Ops.Info.ProtectionMinProduced, target);
+
+			// Guaranteed floor via dedicated production, one outstanding request at a time.
+			if (Units.Count < floor && Ops.OpenRequests(this) == 0)
+			{
+				var chain = Ops.Info.ProtectionFloorTypes.Length > 0 ? Ops.Info.ProtectionFloorTypes : Ops.Info.WaveLightTypes;
+				if (chain.Length > 0)
+					Ops.QueueRequest(this, "floor", chain, floor - Units.Count);
+			}
+
+			// Opportunistic top-up from the shared pool, no production cost.
+			var shortfall = target - Units.Count - Ops.OpenRequests(this);
+			if (shortfall > 0)
+			{
+				var fromPool = Ops.TakeAnyFromPool(shortfall);
+				Ops.AssignFromPool(this, fromPool);
+			}
+		}
+
+		void ScanAndRespond(IBot bot)
+		{
+			var buildings = Ops.World.Actors
+				.Where(a => a.Owner == Ops.Player && !a.IsDead && a.IsInWorld && a.Info.HasTraitInfo<BuildingInfo>()
+					&& (Ops.Info.ProtectionTypes.Count == 0 || Ops.Info.ProtectionTypes.Contains(a.Info.Name)))
+				.ToList();
+
+			var threats = new HashSet<Actor>();
+			foreach (var b in buildings)
+				foreach (var a in Ops.World.FindActorsInCircle(b.CenterPosition, WDist.FromCells(Ops.Info.ProtectionScanRadius)))
+					if (AotOpsUtils.IsPreferredEnemyUnit(Ops.Player, a) && a.CanBeViewedByPlayer(Ops.Player))
+						threats.Add(a);
+
+			if (threats.Count == 0)
+			{
+				responding.Clear();
+				return;
+			}
+
+			var available = Units.Where(a => !Ops.CannotOrder(a)).ToList();
+			if (available.Count == 0)
+				return;
+
+			var want = Math.Clamp(threats.Count * Ops.Info.ProtectionResponseRatio, Ops.Info.ProtectionMinResponse, available.Count);
+			var threatCentre = ThreatCentroid(threats);
+			var responders = available.OrderBy(a => (a.Location - threatCentre).LengthSquared).Take(want).ToList();
+
+			responding.Clear();
+			foreach (var r in responders)
+				responding.Add(r);
+
+			AttackMoveGroup(bot, responders, threatCentre);
+			Log($"threat detected ({threats.Count} enemy unit(s) near base) -> dispatching {responders.Count}/{available.Count} responder(s) to {threatCentre}");
+		}
+
+		static CPos ThreatCentroid(IEnumerable<Actor> actors)
+		{
+			var list = actors.ToList();
+			var x = 0;
+			var y = 0;
+			foreach (var a in list)
+			{
+				x += a.Location.X;
+				y += a.Location.Y;
+			}
+
+			return new CPos(x / list.Count, y / list.Count);
 		}
 	}
 }
