@@ -58,8 +58,6 @@ tc04:
 				Count: 2
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\TC04.SNO\TC04.SNO-{0:D4}.DDS
 				Count: 1
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\TC04.SNO\TC04.SNO-{0:D4}.DDS
-				Count: 1
 		RemasteredPremultiplied: false
 
 tc04.husk:
@@ -83,8 +81,6 @@ tc05:
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\TC05.WIN\TC05.WIN-{0:D4}.DDS
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\TC05.SNO\TC05.SNO-{0:D4}.DDS
-				Count: 1
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\TC05.SNO\TC05.SNO-{0:D4}.DDS
 				Count: 1
 		RemasteredPremultiplied: false
 
@@ -110,8 +106,6 @@ tc03:
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\TC03.SNO\TC03.SNO-{0:D4}.DDS
 				Count: 1
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\TC03.SNO\TC03.SNO-{0:D4}.DDS
-				Count: 1
 		RemasteredPremultiplied: false
 
 tc03.husk:
@@ -136,8 +130,6 @@ tc02:
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\TC02.SNO\TC02.SNO-{0:D4}.DDS
 				Count: 1
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\TC02.SNO\TC02.SNO-{0:D4}.DDS
-				Count: 1
 		RemasteredPremultiplied: false
 
 tc02.husk:
@@ -161,8 +153,6 @@ tc01:
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\TC01.WIN\TC01.WIN-{0:D4}.DDS
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\TC01.SNO\TC01.SNO-{0:D4}.DDS
-				Count: 1
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\TC01.SNO\TC01.SNO-{0:D4}.DDS
 				Count: 1
 		RemasteredPremultiplied: false
 
@@ -200,8 +190,6 @@ t17:
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T17.SNO\T17.SNO-{0:D4}.DDS
 				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T17.SNO\T17.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 t17.husk:
@@ -214,8 +202,6 @@ t17.husk:
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\T17.WIN\T17.WIN-{0:D4}.DDS
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T17.SNO\T17.SNO-{0:D4}.DDS
-				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T17.SNO\T17.SNO-{0:D4}.DDS
 				Count: 2
 		RemasteredPremultiplied: false
 
@@ -230,8 +216,6 @@ t16:
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T16.SNO\T16.SNO-{0:D4}.DDS
 				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T16.SNO\T16.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 t16.husk:
@@ -244,8 +228,6 @@ t16.husk:
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\T16.WIN\T16.WIN-{0:D4}.DDS
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T16.SNO\T16.SNO-{0:D4}.DDS
-				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T16.SNO\T16.SNO-{0:D4}.DDS
 				Count: 2
 		RemasteredPremultiplied: false
 
@@ -260,8 +242,6 @@ t15:
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T15.SNO\T15.SNO-{0:D4}.DDS
 				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T15.SNO\T15.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 t15.husk:
@@ -274,8 +254,6 @@ t15.husk:
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\T15.WIN\T15.WIN-{0:D4}.DDS
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T15.SNO\T15.SNO-{0:D4}.DDS
-				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T15.SNO\T15.SNO-{0:D4}.DDS
 				Count: 2
 		RemasteredPremultiplied: false
 
@@ -290,8 +268,6 @@ t14:
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T14.SNO\T14.SNO-{0:D4}.DDS
 				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T14.SNO\T14.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 t14.husk:
@@ -304,8 +280,6 @@ t14.husk:
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\T14.WIN\T14.WIN-{0:D4}.DDS
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T14.SNO\T14.SNO-{0:D4}.DDS
-				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T14.SNO\T14.SNO-{0:D4}.DDS
 				Count: 2
 		RemasteredPremultiplied: false
 
@@ -320,8 +294,6 @@ t13:
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T13.SNO\T13.SNO-{0:D4}.DDS
 				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T13.SNO\T13.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 t13.husk:
@@ -334,8 +306,6 @@ t13.husk:
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\T13.WIN\T13.WIN-{0:D4}.DDS
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T13.SNO\T13.SNO-{0:D4}.DDS
-				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T13.SNO\T13.SNO-{0:D4}.DDS
 				Count: 2
 		RemasteredPremultiplied: false
 
@@ -350,8 +320,6 @@ t12:
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T12.SNO\T12.SNO-{0:D4}.DDS
 				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T12.SNO\T12.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 t12.husk:
@@ -364,8 +332,6 @@ t12.husk:
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\T12.WIN\T12.WIN-{0:D4}.DDS
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T12.SNO\T12.SNO-{0:D4}.DDS
-				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T12.SNO\T12.SNO-{0:D4}.DDS
 				Count: 2
 		RemasteredPremultiplied: false
 
@@ -380,8 +346,6 @@ t11:
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T11.SNO\T11.SNO-{0:D4}.DDS
 				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T11.SNO\T11.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 t11.husk:
@@ -394,8 +358,6 @@ t11.husk:
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\T11.WIN\T11.WIN-{0:D4}.DDS
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T11.SNO\T11.SNO-{0:D4}.DDS
-				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T11.SNO\T11.SNO-{0:D4}.DDS
 				Count: 2
 		RemasteredPremultiplied: false
 
@@ -410,8 +372,6 @@ t10:
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T10.SNO\T10.SNO-{0:D4}.DDS
 				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T10.SNO\T10.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 t10.husk:
@@ -424,8 +384,6 @@ t10.husk:
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\T10.WIN\T10.WIN-{0:D4}.DDS
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T10.SNO\T10.SNO-{0:D4}.DDS
-				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T10.SNO\T10.SNO-{0:D4}.DDS
 				Count: 2
 		RemasteredPremultiplied: false
 
@@ -452,8 +410,6 @@ t08:
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T08.SNO\T08.SNO-{0:D4}.DDS
 				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T08.SNO\T08.SNO-{0:D4}.DDS
-				Count: 2
 			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\T08.DES\T08.DES-{0:D4}.DDS
 				Count: 3
 		RemasteredScale: 0.5
@@ -471,8 +427,6 @@ t08.husk:
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\T08.WIN\T08.WIN-{0:D4}.DDS
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T08.SNO\T08.SNO-{0:D4}.DDS
-				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T08.SNO\T08.SNO-{0:D4}.DDS
 				Count: 2
 			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\T08.DES\T08.DES-{0:D4}.DDS
 				Count: 3
@@ -492,8 +446,6 @@ t07:
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T07.SNO\T07.SNO-{0:D4}.DDS
 				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T07.SNO\T07.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 t07.husk:
@@ -506,8 +458,6 @@ t07.husk:
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\T07.WIN\T07.WIN-{0:D4}.DDS
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T07.SNO\T07.SNO-{0:D4}.DDS
-				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T07.SNO\T07.SNO-{0:D4}.DDS
 				Count: 2
 		RemasteredPremultiplied: false
 
@@ -522,8 +472,6 @@ t06:
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T06.SNO\T06.SNO-{0:D4}.DDS
 				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T06.SNO\T06.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 t06.husk:
@@ -536,8 +484,6 @@ t06.husk:
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\T06.WIN\T06.WIN-{0:D4}.DDS
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T06.SNO\T06.SNO-{0:D4}.DDS
-				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T06.SNO\T06.SNO-{0:D4}.DDS
 				Count: 2
 		RemasteredPremultiplied: false
 
@@ -552,8 +498,6 @@ t05:
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T05.SNO\T05.SNO-{0:D4}.DDS
 				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T05.SNO\T05.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 t05.husk:
@@ -566,8 +510,6 @@ t05.husk:
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\T05.WIN\T05.WIN-{0:D4}.DDS
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T05.SNO\T05.SNO-{0:D4}.DDS
-				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T05.SNO\T05.SNO-{0:D4}.DDS
 				Count: 2
 		RemasteredPremultiplied: false
 
@@ -594,8 +536,6 @@ t03:
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T03.SNO\T03.SNO-{0:D4}.DDS
 				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T03.SNO\T03.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 t03.husk:
@@ -608,8 +548,6 @@ t03.husk:
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\T03.WIN\T03.WIN-{0:D4}.DDS
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T03.SNO\T03.SNO-{0:D4}.DDS
-				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T03.SNO\T03.SNO-{0:D4}.DDS
 				Count: 2
 		RemasteredPremultiplied: false
 
@@ -624,8 +562,6 @@ t02:
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T02.SNO\T02.SNO-{0:D4}.DDS
 				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T02.SNO\T02.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 t02.husk:
@@ -638,8 +574,6 @@ t02.husk:
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\T02.WIN\T02.WIN-{0:D4}.DDS
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T02.SNO\T02.SNO-{0:D4}.DDS
-				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T02.SNO\T02.SNO-{0:D4}.DDS
 				Count: 2
 		RemasteredPremultiplied: false
 
@@ -654,8 +588,6 @@ t01:
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T01.SNO\T01.SNO-{0:D4}.DDS
 				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T01.SNO\T01.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 t01.husk:
@@ -669,8 +601,6 @@ t01.husk:
 				Count: 3
 			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T01.SNO\T01.SNO-{0:D4}.DDS
 				Count: 2
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T01.SNO\T01.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 v01:
@@ -682,8 +612,6 @@ v01:
 				Count: 3
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\V01.WIN\V01.WIN-{0:D4}.DDS
 				Count: 3
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V01.SNO\V01.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 v01.husk:
@@ -706,8 +634,6 @@ v02:
 				Count: 3
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\V02.WIN\V02.WIN-{0:D4}.DDS
 				Count: 3
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V02.SNO\V02.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 v02.husk:
@@ -730,8 +656,6 @@ v03:
 				Count: 3
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\V03.WIN\V03.WIN-{0:D4}.DDS
 				Count: 3
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V03.SNO\V03.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 v03.husk:
@@ -754,8 +678,6 @@ v04:
 				Count: 3
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\V04.WIN\V04.WIN-{0:D4}.DDS
 				Count: 3
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V04.SNO\V04.SNO-{0:D4}.DDS
-				Count: 4
 		RemasteredPremultiplied: false
 
 v04.husk:
@@ -767,8 +689,6 @@ v04.husk:
 				Count: 3
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\V04.WIN\V04.WIN-{0:D4}.DDS
 				Count: 3
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V04.SNO\V04.SNO-{0:D4}.DDS
-				Count: 4
 		RemasteredPremultiplied: false
 
 v05:
@@ -780,8 +700,6 @@ v05:
 				Count: 3
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\V05.WIN\V05.WIN-{0:D4}.DDS
 				Count: 3
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V05.SNO\V05.SNO-{0:D4}.DDS
-				Count: 4
 		RemasteredPremultiplied: false
 
 v05.husk:
@@ -793,8 +711,6 @@ v05.husk:
 				Count: 3
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\V05.WIN\V05.WIN-{0:D4}.DDS
 				Count: 3
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V05.SNO\V05.SNO-{0:D4}.DDS
-				Count: 4
 		RemasteredPremultiplied: false
 
 v06:
@@ -806,8 +722,6 @@ v06:
 				Count: 3
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\V06.WIN\V06.WIN-{0:D4}.DDS
 				Count: 3
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V06.SNO\V06.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 v06.husk:
@@ -830,8 +744,6 @@ v07:
 				Count: 3
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\V07.WIN\V07.WIN-{0:D4}.DDS
 				Count: 3
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V07.SNO\V07.SNO-{0:D4}.DDS
-				Count: 4
 		RemasteredPremultiplied: false
 
 v07.husk:
@@ -843,8 +755,6 @@ v07.husk:
 				Count: 3
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\V07.WIN\V07.WIN-{0:D4}.DDS
 				Count: 3
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V07.SNO\V07.SNO-{0:D4}.DDS
-				Count: 4
 		RemasteredPremultiplied: false
 
 v08:
@@ -856,8 +766,6 @@ v08:
 				Count: 3
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\V08.WIN\V08.WIN-{0:D4}.DDS
 				Count: 3
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V08.SNO\V08.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 v08.husk:
@@ -880,8 +788,6 @@ v09:
 				Count: 3
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\V09.WIN\V09.WIN-{0:D4}.DDS
 				Count: 3
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V09.SNO\V09.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 v09.husk:
@@ -904,8 +810,6 @@ v10:
 				Count: 3
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\V10.WIN\V10.WIN-{0:D4}.DDS
 				Count: 3
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V10.SNO\V10.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 v10.husk:
@@ -928,8 +832,6 @@ v11:
 				Count: 3
 			SNOW: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\V11.WIN\V11.WIN-{0:D4}.DDS
 				Count: 3
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V11.SNO\V11.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 v11.husk:
@@ -952,8 +854,6 @@ v12:
 				Count: 3
 			SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V12.SNO\V12.SNO-0000.DDS
 				Count: 3
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V12.SNO\V12.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 v12.husk:
@@ -976,8 +876,6 @@ v13:
 				Count: 3
 			SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V13.SNO\V13.SNO-0000.DDS
 				Count: 3
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V13.SNO\V13.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 v13.husk:
@@ -1003,8 +901,6 @@ v14:
 				Count: 3
 			SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V14.SNO\V14.SNO-0000.DDS
 				Count: 3
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V14.SNO\V14.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 v14.husk:
@@ -1033,8 +929,6 @@ v15:
 				Count: 3
 			SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V15.SNO\V15.SNO-0000.DDS
 				Count: 3
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V15.SNO\V15.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 v15.husk:
@@ -1063,8 +957,6 @@ v16:
 				Count: 3
 			SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V16.SNO\V16.SNO-0000.DDS
 				Count: 3
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V16.SNO\V16.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 v16.husk:
@@ -1093,8 +985,6 @@ v17:
 				Count: 3
 			SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V17.SNO\V17.SNO-0000.DDS
 				Count: 3
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V17.SNO\V17.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 v17.husk:
@@ -1123,8 +1013,6 @@ v18:
 				Count: 3
 			SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V18.SNO\V18.SNO-0000.DDS
 				Count: 3
-			AOT_WINTER: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V18.SNO\V18.SNO-{0:D4}.DDS
-				Count: 2
 		RemasteredPremultiplied: false
 
 v18.husk:
@@ -1378,3 +1266,357 @@ arco:
 arco.husk:
 	idle: 
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\ARCO.ZIP
+
+# === Age of Tiberium (aotmod) - Snow-Varianten Sequenzen (eigenstaendige Aktoren) ===
+
+t01-snow:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T01.SNO\T01.SNO-0000.DDS
+		RemasteredPremultiplied: false
+
+t01-snow.husk:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T01.SNO\T01.SNO-0001.DDS
+		RemasteredPremultiplied: false
+
+t02-snow:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T02.SNO\T02.SNO-0000.DDS
+		RemasteredPremultiplied: false
+
+t02-snow.husk:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T02.SNO\T02.SNO-0001.DDS
+		RemasteredPremultiplied: false
+
+t03-snow:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T03.SNO\T03.SNO-0000.DDS
+		RemasteredPremultiplied: false
+
+t03-snow.husk:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T03.SNO\T03.SNO-0001.DDS
+		RemasteredPremultiplied: false
+
+t05-snow:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T05.SNO\T05.SNO-0000.DDS
+		RemasteredPremultiplied: false
+
+t05-snow.husk:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T05.SNO\T05.SNO-0001.DDS
+		RemasteredPremultiplied: false
+
+t06-snow:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T06.SNO\T06.SNO-0000.DDS
+		RemasteredPremultiplied: false
+
+t06-snow.husk:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T06.SNO\T06.SNO-0001.DDS
+		RemasteredPremultiplied: false
+
+t07-snow:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T07.SNO\T07.SNO-0000.DDS
+		RemasteredPremultiplied: false
+
+t07-snow.husk:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T07.SNO\T07.SNO-0001.DDS
+		RemasteredPremultiplied: false
+
+t08-snow:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T08.SNO\T08.SNO-0000.DDS
+		RemasteredPremultiplied: false
+
+t08-snow.husk:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T08.SNO\T08.SNO-0001.DDS
+		RemasteredPremultiplied: false
+
+t10-snow:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T10.SNO\T10.SNO-0000.DDS
+		RemasteredPremultiplied: false
+
+t10-snow.husk:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T10.SNO\T10.SNO-0001.DDS
+		RemasteredPremultiplied: false
+
+t11-snow:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T11.SNO\T11.SNO-0000.DDS
+		RemasteredPremultiplied: false
+
+t11-snow.husk:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T11.SNO\T11.SNO-0001.DDS
+		RemasteredPremultiplied: false
+
+t12-snow:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T12.SNO\T12.SNO-0000.DDS
+		RemasteredPremultiplied: false
+
+t12-snow.husk:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T12.SNO\T12.SNO-0001.DDS
+		RemasteredPremultiplied: false
+
+t13-snow:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T13.SNO\T13.SNO-0000.DDS
+		RemasteredPremultiplied: false
+
+t13-snow.husk:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T13.SNO\T13.SNO-0001.DDS
+		RemasteredPremultiplied: false
+
+t14-snow:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T14.SNO\T14.SNO-0000.DDS
+		RemasteredPremultiplied: false
+
+t14-snow.husk:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T14.SNO\T14.SNO-0001.DDS
+		RemasteredPremultiplied: false
+
+t15-snow:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T15.SNO\T15.SNO-0000.DDS
+		RemasteredPremultiplied: false
+
+t15-snow.husk:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T15.SNO\T15.SNO-0001.DDS
+		RemasteredPremultiplied: false
+
+t16-snow:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T16.SNO\T16.SNO-0000.DDS
+		RemasteredPremultiplied: false
+
+t16-snow.husk:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T16.SNO\T16.SNO-0001.DDS
+		RemasteredPremultiplied: false
+
+t17-snow:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T17.SNO\T17.SNO-0000.DDS
+		RemasteredPremultiplied: false
+
+t17-snow.husk:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\T17.SNO\T17.SNO-0001.DDS
+		RemasteredPremultiplied: false
+
+tc01-snow:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\TC01.SNO\TC01.SNO-0000.DDS
+		RemasteredPremultiplied: false
+
+tc02-snow:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\TC02.SNO\TC02.SNO-0000.DDS
+		RemasteredPremultiplied: false
+
+tc03-snow:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\TC03.SNO\TC03.SNO-0000.DDS
+		RemasteredPremultiplied: false
+
+tc04-snow:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\TC04.SNO\TC04.SNO-0000.DDS
+		RemasteredPremultiplied: false
+
+tc05-snow:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\TC05.SNO\TC05.SNO-0000.DDS
+		RemasteredPremultiplied: false
+
+v01-snow:
+	Defaults:
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V01.SNO\V01.SNO-{0:D4}.DDS
+			Count: 2
+		RemasteredPremultiplied: false
+	idle:
+	damaged-idle:
+		Start: 1
+
+v02-snow:
+	Defaults:
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V02.SNO\V02.SNO-{0:D4}.DDS
+			Count: 2
+		RemasteredPremultiplied: false
+	idle:
+	damaged-idle:
+		Start: 1
+
+v03-snow:
+	Defaults:
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V03.SNO\V03.SNO-{0:D4}.DDS
+			Count: 2
+		RemasteredPremultiplied: false
+	idle:
+	damaged-idle:
+		Start: 1
+
+v04-snow:
+	Defaults:
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V04.SNO\V04.SNO-{0:D4}.DDS
+			Count: 4
+		RemasteredPremultiplied: false
+	idle:
+	damaged-idle:
+		Start: 1
+
+v04-snow.husk:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V04.SNO\V04.SNO-0002.DDS
+		RemasteredPremultiplied: false
+
+v05-snow:
+	Defaults:
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V05.SNO\V05.SNO-{0:D4}.DDS
+			Count: 4
+		RemasteredPremultiplied: false
+	idle:
+	damaged-idle:
+		Start: 1
+
+v05-snow.husk:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V05.SNO\V05.SNO-0002.DDS
+		RemasteredPremultiplied: false
+
+v06-snow:
+	Defaults:
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V06.SNO\V06.SNO-{0:D4}.DDS
+			Count: 2
+		RemasteredPremultiplied: false
+	idle:
+	damaged-idle:
+		Start: 1
+
+v07-snow:
+	Defaults:
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V07.SNO\V07.SNO-{0:D4}.DDS
+			Count: 4
+		RemasteredPremultiplied: false
+	idle:
+	damaged-idle:
+		Start: 1
+
+v07-snow.husk:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V07.SNO\V07.SNO-0002.DDS
+		RemasteredPremultiplied: false
+
+v08-snow:
+	Defaults:
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V08.SNO\V08.SNO-{0:D4}.DDS
+			Count: 2
+		RemasteredPremultiplied: false
+	idle:
+	damaged-idle:
+		Start: 1
+
+v09-snow:
+	Defaults:
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V09.SNO\V09.SNO-{0:D4}.DDS
+			Count: 2
+		RemasteredPremultiplied: false
+	idle:
+	damaged-idle:
+		Start: 1
+
+v10-snow:
+	Defaults:
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V10.SNO\V10.SNO-{0:D4}.DDS
+			Count: 2
+		RemasteredPremultiplied: false
+	idle:
+	damaged-idle:
+		Start: 1
+
+v11-snow:
+	Defaults:
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V11.SNO\V11.SNO-{0:D4}.DDS
+			Count: 2
+		RemasteredPremultiplied: false
+	idle:
+	damaged-idle:
+		Start: 1
+
+v12-snow:
+	Defaults:
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V12.SNO\V12.SNO-{0:D4}.DDS
+			Count: 2
+		RemasteredPremultiplied: false
+	idle:
+	damaged-idle:
+		Start: 1
+
+v13-snow:
+	Defaults:
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V13.SNO\V13.SNO-{0:D4}.DDS
+			Count: 2
+		RemasteredPremultiplied: false
+	idle:
+	damaged-idle:
+		Start: 1
+
+v14-snow:
+	Defaults:
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V14.SNO\V14.SNO-{0:D4}.DDS
+			Count: 2
+		RemasteredPremultiplied: false
+	idle:
+	damaged-idle:
+		Start: 1
+
+v15-snow:
+	Defaults:
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V15.SNO\V15.SNO-{0:D4}.DDS
+			Count: 2
+		RemasteredPremultiplied: false
+	idle:
+	damaged-idle:
+		Start: 1
+
+v16-snow:
+	Defaults:
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V16.SNO\V16.SNO-{0:D4}.DDS
+			Count: 2
+		RemasteredPremultiplied: false
+	idle:
+	damaged-idle:
+		Start: 1
+
+v17-snow:
+	Defaults:
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V17.SNO\V17.SNO-{0:D4}.DDS
+			Count: 2
+		RemasteredPremultiplied: false
+	idle:
+	damaged-idle:
+		Start: 1
+
+v18-snow:
+	Defaults:
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\V18.SNO\V18.SNO-{0:D4}.DDS
+			Count: 2
+		RemasteredPremultiplied: false
+	idle:
+	damaged-idle:
+		Start: 1

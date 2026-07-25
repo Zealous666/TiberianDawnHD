@@ -91,7 +91,189 @@ World:
 		Modifier: 0
 	TimedConditionBar@AOTIRONDOME:
 		Condition: aot-iron-dome
-	# === Ende aotmod ===
+	
+# === Age of Tiberium (aotmod) - AOT_DESERT Desert-Deko-Freischaltung ===
+# Desert-Baeume/Zivilgebaeude sind im Original-Rules per RequireTilesets: DESERT
+# gesperrt (nur klassisches DESERT-Tileset). AOT_DESERT ergaenzt, damit sie auch
+# im neuen Kombitileset platzierbar sind. Kunst ist bereits tileset-unabhaengig
+# (feste DES-DDS-Pfade), keine weiteren Sequenz-Aenderungen noetig.
+T03.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+T04:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+T04.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+T09:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+T09.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+T17.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+T18:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+T18.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V20:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V20.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V21:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V21.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V22:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V22.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V23:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V23.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V24:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V24.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V25:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V25.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V26:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V26.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V27:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V27.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V28:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V28.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V29:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V29.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V30:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V30.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V31:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V31.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V32:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V32.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V33:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V33.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V34:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V34.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V35:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V35.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V36:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V36.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V37:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V37.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+# === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - SpyInfiltrate TargetType auf allen Gebäuden ===
 ^Building:

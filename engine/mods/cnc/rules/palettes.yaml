@@ -59,6 +59,16 @@
 		Tileset: AOT_WINTER
 		Filename: winter.pal
 		ShadowIndex: 4
+	PaletteFromFile@terrain-aot-desert:
+		Name: terrain
+		Tileset: AOT_DESERT
+		Filename: desert.pal
+		ShadowIndex: 4
+	PaletteFromFile@staticterrain-aot-desert:
+		Name: staticterrain
+		Tileset: AOT_DESERT
+		Filename: desert.pal
+		ShadowIndex: 4
 	PaletteFromFile@terrain-aot-snow:
 		Name: terrain
 		Tileset: AOT_SNOW
