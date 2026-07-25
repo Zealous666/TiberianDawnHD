@@ -39,6 +39,14 @@ Terrain:
 		Type: Rock
 		TargetTypes: Ground
 		Color: 44443C
+	# === Age of Tiberium (aotmod) - Jumpjet Custom-Movement-Layer (Zone Trooper Hover) ===
+	TerrainType@Jumpjet:
+		Type: Jumpjet
+		Color: 44443C
+	# === Age of Tiberium (aotmod) - Subterranean Custom-Movement-Layer (Devil's Tongue / Sub APC) ===
+	TerrainType@Subterranean:
+		Type: Subterranean
+		Color: 745537
 	TerrainType@Rough:
 		Type: Rough
 		TargetTypes: Ground
@@ -64,6 +72,12 @@ Terrain:
 		TargetTypes: Water
 		Color: 5C74A4
 		RestrictPlayerColor: true
+	# Eis (aot-ice-cell via ChangesTerrain). Wie in TS befahrbar; Farbe = TS-Volleis (AFCBED).
+	TerrainType@Ice:
+		Type: Ice
+		TargetTypes: Ground
+		AcceptsSmudgeType: Crater, Scorch
+		Color: AFCBED
 
 
 Templates:

@@ -4267,7 +4267,12 @@ SILO:
 	DockHost:
 		Type: OreDeliver
 		DockAngle: 0
-		DockOffset: 0,1c512,0
+		# Dock muss auf der passierbaren Smudge-Reihe (Footprint-Zeile "==", Fussprint-lokal
+		# y=1024..2048) liegen, nicht dahinter. CenterPosition.Y liegt (nach LocalCenterOffset
+		# -412) bei 612 -- der alte Offset 1c512 (=1536) landete bei 2148, eine ganze Zelle
+		# HINTER dem 2x2-Footprint/Smudge (User-Report: "Dockingpoint unterhalb des Smudge").
+		# 924 zentriert den Dock-Punkt in der Zeile (612+924=1536 = Zeilenmitte 1024..2048).
+		DockOffset: 0,924,0
 	# Silo erweitert die Bauzone wie ein normales Gebaeude (Basis-SILO hatte -GivesBuildableArea).
 	GivesBuildableArea:
 		AreaTypes: building
@@ -6297,7 +6302,7 @@ aot-bridgehut:
 	HiddenUnderShroud:
 	MapEditorData:
 		Categories: Ice
-		RequireTilesets: AOT_SNOW
+		RequireTilesets: AOT_SNOW, AOT_WINTER
 	RequiresSpecificOwners:
 		ValidOwnerNames: Neutral
 
