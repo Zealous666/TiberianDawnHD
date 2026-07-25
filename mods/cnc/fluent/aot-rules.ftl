@@ -2,6 +2,7 @@
 
 tileset-aot-temperat = AoT - Temperate (RA)
 tileset-aot-snow = AoT - Snow (RA)
+tileset-aot-winter = AoT - Winter (TD)
 
 actor-lite =
     .name = Vehicle Factory
