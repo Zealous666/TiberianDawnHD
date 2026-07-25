@@ -230,6 +230,7 @@ FileSystem: RemasterFileSystem
 
 MapFolders:
 	cnc|maps: System
+	cnchd|maps: System
 	~^SupportDir|maps/cnc/{DEV_VERSION}: User
 
 Rules:
@@ -259,6 +260,7 @@ Rules:
 	cnchd|rules/aot-critters.yaml
 	cnchd|rules/aot-world.yaml
 	cnchd|rules/aot-ai.yaml
+	cnchd|rules/aot-snow-decor.yaml
 	# === Ende aotmod ===
 
 Sequences:
@@ -292,6 +294,7 @@ TileSets:
 	cnchd|tilesets/aot-temperat.yaml
 	cnchd|tilesets/aot-snow.yaml
 	cnchd|tilesets/aot-winter.yaml
+	cnchd|tilesets/aot-desert.yaml
 
 Weapons:
 	cnc|weapons/explosions.yaml
