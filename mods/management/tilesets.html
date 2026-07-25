@@ -178,6 +178,7 @@
   <a href="buildorder.html">Build Order</a>
   <a href="tilesets.html" class="active">Tilesets</a>
   <a href="operations.html">Operation</a>
+  <a href="building-economy.html">Building &amp; Economy</a>
 </nav>
 
 <header>
@@ -216,6 +217,13 @@ const DEFAULT_CHECKS = {
   "aot-snow-ms-7": true,
   "aot-snow-ms-8": false,
   "aot-snow-ms-9": true,
+  "aot-winter-ms-0": true,
+  "aot-winter-ms-1": true,
+  "aot-winter-ms-2": true,
+  "aot-winter-ms-3": true,
+  "aot-winter-ms-4": true,
+  "aot-winter-ms-5": true,
+  "aot-winter-ms-6": true,
 };
 
 const tilesets = [
@@ -273,19 +281,19 @@ const tilesets = [
     tilesetId: "AOT_WINTER",
     phase: 1,
     meta: [
-      { label: "Basis", value: "TD Winter (engine/mods/cnc/tilesets/winter.yaml)" },
-      { label: "Templates", value: "146 – unverändert von TD" },
-      { label: "Tile-Dateien", value: ".win – aus TD winter.mix / Remaster-Content" },
-      { label: "Parallel zu", value: "AOT_SNOW (beide bleiben erhalten)" },
+      { label: "Basis", value: "TD Winter (engine/mods/cnc/tilesets/winter.yaml) + AOT_SNOW Templates" },
+      { label: "Templates", value: "397 (142 Winter + 255 Snow, offset +1000, eigene 'X (Snow)'-Kategorien)" },
+      { label: "Tile-Dateien", value: ".win/.sno – DDS-Pfade direkt aus TEXTURES_TD_SRGB.MEG / TEXTURES_RA_SRGB.MEG aufgelöst" },
+      { label: "Hinweis", value: "4 Winter Cliff-Randstücke (cliffsl1-4) fehlen im MEG, ausgelassen" },
     ],
     milestones: [
-      "winter.yaml aus cnchd/tilesets/ als aot-winter.yaml kopieren",
-      "Tileset-ID auf AOT_WINTER setzen",
-      "RemasteredFilenames-Blöcke prüfen und ggf. kürzen",
+      "aot-winter.yaml aus winter.yaml dupliziert (eigene Instanz, TD winter.yaml bleibt unverändert)",
+      "Tileset-ID auf AOT_WINTER gesetzt",
+      "RemasteredFilenames direkt aus TEXTURES_TD_SRGB.MEG generiert (142/146 Templates, 4 Cliffs fehlen im MEG)",
+      "AOT_SNOW-Templates (255) mit Offset +1000 und ' (Snow)'-Kategorie-Suffix angehängt",
       "TileSets-Eintrag in mod.yaml: cnchd|tilesets/aot-winter.yaml",
-      "Alten winter.yaml-Eintrag ersetzen",
-      "Im Editor laden und validieren",
-      "TilesetFilenames in Sequence-Overrides auf WINTER prüfen",
+      "Palette AOT_WINTER in engine/mods/cnc/rules/palettes.yaml eingetragen",
+      "Im Editor geladen und validiert",
     ]
   },
   {
