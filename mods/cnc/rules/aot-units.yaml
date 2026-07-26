@@ -4459,6 +4459,11 @@ aot-msam-hover-aa:
 # Sichtbar/baubar: aot-age2 + aot-mtnk-titan-upgrade + WEAP (Advanced War Factory)
 aot-jugg:
 	Inherits: ^Vehicle
+	# Fehlte bisher (User-Fund 2026-07-26, gleiche Fehlerklasse wie aot-ltnk-deployed): andere
+	# Kampffahrzeuge (z.B. MTNK) erben explizit ^AutoTargetGround(AssaultMove) -- aot-jugg hatte
+	# nur ^Vehicle. Turreted/AttackTurreted/Armament funktionieren bei manuellen Befehlen, aber
+	# ohne AutoTarget feuert der Turm nie von selbst, auch nicht im deployten Zustand.
+	Inherits@AUTOTARGET: ^AutoTargetGround
 	RenderSprites:
 		Image: aot-jugg
 	Selectable:
