@@ -4121,10 +4121,18 @@ aot-foundation:
 		RemasteredFilename: aot-foundation-idle.zip
 		RemasteredPremultiplied: false
 		Length: 1
+		# Im Spiel disposed sich der Placer sofort nach dem Platzieren (AotPlaceFoundation
+		# spawnt die echten aot-foundation-cell-Zellen, die den ZOffset unten tragen) -- dieser
+		# Sprite wird dort nie sichtbar. Im Karteneditor laeuft dieser Dispose NIE (keine echte
+		# Simulation), der Placer bleibt dauerhaft mit diesem un-geoffseteten Sprite stehen und
+		# sortiert dadurch auf normaler Gebaeude-Hoehe -> ueberlappt Gebaeude im Editor. Gleicher
+		# ZOffset wie aot-foundation-cell noetig, damit auch die Editor-Ansicht ganz unten sitzt.
+		ZOffset: -8191
 	idle2x2:
 		RemasteredFilename: aot-foundation-idle2.zip
 		RemasteredPremultiplied: false
 		Length: 1
+		ZOffset: -8191
 	icon:
 		Filename: aot-foundation-icon.png
 		Length: 1

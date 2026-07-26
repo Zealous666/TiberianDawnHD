@@ -923,18 +923,20 @@ aot-proc-gdi-age2:
 		LockedGroup: aot-grp-proc
 		Prerequisites: ~aot-age2, aot-age2, aot-weap, silo
 		Queue: Building.GDI
+	-WithSpriteBody@base:
+	-WithMakeAnimation@base:
 	WithSpriteBody@ts:
 		Sequence: aot-age2-nod-idle
 		Name: body-ts
-		RequiresCondition: aot-age2-active
+		RequiresCondition: aot-age2-active || !aot-age2-active
 	WithIdleOverlay@tsremap:
 		Sequence: aot-age2-nod-idle-remap
 		Palette: player
 		IsPlayerPalette: True
-		RequiresCondition: aot-age2-active && !build-incomplete
+		RequiresCondition: !build-incomplete
 	WithIdleOverlay@tsanim:
 		Sequence: aot-age2-nod-anim
-		RequiresCondition: aot-age2-active && !build-incomplete
+		RequiresCondition: !build-incomplete
 	-ActorPreviewPlaceBuildingPreview:
 	SequencePlaceBuildingPreview:
 		Sequence: aot-age2-nod-idle
@@ -980,18 +982,20 @@ aot-proc-nod-age2:
 		LockedGroup: aot-grp-proc
 		Prerequisites: ~aot-age2, aot-age2, afld, silo
 		Queue: Building.Nod
+	-WithSpriteBody@base:
+	-WithMakeAnimation@base:
 	WithSpriteBody@ts:
 		Sequence: aot-age2-nod-idle
 		Name: body-ts
-		RequiresCondition: aot-age2-active
+		RequiresCondition: aot-age2-active || !aot-age2-active
 	WithIdleOverlay@tsremap:
 		Sequence: aot-age2-nod-idle-remap
 		Palette: player
 		IsPlayerPalette: True
-		RequiresCondition: aot-age2-active && !build-incomplete
+		RequiresCondition: !build-incomplete
 	WithIdleOverlay@tsanim:
 		Sequence: aot-age2-nod-anim
-		RequiresCondition: aot-age2-active && !build-incomplete
+		RequiresCondition: !build-incomplete
 	-ActorPreviewPlaceBuildingPreview:
 	SequencePlaceBuildingPreview:
 		Sequence: aot-age2-nod-idle

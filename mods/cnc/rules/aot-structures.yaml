@@ -191,6 +191,51 @@ aot-lite-nod:
 		Condition: build-incomplete
 		Sequence: aot-age2-make
 		RequiresCondition: aot-age2-active
+
+# === Age of Tiberium (aotmod) - LITE Editor-Platzierer fuer die Age-2-Optik (2026-07-26) ===
+# aot-lite-gdi/-nod selbst zeigen im Karteneditor bereits korrekt die Age-0/1-Optik (das ist
+# der Default-Zustand ohne Spieler-Techtree, siehe locked-icon-system.md "Age-Proxy Sprite-
+# Guarantee-Fix"). Fuer die Age-2-Optik gab es aber GAR KEINEN eigenen Platzierer -- diese
+# beiden Aktoren schliessen die Luecke. KEIN Buildable: erscheinen NIE in einer Bau-Queue,
+# rein zum gezielten Vorplatzieren im Karteneditor (bleiben aber voll funktionsfaehig, falls
+# ein Mapper sie tatsaechlich auf eine Karte setzt).
+aot-lite-gdi-editor-age2:
+	Inherits: aot-lite-gdi
+	-Buildable:
+	-WithSpriteBody@base:
+	-WithIdleOverlay@ROOF:
+	-WithMakeAnimation@base:
+	WithSpriteBody@ts:
+		RequiresCondition: aot-age2-active || !aot-age2-active
+	WithIdleOverlay@tsremap:
+		RequiresCondition: !build-incomplete
+	WithIdleOverlay@tsroof:
+		RequiresCondition: !build-incomplete
+	WithIdleOverlay@tsroofremap:
+		RequiresCondition: !build-incomplete
+	WithIdleOverlay@tsblink:
+		RequiresCondition: !build-incomplete
+	WithMakeAnimation@ts:
+		RequiresCondition: aot-age2-active || !aot-age2-active
+
+aot-lite-nod-editor-age2:
+	Inherits: aot-lite-nod
+	-Buildable:
+	-WithSpriteBody@base:
+	-WithIdleOverlay@ROOF:
+	-WithMakeAnimation@base:
+	WithSpriteBody@ts:
+		RequiresCondition: aot-age2-active || !aot-age2-active
+	WithIdleOverlay@tsremap:
+		RequiresCondition: !build-incomplete
+	WithIdleOverlay@tsroof:
+		RequiresCondition: !build-incomplete
+	WithIdleOverlay@tsroofremap:
+		RequiresCondition: !build-incomplete
+	WithIdleOverlay@tsblink:
+		RequiresCondition: !build-incomplete
+	WithMakeAnimation@ts:
+		RequiresCondition: aot-age2-active || !aot-age2-active
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Ore Mine ===
@@ -293,6 +338,71 @@ FACT:
 	WithBuildingPlacedAnimation@td:
 		Body: body-td
 		RequiresCondition: aot-age1-active && !aot-age2-active
+
+# === Age of Tiberium (aotmod) - FACT Editor-Platzierer fuer Age-1/Age-2-Optik (2026-07-26) ===
+# FACT.GDI/FACT.NOD selbst zeigen im Karteneditor bereits korrekt die Age-0/RA-Optik (Default-
+# Zustand ohne Spieler-Techtree). Fuer Age-1 (TD) und Age-2 (TS) gab es GAR KEINEN Platzierer.
+# KEIN Buildable: FACT darf laut Bughistorie (fact-mcv-sprites.md #5) NIEMALS in einer Bau-
+# Queue erscheinen -- nur MCV ist kaufbar. Diese vier Aktoren sind daher bewusst NICHT
+# buildbar, rein zum gezielten Vorplatzieren im Karteneditor (bleiben aber voll funktions-
+# faehig als Construction Yard, falls ein Mapper sie tatsaechlich auf eine Karte setzt).
+aot-fact-gdi-editor-age1:
+	Inherits: FACT.GDI
+	-Buildable:
+	-WithSpriteBody@ra:
+	-WithMakeAnimation@ra:
+	-WithBuildingPlacedAnimation@ra:
+	WithSpriteBody@td:
+		RequiresCondition: !aot-age2-active
+	WithBuildingPlacedAnimation@td:
+		RequiresCondition: !aot-age2-active
+
+aot-fact-gdi-editor-age2:
+	Inherits: FACT.GDI
+	-Buildable:
+	-WithSpriteBody@ra:
+	-WithSpriteBody@td:
+	-WithMakeAnimation@ra:
+	-WithMakeAnimation@td:
+	-WithBuildingPlacedAnimation@ra:
+	-WithBuildingPlacedAnimation@td:
+	WithSpriteBody@ts:
+		RequiresCondition: aot-age2-active || !aot-age2-active
+	WithIdleOverlay@tsremap:
+		RequiresCondition: !build-incomplete
+	WithIdleOverlay@lights:
+		RequiresCondition: !build-incomplete
+	WithMakeAnimation@ts:
+		RequiresCondition: aot-age2-active || !aot-age2-active
+
+aot-fact-nod-editor-age1:
+	Inherits: FACT.NOD
+	-Buildable:
+	-WithSpriteBody@ra:
+	-WithMakeAnimation@ra:
+	-WithBuildingPlacedAnimation@ra:
+	WithSpriteBody@td:
+		RequiresCondition: !aot-age2-active
+	WithBuildingPlacedAnimation@td:
+		RequiresCondition: !aot-age2-active
+
+aot-fact-nod-editor-age2:
+	Inherits: FACT.NOD
+	-Buildable:
+	-WithSpriteBody@ra:
+	-WithSpriteBody@td:
+	-WithMakeAnimation@ra:
+	-WithMakeAnimation@td:
+	-WithBuildingPlacedAnimation@ra:
+	-WithBuildingPlacedAnimation@td:
+	WithSpriteBody@ts:
+		RequiresCondition: aot-age2-active || !aot-age2-active
+	WithIdleOverlay@tsremap:
+		RequiresCondition: !build-incomplete
+	WithIdleOverlay@lights:
+		RequiresCondition: !build-incomplete
+	WithMakeAnimation@ts:
+		RequiresCondition: aot-age2-active || !aot-age2-active
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - PYLE: RA Allied Barracks Sprites in Age 0, TD ab Age 1 ===
@@ -401,6 +511,11 @@ aot-pyle-age1:
 		Description: Trains infantry.
 	Tooltip:
 		Name: actor-pyle.name
+	-WithSpriteBody@ra:
+	-WithMakeAnimation@ra:
+	-WithBuildingPlacedAnimation@ra:
+	WithSpriteBody@td:
+		RequiresCondition: !aot-age2-active
 
 aot-pyle-age2:
 	Inherits: PYLE
@@ -421,6 +536,18 @@ aot-pyle-age2:
 		Description: Trains infantry.
 	Tooltip:
 		Name: actor-pyle.name
+	-WithSpriteBody@ra:
+	-WithSpriteBody@td:
+	-WithMakeAnimation@ra:
+	-WithMakeAnimation@td:
+	-WithBuildingPlacedAnimation@ra:
+	-WithBuildingPlacedAnimation@td:
+	WithSpriteBody@ts:
+		RequiresCondition: aot-age2-active || !aot-age2-active
+	WithIdleOverlay@tsremap:
+		RequiresCondition: !build-incomplete
+	WithIdleOverlay@tsblink:
+		RequiresCondition: !build-incomplete
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - HAND: RA Soviet Barracks Sprites in Age 0, TD ab Age 1 ===
@@ -523,6 +650,11 @@ aot-hand-age1:
 		Description: Trains infantry.
 	Tooltip:
 		Name: actor-hand.name
+	-WithSpriteBody@ra:
+	-WithMakeAnimation@ra:
+	-WithBuildingPlacedAnimation@ra:
+	WithSpriteBody@td:
+		RequiresCondition: !aot-age2-active
 
 aot-hand-age2:
 	Inherits: HAND
@@ -543,6 +675,18 @@ aot-hand-age2:
 		Description: Trains infantry.
 	Tooltip:
 		Name: actor-hand.name
+	-WithSpriteBody@ra:
+	-WithSpriteBody@td:
+	-WithMakeAnimation@ra:
+	-WithMakeAnimation@td:
+	-WithBuildingPlacedAnimation@ra:
+	-WithBuildingPlacedAnimation@td:
+	WithSpriteBody@ts:
+		RequiresCondition: aot-age2-active || !aot-age2-active
+	WithIdleOverlay@tsremap:
+		RequiresCondition: !build-incomplete
+	WithIdleOverlay@tsblink:
+		RequiresCondition: !build-incomplete
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Age-1-Marker ===
@@ -1241,6 +1385,10 @@ aot-atec-age1:
 		BuildLimit: 1
 		Icon: aot-age1-icon
 		Description: Advanced GDI research facility. Enables high-tier upgrades and satellite surveillance.
+	-WithSpriteBody@ra:
+	-WithMakeAnimation@ra:
+	WithSpriteBody@td:
+		RequiresCondition: !aot-age2-active
 
 aot-atec-age2:
 	Inherits: ATEC
@@ -1258,6 +1406,18 @@ aot-atec-age2:
 		BuildLimit: 1
 		Icon: aot-age2-icon
 		Description: Advanced GDI research facility. Enables high-tier upgrades and satellite surveillance.
+	-WithSpriteBody@ra:
+	-WithSpriteBody@td:
+	-WithMakeAnimation@ra:
+	-WithMakeAnimation@td:
+	WithSpriteBody@ts:
+		RequiresCondition: aot-age2-active || !aot-age2-active
+	WithIdleOverlay@remap:
+		RequiresCondition: aot-age2-active || !aot-age2-active
+	WithIdleOverlay@domepulse:
+		RequiresCondition: aot-age2-active || !aot-age2-active
+	WithMakeAnimation@ts:
+		RequiresCondition: aot-age2-active || !aot-age2-active
 # === Age of Tiberium (aotmod) - STEC (Soviet Tech Centre, NOD) ===
 # NOD-exklusives Tech-Gebäude. Sprite: RA Soviet Tech Centre (STEKMAKE-Frames).
 # Schaltet NOD-Tier-2-Upgrades frei (aot-stec Prerequisite).
@@ -1565,6 +1725,12 @@ aot-stec-age1:
 		BuildLimit: 1
 		Icon: aot-age1-icon
 		Description: Advanced NOD research facility. Enables high-tier NOD upgrades.
+	-WithSpriteBody@ra:
+	-WithMakeAnimation@ra:
+	WithSpriteBody@td:
+		RequiresCondition: !aot-age2-active
+	WithMakeAnimation@td:
+		RequiresCondition: !aot-age2-active
 
 aot-stec-age2:
 	Inherits: STEC
@@ -1582,6 +1748,18 @@ aot-stec-age2:
 		BuildLimit: 1
 		Icon: aot-age2-icon
 		Description: Advanced NOD research facility. Enables high-tier NOD upgrades.
+	-WithSpriteBody@ra:
+	-WithSpriteBody@td:
+	-WithMakeAnimation@ra:
+	-WithMakeAnimation@td:
+	WithSpriteBody@ts:
+		RequiresCondition: aot-age2-active || !aot-age2-active
+	WithIdleOverlay@tsremap:
+		RequiresCondition: aot-age2-active || !aot-age2-active
+	WithIdleOverlay@lights:
+		RequiresCondition: aot-age2-active || !aot-age2-active
+	WithMakeAnimation@ts:
+		RequiresCondition: aot-age2-active || !aot-age2-active
 # === Age of Tiberium (aotmod) - MSLO (Nuke Silo, NOD) ===
 # NOD-exklusives Superweapon-Gebäude (RA Nuclear Missile Silo, RA MSLO-Sprites).
 # Sichtbar ab Age 1, baubar sobald STEC + Radar Dome (anyhq) stehen.
@@ -1830,6 +2008,23 @@ aot-mslo-age2:
 		BuildLimit: 1
 		Icon: aot-age2-icon
 		Description: NOD superweapon facility. Comes with Mine Cluster Missile; Tiberium Missile and Atom Bomb unlock via separate upgrades.
+	-WithSpriteBody@ra:
+	-WithMakeAnimation@ra:
+	-WithSupportPowerActivationAnimation@ra:
+	WithSpriteBody@ts:
+		RequiresCondition: aot-age2-active || !aot-age2-active
+	WithSpriteBody@tsremap:
+		RequiresCondition: !build-incomplete
+	WithSpriteBody@tsdoor:
+		RequiresCondition: !build-incomplete
+	WithSpriteBody@tsdoorremap:
+		RequiresCondition: !build-incomplete
+	WithIdleOverlay@tsblink:
+		RequiresCondition: !build-incomplete
+	WithSupportPowerActivationAnimation@ts:
+		RequiresCondition: aot-age2-active || !aot-age2-active
+	WithSupportPowerActivationAnimation@tsremap:
+		RequiresCondition: !build-incomplete
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - MSLO Upgrades: Tiberium Missile (Age 2) + Atom Bomb (Age 3) ===
@@ -2026,6 +2221,9 @@ aot-hq-ion:
 		BuildPaletteOrder: 90
 		Prerequisites: vehicleproduction, ~techlevel.medium, ~!aot-age2, ~aot-ion-cannon-upgrade
 		Icon: aot-ion-icon
+	-WithSpriteBody@hq:
+	WithSpriteBody@eye:
+		RequiresCondition: !aot-age2-active
 
 aot-hq-base-age2:
 	Inherits: HQ
@@ -2037,6 +2235,14 @@ aot-hq-base-age2:
 		BuildPaletteOrder: 90
 		Prerequisites: vehicleproduction, ~aot-age2, ~!aot-ion-cannon-upgrade
 		Icon: aot-age2-icon
+	-WithSpriteBody@hq:
+	-WithSpriteBody@eye:
+	WithSpriteBody@ts:
+		RequiresCondition: aot-age2-active || !aot-age2-active
+	WithIdleOverlay@tsremap:
+		RequiresCondition: !build-incomplete
+	WithIdleOverlay@lights:
+		RequiresCondition: !build-incomplete
 
 aot-hq-ion-age2:
 	Inherits: HQ
@@ -2048,6 +2254,14 @@ aot-hq-ion-age2:
 		BuildPaletteOrder: 90
 		Prerequisites: vehicleproduction, ~aot-age2, ~aot-ion-cannon-upgrade
 		Icon: aot-ion-icon
+	-WithSpriteBody@hq:
+	-WithSpriteBody@eye:
+	WithSpriteBody@ts:
+		RequiresCondition: aot-age2-active || !aot-age2-active
+	WithIdleOverlay@tsremap:
+		RequiresCondition: !build-incomplete
+	WithIdleOverlay@lights:
+		RequiresCondition: !build-incomplete
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - NOD Radar (aot-nod-radar) ===
@@ -2192,6 +2406,10 @@ aot-nod-radar-age1:
 		Description: Provides radar and cloaked unit detection for NOD.
 	Tooltip:
 		Name: actor-aot-nod-radar.name
+	-WithSpriteBody@dome:
+	-WithMakeAnimation@dome:
+	WithSpriteBody@age1:
+		RequiresCondition: !aot-age2-active
 
 aot-nod-radar-age2:
 	Inherits: aot-nod-radar
@@ -2209,6 +2427,16 @@ aot-nod-radar-age2:
 		Description: Provides radar and cloaked unit detection for NOD.
 	Tooltip:
 		Name: actor-aot-nod-radar.name
+	-WithSpriteBody@dome:
+	-WithSpriteBody@age1:
+	-WithMakeAnimation@dome:
+	-WithMakeAnimation@age1:
+	WithSpriteBody@age2:
+		RequiresCondition: aot-age2-active || !aot-age2-active
+	WithSpriteBody@age2remap:
+		RequiresCondition: !build-incomplete
+	WithIdleOverlay@dish:
+		RequiresCondition: !build-incomplete
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Temple of Nod (TMPL): Age 1 Icon + Age 2+ TS NATMPL Sprite-Switch ===
@@ -2303,6 +2531,14 @@ aot-tmpl-age2:
 		Description: actor-tmpl.description
 	Tooltip:
 		Name: actor-tmpl.name
+	-WithSpriteBody@base:
+	-WithMakeAnimation@base:
+	WithSpriteBody@ts:
+		RequiresCondition: aot-age2-active || !aot-age2-active
+	WithSpriteBody@tsremap:
+		RequiresCondition: !build-incomplete
+	WithIdleOverlay@tslight:
+		RequiresCondition: !build-incomplete
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Age Upgrades (GDI/NOD Split) ===
@@ -3082,6 +3318,13 @@ aot-fix-age1:
 		Description: Repairs vehicles.
 	Tooltip:
 		Name: actor-fix.name
+	-WithSpriteBody@ra:
+	-WithMakeAnimation@ra:
+	-WithBuildingPlacedAnimation@ra:
+	WithSpriteBody@td:
+		RequiresCondition: !aot-fix-age2-active
+	WithBuildingPlacedAnimation@td:
+		RequiresCondition: !aot-fix-age2-active
 
 aot-fix-age2:
 	Inherits: FIX
@@ -3102,6 +3345,18 @@ aot-fix-age2:
 		Description: Repairs vehicles.
 	Tooltip:
 		Name: actor-fix.name
+	-WithSpriteBody@ra:
+	-WithSpriteBody@td:
+	-WithMakeAnimation@ra:
+	-WithMakeAnimation@td:
+	-WithBuildingPlacedAnimation@ra:
+	-WithBuildingPlacedAnimation@td:
+	WithSpriteBody@ts:
+		RequiresCondition: aot-fix-age2-active || !aot-fix-age2-active
+	WithIdleOverlay@tsremap:
+		RequiresCondition: !build-incomplete
+	WithMakeAnimation@ts:
+		RequiresCondition: aot-fix-age2-active || !aot-fix-age2-active
 
 aot-fix-age1-nod:
 	Inherits: FIX
@@ -3122,6 +3377,13 @@ aot-fix-age1-nod:
 		Description: Repairs vehicles.
 	Tooltip:
 		Name: actor-fix.name
+	-WithSpriteBody@ra:
+	-WithMakeAnimation@ra:
+	-WithBuildingPlacedAnimation@ra:
+	WithSpriteBody@td:
+		RequiresCondition: !aot-fix-age2-active
+	WithBuildingPlacedAnimation@td:
+		RequiresCondition: !aot-fix-age2-active
 
 aot-fix-age2-nod:
 	Inherits: FIX
@@ -3142,6 +3404,18 @@ aot-fix-age2-nod:
 		Description: Repairs vehicles.
 	Tooltip:
 		Name: actor-fix.name
+	-WithSpriteBody@ra:
+	-WithSpriteBody@td:
+	-WithMakeAnimation@ra:
+	-WithMakeAnimation@td:
+	-WithBuildingPlacedAnimation@ra:
+	-WithBuildingPlacedAnimation@td:
+	WithSpriteBody@ts:
+		RequiresCondition: aot-fix-age2-active || !aot-fix-age2-active
+	WithIdleOverlay@tsremap:
+		RequiresCondition: !build-incomplete
+	WithMakeAnimation@ts:
+		RequiresCondition: aot-fix-age2-active || !aot-fix-age2-active
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Shroud Generator (GDI, RA Gap Generator) ===
@@ -3402,6 +3676,15 @@ aot-nuke-age1:
 		Description: Generates power.
 	Tooltip:
 		Name: actor-nuke.name
+	# Fix (2026-07-26): Age-1 ist fuer DIESEN Proxy garantiert (map-platziert oder ueber
+	# die Queue gebaut, beides setzt Age-1 voraus). Der Age-1-Term wird aus der geerbten
+	# Sprite-Condition entfernt -> Editor-Vorschau + vorplatzierte Aktoren zeigen sofort
+	# den TD-Sprite. Age-2/Turbine bleiben live-gekoppelt (echtes Nachruesten der SELBEN
+	# Instanz funktioniert weiterhin unveraendert).
+	-WithSpriteBody@ra:
+	-WithMakeAnimation@ra:
+	WithSpriteBody@td:
+		RequiresCondition: !aot-age2-gdi && !aot-age2-nod && !aot-turbine-active
 
 aot-nuke-turbine:
 	Inherits: NUKE
@@ -3420,6 +3703,17 @@ aot-nuke-turbine:
 		Description: Generates power.
 	Tooltip:
 		Name: actor-nuke.name
+	# Fix (2026-07-26): Age-1 + Turbine-Upgrade sind fuer DIESEN Proxy garantiert.
+	# Beide Terme raus aus der geerbten Sprite-Condition -> sofort korrekter TD-Turbine-
+	# Sprite in Editor + vorplatziert. Age-2 bleibt live-gekoppelt (Nachruesten weiterhin ok).
+	-WithSpriteBody@ra:
+	-WithSpriteBody@td:
+	-WithMakeAnimation@ra:
+	-WithMakeAnimation@td:
+	WithSpriteBody@turbine:
+		RequiresCondition: !aot-age2-gdi
+	WithSpriteBody@turbineremap:
+		RequiresCondition: !aot-age2-gdi && !build-incomplete
 
 aot-nuke-age2:
 	Inherits: NUKE
@@ -3438,6 +3732,32 @@ aot-nuke-age2:
 		Description: Generates power.
 	Tooltip:
 		Name: actor-nuke.name
+	# Fix (2026-07-26): Age-2-GDI ist fuer DIESEN Proxy garantiert. Term raus aus allen
+	# Sprite-Conditions -> sofort korrekter TS-Sprite in Editor + vorplatziert. Turbine-
+	# Upgrade bleibt live-gekoppelt (Nachruesten von No-Turbine auf Turbine weiterhin ok).
+	-WithSpriteBody@ra:
+	-WithSpriteBody@td:
+	-WithSpriteBody@turbine:
+	-WithSpriteBody@turbineremap:
+	-WithSpriteBody@tsnod:
+	-WithIdleOverlay@tsnodrremap:
+	-WithIdleOverlay@tsnodlights:
+	-WithMakeAnimation@ra:
+	-WithMakeAnimation@td:
+	-WithMakeAnimation@tsnod:
+	-WithMakeAnimation@turbine:
+	WithSpriteBody@ts:
+		RequiresCondition: !aot-turbine-active
+	WithIdleOverlay@tsremap:
+		RequiresCondition: !aot-turbine-active && !build-incomplete
+	WithSpriteBody@tsturbine:
+		RequiresCondition: aot-turbine-active
+	WithIdleOverlay@tsturbineremap:
+		RequiresCondition: aot-turbine-active && !build-incomplete
+	WithIdleOverlay@tsturbinelights:
+		RequiresCondition: aot-turbine-active && !build-incomplete
+	WithMakeAnimation@ts:
+		RequiresCondition: !aot-turbine-active
 
 # NOD-Variante: eigenes Age-2-Icon (nuke_age2.png statt GDI-Turbine-Icon)
 # und NOD-Age2-Platzier-Preview (aot-age2-nod-idle statt GDI aot-age2-idle).
@@ -3458,6 +3778,31 @@ aot-nuke-age2-nod:
 		Description: Generates power.
 	Tooltip:
 		Name: actor-nuke.name
+	# Fix (2026-07-26): Age-2-NOD ist fuer DIESEN Proxy garantiert (kein weiterer
+	# Age-Zweig fuer NUKE-NOD). Tautologie (X || !X) statt leerer RequiresCondition,
+	# da ein komplett leerer Ausdruck beim Ruleset-Laden crasht (BooleanExpression
+	# wirft "Empty expression"). Wertet unter Editor-NoVariables UND live identisch true.
+	-WithSpriteBody@ra:
+	-WithSpriteBody@td:
+	-WithSpriteBody@turbine:
+	-WithSpriteBody@turbineremap:
+	-WithSpriteBody@ts:
+	-WithIdleOverlay@tsremap:
+	-WithSpriteBody@tsturbine:
+	-WithIdleOverlay@tsturbineremap:
+	-WithIdleOverlay@tsturbinelights:
+	-WithMakeAnimation@ra:
+	-WithMakeAnimation@td:
+	-WithMakeAnimation@ts:
+	-WithMakeAnimation@turbine:
+	WithSpriteBody@tsnod:
+		RequiresCondition: aot-age2-nod || !aot-age2-nod
+	WithIdleOverlay@tsnodrremap:
+		RequiresCondition: !build-incomplete
+	WithIdleOverlay@tsnodlights:
+		RequiresCondition: !build-incomplete
+	WithMakeAnimation@tsnod:
+		RequiresCondition: aot-age2-nod || !aot-age2-nod
 
 aot-nuke-turbine-age2:
 	Inherits: NUKE
@@ -3476,6 +3821,30 @@ aot-nuke-turbine-age2:
 		Description: Generates power.
 	Tooltip:
 		Name: actor-nuke.name
+	# Fix (2026-07-26): Age-2-GDI + Turbine-Upgrade sind fuer DIESEN Proxy garantiert,
+	# keine weitere Age-Stufe existiert fuer NUKE. Tautologie fuer den vollstaendig
+	# kollabierten Body (siehe Kommentar bei aot-nuke-age2-nod); Overlays behalten den
+	# echten, weiterhin live-relevanten build-incomplete-Term.
+	-WithSpriteBody@ra:
+	-WithSpriteBody@td:
+	-WithSpriteBody@turbine:
+	-WithSpriteBody@turbineremap:
+	-WithSpriteBody@ts:
+	-WithIdleOverlay@tsremap:
+	-WithSpriteBody@tsnod:
+	-WithIdleOverlay@tsnodrremap:
+	-WithIdleOverlay@tsnodlights:
+	-WithMakeAnimation@ra:
+	-WithMakeAnimation@td:
+	-WithMakeAnimation@ts:
+	-WithMakeAnimation@tsnod:
+	-WithMakeAnimation@turbine:
+	WithSpriteBody@tsturbine:
+		RequiresCondition: aot-turbine-active || !aot-turbine-active
+	WithIdleOverlay@tsturbineremap:
+		RequiresCondition: !build-incomplete
+	WithIdleOverlay@tsturbinelights:
+		RequiresCondition: !build-incomplete
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - NUK2: RA APWR vor Age 1, TD danach, NOD-only ===
@@ -3578,6 +3947,10 @@ aot-nuk2-age1:
 		Description: Generates more power than the standard Power Plant.
 	Tooltip:
 		Name: actor-nuk2.name
+	-WithSpriteBody@ra:
+	-WithMakeAnimation@ra:
+	WithSpriteBody@td:
+		RequiresCondition: !aot-age2-active
 
 aot-nuk2-age2:
 	Inherits: NUK2
@@ -3596,6 +3969,16 @@ aot-nuk2-age2:
 		Description: Generates more power than the standard Power Plant.
 	Tooltip:
 		Name: actor-nuk2.name
+	-WithSpriteBody@ra:
+	-WithSpriteBody@td:
+	-WithMakeAnimation@ra:
+	-WithMakeAnimation@td:
+	WithSpriteBody@ts:
+		RequiresCondition: aot-age2-active || !aot-age2-active
+	WithIdleOverlay@tsremap:
+		RequiresCondition: !build-incomplete
+	WithIdleOverlay@tslights:
+		RequiresCondition: !build-incomplete
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Turbine Technology Upgrade (GDI, Age 2) ===
@@ -3863,6 +4246,13 @@ aot-gun-laser:
 		BuildDuration: 960
 		Icon: gun-laser-icon
 		Description: actor-gun.description
+	-Armament@base:
+	-WithTurretAttackAnimation@base:
+	-WithSpriteTurret@base:
+	Armament@laser:
+		RequiresCondition: aot-gun-laser-active || !aot-gun-laser-active
+	WithSpriteTurret@laser:
+		RequiresCondition: !build-incomplete
 
 # === Age of Tiberium (aotmod) - Shipyard (aot-shipyard) ===
 # Wasser-Gebäude (TerrainTypes: Water). Basis ^BaseBuilding (CnC-Standard),
@@ -4369,6 +4759,11 @@ aot-silo-age1:
 		Queue: Building.GDI, Building.Nod
 		Description: actor-silo.description
 		Icon: aot-icon-age1
+	-WithSpriteBody@ra:
+	-WithIdleOverlay@raremap:
+	-WithMakeAnimation@ra:
+	WithResourceLevelSpriteBody@td:
+		RequiresCondition: !aot-age2-active
 
 aot-silo-age2:
 	Inherits: SILO
@@ -4387,6 +4782,15 @@ aot-silo-age2:
 		Queue: Building.GDI, Building.Nod
 		Description: actor-silo.description
 		Icon: aot-icon-age2
+	-WithSpriteBody@ra:
+	-WithIdleOverlay@raremap:
+	-WithResourceLevelSpriteBody@td:
+	-WithMakeAnimation@ra:
+	-WithMakeAnimation@td:
+	WithSpriteBody@ts:
+		RequiresCondition: aot-age2-active || !aot-age2-active
+	WithIdleOverlay@tsremap:
+		RequiresCondition: !build-incomplete
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - ORBC: Orbital Command (GDI, ab Age 2) ===
@@ -4708,6 +5112,22 @@ aot-slab-age2:
 		BuildLimit: 1
 		Icon: aot-age2-icon
 		Description: GDI research facility. Provides a prerequisite for future GDI technologies.
+	-WithSpriteBody@ra:
+	-WithMakeAnimation@ra:
+	WithSpriteBody@ts:
+		RequiresCondition: aot-age2-active || !aot-age2-active
+	WithSpriteBody@tsremap:
+		RequiresCondition: !build-incomplete
+	WithIdleOverlay@tslights:
+		RequiresCondition: !build-incomplete
+	WithIdleOverlay@tstower:
+		RequiresCondition: !build-incomplete
+	WithIdleOverlay@tstowerremap:
+		RequiresCondition: !build-incomplete
+	WithIdleOverlay@fsflameready:
+		RequiresCondition: aot-fs-matrix-ready && !build-incomplete
+	WithIdleOverlay@fsflameactive:
+		RequiresCondition: aot-fs-matrix-active && !build-incomplete
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Nod Shrine (aot-shrine) ===
@@ -5287,6 +5707,20 @@ aot-pillbox-guard:
 		Queue: Building.GDI
 		Icon: guard-icon
 		Description: Upgraded Pillbox with extended sight and weapon range. Holds up to 5 infantry, who fire out through the tower using their own weapons.
+	-Tooltip@normal:
+	-RevealsShroud@normal:
+	-WithSpriteBody@normal:
+	-WithMakeAnimation@normal:
+	Tooltip@guard:
+		RequiresCondition: aot-guard-tower-active || !aot-guard-tower-active
+	RevealsShroud@guard:
+		RequiresCondition: aot-guard-tower-active || !aot-guard-tower-active
+	RangeMultiplier:
+		RequiresCondition: aot-guard-tower-active || !aot-guard-tower-active
+	WithSpriteBody@guard:
+		RequiresCondition: aot-guard-tower-active || !aot-guard-tower-active
+	WithSpriteBody@guardremap:
+		RequiresCondition: aot-guard-tower-active || !aot-guard-tower-active
 
 # === Age of Tiberium (aotmod) - Guard Tower Upgrade (Phase 2, Age 1 + SLAB) ===
 aot-upgrade-guard-tower:
@@ -5450,6 +5884,15 @@ aot-wall-gdi-fs:
 		Prerequisites: anypower, fact, ~aot-firestorm-defense-upgrade
 		Icon: icon-fs
 		Description: Reinforced walls with sandbags and Firestorm-powergrid.
+	# Fix (2026-07-26): Firestorm-Defense-Upgrade ist fuer DIESEN Proxy garantiert.
+	# Term raus aus den Sprite-Conditions -- Editor-Vorschau + vorplatzierte Aktoren
+	# zeigen sofort den Firestorm-Zaun. aot-fs-matrix (Firestorm-Generator-Aktivierung,
+	# separates globales Toggle) bleibt echt live-gekoppelt.
+	-WithWallSpriteBody@base:
+	WithWallSpriteBody@fs:
+		RequiresCondition: !aot-fs-matrix
+	AotWithWallPulseBody@fspulse:
+		RequiresCondition: aot-fs-matrix
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Firestorm Defense Upgrade ===
@@ -5541,6 +5984,12 @@ aot-wall-nod-laser:
 		Icon: icon-laser
 		Description: Laser fence - stops all ground units and blocks most projectiles.
 	-Crushable:
+	# Fix (2026-07-26): Laser-Fence-Upgrade ist fuer DIESEN Proxy garantiert, kein
+	# weiteres Wall-Upgrade existiert danach. Tautologie (X || !X) statt leerer
+	# RequiresCondition -- ein komplett leerer Ausdruck crasht beim Ruleset-Laden.
+	-WithWallSpriteBody@base:
+	AotWithWallPulseBody@laser:
+		RequiresCondition: aot-laser-fence || !aot-laser-fence
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Fortified Foundation Upgrade ===
@@ -6022,6 +6471,15 @@ aot-ftur-toxic:
 		Queue: Building.Nod
 		Icon: toxic-icon
 		Description: RA Flame Tower upgraded with toxic weaponry. Short-range anti-infantry/vehicle defense.
+	-Tooltip@normal:
+	-Armament@flame:
+	-WithSpriteBody@flame:
+	Tooltip@toxic:
+		RequiresCondition: aot-ftur-toxic || !aot-ftur-toxic
+	Armament@toxic:
+		RequiresCondition: aot-ftur-toxic || !aot-ftur-toxic
+	WithSpriteBody@toxic:
+		RequiresCondition: aot-ftur-toxic || !aot-ftur-toxic
 
 # === Oil Pump (ARCO) UND Oil Derrick (V19): beide lassen beim Zerstoeren eine
 # 1000-Credits-Kiste in einer ZUFAELLIGEN, passierbaren Nachbarzelle fallen.
