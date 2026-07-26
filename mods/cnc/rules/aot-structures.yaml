@@ -4128,6 +4128,10 @@ aot-upgrade-gunboat-destroyer:
 # GUN fuer bereits gebaute Tuerme (1:1 das HTNK/LTNK-Muster).
 GUN:
 	-Buildable:
+	# User-Wunsch (2026-07-26): Verteidigungsgebaeude nicht durch Engineer/Saboteur einnehmbar.
+	# -Capturable: entfernt den von ^BaseBuilding geerbten Trait komplett -> gilt fuer BEIDE
+	# Proxy-Varianten (aot-gun-base/aot-gun-laser), da Capturable nicht pro Proxy gesetzt ist.
+	-Capturable:
 
 	GrantConditionOnPrerequisite@LASER:
 		Condition: aot-gun-laser-active
@@ -5359,6 +5363,8 @@ OBLI:
 		BuildPaletteOrder: 230
 		Prerequisites: ~aot-age3, aot-shrine, aot-laser-fence-upgrade
 		Queue: Building.Nod
+	# User-Wunsch (2026-07-26): nicht durch Engineer/Saboteur einnehmbar.
+	-Capturable:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - NOD SAM Site (RA-Import, 2026-07-05) ===
@@ -5380,6 +5386,10 @@ SAM:
 		# Prereq-String, den jedes NOD-Kraftwerk bereitstellt (Konvention im
 		# gesamten Mod, siehe z.B. GUN/NUK2). "aot-nod-radar" = NOD Radar Dome.
 		Prerequisites: anypower, aot-nod-radar
+
+	# User-Wunsch (2026-07-26): nicht durch Engineer/Saboteur einnehmbar (gilt fuer beide
+	# Upgrade-Zustaende, Bunkered/Cloaked sind Conditions auf demselben Aktor, kein Proxy-Split).
+	-Capturable:
 
 	# KRITISCH (Crash-Historie 2026-07-05, User-Funde: "sam hat mehrere Traits
 	# vom Typ AttackBase" / "Turreted: Sequence contains more than one matching
@@ -5564,6 +5574,9 @@ aot-pillbox:
 	# building-dead-sequence-crash.md - reiner Laufzeit-Crash, check-yaml
 	# meldet nur eine Warnung, keinen harten Fehler).
 	-WithDeathAnimation:
+	# User-Wunsch (2026-07-26): nicht durch Engineer/Saboteur einnehmbar (gilt fuer beide
+	# Proxy-Varianten aot-pillbox-base/aot-pillbox-guard, Capturable ist auf der Basis).
+	-Capturable:
 	# Guard Tower Upgrade (Phase 2, 2026-07-05): reine Namens-/Icon-Aenderung,
 	# Pillbox-Funktionalitaet (Cargo/AttackGarrisoned/Stats) bleibt unveraendert -
 	# 1:1 das FTUR-Toxic-Tower-Tooltip-Switch-Muster.
@@ -5767,6 +5780,8 @@ aot-upgrade-guard-tower:
 aot-fireposition:
 	Inherits: ^Support
 	Inherits@AUTOTARGET: ^AutoTargetAll
+	# User-Wunsch (2026-07-26): nicht durch Engineer/Saboteur einnehmbar.
+	-Capturable:
 	Tooltip:
 		Name: Fire Position
 	Valued:
