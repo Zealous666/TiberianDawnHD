@@ -5478,6 +5478,42 @@ SAM:
 		CloakSound: cloak5.aud
 		UncloakSound: cloak5.aud
 		PauseOnCondition: aot-sam-damaged || lowpower
+
+# === Age of Tiberium (aotmod) - SAM Editor-Platzierer fuer Bunkered/Cloak (2026-07-26) ===
+# SAM selbst zeigt im Editor korrekt den RA-Default-Look (Bunkered/Cloak sind Upgrades, die
+# beim gebauten SAM live nachgeruestet werden -- kein Proxy-Split, absichtlich unveraendert).
+# Fuer die Upgrade-Zustaende gab es aber GAR KEINEN Platzierer. KEIN Buildable: erscheinen NIE
+# in der Bau-Queue, rein zum gezielten Vorplatzieren im Karteneditor (bleiben aber voll
+# funktionsfaehig, inkl. echtem Cloak-Verhalten, falls tatsaechlich auf eine Karte platziert).
+aot-sam-editor-bunkered:
+	Inherits: SAM
+	-Buildable:
+	-WithSpriteBody@ra:
+	-WithSpriteTurret@ra:
+	-Armor@base:
+	WithEmbeddedTurretSpriteBody:
+		RequiresCondition: aot-sam-bunkered || !aot-sam-bunkered
+	Armor@bunkered:
+		RequiresCondition: aot-sam-bunkered || !aot-sam-bunkered
+
+aot-sam-editor-cloak:
+	Inherits: SAM
+	-Buildable:
+	Cloak:
+		RequiresCondition: aot-sam-cloak-active || !aot-sam-cloak-active
+
+aot-sam-editor-bunkered-cloak:
+	Inherits: SAM
+	-Buildable:
+	-WithSpriteBody@ra:
+	-WithSpriteTurret@ra:
+	-Armor@base:
+	WithEmbeddedTurretSpriteBody:
+		RequiresCondition: aot-sam-bunkered || !aot-sam-bunkered
+	Armor@bunkered:
+		RequiresCondition: aot-sam-bunkered || !aot-sam-bunkered
+	Cloak:
+		RequiresCondition: aot-sam-cloak-active || !aot-sam-cloak-active
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - SAM Upgrades: Bunkered (Age 1) + Cloak (Age 2) ===
