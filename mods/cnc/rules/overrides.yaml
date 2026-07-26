@@ -7,6 +7,16 @@
 # Movement-Layer nie betreten -> GrantConditionOnJumpjetLayer feuert nie -> Hover-Anim fehlt.
 # NUR auf World (nicht EditorWorld) erlaubt, deshalb eigener Block statt ^BaseWorld.
 World:
+	# === Age of Tiberium (aotmod) - Tiberium/BlueTiberium auch auf Clear.Snow platzierbar ===
+	# AOT_WINTER hat fuer die aus AOT_SNOW uebernommenen Zellen einen eigenen Terrain-Typ
+	# "Clear.Snow" (siehe aot-winter.yaml, Minimap-Farbtrennung). Ohne diese Ergaenzung würde
+	# die Engine-Basis (AllowedTerrainTypes: Clear, Road) Tiberium dort nicht mehr zulassen.
+	ResourceLayer:
+		ResourceTypes:
+			Tiberium:
+				AllowedTerrainTypes: Clear, Road, Clear.Snow
+			BlueTiberium:
+				AllowedTerrainTypes: Clear, Road, Clear.Snow
 	JumpjetActorLayer:
 	# === Age of Tiberium (aotmod) - SubterraneanActorLayer: PFLICHT-World-Trait fuer SubterraneanLocomotor ===
 	# Analog zu JumpjetActorLayer. Ohne diesen World-Trait wird der Subterranean-Movement-Layer nie
@@ -23,6 +33,17 @@ World:
 		# Originalaktoren (bridge1-4) + AoT-TEMPERAT-Varianten mit korrekten Template-IDs
 		# + zerstörbare Fluss-Brücken (aot-br1/br2/br3, Templates 235-246, AOT_TEMPERAT & AOT_SNOW)
 		Bridges: bridge1, bridge2, bridge3, bridge4, aot-tem-bridge1, aot-tem-bridge2, aot-br1, aot-br2, aot-br3
+
+# === Age of Tiberium (aotmod) - Editor-Pendant zur Clear.Snow-Ressourcenfreischaltung oben ===
+EditorWorld:
+	EditorResourceLayer:
+		ResourceTypes:
+			Tiberium:
+				AllowedTerrainTypes: Clear, Road, Clear.Snow
+			BlueTiberium:
+				AllowedTerrainTypes: Clear, Road, Clear.Snow
+	BuildableTerrainOverlay:
+		AllowedTerrainTypes: Clear, Road, Clear.Snow
 
 # === Age of Tiberium (aotmod) - EdibleByLeap + Heal-TargetType für alle Infanterie ===
 ^Infantry:
@@ -418,26 +439,41 @@ RMBO:
 		Crushes: crate, mine
 		TerrainSpeeds:
 			Ice: 85
+			Clear.Snow: 100
 	Locomotor@CHEM:
 		Crushes: crate, mine
 		TerrainSpeeds:
 			Ice: 85
+			Clear.Snow: 100
 	Locomotor@WHEELED:
 		Crushes: crate, mine
 		TerrainSpeeds:
 			Ice: 90
+			Clear.Snow: 100
 	Locomotor@HEAVYWHEELED:
 		Crushes: crate, infantry, mine
 		TerrainSpeeds:
 			Ice: 90
+			Clear.Snow: 100
 	Locomotor@TRACKED:
 		Crushes: wall, crate, infantry, mine
 		TerrainSpeeds:
 			Ice: 95
+			Clear.Snow: 100
 	Locomotor@HEAVYTRACKED:
 		Crushes: wall, heavywall, crate, infantry, mine
 		TerrainSpeeds:
 			Ice: 95
+			Clear.Snow: 100
+	Locomotor@LANDINGCRAFT:
+		TerrainSpeeds:
+			Clear.Snow: 100
+	Locomotor@CRITTER:
+		TerrainSpeeds:
+			Clear.Snow: 100
+	Locomotor@VISC:
+		TerrainSpeeds:
+			Clear.Snow: 100
 	# Hover gleitet ueber Eis wie ueber Wasser.
 	# Land-Malus abgeschwaecht: Engine-Original hat 33 auf Clear/Rough/Road/Tiberium/
 	# BlueTiberium/River -> hier auf 75 angehoben (aot-transport-hover, Speed 115:
@@ -448,6 +484,7 @@ RMBO:
 		TerrainSpeeds:
 			Ice: 100
 			Clear: 75
+			Clear.Snow: 75
 			Rough: 75
 			Road: 75
 			Tiberium: 75
@@ -459,6 +496,7 @@ RMBO:
 		Crushes: crate, mine
 		TerrainSpeeds:
 			Clear: 100
+			Clear.Snow: 100
 			Rough: 88
 			Road: 125
 			Bridge: 125
@@ -474,6 +512,7 @@ RMBO:
 		Crushes: crate, mine
 		TerrainSpeeds:
 			Clear: 100
+			Clear.Snow: 100
 			Rough: 88
 			Road: 125
 			Bridge: 125
@@ -511,6 +550,7 @@ RMBO:
 		JumpjetTransitionTerrainTypes: Rock, River
 		TerrainSpeeds:
 			Clear: 100
+			Clear.Snow: 100
 			Rough: 89
 			Road: 111
 			Bridge: 111
@@ -532,6 +572,7 @@ RMBO:
 		Crushes: crate, mine
 		TerrainSpeeds:
 			Clear: 80
+			Clear.Snow: 80
 			Road: 100
 			Rough: 65
 			Tiberium: 70
