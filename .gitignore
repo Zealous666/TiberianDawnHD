@@ -105,6 +105,9 @@ engine/**
 !engine/OpenRA.Mods.Cnc/Traits/Render/
 !engine/OpenRA.Mods.Cnc/Traits/Render/WithCargo.cs
 !engine/OpenRA.Mods.Common/Traits/Cargo.cs
+!engine/OpenRA.Mods.Common/Scripting/
+!engine/OpenRA.Mods.Common/Scripting/Properties/
+!engine/OpenRA.Mods.Common/Scripting/Properties/AotFirestormMatrixProperties.cs
 
 # aotmod: AI Operations Framework (Army/Kampf-KI, 2026-07-21)
 !engine/OpenRA.Mods.Common/Traits/BotModules/
