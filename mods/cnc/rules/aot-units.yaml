@@ -1567,6 +1567,14 @@ LTNK:
 # danach zeigt WithSpriteBody den buried-Frame (24) als idle.
 aot-ltnk-deployed:
 	Inherits: ^Building
+	# Fehlte bisher (User-Fund 2026-07-26): GUN erbt ^AutoTargetGround (structures.yaml)
+	# und feuert dadurch automatisch auf Feinde in Reichweite. aot-ltnk-deployed hatte nur
+	# ^Building -> Turreted/AttackTurreted/Armament sind zwar vorhanden und funktionieren bei
+	# manuellen Befehlen, aber ohne AutoTarget dreht sich der Turm nie von selbst und es wird
+	# nie automatisch geschossen. Faellt bei spielergebauten Einheiten kaum auf (Spieler gibt
+	# Befehle), macht aber JEDE map-platzierte Instanz mit KI-losem Owner (z.B. "Creeps" auf
+	# Hammerfest) komplett passiv.
+	Inherits@AUTOTARGET: ^AutoTargetGround
 
 	Building:
 		Footprint: x
