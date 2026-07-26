@@ -3325,6 +3325,8 @@ aot-fix-age1:
 		RequiresCondition: !aot-fix-age2-active
 	WithBuildingPlacedAnimation@td:
 		RequiresCondition: !aot-fix-age2-active
+	WithResupplyAnimation:
+		Body: body-td
 
 aot-fix-age2:
 	Inherits: FIX
@@ -3357,6 +3359,8 @@ aot-fix-age2:
 		RequiresCondition: !build-incomplete
 	WithMakeAnimation@ts:
 		RequiresCondition: aot-fix-age2-active || !aot-fix-age2-active
+	WithResupplyAnimation:
+		Body: body-ts
 
 aot-fix-age1-nod:
 	Inherits: FIX
@@ -3384,6 +3388,8 @@ aot-fix-age1-nod:
 		RequiresCondition: !aot-fix-age2-active
 	WithBuildingPlacedAnimation@td:
 		RequiresCondition: !aot-fix-age2-active
+	WithResupplyAnimation:
+		Body: body-td
 
 aot-fix-age2-nod:
 	Inherits: FIX
@@ -3416,6 +3422,8 @@ aot-fix-age2-nod:
 		RequiresCondition: !build-incomplete
 	WithMakeAnimation@ts:
 		RequiresCondition: aot-fix-age2-active || !aot-fix-age2-active
+	WithResupplyAnimation:
+		Body: body-ts
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Shroud Generator (GDI, RA Gap Generator) ===
