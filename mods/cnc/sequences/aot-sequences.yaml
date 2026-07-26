@@ -1981,6 +1981,9 @@ icon:
 	aot-iron-dome:
 		Filename: aot-iron-dome-icon.png
 		Length: 1
+	aot-forward-hq:
+		Filename: aot-forward-hq-icon.png
+		Length: 1
 	aot-orcatransport:
 		Filename: aot-orcatransport-icon.png
 		Length: 1
@@ -4825,6 +4828,19 @@ aot-bridgehut:
 		Offset: 0, 0
 
 # === Iron Dome (RA Remaster) ===
+# FCOM.ZIP: 2 Frames (fcom-0000 = idle, fcom-0001 = damaged). Kein FCOMMAKE.ZIP im MEG.
+# Pfad: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\FCOM.ZIP
+aot-forward-hq:
+	Defaults:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\FCOM.ZIP
+	idle:
+		Length: 1
+	damaged-idle:
+		Start: 1
+		Length: 1
+	make:
+		Length: 1
+
 # IRON.ZIP: Idle-Animation (Pfad in MEG: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\IRON.ZIP)
 # IRONMAKE.ZIP: Build-Animation (Pfad: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\IRONMAKE.ZIP)
 # Kein klassisches SHP-Fallback -> Remaster-only Sprite aus TEXTURES_RA_SRGB.MEG.

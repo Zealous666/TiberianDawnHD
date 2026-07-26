@@ -6562,6 +6562,59 @@ OREREF:
 		OwnerType: InternalName
 		InternalOwner: Neutral
 
+# === Forward HQ (Allied RA FCOM): neutral-capturable Struktur mit Paratrooper-Drop-Superpower ===
+# Sprite: FCOM.ZIP (Remaster, TEXTURES_RA_SRGB.MEG), 2 Frames (idle + damaged).
+# FCOMMAKE.ZIP existiert nicht im MEG -> make = 1-Frame-Dummy aus idle.
+# Kein WithDeathAnimation (kein "dead"-Frame) -> -WithDeathAnimation: notwendig.
+# Nach Einnahme: ParatroopersPower wirft 5 Gunner + 3 Rocket Troopers (je 2x befoerdert) ab.
+# Cooldown 5 Minuten (7500 Ticks bei 25fps/Normal-Speed).
+aot-forward-hq:
+	Inherits: ^TechBuilding
+	Building:
+		Footprint: xx xx __
+		Dimensions: 2,3
+		LocalCenterOffset: 0,-512,0
+	Selectable:
+		Bounds: 2048, 3072
+	Health:
+		HP: 50000
+	Armor:
+		Type: Wood
+	Tooltip:
+		Name: actor-aot-forward-hq.name
+	MapEditorData:
+		Categories: Civilians
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral
+	RevealsShroud:
+		Range: 4c0
+	ParatroopersPower@PARADROP:
+		OrderName: AotParatrooperDrop
+		Description: actor-aot-forward-hq.description
+		Icon: aot-forward-hq
+		SupportPowerPaletteOrder: 71
+		EndChargeSpeechNotification: UnitReady
+		SelectTargetSpeechNotification: SelectTarget
+		EndChargeTextNotification: notification-reinforcements-ready
+		SelectTargetTextNotification: notification-select-target
+		ReinforcementsArrivedSpeechNotification: Reinforce
+		ReinforcementsArrivedTextNotification: notification-reinforcements-have-arrived
+		ChargeInterval: 15000
+		UnitType: aot-badr-para
+		SquadSize: 2
+		SquadOffset: -1536, 1536, 0
+		DropItems: aot-para-gunner, aot-para-gunner, aot-para-gunner, aot-para-gunner, aot-para-gunner, aot-para-rocketeer, aot-para-rocketeer, aot-para-rocketeer
+		AllowImpassableCells: true
+		DisplayBeacon: true
+		BeaconPoster: airstrike
+		BeaconPosterPalette: beaconposter
+		DisplayRadarPing: true
+		ArrowSequence: arrow
+		ClockSequence: clock
+		CircleSequence: circles
+		UseDirectionalTarget: true
+		DirectionArrowAnimation: airstrikedirection
+
 # === Iron Dome (Soviet RA): neutral-capturable Struktur mit Iron-Dome-Superpower ===
 # Sprite: IRON.ZIP (Remaster, TEXTURES_RA_SRGB.MEG), 8 Idle-Frames.
 # Buildphase: IRONMAKE.ZIP (4 Frames), wird als make-Sequenz verwendet.

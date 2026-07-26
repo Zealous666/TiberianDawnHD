@@ -242,6 +242,16 @@ actor-aot-iron-dome =
     .name = Iron Dome Experimental Installation
     .description = Iron Dome
 
+notification-reinforcements-ready = Reinforcements ready.
+
+actor-aot-forward-hq =
+    .name = Forward HQ
+    .description = Paratrooper Drop
+
+        Deploys 5 battle-hardened Gunners and 3 Rocket Troopers behind enemy lines via plane.
+
+        All troops arrive at veteran rank.
+
 meta-ant-generic-name = Ant
 
 actor-aot-ant =

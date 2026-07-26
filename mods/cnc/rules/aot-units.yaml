@@ -2268,6 +2268,43 @@ aot-badr:
 		StartColorAlpha: 128
 	-MapEditorData:
 
+# === Age of Tiberium (aotmod) - aot-badr-para: Badger für ParatroopersPower (Forward HQ) ===
+# Identisch zu aot-badr, aber kein AttackBomber/AmmoPool/Armament — stattdessen ParaDrop+Cargo.
+# ParatroopersPower erwartet Cargo + ParaDrop auf dem Flugzeug (AirstrikePower nicht).
+aot-badr-para:
+	Inherits: aot-badr
+	-AttackBomber:
+	-AmmoPool:
+	-Armament:
+	ParaDrop:
+		DropRange: 4c0
+		ChuteSound: aot-chute1.aud
+	Cargo:
+		MaxWeight: 10
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Paratrooper-Proxy-Infanterie (Forward HQ Superpower) ===
+# Erben von GDI-Infanterie, sind aber NICHT baubar. Haben Veteran-Level-2-Stats
+# eingebaut (FirepowerMultiplier 125 = +25%, DamageMultiplier 80 = -20% Treffer-Schaden).
+aot-para-gunner:
+	Inherits: aot-e1-gdi
+	-Buildable:
+	-MapEditorData:
+	GrantCondition@PARA-RANK-1:
+		Condition: rank-veteran
+	GrantCondition@PARA-RANK-2:
+		Condition: rank-veteran
+
+aot-para-rocketeer:
+	Inherits: aot-e3-gdi
+	-Buildable:
+	-MapEditorData:
+	GrantCondition@PARA-RANK-1:
+		Condition: rank-veteran
+	GrantCondition@PARA-RANK-2:
+		Condition: rank-veteran
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - aot-banshee: Banshee Fighter (NOD Banshee-Airstrike) ===
 # Ersetzt die MiGs in der Banshee-Airstrike-Version. Sprite: gebackenes TS-Voxel scrin.vxl
 # (Zwei-Layer body + Player-Color-Remap). AttackBomber feuert Burst 3 = 3 Salven pro Anflug,
