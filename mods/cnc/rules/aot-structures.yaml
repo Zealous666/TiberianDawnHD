@@ -5558,7 +5558,6 @@ aot-upgrade-avatar-laser:
 # bereits ValidTargets inkl. Air) auch automatisch Luftziele anvisiert.
 aot-pillbox:
 	Inherits: ^Support
-	Inherits@IDISABLE: ^DisabledOverlay
 	Inherits@AUTOTARGET: ^AutoTargetAll
 	# Custom RA-Sprite ohne "dead"-Rubble-Frame -> WithDeathAnimation (von
 	# ^Support/^BaseBuilding geerbt) wuerde beim Zerstoeren crashen (siehe
@@ -5661,6 +5660,9 @@ aot-pillbox:
 	Cargo:
 		Types: Infantry
 		MaxWeight: 5
+		# Insassen steigen beim Zerstoeren des Turms aus (Engine-Default: false =
+		# sie sterben mit). Ausstieg nur wenn die Zelle betretbar ist, sonst Tod.
+		EjectOnDeath: true
 	WithCargoPipsDecoration:
 		Position: BottomLeft
 		Margin: 4, 3
@@ -5668,13 +5670,15 @@ aot-pillbox:
 	# 6 Fire-Ports rundherum (identische Geometrie wie RAs PBOX) - je ~60 Grad
 	# Sichtkegel, deckt alle Richtungen ab.
 	AttackGarrisoned:
-		PauseOnCondition: lowpower || build-incomplete
+		# Pillbox braucht KEINE Power und feuert auch bei Low-Power weiter
+		# (User 2026-07-26, analog Fire Position).
+		PauseOnCondition: build-incomplete
 		Armaments: garrisoned
 		PortOffsets: 384,0,128, 224,-341,128, -224,-341,128, -384,0,128, -224,341,128, 224,341,128
 		PortYaws: 0, 176, 341, 512, 682, 853
 		PortCones: 88, 88, 88, 88, 88, 88
 	Power:
-		Amount: -20
+		Amount: 0
 	# RenderDetectionCircle (von ^Support geerbt) verlangt DetectCloaked -
 	# ohne das crasht der Aktor beim Laden ("not constructible").
 	DetectCloaked:
