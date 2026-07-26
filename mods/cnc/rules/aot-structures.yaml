@@ -202,6 +202,8 @@ aot-lite-nod:
 aot-lite-gdi-editor-age2:
 	Inherits: aot-lite-gdi
 	-Buildable:
+	RenderSprites:
+		Image: lite-gdi
 	-WithSpriteBody@base:
 	-WithIdleOverlay@ROOF:
 	-WithMakeAnimation@base:
@@ -221,6 +223,8 @@ aot-lite-gdi-editor-age2:
 aot-lite-nod-editor-age2:
 	Inherits: aot-lite-nod
 	-Buildable:
+	RenderSprites:
+		Image: lite-nod
 	-WithSpriteBody@base:
 	-WithIdleOverlay@ROOF:
 	-WithMakeAnimation@base:
@@ -349,6 +353,8 @@ FACT:
 aot-fact-gdi-editor-age1:
 	Inherits: FACT.GDI
 	-Buildable:
+	RenderSprites:
+		Image: fact
 	-WithSpriteBody@ra:
 	-WithMakeAnimation@ra:
 	-WithBuildingPlacedAnimation@ra:
@@ -360,6 +366,8 @@ aot-fact-gdi-editor-age1:
 aot-fact-gdi-editor-age2:
 	Inherits: FACT.GDI
 	-Buildable:
+	RenderSprites:
+		Image: fact
 	-WithSpriteBody@ra:
 	-WithSpriteBody@td:
 	-WithMakeAnimation@ra:
@@ -378,6 +386,8 @@ aot-fact-gdi-editor-age2:
 aot-fact-nod-editor-age1:
 	Inherits: FACT.NOD
 	-Buildable:
+	RenderSprites:
+		Image: fact
 	-WithSpriteBody@ra:
 	-WithMakeAnimation@ra:
 	-WithBuildingPlacedAnimation@ra:
@@ -389,6 +399,8 @@ aot-fact-nod-editor-age1:
 aot-fact-nod-editor-age2:
 	Inherits: FACT.NOD
 	-Buildable:
+	RenderSprites:
+		Image: fact
 	-WithSpriteBody@ra:
 	-WithSpriteBody@td:
 	-WithMakeAnimation@ra:
@@ -5488,6 +5500,8 @@ SAM:
 aot-sam-editor-bunkered:
 	Inherits: SAM
 	-Buildable:
+	RenderSprites:
+		Image: sam
 	-WithSpriteBody@ra:
 	-WithSpriteTurret@ra:
 	-Armor@base:
@@ -5499,12 +5513,16 @@ aot-sam-editor-bunkered:
 aot-sam-editor-cloak:
 	Inherits: SAM
 	-Buildable:
+	RenderSprites:
+		Image: sam
 	Cloak:
 		RequiresCondition: aot-sam-cloak-active || !aot-sam-cloak-active
 
 aot-sam-editor-bunkered-cloak:
 	Inherits: SAM
 	-Buildable:
+	RenderSprites:
+		Image: sam
 	-WithSpriteBody@ra:
 	-WithSpriteTurret@ra:
 	-Armor@base:
