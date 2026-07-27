@@ -17,6 +17,20 @@
 		Name: aot-ts-isosno
 		Filename: aot-ts-isosno.pal
 
+# WICHTIG: engine/mods/cnc/rules/palettes.yaml registriert `RotationPaletteEffect@water` OHNE
+# `Palettes:`-Filter -> wirkt per Default auf ALLE geladenen Paletten ausser `ExcludePalettes`
+# (aktuell nur "effect, chrome"). Der Trait rotiert Index 32-38 kontinuierlich (klassischer
+# TD/RA-Wasser-Schimmer) - ohne Ausschluss faerbt das jeden Pixel unserer neuen aot-ts-isotem/
+# aot-ts-isosno-Paletten in diesem Indexbereich staendig um. TS-Gebaeude-SHPs nutzen genau
+# diesen Bereich fuer Schattierungen/Fenster -> sah wie ein Sequenz-Loop aus, war aber reine
+# Palette-Rotation (Sprite-Frame bleibt korrekt statisch bei Length: 1). Fix: unsere beiden
+# Paletten zur ExcludePalettes-Liste hinzufuegen (komplette Liste, da Override ersetzt statt
+# mergt).
+^Palettes:
+	RotationPaletteEffect@water:
+		ExcludePalettes: effect, chrome, aot-ts-isotem, aot-ts-isosno
+		RotationBase: 32
+
 # === Age of Tiberium (aotmod) - TS Civilian Buildings (CA-Serie) ===
 # Normal-Instanz (Temperate-Look): AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
 # Snow-Instanz (separater Aktor, wie T01/T01-Snow): AOT_WINTER, AOT_SNOW
