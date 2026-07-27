@@ -6595,6 +6595,10 @@ ARCO:
 		AreaTypes: building
 
 V19:
+	# Einkommen erhoeht 10 -> 25 (User-Wunsch 2026-07-27).
+	CashTrickler:
+		Amount: 25
+		RequiresCondition: enabled
 	AotDropActorOnDeath:
 		Actor: OILCRATE1000
 		Range: 1

@@ -69,3 +69,15 @@ World:
 	Targetable:
 		TargetTypes: Trees
 	HitShape:
+
+# T03.Transformable/T13.Transformable mutieren zu Blossom Trees (TransformsNearResources),
+# sobald Tiberium angrenzt. Default-Delay war 1000-3000 Ticks (= 40-120s bei Timestep 40ms) -
+# viel zu schnell. User-Wunsch (2026-07-27): fruehestens nach 10 Minuten. 10min = 600s / 0.04s
+# pro Tick = 15000 Ticks Minimum, mit etwas Streuung bis 20000 (~13,3min).
+T03.Transformable:
+	TransformsNearResources:
+		Delay: 15000, 20000
+
+T13.Transformable:
+	TransformsNearResources:
+		Delay: 15000, 20000
