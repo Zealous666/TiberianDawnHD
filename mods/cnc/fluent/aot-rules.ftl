@@ -266,6 +266,9 @@ actor-aot-scoutant =
 actor-aot-ant-spawner =
     .name = Ant Nest
 
+actor-aot-light-system =
+    .name = Light System (Day/Night Cycle)
+
 actor-aot-foundation =
     .name = Fortified Foundation
     .description = Reinforced foundation plating. Prevents subterranean units from burrowing in or surfacing on it. Cannot be destroyed or sold.

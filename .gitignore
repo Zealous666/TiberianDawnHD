@@ -130,6 +130,13 @@ engine/**
 !engine/OpenRA.Mods.Common/Traits/AotAntSpawner.cs
 !engine/OpenRA.Mods.Common/Traits/AotAntWander.cs
 !engine/OpenRA.Mods.Common/Traits/Buildings/Building.cs
+# Lighting-System (Tag/Nacht-Zyklus + lokale Lichtquellen, 2026-07-26)
+!engine/OpenRA.Mods.Cnc/Traits/AotDayNightCycle.cs
+!engine/OpenRA.Mods.Cnc/Traits/AotResourceLighting.cs
+!engine/OpenRA.Mods.Cnc/Traits/AotVeinLighting.cs
+!engine/OpenRA.Mods.Common/Traits/TerrainLightSource.cs
+!engine/OpenRA.Mods.Common/Traits/World/
+!engine/OpenRA.Mods.Common/Traits/World/TerrainLighting.cs
 # Engine-Regel-Patches (AOT-Paletten, BuildPaletteOrder, HTNK, hover/mine-Loko, DroneExplode)
 !engine/mods/cnc/rules/
 !engine/mods/cnc/rules/defaults.yaml

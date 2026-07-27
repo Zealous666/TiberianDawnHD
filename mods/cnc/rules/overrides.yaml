@@ -442,6 +442,23 @@ RMBO:
 ^BaseWorld:
 	-TerrainRenderer:
 	RemasterTerrainRenderer:
+	# === Age of Tiberium (aotmod) - Lighting-System (2026-07-26) ===
+	# Weltweiter Beleuchtungs-Trait: liefert den globalen Tint (vom Tag/Nacht-Zyklus
+	# aot-light-system gesteuert) UND nimmt lokale Lichtquellen (TerrainLightSource) auf.
+	# Defaults hier = voll neutral (1/1/1, Intensity 1) -> ohne platziertes aot-light-system
+	# sieht eine Karte exakt aus wie vorher, es gibt KEINE stille Verdunkelung.
+	# Auf ^BaseWorld (statt World:), damit auch die EditorWorld ihn hat -- TerrainLightSource
+	# ruft beim Platzieren im Editor WorldActor.Trait<TerrainLighting>() auf und crasht sonst.
+	# Gerendert wird ohne gebackene Assets: RemasterTerrainRenderer schreibt seine Kacheln
+	# durch TerrainSpriteLayer (Tint pro Vertex, GPU interpoliert weich ueber die Zelle),
+	# Aktoren/Voxel sampeln TintAt live pro Frame (SpriteRenderable/ModelRenderable).
+	TerrainLighting:
+		Intensity: 1.0
+		RedTint: 1.0
+		GreenTint: 1.0
+		BlueTint: 1.0
+		# Bin-Groesse der Lichtquellen-Partitionierung in Zellen (Nachbarschaftssuche).
+		BinSize: 10
 	# === Age of Tiberium (aotmod) - Mine Cluster Missile: "mine" CrushClass für alle Boden-Loko ===
 	# Ohne das kann in diesem (TD-basierten) Mod NIEMAND über eine Mine laufen — die cnc-Loko-Vorlagen
 	# kannten "mine" als CrushClass bisher gar nicht (nur RA's eigene Loko-Vorlagen hatten das).

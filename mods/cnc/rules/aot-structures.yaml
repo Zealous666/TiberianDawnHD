@@ -5653,6 +5653,13 @@ aot-pillbox:
 	GrantConditionOnPrerequisite@GUARDTOWER:
 		Condition: aot-guard-tower-active
 		Prerequisites: aot-guard-tower-upgrade
+	# Camo-Pillbox-Upgrade (2026-07-27): Ausschluss-Upgrade zum Guard Tower -
+	# entweder/oder, siehe ~!-Kreuzverweise auf den beiden Upgrade-Aktoren
+	# weiter unten. Reine Namens-/Sprite-/Cloak-Aenderung, Cargo/AttackGarrisoned
+	# bleiben unveraendert (1:1 dasselbe Muster wie Guard Tower).
+	GrantConditionOnPrerequisite@CAMOPILLBOX:
+		Condition: aot-camo-pillbox-active
+		Prerequisites: aot-camo-pillbox-upgrade
 	# "-Tooltip:" legitim: die unbenannte Tooltip-Instanz kommt von ^Building
 	# (GenericName: meta-building-generic-name), nicht aus dieser Datei -
 	# ohne diese Entfernung bleibt sie ohne Name (FieldLoader.Require) zurueck
@@ -5660,10 +5667,13 @@ aot-pillbox:
 	-Tooltip:
 	Tooltip@normal:
 		Name: Pillbox
-		RequiresCondition: !aot-guard-tower-active
+		RequiresCondition: !aot-guard-tower-active && !aot-camo-pillbox-active
 	Tooltip@guard:
 		Name: Guard Tower
 		RequiresCondition: aot-guard-tower-active
+	Tooltip@camo:
+		Name: Camo Pillbox
+		RequiresCondition: aot-camo-pillbox-active
 	Valued:
 		Cost: 100
 	Health:
@@ -5680,10 +5690,15 @@ aot-pillbox:
 	# von ^Support/^Building geerbt).
 	RevealsShroud@normal:
 		Range: 6c0
-		RequiresCondition: !aot-guard-tower-active
+		RequiresCondition: !aot-guard-tower-active && !aot-camo-pillbox-active
 	RevealsShroud@guard:
 		Range: 9c0
 		RequiresCondition: aot-guard-tower-active
+	# Camo Pillbox behaelt die normale Sichtweite (KEIN Bonus wie Guard Tower) -
+	# der Tausch ist Tarnung gegen Reichweite, nicht beides.
+	RevealsShroud@camo:
+		Range: 6c0
+		RequiresCondition: aot-camo-pillbox-active
 	# RangeMultiplier wirkt auf JEDE Waffe, die von diesem Aktor abgefeuert wird
 	# - also auch auf die geliehene Garrison-Waffe der eingeladenen Infanterie.
 	# Eigenstaendiger Modifier-Trait (kein AttackBase-Abkoemmling), daher ohne
@@ -5712,7 +5727,7 @@ aot-pillbox:
 	WithSpriteBody@normal:
 		Sequence: idle
 		Name: body
-		RequiresCondition: !aot-guard-tower-active
+		RequiresCondition: !aot-guard-tower-active && !aot-camo-pillbox-active
 	WithSpriteBody@guard:
 		Sequence: guard-idle
 		Name: body-guard
@@ -5721,6 +5736,12 @@ aot-pillbox:
 		Sequence: guard-remap
 		Name: body-guard-remap
 		RequiresCondition: aot-guard-tower-active
+	# RA HBOX.ZIP (Camo Pillbox), 1:1 importiert wie die Basis-Pillbox (kein
+	# Zwei-Layer-Remap noetig, HBOX ist ein Ein-Layer-RA-Sprite wie PBOX).
+	WithSpriteBody@camo:
+		Sequence: camo-idle
+		Name: body-camo
+		RequiresCondition: aot-camo-pillbox-active
 	# KRITISCHER Bugfix (2026-07-05, User-Fund: "Verkaufen tut nichts"):
 	# Sellable.Sell() sucht sich per WithMakeAnimation.HasActiveBody() die
 	# AKTIVE Sprite-Instanz und spielt deren "make"-Sequenz RUECKWAERTS ab, bevor
@@ -5740,6 +5761,10 @@ aot-pillbox:
 		BodyNames: body-guard
 		Condition: build-incomplete
 		Sequence: make
+	WithMakeAnimation@camo:
+		BodyNames: body-camo
+		Condition: build-incomplete
+		Sequence: camo-make
 	Cargo:
 		Types: Infantry
 		MaxWeight: 5
@@ -5766,6 +5791,26 @@ aot-pillbox:
 	# ohne das crasht der Aktor beim Laden ("not constructible").
 	DetectCloaked:
 		Range: 5c0
+	# Camo-Pillbox-Upgrade (2026-07-27): 1:1 RAs eigene HBOX-Technik uebernommen
+	# (engine/mods/ra/rules/structures.yaml) - Standard-Cloak-Trait, kein
+	# eigenes Tarn-System noetig. Default UncloakOn (Attack|Unload|Infiltrate|
+	# Demolish|Dock) sorgt automatisch dafuer, dass die Pillbox beim Feuern
+	# (auch mit der geliehenen Garrison-Waffe der Insassen) entarnt und erst
+	# CloakDelay-Ticks nach dem letzten Angriff wieder tarnt. CloakSound/
+	# UncloakSound sind Engine-Default null (RA HBOX setzt sie ebenfalls nicht) -
+	# "ohne Geraeusch" ist damit bereits erfuellt, kein Override noetig. Cloak
+	# blendet nur die Sicht der GEGNER aus (Shroud/Visibility-System) - der
+	# Eigentuemer sieht sein Gebaeude immer normal farbig, wie gefordert.
+	Cloak:
+		RequiresCondition: aot-camo-pillbox-active
+		InitialDelay: 125
+		CloakDelay: 60
+		PauseOnCondition: cloak-force-disabled
+	# Bei kritischem Schaden wird die Tarnung (wie im RA-Original) erzwungen
+	# aufgehoben - ein aufgerissener Bunker kann sich nicht mehr tarnen.
+	GrantConditionOnDamageState@UNCLOAK:
+		Condition: cloak-force-disabled
+		ValidDamageStates: Critical
 # === Ende aotmod ===
 
 # Proxy-Aktoren fuer den Bau-Icon-/Namens-Wechsel nach dem Guard-Tower-Upgrade
@@ -5783,7 +5828,7 @@ aot-pillbox-base:
 	Buildable:
 		LockedGroup: aot-grp-pillbox
 		BuildPaletteOrder: 70
-		Prerequisites: barracks, ~!aot-guard-tower-upgrade
+		Prerequisites: barracks, ~!aot-guard-tower-upgrade, ~!aot-camo-pillbox-upgrade
 		Queue: Building.GDI
 		Description: Garrisonable defense structure. Holds up to 5 infantry, who fire out through the pillbox using their own weapons.
 
@@ -5817,6 +5862,37 @@ aot-pillbox-guard:
 	WithSpriteBody@guardremap:
 		RequiresCondition: aot-guard-tower-active || !aot-guard-tower-active
 
+# Camo-Pillbox-Upgrade (2026-07-27), Ausschluss-Alternative zum Guard Tower -
+# 1:1 dasselbe Proxy-Muster wie aot-pillbox-guard oben. Icon bleibt bewusst
+# das der normalen Pillbox (kein "Icon:"-Override, User-Wunsch: Tarnung soll
+# sich schon im Baumenue nicht verraten).
+aot-pillbox-camo:
+	Inherits: aot-pillbox
+	RenderSprites:
+		Image: aot-pillbox
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: camo-idle
+		SequenceAlpha: 0.65
+	Buildable:
+		LockedGroup: aot-grp-pillbox
+		BuildPaletteOrder: 70
+		Prerequisites: barracks, ~aot-camo-pillbox-upgrade
+		Queue: Building.GDI
+		Description: Camouflaged Pillbox, invisible to the enemy until detected or engaging. Holds up to 5 infantry, who fire out through the pillbox using their own weapons.
+	-Tooltip@normal:
+	-RevealsShroud@normal:
+	-WithSpriteBody@normal:
+	-WithMakeAnimation@normal:
+	Tooltip@camo:
+		RequiresCondition: aot-camo-pillbox-active || !aot-camo-pillbox-active
+	RevealsShroud@camo:
+		RequiresCondition: aot-camo-pillbox-active || !aot-camo-pillbox-active
+	WithSpriteBody@camo:
+		RequiresCondition: aot-camo-pillbox-active || !aot-camo-pillbox-active
+	Cloak:
+		RequiresCondition: aot-camo-pillbox-active || !aot-camo-pillbox-active
+
 # === Age of Tiberium (aotmod) - Guard Tower Upgrade (Phase 2, Age 1 + SLAB) ===
 aot-upgrade-guard-tower:
 	Tooltip:
@@ -5824,11 +5900,14 @@ aot-upgrade-guard-tower:
 
 	Buildable:
 		BuildPaletteOrder: 35
-		Prerequisites: ~aot-age1, aot-age1, aot-slab
+		# Ausschluss-Upgrade (2026-07-27): entweder Guard Tower ODER Camo Pillbox,
+		# nie beides - ~! versteckt den Bau-Button sobald das jeweils andere
+		# Upgrade gekauft wurde (siehe openra-prerequisite-syntax.md).
+		Prerequisites: ~aot-age1, aot-age1, aot-slab, ~!aot-camo-pillbox-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
-		Description: Upgrades all Pillboxes to Guard Towers with extended sight and weapon range (+50%).
+		Description: Upgrades all Pillboxes to Guard Towers with extended sight and weapon range (+50%). Exclusive with the Camo Pillbox upgrade.
 
 	Valued:
 		Cost: 500
@@ -5838,6 +5917,34 @@ aot-upgrade-guard-tower:
 
 	ProvidesPrerequisite:
 		Prerequisite: aot-guard-tower-upgrade
+
+	Interactable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Camo Pillbox Upgrade (2026-07-27) ===
+# Ausschluss-Alternative zum Guard Tower: RA-Camo-Pillbox-Technik (Standard-
+# Cloak-Trait, siehe aot-pillbox oben) statt Sicht-/Reichweitenbonus. Gleiche
+# Bau-Voraussetzungen wie Guard Tower (Age 1 + Science Lab), User-Wunsch.
+aot-upgrade-camo-pillbox:
+	Tooltip:
+		Name: Camo Pillbox Upgrade
+
+	Buildable:
+		BuildPaletteOrder: 36
+		Prerequisites: ~aot-age1, aot-age1, aot-slab, ~!aot-guard-tower-upgrade
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Upgrades all Pillboxes to Camo Pillboxes, cloaked from the enemy until detected or engaging. Exclusive with the Guard Tower upgrade.
+
+	Valued:
+		Cost: 500
+
+	RenderSprites:
+		Image: aot-upgrade-camo-pillbox
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-camo-pillbox-upgrade
 
 	Interactable:
 # === Ende aotmod ===

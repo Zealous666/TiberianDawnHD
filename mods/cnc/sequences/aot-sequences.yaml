@@ -4578,12 +4578,35 @@ aot-pillbox:
 		Length: 1
 		Scale: 0.0875
 		Offset: 0,-115
+	# Camo-Pillbox-Upgrade (2026-07-27): RA HBOX.ZIP (Camo Pillbox), 1:1 dasselbe
+	# Import-Muster wie aot-pillbox.zip/PBOX.ZIP. HBOX.ZIP hat 4 Frames statt 2
+	# (0/1 = unbeschaedigt, 2/3 = beschaedigt - jeweils ein Duplikat-Frame, nur
+	# Frame 0 und 2 verwendet, analog zur Basis-Pillbox die auch nur je 1 Frame
+	# pro Zustand nutzt).
+	camo-idle:
+		RemasteredFilename: aot-pillbox-camo.zip
+		Length: 1
+	damaged-camo-idle:
+		RemasteredFilename: aot-pillbox-camo.zip
+		Start: 2
+		Length: 1
+	camo-make:
+		RemasteredFilename: aot-pillbox-camo-make.zip
+		Length: *
 # === Ende aotmod ===
 
 # Bau-Icon fuer das Guard-Tower-Upgrade selbst (Phase 2, 2026-07-05).
 aot-upgrade-guard-tower:
 	icon:
 		RemasteredFilename: aot-guard-tower-icon.png
+		Length: 1
+
+# Bau-Icon fuer das Camo-Pillbox-Upgrade (2026-07-27) - User-Wunsch: kein
+# eigenes Icon, sondern dasselbe wie die normale Pillbox (Tarnung soll sich
+# auch im Baumenue nicht verraten).
+aot-upgrade-camo-pillbox:
+	icon:
+		RemasteredFilename: aot-pillbox-icon.png
 		Length: 1
 
 # === Age of Tiberium (aotmod) - Fire Position (Phase 3, Vehicle-Garrison) ===
@@ -4951,6 +4974,13 @@ aot-ice-cell:
 aot-ant-spawner:
 	idle:
 		Filename: aot-ant-spawner-marker.png
+		Length: 1
+
+# === Age of Tiberium (aotmod) — Light System Marker (Tag/Nacht-Zyklus) ===
+# Nur im Karteneditor sichtbar (RenderSpritesEditorOnly), im Spiel unsichtbar.
+aot-light-system:
+	idle:
+		Filename: aot-light-system-marker.png
 		Length: 1
 
 # === Age of Tiberium (aotmod) — Counter-Strike Ant Sequences ===

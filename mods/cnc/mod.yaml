@@ -262,6 +262,7 @@ Rules:
 	cnchd|rules/aot-ai.yaml
 	cnchd|rules/aot-snow-decor.yaml
 	cnchd|rules/aot-ts-civilian.yaml
+	cnchd|rules/aot-lighting.yaml
 	# === Ende aotmod ===
 
 Sequences:

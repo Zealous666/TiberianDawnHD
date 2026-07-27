@@ -604,12 +604,27 @@ aot-ts-ctpyr03:
 		Length: 1
 		Scale: 0.171
 
+# Light Post: neu gebacken 2026-07-27 (siehe lighting-system.md).
+# Vorher: rohes galite.shp mit Scale 1.778 -- gleich ZWEI Fehler.
+#  1) galite.shp ist laut TS (sequences/civilian.yaml: TilesetFilenames TEMPERATE: gtlite.shp /
+#     SNOW: galite.shp) die SCHNEE-Variante; fuer den Temperate-Look gehoert gtlite.shp her.
+#  2) Scale 1.778 kam aus der 32/Content-Breite-Formel (32/18px) -- die gilt so nicht.
+#     Belastbar: classicUpscaleFactor = RemasteredTileSize/TileSize = 128/24 = 5.333 (fuer den
+#     klassischen Filename-Pfad). TS-Zelle 48px -> unsere 128px = Faktor 2.67 noetig
+#     -> Scale = 2.67/5.333 = 0.5. Deckt sich mit dem einzigen in-game bestaetigten Referenzwert
+#     des Mods (gtpowr.shp, 96px-Canvas, final 0.55). 1.778 war also gut 3x zu gross.
+# Jetzt gebackenes RGBA-PNG (Frame 0 intakt, Frame 1 beschaedigt) statt rohem SHP -> Farben sind
+# fest aus isotem.pal gebacken, immun gegen Palette-Rotation/Fehlfarben.
+# ⚠️ Scale/Offset sind Startwerte, brauchen In-Game-Feinjustierung (Mod-Konvention).
 aot-ts-galite:
-	Defaults:
-		Filename: galite.shp
 	idle:
+		Filename: aot-ts-galite.png
 		Length: 1
-		Scale: 1.778
+		Scale: 0.55
+	damaged-idle:
+		Filename: aot-ts-galite-damaged.png
+		Length: 1
+		Scale: 0.55
 
 aot-ts-ctvega:
 	Defaults:
