@@ -277,10 +277,184 @@ namespace OpenRA.Mods.Common.Traits
 			return false;
 		}
 
+		// True "Beach" terrain only -- NOT the broader IsCoastal() definition, which also accepts a cliff
+		// cell that merely touches Water at its edge. A cliff can satisfy the terrain-adjacency check
+		// while being physically un-approachable by a real ship (confirmed 2026-07-23 by the user: the
+		// same coastline had a genuine sandy beach further along, with tanks correctly waiting there, but
+		// FindCoastalCellNear's plain "nearest coastal cell" search picked a nearby CLIFF section instead
+		// because it happened to be a few cells closer to base -- the ship then repeatedly tried and
+		// failed to reach it, never once considering the beach). Used to prefer Beach over any other
+		// coastal cell when searching for an actual embark/landing point.
+		public bool IsBeach(CPos c) => World.Map.GetTerrainInfo(c).Type == "Beach";
+
+		// A cell a ship's own Locomotor considers passable (terrain-wise) can still be physically
+		// occupied by a Building actor -- e.g. the Sub Pen's own footprint spilling one cell beyond
+		// its reported anchor. MovementCostForCell only reflects terrain, never actor occupancy, so
+		// without this check the reachable set (and anything picked from it, like a dock cell) could
+		// include a cell no ship can ever actually stand on (confirmed 2026-07-22: ship stalled at
+		// the exact same cell, 2 cells short of the computed dock, for both a tank wave AND a scout
+		// group -- reproducible regardless of unit type, pointing at a fixed map obstruction rather
+		// than a per-attempt fluke).
+		bool NavalFree(CPos c) => World.Map.Contains(c) && !World.ActorMap.GetActorsAt(c).Any(a => a.TraitOrDefault<Building>() != null);
+
+		// Ship-locomotor reachable set, flood-filled from the nearest cell to `seed` that locomotor can
+		// actually stand on. Computed fresh per call (not cached/refreshed on a timer, unlike the ground
+		// set above) -- this is only called a handful of times per match at specific decision points
+		// (naval site planning, ferry embark/landing search), never every tick, so the cost is negligible.
+		HashSet<CPos> NavalReachableFrom(CPos seed, Locomotor navalLoco)
+		{
+			var result = new HashSet<CPos>();
+			CPos? start = null;
+			for (var r = 0; r <= 24 && start == null; r++)
+				foreach (var c in AotOpsUtils.Ring(seed, r))
+					if (NavalFree(c) && navalLoco.MovementCostForCell(c) != PathGraph.MovementCostForUnreachableCell)
+					{
+						start = c;
+						break;
+					}
+
+			if (start == null)
+				return result;
+
+			// Orthogonal-only expansion (NOT CVec.Directions, which is all 8 including diagonals): a ship
+			// hugging a building's corner can be diagonally "visible" to the cell on the far side without
+			// any real path there -- the same corner-peek issue already fixed for IsCoastal/Beachy this
+			// session, just for buildings instead of Rock terrain. Using all 8 directions here let the
+			// reachable set silently connect two cells split by the Sub Pen's own footprint (confirmed
+			// 2026-07-23: ship stuck at a fixed cell literally attempted to detour around the pen -- "erst
+			// runter, dann zur Seite" -- and got stuck mid-detour, because the diagonal "connection" the
+			// BFS trusted was never a route the ship's own pathfinder would actually take).
+			var queue = new Queue<CPos>();
+			queue.Enqueue(start.Value);
+			result.Add(start.Value);
+			while (queue.Count > 0)
+			{
+				var c = queue.Dequeue();
+				foreach (var d in OrthogonalDirections)
+				{
+					var n = c + d;
+					if (!result.Contains(n) && NavalFree(n)
+						&& navalLoco.MovementCostForCell(n) != PathGraph.MovementCostForUnreachableCell)
+					{
+						result.Add(n);
+						queue.Enqueue(n);
+					}
+				}
+			}
+
+			return result;
+		}
+
+		// Given a coastal LAND cell (as returned by FindCoastalCellNear), find the specific orthogonally
+		// adjacent WATER cell a ship using this locomotor can actually stand on. The land cell itself is
+		// never enterable by a ship -- ordering a ship to "Move" straight at it only gets it generically
+		// "close" via the pathfinder's own stopping tolerance, not necessarily truly adjacent to the
+		// waiting units (confirmed 2026-07-22: ship parked dist2=5/8 from embark, tanks stood right at
+		// the shore, EnterTransport never found anyone in interaction range -- the ship needs to be told
+		// to go to the water cell that TOUCHES the shore, not the shore cell itself).
+		public CPos? DockCellFor(CPos coastalCell, string navalLocomotor, CPos? navalSeed = null)
+		{
+			if (navalLocomotor == null)
+				return null;
+
+			var navalLoco = World.WorldActor.TraitsImplementing<Locomotor>().FirstOrDefault(l => l.Info.Name == navalLocomotor);
+			if (navalLoco == null)
+				return null;
+
+			// Prefer a dock on the crossing sea (navalSeed) so the ship can actually reach it from open
+			// water rather than a building-walled inlet -- see FindCoastalCellNear. Falls back to the
+			// local flood if the crossing sea touches no neighbour of this shore cell, so a shore that
+			// only the fallback search could justify still gets a usable dock instead of none.
+			if (navalSeed != null)
+			{
+				var seaSet = NavalReachableFrom(navalSeed.Value, navalLoco);
+				foreach (var d in OrthogonalDirections)
+				{
+					var n = coastalCell + d;
+					if (seaSet.Contains(n))
+						return n;
+				}
+			}
+
+			var navalReachable = NavalReachableFrom(coastalCell, navalLoco);
+			foreach (var d in OrthogonalDirections)
+			{
+				var n = coastalCell + d;
+				if (navalReachable.Contains(n))
+					return n;
+			}
+
+			return null;
+		}
+
 		// Nearest walkable coastal cell to `target` within `radius`. requireOwnReachable restricts
 		// to the AI's own (base-side) ground-reachable set — use true for the embark point on home
 		// soil, false for a landing cell near the enemy (by definition outside that set).
-		public CPos? FindCoastalCellNear(CPos target, int radius, bool requireOwnReachable)
+		//
+		// navalLocomotor (optional): when given, the candidate must ALSO have an orthogonal water
+		// neighbour that a ship using this locomotor can actually reach by pathing from open water near
+		// `target` -- a land cell next to Water terrain in the raw terrain-type sense (IsCoastal) is not
+		// necessarily a spot a ship can ever actually dock at: rocks can wall off a small inlet from the
+		// open sea even though the two visually "touch". Without this check the AI could pick an embark
+		// point a ship can approach only to within a few cells and never truly reach (confirmed
+		// 2026-07-22: ship sat idle at dist2ToEmbark=5 for 14+ diagnostic samples, cargo never filled,
+		// wave eventually timed out with nobody having boarded).
+		// Minimum squared distance a candidate embark cell must keep from every cell in `exclude`
+		// (already claimed by another concurrent ferry mission) -- 36 == 6 cells, enough that two
+		// missions get genuinely separate stretches of shore rather than adjacent docks that still
+		// crowd each other's approach.
+		const int ExcludeRadius2 = 36;
+
+		public CPos? FindCoastalCellNear(CPos target, int radius, bool requireOwnReachable, string navalLocomotor = null, IReadOnlyCollection<CPos> exclude = null, CPos? navalSeed = null)
+		{
+			var navalLoco = navalLocomotor != null
+				? World.WorldActor.TraitsImplementing<Locomotor>().FirstOrDefault(l => l.Info.Name == navalLocomotor)
+				: null;
+
+			// Preferred: flood reachability from `navalSeed` (the far-shore/crossing sea). Seeding at
+			// `target` instead finds the nearest water to the embark shore, which can be a small inlet
+			// walled off from the open sea by a building (the Sub Pen's own footprint) or rock -- a ship
+			// coming from the real sea could never reach a dock in that pocket (confirmed 2026-07-23:
+			// embarkDock=35,13 sat in a pen-blocked notch, the ship oscillated 30s then timed out).
+			//
+			// This is a PREFERENCE, not a hard requirement: if no shore at all qualifies against the
+			// crossing sea, fall back to the local seed (the old behaviour) rather than reporting "no
+			// coastal cell" and killing the mission outright -- seeding from the far shore proved too
+			// strict on some spawns and regressed groups that previously found a valid embark.
+			if (navalLoco != null && navalSeed != null)
+			{
+				var seaSet = NavalReachableFrom(navalSeed.Value, navalLoco);
+				var viaSea = SearchCoastal(target, radius, requireOwnReachable, seaSet, exclude);
+				if (viaSea != null)
+					return viaSea;
+			}
+
+			var localSet = navalLoco != null ? NavalReachableFrom(target, navalLoco) : null;
+			return SearchCoastal(target, radius, requireOwnReachable, localSet, exclude);
+		}
+
+		// Two passes: real Beach terrain first (a genuine landing spot), only falling back to the
+		// broader "any land touching Water" definition (which also matches an unapproachable cliff)
+		// if no beach exists within radius at all. See IsBeach for why this matters (confirmed
+		// 2026-07-23: a nearby cliff beat the true beach purely on raw distance, and no ship could
+		// ever actually reach it).
+		//
+		// Within each pass, first try to steer clear of cells other concurrent missions already
+		// claimed (spreading missions across different shore stretches instead of piling everyone
+		// onto the same dock); if that's too restrictive to find anything, fall back to ignoring
+		// the claims entirely rather than fail the mission outright.
+		CPos? SearchCoastal(CPos target, int radius, bool requireOwnReachable, HashSet<CPos> navalReachable, IReadOnlyCollection<CPos> exclude)
+		{
+			var beachOnly = FindCoastalCellNearInner(target, radius, requireOwnReachable, navalReachable, requireBeach: true, exclude)
+				?? FindCoastalCellNearInner(target, radius, requireOwnReachable, navalReachable, requireBeach: true, exclude: null);
+			if (beachOnly != null)
+				return beachOnly;
+
+			return FindCoastalCellNearInner(target, radius, requireOwnReachable, navalReachable, requireBeach: false, exclude)
+				?? FindCoastalCellNearInner(target, radius, requireOwnReachable, navalReachable, requireBeach: false, exclude: null);
+		}
+
+		CPos? FindCoastalCellNearInner(CPos target, int radius, bool requireOwnReachable, HashSet<CPos> navalReachable, bool requireBeach, IReadOnlyCollection<CPos> exclude)
 		{
 			CPos? best = null;
 			var bestDist = int.MaxValue;
@@ -295,7 +469,13 @@ namespace OpenRA.Mods.Common.Traits
 					if (requireOwnReachable && !IsReachable(c))
 						continue;
 
-					if (!IsCoastal(c))
+					if (requireBeach ? !IsBeach(c) : !IsCoastal(c))
+						continue;
+
+					if (navalReachable != null && !OrthogonalDirections.Any(d => navalReachable.Contains(c + d)))
+						continue;
+
+					if (exclude != null && exclude.Any(e => (e - c).LengthSquared <= ExcludeRadius2))
 						continue;
 
 					var d = (c - target).LengthSquared;

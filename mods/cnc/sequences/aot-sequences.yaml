@@ -5046,3 +5046,29 @@ explosion:
 	aot-h2o-splash3:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\VFX\H2O_EXP3.ZIP
 		Length: *
+
+# === Tiberian Veins (Klon des Eis-Sprite-Systems) ===
+# Zelle: 256 Frames (16 Ecken-Configs x 4x4 Rauschpositionen), gequiltetes gruenes Mesh + Ecken-Alpha.
+# DREI Ebenen wie beim Eis: Einheiten (0) > Heart (-1023) > Zellen (-8191).
+aot-vein-cell:
+	idle:
+		RemasteredFilename: aot-vein-cell.zip
+		RemasteredPremultiplied: false
+		Length: 256
+		ZOffset: -8191
+# Heart: idle = ruhiger Einzelframe (Frame 0, wenig "Kreatur" sichtbar), gas = die vollen
+# 12 Frames als EINMALIGE Reaktions-Animation beim Gas-Ausstoss (siehe AotEmitWeaponWhenAttacked).
+# User-Fund: Dauerschleife der 12 Frames liess das Heart durch die spaeteren (blass-weissen)
+# Frames zeitweise grau statt gruen wirken -- kein Farbfehler, sondern Animationsphase.
+# Scale: 2 -- native TS-Groesse (144px) wirkte bei 3x3-Footprint auf 128px-Zellen zu klein.
+aot-vein-heart:
+	Defaults:
+		RemasteredFilename: aot-vein-heart.zip
+		RemasteredPremultiplied: false
+		ZOffset: -1023
+		Scale: 2
+	idle:
+		Start: 0
+		Length: 1
+	gas:
+		Length: 12

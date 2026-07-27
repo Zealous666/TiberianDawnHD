@@ -80,6 +80,10 @@ namespace OpenRA.Mods.Cnc.Traits
 			if (a.IsDead || !a.IsInWorld)
 				return false;
 
+			// Explizit ausgenommene Aktoren (Marker-Trait, via Basis-Aktor an alle Proxies vererbt).
+			if (a.Info.HasTraitInfo<AotIceUnbreakableInfo>())
+				return false;
+
 			var mobile = a.TraitOrDefault<Mobile>();
 			return mobile != null && Info.BreakingLocomotors.Contains(mobile.Info.Locomotor);
 		}
@@ -142,4 +146,10 @@ namespace OpenRA.Mods.Cnc.Traits
 			self.Dispose();
 		}
 	}
+
+	[Desc("Marker: this ground vehicle is light enough that it does NOT break through ice.",
+		"Put it on the base actor (JEEP/BGGY/BIKE/APC) so every proxy/upgrade variant inherits it.")]
+	sealed class AotIceUnbreakableInfo : TraitInfo<AotIceUnbreakable> { }
+
+	sealed class AotIceUnbreakable { }
 }

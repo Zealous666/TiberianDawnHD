@@ -1,0 +1,1793 @@
+# === Age of Tiberium (aotmod) - TS Civilian Buildings Import ===
+# Editor-only Zivilgebaeude aus TS civilian-structures.yaml (kein Buildable),
+# analog aot-snow-decor.yaml: Normal/Snow als eigene Aktor-Instanzen mit
+# MapEditorData.RequireTilesets statt per-Tileset-Sprite-Switch.
+
+# WICHTIG: TS-Gebaeude-SHPs sind mit TS's eigener isotem.pal/isosno.pal indiziert.
+# Ohne expliziten Palette-Override faellt RenderSprites auf dieses Mods "player"-Palette
+# zurueck (dynamischer Owner-Remap, gebaut aus einer voellig anderen CNC-eigenen Datei) ->
+# falsche/verwaschene Farben (gelbstichig), da TS- und CNC-Palettenindizes NICHT kompatibel
+# sind. Fix: statische eigene Palette je Aktor referenzieren (kein Player-Color-Remap noetig,
+# das Original hat auch keinen).
+^BaseWorld:
+	PaletteFromFile@aot-ts-isotem:
+		Name: aot-ts-isotem
+		Filename: aot-ts-isotem.pal
+	PaletteFromFile@aot-ts-isosno:
+		Name: aot-ts-isosno
+		Filename: aot-ts-isosno.pal
+
+# === Age of Tiberium (aotmod) - TS Civilian Buildings (CA-Serie) ===
+# Normal-Instanz (Temperate-Look): AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+# Snow-Instanz (separater Aktor, wie T01/T01-Snow): AOT_WINTER, AOT_SNOW
+
+aot-ts-ct0001:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xxX xxX XXX
+		Dimensions: 3,3
+	Selectable:
+		Bounds: 3072, 3072
+	Health:
+		HP: 40000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-ct0001
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Rade's Roadhouse
+	MapEditorData:
+		Categories: Civilian Buildings (TS)
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+
+aot-ts-ca0001:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xxX xxX XXX
+		Dimensions: 3,3
+	Selectable:
+		Bounds: 3072, 3072
+	Health:
+		HP: 40000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-ca0001
+		Palette: aot-ts-isosno
+	Tooltip:
+		Name: Rade's Roadhouse
+	MapEditorData:
+		Categories: Civilian Buildings (TS) (Snow)
+		RequireTilesets: AOT_WINTER, AOT_SNOW
+
+aot-ts-ct0002:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xxX xxx Xxx
+		Dimensions: 3,3
+	Selectable:
+		Bounds: 3072, 3072
+	Health:
+		HP: 40000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-ct0002
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Sandberg and Son's
+	MapEditorData:
+		Categories: Civilian Buildings (TS)
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+
+aot-ts-ca0002:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xxX xxx Xxx
+		Dimensions: 3,3
+	Selectable:
+		Bounds: 3072, 3072
+	Health:
+		HP: 40000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-ca0002
+		Palette: aot-ts-isosno
+	Tooltip:
+		Name: Sandberg and Son's
+	MapEditorData:
+		Categories: Civilian Buildings (TS) (Snow)
+		RequireTilesets: AOT_WINTER, AOT_SNOW
+
+aot-ts-ct0003:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xx xx
+		Dimensions: 2,2
+	Selectable:
+		Bounds: 2048, 2048
+	Health:
+		HP: 30000
+	Armor:
+		Type: Light
+	RenderSprites:
+		Image: aot-ts-ct0003
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Temp Housing
+	MapEditorData:
+		Categories: Civilian Buildings (TS)
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+
+aot-ts-ca0003:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xx xx
+		Dimensions: 2,2
+	Selectable:
+		Bounds: 2048, 2048
+	Health:
+		HP: 30000
+	Armor:
+		Type: Light
+	RenderSprites:
+		Image: aot-ts-ca0003
+		Palette: aot-ts-isosno
+	Tooltip:
+		Name: Temp Housing
+	MapEditorData:
+		Categories: Civilian Buildings (TS) (Snow)
+		RequireTilesets: AOT_WINTER, AOT_SNOW
+
+aot-ts-ct0004:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xx xX
+		Dimensions: 2,2
+	Selectable:
+		Bounds: 2048, 2048
+	Health:
+		HP: 30000
+	Armor:
+		Type: Light
+	RenderSprites:
+		Image: aot-ts-ct0004
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Waystation
+	MapEditorData:
+		Categories: Civilian Buildings (TS)
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+
+aot-ts-ca0004:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xx xX
+		Dimensions: 2,2
+	Selectable:
+		Bounds: 2048, 2048
+	Health:
+		HP: 30000
+	Armor:
+		Type: Light
+	RenderSprites:
+		Image: aot-ts-ca0004
+		Palette: aot-ts-isosno
+	Tooltip:
+		Name: Waystation
+	MapEditorData:
+		Categories: Civilian Buildings (TS) (Snow)
+		RequireTilesets: AOT_WINTER, AOT_SNOW
+
+aot-ts-ct0005:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x x
+		Dimensions: 1,2
+	Selectable:
+		Bounds: 1024, 2048
+	Health:
+		HP: 30000
+	Armor:
+		Type: Light
+	RenderSprites:
+		Image: aot-ts-ct0005
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Ferbie's 4 Sale
+	MapEditorData:
+		Categories: Civilian Buildings (TS)
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+
+aot-ts-ca0005:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x x
+		Dimensions: 1,2
+	Selectable:
+		Bounds: 1024, 2048
+	Health:
+		HP: 30000
+	Armor:
+		Type: Light
+	RenderSprites:
+		Image: aot-ts-ca0005
+		Palette: aot-ts-isosno
+	Tooltip:
+		Name: Ferbie's 4 Sale
+	MapEditorData:
+		Categories: Civilian Buildings (TS) (Snow)
+		RequireTilesets: AOT_WINTER, AOT_SNOW
+
+aot-ts-ct0006:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x x
+		Dimensions: 1,2
+	Selectable:
+		Bounds: 1024, 2048
+	Health:
+		HP: 30000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-ct0006
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Deluxe Accomodations
+	MapEditorData:
+		Categories: Civilian Buildings (TS)
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+
+aot-ts-ca0006:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x x
+		Dimensions: 1,2
+	Selectable:
+		Bounds: 1024, 2048
+	Health:
+		HP: 30000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-ca0006
+		Palette: aot-ts-isosno
+	Tooltip:
+		Name: Deluxe Accomodations
+	MapEditorData:
+		Categories: Civilian Buildings (TS) (Snow)
+		RequireTilesets: AOT_WINTER, AOT_SNOW
+
+aot-ts-ct0007:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x x
+		Dimensions: 1,2
+	Selectable:
+		Bounds: 1024, 2048
+	Health:
+		HP: 40000
+	Armor:
+		Type: Light
+	RenderSprites:
+		Image: aot-ts-ct0007
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Field Generator
+	MapEditorData:
+		Categories: Civilian Buildings (TS)
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+
+aot-ts-ca0007:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x x
+		Dimensions: 1,2
+	Selectable:
+		Bounds: 1024, 2048
+	Health:
+		HP: 40000
+	Armor:
+		Type: Light
+	RenderSprites:
+		Image: aot-ts-ca0007
+		Palette: aot-ts-isosno
+	Tooltip:
+		Name: Field Generator
+	MapEditorData:
+		Categories: Civilian Buildings (TS) (Snow)
+		RequireTilesets: AOT_WINTER, AOT_SNOW
+
+aot-ts-ct0008:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xX xX xx
+		Dimensions: 2,3
+	Selectable:
+		Bounds: 2048, 3072
+	Health:
+		HP: 40000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-ct0008
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Subterranean Dwelling
+	MapEditorData:
+		Categories: Civilian Buildings (TS)
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+
+aot-ts-ca0008:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xX xX xx
+		Dimensions: 2,3
+	Selectable:
+		Bounds: 2048, 3072
+	Health:
+		HP: 40000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-ca0008
+		Palette: aot-ts-isosno
+	Tooltip:
+		Name: Subterranean Dwelling
+	MapEditorData:
+		Categories: Civilian Buildings (TS) (Snow)
+		RequireTilesets: AOT_WINTER, AOT_SNOW
+
+aot-ts-ct0009:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xX xx xX
+		Dimensions: 2,3
+	Selectable:
+		Bounds: 2048, 3072
+	Health:
+		HP: 40000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-ct0009
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Subterranean Dwelling
+	MapEditorData:
+		Categories: Civilian Buildings (TS)
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+
+aot-ts-ca0009:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xX xx xX
+		Dimensions: 2,3
+	Selectable:
+		Bounds: 2048, 3072
+	Health:
+		HP: 40000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-ca0009
+		Palette: aot-ts-isosno
+	Tooltip:
+		Name: Subterranean Dwelling
+	MapEditorData:
+		Categories: Civilian Buildings (TS) (Snow)
+		RequireTilesets: AOT_WINTER, AOT_SNOW
+
+aot-ts-ct0010:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xx xx
+		Dimensions: 2,2
+	Selectable:
+		Bounds: 2048, 2048
+	Health:
+		HP: 30000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-ct0010
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Leary Traveller Inn
+	MapEditorData:
+		Categories: Civilian Buildings (TS)
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+
+aot-ts-ca0010:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xx xx
+		Dimensions: 2,2
+	Selectable:
+		Bounds: 2048, 2048
+	Health:
+		HP: 30000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-ca0010
+		Palette: aot-ts-isosno
+	Tooltip:
+		Name: Leary Traveller Inn
+	MapEditorData:
+		Categories: Civilian Buildings (TS) (Snow)
+		RequireTilesets: AOT_WINTER, AOT_SNOW
+
+aot-ts-ct0011:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x x
+		Dimensions: 1,2
+	Selectable:
+		Bounds: 1024, 2048
+	Health:
+		HP: 20000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-ct0011
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Water Tank
+	MapEditorData:
+		Categories: Civilian Buildings (TS)
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+
+aot-ts-ca0011:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x x
+		Dimensions: 1,2
+	Selectable:
+		Bounds: 1024, 2048
+	Health:
+		HP: 20000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-ca0011
+		Palette: aot-ts-isosno
+	Tooltip:
+		Name: Water Tank
+	MapEditorData:
+		Categories: Civilian Buildings (TS) (Snow)
+		RequireTilesets: AOT_WINTER, AOT_SNOW
+
+aot-ts-ct0012:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x x
+		Dimensions: 1,2
+	Selectable:
+		Bounds: 1024, 2048
+	Health:
+		HP: 10000
+	Armor:
+		Type: Light
+	RenderSprites:
+		Image: aot-ts-ct0012
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Greenhouse
+	MapEditorData:
+		Categories: Civilian Buildings (TS)
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+
+aot-ts-ca0012:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x x
+		Dimensions: 1,2
+	Selectable:
+		Bounds: 1024, 2048
+	Health:
+		HP: 10000
+	Armor:
+		Type: Light
+	RenderSprites:
+		Image: aot-ts-ca0012
+		Palette: aot-ts-isosno
+	Tooltip:
+		Name: Greenhouse
+	MapEditorData:
+		Categories: Civilian Buildings (TS) (Snow)
+		RequireTilesets: AOT_WINTER, AOT_SNOW
+
+aot-ts-ct0013:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xx
+		Dimensions: 2,1
+	Selectable:
+		Bounds: 2048, 1024
+	Health:
+		HP: 30000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-ct0013
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Water Purifier
+	MapEditorData:
+		Categories: Civilian Buildings (TS)
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+
+aot-ts-ca0013:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xx
+		Dimensions: 2,1
+	Selectable:
+		Bounds: 2048, 1024
+	Health:
+		HP: 30000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-ca0013
+		Palette: aot-ts-isosno
+	Tooltip:
+		Name: Water Purifier
+	MapEditorData:
+		Categories: Civilian Buildings (TS) (Snow)
+		RequireTilesets: AOT_WINTER, AOT_SNOW
+
+aot-ts-ct0014:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x
+		Dimensions: 1,1
+	Selectable:
+		Bounds: 1024, 1024
+	Health:
+		HP: 30000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-ct0014
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Observation Tower
+	MapEditorData:
+		Categories: Civilian Buildings (TS)
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+
+aot-ts-ca0014:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x
+		Dimensions: 1,1
+	Selectable:
+		Bounds: 1024, 1024
+	Health:
+		HP: 30000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-ca0014
+		Palette: aot-ts-isosno
+	Tooltip:
+		Name: Observation Tower
+	MapEditorData:
+		Categories: Civilian Buildings (TS) (Snow)
+		RequireTilesets: AOT_WINTER, AOT_SNOW
+
+aot-ts-ct0015:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x
+		Dimensions: 1,1
+	Selectable:
+		Bounds: 1024, 1024
+	Health:
+		HP: 30000
+	Armor:
+		Type: Light
+	RenderSprites:
+		Image: aot-ts-ct0015
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Port-A-Shack
+	MapEditorData:
+		Categories: Civilian Buildings (TS)
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+
+aot-ts-ca0015:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x
+		Dimensions: 1,1
+	Selectable:
+		Bounds: 1024, 1024
+	Health:
+		HP: 30000
+	Armor:
+		Type: Light
+	RenderSprites:
+		Image: aot-ts-ca0015
+		Palette: aot-ts-isosno
+	Tooltip:
+		Name: Port-A-Shack
+	MapEditorData:
+		Categories: Civilian Buildings (TS) (Snow)
+		RequireTilesets: AOT_WINTER, AOT_SNOW
+
+aot-ts-ct0016:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x
+		Dimensions: 1,1
+	Selectable:
+		Bounds: 1024, 1024
+	Health:
+		HP: 30000
+	Armor:
+		Type: Light
+	RenderSprites:
+		Image: aot-ts-ct0016
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Port-A-Shack Deluxe
+	MapEditorData:
+		Categories: Civilian Buildings (TS)
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+
+aot-ts-ca0016:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x
+		Dimensions: 1,1
+	Selectable:
+		Bounds: 1024, 1024
+	Health:
+		HP: 30000
+	Armor:
+		Type: Light
+	RenderSprites:
+		Image: aot-ts-ca0016
+		Palette: aot-ts-isosno
+	Tooltip:
+		Name: Port-A-Shack Deluxe
+	MapEditorData:
+		Categories: Civilian Buildings (TS) (Snow)
+		RequireTilesets: AOT_WINTER, AOT_SNOW
+
+aot-ts-ct0017:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x
+		Dimensions: 1,1
+	Selectable:
+		Bounds: 1024, 1024
+	Health:
+		HP: 30000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-ct0017
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Energy Transformer
+	MapEditorData:
+		Categories: Civilian Buildings (TS)
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+
+aot-ts-ca0017:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x
+		Dimensions: 1,1
+	Selectable:
+		Bounds: 1024, 1024
+	Health:
+		HP: 30000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-ca0017
+		Palette: aot-ts-isosno
+	Tooltip:
+		Name: Energy Transformer
+	MapEditorData:
+		Categories: Civilian Buildings (TS) (Snow)
+		RequireTilesets: AOT_WINTER, AOT_SNOW
+
+aot-ts-ct0018:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x x
+		Dimensions: 1,2
+	Selectable:
+		Bounds: 1024, 2048
+	Health:
+		HP: 20000
+	Armor:
+		Type: Light
+	RenderSprites:
+		Image: aot-ts-ct0018
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Solar Panel
+	MapEditorData:
+		Categories: Civilian Buildings (TS)
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+
+aot-ts-ca0018:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x x
+		Dimensions: 1,2
+	Selectable:
+		Bounds: 1024, 2048
+	Health:
+		HP: 20000
+	Armor:
+		Type: Light
+	RenderSprites:
+		Image: aot-ts-ca0018
+		Palette: aot-ts-isosno
+	Tooltip:
+		Name: Solar Panel
+	MapEditorData:
+		Categories: Civilian Buildings (TS) (Snow)
+		RequireTilesets: AOT_WINTER, AOT_SNOW
+
+aot-ts-ct0019:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x x
+		Dimensions: 1,2
+	Selectable:
+		Bounds: 1024, 2048
+	Health:
+		HP: 20000
+	Armor:
+		Type: Light
+	RenderSprites:
+		Image: aot-ts-ct0019
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Solar Panel
+	MapEditorData:
+		Categories: Civilian Buildings (TS)
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+
+aot-ts-ca0019:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x x
+		Dimensions: 1,2
+	Selectable:
+		Bounds: 1024, 2048
+	Health:
+		HP: 20000
+	Armor:
+		Type: Light
+	RenderSprites:
+		Image: aot-ts-ca0019
+		Palette: aot-ts-isosno
+	Tooltip:
+		Name: Solar Panel
+	MapEditorData:
+		Categories: Civilian Buildings (TS) (Snow)
+		RequireTilesets: AOT_WINTER, AOT_SNOW
+
+aot-ts-ct0020:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x x
+		Dimensions: 1,2
+	Selectable:
+		Bounds: 1024, 2048
+	Health:
+		HP: 20000
+	Armor:
+		Type: Light
+	RenderSprites:
+		Image: aot-ts-ct0020
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Solar Panel
+	MapEditorData:
+		Categories: Civilian Buildings (TS)
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+
+aot-ts-ca0020:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x x
+		Dimensions: 1,2
+	Selectable:
+		Bounds: 1024, 2048
+	Health:
+		HP: 20000
+	Armor:
+		Type: Light
+	RenderSprites:
+		Image: aot-ts-ca0020
+		Palette: aot-ts-isosno
+	Tooltip:
+		Name: Solar Panel
+	MapEditorData:
+		Categories: Civilian Buildings (TS) (Snow)
+		RequireTilesets: AOT_WINTER, AOT_SNOW
+
+aot-ts-ct0021:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x x
+		Dimensions: 1,2
+	Selectable:
+		Bounds: 1024, 2048
+	Health:
+		HP: 20000
+	Armor:
+		Type: Light
+	RenderSprites:
+		Image: aot-ts-ct0021
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Solar Panel
+	MapEditorData:
+		Categories: Civilian Buildings (TS)
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+
+aot-ts-ca0021:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x x
+		Dimensions: 1,2
+	Selectable:
+		Bounds: 1024, 2048
+	Health:
+		HP: 20000
+	Armor:
+		Type: Light
+	RenderSprites:
+		Image: aot-ts-ca0021
+		Palette: aot-ts-isosno
+	Tooltip:
+		Name: Solar Panel
+	MapEditorData:
+		Categories: Civilian Buildings (TS) (Snow)
+		RequireTilesets: AOT_WINTER, AOT_SNOW
+
+# === Age of Tiberium (aotmod) - TS Civilian City (CITY-Serie) ===
+# Kein Snow-Reskin im Original -> ein Aktor je Gebaeude, alle Tilesets.
+
+aot-ts-city01:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xxxX XxxX
+		Dimensions: 4,2
+	Selectable:
+		Bounds: 4096, 2048
+	Health:
+		HP: 40000
+	Armor:
+		Type: Wood
+	RenderSprites:
+		Image: aot-ts-city01
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Connelly Court Apts
+	MapEditorData:
+		Categories: Civilian City (TS)
+
+aot-ts-city02:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xx xx xx
+		Dimensions: 2,3
+	Selectable:
+		Bounds: 2048, 3072
+	Health:
+		HP: 70000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-city02
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Lightner's Luxury Suites
+	MapEditorData:
+		Categories: Civilian City (TS)
+
+aot-ts-city03:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xxx xxx
+		Dimensions: 3,2
+	Selectable:
+		Bounds: 3072, 2048
+	Health:
+		HP: 50000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-city03
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Office Building
+	MapEditorData:
+		Categories: Civilian City (TS)
+
+aot-ts-city04:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xxx xxx
+		Dimensions: 3,2
+	Selectable:
+		Bounds: 3072, 2048
+	Health:
+		HP: 60000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-city04
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Westwood Stock Exchange
+	MapEditorData:
+		Categories: Civilian City (TS)
+
+aot-ts-city05:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xxx xxx
+		Dimensions: 3,2
+	Selectable:
+		Bounds: 3072, 2048
+	Health:
+		HP: 60000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-city05
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Daily Sun Times
+	MapEditorData:
+		Categories: Civilian City (TS)
+
+aot-ts-city06:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xxxx XxxX
+		Dimensions: 4,2
+	Selectable:
+		Bounds: 4096, 2048
+	Health:
+		HP: 50000
+	Armor:
+		Type: Concrete
+	RenderSprites:
+		Image: aot-ts-city06
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: YEO-CA Cola Corp.
+	MapEditorData:
+		Categories: Civilian City (TS)
+
+aot-ts-city07:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xxxx xxxx
+		Dimensions: 4,2
+	Selectable:
+		Bounds: 4096, 2048
+	Health:
+		HP: 40000
+	Armor:
+		Type: Wood
+	RenderSprites:
+		Image: aot-ts-city07
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Urban Housing
+	MapEditorData:
+		Categories: Civilian City (TS)
+
+aot-ts-city08:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xx xx
+		Dimensions: 2,2
+	Selectable:
+		Bounds: 2048, 2048
+	Health:
+		HP: 30000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-city08
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Yee's Discount Liquor
+	MapEditorData:
+		Categories: Civilian City (TS)
+
+aot-ts-city09:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xx xx
+		Dimensions: 2,2
+	Selectable:
+		Bounds: 2048, 2048
+	Health:
+		HP: 40000
+	Armor:
+		Type: Wood
+	RenderSprites:
+		Image: aot-ts-city09
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Abandoned Warehouse
+	MapEditorData:
+		Categories: Civilian City (TS)
+
+aot-ts-city10:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xx xx
+		Dimensions: 2,2
+	Selectable:
+		Bounds: 2048, 2048
+	Health:
+		HP: 30000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-city10
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Urban Storefront
+	MapEditorData:
+		Categories: Civilian City (TS)
+
+aot-ts-city11:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xx xx
+		Dimensions: 2,2
+	Selectable:
+		Bounds: 2048, 2048
+	Health:
+		HP: 50000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-city11
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Ambrose Lounge
+	MapEditorData:
+		Categories: Civilian City (TS)
+
+aot-ts-city12:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xX xx
+		Dimensions: 2,2
+	Selectable:
+		Bounds: 2048, 2048
+	Health:
+		HP: 60000
+	Armor:
+		Type: Concrete
+	RenderSprites:
+		Image: aot-ts-city12
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Bostic Tower
+	MapEditorData:
+		Categories: Civilian City (TS)
+
+aot-ts-city13:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xX Xx
+		Dimensions: 2,2
+	Selectable:
+		Bounds: 2048, 2048
+	Health:
+		HP: 50000
+	Armor:
+		Type: Wood
+	RenderSprites:
+		Image: aot-ts-city13
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Hewitt Hair Salon
+	MapEditorData:
+		Categories: Civilian City (TS)
+
+aot-ts-city14:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x
+		Dimensions: 1,1
+	Selectable:
+		Bounds: 1024, 1024
+	Health:
+		HP: 60000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-city14
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Business Offices
+	MapEditorData:
+		Categories: Civilian City (TS)
+
+aot-ts-city15:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xxxX xxxX
+		Dimensions: 4,2
+	Selectable:
+		Bounds: 4096, 2048
+	Health:
+		HP: 50000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-city15
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: 2nd National Bank
+	MapEditorData:
+		Categories: Civilian City (TS)
+
+aot-ts-city16:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xxxx xxxx
+		Dimensions: 4,2
+	Selectable:
+		Bounds: 4096, 2048
+	Health:
+		HP: 50000
+	Armor:
+		Type: Wood
+	RenderSprites:
+		Image: aot-ts-city16
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Highrise Hotel
+	MapEditorData:
+		Categories: Civilian City (TS)
+
+aot-ts-city17:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: XxxX xxxx xxxX
+		Dimensions: 4,3
+	Selectable:
+		Bounds: 4096, 3072
+	Health:
+		HP: 30000
+	Armor:
+		Type: Wood
+	RenderSprites:
+		Image: aot-ts-city17
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: The Projects
+	MapEditorData:
+		Categories: Civilian City (TS)
+
+aot-ts-city18:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xxx xxx xxx xxx xxX
+		Dimensions: 3,5
+	Selectable:
+		Bounds: 3072, 5120
+	Health:
+		HP: 60000
+	Armor:
+		Type: Concrete
+	RenderSprites:
+		Image: aot-ts-city18
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Archer Asylum
+	MapEditorData:
+		Categories: Civilian City (TS)
+
+aot-ts-city19:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xx xX
+		Dimensions: 2,2
+	Selectable:
+		Bounds: 2048, 2048
+	Health:
+		HP: 50000
+	Armor:
+		Type: Wood
+	RenderSprites:
+		Image: aot-ts-city19
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Fill'er Up-Pump'N'Go
+	MapEditorData:
+		Categories: Civilian City (TS)
+
+aot-ts-city20:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x
+		Dimensions: 1,1
+	Selectable:
+		Bounds: 1024, 1024
+	Health:
+		HP: 25000
+	Armor:
+		Type: Wood
+	RenderSprites:
+		Image: aot-ts-city20
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Gas Pump
+	MapEditorData:
+		Categories: Civilian City (TS)
+
+aot-ts-city21:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x
+		Dimensions: 1,1
+	Selectable:
+		Bounds: 1024, 1024
+	Health:
+		HP: 10000
+	Armor:
+		Type: None
+	RenderSprites:
+		Image: aot-ts-city21
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Gas Station Sign
+	MapEditorData:
+		Categories: Civilian City (TS)
+
+aot-ts-city22:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xx xx
+		Dimensions: 2,2
+	Selectable:
+		Bounds: 2048, 2048
+	Health:
+		HP: 10000
+	Armor:
+		Type: None
+	RenderSprites:
+		Image: aot-ts-city22
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Church
+	MapEditorData:
+		Categories: Civilian City (TS)
+
+# === Age of Tiberium (aotmod) - TS Civilian City Ruins (ABAN-Serie) ===
+
+aot-ts-aban01:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xx xx xx xx xx XX
+		Dimensions: 2,6
+	Selectable:
+		Bounds: 2048, 6144
+	Health:
+		HP: 60000
+	Armor:
+		Type: Wood
+	RenderSprites:
+		Image: aot-ts-aban01
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: WS Logging Company
+	MapEditorData:
+		Categories: Civilian City (Ruins)
+
+aot-ts-aban02:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xxxxx xxxxx XXXxX
+		Dimensions: 5,3
+	Selectable:
+		Bounds: 5120, 3072
+	Health:
+		HP: 60000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-aban02
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Panullo Hacienda
+	MapEditorData:
+		Categories: Civilian City (Ruins)
+
+aot-ts-aban03:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xx xx xx xx XX
+		Dimensions: 2,5
+	Selectable:
+		Bounds: 2048, 5120
+	Health:
+		HP: 50000
+	Armor:
+		Type: Wood
+	RenderSprites:
+		Image: aot-ts-aban03
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Abandoned Factory
+	MapEditorData:
+		Categories: Civilian City (Ruins)
+
+aot-ts-aban04:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xxxX xxxX
+		Dimensions: 4,2
+	Selectable:
+		Bounds: 4096, 2048
+	Health:
+		HP: 40000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-aban04
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: City Hall
+	MapEditorData:
+		Categories: Civilian City (Ruins)
+
+aot-ts-aban05:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xxX xxX
+		Dimensions: 3,2
+	Selectable:
+		Bounds: 3072, 2048
+	Health:
+		HP: 50000
+	Armor:
+		Type: Wood
+	RenderSprites:
+		Image: aot-ts-aban05
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Hunting Lodge
+	MapEditorData:
+		Categories: Civilian City (Ruins)
+
+aot-ts-aban06:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xx xx
+		Dimensions: 2,2
+	Selectable:
+		Bounds: 2048, 2048
+	Health:
+		HP: 50000
+	Armor:
+		Type: Wood
+	RenderSprites:
+		Image: aot-ts-aban06
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Local Inn & Lodging
+	MapEditorData:
+		Categories: Civilian City (Ruins)
+
+aot-ts-aban07:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xx xx
+		Dimensions: 2,2
+	Selectable:
+		Bounds: 2048, 2048
+	Health:
+		HP: 35000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-aban07
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Church
+	MapEditorData:
+		Categories: Civilian City (Ruins)
+
+aot-ts-aban08:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xx xx
+		Dimensions: 2,2
+	Selectable:
+		Bounds: 2048, 2048
+	Health:
+		HP: 50000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-aban08
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Abandoned Warehouse
+	MapEditorData:
+		Categories: Civilian City (Ruins)
+
+aot-ts-aban09:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xx xx
+		Dimensions: 2,2
+	Selectable:
+		Bounds: 2048, 2048
+	Health:
+		HP: 35000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-aban09
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Tall's Residence
+	MapEditorData:
+		Categories: Civilian City (Ruins)
+
+aot-ts-aban10:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xx xx
+		Dimensions: 2,2
+	Selectable:
+		Bounds: 2048, 2048
+	Health:
+		HP: 50000
+	Armor:
+		Type: Wood
+	RenderSprites:
+		Image: aot-ts-aban10
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Denzil's Last Chance Motel
+	MapEditorData:
+		Categories: Civilian City (Ruins)
+
+aot-ts-aban11:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xx xx
+		Dimensions: 2,2
+	Selectable:
+		Bounds: 2048, 2048
+	Health:
+		HP: 40000
+	Armor:
+		Type: Wood
+	RenderSprites:
+		Image: aot-ts-aban11
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Miele Manor
+	MapEditorData:
+		Categories: Civilian City (Ruins)
+
+aot-ts-aban12:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xx xx
+		Dimensions: 2,2
+	Selectable:
+		Bounds: 2048, 2048
+	Health:
+		HP: 40000
+	Armor:
+		Type: Wood
+	RenderSprites:
+		Image: aot-ts-aban12
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Kettler's Place
+	MapEditorData:
+		Categories: Civilian City (Ruins)
+
+aot-ts-aban13:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x
+		Dimensions: 1,1
+	Selectable:
+		Bounds: 1024, 1024
+	Health:
+		HP: 40000
+	Armor:
+		Type: Wood
+	RenderSprites:
+		Image: aot-ts-aban13
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Long's Home
+	MapEditorData:
+		Categories: Civilian City (Ruins)
+
+aot-ts-aban14:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x
+		Dimensions: 1,1
+	Selectable:
+		Bounds: 1024, 1024
+	Health:
+		HP: 30000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-aban14
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Local Store
+	MapEditorData:
+		Categories: Civilian City (Ruins)
+
+aot-ts-aban15:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x
+		Dimensions: 1,1
+	Selectable:
+		Bounds: 1024, 1024
+	Health:
+		HP: 40000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-aban15
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Adam's House
+	MapEditorData:
+		Categories: Civilian City (Ruins)
+
+aot-ts-aban16:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xx xX
+		Dimensions: 2,2
+	Selectable:
+		Bounds: 2048, 2048
+	Health:
+		HP: 40000
+	Armor:
+		Type: Wood
+	RenderSprites:
+		Image: aot-ts-aban16
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Gas Station
+	MapEditorData:
+		Categories: Civilian City (Ruins)
+
+aot-ts-aban17:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x
+		Dimensions: 1,1
+	Selectable:
+		Bounds: 1024, 1024
+	Health:
+		HP: 40000
+	Armor:
+		Type: Wood
+	RenderSprites:
+		Image: aot-ts-aban17
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Gas Pumps
+	MapEditorData:
+		Categories: Civilian City (Ruins)
+
+aot-ts-aban18:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x
+		Dimensions: 1,1
+	Selectable:
+		Bounds: 1024, 1024
+	Health:
+		HP: 40000
+	Armor:
+		Type: Wood
+	RenderSprites:
+		Image: aot-ts-aban18
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Gas Station Sign
+	MapEditorData:
+		Categories: Civilian City (Ruins)
+
+# === Age of Tiberium (aotmod) - Civilian Array (nur Import, fuer spaeteres Superweapon-Gebaeude) ===
+
+aot-ts-ctaray:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xx xx
+		Dimensions: 2,2
+	Selectable:
+		Bounds: 2048, 2048
+	Health:
+		HP: 40000
+	Armor:
+		Type: Concrete
+	RenderSprites:
+		Image: aot-ts-ctaray
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Civilian Array
+
+# === Age of Tiberium (aotmod) - Pyramiden (nur AOT_DESERT) ===
+
+aot-ts-ctpyr01:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xx xx
+		Dimensions: 2,2
+	Selectable:
+		Bounds: 2048, 2048
+	Health:
+		HP: 40000
+	Armor:
+		Type: Concrete
+	RenderSprites:
+		Image: aot-ts-ctpyr01
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Small Pyramid
+	MapEditorData:
+		RequireTilesets: AOT_DESERT
+
+aot-ts-ctpyr02:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xxxx xxxx xxxx xxxx
+		Dimensions: 4,4
+	Selectable:
+		Bounds: 4096, 4096
+	Health:
+		HP: 40000
+	Armor:
+		Type: Concrete
+	RenderSprites:
+		Image: aot-ts-ctpyr02
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Pyramid
+	MapEditorData:
+		RequireTilesets: AOT_DESERT
+
+aot-ts-ctpyr03:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xxxx xxxx xxxx xxxx
+		Dimensions: 4,4
+	Selectable:
+		Bounds: 4096, 4096
+	Health:
+		HP: 40000
+	Armor:
+		Type: Concrete
+	RenderSprites:
+		Image: aot-ts-ctpyr03
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Great Pyramid
+	MapEditorData:
+		RequireTilesets: AOT_DESERT
+
+# === Age of Tiberium (aotmod) - Light Posts (nur Import, fuer spaetere Verwendung) ===
+# REDLAMP/GRENLAMP/BLUELAMP/YELWLAMP/PURPLAMP nutzen identisches Sprite wie GALITE,
+# unterscheiden sich in TS nur durch die Farbe der TerrainLightSource zur Laufzeit.
+# TerrainLightSource ist HIER NOCH NICHT aktiv: der Trait erfordert einen World-weiten
+# "TerrainLighting"-Trait, den dieser Mod bisher nicht registriert hat (Engine-Crash beim
+# Laden ohne ihn). Vorerst rein dekorativ importiert, farbige Lichtquelle als offener Punkt.
+
+aot-ts-galite:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x
+		Dimensions: 1,1
+	Selectable:
+		Bounds: 1024, 1024
+	Health:
+		HP: 60000
+	Armor:
+		Type: Wood
+	RenderSprites:
+		Image: aot-ts-galite
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Light Post
+
+aot-ts-redlamp:
+	Inherits: aot-ts-galite
+	Tooltip:
+		Name: Red Light Post
+
+aot-ts-grenlamp:
+	Inherits: aot-ts-galite
+	Tooltip:
+		Name: Green Light Post
+
+aot-ts-bluelamp:
+	Inherits: aot-ts-galite
+	Tooltip:
+		Name: Blue Light Post
+
+aot-ts-yelwlamp:
+	Inherits: aot-ts-galite
+	Tooltip:
+		Name: Yellow Light Post
+
+aot-ts-purplamp:
+	Inherits: aot-ts-galite
+	Tooltip:
+		Name: Purple Light Post
+
+# === Age of Tiberium (aotmod) - Ancient Pyramid (CTVEGA), normale Civilian Buildings ===
+
+aot-ts-ctvega:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xxxx xxxx xxxx xxxx
+		Dimensions: 4,4
+	Selectable:
+		Bounds: 4096, 4096
+	Health:
+		HP: 10000
+	Armor:
+		Type: None
+	RenderSprites:
+		Image: aot-ts-ctvega
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Ancient Pyramid
+
+# === Age of Tiberium (aotmod) - Hydroelectric Dam (nur Import, fuer spaetere Verwendung) ===
+
+aot-ts-ctdam:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: xx xx xx xx xx
+		Dimensions: 2,5
+	Selectable:
+		Bounds: 2048, 5120
+	Health:
+		HP: 100000
+	Armor:
+		Type: Heavy
+	RenderSprites:
+		Image: aot-ts-ctdam
+		Palette: aot-ts-isotem
+	Tooltip:
+		Name: Hydroelectric Dam
+# === Ende aotmod ===

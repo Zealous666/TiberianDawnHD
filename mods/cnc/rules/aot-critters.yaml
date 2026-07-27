@@ -136,3 +136,27 @@ aot-ant-spawner:
 		DefaultMaxAnts: 3
 		DefaultPatrolRadius: 5
 		SpawnInterval: 150
+
+# === Age of Tiberium (aotmod) — Visceroid (vanilla TD-Creep, VICE) ===
+# Echte vanilla-Einheit (siehe engine/mods/cnc/rules/civilian.yaml: VICE erbt ^Viceroid +
+# AttackWander) -- volle Original-Stats (HP 30000, Armor Light, Speed 68), keine eigene
+# Balance-Aenderung. Wird vom Vein-Heart per AotVisceroidSpawner nachgespawnt.
+aot-visceroid:
+	Inherits: VICE
+	# RenderSprites.Image defaultet auf den Aktornamen ("aot-visceroid"), aber die Sequenz
+	# heisst "vice" -- ohne diesen Override sucht die Engine nach nicht existenten
+	# aot-visceroid-Sequenzen ("Image does not have any sequences defined").
+	RenderSprites:
+		Image: vice
+	# VICE's eingebautes AttackWander nutzt bare WandersInfo-Defaults (Radius 1, Delay 0/0) --
+	# praktisch unsichtbares Wandern. Ersetzt durch AotVisceroidWander (Radius kommt vom
+	# Heart-Editor-Regler, siehe AotVisceroidSpawner), gleiches Pattern wie AotAntWander.
+	-AttackWander:
+	AotVisceroidWander:
+		DefaultWanderRadius: 8
+		MinMoveDelay: 25
+		MaxMoveDelay: 90
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral, Creeps
+	MapEditorData:
+		Categories: Critter

@@ -95,6 +95,11 @@ namespace OpenRA.Mods.Common.Traits
 
 		public virtual void OnUnitAssigned(Actor a) { Units.Add(a); }
 
+		// May this mission absorb spare units that have been sitting in the pool doing nothing?
+		// Fixed-composition missions (scouts, derrick squads, ferries) say no -- they would be thrown
+		// off by arbitrary extra units.
+		public virtual bool AcceptsReinforcements => false;
+
 		protected void Log(string message)
 		{
 			OpenRA.Log.Write("debug", $"[AotOps][{Ops.Player.PlayerName}][{Name}] {message}");
@@ -264,8 +269,27 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Number of transports built (and reused across waves) to ferry a wave across water.")]
 		public readonly int FerryCount = 2;
 
+		[Desc("Global cap on transports across ALL ferry missions at once. FerryCount is per mission,",
+			"so without this each concurrent ferrying mission builds its own fleet.")]
+		public readonly int FerryMaxTotal = 2;
+
+		// Was 14, independent of every other coastal-search radius in this AI (NavalSiteSearchRadius=20,
+		// MaxBridgeLength=24) -- confirmed root cause 2026-07-22 of a wave never requesting naval
+		// production despite a real, buildable coastal site existing: yard-to-approach distance on the
+		// test map was 19 cells, inside NavalSiteSearchRadius (so AotBaseBuilderBotModule found and
+		// logged a valid Sub Pen site) but outside FerrySearchRadius (so TryStartFerry's OWN coastal
+		// search failed first with "no coastal embark/landing cell found nearby" and never even reached
+		// the RequestNavalProduction() call). Raised to match MaxBridgeLength so the same coast is
+		// reachable by every coastal search in this AI, not just some of them.
 		[Desc("Radius in cells to search for a coastal embark/landing cell around the reference point.")]
-		public readonly int FerrySearchRadius = 14;
+		public readonly int FerrySearchRadius = 24;
+
+		[Desc("Locomotor name of FerryTypes (e.g. \"aot-lst\") -- used to verify the chosen embark/landing",
+			"cell's adjacent water is actually ship-navigable, not just orthogonally Water-typed terrain",
+			"(a rock-enclosed inlet can satisfy the terrain check but be unreachable by a real ship, leaving",
+			"the ship parked a few cells short forever -- confirmed 2026-07-22: ship idle at",
+			"dist2ToEmbark=5 for 14+ ticks, nobody ever boarded). Leave empty to skip the check.")]
+		public readonly string FerryLocomotor = null;
 
 		[Desc("Ferry phase timeout; proceeds with whoever made it ashore, or cancels the wave if",
 			"nobody did.")]
@@ -392,6 +416,11 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Ticks between mission ticks.")]
 		public readonly int MissionInterval = 25;
 
+		[Desc("Ticks a unit may sit unused in the shared pool before it is folded into an active",
+			"combat mission. Without this, any unit whose type no mission happens to ask for parks in",
+			"the base for the rest of the match.")]
+		public readonly int PoolIdleReinforceTicks = 1500;
+
 		public override object Create(ActorInitializer init) { return new AotOperationsBotModule(init.Self, this); }
 	}
 
@@ -407,6 +436,9 @@ namespace OpenRA.Mods.Common.Traits
 		public readonly List<AotMission> Missions = [];
 		readonly Dictionary<Actor, AotMission> owned = [];
 		readonly List<Actor> pool = [];
+
+		// World tick each pooled unit entered the pool, so idlers can be spotted and put to use.
+		readonly Dictionary<Actor, int> pooledSince = [];
 		readonly List<AotProductionRequest> requests = [];
 		readonly HashSet<Actor> knownUnits = [];
 		readonly Predicate<Actor> unitCannotBeOrdered;
@@ -432,6 +464,18 @@ namespace OpenRA.Mods.Common.Traits
 		int rallyCheckTicks;
 		readonly HashSet<int> scoutGroupsLaunched = [];
 		readonly Dictionary<int, List<CPos>> scoutAssignments = [];
+
+		// Every concurrent ferry mission (scouts + tank waves) independently searched for the
+		// nearest coastal cell to the SAME BaseCentre(), so they all converged on the exact same
+		// embark cell and dock -- crowding units from unrelated missions onto one tiny landing
+		// spot, blocking each other's approach to the ship (User 2026-07-23: "alle Küstenzellen
+		// sind von anderen Transport-Wartegästen belegt"). Missions claim an embark cell here once
+		// found and release it when their ferry finishes/fails, so FindCoastalCellNear can steer
+		// later callers to a different stretch of shore instead of piling onto the same one.
+		readonly HashSet<CPos> claimedEmbarkCells = [];
+		public IReadOnlyCollection<CPos> ClaimedEmbarkCells => claimedEmbarkCells;
+		public void ClaimEmbarkCell(CPos c) => claimedEmbarkCells.Add(c);
+		public void ReleaseEmbarkCell(CPos c) => claimedEmbarkCells.Remove(c);
 
 		public AotOperationsBotModule(Actor self, AotOperationsBotModuleInfo info)
 			: base(info)
@@ -691,6 +735,7 @@ namespace OpenRA.Mods.Common.Traits
 			}
 
 			Schedule(bot);
+			SweepIdlePool(bot);
 
 			if (--missionTicks <= 0)
 			{
@@ -729,13 +774,24 @@ namespace OpenRA.Mods.Common.Traits
 			}
 		}
 
+		// "Really gone", as opposed to CannotOrder's "cannot be given an order right now".
+		//
+		// A passenger riding a transport is alive but NOT in the world, so CannotOrder is true for it.
+		// Using that to prune mission rosters silently deleted every unit the moment it boarded a ferry:
+		// the mission then saw an empty roster, concluded the group had been wiped out and cancelled
+		// itself mid-crossing -- the "embark but never disembark" behaviour (User 2026-07-24), and the
+		// reason ferrying looked so erratic. Only death (or changing owner) removes a unit here.
+		public bool IsGone(Actor a) => a == null || a.Owner != Player || a.IsDead;
+
 		void CleanDead()
 		{
 			foreach (var m in Missions)
-				m.Units.RemoveWhere(unitCannotBeOrdered);
-			pool.RemoveAll(unitCannotBeOrdered);
-			knownUnits.RemoveWhere(unitCannotBeOrdered);
-			foreach (var dead in owned.Keys.Where(a => unitCannotBeOrdered(a)).ToList())
+				m.Units.RemoveWhere(IsGone);
+			pool.RemoveAll(a => IsGone(a));
+			foreach (var gone in pooledSince.Keys.Where(IsGone).ToList())
+				pooledSince.Remove(gone);
+			knownUnits.RemoveWhere(IsGone);
+			foreach (var dead in owned.Keys.Where(IsGone).ToList())
 				owned.Remove(dead);
 		}
 
@@ -774,7 +830,7 @@ namespace OpenRA.Mods.Common.Traits
 					starting.OnUnitAssigned(a);
 				}
 				else
-					pool.Add(a);
+					PoolAdd(a);
 			}
 
 			Log($"initial claim: {(starting != null ? starting.Units.Count : pool.Count)} unit(s)");
@@ -810,7 +866,7 @@ namespace OpenRA.Mods.Common.Traits
 				}
 				else
 				{
-					pool.Add(a);
+					PoolAdd(a);
 					Log($"claim {a.Info.Name}@{a.Location} -> pool ({pool.Count})");
 				}
 			}
@@ -819,6 +875,9 @@ namespace OpenRA.Mods.Common.Traits
 		}
 
 		// ---- Production -----------------------------------------------------
+
+		// Role tag for naval ferry transports -- exempt from the production cash reserve, see PumpProduction.
+		public const string FerryRole = "ferry";
 
 		public void QueueRequest(AotMission mission, string role, string[] chain, int count)
 		{
@@ -837,6 +896,26 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			return requests.Where(r => r.Mission == mission).Sum(r => r.Remaining);
 		}
+
+		// How many more transports may be produced right now, across the WHOLE AI.
+		//
+		// FerryCount is per mission, so with several ferry missions running at once (a derrick squad,
+		// an attack wave and two scout groups all needing to cross) each independently asked for its
+		// own FerryCount and the AI ended up building far more ships than intended -- confirmed
+		// 2026-07-24: FerryCount=2 but four transports produced, most of them idling. This caps the
+		// fleet globally; missions share the surplus through the pool instead of each building its own.
+		public int FerryBudget()
+		{
+			var queued = requests.Where(r => r.Role == FerryRole).Sum(r => r.Remaining);
+			return Math.Max(0, Info.FerryMaxTotal - OwnedFerryCount() - queued);
+		}
+
+		// Transports the AI owns right now, no matter which mission is using them. A mission that
+		// currently has none must NOT conclude that ferrying is impossible while these exist -- they
+		// are shared through the pool and become available again after each crossing.
+		public int OwnedFerryCount() =>
+			World.Actors.Count(a => a.Owner == Player && !a.IsDead && a.IsInWorld
+				&& Info.FerryTypes.Contains(a.Info.Name));
 
 		public string FirstBuildable(string[] chain)
 		{
@@ -873,14 +952,22 @@ namespace OpenRA.Mods.Common.Traits
 			if (requests.Count == 0)
 				return;
 
-			if (playerResources.GetCashAndResources() < Info.ProductionMinCash)
-				return;
+			// The cash reserve keeps the AI from spending its last credits on ordinary units. It must
+			// NOT apply to a ferry transport: an entire mission is blocked waiting for that one ship,
+			// and on a poor spawn (no land route to the derricks) cash+ore can sit under the reserve
+			// indefinitely -- confirmed 2026-07-24: cash=0/ore~250 for the whole match, "transports
+			// requested" logged repeatedly, yet `produce aot-transport` never fired once and every
+			// ferry timed out. Everything else still respects the reserve (User spec).
+			var reserveMet = playerResources.GetCashAndResources() >= Info.ProductionMinCash;
 
 			var queuesByCategory = AIUtils.FindQueuesByCategory(Player);
 			var usedQueues = new HashSet<ProductionQueue>();
 
 			foreach (var request in requests)
 			{
+				if (!reserveMet && request.Role != FerryRole)
+					continue;
+
 				// Reconcile leaked orders: nothing of this chain is anywhere in production anymore.
 				if (request.Ordered > 0 && World.WorldTick > request.LastOrderTick + 1500)
 				{
@@ -931,6 +1018,47 @@ namespace OpenRA.Mods.Common.Traits
 
 		// ---- Pool -----------------------------------------------------------
 
+		void PoolAdd(Actor a)
+		{
+			pool.Add(a);
+			pooledSince[a] = World.WorldTick;
+		}
+
+		void PoolRemove(Actor a)
+		{
+			pool.Remove(a);
+			pooledSince.Remove(a);
+		}
+
+		// Units nobody asked for pile up in the pool and would otherwise stand around in the base for
+		// the rest of the match (User 2026-07-25: "zieht er parkende einheiten nicht nach"). TakeFromPool
+		// only matches a mission's own type chain, and base defense stops drawing once its garrison
+		// target is met -- so any leftover type never gets picked up again. Fold long-idle units into an
+		// active combat mission instead.
+		void SweepIdlePool(IBot bot)
+		{
+			if (Info.PoolIdleReinforceTicks <= 0 || pool.Count == 0)
+				return;
+
+			var stale = pool.Where(a => !unitCannotBeOrdered(a)
+				&& pooledSince.TryGetValue(a, out var since)
+				&& World.WorldTick - since >= Info.PoolIdleReinforceTicks).ToList();
+			if (stale.Count == 0)
+				return;
+
+			// Prefer an actual attack mission (gets them into the fight); fall back to the garrison.
+			var target = Missions.FirstOrDefault(m => !m.Done && m.AcceptsReinforcements && m is AotRegularWaveMission)
+				?? Missions.FirstOrDefault(m => !m.Done && m.AcceptsReinforcements);
+			if (target == null)
+				return;
+
+			foreach (var a in stale)
+				PoolRemove(a);
+
+			AssignFromPool(target, stale);
+			Log($"pool sweep: {stale.Count} idle unit(s) reinforced {target.Name}");
+		}
+
 		public void ReleaseToPool(AotMission mission, List<Actor> units)
 		{
 			foreach (var a in units)
@@ -938,7 +1066,7 @@ namespace OpenRA.Mods.Common.Traits
 				if (unitCannotBeOrdered(a))
 					continue;
 				owned.Remove(a);
-				pool.Add(a);
+				PoolAdd(a);
 			}
 		}
 
@@ -946,7 +1074,7 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			var taken = pool.Where(a => chain.Contains(a.Info.Name)).Take(count).ToList();
 			foreach (var a in taken)
-				pool.Remove(a);
+				PoolRemove(a);
 			return taken;
 		}
 
@@ -957,7 +1085,7 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			var taken = pool.Take(count).ToList();
 			foreach (var a in taken)
-				pool.Remove(a);
+				PoolRemove(a);
 			return taken;
 		}
 
@@ -1050,9 +1178,15 @@ namespace OpenRA.Mods.Common.Traits
 
 				if (freeSlots > 0)
 				{
+					// A derrick with no land route used to be filtered out here entirely, so a squad was
+					// never even formed for it. The capture squad can now cross with a transport
+					// (User 2026-07-24), so those count as candidates too -- still ranked behind every
+					// walkable derrick, and only when a ferry chain is configured at all.
 					var candidates = Intel.UncontrolledDerricksAnywhere()
-						.Where(d => Intel.IsReachable(d.Location) && !pursued.Any(m => m.Derrick == d))
-						.OrderBy(d => (d.Location - baseCentre).LengthSquared)
+						.Where(d => !pursued.Any(m => m.Derrick == d))
+						.Where(d => Intel.IsReachable(d.Location) || Info.FerryTypes.Length > 0)
+						.OrderBy(d => Intel.IsReachable(d.Location) ? 0 : 1)
+						.ThenBy(d => (d.Location - baseCentre).LengthSquared)
 						.Take(freeSlots);
 
 					foreach (var derrick in candidates)

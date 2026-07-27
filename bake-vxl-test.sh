@@ -26,6 +26,9 @@ COLOR="${5:-gdi}"
 # Body-Helligkeit (nur Nicht-Player-Color). 1.0 = unverändert, 0.9 = 10% dunkler. Via Env:
 #   BRIGHTNESS=0.9 ./bake-vxl-test.sh ...
 BRIGHTNESS="${BRIGHTNESS:-1.0}"
+# Body-Sättigung (nur Nicht-Player-Color). 1.0 = volle Farbe, 0.1 = 90% desaturiert (fast silbergrau). Via Env:
+#   SATURATION=0.1 ./bake-vxl-test.sh ...
+SATURATION="${SATURATION:-1.0}"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ENGINE_DIR="${SCRIPT_DIR}/engine"
@@ -53,7 +56,7 @@ MOD_SEARCH_PATHS="${SCRIPT_DIR}/mods" ENGINE_DIR=".." \
     --vxl-to-png "${TMP_DIR}/${VXL}.vxl" "${TMP_DIR}/${VXL}.hva" "${TMP_DIR}/unittem.pal" \
     --facings 32 --scale "${SCALE}" --pitch 30 --yaw 225 \
     --light-yaw 240 --light-pitch 50 --ambient 0.6 --diffuse 0.4 \
-    --supersample 8 --facing-offset 45 --facing-flip --brightness "${BRIGHTNESS}" \
+    --supersample 8 --facing-offset 45 --facing-flip --brightness "${BRIGHTNESS}" --saturation "${SATURATION}" \
     --remap-sheet "${TMP_DIR}/aot-${OUT}-test-remap.png" --remap-floor "${REMAP_FLOOR}" \
     --output-dir "${RENDER_DIR}" 2>&1 | grep -E "Voxels|Saved|overlay"
 
@@ -103,7 +106,7 @@ if [ -n "${ARCHIVE_DIR}" ]; then
         --vxl-to-png "${TMP_DIR}/${VXL}.vxl" "${TMP_DIR}/${VXL}.hva" "${TMP_DIR}/unittem.pal" \
         --facings 32 --scale "${SCALE}" --pitch 30 --yaw 225 \
         --light-yaw 240 --light-pitch 50 --ambient 0.6 --diffuse 0.4 \
-        --supersample 8 --facing-offset 45 --facing-flip --brightness "${BRIGHTNESS}" \
+        --supersample 8 --facing-offset 45 --facing-flip --brightness "${BRIGHTNESS}" --saturation "${SATURATION}" \
         --player-color "${COLOR}" \
         --output-dir "${ABS_ARCHIVE}" 2>&1 | grep -E "Saved"
     # Frames auf OUT-Namen umbenennen (Renderer nutzt VXL-Basisnamen)

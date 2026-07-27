@@ -26,6 +26,8 @@ World:
 	# Eis-System: haelt die Menge aller vereisten Zellen (Hosts + gewachsene Zellen).
 	# Die Zellen fragen darueber ihre geteilten Ecken ab -> stetige Kanten.
 	AotIceLayer:
+	# Tiberian-Veins-System (Klon des Eis-Systems): haelt alle vom Geflecht bedeckten Zellen.
+	AotVeinLayer:
 	# Foundation-System: haelt die Menge aller platzierten BIB-Boden-Zellen.
 	# Die Zellen fragen ihre 4 Nachbarn ab -> stetiger Kantenübergang (face-adjacency).
 	AotFoundationLayer:
@@ -310,6 +312,19 @@ V37.Husk:
 		Damage: 40
 		DamageInterval: 25
 		DamageTypes: TiberiumDeath
+	# === Tiberian Veins: Gebaeude nehmen Schaden, wenn Geflecht angrenzt (wie in TS) ===
+	# TS-Original (firestrm.ini): `ImmuneToVeins=yes` existiert nur bei einzelnen Einheiten
+	# (REAPER, JFISH, DEFENDER, HUEY, Zivilisten, DOGGIE) -> impliziert, dass in TS grundsaetzlich
+	# ALLES (auch Gebaeude) Vein-Schaden nimmt, sofern nicht explizit ausgenommen. Vorher hatten
+	# NUR Fahrzeuge (^Vehicle) einen Vein-DoT, Gebaeude gar keinen. Anders als beim Fahrzeug-DoT
+	# (der auf der EIGENEN Zelle prueft) hier PROXIMITY-basiert: Footprint-Zellen + deren direkte
+	# Nachbarn, damit auch angrenzendes (nicht ueberwachsenes) Geflecht zaehlt.
+	# ⚠️ Kein TS-Originalwert auffindbar (firestrm.ini = nur Firestorm-Overrides, keine
+	# Basis-Werte) -> an die bestehende Gas-Ambient-Schaden-Kalibrierung angelehnt (Damage:40/1s).
+	AotDamagedByAdjacentVeins@VEINS:
+		Damage: 180
+		DamageInterval: 25
+		DamageTypes: TiberiumDeath
 	# === Nod Stealth Generator (aot-sgen) - Stealth Field ===
 	# Jedes Gebaeude kann getarnt werden, solange es im Feld eines aktiven Stealth Generators
 	# steht (der die External-Condition aot-stealth-field gewaehrt). Ausserhalb des Feldes ist
@@ -439,31 +454,37 @@ RMBO:
 		Crushes: crate, mine
 		TerrainSpeeds:
 			Ice: 85
+			Veins: 100
 			Clear.Snow: 100
 	Locomotor@CHEM:
 		Crushes: crate, mine
 		TerrainSpeeds:
 			Ice: 85
+			Veins: 100
 			Clear.Snow: 100
 	Locomotor@WHEELED:
 		Crushes: crate, mine
 		TerrainSpeeds:
 			Ice: 90
+			Veins: 100
 			Clear.Snow: 100
 	Locomotor@HEAVYWHEELED:
 		Crushes: crate, infantry, mine
 		TerrainSpeeds:
 			Ice: 90
+			Veins: 100
 			Clear.Snow: 100
 	Locomotor@TRACKED:
 		Crushes: wall, crate, infantry, mine
 		TerrainSpeeds:
 			Ice: 95
+			Veins: 100
 			Clear.Snow: 100
 	Locomotor@HEAVYTRACKED:
 		Crushes: wall, heavywall, crate, infantry, mine
 		TerrainSpeeds:
 			Ice: 95
+			Veins: 100
 			Clear.Snow: 100
 	Locomotor@LANDINGCRAFT:
 		TerrainSpeeds:
@@ -474,15 +495,34 @@ RMBO:
 	Locomotor@VISC:
 		TerrainSpeeds:
 			Clear.Snow: 100
+			Veins: 100
 	# Hover gleitet ueber Eis wie ueber Wasser.
 	# Land-Malus abgeschwaecht: Engine-Original hat 33 auf Clear/Rough/Road/Tiberium/
 	# BlueTiberium/River -> hier auf 75 angehoben (aot-transport-hover, Speed 115:
 	# 37 -> 86). Water/Beach/Ice bleiben bei 100 (= 115). Einziger Nutzer des
 	# hover-Locomotors ist aot-transport-hover. Siehe [[hover-transport-system]].
+	# Giftwolke (aot-gascloud): darf praktisch ueberall hindriften (Wasser, Veins, Tiberium),
+	# teilt sich die Zelle mit allen (SharesCell) -- blockiert/kollidiert nicht mit echten
+	# Einheiten, ist rein optisch+DoT-Aura. Siehe [[vein-system]].
+	Locomotor@AOT_GAS:
+		Name: aot-gas
+		SharesCell: true
+		TerrainSpeeds:
+			Clear: 60
+			Rough: 60
+			Road: 60
+			Sand: 60
+			Beach: 60
+			Water: 60
+			Tiberium: 60
+			BlueTiberium: 60
+			Veins: 60
+			Ice: 60
 	Locomotor@HOVER:
 		Crushes: crate
 		TerrainSpeeds:
 			Ice: 100
+			Veins: 100
 			Clear: 75
 			Clear.Snow: 75
 			Rough: 75
@@ -506,6 +546,7 @@ RMBO:
 			Water: 100
 			River: 100
 			Ice: 100
+			Veins: 100
 	# === Age of Tiberium (aotmod) - Amphibious APC Locomotor ===
 	Locomotor@AOT_AMPHIBIOUS:
 		Name: aot-amphibious
@@ -522,6 +563,7 @@ RMBO:
 			Water: 80
 			# Amphibisch -> darf aufs Eis (wie Hover/LST). Reine Schiffe duerfen das NICHT.
 			Ice: 90
+			Veins: 100
 	# === Age of Tiberium (aotmod) - LST-Locomotor: naval + Eis ===
 	# Das LST (aot-transport) ist amphibisch und soll auf zugefrorene Flaechen koennen.
 	# Es teilte sich bisher "naval" mit den echten Schiffen (aot-gunboat/-sub/-msub/-cruiser),
@@ -532,6 +574,7 @@ RMBO:
 		TerrainSpeeds:
 			Water: 100
 			Ice: 80
+			Veins: 100
 	# === Age of Tiberium (aotmod) - Zone Trooper Jumpjet-Locomotor ===
 	# Kann Rock (unpassierbare Klippen/Berge) und River kurz überspringen (JumpjetTransitionTerrainTypes),
 	# aber NICHT Water (Ozean) — bewusst kein Hovercraft-Ersatz, siehe [[orbc-system]].
@@ -1004,6 +1047,11 @@ aot-proc-nod-age2:
 # === Age of Tiberium (aotmod) - APC: erst nach APC Upgrade baubar ===
 # Verhindert APC-Produktion bis der Spieler das APC Upgrade (Entweder/Oder) kauft.
 APC:
+	# Eis: bricht NICHT ein (leicht genug). Am Basis-Aktor -> alle Proxies (aot-jeep-humvee,
+	# aot-jeep-wolverine, aot-bggy/bike-laser, aot-apc-*) erben es automatisch. Siehe [[ice-growth-system]].
+	AotIceUnbreakable:
+	# Veins: kein DoT (leicht genug), analog zum Eis-AotIceUnbreakable. Proxies erben es.
+	-DamagedByTerrain@VEINS:
 	Buildable:
 		ShowWhenLocked: False
 		Prerequisites: lite, ~aot-apc-upgrade, ~!aot-humvee-upgrade, ~!aot-amphibious-upgrade, ~!aot-minelayer-upgrade
@@ -1205,6 +1253,11 @@ HELI:
 # Laser wie der Harpy (aot-HarpyLaser). Kein eigener Upgrade-Aktor noetig -
 # die Condition greift direkt auf das globale Prerequisite zu (analog HELI/Harpy).
 BGGY:
+	# Eis: bricht NICHT ein (leicht genug). Am Basis-Aktor -> alle Proxies (aot-jeep-humvee,
+	# aot-jeep-wolverine, aot-bggy/bike-laser, aot-apc-*) erben es automatisch. Siehe [[ice-growth-system]].
+	AotIceUnbreakable:
+	# Veins: kein DoT (leicht genug), analog zum Eis-AotIceUnbreakable. Proxies erben es.
+	-DamagedByTerrain@VEINS:
 	-Buildable:
 	GrantConditionOnPrerequisite@laserupgrade:
 		Condition: aot-bggy-laser
@@ -1394,6 +1447,11 @@ JEEP:
 		CargoType: GarrisonVehicle
 		Weight: 5
 		CustomPipType: green
+	# Eis: bricht NICHT ein (leicht genug). Am Basis-Aktor -> alle Proxies (aot-jeep-humvee,
+	# aot-jeep-wolverine, aot-bggy/bike-laser, aot-apc-*) erben es automatisch. Siehe [[ice-growth-system]].
+	AotIceUnbreakable:
+	# Veins: kein DoT (leicht genug), analog zum Eis-AotIceUnbreakable. Proxies erben es.
+	-DamagedByTerrain@VEINS:
 BGGY:
 	Passenger:
 		CargoType: GarrisonVehicle
@@ -1450,6 +1508,11 @@ FTNK:
 # Laser-Switch analog BGGY: GrantConditionOnPrerequisite greift auf aot-laser-fence-upgrade.
 # Zwei Laser-Armaments (links/rechts, gleiche Offsets wie Original-Raketen).
 BIKE:
+	# Eis: bricht NICHT ein (leicht genug). Am Basis-Aktor -> alle Proxies (aot-jeep-humvee,
+	# aot-jeep-wolverine, aot-bggy/bike-laser, aot-apc-*) erben es automatisch. Siehe [[ice-growth-system]].
+	AotIceUnbreakable:
+	# Veins: kein DoT (leicht genug), analog zum Eis-AotIceUnbreakable. Proxies erben es.
+	-DamagedByTerrain@VEINS:
 	-Buildable:
 	# Garrison-faehig (Armament@garrisoned unten) -> GarrisonVehicle statt ^Vehicle-Default.
 	Passenger:
@@ -1487,6 +1550,15 @@ BIKE:
 
 # === Age of Tiberium (aotmod) - Fahrzeuge capturable für Carjacker ===
 ^Vehicle:
+	# === Tiberian Veins: langsamer DoT auf dem Geflecht (wie Tiberium bei Infanterie) ===
+	# Analog zum Eis-Einbrechen, aber nicht abrupt: solange das Fahrzeug auf Terrain "Veins"
+	# steht, alle 16 Ticks etwas Schaden. Die leichten Fahrzeuge (JEEP/BGGY/BIKE/APC + Proxies)
+	# entfernen diesen Trait wieder (-DamagedByTerrain@VEINS) -- dieselbe Ausnahme wie beim Eis.
+	DamagedByTerrain@VEINS:
+		Terrain: Veins
+		Damage: 900
+		DamageInterval: 16
+		DamageTypes: TiberiumDeath
 	# === Age of Tiberium (aotmod) - Cargo: ALLE Bodenfahrzeuge sind transportierbar ===
 	# Zentral hier statt pro Aktor: der Engine-Default (^Vehicle in cnc|rules/defaults.yaml)
 	# ist CargoType: Vehicle / Weight: 1. Diesen Typ akzeptiert KEIN Cargo im Mod

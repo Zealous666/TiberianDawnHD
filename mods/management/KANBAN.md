@@ -23,6 +23,7 @@
   - [ ] TS lightning & ambient sounds
   - [ ] stealth sammler
   - [ ] gdi carryall harvester routine
+  - [ ] Advanced Technologies (Flame upgrade,
 - [ ] Fixes
   - [ ] einheiten auf repair facility verkaufen
   - [x] upgrades wenn tec center selektiert
@@ -42,6 +43,10 @@
   - [ ] Unit Balancing
   - [ ] blue tiberium explosive-chains
   - [ ] laser-fence stealthing
+  - [ ] FIX repair animation pro age & layering
+  - [ ] super power cooldowns
+  - [ ] hovercraft über flüsse verbieten
+  - [ ] APCs, Jeeps, Buggy, Bikes nicht in Eis
 
 ## Design / Konzept
 
@@ -103,6 +108,8 @@
 - [ ] GDI Units Balancing
 - [ ] NOD Building Balancing
 - [ ] GDI Building Balancing
+- [ ] Gatekeep Upgrades
+  - [ ] Age 1 Brotherhood Technologies (Flametank direkt, stealth tank & recon bike & temple voraussetzung
 
 ## Skirmish Maps
 
@@ -124,24 +131,29 @@
   - [ ] test gegen AI
   - [ ] ressource balancing
   - [x] tiberium bäume
-  - [x] Iron dome island
+  - [x] paratrooper hq
   - [x] oil derricks & pumps
   - [x] bridge repair huts
   - [x] ice system
+- [ ] Hammerfest (6)
+  Winter (TD/RA)
+  - [x] iron dome
+  - [x] snow water-cliffs & snow cliffs
+  - [x] ice system
+  - [ ] lightning system
+  - [x] TS Buildings (Snow)
+  - [ ] firestorm running (creep)
 - [ ] Tiberium Garden (5)
   Desert (TD)
-  - [ ] Critter waves (spawner wie ants, random base attack order)
+  - [ ] critter visceroids
   - [ ] toxic tiberium (weat)
   - [ ] destructable cliffs
-- [ ] Winter?
-  - [ ] hq island (paradrops) im norden
-  - [ ] snow water-cliffs & snow cliffs
-  - [ ] ice system
-- [ ] Jungle?
-  - [ ] Ion Storm?
+  - [ ] Ion Storm control
+- [ ] Jungle? (8)
   - [ ] Dinosaur valley
-  - [ ] hospital in valley
+  - [ ] hospital in valley (heal all)
   - [ ] destructable cliff
+  - [ ] Critter waves sobald valley gerodet
 - [ ] ☑️ Testmap
   Erste Zoomap (klein, 2 Spieler) bauen
   - [x] 2 startpunkte
@@ -149,27 +161,20 @@
   - [x] 2 tiberium felder
   - [x] wasser
 
-## Campaigns
-
-- [ ] Age 0 NOD
-
 ## AI
 
 - [ ] Base Building NOD
-  - [x] Power bulks
-  - [ ] Production bulks
-  - [ ] Tec Bulks
-  - [ ] Main Base Pattern NOD
+  - [x] Age 0
+  - [ ] Age 1
+  - [ ] Age 2
+  - [ ] Age 3
   - [ ] Anti air "inseln"
   - [ ] gaps für generators
   - [ ] Pen /nur strategisch
   - [ ] Remote Defense posts
   - [ ] Smudge Foundations (age2)
   - [ ] res-base: 2x NUKE, stealth, silo & Refinery (umzäunt & gate, 2 tick tanks
-  - [ ] fences FACT, POWER, TEC (age1)
-  - [ ] fences FACT, POWER, TEC (age1)
   - [ ] generators & nuke silo
-  - [ ] AGE-EVOLUTION nach upgrades
 - [ ] Defenses
   - [x] Choke points
   - [x] Trees & Buildings
@@ -178,17 +183,18 @@
   - [ ] AA NOD
   - [ ] AA GDI
   - [ ] Shore Site defense (vereinzelte turrets? see patrouillen ab age 1)
-  - [ ] zäune/walls ab age 1
+  - [ ] Defense squadds (wenn angriff)
 - [ ] Economy
   - [x] Silo
-  - [ ] Refinery
+  - [x] Refinery
   - [ ] Outpost (more refinery)
-  - [ ] Derricks (1 engineer, 2 gunner, 2 rockets -> escort & derrick guard)
-  - [ ] OreT verkaufen
+  - [x] Derricks (1 engineer, 2 gunner, 2 rockets -> escort & derrick guard)
+  - [ ] stealth harvester
+  - [ ] carryall harvester routine
 - [ ] Attack Logic
-  - [ ] Regular Attack Waves
-  - [ ] Scout expeditions
-  - [ ] Derrick Engineer Squads
+  - [x] Regular Attack Waves
+  - [x] Scout expeditions
+  - [x] Derrick Engineer Squads
   - [ ] Bridge Engineer Squads
   - [ ] Base Engineer Squads (Transport Helo, Sub Terrain APC, APC/Amphibious APC)
   - [ ] Sub Terrain Flame Raids
@@ -198,7 +204,7 @@
   - [ ] Sekundär-Angriffe (Nebeneingänge)
   - [ ] Gebäude besetzen (Garissoning)
   - [ ] Strategische Map-Objectives sichern
-  - [ ] Super-Weapon Einsatz
+  - [ ] super weapons (mine rockets auf chockepoints)
   - [ ] Fastmover-Patrols (GDI only)
 - [ ] Difficulties
   - [ ] Moderate (nur kleinere angriffswellen, hauptsächlich eingraben)

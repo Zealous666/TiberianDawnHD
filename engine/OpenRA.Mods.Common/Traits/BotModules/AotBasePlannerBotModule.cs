@@ -1120,6 +1120,12 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				Kind = AotStepKind.Fence,
 				Role = label,
+
+				// Fence steps drive off FenceNodes, but TopLeft is still read as a fallback target (the
+				// wall bridge when the node queue is empty) and by the block diagnostics. Leaving it at
+				// the default made both aim at 0,0 -- confirmed 2026-07-24 in-game: "Waiting (target
+				// blocked): PowerFence at 0,0" and "Diag Nuk2aFence@0,0 ... inPocket=False".
+				TopLeft = new CPos(x, y),
 				Variants = Info.WallTypes,
 				FenceNodes = nodes.Distinct().ToList(),
 				FencePerimeter = perimeter.Distinct().ToList()

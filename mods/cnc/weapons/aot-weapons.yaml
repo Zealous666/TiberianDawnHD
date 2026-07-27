@@ -1455,3 +1455,27 @@ AotIceSplash:
 	Warhead@Eff: CreateEffect
 		Explosions: aot-h2o-splash, aot-h2o-splash2, aot-h2o-splash3
 		ImpactActors: false
+
+# === Age of Tiberium (aotmod) - Vein Heart Gas: Reaktion des Veinhole-Heart auf Angriffe ===
+# Von AotEmitWeaponWhenAttacked direkt am Heart ausgeloest (kein Projektil). Spawnt dieselbe
+# Toxic-Gaswolke wie die Toxic Missile (aot-gascloud). Siehe [[ice-growth-system]]/Veins.
+aot-VeinGas:
+	ValidTargets: Ground, Water, Air, Trees
+	Warhead@1Dam: SpreadDamage
+		Spread: 512
+		Damage: 400
+		ValidTargets: Ground, Air, Trees
+		Versus:
+			None: 150
+			Wood: 15
+			Light: 35
+			Heavy: 25
+			Concrete: 8
+		DamageTypes: Prone50Percent, TriggerProne, TiberiumDeath
+	Warhead@2Eff: CreateEffect
+		Image: aot-gascloud-formation
+		Explosions: idle
+		ImpactSounds: xplos.aud
+		ImpactActors: false
+	Warhead@3Spawn: AotSpawnActor
+		Actor: aot-gascloud

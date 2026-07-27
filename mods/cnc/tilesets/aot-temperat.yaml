@@ -74,6 +74,14 @@ Terrain:
 		Color: 5C74A4
 		RestrictPlayerColor: true
 
+	# Tiberian Veins (aot-vein-cell, ChangesTerrain: Veins). Begehbar wie Clear; gruene Radarfarbe.
+	# Fahrzeuge nehmen darauf langsamen DoT (DamagedByTerrain@VEINS in overrides.yaml).
+	TerrainType@Veins:
+		Type: Veins
+		TargetTypes: Ground
+		AcceptsSmudgeType: Crater, Scorch
+		Color: 3CA028
+
 Templates:
 	Template@0:
 		Filename: clear1.tem

@@ -2158,7 +2158,17 @@ aot-minp:
 aot-gascloud:
 	Inherits: ^SpriteActor
 	Inherits@shape: ^1x1Shape
-	Immobile:
+	# User-Korrektur: NICHT wie in einer frueheren Fassung neue Nachbarwolken spawnen (das war
+	# nicht wie in TS) -- stattdessen wandert DIESELBE Wolke langsam zufaellig umher, wie in TS.
+	# Mobile+Wanders statt Immobile: nur Mobile kann die Zellposition eines Aktors ueberhaupt
+	# aendern. Locomotor aot-gas: SharesCell -> blockiert/kollidiert nie mit echten Einheiten.
+	Mobile:
+		Speed: 25
+		Locomotor: aot-gas
+	Wanders:
+		WanderMoveRadius: 3
+		MinMoveDelay: 25
+		MaxMoveDelay: 75
 	Health:
 		HP: 5000
 	RenderSprites:
@@ -2178,7 +2188,13 @@ aot-gascloud:
 aot-gascloud2:
 	Inherits: ^SpriteActor
 	Inherits@shape: ^1x1Shape
-	Immobile:
+	Mobile:
+		Speed: 25
+		Locomotor: aot-gas
+	Wanders:
+		WanderMoveRadius: 3
+		MinMoveDelay: 25
+		MaxMoveDelay: 75
 	Health:
 		HP: 5000
 	RenderSprites:
@@ -6959,4 +6975,106 @@ aot-ice-cell:
 	RequiresSpecificOwners:
 		ValidOwnerNames: Neutral
 
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Tiberian Veins (Klon des Eis-Systems) ===
+# Heart = Host (breitet Geflecht ueber Clear/Rough/Desert aus), Zellen = aot-vein-cell.
+# Mechanik-Analogie siehe [[ice-growth-system]]. Gruenes Tiberium-Mesh-Overlay.
+
+# --- Geflecht-Zelle: wie aot-ice-cell, aber ChangesTerrain: Veins, KEIN Einbrechen/HP ---
+aot-vein-cell:
+	# OccupiesSpace: false (sonst blockiert die Zelle Einheiten) + HiddenUnderShroud: CenterPosition
+	# (Pflicht bei leerem Footprint, sonst rendert nichts) -- beide Fallen aus dem Eis-System.
+	Immobile:
+		OccupiesSpace: false
+	RenderSprites:
+	AotVeinCellBody:
+		Period: 4
+	ChangesTerrain:
+		TerrainType: Veins
+	HiddenUnderShroud:
+		Type: CenterPosition
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral
+
+# --- Das Heart (TS Veinhole): sehr zaeh, Host, stoesst bei Angriff Gas aus, zerstoerbar ---
+aot-vein-heart:
+	# Building statt Immobile: braucht einen ECHTEN 3x3-Footprint, sonst ist nur die
+	# TopLeft-Zelle klickbar/angreifbar, obwohl das Sprite (2x Scale) den ganzen 3x3-Bereich
+	# einnimmt -- das war der Grund fuer den fehlenden Angriffscursor. Bare Building-Trait
+	# (nicht ^Building), sonst kommen ungewollte Buildable/Sellable/Huntable-Traits mit.
+	Building:
+		Footprint: xxx xxx xxx
+		Dimensions: 3, 3
+		TerrainTypes: Clear, Rough, Road, Sand, Beach
+	# Selectable (nicht bloss Interactable) fuer Healthbar/Selection-Ring via SelectionDecorations.
+	Selectable:
+		Bounds: 3072, 3072
+	SelectionDecorations:
+	AotVeinGrowth:
+		# REGLER (Map-Editor-Slider): Ausbreitung (Zellen) + Wachstums-Tempo (%).
+		MaxRadius: 14
+		GrowthSpeed: 100
+		# Building.TopLeft (= self.Location) ist die OBERE LINKE Ecke des 3x3-Footprints,
+		# nicht die Mitte. Ohne diesen Offset waechst das Geflecht schief zum Sprite versetzt.
+		CenterOffset: 1, 1
+	RenderSprites:
+	# idle = ruhiger Einzelframe, gas = 12-Frame-Reaktion (siehe Sequenzen + AotEmitWeaponWhenAttacked).
+	WithSpriteBody:
+	BodyOrientation:
+		QuantizedFacings: 1
+	# ⚠️ GEMESSEN: Armor:Concrete brachte NICHTS. DamageWarhead.DamageVersus() filtert
+	# Ruestungstypen komplett heraus, die in der Waffen-Versus-Tabelle FEHLEN (die normale
+	# 120mm-Panzerwaffe kennt nur None/Wood/Light/Heavy, kein Concrete) -> voller Schaden.
+	# Deshalb hier stattdessen ein UNBEDINGTER DamageMultiplier (wirkt unabhaengig vom
+	# Waffen-Versus-Table, gleiches Prinzip wie Iron Dome). HP 250000 + 70% Reduktion + Heal
+	# ergeben zusammen eine deutlich laengere Belagerung als vorher (~13s bei 3 Panzern).
+	# TS-Original-HP war NICHT ermittelbar (firestrm.ini enthaelt nur Overrides, keine
+	# Basis-rules.ini mit [VEINHOLE]) -> das ist eine Design-Schaetzung, kein TS-Originalwert.
+	Health:
+		HP: 250000
+	DamageMultiplier@AOTVEINHEART:
+		Modifier: 30
+	HitShape:
+	Targetable:
+		TargetTypes: Ground, Structure
+	# Aggressive Selbstheilung: heilt auch WAEHREND es beschossen wird (DamageCooldown: 0),
+	# nicht erst nach einer Feuerpause. 1% der Max-HP alle 5 Sekunden = 2500 HP/5s.
+	ChangesHealth:
+		StartIfBelow: 100
+		PercentageStep: 1
+		Delay: 125
+		DamageCooldown: 0
+	# Beim Tod zieht sich das Geflecht langsam zurueck, statt fuer immer stehen zu bleiben.
+	AotVeinRecedesOnDeath:
+	# Spawnt Visceroids (vanilla TD-Creep, siehe aot-critters.yaml) -- gleiche Funktion wie
+	# der Ant-Nest-Spawner (AotAntSpawner), nur direkt am Heart statt als eigener Marker-Aktor.
+	AotVisceroidSpawner:
+		VisceroidActors: aot-visceroid
+		DefaultMaxVisceroids: 2
+		SpawnInterval: 300
+	# Bei jedem Treffer eine Toxic-Gaswolke (Cooldown gegen Spam). Ignoriert das eigene
+	# Gaswolken-Damage (TiberiumDeath), damit keine Rueckkopplung entsteht.
+	AotEmitWeaponWhenAttacked:
+		Weapon: aot-VeinGas
+		Cooldown: 75
+		IgnoreDamageTypes: TiberiumDeath
+		# Die vollen 12 Frames (Wachstums-/Spuck-Animation) nur EINMAL beim Ausstoss, danach
+		# zurueck zu idle (Frame 0). War vorher Dauerschleife -> sah zeitweise grau statt gruen aus.
+		ReactionSequence: gas
+	HiddenUnderShroud:
+	MapEditorData:
+		Categories: Resource spawn
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral
+
+# --- Unsichtbarer Controller: zieht das Geflecht nach dem Heart-Tod zurueck ---
+aot-vein-recession:
+	# Muss deutlich schneller sichtbar sein als das Wachstum (Growth-Pass alle ~300 Ticks bei
+	# GrowthSpeed 100). Interval:2/CellsPerPass:6 = 3 Zellen/Tick -> mind. doppelt so schnelles
+	# Zurueckziehen wie das Wachstum, klar erkennbar statt unmerklich langsam.
+	AotVeinRecession:
+		Interval: 2
+		CellsPerPass: 6
 # === Ende aotmod ===

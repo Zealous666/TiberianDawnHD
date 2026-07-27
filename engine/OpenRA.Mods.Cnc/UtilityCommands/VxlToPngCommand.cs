@@ -45,7 +45,9 @@ namespace OpenRA.Mods.Cnc.UtilityCommands
 			"                      Maps [floor,1.0] brightness onto the full ramp so the actual",
 			"                      diffuse range drives the shading. Set to ambient-0.05 for best",
 			"                      results (e.g. 0.55 when --ambient 0.6). Transferable: same",
-			"                      formula applies to any future TS-Voxel import.")]
+			"                      formula applies to any future TS-Voxel import.",
+			"  --saturation F      Body saturation 0..1 (default: 1.0 = full color). 0.1 = 90%",
+			"                      desaturated (almost silver-gray). Never affects player-color region.")]
 		void IUtilityCommand.Run(Utility utility, string[] args)
 		{
 			var vxlPath = args[1];
@@ -72,6 +74,9 @@ namespace OpenRA.Mods.Cnc.UtilityCommands
 			// Multiplies the body (non-player-color) brightness. 1.0 = unchanged, 0.9 = 10% darker.
 			// The player-color region (palette indices 16-31) is never affected by this.
 			var brightness = GetArgFloat(args, "--brightness", 1.0f);
+			// Saturation of the body (non-player-color) pixels. 1.0 = full color, 0.0 = grayscale.
+			// 0.1 = 90% desaturated (almost silver-gray). Never affects the player-color region.
+			var saturation = GetArgFloat(args, "--saturation", 1.0f);
 			// Two-layer player-color: emit an INDEXED overlay sheet (house-color indices 176-191)
 			// for the remap region (TS palette indices 16-31), to be tinted by the in-game `player`
 			// palette. The RGBA body keeps full lighting; the remap region is desaturated in the body.
@@ -363,6 +368,15 @@ namespace OpenRA.Mods.Cnc.UtilityCommands
 					var r = (byte)MathF.Min(255f, ((baseColor >> 16) & 0xFF) * bodyBright);
 					var g = (byte)MathF.Min(255f, ((baseColor >> 8) & 0xFF) * bodyBright);
 					var b = (byte)MathF.Min(255f, (baseColor & 0xFF) * bodyBright);
+
+					// Desaturate body (non-player-color) pixels. lum mix: sat=1 = full color, sat=0 = grayscale.
+					if (!isRemapColor && saturation < 1f)
+					{
+						var lum = 0.299f * r + 0.587f * g + 0.114f * b;
+						r = (byte)MathF.Round(lum + saturation * (r - lum));
+						g = (byte)MathF.Round(lum + saturation * (g - lum));
+						b = (byte)MathF.Round(lum + saturation * (b - lum));
+					}
 
 					// Remap voxels (TS palette indices 16-31) carry the player color in two-layer
 					// mode: render them transparent in the body (overlay fills them) and record

@@ -58,9 +58,11 @@ namespace OpenRA.Mods.Common.Traits
 			"wall-bridge machinery as every other out-of-reach plan step to reach a coastal site.")]
 		public readonly string[] NavalPenTypes = [];
 
-		[Desc("Radius (cells) around the base centre searched for a coastal site for the on-demand naval",
-			"building. Kept close to MaxBridgeLength so the wall-bridge machinery can actually reach it.")]
-		public readonly int NavalSiteSearchRadius = 20;
+		[Desc("Locomotor name of the ferry ship that will dock here (e.g. \"aot-lst\") -- used to verify the",
+			"chosen site's adjacent water is actually ship-navigable, not just orthogonally Water-typed",
+			"terrain (a rock-enclosed inlet can satisfy the terrain check but be unreachable by a real ship).",
+			"Leave empty to skip the check (falls back to the old terrain-only behaviour).")]
+		public readonly string NavalLocomotor = null;
 
 		public override object Create(ActorInitializer init) { return new AotBaseBuilderBotModule(init.Self, this); }
 	}
@@ -73,15 +75,21 @@ namespace OpenRA.Mods.Common.Traits
 		AotBasePlannerBotModule planner;
 		AotMapIntelBotModule intel;
 		PowerManager playerPower;
+		PlayerResources playerResources;
 
 		int ticks;
 		int rebuildTicks;
 		int waitLog;
 		int pendingWaitLog;
 
-		// On-demand naval production (Sub Pen / Shipyard): NOT part of the Rhythm. Requested by any
-		// Operations mission that needs ships/subs/vessels; sticky (never cleared) so a later loss of the
-		// building triggers an automatic rebuild the next time HasNavalProduction() is checked.
+		// On-demand naval production (Sub Pen / Shipyard): NOT part of the fixed Rhythm, but the SITE is
+		// planned eagerly (navalPlanAttempted) as soon as map intel is ready -- independent of whether any
+		// Operations mission has ever actually asked for it (user spec 2026-07-22: "sauber geplant, aber
+		// nur bei request gebaut" -- know and log whether a coastal site exists at all well before it's
+		// needed, but only queue the actual construction on-demand). Requested by any Operations mission
+		// that needs ships/subs/vessels; sticky (never cleared) so a later loss of the building triggers an
+		// automatic rebuild the next time HasNavalProduction() is checked.
+		bool navalPlanAttempted;
 		bool navalRequested;
 		AotPlanStep navalStep;
 		int navalWaitLog;
@@ -99,6 +107,11 @@ namespace OpenRA.Mods.Common.Traits
 		AotPlanStep fenceStep;
 		readonly Queue<CPos> fenceQueue = new();
 
+		// How many consecutive attempts a single fence node may stay blocked by something non-permanent
+		// (an own unit parked on it) before the node is skipped, so one loiterer cannot stall the ring.
+		const int FenceNodeMaxWaits = 12;
+		int fenceNodeWaits;
+
 		public AotBaseBuilderBotModule(Actor self, AotBaseBuilderBotModuleInfo info)
 			: base(info)
 		{
@@ -114,6 +127,7 @@ namespace OpenRA.Mods.Common.Traits
 			var planners = self.Owner.PlayerActor.TraitsImplementing<AotBasePlannerBotModule>().ToList();
 			planner = planners.FirstOrDefault(p => p.Info.Faction == Info.Faction) ?? planners.FirstOrDefault();
 			playerPower = self.Owner.PlayerActor.TraitOrDefault<PowerManager>();
+			playerResources = self.Owner.PlayerActor.TraitOrDefault<PlayerResources>();
 
 			// Faction-agnostic, one instance per player -- same resolution AotOperationsBotModule uses.
 			intel = self.Owner.PlayerActor.TraitsImplementing<AotMapIntelBotModule>().FirstOrDefault();
@@ -129,7 +143,7 @@ namespace OpenRA.Mods.Common.Traits
 		// for the rest of the match (a later loss triggers an automatic rebuild -- see BotTick).
 		public void RequestNavalProduction() => navalRequested = true;
 
-		AotPlanStep BuildNavalStep()
+		AotPlanStep BuildNavalStep(bool logImmediately)
 		{
 			if (Info.NavalPenTypes.Length == 0 || intel == null || !intel.Ready)
 				return null;
@@ -137,13 +151,17 @@ namespace OpenRA.Mods.Common.Traits
 			var site = FindNavalSite();
 			if (site == null)
 			{
-				if (++navalWaitLog % 8 == 0)
+				if (logImmediately)
+					Log.Write("debug", "[AotBuild] Naval site planning: NO coastal site found near the base -- naval production will never be available if requested");
+				else if (++navalWaitLog % 8 == 0)
 					Log.Write("debug", "[AotBuild] Naval production requested but no coastal site found near the base yet");
 
 				return null;
 			}
 
-			Log.Write("debug", $"[AotBuild] Naval production requested -> site {site.Value}");
+			Log.Write("debug", logImmediately
+				? $"[AotBuild] Naval site planned -> {site.Value} (proactive, not yet requested)"
+				: $"[AotBuild] Naval production requested -> site {site.Value}");
 			return new AotPlanStep { Kind = AotStepKind.Building, Role = "NAVAL", Variants = Info.NavalPenTypes, TopLeft = site.Value };
 		}
 
@@ -151,6 +169,123 @@ namespace OpenRA.Mods.Common.Traits
 		// ferry embark point), then spiral out from there for the first cell the actor's actual footprint
 		// can occupy (the anchor itself is a 1x1 shoreline cell, rarely a match for a multi-tile building).
 		// Reach (buildable area) is NOT checked here -- that is what TryBridgeStep is for.
+		// How far from a bridge WALL this actor may still be placed. ^Building carries both
+		// RequiresBuildableArea (AreaTypes: building, Adjacent 2) and RequiresBuildableArea@OUTPOST
+		// (AreaTypes: outpost, Adjacent 6); a wall only ever grants `building`, so only matching
+		// AreaTypes count -- taking the largest across all instances claims a reach the chain cannot
+		// actually deliver.
+		int BuildableReachFor(ActorInfo ai)
+		{
+			var wallAreas = world.Map.Rules.Actors[Info.WallType]
+				.TraitInfos<GivesBuildableAreaInfo>()
+				.SelectMany(g => g.AreaTypes)
+				.ToHashSet();
+
+			return ai.TraitInfos<RequiresBuildableAreaInfo>()
+				.Where(r => r.AreaTypes.Any(wallAreas.Contains))
+				.Select(r => r.Adjacent)
+				.DefaultIfEmpty(2)
+				.Min();
+		}
+
+		// Land cells a wall chain could EVER reach from our existing buildings, with the number of
+		// wall segments needed. One flood fill replaces the old chain of single-point checks (nearest
+		// coastal cell -> 6-cell spiral -> one BFS path -> one reach test): that chain gave up entirely
+		// whenever its ONE anchor happened to be unusable, even when a perfectly good site existed
+		// further along the same coast. Confirmed the hard way on real sea maps, where no pen was ever
+		// built although water sits only 9-14 cells from every spawn (Polar Panic, Hammerfest).
+		//
+		// Deliberately terrain-based, NOT CanPlaceBuilding: a unit walking across a cell must not make
+		// the coast look permanently unreachable. Transient blockers are handled by nudging when the
+		// chain is actually built.
+		Dictionary<CPos, int> WallReach()
+		{
+			var wai = world.Map.Rules.Actors[Info.WallType];
+			var wbi = wai.TraitInfoOrDefault<BuildingInfo>();
+			if (wbi == null)
+				return null;
+
+			var resourceLayer = world.WorldActor.TraitOrDefault<IResourceLayer>();
+			bool Usable(CPos c) =>
+				world.Map.Contains(c)
+				&& (resourceLayer == null || resourceLayer.GetResource(c).Type == null)
+				&& wbi.TerrainTypes.Contains(world.Map.GetTerrainInfo(c).Type);
+
+			var reach = new Dictionary<CPos, int>();
+			var q = new Queue<CPos>();
+
+			foreach (var a in world.ActorsHavingTrait<Building>())
+			{
+				if (a.Owner != player || a.IsDead || !a.IsInWorld || !a.Info.HasTraitInfo<GivesBuildableAreaInfo>())
+					continue;
+
+				var abi = a.Info.TraitInfoOrDefault<BuildingInfo>();
+				if (abi == null)
+					continue;
+
+				foreach (var t in abi.Tiles(a.Location))
+					if (reach.TryAdd(t, 0))
+						q.Enqueue(t);
+			}
+
+			while (q.Count > 0)
+			{
+				var c = q.Dequeue();
+				var d = reach[c];
+				if (d >= Info.MaxBridgeLength)
+					continue;
+
+				foreach (var dir in new[] { new CVec(1, 0), new CVec(-1, 0), new CVec(0, 1), new CVec(0, -1) })
+				{
+					var n = c + dir;
+					if (reach.ContainsKey(n) || !Usable(n))
+						continue;
+
+					reach[n] = d + 1;
+					q.Enqueue(n);
+				}
+			}
+
+			return reach;
+		}
+
+		// Size of the connected water body containing `seed`, capped at `cap` (we only care whether it
+		// is the open sea or a puddle). Used to avoid planning naval production on a pond that leads
+		// nowhere.
+		int WaterBodySize(CPos seed, int cap)
+		{
+			bool IsWater(CPos c)
+			{
+				if (!world.Map.Contains(c))
+					return false;
+
+				var t = world.Map.GetTerrainInfo(c).Type;
+				return t == "Water" || t == "River";
+			}
+
+			if (!IsWater(seed))
+				return 0;
+
+			var seen = new HashSet<CPos> { seed };
+			var q = new Queue<CPos>();
+			q.Enqueue(seed);
+			while (q.Count > 0 && seen.Count < cap)
+			{
+				var c = q.Dequeue();
+				foreach (var dir in new[] { new CVec(1, 0), new CVec(-1, 0), new CVec(0, 1), new CVec(0, -1) })
+				{
+					var n = c + dir;
+					if (IsWater(n) && seen.Add(n))
+						q.Enqueue(n);
+				}
+			}
+
+			return seen.Count;
+		}
+
+		// Best site for the naval production building: every placeable footprint in range is scored,
+		// instead of committing to a single anchor. A site counts as reachable when some footprint tile
+		// lies within the building's own buildable-area reach of a cell the wall chain can get to.
 		CPos? FindNavalSite()
 		{
 			var variant = Info.NavalPenTypes.FirstOrDefault(v => world.Map.Rules.Actors.ContainsKey(v));
@@ -162,24 +297,92 @@ namespace OpenRA.Mods.Common.Traits
 			if (bi == null)
 				return null;
 
-			var anchor = intel.FindCoastalCellNear(intel.BaseCentre, Info.NavalSiteSearchRadius, requireOwnReachable: true)
-				?? intel.FindCoastalCellNear(intel.BaseCentre, Info.NavalSiteSearchRadius, requireOwnReachable: false);
-			if (anchor == null)
+			var adjacent = BuildableReachFor(ai);
+			var reach = WallReach();
+			if (reach == null || reach.Count == 0)
+			{
+				Log.Write("debug", "[AotBuild] Naval site: no wall-reachable land at all (no own buildings?)");
 				return null;
+			}
 
-			for (var r = 0; r <= 6; r++)
-				for (var dx = -r; dx <= r; dx++)
-					for (var dy = -r; dy <= r; dy++)
+			// Everything the wall chain plus the building's own reach can cover.
+			var radius = Info.MaxBridgeLength + adjacent + 2;
+			var centre = intel.BaseCentre;
+
+			// Rank: furthest offshore first (a pen hugging the shore seals the water beside it into an
+			// inlet no ship can enter), then the shortest wall chain, then closest to base. Water-body
+			// size is a PREFERENCE, never a filter -- a small sea must still be usable if it is all
+			// there is (a hard filter here is exactly how earlier attempts blocked naval production
+			// entirely).
+			CPos? best = null;
+			var bestKey = (Body: -1, Offshore: -1, Steps: int.MaxValue, Dist: int.MaxValue);
+			var placeable = 0;
+			var bodySizes = new Dictionary<CPos, int>();
+
+			for (var dy = -radius; dy <= radius; dy++)
+				for (var dx = -radius; dx <= radius; dx++)
+				{
+					var c = centre + new CVec(dx, dy);
+					if (!world.Map.Contains(c) || !world.CanPlaceBuilding(c, ai, bi, null))
+						continue;
+
+					placeable++;
+
+					// Closest wall-reachable cell to any footprint tile.
+					var offshore = int.MaxValue;
+					var steps = int.MaxValue;
+					foreach (var t in bi.Tiles(c))
+						for (var oy = -adjacent; oy <= adjacent; oy++)
+							for (var ox = -adjacent; ox <= adjacent; ox++)
+							{
+								if (!reach.TryGetValue(t + new CVec(ox, oy), out var st))
+									continue;
+
+								var gap = Math.Max(Math.Abs(ox), Math.Abs(oy));
+								if (gap < offshore || (gap == offshore && st < steps))
+								{
+									offshore = gap;
+									steps = st;
+								}
+							}
+
+					if (offshore == int.MaxValue)
+						continue;
+
+					var probe = bi.Tiles(c).First();
+					if (!bodySizes.TryGetValue(probe, out var body))
 					{
-						if (Math.Max(Math.Abs(dx), Math.Abs(dy)) != r)
-							continue;
-
-						var c = anchor.Value + new CVec(dx, dy);
-						if (world.CanPlaceBuilding(c, ai, bi, null))
-							return c;
+						body = WaterBodySize(probe, 400);
+						bodySizes[probe] = body;
 					}
 
-			return null;
+					// Bucket the body size so a marginally bigger puddle cannot outrank a much better
+					// placement on the same sea.
+					var bodyBucket = body >= 400 ? 2 : body >= 60 ? 1 : 0;
+					var dist = (c - centre).LengthSquared;
+					var better = best == null
+						|| bodyBucket > bestKey.Body
+						|| (bodyBucket == bestKey.Body && offshore > bestKey.Offshore)
+						|| (bodyBucket == bestKey.Body && offshore == bestKey.Offshore && steps < bestKey.Steps)
+						|| (bodyBucket == bestKey.Body && offshore == bestKey.Offshore && steps == bestKey.Steps && dist < bestKey.Dist);
+					if (better)
+					{
+						best = c;
+						bestKey = (bodyBucket, offshore, steps, dist);
+					}
+				}
+
+			if (best == null)
+			{
+				Log.Write("debug", $"[AotBuild] Naval site: none usable -- {placeable} placeable footprint(s) within {radius} of {centre}, " +
+					$"wall chain reaches {reach.Count} land cell(s) (max {Info.MaxBridgeLength} segments), building reach {adjacent}");
+				return null;
+			}
+
+			Log.Write("debug", $"[AotBuild] Naval site {best.Value}: {bestKey.Offshore} cell(s) offshore (max {adjacent}), " +
+				$"{bestKey.Steps} wall segment(s) from base, water body {bestKey.Body switch { 2 => "sea", 1 => "medium", _ => "small" }}, " +
+				$"{placeable} candidate(s) considered");
+			return best;
 		}
 
 		ProductionQueue QueueFor(string actorType)
@@ -231,6 +434,19 @@ namespace OpenRA.Mods.Common.Traits
 				PruneStrayFenceSegments(bot);
 			}
 
+			// Plan the site ONCE, eagerly, the moment map intel is ready -- regardless of whether anything
+			// has actually asked for naval production yet, and regardless of whatever else is currently
+			// mid-build (`pending`). Must run BEFORE the `pending != null` early-return below: during normal
+			// play a build step is in flight almost every single tick, back-to-back, for minutes on end --
+			// gating this behind "pending == null" meant it effectively never got a turn (confirmed
+			// 2026-07-22: no "Naval site planned" line ever appeared despite reaching deep into Age 0). This
+			// is pure reconnaissance (logs success/failure immediately), never touches `pending` itself.
+			if (!navalPlanAttempted && intel != null && intel.Ready)
+			{
+				navalPlanAttempted = true;
+				navalStep = BuildNavalStep(logImmediately: true);
+			}
+
 			if (pending != null)
 			{
 				TickPending(bot);
@@ -240,14 +456,15 @@ namespace OpenRA.Mods.Common.Traits
 			// On-demand naval production takes priority over the Rhythm: an Operations mission is blocked
 			// waiting for it. Re-evaluated every tick against HasNavalProduction(), so a destroyed pen is
 			// picked back up automatically (navalStep is dropped once satisfied, forcing a fresh site
-			// search -- the old building's site may no longer be valid, e.g. terrain changed).
+			// search -- the old building's site may no longer be valid, e.g. terrain changed). Only THIS
+			// branch ever actually queues construction (StartStep) -- the eager plan above never builds.
 			if (navalRequested)
 			{
 				if (HasNavalProduction())
 					navalStep = null;
 				else
 				{
-					navalStep ??= BuildNavalStep();
+					navalStep ??= BuildNavalStep(logImmediately: false);
 					if (navalStep != null)
 					{
 						StartStep(bot, navalStep);
@@ -638,7 +855,14 @@ namespace OpenRA.Mods.Common.Traits
 				return false;
 
 			var target = step.Kind == AotStepKind.Fence && fenceQueue.Count > 0 ? fenceQueue.Peek() : step.TopLeft;
-			var frontier = BridgeFrontier(target);
+
+			// A target on water (the naval pen) can never be walled up to; that last stretch is covered
+			// by the building's own buildable-area reach, so exempt it from the wall-terrain constraint.
+			var stepInfo = step.Variants
+				.Select(v => world.Map.Rules.Actors.TryGetValue(v, out var vi) ? vi : null)
+				.FirstOrDefault(vi => vi != null);
+			var freeRadius = stepInfo != null ? BuildableReachFor(stepInfo) : 0;
+			var frontier = BridgeFrontier(target, freeRadius);
 			if (frontier == null)
 				return false;
 
@@ -654,7 +878,10 @@ namespace OpenRA.Mods.Common.Traits
 
 		// Furthest wall-placeable + in-area cell on the actual BFS PATH (within the pocket) from the
 		// nearest own building to the target — a straight line breaks on rocks; the path never does.
-		CPos? BridgeFrontier(CPos target)
+		// Path of cells from one of our own buildings out to `target`, or null if no route exists.
+		// Shared by BridgeFrontier (what is buildable right now) and BridgeReachEnd (how far the
+		// chain can ultimately get).
+		List<CPos> BridgePath(CPos target, int freeRadius = 0)
 		{
 			var wai = world.Map.Rules.Actors[Info.WallType];
 			var wbi = wai.TraitInfoOrDefault<BuildingInfo>();
@@ -679,6 +906,9 @@ namespace OpenRA.Mods.Common.Traits
 			// naturally finds the buildable perimeter instead of beelining into a field and dead-ending.
 			var resourceLayer = world.WorldActor.TraitOrDefault<IResourceLayer>();
 			bool ResourceFree(CPos c) => resourceLayer == null || resourceLayer.GetResource(c).Type == null;
+
+			bool WallTerrain(CPos c) => world.Map.Contains(c)
+				&& wbi.TerrainTypes.Contains(world.Map.GetTerrainInfo(c).Type);
 
 			// BFS from the target back to any own cell, constrained to the pocket (plus own cells) and
 			// clear of resources (own cells are always allowed through — they're already built there).
@@ -725,6 +955,14 @@ namespace OpenRA.Mods.Common.Traits
 					if (!InBounds(n) || !ResourceFree(n))
 						continue;
 
+					// A wall chain can only follow terrain a wall may actually stand on. Without this the BFS
+					// happily beelined across water and handed back a route the chain could never build along
+					// (User 2026-07-24: "berücksichtigt nicht sauber buildable und wählt falschen Pfad").
+					// Cells within freeRadius of the target are exempt: for a naval site sitting offshore that
+					// last stretch is bridged by the building's own buildable-area reach, not by walls.
+					if (!WallTerrain(n) && (n - target).LengthSquared > freeRadius * freeRadius)
+						continue;
+
 					pred[n] = c;
 					q.Enqueue(n);
 				}
@@ -743,6 +981,22 @@ namespace OpenRA.Mods.Common.Traits
 				cur = pred[cur];
 			}
 
+			return path;
+		}
+
+		CPos? BridgeFrontier(CPos target, int freeRadius = 0)
+		{
+			var wai = world.Map.Rules.Actors[Info.WallType];
+			var wbi = wai.TraitInfoOrDefault<BuildingInfo>();
+			if (wbi == null)
+				return null;
+
+			var path = BridgePath(target, freeRadius);
+			if (path == null)
+				return null;
+
+			// Walk from our building toward the target; the frontier is the FURTHEST cell along the path
+			// that is placeable and still inside the current buildable area.
 			CPos? best = null;
 			foreach (var c in path)
 			{
@@ -769,7 +1023,7 @@ namespace OpenRA.Mods.Common.Traits
 			}
 
 			if (best == null && diagBridge)
-				Log.Write("debug", $"[AotBuild] Diag frontier: target={target} met={met} pathLen={path.Count} (nudged blockers along path, see above)");
+				Log.Write("debug", $"[AotBuild] Diag frontier: target={target} pathLen={path.Count} (nudged blockers along path, see above)");
 
 			return best;
 		}
@@ -798,6 +1052,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (fenceStep != step)
 			{
 				fenceStep = step;
+				fenceNodeWaits = 0;
 				fenceQueue.Clear();
 				foreach (var n in step.FenceNodes)
 					fenceQueue.Enqueue(n);
@@ -828,6 +1083,22 @@ namespace OpenRA.Mods.Common.Traits
 				if (blockedByBuilding || blockedByResource)
 				{
 					fenceQueue.Dequeue();
+					fenceNodeWaits = 0;
+					continue;
+				}
+
+				// Nothing permanent in the way -- almost always one of our own units parked on the node.
+				// Ask it to step aside (the engine only nudges when something PATHS through a blocker,
+				// and placing a building is not pathing, so nobody does this for us). If it still has
+				// not cleared after a while, skip the node rather than stall the whole ring forever
+				// (User 2026-07-24: fence completion sat blocked by waiting units and never resolved).
+				NudgeBlockers(ai.Name, c);
+
+				if (++fenceNodeWaits >= FenceNodeMaxWaits)
+				{
+					Log.Write("debug", $"[AotBuild] Fence node {c} still blocked after {fenceNodeWaits} tries -> skipping (ring keeps a gap)");
+					fenceQueue.Dequeue();
+					fenceNodeWaits = 0;
 					continue;
 				}
 
@@ -878,9 +1149,18 @@ namespace OpenRA.Mods.Common.Traits
 				if (++pendingWaitLog % 8 == 0)
 				{
 					var item = queued.FirstOrDefault();
+
+					// A second, DIFFERENT stall shape confirmed 2026-07-22 (FIX): item sits genuinely at
+					// queuePos=0 (not blocked by anything else), Started=True, Paused=False, excessPower
+					// positive -- yet remainingTime/remainingCost stop changing entirely. The only path in
+					// ProductionItem.Tick() that returns WITHOUT decrementing RemainingTime once Started &&
+					// !Done && !Paused && power is Normal is the cash branch: costThisFrame computed but
+					// pr.TakeCash(costThisFrame, true) fails, i.e. GetCashAndResources() < costThisFrame.
+					// excessPower alone never proves "nothing is blocking" -- log actual spendable cash too.
 					Log.Write("debug", $"[AotBuild] Still building {pending.Role} ({pendingType}): " +
 						$"started={item?.Started} paused={item?.Paused} remainingTime={item?.RemainingTime}/{item?.TotalTime} " +
 						$"remainingCost={item?.RemainingCost} excessPower={playerPower?.ExcessPower} " +
+						$"cash={playerResources?.Cash} ore={playerResources?.Resources} " +
 						$"queuePos={ourIndex}/{allItems.Count} queueItems=[{string.Join(",", allItems.Select(i => $"{i.Item}(done={i.Done},started={i.Started})"))}]");
 				}
 

@@ -125,6 +125,10 @@ Player:
 		# Landweg zum Gegner) -- Wall-Bridge zur nächsten erreichbaren Küste, exakt wie jeder andere
 		# unerreichbare Rhythmus-Schritt.
 		NavalPenTypes: aot-subpen
+		# aot-transport's actual Locomotor (aot-units.yaml) -- verifies the dock's adjacent water is
+		# really ship-navigable, not just terrain-adjacent to Water (User 2026-07-22: rock-enclosed
+		# inlets can pass the naive terrain check but trap a ship a few cells short forever).
+		NavalLocomotor: aot-lst
 
 	# CHOKEPOINT-FORTIFIER: für V1 DEAKTIVIERT (baute Streu-Zäune, konkurrierte um
 	# die Building-Queue). Kommt als V2 zurück, integriert mit AotBaseBuilder.
@@ -620,9 +624,11 @@ Player:
 	AotOperationsBotModule@nod:
 		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
 		Faction: nod
-		# Priority tier below base building AND upgrades (User 2026-07-22): base building 0, upgrades
-		# 500 -- army production waits for 1000 credits of headroom before spending, lowest of the 3.
-		ProductionMinCash: 1000
+		# Priority tier below base building AND upgrades (User 2026-07-22, lowered from 1000 same day):
+		# army production waits for at least 500 credits of headroom before spending any unit -- below
+		# that, no units at all (economy stays cash-starved on some spawns, e.g. no land route to
+		# derricks; 500 is the floor, not a target).
+		ProductionMinCash: 500
 		ConstructionYardTypes: fact, fact.gdi, fact.nod
 		ExcludeFromOpsTypes: aot-harv, aot-harv-nod, aot-mcv-age0, aot-mcv-age1, aot-surveyor-gdi, aot-surveyor-nod, oret, aot-oret-lite, aot-minelayer, aot-aray, aot-mgap, aot-mstealth, aot-subapc, truck, mcv
 		ChokepointReserveSize: 4
@@ -644,6 +650,11 @@ Player:
 		NavalProductionTypes: aot-subpen
 		FerryTypes: aot-transport-base, aot-transport-gun-proxy
 		FerryCount: 2
+		# Both variants inherit aot-transport's actual Locomotor (aot-units.yaml) -- verifies the chosen
+		# embark/landing cell's adjacent water is really ship-navigable, not just terrain-adjacent to
+		# Water (User 2026-07-22: rock-enclosed inlets can pass the naive terrain check but trap a ship
+		# a few cells short of the shore forever, boarding never completes).
+		FerryLocomotor: aot-lst
 		# Bike/Buggy need ~aot-age1 -> not buildable in Age 0. Scout squad is a 5-man
 		# infantry mix instead (User 2026-07-21, corrected 2026-07-21b): 3x Gunner (Role A) +
 		# 2x Flame Trooper (Role B, falls back to the toxic variant post-Age3). Rocket

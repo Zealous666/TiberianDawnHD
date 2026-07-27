@@ -261,6 +261,7 @@ Rules:
 	cnchd|rules/aot-world.yaml
 	cnchd|rules/aot-ai.yaml
 	cnchd|rules/aot-snow-decor.yaml
+	cnchd|rules/aot-ts-civilian.yaml
 	# === Ende aotmod ===
 
 Sequences:
@@ -284,6 +285,7 @@ Sequences:
 	cnchd|sequences/campaign-overrides.yaml
 	# === Age of Tiberium (aotmod) sequences ===
 	cnchd|sequences/aot-sequences.yaml
+	cnchd|sequences/aot-ts-civilian-sequences.yaml
 	# === Ende aotmod ===
 
 TileSets:
