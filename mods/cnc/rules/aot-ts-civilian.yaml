@@ -10,12 +10,19 @@
 # sind. Fix: statische eigene Palette je Aktor referenzieren (kein Player-Color-Remap noetig,
 # das Original hat auch keinen).
 ^BaseWorld:
+	# ShadowIndex: 1 fehlte (Bug, User-Fund 2026-07-27) -> Palette-Index 1 (TS-Schattenmaske-
+	# Konvention, siehe ShadowStart-Fix oben) wurde als normale Farbe aus der .pal-Datei gerendert
+	# (blauer Platzhalter-Wert) statt als transluzentes Schwarz. TS registriert seine eigenen
+	# isotem/isosno-Paletten ("terraindecoration"/"player" in engine/mods/ts/rules/palettes.yaml)
+	# ebenfalls mit ShadowIndex: 1 - exakt uebernommen.
 	PaletteFromFile@aot-ts-isotem:
 		Name: aot-ts-isotem
 		Filename: aot-ts-isotem.pal
+		ShadowIndex: 1
 	PaletteFromFile@aot-ts-isosno:
 		Name: aot-ts-isosno
 		Filename: aot-ts-isosno.pal
+		ShadowIndex: 1
 
 # WICHTIG: engine/mods/cnc/rules/palettes.yaml registriert `RotationPaletteEffect@water` OHNE
 # `Palettes:`-Filter -> wirkt per Default auf ALLE geladenen Paletten ausser `ExcludePalettes`
@@ -1655,7 +1662,6 @@ aot-ts-ctaray:
 		Type: Concrete
 	RenderSprites:
 		Image: aot-ts-ctaray
-		Palette: aot-ts-isotem
 	Tooltip:
 		Name: Civilian Array
 

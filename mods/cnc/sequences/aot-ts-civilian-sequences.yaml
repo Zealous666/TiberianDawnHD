@@ -7,6 +7,7 @@ aot-ts-ct0001:
 		Filename: ct0001.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.283
 
 aot-ts-ca0001:
@@ -14,6 +15,7 @@ aot-ts-ca0001:
 		Filename: ca0001.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.333
 
 aot-ts-ct0002:
@@ -21,6 +23,7 @@ aot-ts-ct0002:
 		Filename: ct0002.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.438
 
 aot-ts-ca0002:
@@ -28,6 +31,7 @@ aot-ts-ca0002:
 		Filename: ca0002.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.416
 
 aot-ts-ct0003:
@@ -35,6 +39,7 @@ aot-ts-ct0003:
 		Filename: ct0003.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.444
 
 aot-ts-ca0003:
@@ -42,6 +47,7 @@ aot-ts-ca0003:
 		Filename: ca0003.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.444
 
 aot-ts-ct0004:
@@ -49,6 +55,7 @@ aot-ts-ct0004:
 		Filename: ct0004.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.376
 
 aot-ts-ca0004:
@@ -56,6 +63,7 @@ aot-ts-ca0004:
 		Filename: ca0004.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.376
 
 aot-ts-ct0005:
@@ -63,6 +71,7 @@ aot-ts-ct0005:
 		Filename: ct0005.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.5
 
 aot-ts-ca0005:
@@ -70,6 +79,7 @@ aot-ts-ca0005:
 		Filename: ca0005.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.5
 
 aot-ts-ct0006:
@@ -77,6 +87,7 @@ aot-ts-ct0006:
 		Filename: ct0006.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.5
 
 aot-ts-ca0006:
@@ -84,6 +95,7 @@ aot-ts-ca0006:
 		Filename: ca0006.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.5
 
 aot-ts-ct0007:
@@ -91,6 +103,7 @@ aot-ts-ct0007:
 		Filename: ct0007.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.5
 
 aot-ts-ca0007:
@@ -98,6 +111,7 @@ aot-ts-ca0007:
 		Filename: ca0007.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.5
 
 aot-ts-ct0008:
@@ -105,6 +119,7 @@ aot-ts-ct0008:
 		Filename: ct0008.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.327
 
 aot-ts-ca0008:
@@ -112,6 +127,7 @@ aot-ts-ca0008:
 		Filename: ca0008.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.34
 
 aot-ts-ct0009:
@@ -119,6 +135,7 @@ aot-ts-ct0009:
 		Filename: ct0009.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.356
 
 aot-ts-ca0009:
@@ -126,6 +143,7 @@ aot-ts-ca0009:
 		Filename: ca0009.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.395
 
 aot-ts-ct0010:
@@ -133,6 +151,7 @@ aot-ts-ct0010:
 		Filename: ct0010.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.333
 
 aot-ts-ca0010:
@@ -140,6 +159,7 @@ aot-ts-ca0010:
 		Filename: ca0010.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.333
 
 aot-ts-ct0011:
@@ -147,6 +167,7 @@ aot-ts-ct0011:
 		Filename: ct0011.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.571
 
 aot-ts-ca0011:
@@ -154,6 +175,7 @@ aot-ts-ca0011:
 		Filename: ca0011.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.571
 
 aot-ts-ct0012:
@@ -161,6 +183,7 @@ aot-ts-ct0012:
 		Filename: ct0012.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.516
 
 aot-ts-ca0012:
@@ -168,6 +191,7 @@ aot-ts-ca0012:
 		Filename: ca0012.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.516
 
 aot-ts-ct0013:
@@ -175,6 +199,7 @@ aot-ts-ct0013:
 		Filename: ct0013.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.571
 
 aot-ts-ca0013:
@@ -182,6 +207,7 @@ aot-ts-ca0013:
 		Filename: ca0013.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.571
 
 aot-ts-ct0014:
@@ -189,6 +215,7 @@ aot-ts-ct0014:
 		Filename: ct0014.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.667
 
 aot-ts-ca0014:
@@ -196,6 +223,7 @@ aot-ts-ca0014:
 		Filename: ca0014.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.667
 
 aot-ts-ct0015:
@@ -203,6 +231,7 @@ aot-ts-ct0015:
 		Filename: ct0015.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.667
 
 aot-ts-ca0015:
@@ -210,6 +239,7 @@ aot-ts-ca0015:
 		Filename: ca0015.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.667
 
 aot-ts-ct0016:
@@ -217,6 +247,7 @@ aot-ts-ct0016:
 		Filename: ct0016.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.667
 
 aot-ts-ca0016:
@@ -224,6 +255,7 @@ aot-ts-ca0016:
 		Filename: ca0016.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.667
 
 aot-ts-ct0017:
@@ -231,6 +263,7 @@ aot-ts-ct0017:
 		Filename: ct0017.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.727
 
 aot-ts-ca0017:
@@ -238,6 +271,7 @@ aot-ts-ca0017:
 		Filename: ca0017.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.727
 
 aot-ts-ct0018:
@@ -245,6 +279,7 @@ aot-ts-ct0018:
 		Filename: ct0018.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.457
 
 aot-ts-ca0018:
@@ -252,6 +287,7 @@ aot-ts-ca0018:
 		Filename: ca0018.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.457
 
 aot-ts-ct0019:
@@ -259,6 +295,7 @@ aot-ts-ct0019:
 		Filename: ct0019.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.457
 
 aot-ts-ca0019:
@@ -266,6 +303,7 @@ aot-ts-ca0019:
 		Filename: ca0019.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.457
 
 aot-ts-ct0020:
@@ -273,6 +311,7 @@ aot-ts-ct0020:
 		Filename: ct0020.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.508
 
 aot-ts-ca0020:
@@ -280,6 +319,7 @@ aot-ts-ca0020:
 		Filename: ca0020.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.508
 
 aot-ts-ct0021:
@@ -287,6 +327,7 @@ aot-ts-ct0021:
 		Filename: ct0021.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.542
 
 aot-ts-ca0021:
@@ -294,6 +335,7 @@ aot-ts-ca0021:
 		Filename: ca0021.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.508
 
 aot-ts-city01:
@@ -301,6 +343,7 @@ aot-ts-city01:
 		Filename: city01.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.26
 
 aot-ts-city02:
@@ -308,6 +351,7 @@ aot-ts-city02:
 		Filename: city02.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.372
 
 aot-ts-city03:
@@ -315,6 +359,7 @@ aot-ts-city03:
 		Filename: city03.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.32
 
 aot-ts-city04:
@@ -322,6 +367,7 @@ aot-ts-city04:
 		Filename: city04.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.286
 
 aot-ts-city05:
@@ -329,6 +375,7 @@ aot-ts-city05:
 		Filename: city05.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.305
 
 aot-ts-city06:
@@ -336,6 +383,7 @@ aot-ts-city06:
 		Filename: city06.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.258
 
 aot-ts-city07:
@@ -343,6 +391,7 @@ aot-ts-city07:
 		Filename: city07.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.302
 
 aot-ts-city08:
@@ -350,6 +399,7 @@ aot-ts-city08:
 		Filename: city08.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.464
 
 aot-ts-city09:
@@ -357,6 +407,7 @@ aot-ts-city09:
 		Filename: city09.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.39
 
 aot-ts-city10:
@@ -364,6 +415,7 @@ aot-ts-city10:
 		Filename: city10.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.333
 
 aot-ts-city11:
@@ -371,6 +423,7 @@ aot-ts-city11:
 		Filename: city11.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.314
 
 aot-ts-city12:
@@ -378,6 +431,7 @@ aot-ts-city12:
 		Filename: city12.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.508
 
 aot-ts-city13:
@@ -385,6 +439,7 @@ aot-ts-city13:
 		Filename: city13.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.372
 
 aot-ts-city14:
@@ -392,6 +447,7 @@ aot-ts-city14:
 		Filename: city14.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.727
 
 aot-ts-city15:
@@ -399,6 +455,7 @@ aot-ts-city15:
 		Filename: city15.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.232
 
 aot-ts-city16:
@@ -406,6 +463,7 @@ aot-ts-city16:
 		Filename: city16.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.286
 
 aot-ts-city17:
@@ -413,6 +471,7 @@ aot-ts-city17:
 		Filename: city17.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.201
 
 aot-ts-city18:
@@ -420,6 +479,7 @@ aot-ts-city18:
 		Filename: city18.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.18
 
 aot-ts-city19:
@@ -427,6 +487,7 @@ aot-ts-city19:
 		Filename: city19.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.372
 
 aot-ts-city20:
@@ -434,6 +495,7 @@ aot-ts-city20:
 		Filename: city20.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 1.103
 
 aot-ts-city21:
@@ -441,6 +503,7 @@ aot-ts-city21:
 		Filename: city21.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 1.067
 
 aot-ts-city22:
@@ -448,6 +511,7 @@ aot-ts-city22:
 		Filename: city22.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.4
 
 aot-ts-aban01:
@@ -455,6 +519,7 @@ aot-ts-aban01:
 		Filename: aban01.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.195
 
 aot-ts-aban02:
@@ -462,6 +527,7 @@ aot-ts-aban02:
 		Filename: aban02.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.182
 
 aot-ts-aban03:
@@ -469,6 +535,7 @@ aot-ts-aban03:
 		Filename: aban03.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.211
 
 aot-ts-aban04:
@@ -476,6 +543,7 @@ aot-ts-aban04:
 		Filename: aban04.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.26
 
 aot-ts-aban05:
@@ -483,6 +551,7 @@ aot-ts-aban05:
 		Filename: aban05.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.281
 
 aot-ts-aban06:
@@ -490,6 +559,7 @@ aot-ts-aban06:
 		Filename: aban06.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.405
 
 aot-ts-aban07:
@@ -497,6 +567,7 @@ aot-ts-aban07:
 		Filename: aban07.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.395
 
 aot-ts-aban08:
@@ -504,6 +575,7 @@ aot-ts-aban08:
 		Filename: aban08.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.364
 
 aot-ts-aban09:
@@ -511,6 +583,7 @@ aot-ts-aban09:
 		Filename: aban09.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.416
 
 aot-ts-aban10:
@@ -518,6 +591,7 @@ aot-ts-aban10:
 		Filename: aban10.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.427
 
 aot-ts-aban11:
@@ -525,6 +599,7 @@ aot-ts-aban11:
 		Filename: aban11.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.416
 
 aot-ts-aban12:
@@ -532,6 +607,7 @@ aot-ts-aban12:
 		Filename: aban12.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.395
 
 aot-ts-aban13:
@@ -539,6 +615,7 @@ aot-ts-aban13:
 		Filename: aban13.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.762
 
 aot-ts-aban14:
@@ -546,6 +623,7 @@ aot-ts-aban14:
 		Filename: aban14.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.78
 
 aot-ts-aban15:
@@ -553,6 +631,7 @@ aot-ts-aban15:
 		Filename: aban15.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.762
 
 aot-ts-aban16:
@@ -560,6 +639,7 @@ aot-ts-aban16:
 		Filename: aban16.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 0.372
 
 aot-ts-aban17:
@@ -567,6 +647,7 @@ aot-ts-aban17:
 		Filename: aban17.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 1.103
 
 aot-ts-aban18:
@@ -574,35 +655,48 @@ aot-ts-aban18:
 		Filename: aban18.shp
 	idle:
 		Length: 1
+		ShadowStart: 2
 		Scale: 1.067
 
+# Neu gebacken (2026-07-27): rohes ctaray.shp direkt referenziert sah bei groesserer Skalierung
+# extrem pixelig aus (identisches Problem wie beim Wolverine-Mech-Import, siehe
+# [[ts-shp-mech-import]] "Cyborg-Palette-Ansatz ... extrem pixelig/grobkoernig"). Fix: eigener
+# SHP-TS-Format-Decoder (Python, TS-Frame-Format aus ShpTSLoader.cs rekonstruiert) liest die
+# rohen Palette-Indizes von Frame 0 direkt (keine Hausfarben-Pixel 16-31 vorhanden -> kein
+# Player-Color-Layer noetig), Scale3x/EPX-Vorskalierung (indexed-erhaltend, scharfe Kanten,
+# kein LANCZOS-Blur) 84x80 -> 252x240, dann erst zu RGBA (unittem.pal) geflattet und als
+# statisches PNG gebacken (bits/aot-ts-ctaray.png) - analog zum aot-ts-galite-Rebake.
+# Scale kompensiert die 3x-Vorskalierung: alte Ziel-Groesse (Scale 1.0 auf Rohgroesse) / 3 = 0.333.
+# User-Wunsch 2026-07-27: nochmal 25% kleiner -> 0.333 * 0.75 = 0.25.
 aot-ts-ctaray:
-	Defaults:
-		Filename: ctaray.shp
 	idle:
+		Filename: aot-ts-ctaray.png
 		Length: 1
-		Scale: 0.381
+		Scale: 0.25
 
 aot-ts-ctpyr01:
 	Defaults:
 		Filename: ctpyr01.shp
 	idle:
 		Length: 1
-		Scale: 0.333
+		ShadowStart: 1
+		Scale: 1.0
 
 aot-ts-ctpyr02:
 	Defaults:
 		Filename: ctpyr02.shp
 	idle:
 		Length: 1
-		Scale: 0.167
+		ShadowStart: 1
+		Scale: 1.0
 
 aot-ts-ctpyr03:
 	Defaults:
 		Filename: ctpyr03.shp
 	idle:
 		Length: 1
-		Scale: 0.171
+		ShadowStart: 1
+		Scale: 1.0
 
 # Light Post: neu gebacken 2026-07-27 (siehe lighting-system.md).
 # Vorher: rohes galite.shp mit Scale 1.778 -- gleich ZWEI Fehler.
@@ -631,7 +725,8 @@ aot-ts-ctvega:
 		Filename: ctvega.shp
 	idle:
 		Length: 1
-		Scale: 0.186
+		ShadowStart: 3
+		Scale: 1.0
 
 aot-ts-ctdam:
 	Defaults:
