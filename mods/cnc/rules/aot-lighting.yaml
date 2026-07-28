@@ -206,4 +206,43 @@ aot-ts-purplamp:
 		RedTint: 2.0
 		GreenTint: 0.01
 		BlueTint: 2.0
+
+# --- Baubarer Lightpost (aot-lightpost, Age 3): Licht in SPIELERFARBE, schwaecher ---
+# Das SPRITE bleibt neutral wie bei den Editor-Posts (User 2026-07-28) -- die Spielerfarbe
+# steckt komplett im Licht.
+# UsePlayerColor (Engine-Patch 2026-07-28 in TerrainLightSource.cs): der Tint kommt aus der
+# Farbe des Besitzers statt aus Red/Green/BlueTint. Die Farbe wird normiert (hellster Kanal = 1)
+# und dann mit PlayerColorTintScale skaliert -- ohne die Normierung wuerde ein dunkles
+# Spielerblau bei identischen Rules-Werten kaum leuchten und ein helles Gelb ausbrennen.
+# Bei Uebernahme (Engineer/Carjacker) wird die Lichtquelle neu registriert -> Farbe folgt.
+# Der Tint ist ADDITIV auf den Welt-Tint (TerrainLighting.TintAt) und damit der Traeger der
+# FARBE; Intensity bestimmt, wie viel HELLER es wird. Die TS-Farblampen fahren Tint 1.5 bei
+# Intensity 0.01 -- 0.9/0.05 ist also klar die schwaechere Variante, wie gewuenscht.
+# Der Aktor erbt von ^BaseBuilding auch das Fraktions-Gebaeudelicht (@AOTLIGHTGDI/NOD) -- das
+# wird hier entfernt, sonst liegt ein gelb-/rotstichiger Schein UNTER dem weissen Lampenlicht
+# und verfaelscht es. Beide GrantConditionOnFaction fliegen mit raus, damit keine Condition
+# ohne Konsumenten uebrig bleibt.
+# RequiresCondition: TerrainLightSource ist im Mod ein ConditionalTrait (Engine-Patch) --
+# die Lampe geht komplett aus (nicht nur gedimmt), und zwar bei allen drei Anlaessen:
+#   !lowpower                 kein Strom
+#   !aot-ion-storm-blackout   Ion Storm (Condition kommt von ^Building, s. overrides.yaml).
+#                             Streng genommen redundant -- AotIonStormPower ruft beim Sturm
+#                             lighting.SetLightSourcesDisabled(true) und loescht damit ohnehin
+#                             ALLE Lichtquellen. Steht hier trotzdem, damit die Lampe nicht
+#                             von diesem globalen Seiteneffekt abhaengt und Licht+Sensor
+#                             nachweislich dieselbe Bedingung teilen.
+#   !aot-lightpost-off        von Hand per Deploy abgeschaltet (s. aot-structures.yaml)
+# Die Bedingung MUSS mit der von DetectCloaked identisch sein, damit Licht und Sensor immer
+# gemeinsam schalten.
+aot-lightpost:
+	-GrantConditionOnFaction@AOTLIGHTGDI:
+	-GrantConditionOnFaction@AOTLIGHTNOD:
+	-TerrainLightSource@AOTLIGHTGDI:
+	-TerrainLightSource@AOTLIGHTNOD:
+	TerrainLightSource:
+		RequiresCondition: !lowpower && !aot-ion-storm-blackout && !aot-lightpost-off && !build-incomplete
+		Range: 6c0
+		UsePlayerColor: true
+		PlayerColorTintScale: 0.9
+		Intensity: 0.05
 # === Ende aotmod ===

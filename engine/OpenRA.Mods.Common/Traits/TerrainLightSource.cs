@@ -51,6 +51,31 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Display order for the brightness slider in the map editor.")]
 		public readonly int EditorBrightnessDisplayOrder = 2;
 
+		// aotmod (2026-07-28): light in the owning player's colour (buildable light post).
+		[Desc("Take the tint from the owning player's colour instead of the Red/Green/BlueTint",
+			"fields. The colour is normalised so its brightest channel becomes 1 before",
+			"PlayerColorTintScale is applied -- otherwise a dark player colour would produce a",
+			"barely visible light and a bright one would blow out, for the same rules values.",
+			"The tint is ADDED to the world tint (see TerrainLighting.TintAt), so a scale around",
+			"1 gives a clearly coloured pool of light; Intensity on top of that controls how much",
+			"brighter the lit area gets.")]
+		public readonly bool UsePlayerColor = false;
+
+		[Desc("Strength of the player colour tint. Only used when UsePlayerColor is true.")]
+		public readonly float PlayerColorTintScale = 1f;
+
+		// Normalised so the brightest channel is 1: keeps the hue, drops the player colour's own
+		// brightness, which is what makes every player's lamp read equally strong.
+		public float3 PlayerColorTint(Color color)
+		{
+			var max = Math.Max(color.R, Math.Max(color.G, color.B));
+			if (max == 0)
+				return float3.Zero;
+
+			var scale = PlayerColorTintScale / max;
+			return new float3(color.R * scale, color.G * scale, color.B * scale);
+		}
+
 		IEnumerable<EditorActorOption> IEditorActorOptions.ActorOptions(ActorInfo ai, World world)
 		{
 			if (!EditorConfigurable)
@@ -73,7 +98,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		object INotifyEditorPlacementInfo.AddedToEditor(EditorActorPreview preview, World editorWorld)
 		{
-			var tint = new float3(RedTint, GreenTint, BlueTint);
+			var tint = UsePlayerColor ? PlayerColorTint(preview.Owner.Color) : new float3(RedTint, GreenTint, BlueTint);
 
 			// Honour the per-actor settings, so the editor preview shows what the map will look like.
 			var brightness = preview.GetInitOrDefault<TerrainLightBrightnessInit>()?.Value ?? Brightness;
@@ -99,7 +124,7 @@ namespace OpenRA.Mods.Common.Traits
 		public override object Create(ActorInitializer init) { return new TerrainLightSource(init, this); }
 	}
 
-	public sealed class TerrainLightSource : ConditionalTrait<TerrainLightSourceInfo>, INotifyAddedToWorld, INotifyRemovedFromWorld
+	public sealed class TerrainLightSource : ConditionalTrait<TerrainLightSourceInfo>, INotifyAddedToWorld, INotifyRemovedFromWorld, INotifyOwnerChanged
 	{
 		readonly TerrainLighting terrainLighting;
 
@@ -133,15 +158,35 @@ namespace OpenRA.Mods.Common.Traits
 		protected override void TraitEnabled(Actor self) { Refresh(self); }
 		protected override void TraitDisabled(Actor self) { Refresh(self); }
 
+		// aotmod (2026-07-28): a player-coloured light has to follow a capture. The tint is baked
+		// into the light source when it is added, so the source is dropped and re-added.
+		void INotifyOwnerChanged.OnOwnerChanged(Actor self, Player oldOwner, Player newOwner)
+		{
+			if (!Info.UsePlayerColor || lightingToken == -1)
+				return;
+
+			terrainLighting.RemoveLightSource(lightingToken);
+			lightingToken = -1;
+			Refresh(self, newOwner);
+		}
+
 		// aotmod (2026-07-26): the light exists exactly while the actor is in the world AND the
 		// trait is enabled. Killing/selling the actor removes it from the world, so the light dies
 		// with it -- deliberately unlike Tiberian Sun, where a destroyed light post kept lighting.
-		void Refresh(Actor self)
+		void Refresh(Actor self, Player owner = null)
 		{
 			var wanted = inWorld && !IsTraitDisabled;
 			if (wanted && lightingToken == -1)
+			{
+				// aotmod (2026-07-28): player-coloured lights read the owner here, so the colour is
+				// picked up whenever the source is (re-)added -- including after a capture.
+				var tint = Info.UsePlayerColor
+					? Info.PlayerColorTint((owner ?? self.Owner).Color)
+					: new float3(Info.RedTint, Info.GreenTint, Info.BlueTint);
+
 				lightingToken = terrainLighting.AddLightSource(self.CenterPosition, Info.Range, Info.Intensity,
-					new float3(Info.RedTint, Info.GreenTint, Info.BlueTint), brightness, alwaysOn);
+					tint, brightness, alwaysOn);
+			}
 			else if (!wanted && lightingToken != -1)
 			{
 				terrainLighting.RemoveLightSource(lightingToken);

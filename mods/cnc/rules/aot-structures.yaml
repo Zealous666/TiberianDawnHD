@@ -7195,3 +7195,123 @@ aot-vein-recession:
 		Interval: 2
 		CellsPerPass: 6
 # === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Lightpost (aot-lightpost), 2026-07-28 ===
+# Baubare Variante der Editor-Light-Posts (aot-ts-galite & Co, aot-ts-civilian.yaml):
+#   - in SPIELERFARBE statt neutralem Graumetall (indiziertes Remap-Overlay, s. Sequenzen)
+#   - SCHWAECHERES Licht als der Editor-Post (Werte in aot-lighting.yaml)
+#   - dazu ein kleiner Tarnungs-Erkennungsradius mit sichtbarem Radius-Marker
+#   - braucht Strom: bei Low Power gehen Licht UND Erkennung aus
+# Beide Fraktionen (Queue: Building.GDI, Building.Nod), sichtbar+baubar ab Age 3 (~aot-age3).
+aot-lightpost:
+	Inherits: ^BaseBuilding
+	Inherits@IDISABLE: ^DisabledOverlay
+	# Das TS-Sprite hat keinen "dead"-Rubble-Frame -> WithDeathAnimation (von ^BaseBuilding)
+	# wuerde beim Zerstoeren crashen (siehe building-dead-sequence-crash Memory).
+	-WithDeathAnimation:
+	Tooltip:
+		Name: Lightpost
+	Valued:
+		Cost: 500
+	Building:
+		Footprint: x
+		Dimensions: 1,1
+	Selectable:
+		Bounds: 1024, 1024
+	Health:
+		HP: 15000
+	Armor:
+		Type: Wood
+	# --- Sprite: exakt wie die Editor-Light-Posts, KEINE Spielerfarbe auf dem Sprite ---
+	# (User 2026-07-28: der Post soll aussehen wie die anderen; die Spielerfarbe steckt
+	# ausschliesslich im LICHT, siehe TerrainLightSource in aot-lighting.yaml.)
+	# Palette/IsPlayerPalette MUSS am Body-Trait explizit stehen: ohne Wert faellt RenderSprites
+	# intern auf "player" zurueck und PlayerColorShift verschiebt jeden gruenlichen Pixel
+	# (siehe gemini-building-import.md) -- genau das hat den Post gruen eingefaerbt.
+	RenderSprites:
+		Image: aot-lightpost
+		Palette: effect
+	WithSpriteBody:
+		Palette: effect
+		IsPlayerPalette: false
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: idle
+		SequenceAlpha: 0.65
+	# --- Strom: ohne Energie kein Licht und keine Erkennung ---
+	# Manuell abgeschaltet (aot-lightpost-off) zieht der Post auch keinen Strom mehr -- gleiches
+	# Verhalten wie Shroud-/Stealth-Generator (aot-gap, aot-sgen).
+	Power:
+		Amount: -10
+		RequiresCondition: !aot-lightpost-off
+	# --- Deploy-Toggle: Lampe von Hand an/aus ---
+	# Startet AN; ein Deploy-Befehl (Button oder Rechtsklick) schaltet ab -> aot-lightpost-off
+	# -> Licht aus, Sensor aus, Stromverbrauch 0. Erneuter Deploy schaltet wieder an.
+	# SkipMakeAnimation: kein Replay der Bau-Animation beim Umschalten.
+	GrantConditionOnDeploy:
+		DeployedCondition: aot-lightpost-off
+		SkipMakeAnimation: true
+	# --- Kleiner Tarnungs-Erkennungsradius ---
+	# 4c0 = knapp unter dem Radar/Pillbox-Wert (5c0), also klar "klein".
+	# Faellt mit dem Licht zusammen aus: kein Strom, Ion Storm oder von Hand abgeschaltet.
+	# !lowpower gehoert IMMER mit in die Bedingung -- RequiresCondition ERSETZT den geerbten
+	# Wert, ein blosses "!aot-ion-storm-blackout" wuerde die Stromabhaengigkeit stillschweigend
+	# entfernen (dieser Bug ist 2026-07-28 beim Radar real passiert, siehe overrides.yaml).
+	DetectCloaked:
+		Range: 4c0
+		RequiresCondition: !lowpower && !aot-ion-storm-blackout && !aot-lightpost-off && !build-incomplete
+	# Zwei Marker, weil sie unterschiedliche Momente abdecken:
+	#   RenderDetectionCircle = der rotierende Scanner-Kreis bei Selektion (liest die Range
+	#     direkt aus DetectCloaked, braucht daher keinen eigenen Wert).
+	#   WithRangeCircle = IPlaceBuildingDecorationInfo, zeichnet den Radius schon WAEHREND der
+	#     Platzierung (und bei Selektion). Range MUSS mit DetectCloaked uebereinstimmen.
+	RenderDetectionCircle:
+	WithRangeCircle:
+		Type: detection
+		Range: 4c0
+		Color: 44FF88B4
+		BorderColor: 10201080
+	# Kleiner Sichtradius, passend zum Erkennungsbereich (kein Ersatz-Radar).
+	RevealsShroud:
+		Range: 5c0
+	ProvidesPrerequisite@buildingname:
+		Prerequisite: aot-lightpost
+	# Kein Buildable auf dem Basis-Aktor: die Bau-Position soll pro Fraktion unterschiedlich sein
+	# (User 2026-07-28: GDI direkt vor Orbital Command, NOD direkt vor Obelisk), und
+	# BuildPaletteOrder gilt fuer ALLE Queues eines Buildable gleichzeitig. Deshalb zwei
+	# Fraktions-Proxies unten -- gleiches Muster wie aot-lite-gdi/-nod.
+
+# --- Fraktions-Proxies, nur fuer die unterschiedliche Position im Baumenue ---
+# Beide bauen denselben Post; die LockedGroup haelt sie im Platzhalter-System zusammen.
+# ⚠️ RenderSprites: Image: MUSS auf jedem Proxy explizit stehen, auch wenn der Basis-Aktor es
+# schon setzt -- ohne das faellt der Image-Name auf den AKTORNAMEN zurueck und der Proxy
+# verschwindet aus dem Editor-Browser (siehe locked-icon-system.md, 9 Placer betroffen).
+aot-lightpost-gdi:
+	Inherits: aot-lightpost
+	RenderSprites:
+		Image: aot-lightpost
+	Buildable:
+		Queue: Building.GDI
+		# GDI: direkt vor ORBC (200), das damit letztes Icon der Queue bleibt.
+		BuildPaletteOrder: 195
+		Prerequisites: ~aot-age3
+		Icon: icon
+		# LockedGroup explizit: der Post ist vor Age 3 komplett versteckt und faellt damit unter
+		# das Platzhalter-Icon-System (ShowWhenLocked ist Default true). Beide Proxies teilen sich
+		# die Gruppe, damit nicht zwei Platzhalter-Slots entstehen (siehe locked-icon-system.md).
+		LockedGroup: aot-grp-lightpost
+		Description: Lights the surrounding area at night and detects nearby cloaked units. Requires power to operate.
+
+aot-lightpost-nod:
+	Inherits: aot-lightpost
+	RenderSprites:
+		Image: aot-lightpost
+	Buildable:
+		Queue: Building.Nod
+		# NOD: direkt vor OBLI (230), das damit letztes Icon der Queue bleibt.
+		BuildPaletteOrder: 225
+		Prerequisites: ~aot-age3
+		Icon: icon
+		LockedGroup: aot-grp-lightpost
+		Description: Lights the surrounding area at night and detects nearby cloaked units. Requires power to operate.
+# === Ende aotmod ===

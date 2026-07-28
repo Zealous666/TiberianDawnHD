@@ -5123,4 +5123,36 @@ aot-litning:
 		Start: 4
 		Length: 4
 		ZOffset: 2047
+
+# === Age of Tiberium (aotmod) - Lightpost (baubar ab Age 3) ===
+# Sprite BYTE-IDENTISCH zum Editor-Light-Post aot-ts-galite (gtlite.shp, siehe
+# aot-ts-civilian-sequences.yaml) -- gleiche Scale 0.55, kein Remap-Overlay: der baubare Post
+# soll genauso aussehen wie die Editor-Posts (User 2026-07-28). Die Spielerfarbe steckt
+# ausschliesslich im LICHT (TerrainLightSource.UsePlayerColor, s. aot-lighting.yaml).
+# Eigene Sequenz-Eintraege statt Wiederverwendung von aot-ts-galite, weil nur der baubare Post
+# ein "icon" und ein "make" braucht.
+# "make" ist bewusst ein Ein-Frame-Platzhalter: das TS-Sprite hat keine Bau-Animation, aber
+# WithMakeAnimation (von ^BaseBuilding) vergibt die build-incomplete-Condition, die reihenweise
+# andere Traits konsumieren -- den Trait zu entfernen wuerde check-yaml-Fehler ausloesen.
+# ⚠️ Scale/Offset sind Startwerte und brauchen In-Game-Feinjustierung (Mod-Konvention).
+aot-lightpost:
+	icon:
+		Filename: aot-lightpost-icon.png
+		RemasteredFilename:
+		Length: 1
+	idle:
+		Filename: aot-lightpost.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+	damaged-idle:
+		Filename: aot-lightpost-damaged.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
+	make:
+		Filename: aot-lightpost.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.55
 # === Ende aotmod ===
