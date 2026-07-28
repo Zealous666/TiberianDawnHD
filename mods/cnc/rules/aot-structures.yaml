@@ -4275,7 +4275,7 @@ aot-gun-base:
 		BuildPaletteOrder: 170
 		# Voraussetzung von "barracks" (Infanterie-Produktion) auf "lite"
 		# (Fahrzeug-Produktion) geaendert (User-Wunsch 2026-07-05).
-		Prerequisites: ~aot-age1, lite, ~!aot-laser-fence-upgrade
+		Prerequisites: ~aot-turret-upgrade, aot-turret-upgrade, lite, ~!aot-laser-fence-upgrade
 		Queue: Building.Nod
 		BuildDuration: 960
 		Description: actor-gun.description
@@ -4287,7 +4287,7 @@ aot-gun-laser:
 	Buildable:
 		LockedGroup: aot-grp-gun
 		BuildPaletteOrder: 170
-		Prerequisites: ~aot-age1, lite, ~aot-laser-fence-upgrade
+		Prerequisites: ~aot-turret-upgrade, aot-turret-upgrade, lite, ~aot-laser-fence-upgrade
 		Queue: Building.Nod
 		BuildDuration: 960
 		Icon: gun-laser-icon
@@ -6585,15 +6585,50 @@ aot-ftur:
 	Building:
 		Footprint: x
 		Dimensions: 1,1
+	# Sicht muss mit der Napalm-Reichweite mitwachsen, sonst sieht der Turm seine eigenen Ziele
+	# nicht mehr (AutoTarget sucht nur im Sichtbereich) und feuert nur auf fremd-aufgeklaertes.
 	RevealsShroud:
 		MinRange: 5c0
 		Range: 6c0
+		RequiresCondition: !aot-ftur-napalm
+	RevealsShroud@napalm:
+		MinRange: 5c0
+		Range: 8c0
+		RequiresCondition: aot-ftur-napalm
 	Turreted:
 		TurnSpeed: 512
 		Offset: 0,0,112
+	# Toxic braucht BEIDES: Nitro Napalm UND das fraktionsweite Toxic-Upgrade.
+	# GrantConditionOnPrerequisite.Prerequisites ist selbst schon eine UND-Liste
+	# (TechTree.HasPrerequisites -> .All(...)), die Kombination geht also direkt hier.
+	# E4/TTNK bleiben unveraendert am reinen aot-toxic-upgrade -- nur FTUR ist gegated.
 	GrantConditionOnPrerequisite@TOXIC:
 		Condition: aot-ftur-toxic
-		Prerequisites: aot-toxic-upgrade
+		Prerequisites: aot-nitro-napalm-upgrade, aot-toxic-upgrade
+	# Menue-Token fuer den Proxy-Wechsel (flame <-> toxic). Muss von einem Aktor kommen,
+	# der WIRKLICH auf der Karte steht: GrantConditionOnPrerequisite registriert sich erst
+	# in INotifyAddedToWorld, auf einem Upgrade-Aktor feuert das nicht.
+	ProvidesPrerequisite@TOXICREADY:
+		Prerequisite: aot-ftur-toxic-ready
+		RequiresCondition: aot-ftur-toxic
+	# Turret-Upgrade verdraengt den Flammenturm nicht nur aus dem Baumenue, sondern baut
+	# ALLE bereits stehenden FTURs in Gun Turrets um (User-Wunsch 2026-07-27).
+	# Gleicher Trait wie beim Devil's-Tongue-Umbau des TTNK; Footprints sind identisch
+	# (beide 1x1 "x"), der Turm steht danach also exakt auf derselben Zelle.
+	# Greift nur fuer Spieler MIT dem Upgrade -- map-platzierte FTURs von Creeps/Neutral
+	# bleiben unangetastet, da Prerequisites pro Spieler ausgewertet werden.
+	AotTransformOnPrerequisite:
+		IntoActor: gun
+		Prerequisites: aot-turret-upgrade
+	# Nitro Napalm: mehr Waffenreichweite (5c0 -> 6c5) und passend erweiterte Sicht.
+	# RangeMultiplier ist ein eigenstaendiger Modifier-Trait (kein AttackBase-Abkoemmling),
+	# daher gefahrlos -- gleiches Muster wie das Guard-Tower-Upgrade der Pillbox.
+	GrantConditionOnPrerequisite@NAPALM:
+		Condition: aot-ftur-napalm
+		Prerequisites: aot-nitro-napalm-upgrade
+	RangeMultiplier@NAPALM:
+		RequiresCondition: aot-ftur-napalm
+		Modifier: 130
 	Armament@flame:
 		Name: primary
 		Weapon: aot-FturFlame
@@ -6614,10 +6649,24 @@ aot-ftur:
 	# automatisch ueber RenderSprites.NormalizeSequence's "damaged-"-Praefix-
 	# Konvention, solange "damaged-toxic-idle" existiert.
 	-WithSpriteBody:
+	# Drei Sprite-Zustaende (2026-07-27): normal -> Nitro Napalm (schwarze Tanks) ->
+	# Toxic (gruene Tanks). Toxic setzt Napalm voraus, die Bedingungen sind trotzdem
+	# explizit ausformuliert, damit kein Zustand doppelt rendert.
 	WithSpriteBody@flame:
 		Sequence: idle
 		Name: body
-		RequiresCondition: !aot-ftur-toxic
+		RequiresCondition: !aot-ftur-napalm && !aot-ftur-toxic
+	WithSpriteBody@napalm:
+		Sequence: napalm-idle
+		Name: body-napalm
+		RequiresCondition: aot-ftur-napalm && !aot-ftur-toxic
+	# Bau-Animation muss ALLE drei Bodies kennen, sonst baut ein FTUR im Napalm- oder
+	# Toxic-Zustand ohne Animation (WithMakeAnimation.BodyNames defaultet auf nur "body",
+	# der ist dann deaktiviert -> Forward() findet keinen aktiven Body und kehrt zurueck).
+	# Mehrere Namen sind ungefaehrlich: Forward()/Reverse() waehlen per
+	# FirstEnabledConditionalTraitOrDefault() GENAU EINEN aktiven Body aus.
+	WithMakeAnimation:
+		BodyNames: body, body-napalm, body-toxic
 	WithSpriteBody@toxic:
 		Sequence: toxic-idle
 		Name: body-toxic
@@ -6660,7 +6709,7 @@ aot-ftur-flame:
 	Buildable:
 		LockedGroup: aot-grp-ftur
 		BuildPaletteOrder: 100
-		Prerequisites: barracks, ~!aot-toxic-upgrade
+		Prerequisites: barracks, ~!aot-turret-upgrade, ~!aot-ftur-toxic-ready
 		Queue: Building.Nod
 		Description: RA Flame Tower. Short-range anti-infantry/vehicle defense.
 
@@ -6677,19 +6726,65 @@ aot-ftur-toxic:
 	Buildable:
 		LockedGroup: aot-grp-ftur
 		BuildPaletteOrder: 100
-		Prerequisites: barracks, ~aot-toxic-upgrade
+		Prerequisites: barracks, ~!aot-turret-upgrade, ~aot-ftur-toxic-ready
 		Queue: Building.Nod
 		Icon: toxic-icon
 		Description: RA Flame Tower upgraded with toxic weaponry. Short-range anti-infantry/vehicle defense.
 	-Tooltip@normal:
 	-Armament@flame:
 	-WithSpriteBody@flame:
+	-WithSpriteBody@napalm:
 	Tooltip@toxic:
 		RequiresCondition: aot-ftur-toxic || !aot-ftur-toxic
 	Armament@toxic:
 		RequiresCondition: aot-ftur-toxic || !aot-ftur-toxic
 	WithSpriteBody@toxic:
 		RequiresCondition: aot-ftur-toxic || !aot-ftur-toxic
+
+# === Age of Tiberium (aotmod) - NOD Verteidigungs-Zweig ab Age 1 (2026-07-27) ===
+# Zwei sich GEGENSEITIG AUSSCHLIESSENDE Upgrades (Branch-Paar wie Airstrike/Spyplane):
+#   Nitro Napalm -> FTUR bleibt und wird besser (mehr Reichweite), Tor zum spaeteren Toxic Tower.
+#   Turret       -> schaltet das GUN erst frei, verdraengt dafuer den FTUR, Tor zum Laser Turret.
+# Vor Age 1 ist NUR der FTUR da (wie bisher, ab barracks); das GUN ist ohne Turret-Upgrade
+# ueberhaupt nicht mehr baubar.
+# LockedGroup: beide teilen sich EINEN Platzhalter-Slot, sonst zeigt das C&C3-Icon-System zwei
+# Platzhalter fuer eine Entscheidung, von der sich nur eine je materialisieren kann.
+aot-upgrade-ftur-napalm:
+	Tooltip:
+		Name: Nitro Napalm
+	Buildable:
+		LockedGroup: aot-grp-up-noddefense
+		BuildPaletteOrder: 26
+		Prerequisites: ~aot-age1, aot-age1, barracks, ~!aot-turret-upgrade
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		Description: Nitro-enriched napalm for the Flame Tower - longer reach, and the base for later toxic conversion. Rules out the Turret.
+	Valued:
+		Cost: 500
+	RenderSprites:
+		Image: aot-ftur
+	ProvidesPrerequisite:
+		Prerequisite: aot-nitro-napalm-upgrade
+	Interactable:
+
+aot-upgrade-turret:
+	Tooltip:
+		Name: Turret
+	Buildable:
+		LockedGroup: aot-grp-up-noddefense
+		BuildPaletteOrder: 27
+		Prerequisites: ~aot-age1, aot-age1, lite, ~!aot-nitro-napalm-upgrade
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		Description: Unlocks the Gun Turret and the later Laser Turret. Rules out the Flame Tower.
+	Valued:
+		Cost: 500
+	RenderSprites:
+		Image: gun
+	ProvidesPrerequisite:
+		Prerequisite: aot-turret-upgrade
+	Interactable:
+# === Ende aotmod ===
 
 # === Oil Pump (ARCO) UND Oil Derrick (V19): beide lassen beim Zerstoeren eine
 # 1000-Credits-Kiste in einer ZUFAELLIGEN, passierbaren Nachbarzelle fallen.

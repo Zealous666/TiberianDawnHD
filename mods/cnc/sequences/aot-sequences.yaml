@@ -4437,6 +4437,16 @@ aot-ftur:
 	toxic-icon:
 		RemasteredFilename: aot-ftur-toxic-icon.png
 		Length: 1
+	# Nitro-Napalm-Upgrade (2026-07-27): dieselben zwei Gas-Tanks, aber SCHWARZ statt gruen
+	# (recolor-ftur-napalm.py, gleiche Tank-Erkennung wie die Toxic-Variante -- nur ein
+	# dunkler Graukeil 14..74 als Ziel, damit die Woelbung der Tanks lesbar bleibt).
+	# Gleiche "damaged-"-Praefix-Konvention wie oben -> Damage-State laeuft automatisch.
+	napalm-idle:
+		RemasteredFilename: aot-ftur-napalm-idle.zip
+		Length: 10
+	damaged-napalm-idle:
+		RemasteredFilename: aot-ftur-napalm-damaged-idle.zip
+		Length: 10
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - FTUR Feuerball-Projektil (RA FB1/FB2-Import) ===
