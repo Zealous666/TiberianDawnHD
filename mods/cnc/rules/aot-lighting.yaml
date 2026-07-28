@@ -147,10 +147,20 @@ aot-vein-heart:
 # die ungleiche Zugabe 0.40/0.35/0.10 ergibt exakt 1.25/1.25/1.25 = neutral weiss.
 # Ergebnis im Zentrum: RGB 1.125 gleichmaessig = 2.25x Nacht-Luminanz -> klar sichtbarer,
 # neutral-weisser Lichtkegel im blauen Nachtbild, vergleichbar praesent wie die Farblampen.
+#
+# EditorConfigurable schaltet die beiden Karteneditor-Optionen frei (User-Wunsch 2026-07-28) und
+# wird von den fuenf Farblampen ueber "Inherits: aot-ts-galite" mitgeerbt:
+#   CHECKBOX "Always on" - Lampe ignoriert die Tag/Nacht-Abblendung und leuchtet rund um die Uhr.
+#     Einzige Ausnahme bleibt der Ion Storm, der ausnahmslos alle Lichtquellen loescht.
+#   SLIDER "Brightness (%)" - dimmt die Lampe zwischen 0% und dem hier gesetzten Intensity/Tint.
+#     Die Werte unten sind also Maximum UND Standardwert (Regler startet auf 100%).
+# Bewusst NICHT auf ^BaseBuilding: dort haengen zwei Condition-Instanzen (GDI/NOD) am selben
+# Aktor, jede wuerde ein eigenes gleichnamiges Widget auf denselben ActorInit anlegen.
 aot-ts-galite:
 	RenderSprites:
 		Palette: effect
 	TerrainLightSource:
+		EditorConfigurable: True
 		Range: 14c664
 		Intensity: 0.35
 		RedTint: 0.40

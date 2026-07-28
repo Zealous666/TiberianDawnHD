@@ -170,6 +170,10 @@ namespace OpenRA.Mods.Cnc.Traits
 				var t = info.NightTint;
 				lighting.SetGlobalLighting(info.NightIntensity,
 					new float3(t.Length > 0 ? t[0] : 1f, t.Length > 1 ? t[1] : 1f, t.Length > 2 ? t[2] : 1f));
+
+				// Der Sturm loescht JEDE lokale Lichtquelle - auch die auf "Immer an" gestellten
+				// Lightposts, fuer die er damit die einzige Ausnahme bleibt.
+				lighting.SetLightSourcesDisabled(true);
 				StartSweep(self);
 			}
 
@@ -418,6 +422,7 @@ namespace OpenRA.Mods.Cnc.Traits
 			if (lighting != null)
 			{
 				lighting.SetGlobalLighting(savedIntensity, savedTint);
+				lighting.SetLightSourcesDisabled(false);
 				StartSweep(self);
 			}
 

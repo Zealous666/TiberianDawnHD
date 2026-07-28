@@ -35,13 +35,21 @@ namespace OpenRA.Mods.Common.Traits
 
 	public sealed class TerrainLighting : ITerrainLighting
 	{
-		sealed class LightSource(WPos pos, CPos cell, WDist range, float intensity, in float3 tint)
+		sealed class LightSource(WPos pos, CPos cell, WDist range, float intensity, in float3 tint,
+			float brightness, bool ignoresGlobalScale)
 		{
 			public readonly WPos Pos = pos;
 			public readonly CPos Cell = cell;
 			public readonly WDist Range = range;
 			public readonly float Intensity = intensity;
 			public readonly float3 Tint = tint;
+
+			// aotmod (2026-07-28): per-source dimmer, 0-1. The rules value is the maximum.
+			public readonly float Brightness = brightness;
+
+			// aotmod (2026-07-28): "always on" -- the day/night fade below does not apply, so this
+			// source burns at full strength at noon as well. The storm blackout still switches it off.
+			public readonly bool IgnoresGlobalScale = ignoresGlobalScale;
 		}
 
 		readonly TerrainLightingInfo info;
@@ -60,6 +68,10 @@ namespace OpenRA.Mods.Common.Traits
 		// glowing tiberium fade in at dusk instead of washing out the map at noon. Stays at 1
 		// on maps without a cycle actor, i.e. unchanged "always on" behaviour.
 		float lightSourceScale = 1f;
+
+		// aotmod (2026-07-28): hard off switch for ALL local light sources, including the ones flagged
+		// "always on". Driven by the Ion Storm superpower -- during a storm the map goes fully dark.
+		bool lightSourcesDisabled;
 		int nextLightSourceToken = 1;
 
 		public event Action<MPos> CellChanged = null;
@@ -85,10 +97,12 @@ namespace OpenRA.Mods.Common.Traits
 			return new Rectangle(c.X - r, c.Y - r, 2 * r, 2 * r);
 		}
 
-		public int AddLightSource(WPos pos, WDist range, float intensity, in float3 tint)
+		public int AddLightSource(WPos pos, WDist range, float intensity, in float3 tint,
+			float brightness = 1f, bool ignoresGlobalScale = false)
 		{
 			var token = nextLightSourceToken++;
-			var source = new LightSource(pos, map.CellContaining(pos), range, intensity, tint);
+			var source = new LightSource(pos, map.CellContaining(pos), range, intensity, tint,
+				brightness, ignoresGlobalScale);
 			var bounds = Bounds(source);
 			lightSources.Add(token, source);
 			partitionedLightSources.Add(source, bounds);
@@ -120,6 +134,12 @@ namespace OpenRA.Mods.Common.Traits
 		public void SetLightSourceScale(float scale)
 		{
 			lightSourceScale = scale;
+		}
+
+		// aotmod (2026-07-28): true = every local light goes out, "always on" sources included.
+		public void SetLightSourcesDisabled(bool disabled)
+		{
+			lightSourcesDisabled = disabled;
 		}
 
 		// aotmod (2026-07-26): invalidate one map row (all cells with this V coordinate).
@@ -154,16 +174,22 @@ namespace OpenRA.Mods.Common.Traits
 					return tint;
 
 				var intensity = globalIntensity + info.HeightStep * map.Height[uv];
-				if (lightSources.Count > 0 && lightSourceScale > 0f)
+				// aotmod (2026-07-28): the lightSourceScale == 0 shortcut cannot be taken any more --
+				// "always on" sources ignore that scale and still have to be summed at high noon.
+				if (lightSources.Count > 0 && !lightSourcesDisabled)
 				{
 					foreach (var source in partitionedLightSources.At(new int2(pos.X, pos.Y)))
 					{
+						var scale = (source.IgnoresGlobalScale ? 1f : lightSourceScale) * source.Brightness;
+						if (scale <= 0f)
+							continue;
+
 						var range = source.Range.Length;
 						var distance = (source.Pos - pos).Length;
 						if (distance > range)
 							continue;
 
-						var falloff = (range - distance) * 1f / range * lightSourceScale;
+						var falloff = (range - distance) * 1f / range * scale;
 						intensity += falloff * source.Intensity;
 						tint += falloff * source.Tint;
 					}
