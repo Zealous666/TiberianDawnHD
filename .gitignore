@@ -69,6 +69,8 @@ engine/**
 !engine/OpenRA.Mods.Cnc/Traits/AotTransformsOnTerrain.cs
 !engine/OpenRA.Mods.Cnc/Traits/AotAgeActivationNotification.cs
 !engine/OpenRA.Mods.Cnc/Traits/AotParachuteDropCargo.cs
+!engine/OpenRA.Mods.Cnc/Traits/SupportPowers/
+!engine/OpenRA.Mods.Cnc/Traits/SupportPowers/AotIonStormPower.cs
 !engine/OpenRA.Mods.Cnc/UtilityCommands/
 !engine/OpenRA.Mods.Cnc/UtilityCommands/VxlToPngCommand.cs
 !engine/OpenRA.Mods.Cnc/UtilityCommands/AotMixToolCommand.cs

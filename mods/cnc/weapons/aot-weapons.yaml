@@ -1479,3 +1479,32 @@ aot-VeinGas:
 		ImpactActors: false
 	Warhead@3Spawn: AotSpawnActor
 		Actor: aot-gascloud
+
+# === Age of Tiberium (aotmod) - Ion Storm Blitz (Civilian Array Superpower) ===
+# Schadenswerte 1:1 vom Obelisk (engine/mods/cnc/weapons/other.yaml "Laser"), User-Vorgabe:
+# "die blitze machen auch den gleichen schaden wie der obelisk" + "infanterie wird gegrillt
+# wie vom obelisk" -> FireDeath loest dieselbe Verbrennungs-Todesanimation aus.
+# Projektil TeslaZap zeichnet den Blitz mit den RA-Remaster-LITNING-Frames von der
+# Wolkenhoehe senkrecht nach unten (Source setzt AotIonStormPower.cs).
+IonStormBolt:
+	ValidTargets: Ground, Water, GroundActor, WaterActor, Air
+	Projectile: TeslaZap
+		Image: aot-litning
+		BrightZaps: 2
+		DimZaps: 3
+		Duration: 5
+		DamageDuration: 1
+		TrackTarget: false
+	Warhead@1Dam: SpreadDamage
+		Spread: 42
+		Damage: 36000
+		Versus:
+			Wood: 50
+		DamageTypes: Prone50Percent, TriggerProne, FireDeath
+	Warhead@2Smu: LeaveSmudge
+		SmudgeType: Scorch
+	# Vollbild-Weissblitz bei jedem Einschlag (User-Wunsch). Trifft ueber den Type gezielt
+	# FlashPostProcessEffect@aot-ionstorm (in aot-ts-civilian.yaml), nicht den Standard-Flash.
+	Warhead@3Flash: FlashEffect
+		FlashType: aot-ionstorm
+		Duration: 12

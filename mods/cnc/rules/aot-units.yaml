@@ -4332,8 +4332,14 @@ aot-msam-hover-mlrs:
 	Inherits: MSAM
 	RenderSprites:
 		Image: msam
+	# === Ion Storm - Hovercraft setzen auf und koennen sich nicht bewegen ===
+	# Kein Absturz (nur Flugzeuge werden zerstoert), stattdessen "Zwangslandung":
+	# das pausierte Mobile stoppt die Fahrt fuer die Sturmdauer.
+	ExternalCondition@AOTIONSTORM:
+		Condition: aot-ion-storm-grounded
 	Mobile:
 		Locomotor: aot-hvr
+		PauseOnCondition: aot-ion-storm-grounded
 	-GrantConditionOnPrerequisite@HOVER_MLRS:
 	-GrantConditionOnPrerequisite@HOVER_AA:
 	-AotTransformsOnTerrain@HOVER_MLRS:
@@ -4382,8 +4388,14 @@ aot-msam-hover-aa:
 	Inherits: MSAM
 	RenderSprites:
 		Image: msam
+	# === Ion Storm - Hovercraft setzen auf und koennen sich nicht bewegen ===
+	# Kein Absturz (nur Flugzeuge werden zerstoert), stattdessen "Zwangslandung":
+	# das pausierte Mobile stoppt die Fahrt fuer die Sturmdauer.
+	ExternalCondition@AOTIONSTORM:
+		Condition: aot-ion-storm-grounded
 	Mobile:
 		Locomotor: aot-hvr
+		PauseOnCondition: aot-ion-storm-grounded
 	-GrantConditionOnPrerequisite@HOVER_MLRS:
 	-GrantConditionOnPrerequisite@HOVER_AA:
 	-AotTransformsOnTerrain@HOVER_MLRS:

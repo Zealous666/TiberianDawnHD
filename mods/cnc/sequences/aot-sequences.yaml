@@ -1987,6 +1987,10 @@ icon:
 	aot-orcatransport:
 		Filename: aot-orcatransport-icon.png
 		Length: 1
+	# === Age of Tiberium (aotmod) - Ion Storm Control (Civilian Array) ===
+	aot-ionstorm:
+		Filename: aot-ionstorm-icon.png
+		Length: 1
 	# === Age of Tiberium (aotmod) - NOD Airstrike-Superpower-Icon (MiG) ===
 	aot-airstrike:
 		Filename: mig_base.png
@@ -5102,3 +5106,21 @@ aot-vein-heart:
 		Length: 1
 	gas:
 		Length: 12
+
+# === Age of Tiberium (aotmod) - Ion Storm Blitz-Grafik ===
+# TS besitzt KEINE Blitz-Sprite (der Bolt wird dort prozedural im Engine-Code gezeichnet,
+# siehe TSpp src/ionstorm.h - kein einziges "Bolt"-Symbol, und die [Animations]-Liste in
+# rules.ini enthaelt nur TWLT100/ELECTRO/IONBEAM). Ersatz ist das RA-Remaster-VFX LITNING
+# (8 Frames), das ueber TEXTURES_RA_SRGB.MEG bereits gemountet ist - identisches Frame-Layout
+# wie RAs eigene litning.shp: 0-3 = hell (Zentrum), 4-7 = matt (Raender).
+aot-litning:
+	Defaults:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\VFX\LITNING.ZIP
+	bright:
+		Length: 4
+		ZOffset: 2047
+	dim:
+		Start: 4
+		Length: 4
+		ZOffset: 2047
+# === Ende aotmod ===

@@ -37,6 +37,13 @@
 	RotationPaletteEffect@water:
 		ExcludePalettes: effect, chrome, aot-ts-isotem, aot-ts-isosno
 		RotationBase: 32
+	# Weisser Vollbild-Blitz bei jedem Ion-Storm-Einschlag. Eigener Type, damit der
+	# unbenannte Standard-Flash (Nuke o.ae.) unberuehrt bleibt. Ausgeloest per
+	# FlashEffectWarhead in der Waffe IonStormBolt - kein C# noetig.
+	FlashPostProcessEffect@aot-ionstorm:
+		Type: aot-ionstorm
+		Length: 12
+		Color: FFFFFF
 
 # === Age of Tiberium (aotmod) - TS Civilian Buildings (CA-Serie) ===
 # Normal-Instanz (Temperate-Look): AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
@@ -1647,10 +1654,14 @@ aot-ts-aban18:
 	MapEditorData:
 		Categories: Civilian City (Ruins)
 
-# === Age of Tiberium (aotmod) - Civilian Array (nur Import, fuer spaeteres Superweapon-Gebaeude) ===
-
+# === Age of Tiberium (aotmod) - Civilian Array mit Ion-Storm-Superpower ===
+# Neutrale Struktur, nur ueber den Karteneditor platzierbar. Nach Einnahme durch einen
+# Ingenieur/Saboteur (^TechBuilding -> CaptureTypes "building") erhaelt der neue Besitzer
+# die Superpower "Ion Storm Control" (AotIonStormPower, engine-Trait).
+# Muster 1:1 wie aot-iron-dome / aot-forward-hq.
 aot-ts-ctaray:
-	Inherits: ^CivBuilding
+	Inherits: ^TechBuilding
+	Inherits@shape: ^2x2Shape
 	Building:
 		Footprint: xx xx
 		Dimensions: 2,2
@@ -1663,7 +1674,40 @@ aot-ts-ctaray:
 	RenderSprites:
 		Image: aot-ts-ctaray
 	Tooltip:
-		Name: Civilian Array
+		Name: actor-aot-ts-ctaray.name
+	MapEditorData:
+		Categories: Civilians
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral
+	RevealsShroud:
+		Range: 4c0
+	AotIonStormPower:
+		OrderName: AotIonStormPower
+		Description: actor-aot-ts-ctaray.description
+		Icon: aot-ionstorm
+		ChargeInterval: 15000
+		SupportPowerPaletteOrder: 75
+		# 1500 Ticks = 60 Sekunden bei 25 tps (User-Vorgabe 2026-07-28, vorher 5 Minuten).
+		Duration: 1500
+		Weapon: IonStormBolt
+		# Blitze halb so haeufig wie zuvor (war 20/60).
+		MinStrikeDelay: 40
+		MaxStrikeDelay: 120
+		# TS-Original waere 90 (= 10% gezielte Treffer). Das war mit Obelisk-Schaden viel zu
+		# toedlich -> 97 (= 3% gezielt). Die restlichen 97% treffen Zufallszellen und erwischen
+		# ohnehin gelegentlich etwas, dadurch bleibt "es trifft auch mal was" erhalten.
+		Randomness: 97
+		# Donner = beide TS-Sounds gleichzeitig (User-Wunsch: "mischung aus beidem gleichzeitig").
+		# TS selbst hat KEINEN Ion-Storm-Donner (LightningSound= ist im Original leer).
+		StrikeSounds: aot-ionstorm-thunder.aud, aot-ionstorm-zap.aud
+		ActivationSounds: aot-ionstorm-thunder.aud
+		SoundCooldown: 45
+		# TS-EVA: 00-i176 = "Ion storm approaching", 00-n070 = "Ion storm abating".
+		ActivationSpeech: aot-eva-ionstorm-approaching.aud
+		EndSpeech: aot-eva-ionstorm-abating.aud
+		# Hovercraft sind Bodenfahrzeuge (Locomotor aot-hvr), kein Aircraft-Trait -> explizit listen.
+		# Sie werden NICHT zerstoert, sondern nur bewegungsunfaehig (Mobile.PauseOnCondition).
+		GroundedActorTypes: aot-msam-hover-mlrs, aot-msam-hover-aa
 
 # === Age of Tiberium (aotmod) - Pyramiden (nur AOT_DESERT) ===
 

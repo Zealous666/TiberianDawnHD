@@ -300,6 +300,16 @@ V37.Husk:
 
 # === Age of Tiberium (aotmod) - SpyInfiltrate TargetType auf allen Gebäuden ===
 ^Building:
+	# === Ion Storm (aot-ts-ctaray) - Blackout ===
+	# Waehrend eines Ion Storms faellt bei ALLEN Spielern die Stromproduktion auf 0.
+	# PowerMultiplier greift nur dort, wo ueberhaupt ein Power-Trait sitzt (Kraftwerke),
+	# an allen anderen Gebaeuden ist er wirkungslos - deshalb reicht der Eintrag auf ^Building.
+	# Die Condition verteilt AotIonStormPower beim Sturmbeginn an alle Gebaeude im Spiel.
+	ExternalCondition@AOTIONSTORM:
+		Condition: aot-ion-storm-blackout
+	PowerMultiplier@AOTIONSTORM:
+		RequiresCondition: aot-ion-storm-blackout
+		Modifier: 0
 	# Fortified Foundation: wird ein Gebaeude direkt an bestehende Foundation gebaut, schiebt sich
 	# die Foundation unter sein Footprint -> schliesst die Luecke, Kanten werden buendig.
 	AotFoundationUnderfill:
@@ -1757,6 +1767,15 @@ ARTY:
 		UncloakSound: trans1.aud
 
 ^Helicopter:
+	# === Ion Storm (aot-ts-ctaray) - Zwangslandung statt Absturz ===
+	# Helikopter werden im Sturm NICHT zerstoert (nur Flugzeuge), sondern zur Landung gezwungen
+	# und bleiben bis Sturmende am Boden. Das nutzt die eingebaute Engine-Mechanik: ein
+	# PAUSIERTER Aircraft-Trait queued automatisch eine Land-Aktivitaet (Aircraft.cs Tick:
+	# "Add land activity if Aircraft trait is paused") und startet nach dem Entpausen wieder.
+	ExternalCondition@AOTIONSTORM:
+		Condition: aot-ion-storm-grounded
+	Aircraft:
+		PauseOnCondition: aot-ion-storm-grounded
 	ExternalCondition@GAPSUPPRESS:
 		Condition: aot-gap-suppressed
 	RevealsShroud:

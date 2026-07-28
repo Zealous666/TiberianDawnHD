@@ -248,6 +248,10 @@ actor-aot-forward-hq =
     .name = Forward HQ
     .description = Paratrooper Drop
 
+actor-aot-ts-ctaray =
+    .name = Civilian Array
+    .description = Ion Storm Control
+
         Deploys 5 battle-hardened Gunners and 3 Rocket Troopers behind enemy lines via plane.
 
         All troops arrive at veteran rank.

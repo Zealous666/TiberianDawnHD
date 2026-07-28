@@ -127,6 +127,13 @@ namespace OpenRA.Mods.Cnc.Traits
 		float appliedIntensity = float.NaN;
 		float3 appliedTint;
 
+		// Externe Systeme (aktuell die Ion-Storm-Superpower, AotIonStormPower) koennen den Zyklus
+		// voruebergehend stilllegen: die Uhr bleibt stehen UND es wird nicht mehr in die globale
+		// Beleuchtung geschrieben, solange der Sturm sie besitzt. Nach dem Freigeben laeuft der
+		// Zyklus exakt dort weiter, wo er angehalten wurde (appliedIntensity/-Tint bleiben gueltig,
+		// weil der Sturm den gemerkten Zustand vorher wiederherstellt).
+		public bool Suppressed;
+
 		public AotDayNightCycle(ActorInitializer init, AotDayNightCycleInfo info)
 			: base(info)
 		{
@@ -186,6 +193,10 @@ namespace OpenRA.Mods.Cnc.Traits
 		void ITick.Tick(Actor self)
 		{
 			if (IsTraitDisabled || lighting == null)
+				return;
+
+			// Ein laufender Ion Storm besitzt die Beleuchtung exklusiv -> Uhr anhalten, nichts schreiben.
+			if (Suppressed)
 				return;
 
 			// "Zeit einfrieren": the clock stays at StartHour. The lighting for that hour is still
