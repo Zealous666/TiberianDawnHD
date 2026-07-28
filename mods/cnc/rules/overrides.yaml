@@ -949,8 +949,53 @@ PROC:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Advanced Guard Tower: fuer alle Fraktionen nicht baubar (User-Wunsch 2026-07-12) ===
+# === Age of Tiberium (aotmod) - Ion Storm: Radar faellt aus ===
+# Waehrend eines Ion Storms ist bei ALLEN Spielern das Radar tot (User-Wunsch 2026-07-28).
+# ProvidesRadar ist ein ConditionalTrait -> RequiresCondition reicht. Der Eintrag kann NICHT
+# auf ^Building stehen: dort wuerde er den Trait jedem Gebaeude erst hinzufuegen und damit
+# allen Gebaeuden Radar geben. Deshalb einzeln auf den vier Basis-Aktoren, die ihn wirklich
+# haben - ihre Proxy-Varianten (aot-hq-base/-ion, aot-nod-radar-age0/-age2, ...) erben das.
+# Die Condition verteilt AotIonStormPower an alle Aktoren mit ProvidesRadar.
+# !lowpower gehoert IMMER mit in die Bedingung: RequiresCondition ersetzt den geerbten Wert,
+# ein blosses "!aot-ion-storm-blackout" wuerde die Stromabhaengigkeit also stillschweigend
+# entfernen (genau dieser Bug 2026-07-28).
+HQ:
+	ProvidesRadar:
+		RequiresCondition: !lowpower && !aot-ion-storm-blackout
+
+EYE:
+	ProvidesRadar:
+		RequiresCondition: !lowpower && !aot-ion-storm-blackout
+
+ATEC:
+	ProvidesRadar:
+		RequiresCondition: !lowpower && !aot-ion-storm-blackout
+
+aot-nod-radar:
+	ProvidesRadar:
+		RequiresCondition: !lowpower && !aot-ion-storm-blackout
+
 ATWR:
 	-Buildable:
+	# Nur noch im Karteneditor platzierbar (MapEditorData.Categories: Support bleibt erhalten).
+	# Da er dort auch ohne zugehoeriges Stromnetz stehen soll, braucht er keinen Strom mehr:
+	Power:
+		Amount: 0
+	# ...und er darf auch nicht mehr durch den Low-Power-Zustand des Besitzers lahmgelegt werden.
+	# Dazu muss BEIDES weg: die Condition-Quelle UND alle drei Konsumenten - sonst meldet
+	# check-yaml "consumes conditions that are not granted: lowpower".
+	-GrantConditionOnPowerState@LOWPOWER:
+	# Roter "abgeschaltet"-Overlay (aus ^DisabledOverlay) entfaellt ersatzlos.
+	-WithColoredOverlay@IDISABLE:
+	# Feuert jetzt auch ohne Strom; nur waehrend des Bauvorgangs noch pausiert.
+	AttackTurreted:
+		PauseOnCondition: build-incomplete
+	# Tarnungserkennung dauerhaft aktiv statt nur bei ausreichender Energie.
+	# ⚠️ Ein leeres "RequiresCondition:" loescht den geerbten Wert NICHT (der Knoten wird beim
+	# Merge ignoriert) - der Trait muss entfernt und neu angelegt werden.
+	-DetectCloaked:
+	DetectCloaked@AOTNOPOWER:
+		Range: 5c0
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - aot-proc-gdi: PROC für GDI (braucht Advanced Factory) ===

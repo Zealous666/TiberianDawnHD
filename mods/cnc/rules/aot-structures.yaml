@@ -1300,8 +1300,11 @@ ATEC:
 		Prerequisite: aot-atec
 	ProvidesPrerequisite@techname:
 		Prerequisite: atec
+	# !aot-ion-storm-blackout: waehrend eines Ion Storms faellt das Radar aus (siehe overrides.yaml).
+	# Muss HIER stehen, nicht in overrides.yaml - diese Datei laedt spaeter und wuerde den dortigen
+	# Wert sonst wieder ueberschreiben.
 	ProvidesRadar:
-		RequiresCondition: !lowpower
+		RequiresCondition: !lowpower && !aot-ion-storm-blackout
 	RevealsShroud:
 		Range: 5c0
 	WithBuildingBib:
@@ -2387,8 +2390,11 @@ aot-nod-radar:
 	RevealsShroud:
 		Range: 10c0
 	WithBuildingBib:
+	# !aot-ion-storm-blackout: waehrend eines Ion Storms faellt das Radar aus (siehe overrides.yaml).
+	# Muss HIER stehen, nicht in overrides.yaml - diese Datei laedt spaeter und wuerde den dortigen
+	# Wert sonst wieder ueberschreiben.
 	ProvidesRadar:
-		RequiresCondition: !lowpower
+		RequiresCondition: !lowpower && !aot-ion-storm-blackout
 	RenderDetectionCircle:
 	DetectCloaked:
 		Range: 5c0

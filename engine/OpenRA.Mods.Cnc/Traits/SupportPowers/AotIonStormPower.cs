@@ -13,7 +13,9 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using OpenRA.GameRules;
+using OpenRA.Mods.Common.Activities;
 using OpenRA.Mods.Common.Traits;
+using OpenRA.Mods.Common.Traits.Radar;
 using OpenRA.Primitives;
 using OpenRA.Traits;
 
@@ -77,6 +79,14 @@ namespace OpenRA.Mods.Cnc.Traits
 		[Desc("Aktortypen, die waehrend des Sturms bewegungsunfaehig werden (Hovercraft).",
 			"Sie werden NICHT zerstoert - dafuer muss der Aktor " + nameof(GroundedCondition) + " tragen.")]
 		public readonly ImmutableArray<string> GroundedActorTypes = [];
+
+		[Desc("Umkreis, in dem ein Helikopter nach einem freien Landeplatz sucht, wenn die Zelle",
+			"direkt unter ihm belegt ist.")]
+		public readonly WDist LandingSearchRange = new(8192);
+
+		[Desc("Terrain-Typen, ueber denen ein Helikopter IMMER abstuerzt, statt einen Landeplatz",
+			"zu suchen. Er geht also schon dann verloren, wenn ihn der Sturm ueber Wasser erwischt.")]
+		public readonly ImmutableArray<string> CrashTerrainTypes = ["Water", "River"];
 
 		[Desc("ExternalCondition, die Helikopter (Aircraft mit VTOL) und die Typen aus",
 			nameof(GroundedActorTypes) + " fuer die Sturmdauer erhalten. Am Aktor haengt daran ein",
@@ -218,8 +228,10 @@ namespace OpenRA.Mods.Cnc.Traits
 
 				if (pair.Trait.Info.VTOL)
 				{
-					// Helikopter: Zwangslandung ueber die Condition (Aircraft.PauseOnCondition).
-					Grant(a, info.GroundedCondition);
+					// Helikopter landen normalerweise nur; ueber Wasser stuerzen sie ab.
+					if (ForceLand(a, pair.Trait))
+						doomed.Add(a);
+
 					continue;
 				}
 
@@ -233,8 +245,11 @@ namespace OpenRA.Mods.Cnc.Traits
 				if (a.IsDead || !a.IsInWorld)
 					continue;
 
-				// Blackout gilt fuer ALLE Spieler, auch fuer den Ausloeser selbst.
-				if (!a.Owner.NonCombatant && a.Info.HasTraitInfo<PowerInfo>())
+				// Blackout gilt fuer ALLE Spieler, auch fuer den Ausloeser selbst: Kraftwerke
+				// liefern keinen Strom mehr (PowerMultiplier 0) und Radarkuppeln fallen aus
+				// (ProvidesRadar.RequiresCondition), beides via overrides.yaml verdrahtet.
+				if (!a.Owner.NonCombatant &&
+					(a.Info.HasTraitInfo<PowerInfo>() || a.Info.HasTraitInfo<ProvidesRadarInfo>()))
 					Grant(a, info.BlackoutCondition);
 
 				if (info.GroundedActorTypes.Contains(a.Info.Name))
@@ -246,6 +261,47 @@ namespace OpenRA.Mods.Cnc.Traits
 					a.Kill(self);
 				else
 					a.Dispose();
+		}
+
+		/// <summary>
+		/// Bringt einen Helikopter herunter, OHNE ihn zu zerstoeren.
+		/// ⚠️ Die Condition (Aircraft.PauseOnCondition) darf erst gesetzt werden, wenn die Maschine
+		/// wirklich am Boden ist: ein pausierter Aircraft-Trait hat MovementSpeed/TurnSpeed 0 und
+		/// landet nur, wenn ausgerechnet die Zelle UNTER ihm frei und landbar ist
+		/// (Aircraft.Tick -> CanLand(self.Location)). Ueber Wasser oder wenn sich mehrere Helis eine
+		/// Zelle teilen, blieben sie sonst fuer immer bewegungsunfaehig in der Luft haengen.
+		/// Deshalb: erst per Land-Aktivitaet zu einem freien Landeplatz fliegen lassen, und erst
+		/// nach der Landung festsetzen.
+		/// Ausnahme (User-Wunsch): ueber Wasser stuerzt er SOFORT ab - dort wird gar nicht erst
+		/// nach einem Landeplatz gesucht, auch wenn das Ufer in Reichweite waere.
+		/// </summary>
+		/// <returns>true, wenn die Maschine abstuerzen soll.</returns>
+		bool ForceLand(Actor a, Aircraft aircraft)
+		{
+			var landed = a.World.Map.DistanceAboveTerrain(a.CenterPosition).Length < aircraft.Info.MinAirborneAltitude;
+			if (landed)
+			{
+				// Unten angekommen -> festnageln, damit er nicht wieder startet.
+				Grant(a, info.GroundedCondition);
+				return false;
+			}
+
+			// Ueber Wasser erwischt = verloren, ohne Ausweichversuch.
+			if (info.CrashTerrainTypes.Contains(a.World.Map.GetTerrainInfo(a.Location).Type))
+				return true;
+
+			// Noch in der Luft: nicht pausieren (sonst kann er sich nicht mehr bewegen),
+			// sondern einmalig zur Landung schicken.
+			if (a.CurrentActivity is Land)
+				return false;
+
+			var cell = aircraft.FindLandingLocation(a.Location, info.LandingSearchRange);
+			if (cell == null)
+				return true;
+
+			a.CancelActivity();
+			a.QueueActivity(new Land(a, Target.FromCell(a.World, cell.Value)));
+			return false;
 		}
 
 		/// <summary>Gewaehrt eine ExternalCondition genau einmal pro Aktor und merkt sich das Token.</summary>
