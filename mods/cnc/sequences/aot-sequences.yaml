@@ -5140,9 +5140,18 @@ aot-litning:
 # einmal komplett ab, wenn AttackTesla feuert (siehe aot-structures.yaml). Kein "make"/"icon" -
 # der Turm ist nicht baubar (User-Wunsch: kein Icon noetig) und wird nur ueber den
 # Karteneditor platziert.
+# ⚠️ Bug 2026-07-29 (User-Fund, Polar Panic): Angriffscursor/Hitbox lagen deutlich ueber dem
+# sichtbaren Sprite (nur der obere Turmteil war klickbar). Ursache: bei RemasteredFilename-
+# Sequenzen zaehlt NICHT das klassische "Offset:" (das habe ich zuerst faelschlich probiert),
+# sondern "RemasteredOffset:" - siehe OBLI/ATWR in structures-overrides.yaml, die exakt dieses
+# Feld fuer denselben Zweck nutzen. TSLA's klassisches tsla.shp-Offset war 0,-13 - identisch mit
+# ATWR's klassischem atwr.shp-Offset (auch 0,-13) - dessen RemasteredOffset ist 0,-69. Da User
+# bestaetigt hat, dass Obelisk/ATWR/Tesla Coil "ungefaehr die gleichen Masse" haben, wird hier
+# derselbe Wert uebernommen.
 aot-tesla:
 	Defaults:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\TSLA.ZIP
+		RemasteredOffset: 0, -69
 	idle:
 		Start: 0
 	damaged-idle:

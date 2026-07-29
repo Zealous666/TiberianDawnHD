@@ -1492,11 +1492,16 @@ aot-TeslaZap:
 	Report: aot-tesla-fire.aud
 	Projectile: TeslaZap
 		Image: aot-litning
-	ValidTargets: Ground, Water, GroundActor, WaterActor
+	# "GroundActor"/"WaterActor" sind RA-Composite-TargetTypes, die es in diesem TD-basierten Mod
+	# NICHT gibt (siehe aot-critters.yaml-Kommentar bei ^AotAnt) - der Warhead traf dadurch
+	# NIEMALS einen echten Aktor (Bug 2026-07-29, User-Fund "macht uns praktisch keinen
+	# Schaden"). Weapon- und Warhead-Level auf die Engine-Defaults {Ground, Water} zurueckgesetzt,
+	# die hier tatsaechlich verwendet werden (TowerMissile in engine/mods/cnc/weapons/missiles.yaml
+	# macht es genauso).
+	ValidTargets: Ground, Water
 	Warhead@1Dam: SpreadDamage
 		Spread: 42
 		Damage: 10000
-		ValidTargets: GroundActor, WaterActor
 		Versus:
 			None: 1000
 			Wood: 60

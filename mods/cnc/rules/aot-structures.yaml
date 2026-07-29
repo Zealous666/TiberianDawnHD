@@ -7394,9 +7394,9 @@ aot-lightpost-gdi:
 		Queue: Building.GDI
 		# GDI: direkt vor ORBC (200), das damit letztes Icon der Queue bleibt.
 		BuildPaletteOrder: 195
-		Prerequisites: ~aot-age3
+		Prerequisites: ~aot-age2
 		Icon: icon
-		# LockedGroup explizit: der Post ist vor Age 3 komplett versteckt und faellt damit unter
+		# LockedGroup explizit: der Post ist vor Age 2 komplett versteckt und faellt damit unter
 		# das Platzhalter-Icon-System (ShowWhenLocked ist Default true). Beide Proxies teilen sich
 		# die Gruppe, damit nicht zwei Platzhalter-Slots entstehen (siehe locked-icon-system.md).
 		LockedGroup: aot-grp-lightpost
@@ -7410,7 +7410,7 @@ aot-lightpost-nod:
 		Queue: Building.Nod
 		# NOD: direkt vor OBLI (230), das damit letztes Icon der Queue bleibt.
 		BuildPaletteOrder: 225
-		Prerequisites: ~aot-age3
+		Prerequisites: ~aot-age2
 		Icon: icon
 		LockedGroup: aot-grp-lightpost
 		Description: Lights the surrounding area at night and detects nearby cloaked units. Requires power to operate.
@@ -7425,11 +7425,23 @@ aot-lightpost-nod:
 # --aot-mix extrahiert -> mods/cnc/bits/aot-tesla-fire.aud/aot-tesla-charge.aud). Der Blitz
 # selbst nutzt das bereits importierte aot-litning-Bild (LITNING.ZIP) - siehe aot-weapons.yaml.
 #
-# Neutral + AttackAnything: RequiresSpecificOwners haelt den Aktor dauerhaft beim Neutral-
-# Spieler - bewusst KEIN ^TechBuilding, dieser Turm soll (anders als aot-ts-ctaray) nicht
-# einnehmbar sein. AutoTarget.InitialStance/-AI = AttackAnything ist PFLICHT fuer einen
-# neutralen Angreifer: der Neutral-Spieler hat von Haus aus KEINE Feinde (derselbe Trick wie
-# bei ^AotAnt in aot-critters.yaml) - ohne die Stance wuerde der Turm nie feuern.
+# Neutral/Creeps + AttackAnything: RequiresSpecificOwners haelt den Aktor bei einem der beiden
+# nicht-spielbaren Besitzer - bewusst KEIN ^TechBuilding, dieser Turm soll (anders als
+# aot-ts-ctaray) nicht einnehmbar sein. AutoTarget.InitialStance/-AI = AttackAnything ist
+# PFLICHT, damit der Turm ueberhaupt feuert (derselbe Trick wie bei ^AotAnt in
+# aot-critters.yaml) - das regelt aber NUR, dass der Turm selbst schiesst.
+# ⚠️ Bug 2026-07-29 (User-Fund, Polar Panic getestet): "meine Einheiten greifen es nicht an,
+# obwohl es uns angreift" + kein Angriffscursor. Ursache war die Owner-Wahl: unter "Neutral"
+# platziert ist die Relationship zwischen Spieler und Turm in BEIDE Richtungen "Neutral", nicht
+# "Enemy". Der Turm feuert trotzdem (AutoTargetPriority erlaubt per Default auch Neutral-
+# Relationships als Ziel), aber Spieler-Einheiten scannen per Default NUR nach "Enemy"
+# (AutoTarget.ChooseTarget: `attackStances == PlayerRelationship.Enemy && !AppearsHostileTo`
+# bricht sonst sofort ab) - und auch der normale Angriffscursor braucht "Enemy". Fix: den Aktor
+# im Karteneditor als "Creeps" statt "Neutral" platzieren. AotCreepsSetup (Engine-Trait, World-
+# Ebene) setzt NUR den Creeps-Spieler beim World-Load automatisch feindlich zu allen spielbaren
+# Spielern (siehe engine/OpenRA.Mods.Cnc/Traits/AotCreepsSetup.cs) - "Neutral" bekommt dieses
+# Enemy-Flag nie. ValidOwnerNames laesst deshalb jetzt beide zu (wie bei ^AotAnt), aber nur
+# "Creeps" ergibt tatsaechlich Gegenwehr.
 #
 # Power-Checkbox (User-Wunsch, identisches AotOptionalPower-Pattern wie ATWR in overrides.yaml):
 # Standard = an (RA-Original zieht -80 Power), ABER der Neutral-Spieler hat in aller Regel KEIN
@@ -7448,7 +7460,7 @@ aot-tesla:
 	Armor:
 		Type: Heavy
 	RequiresSpecificOwners:
-		ValidOwnerNames: Neutral
+		ValidOwnerNames: Neutral, Creeps
 	# Muss mindestens der Waffenreichweite entsprechen (7c0), sonst sieht AutoTarget seine
 	# eigenen Ziele nicht (derselbe Bug wie bei aot-ftur, siehe ftur-system.md).
 	RevealsShroud:
