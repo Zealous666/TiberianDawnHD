@@ -4987,8 +4987,10 @@ aot-ice-cell:
 		# Abstand muss groesser sein als die Reichweite der Ueberlappung -> 8 Zellen.
 		ZOffset: -8191
 
-# === Age of Tiberium (aotmod) — Ant Spawner Marker ===
-aot-ant-spawner:
+# === Age of Tiberium (aotmod) — Critter Spawner Marker ===
+# Blockname MUSS dem Aktornamen folgen: RenderSprites.Image defaultet auf die Aktor-ID,
+# ohne Umbenennung faende der umbenannte Spawner keine Sequenz mehr.
+aot-critter-spawner:
 	idle:
 		Filename: aot-ant-spawner-marker.png
 		Length: 1

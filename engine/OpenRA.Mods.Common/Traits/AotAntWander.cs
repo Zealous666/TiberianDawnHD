@@ -2,7 +2,7 @@
 /*
  * Age of Tiberium mod — custom trait.
  * Patrol behaviour for ant critters. Like AttackWander, but the radius is supplied
- * per-instance at spawn time by the nest (AotAntSpawner editor slider), and the
+ * per-instance at spawn time by the spawner (AotCritterSpawner editor slider), and the
  * patrol is anchored to the nest cell instead of drifting with the actor.
  */
 #endregion

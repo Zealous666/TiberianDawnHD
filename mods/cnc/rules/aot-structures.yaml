@@ -7302,12 +7302,10 @@ aot-vein-heart:
 		DamageCooldown: 0
 	# Beim Tod zieht sich das Geflecht langsam zurueck, statt fuer immer stehen zu bleiben.
 	AotVeinRecedesOnDeath:
-	# Spawnt Visceroids (vanilla TD-Creep, siehe aot-critters.yaml) -- gleiche Funktion wie
-	# der Ant-Nest-Spawner (AotAntSpawner), nur direkt am Heart statt als eigener Marker-Aktor.
-	AotVisceroidSpawner:
-		VisceroidActors: aot-visceroid
-		DefaultMaxVisceroids: 2
-		SpawnInterval: 300
+	# aotmod (2026-07-29): AotVisceroidSpawner ENTFERNT (User-Wunsch). Visceroids werden jetzt
+	# ausschliesslich ueber den aot-critter-spawner platziert -- ein Ort fuer alle Critter statt
+	# zwei konkurrierender Quellen. Der Engine-Trait wurde mitgeloescht; die Visceroids selbst
+	# (aot-visceroid inkl. AotVisceroidWander) bleiben unveraendert bestehen.
 	# Bei jedem Treffer eine Toxic-Gaswolke (Cooldown gegen Spam). Ignoriert das eigene
 	# Gaswolken-Damage (TiberiumDeath), damit keine Rueckkopplung entsteht.
 	AotEmitWeaponWhenAttacked:

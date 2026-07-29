@@ -10,7 +10,7 @@
 # EditorWorld hat -- ohne ihn crasht TerrainLightSource beim Platzieren im Karteneditor.
 
 # --- Der Zyklus-Marker (unsichtbar im Spiel, nur im Editor platzierbar) ---
-# Muster 1:1 wie aot-ant-spawner: RenderSpritesEditorOnly + OccupiesSpace: false.
+# Muster 1:1 wie aot-critter-spawner: RenderSpritesEditorOnly + OccupiesSpace: false.
 # OHNE diesen Aktor auf der Karte passiert GAR NICHTS -- TerrainLighting bleibt auf seinen
 # neutralen Defaults (Intensity 1, Tint 1/1/1), die Karte sieht aus wie vorher.
 aot-light-system:

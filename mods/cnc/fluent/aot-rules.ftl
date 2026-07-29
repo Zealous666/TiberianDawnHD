@@ -276,8 +276,8 @@ actor-aot-fireant =
 actor-aot-scoutant =
     .name = Scout Ant
 
-actor-aot-ant-spawner =
-    .name = Ant Nest
+actor-aot-critter-spawner =
+    .name = Critter Spawner
 
 actor-aot-light-system =
     .name = Light System (Day/Night Cycle)

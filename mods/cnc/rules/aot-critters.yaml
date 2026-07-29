@@ -1,7 +1,7 @@
 # === Age of Tiberium (aotmod) — Counter-Strike Ants ===
 # Drei Varianten: Worker Ant (aot-ant), Fire Ant (aot-fireant), Scout Ant (aot-scoutant).
 # Sprites: ant1.shp / ant2.shp / ant3.shp aus dem RA-Content-Package.
-# Spawner: aot-ant-spawner (unsichtbar, im Editor konfigurierbar).
+# Spawner: aot-critter-spawner (unsichtbar, im Editor konfigurierbar).
 
 ^AotAnt:
 	Inherits: ^Infantry
@@ -10,13 +10,17 @@
 		GenericName: meta-ant-generic-name
 	# AttackMove wird von AotAntWander gebraucht (AttackMoveActivity greift unterwegs an).
 	AttackMove:
-	# Patrouille im Nest-Umkreis. Radius kommt vom Nest-Regler (AotAntSpawner) beim Spawn.
+	# Patrouille im Spawner-Umkreis. Radius kommt vom Editor-Regler (AotCritterSpawner) beim Spawn.
 	# Laeuft NUR im Idle -> unterbricht keinen Angriff (das tat die alte Spawner-Patrouille).
 	AotAntWander:
 		DefaultPatrolRadius: 5
 		MinMoveDelay: 25
 		MaxMoveDelay: 100
 		AvoidTerrainTypes: Water
+		# Angriffswelle (Spawner-Checkbox) schaltet die Patrouille ab -- sonst wuerden beide
+		# Traits im Idle konkurrierende Aktivitaeten einreihen.
+		RequiresCondition: !aot-attack-wave
+	AotCritterAttackWave:
 	AutoTarget:
 		InitialStance: AttackAnything
 		InitialStanceAI: AttackAnything
@@ -113,11 +117,15 @@ aot-scoutant:
 	MapEditorData:
 		Categories: Critter
 
-# --- Ant Spawner (Editor-Marker, nur im Editor sichtbar) ---
-aot-ant-spawner:
+# --- Critter Spawner (Editor-Marker, nur im Editor sichtbar) ---
+# Frueher "aot-ant-spawner", deckt jetzt alle Critter ab: Ameisen, Visceroid und Dinosaurier.
+# Zwei Random-Gruppen im Editor-Dropdown ("Random Ants" / "Random Dinosaurs") statt einem
+# gemeinsamen "random" -- gemischt waere kaum sinnvoll steuerbar.
+# ⚠️ Beim Umbenennen des Aktors muessen bestehende Karten mitgezogen werden (aot_forestfires).
+aot-critter-spawner:
 	Inherits@1: ^ExistsInWorld
 	Tooltip:
-		Name: actor-aot-ant-spawner.name
+		Name: actor-aot-critter-spawner.name
 	Selectable:
 		Bounds: 512, 512
 	MapEditorData:
@@ -130,17 +138,20 @@ aot-ant-spawner:
 	WithSpriteBody:
 	BodyOrientation:
 		QuantizedFacings: 1
-	AotAntSpawner:
+	AotCritterSpawner:
 		AntActors: aot-ant, aot-fireant, aot-scoutant
-		DefaultAntType: random
-		DefaultMaxAnts: 3
+		DinoActors: aot-steg, aot-trex, aot-tric, aot-rapt
+		DefaultCritterType: random-ants
+		DefaultMaxCritters: 3
 		DefaultPatrolRadius: 5
 		SpawnInterval: 150
 
 # === Age of Tiberium (aotmod) — Visceroid (vanilla TD-Creep, VICE) ===
 # Echte vanilla-Einheit (siehe engine/mods/cnc/rules/civilian.yaml: VICE erbt ^Viceroid +
 # AttackWander) -- volle Original-Stats (HP 30000, Armor Light, Speed 68), keine eigene
-# Balance-Aenderung. Wird vom Vein-Heart per AotVisceroidSpawner nachgespawnt.
+# Balance-Aenderung. Wird ueber den aot-critter-spawner platziert (frueher zusaetzlich vom
+# Vein-Heart -- diese Spawn-Faehigkeit wurde 2026-07-29 entfernt, alles laeuft jetzt zentral
+# ueber den Spawner).
 aot-visceroid:
 	Inherits: VICE
 	# RenderSprites.Image defaultet auf den Aktornamen ("aot-visceroid"), aber die Sequenz
@@ -150,12 +161,80 @@ aot-visceroid:
 		Image: vice
 	# VICE's eingebautes AttackWander nutzt bare WandersInfo-Defaults (Radius 1, Delay 0/0) --
 	# praktisch unsichtbares Wandern. Ersetzt durch AotVisceroidWander (Radius kommt vom
-	# Heart-Editor-Regler, siehe AotVisceroidSpawner), gleiches Pattern wie AotAntWander.
+	# Spawner-Editor-Regler), gleiches Pattern wie AotAntWander.
 	-AttackWander:
 	AotVisceroidWander:
 		DefaultWanderRadius: 8
 		MinMoveDelay: 25
 		MaxMoveDelay: 90
+		RequiresCondition: !aot-attack-wave
+	AotCritterAttackWave:
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral, Creeps
+	MapEditorData:
+		Categories: Critter
+
+# === Age of Tiberium (aotmod) — Dinosaurier-Critter (vanilla TD, STEG/TREX/TRIC/RAPT) ===
+# Wrapper statt Override der Vanilla-Aktoren: die Originale erscheinen unveraendert in den
+# TD-Kampagnenkarten (Dinosaurier-Missionen), wo sie NICHT herumlaufen sollen. Gleiches
+# Muster wie aot-visceroid fuer VICE.
+# Einzige Ergaenzung ist AotAntWander -- ^DINO bringt Mobile + AttackMove mit, die der Trait
+# voraussetzt, hat aber selbst kein Wander. Der Radius kommt vom Spawner-Regler.
+aot-steg:
+	Inherits: STEG
+	RenderSprites:
+		Image: steg
+	AotAntWander:
+		DefaultPatrolRadius: 6
+		MinMoveDelay: 40
+		MaxMoveDelay: 140
+		RequiresCondition: !aot-attack-wave
+	AotCritterAttackWave:
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral, Creeps
+	MapEditorData:
+		Categories: Critter
+
+aot-trex:
+	Inherits: TREX
+	RenderSprites:
+		Image: trex
+	AotAntWander:
+		DefaultPatrolRadius: 6
+		MinMoveDelay: 40
+		MaxMoveDelay: 140
+		RequiresCondition: !aot-attack-wave
+	AotCritterAttackWave:
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral, Creeps
+	MapEditorData:
+		Categories: Critter
+
+aot-tric:
+	Inherits: TRIC
+	RenderSprites:
+		Image: tric
+	AotAntWander:
+		DefaultPatrolRadius: 6
+		MinMoveDelay: 40
+		MaxMoveDelay: 140
+		RequiresCondition: !aot-attack-wave
+	AotCritterAttackWave:
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral, Creeps
+	MapEditorData:
+		Categories: Critter
+
+aot-rapt:
+	Inherits: RAPT
+	RenderSprites:
+		Image: rapt
+	AotAntWander:
+		DefaultPatrolRadius: 6
+		MinMoveDelay: 40
+		MaxMoveDelay: 140
+		RequiresCondition: !aot-attack-wave
+	AotCritterAttackWave:
 	RequiresSpecificOwners:
 		ValidOwnerNames: Neutral, Creeps
 	MapEditorData:
