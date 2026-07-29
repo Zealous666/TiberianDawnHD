@@ -15,6 +15,7 @@ engine/**
 !engine/OpenRA.Mods.Common/Widgets/ProductionPaletteWidget.cs
 !engine/OpenRA.Mods.Common/Traits/AotOpensProductionTabOnSelection.cs
 !engine/OpenRA.Mods.Common/Traits/
+!engine/OpenRA.Mods.Common/Traits/Mobile.cs
 !engine/OpenRA.Mods.Common/Traits/Player/
 !engine/OpenRA.Mods.Common/Traits/Player/BulkProductionQueue.cs
 !engine/OpenRA.Mods.Common/Traits/Player/ProductionQueue.cs
@@ -127,6 +128,7 @@ engine/**
 # === Age of Tiberium (aotmod) - Engine-Patches Sammel-Sync 2026-07-17 ===
 # Eis-System (AotIceLayer/Growth/Breaks + Render), Ants, Creeps-Setup, Building.cs-Patch
 !engine/OpenRA.Mods.Cnc/Traits/AotCreepsSetup.cs
+!engine/OpenRA.Mods.Cnc/Traits/AotSubterraneanAmbush.cs
 !engine/OpenRA.Mods.Cnc/Traits/AotIceBreaks.cs
 !engine/OpenRA.Mods.Cnc/Traits/AotIceGrowth.cs
 !engine/OpenRA.Mods.Cnc/Traits/AotIceLayer.cs

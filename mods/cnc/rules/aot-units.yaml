@@ -1200,7 +1200,7 @@ APC:
 		RequiresCondition: aot-amphibious-upgrade
 	AotTransformsOnTerrain@WATER:
 		IntoActor: aot-apc-amphibious
-		TerrainTypes: Clear, Rough, Road, Bridge, Tiberium, BlueTiberium, Beach, Water, Rock
+		TerrainTypes: Clear, Rough, Road, Bridge, Tiberium, BlueTiberium, Beach, Water, Rock, Clear.Snow
 		RequiresCondition: aot-amphibious-upgrade
 # === Ende aotmod ===
 
@@ -1345,7 +1345,7 @@ aot-minelayer:
 		Mine: aot-minv
 		AmmoPoolName: primary
 		TileUnknownName: build-valid
-		TerrainTypes: Clear, Road, Rough, Bridge, Tiberium, BlueTiberium, Beach
+		TerrainTypes: Clear, Road, Rough, Bridge, Tiberium, BlueTiberium, Beach, Clear.Snow
 	MineImmune:
 	AmmoPool:
 		Ammo: 5
@@ -1580,7 +1580,7 @@ aot-ltnk-deployed:
 		Footprint: x
 		Dimensions: 1,1
 		RequiresBaseProvider: false
-		TerrainTypes: Clear,Road,Rough,Dirt,Rock,Water
+		TerrainTypes: Clear,Road,Rough,Dirt,Rock,Water,Clear.Snow
 
 	-ActorPreviewPlaceBuildingPreview:
 	-Demolishable:
@@ -2591,6 +2591,17 @@ aot-ttnk-devil-base:
 		SubterraneanTransitionSequence: idle
 		SubterraneanTransitionPalette: effect
 		SubterraneanTransitionSound: subdril1.aud
+	# Der Devil's Tongue IST per Definition der aufgeruestete Flammenpanzer -- die Flammenwaffe
+	# darf deshalb NICHT am Upgrade-Prerequisite des jeweiligen BESITZERS haengen. Der von TTNK
+	# geerbte GrantConditionOnPrerequisite feuert nur, wenn der Besitzer "aot-ttnk-flame-upgrade"
+	# gekauft hat; eine im Karteneditor platzierte Creeps-/Neutral-Instanz erfuellt das nie, damit
+	# blieb aot-ttnk-flame aus -> Armament@PRIMARY (aot-TtnkDual) + AttackTurreted (!aot-ttnk-flame)
+	# waren aktiv und der Panzer schoss mit der normalen Kanone statt mit Flammen.
+	# aot-ttnk-toxin bleibt bewusst prerequisite-gesteuert: Toxin ist ein echtes Zusatz-Upgrade,
+	# Flamme dagegen ist konstituierend fuer diesen Aktor.
+	-GrantConditionOnPrerequisite@flame-upgrade:
+	GrantCondition@flame:
+		Condition: aot-ttnk-flame
 	# AttackTurreted erbt RequiresCondition: !aot-ttnk-flame -> feuert nie (devil hat immer flame).
 	# AttackFrontal: Waffe via erbte Conditions (flame/toxin), submerged-Pause.
 	AttackFrontal:
@@ -2602,6 +2613,21 @@ aot-ttnk-devil-base:
 		RequiresCondition: submerged
 		UncloakSound:
 		CloakSound:
+	# === Hinterhalt-Modus (Editor-Checkbox "Underground") ===
+	# Im Karteneditor vorplatzierte Devil's Tongue starten wahlweise bereits eingegraben und
+	# bleiben liegen, bis ein Gegner in Waffenreichweite kommt -- dann graben sie sich selbst
+	# aus und greifen normal an. Verhalten wie ein lauernder Stealth Tank.
+	# Zwei Dinge gehen NICHT in YAML und stecken deshalb im Trait (siehe AotSubterraneanAmbush.cs):
+	#   1. Start auf dem Subterranean-Layer (es gibt keinen "spawn auf Layer"-ActorInit)
+	#   2. Liegenbleiben -- Mobile.OnBecomingIdle taucht Custom-Layer-Einheiten sonst SOFORT auf
+	AotSubterraneanAmbush:
+		AmbushCondition: aot-ambush
+	# Waehrend des Hinterhalts kein AutoTarget: der Trait scannt selbst und entscheidet, wann
+	# ausgegraben wird. Ohne diese Sperre wuerde AutoTarget schon unter der Erde eine
+	# Angriffs-Activity einreihen (AttackFrontal ist nur PAUSIERT, nicht deaktiviert) -- die
+	# Einheit waere nicht mehr idle, hinge in einer folgenlosen Attacke fest und verriete sich.
+	AutoTarget:
+		RequiresCondition: !aot-ambush
 
 aot-ttnk-devil:
 	Inherits: aot-ttnk-devil-base
@@ -3950,7 +3976,7 @@ aot-msub-drone-unit:
 		TurnSpeed: 20
 		TakeoffSounds: orcaup1.aud
 		LandingSounds: orcadwn1.aud
-		LandableTerrainTypes: Clear, Rough, Road, Beach, Tiberium, BlueTiberium
+		LandableTerrainTypes: Clear, Rough, Road, Beach, Tiberium, BlueTiberium, Clear.Snow
 		Crushes: crate, infantry
 		CanSlide: True
 	AttackAircraft:
@@ -4057,7 +4083,7 @@ aot-transport-hover:
 		Offset: 20, 40, 0
 		ZOffset: -64
 	WithLandingCraftAnimation:
-		OpenTerrainTypes: Clear, Rough, Road, Beach, Tiberium, BlueTiberium
+		OpenTerrainTypes: Clear, Rough, Road, Beach, Tiberium, BlueTiberium, Clear.Snow
 		Body: body
 	Cargo:
 		Types: GroundVehicle, GarrisonVehicle
@@ -4118,7 +4144,7 @@ aot-transport:
 		Sequence: idle
 		Name: body
 	WithLandingCraftAnimation:
-		OpenTerrainTypes: Clear, Rough, Road, Beach, Tiberium, BlueTiberium
+		OpenTerrainTypes: Clear, Rough, Road, Beach, Tiberium, BlueTiberium, Clear.Snow
 		Body: body
 	Cargo:
 		Types: Infantry, GroundVehicle, GarrisonVehicle
@@ -4875,7 +4901,7 @@ aot-orcatran:
 		CruiseAltitude: 2560
 		Speed: 180
 		TurnSpeed: 20
-		LandableTerrainTypes: Clear, Road, Rough, Beach, Tiberium, BlueTiberium
+		LandableTerrainTypes: Clear, Road, Rough, Beach, Tiberium, BlueTiberium, Clear.Snow
 		TakeoffSounds: orcaup1.aud
 		LandingSounds: orcadwn1.aud
 	Cargo:
@@ -5143,7 +5169,7 @@ aot-gadpsa:
 		Footprint: x
 		Dimensions: 1,1
 		RequiresBaseProvider: false
-		TerrainTypes: Clear,Road,Rough,Dirt,Rock,Water,Beach
+		TerrainTypes: Clear,Road,Rough,Dirt,Rock,Water,Beach,Clear.Snow
 
 	-ActorPreviewPlaceBuildingPreview:
 	-Demolishable:
@@ -5306,7 +5332,7 @@ aot-outpost-gdi:
 		Footprint: x
 		Dimensions: 1,1
 		RequiresBaseProvider: false
-		TerrainTypes: Clear,Road,Rough,Dirt,Rock
+		TerrainTypes: Clear,Road,Rough,Dirt,Rock,Clear.Snow
 
 	-ActorPreviewPlaceBuildingPreview:
 	-Demolishable:
@@ -5415,7 +5441,7 @@ aot-outpost-nod:
 		Footprint: x
 		Dimensions: 1,1
 		RequiresBaseProvider: false
-		TerrainTypes: Clear,Road,Rough,Dirt,Rock
+		TerrainTypes: Clear,Road,Rough,Dirt,Rock,Clear.Snow
 
 	-ActorPreviewPlaceBuildingPreview:
 	-Demolishable:

@@ -19,29 +19,43 @@ namespace OpenRA.Mods.Common.Scripting
 	[ScriptPropertyGroup("Support Powers")]
 	public class AotFirestormMatrixProperties : ScriptActorProperties, Requires<AotFirestormMatrixPowerInfo>
 	{
-		readonly AotFirestormMatrixPower matrix;
+		readonly Actor self;
 
 		public AotFirestormMatrixProperties(ScriptContext context, Actor self)
 			: base(context, self)
 		{
-			matrix = self.TraitsImplementing<AotFirestormMatrixPower>().First();
+			this.self = self;
 		}
+
+		// aotmod (2026-07-29): actors can carry more than one AotFirestormMatrixPower instance
+		// (e.g. aot-slab-age2-creeps-firestorm in Operation Hammerfest: a Creeps-only always-on
+		// instance plus the normal upgrade-gated one, mutually exclusive via RequiresCondition
+		// depending on whether the building has been captured). This binding is cached for the
+		// actor's whole lifetime (see ScriptActorInterface), so it must resolve to the CURRENTLY
+		// enabled instance on every call rather than latching onto whichever trait happened to
+		// be first at construction time - otherwise a captured/re-captured actor (or, as observed,
+		// simply picking the wrong one of two co-existing instances) silently talks to a disabled
+		// trait and the power never activates.
+		AotFirestormMatrixPower Matrix =>
+			self.TraitsImplementing<AotFirestormMatrixPower>().FirstOrDefault(t => !t.IsTraitDisabled)
+			?? self.TraitsImplementing<AotFirestormMatrixPower>().First();
 
 		[Desc("Issue the order to activate the actor's Firestorm Defense Matrix support power. " +
 			"Same order as clicking the icon - a no-op if the power is not ready (still charging/paused).")]
 		public void ActivateFirestormMatrix()
 		{
-			Self.World.IssueOrder(new Order(matrix.Info.OrderName, Self.Owner.PlayerActor, Target.Invalid, false));
+			Self.World.IssueOrder(new Order(Matrix.Info.OrderName, Self.Owner.PlayerActor, Target.Invalid, false));
 		}
 
 		[Desc("Whether the Firestorm Defense Matrix is currently active.")]
-		public bool FirestormMatrixActive => matrix.IsActive;
+		public bool FirestormMatrixActive => Matrix.IsActive;
 
 		[Desc("Debug: 'ready|active|remainingTicks|disabled|paused' for the underlying support power instance.")]
 		public string FirestormMatrixDebug
 		{
 			get
 			{
+				var matrix = Matrix;
 				var manager = Self.Owner.PlayerActor.Trait<SupportPowerManager>();
 				if (!manager.Powers.TryGetValue(matrix.Info.OrderName, out var instance))
 					return "no-instance";

@@ -302,7 +302,7 @@
 		CanHover: True
 		TakeOffOnResupply: true
 		VTOL: true
-		LandableTerrainTypes: Clear, Rough, Road, Beach, Tiberium, BlueTiberium
+		LandableTerrainTypes: Clear, Rough, Road, Beach, Tiberium, BlueTiberium, Clear.Snow
 		Crushes: crate, infantry
 		CanSlide: True
 	HiddenUnderFog:
@@ -738,7 +738,15 @@
 		RequiresBaseProvider: true
 		BuildSounds: constru2.aud, hvydoor1.aud
 		UndeploySounds: cashturn.aud
-		TerrainTypes: Clear,Road
+		# aotmod (2026-07-29): Clear.Snow MUSS mit rein. AOT_WINTER fuehrt fuer die aus AOT_SNOW
+		# uebernommenen Clear-Zellen einen EIGENEN Terraintyp "Clear.Snow" (aot-winter.yaml,
+		# nur wegen der hellen Minimap-Farbe -- Passierbarkeit ist identisch mit Clear).
+		# Locomotors (overrides.yaml TerrainSpeeds) und Tiberium-Wachstum (AllowedTerrainTypes)
+		# wurden damals nachgezogen, die GEBAEUDE-Platzierung nicht -> auf AOT_WINTER-Karten war
+		# auf dem gesamten Schneeboden NICHTS baubar, nur auf den Strassen-Streifen.
+		# Nachgewiesen auf aot_hammerfest: die komplette GDI-Basis im Norden (x25-39, y27-36)
+		# ist Clear.Snow, nur y=26/y=37 und x=37 sind Road -> exakt dort ging Bauen.
+		TerrainTypes: Clear,Road,Clear.Snow
 	RequiresBuildableArea:
 		AreaTypes: building
 		# aotmod (2026-07-12): Bauzone 4 -> 2 Zellen fuer alle Gebaeude.
@@ -920,7 +928,13 @@
 		Dimensions: 1,1
 		Footprint: x
 		BuildSounds: hvydoor1.aud
-		TerrainTypes: Clear,Road
+		# aotmod (2026-07-27): Beach ergaenzt. Ohne Strand endet jede Mauerkette an der Strandkante,
+		# und da ein Sub Pen nur 4 Zellen Bauzonen-Reichweite hat, ist Marine-Produktion auf jeder
+		# Karte mit breiterem Strandsaum unmoeglich -- fuer KI wie Spieler. Nachgewiesen auf
+		# aot_hammerfest: Flutung erreichte 721 statt 1070 Landzellen, kein Pen-Platz je in Reichweite.
+		# aotmod (2026-07-29): Clear.Snow ergaenzt, siehe ^BaseBuilding oben -- sonst enden Mauern
+		# auf AOT_WINTER-Karten an jeder Schneekante.
+		TerrainTypes: Clear,Road,Beach,Clear.Snow
 	FootprintPlaceBuildingPreview:
 		LineBuildFootprintAlpha: 0.65
 	RequiresBuildableArea:
@@ -1102,7 +1116,7 @@
 ^Husk:
 	Inherits: ^CommonHuskDefaults
 	Husk:
-		AllowedTerrain: Clear, Rough, Road, Tiberium, BlueTiberium, Beach
+		AllowedTerrain: Clear, Rough, Road, Tiberium, BlueTiberium, Beach, Clear.Snow
 		Locomotor: tracked
 	Targetable:
 		RequiresForceFire: true
@@ -1185,7 +1199,7 @@
 		GenericName: meta-crate.generic-name
 		ShowOwnerRow: false
 	Crate:
-		TerrainTypes: Clear, Rough, Road, Tiberium, BlueTiberium, Beach
+		TerrainTypes: Clear, Rough, Road, Tiberium, BlueTiberium, Beach, Clear.Snow
 	RenderSprites:
 		Palette: effect
 		Image: scrate

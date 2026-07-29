@@ -40,7 +40,16 @@ namespace OpenRA.Mods.Cnc.Traits
 			var world = self.World;
 			var layer = world.WorldActor.TraitOrDefault<AotFoundationLayer>();
 			var buildingInfo = self.Info.TraitInfo<BuildingInfo>();
-			var neutral = world.Players.First(p => p.NonCombatant);
+			// aotmod (2026-07-29): world.Players.First(p => p.NonCombatant) picked whichever
+			// non-combatant player happened to come first in the map's player list. On maps that
+			// also define a "Creeps" player (NonCombatant too, see ant-critter-system), foundation
+			// cells could end up owned by Creeps instead of Neutral, depending purely on player
+			// definition order - RequiresSpecificOwners(ValidOwnerNames: Neutral) on
+			// aot-foundation-cell only ever guards against wrong VALUES, it doesn't fix wrong
+			// INTENT here. WorldActor.Owner is the actual canonical "Neutral" player (the one
+			// CreateMapPlayers assigns via PlayerReference.OwnsWorld) - same pattern already used
+			// by CrateSpawner/LegacyBridgeLayer/SpawnMapActors for exactly this purpose.
+			var neutral = world.WorldActor.Owner;
 
 			var toSpawn = new List<CPos>();
 			foreach (var cell in buildingInfo.Tiles(self.Location))

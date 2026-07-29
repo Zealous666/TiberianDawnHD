@@ -504,6 +504,16 @@ namespace OpenRA.Mods.Common.Traits
 
 	public interface ICustomMovementLayerInfo : ITraitInfoInterface { }
 
+	// aotmod (2026-07-29): lets a trait keep its actor on a custom movement layer while idle,
+	// overriding ICustomMovementLayer.ReturnToGroundLayerOnIdle for that one actor. Used by
+	// AotSubterraneanAmbush so a buried Devil's Tongue stays buried instead of surfacing the
+	// moment it goes idle (Mobile.OnBecomingIdle would otherwise queue a move to the surface).
+	[RequireExplicitImplementation]
+	public interface IPreventsIdleLayerReturn
+	{
+		bool PreventsIdleLayerReturn(Actor self);
+	}
+
 	// For traits that want to be exposed to the "Deploy" UI button / hotkey
 	[RequireExplicitImplementation]
 	public interface IIssueDeployOrder

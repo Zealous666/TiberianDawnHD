@@ -648,7 +648,7 @@ RMBO:
 			Tiberium: 70
 			BlueTiberium: 70
 			Subterranean: 120
-		SubterraneanTransitionTerrainTypes: Clear, Road, Rough, Tiberium, BlueTiberium
+		SubterraneanTransitionTerrainTypes: Clear, Road, Rough, Tiberium, BlueTiberium, Clear.Snow
 		SubterraneanTransitionCost: 100
 		SubterraneanTransitionOnRamps: false
 		# ~3x schnellere Unsichtbarkeit vs Default -1024 (setzt submerged-Condition früher).
@@ -722,7 +722,7 @@ c17.bulk:
 		Speed: 700
 		Repulsable: False
 		MaximumPitch: 36
-		LandableTerrainTypes: Clear, Rough, Road, Beach, Tiberium, BlueTiberium
+		LandableTerrainTypes: Clear, Rough, Road, Beach, Tiberium, BlueTiberium, Clear.Snow
 	Cargo:
 		MaxWeight: 20
 		BeforeUnloadDelay: 12
@@ -1151,11 +1151,11 @@ MSAM:
 		Prerequisites: aot-hover-aa-upgrade
 	AotTransformsOnTerrain@HOVER_MLRS:
 		IntoActor: aot-msam-hover-mlrs
-		TerrainTypes: Clear, Rough, Road, Bridge, Tiberium, BlueTiberium, Beach, Water, Rock
+		TerrainTypes: Clear, Rough, Road, Bridge, Tiberium, BlueTiberium, Beach, Water, Rock, Clear.Snow
 		RequiresCondition: aot-hover-mlrs-upgrade
 	AotTransformsOnTerrain@HOVER_AA:
 		IntoActor: aot-msam-hover-aa
-		TerrainTypes: Clear, Rough, Road, Bridge, Tiberium, BlueTiberium, Beach, Water, Rock
+		TerrainTypes: Clear, Rough, Road, Bridge, Tiberium, BlueTiberium, Beach, Water, Rock, Clear.Snow
 		RequiresCondition: aot-hover-aa-upgrade
 	# Fire Position (Phase 3) Garrison-Waffe. 227mm ist bereits Blockable:false,
 	# daher keine eigene Garrison-Waffenvariante noetig (direkte Wiederverwendung).
