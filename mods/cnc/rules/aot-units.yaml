@@ -790,6 +790,13 @@ aot-mtnk-base:
 
 aot-mtnk-pred:
 	Inherits: MTNK
+	# aotmod (2026-07-29): Varianten-Condition UNBEDINGT granten. Sie kam bisher nur aus dem
+	# von MTNK geerbten GrantConditionOnPrerequisite, das den BESITZER auf das Upgrade prueft.
+	# Im Karteneditor platzierte Creeps-/Neutral-Instanzen erfuellen das nie -> der Aktor erschien
+	# als Basis-Variante (falscher Sprite, falsche Waffe), obwohl der Placer die Variante ist.
+	# Der Proxy IST die Variante: das ist konstituierend und darf nicht am Upgrade-Stand haengen.
+	GrantCondition@variant:
+		Condition: aot-mtnk-predator
 	RenderSprites:
 		Image: mtnk
 	Buildable:
@@ -802,8 +809,29 @@ aot-mtnk-pred:
 	Tooltip:
 		Name: Medium Tank (Predator)
 
+	# aotmod (2026-07-29): Editor-Vorschau. ConditionalTrait.EnabledByDefault wertet die
+	# RequiresCondition mit ALLEN Variablen = false aus; nur dann rendert der Trait im
+	# Karteneditor. Deshalb gewann bisher der Basis-Trait ("!variante" ist bei 0 wahr) und
+	# der Placer zeigte den Basis-Sprite. Auf diesem Proxy sind die oben unbedingt
+	# granteten Conditions IMMER 1 -> Basis-Traits treffen nie zu (entfernt), und bei der
+	# Zielvariante werden die stets-wahren Terme gekuerzt. Laufzeit-Semantik bleibt gleich.
+	-WithSpriteTurret@base:
+	WithSpriteTurret@predator:
+		RequiresCondition: !aot-mtnk-railgun
+
 aot-mtnk-rail:
 	Inherits: MTNK
+	# aotmod (2026-07-29): Varianten-Condition UNBEDINGT granten. Sie kam bisher nur aus dem
+	# von MTNK geerbten GrantConditionOnPrerequisite, das den BESITZER auf das Upgrade prueft.
+	# Im Karteneditor platzierte Creeps-/Neutral-Instanzen erfuellen das nie -> der Aktor erschien
+	# als Basis-Variante (falscher Sprite, falsche Waffe), obwohl der Placer die Variante ist.
+	# Der Proxy IST die Variante: das ist konstituierend und darf nicht am Upgrade-Stand haengen.
+	# Beide Conditions noetig -- mit nur 'aot-mtnk-railgun' bliebe die Basis-Variante MIT aktiv
+	# (deren RequiresCondition prueft auf !aot-mtnk-predator).
+	GrantCondition@variant:
+		Condition: aot-mtnk-predator
+	GrantCondition@variant2:
+		Condition: aot-mtnk-railgun
 	RenderSprites:
 		Image: mtnk
 	Buildable:
@@ -816,8 +844,26 @@ aot-mtnk-rail:
 	Tooltip:
 		Name: Medium Tank (Railgun)
 
+	# aotmod (2026-07-29): Editor-Vorschau. ConditionalTrait.EnabledByDefault wertet die
+	# RequiresCondition mit ALLEN Variablen = false aus; nur dann rendert der Trait im
+	# Karteneditor. Deshalb gewann bisher der Basis-Trait ("!variante" ist bei 0 wahr) und
+	# der Placer zeigte den Basis-Sprite. Auf diesem Proxy sind die oben unbedingt
+	# granteten Conditions IMMER 1 -> Basis-Traits treffen nie zu (entfernt), und bei der
+	# Zielvariante werden die stets-wahren Terme gekuerzt. Laufzeit-Semantik bleibt gleich.
+	-WithSpriteTurret@base:
+	-WithSpriteTurret@predator:
+	WithSpriteTurret@railgun:
+		RequiresCondition: aot-mtnk-railgun || !aot-mtnk-railgun
+
 aot-mtnk-titn:
 	Inherits: MTNK
+	# aotmod (2026-07-29): Varianten-Condition UNBEDINGT granten. Sie kam bisher nur aus dem
+	# von MTNK geerbten GrantConditionOnPrerequisite, das den BESITZER auf das Upgrade prueft.
+	# Im Karteneditor platzierte Creeps-/Neutral-Instanzen erfuellen das nie -> der Aktor erschien
+	# als Basis-Variante (falscher Sprite, falsche Waffe), obwohl der Placer die Variante ist.
+	# Der Proxy IST die Variante: das ist konstituierend und darf nicht am Upgrade-Stand haengen.
+	GrantCondition@variant:
+		Condition: aot-mtnk-titan
 	RenderSprites:
 		Image: mtnk
 	Buildable:
@@ -830,8 +876,38 @@ aot-mtnk-titn:
 	Tooltip:
 		Name: Titan Mech
 
+	# aotmod (2026-07-29): Editor-Vorschau. ConditionalTrait.EnabledByDefault wertet die
+	# RequiresCondition mit ALLEN Variablen = false aus; nur dann rendert der Trait im
+	# Karteneditor. Deshalb gewann bisher der Basis-Trait ("!variante" ist bei 0 wahr) und
+	# der Placer zeigte den Basis-Sprite. Auf diesem Proxy sind die oben unbedingt
+	# granteten Conditions IMMER 1 -> Basis-Traits treffen nie zu (entfernt), und bei der
+	# Zielvariante werden die stets-wahren Terme gekuerzt. Laufzeit-Semantik bleibt gleich.
+	-WithSpriteTurret@base:
+	-WithFacingSpriteBody@base:
+	WithFacingSpriteBody@titan:
+		RequiresCondition: aot-mtnk-titan || !aot-mtnk-titan
+	WithFacingSpriteBody@titan-remap:
+		RequiresCondition: aot-mtnk-titan || !aot-mtnk-titan
+	WithSpriteTurret@titan-barrel:
+		RequiresCondition: !aot-mtnk-titan-railgun
+	WithSpriteTurret@titan:
+		RequiresCondition: !aot-mtnk-titan-railgun
+	WithSpriteTurret@titan-remap:
+		RequiresCondition: !aot-mtnk-titan-railgun
+
 aot-mtnk-titn-rail:
 	Inherits: MTNK
+	# aotmod (2026-07-29): Varianten-Condition UNBEDINGT granten. Sie kam bisher nur aus dem
+	# von MTNK geerbten GrantConditionOnPrerequisite, das den BESITZER auf das Upgrade prueft.
+	# Im Karteneditor platzierte Creeps-/Neutral-Instanzen erfuellen das nie -> der Aktor erschien
+	# als Basis-Variante (falscher Sprite, falsche Waffe), obwohl der Placer die Variante ist.
+	# Der Proxy IST die Variante: das ist konstituierend und darf nicht am Upgrade-Stand haengen.
+	# Beide Conditions noetig -- mit nur 'aot-mtnk-titan-railgun' bliebe die Basis-Variante MIT aktiv
+	# (deren RequiresCondition prueft auf !aot-mtnk-titan).
+	GrantCondition@variant:
+		Condition: aot-mtnk-titan
+	GrantCondition@variant2:
+		Condition: aot-mtnk-titan-railgun
 	RenderSprites:
 		Image: mtnk
 	Buildable:
@@ -843,6 +919,28 @@ aot-mtnk-titn-rail:
 		Description: GDI Titan Mech with Railgun.
 	Tooltip:
 		Name: Titan Mech (Railgun)
+	# aotmod (2026-07-29): Editor-Vorschau. ConditionalTrait.EnabledByDefault wertet die
+	# RequiresCondition mit ALLEN Variablen = false aus; nur dann rendert der Trait im
+	# Karteneditor. Deshalb gewann bisher der Basis-Trait ("!variante" ist bei 0 wahr) und
+	# der Placer zeigte den Basis-Sprite. Auf diesem Proxy sind die oben unbedingt
+	# granteten Conditions IMMER 1 -> Basis-Traits treffen nie zu (entfernt), und bei der
+	# Zielvariante werden die stets-wahren Terme gekuerzt. Laufzeit-Semantik bleibt gleich.
+	-WithSpriteTurret@base:
+	-WithFacingSpriteBody@base:
+	-WithSpriteTurret@titan-barrel:
+	-WithSpriteTurret@titan:
+	-WithSpriteTurret@titan-remap:
+	WithFacingSpriteBody@titan:
+		RequiresCondition: aot-mtnk-titan || !aot-mtnk-titan
+	WithFacingSpriteBody@titan-remap:
+		RequiresCondition: aot-mtnk-titan || !aot-mtnk-titan
+	WithSpriteTurret@titan-barrel-railgun:
+		RequiresCondition: aot-mtnk-titan-railgun || !aot-mtnk-titan-railgun
+	WithSpriteTurret@titan-railgun:
+		RequiresCondition: aot-mtnk-titan-railgun || !aot-mtnk-titan-railgun
+	WithSpriteTurret@titan-railgun-remap:
+		RequiresCondition: aot-mtnk-titan-railgun || !aot-mtnk-titan-railgun
+
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - MTNK Upgrade-Conditions ===
@@ -1044,6 +1142,13 @@ aot-htnk-base:
 
 aot-htnk-rocket:
 	Inherits: HTNK
+	# aotmod (2026-07-29): Varianten-Condition UNBEDINGT granten. Sie kam bisher nur aus dem
+	# von HTNK geerbten GrantConditionOnPrerequisite, das den BESITZER auf das Upgrade prueft.
+	# Im Karteneditor platzierte Creeps-/Neutral-Instanzen erfuellen das nie -> der Aktor erschien
+	# als Basis-Variante (falscher Sprite, falsche Waffe), obwohl der Placer die Variante ist.
+	# Der Proxy IST die Variante: das ist konstituierend und darf nicht am Upgrade-Stand haengen.
+	GrantCondition@variant:
+		Condition: aot-htnk-rocket
 	RenderSprites:
 		Image: htnk
 	Buildable:
@@ -1056,8 +1161,25 @@ aot-htnk-rocket:
 	Tooltip:
 		Name: Mammoth Tank (Rocket)
 
+	# aotmod (2026-07-29): Editor-Vorschau. ConditionalTrait.EnabledByDefault wertet die
+	# RequiresCondition mit ALLEN Variablen = false aus; nur dann rendert der Trait im
+	# Karteneditor. Deshalb gewann bisher der Basis-Trait ("!variante" ist bei 0 wahr) und
+	# der Placer zeigte den Basis-Sprite. Auf diesem Proxy sind die oben unbedingt
+	# granteten Conditions IMMER 1 -> Basis-Traits treffen nie zu (entfernt), und bei der
+	# Zielvariante werden die stets-wahren Terme gekuerzt. Laufzeit-Semantik bleibt gleich.
+	-WithSpriteTurret@base:
+	WithSpriteTurret@rocket:
+		RequiresCondition: !aot-htnk-laser
+
 aot-htnk-laser:
 	Inherits: HTNK
+	# aotmod (2026-07-29): Varianten-Condition UNBEDINGT granten. Sie kam bisher nur aus dem
+	# von HTNK geerbten GrantConditionOnPrerequisite, das den BESITZER auf das Upgrade prueft.
+	# Im Karteneditor platzierte Creeps-/Neutral-Instanzen erfuellen das nie -> der Aktor erschien
+	# als Basis-Variante (falscher Sprite, falsche Waffe), obwohl der Placer die Variante ist.
+	# Der Proxy IST die Variante: das ist konstituierend und darf nicht am Upgrade-Stand haengen.
+	GrantCondition@variant:
+		Condition: aot-htnk-laser
 	RenderSprites:
 		Image: htnk
 	Buildable:
@@ -1069,6 +1191,18 @@ aot-htnk-laser:
 		Description: Mammoth Tank with dual high-powered railguns. Requires the Tank Railguns upgrade (Predator path).
 	Tooltip:
 		Name: Mammoth Tank (Railgun)
+
+	# aotmod (2026-07-29): Editor-Vorschau. ConditionalTrait.EnabledByDefault wertet die
+	# RequiresCondition mit ALLEN Variablen = false aus; nur dann rendert der Trait im
+	# Karteneditor. Deshalb gewann bisher der Basis-Trait ("!variante" ist bei 0 wahr) und
+	# der Placer zeigte den Basis-Sprite. Auf diesem Proxy sind die oben unbedingt
+	# granteten Conditions IMMER 1 -> Basis-Traits treffen nie zu (entfernt), und bei der
+	# Zielvariante werden die stets-wahren Terme gekuerzt. Laufzeit-Semantik bleibt gleich.
+	-WithSpriteTurret@base:
+	WithSpriteTurret@laseronly:
+		RequiresCondition: !aot-htnk-rocket
+	WithSpriteTurret@laser:
+		RequiresCondition: aot-htnk-rocket
 
 HTNK:
 	GrantConditionOnPrerequisite@ROCKET:
@@ -1224,6 +1358,13 @@ aot-jeep-base:
 
 aot-jeep-humvee:
 	Inherits: JEEP
+	# aotmod (2026-07-29): Varianten-Condition UNBEDINGT granten. Sie kam bisher nur aus dem
+	# von JEEP geerbten GrantConditionOnPrerequisite, das den BESITZER auf das Upgrade prueft.
+	# Im Karteneditor platzierte Creeps-/Neutral-Instanzen erfuellen das nie -> der Aktor erschien
+	# als Basis-Variante (falscher Sprite, falsche Waffe), obwohl der Placer die Variante ist.
+	# Der Proxy IST die Variante: das ist konstituierend und darf nicht am Upgrade-Stand haengen.
+	GrantCondition@variant:
+		Condition: aot-jeep-humvee
 	RenderSprites:
 		Image: jeep
 	Buildable:
@@ -1236,8 +1377,28 @@ aot-jeep-humvee:
 	Tooltip:
 		Name: GDI HUMVEE
 
+	# aotmod (2026-07-29): Editor-Vorschau. ConditionalTrait.EnabledByDefault wertet die
+	# RequiresCondition mit ALLEN Variablen = false aus; nur dann rendert der Trait im
+	# Karteneditor. Deshalb gewann bisher der Basis-Trait ("!variante" ist bei 0 wahr) und
+	# der Placer zeigte den Basis-Sprite. Auf diesem Proxy sind die oben unbedingt
+	# granteten Conditions IMMER 1 -> Basis-Traits treffen nie zu (entfernt), und bei der
+	# Zielvariante werden die stets-wahren Terme gekuerzt. Laufzeit-Semantik bleibt gleich.
+	-WithFacingSpriteBody@base:
+	-WithSpriteTurret@base:
+	WithFacingSpriteBody@humvee:
+		RequiresCondition: !aot-jeep-wolverine
+	WithSpriteTurret@humvee:
+		RequiresCondition: !aot-jeep-wolverine
+
 aot-jeep-wolverine:
 	Inherits: JEEP
+	# aotmod (2026-07-29): Varianten-Condition UNBEDINGT granten. Sie kam bisher nur aus dem
+	# von JEEP geerbten GrantConditionOnPrerequisite, das den BESITZER auf das Upgrade prueft.
+	# Im Karteneditor platzierte Creeps-/Neutral-Instanzen erfuellen das nie -> der Aktor erschien
+	# als Basis-Variante (falscher Sprite, falsche Waffe), obwohl der Placer die Variante ist.
+	# Der Proxy IST die Variante: das ist konstituierend und darf nicht am Upgrade-Stand haengen.
+	GrantCondition@variant:
+		Condition: aot-jeep-wolverine
 	RenderSprites:
 		Image: jeep
 	Buildable:
@@ -1249,6 +1410,21 @@ aot-jeep-wolverine:
 		Description: Wolverine Mech. Fast anti-infantry walker.
 	Tooltip:
 		Name: Wolverine
+	# aotmod (2026-07-29): Editor-Vorschau. ConditionalTrait.EnabledByDefault wertet die
+	# RequiresCondition mit ALLEN Variablen = false aus; nur dann rendert der Trait im
+	# Karteneditor. Deshalb gewann bisher der Basis-Trait ("!variante" ist bei 0 wahr) und
+	# der Placer zeigte den Basis-Sprite. Auf diesem Proxy sind die oben unbedingt
+	# granteten Conditions IMMER 1 -> Basis-Traits treffen nie zu (entfernt), und bei der
+	# Zielvariante werden die stets-wahren Terme gekuerzt. Laufzeit-Semantik bleibt gleich.
+	-WithFacingSpriteBody@base:
+	-WithSpriteTurret@base:
+	-WithFacingSpriteBody@humvee:
+	-WithSpriteTurret@humvee:
+	WithFacingSpriteBody@wolverine:
+		RequiresCondition: aot-jeep-wolverine || !aot-jeep-wolverine
+	WithFacingSpriteBody@wolverine-remap:
+		RequiresCondition: aot-jeep-wolverine || !aot-jeep-wolverine
+
 aot-apc-amphibious:
 	Inherits: APC
 	RenderSprites:
@@ -1447,6 +1623,13 @@ aot-ltnk-base:
 
 aot-ltnk-tick:
 	Inherits: LTNK
+	# aotmod (2026-07-29): Varianten-Condition UNBEDINGT granten. Sie kam bisher nur aus dem
+	# von LTNK geerbten GrantConditionOnPrerequisite, das den BESITZER auf das Upgrade prueft.
+	# Im Karteneditor platzierte Creeps-/Neutral-Instanzen erfuellen das nie -> der Aktor erschien
+	# als Basis-Variante (falscher Sprite, falsche Waffe), obwohl der Placer die Variante ist.
+	# Der Proxy IST die Variante: das ist konstituierend und darf nicht am Upgrade-Stand haengen.
+	GrantCondition@variant:
+		Condition: aot-ltnk-upgraded
 	RenderSprites:
 		Image: ltnk
 	Buildable:
@@ -1460,8 +1643,30 @@ aot-ltnk-tick:
 	Tooltip:
 		Name: Light Tank (Tick Chassis)
 
+	# aotmod (2026-07-29): Editor-Vorschau. ConditionalTrait.EnabledByDefault wertet die
+	# RequiresCondition mit ALLEN Variablen = false aus; nur dann rendert der Trait im
+	# Karteneditor. Deshalb gewann bisher der Basis-Trait ("!variante" ist bei 0 wahr) und
+	# der Placer zeigte den Basis-Sprite. Auf diesem Proxy sind die oben unbedingt
+	# granteten Conditions IMMER 1 -> Basis-Traits treffen nie zu (entfernt), und bei der
+	# Zielvariante werden die stets-wahren Terme gekuerzt. Laufzeit-Semantik bleibt gleich.
+	-WithFacingSpriteBody@normal:
+	-WithSpriteTurret@normal:
+	WithFacingSpriteBody@ttnk:
+		RequiresCondition: aot-ltnk-upgraded || !aot-ltnk-upgraded
+	WithFacingSpriteBody@ttnk-remap:
+		RequiresCondition: aot-ltnk-upgraded || !aot-ltnk-upgraded
+	WithSpriteTurret@dark:
+		RequiresCondition: !aot-ltnk-upgraded2
+
 aot-ltnk-laser:
 	Inherits: LTNK
+	# aotmod (2026-07-29): Varianten-Condition UNBEDINGT granten. Sie kam bisher nur aus dem
+	# von LTNK geerbten GrantConditionOnPrerequisite, das den BESITZER auf das Upgrade prueft.
+	# Im Karteneditor platzierte Creeps-/Neutral-Instanzen erfuellen das nie -> der Aktor erschien
+	# als Basis-Variante (falscher Sprite, falsche Waffe), obwohl der Placer die Variante ist.
+	# Der Proxy IST die Variante: das ist konstituierend und darf nicht am Upgrade-Stand haengen.
+	GrantCondition@variant:
+		Condition: aot-ltnk-upgraded2
 	RenderSprites:
 		Image: ltnk
 	Buildable:
@@ -1474,6 +1679,22 @@ aot-ltnk-laser:
 		Description: Light Tank (Tick Chassis) with experimental laser turret. Remains deployed after upgrade.
 	Tooltip:
 		Name: Light Tank (Laser)
+	# aotmod (2026-07-29): Editor-Vorschau. ConditionalTrait.EnabledByDefault wertet die
+	# RequiresCondition mit ALLEN Variablen = false aus; nur dann rendert der Trait im
+	# Karteneditor. Deshalb gewann bisher der Basis-Trait ("!variante" ist bei 0 wahr) und
+	# der Placer zeigte den Basis-Sprite. Auf diesem Proxy sind die oben unbedingt
+	# granteten Conditions IMMER 1 -> Basis-Traits treffen nie zu (entfernt), und bei der
+	# Zielvariante werden die stets-wahren Terme gekuerzt. Laufzeit-Semantik bleibt gleich.
+	-WithFacingSpriteBody@normal:
+	-WithSpriteTurret@normal:
+	-WithSpriteTurret@dark:
+	WithFacingSpriteBody@ttnk:
+		RequiresCondition: aot-ltnk-upgraded2 || !aot-ltnk-upgraded2
+	WithFacingSpriteBody@ttnk-remap:
+		RequiresCondition: aot-ltnk-upgraded2 || !aot-ltnk-upgraded2
+	WithSpriteTurret@laser:
+		RequiresCondition: aot-ltnk-upgraded2 || !aot-ltnk-upgraded2
+
 # === Ende aotmod ===
 
 LTNK:
@@ -2124,6 +2345,13 @@ AJET:
 # → identisches Aussehen/Waffen wie umgeschaltete Bestands-AJET.
 aot-ajet-firehawk:
 	Inherits: AJET
+	# aotmod (2026-07-29): Varianten-Condition UNBEDINGT granten. Sie kam bisher nur aus dem
+	# von AJET geerbten GrantConditionOnPrerequisite, das den BESITZER auf das Upgrade prueft.
+	# Im Karteneditor platzierte Creeps-/Neutral-Instanzen erfuellen das nie -> der Aktor erschien
+	# als Basis-Variante (falscher Sprite, falsche Waffe), obwohl der Placer die Variante ist.
+	# Der Proxy IST die Variante: das ist konstituierend und darf nicht am Upgrade-Stand haengen.
+	GrantCondition@variant:
+		Condition: aot-firehawk
 	-Encyclopedia:
 	RenderSprites:
 		Image: aot-ajet
@@ -2135,6 +2363,18 @@ aot-ajet-firehawk:
 		Queue: Aircraft.GDI.AFLT
 		Icon: firehawk-icon
 		Description: Firehawk strike fighter. Fires triple-double rocket salvos, effective against ground and air targets.
+	# aotmod (2026-07-29): Editor-Vorschau. ConditionalTrait.EnabledByDefault wertet die
+	# RequiresCondition mit ALLEN Variablen = false aus; nur dann rendert der Trait im
+	# Karteneditor. Deshalb gewann bisher der Basis-Trait ("!variante" ist bei 0 wahr) und
+	# der Placer zeigte den Basis-Sprite. Auf diesem Proxy sind die oben unbedingt
+	# granteten Conditions IMMER 1 -> Basis-Traits treffen nie zu (entfernt), und bei der
+	# Zielvariante werden die stets-wahren Terme gekuerzt. Laufzeit-Semantik bleibt gleich.
+	-WithFacingSpriteBody@a10:
+	WithFacingSpriteBody@hawk:
+		RequiresCondition: aot-firehawk || !aot-firehawk
+	WithFacingSpriteBody@hawk-remap:
+		RequiresCondition: aot-firehawk || !aot-firehawk
+
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - aot-mig: MiG Attack Jet (NOD Airstrike-Superpower) ===
@@ -2506,6 +2746,13 @@ aot-ttnk-base:
 
 aot-ttnk-flame:
 	Inherits: TTNK
+	# aotmod (2026-07-29): Varianten-Condition UNBEDINGT granten. Sie kam bisher nur aus dem
+	# von TTNK geerbten GrantConditionOnPrerequisite, das den BESITZER auf das Upgrade prueft.
+	# Im Karteneditor platzierte Creeps-/Neutral-Instanzen erfuellen das nie -> der Aktor erschien
+	# als Basis-Variante (falscher Sprite, falsche Waffe), obwohl der Placer die Variante ist.
+	# Der Proxy IST die Variante: das ist konstituierend und darf nicht am Upgrade-Stand haengen.
+	GrantCondition@variant:
+		Condition: aot-ttnk-flame
 	RenderSprites:
 		Image: ttnk
 	Buildable:
@@ -2519,8 +2766,30 @@ aot-ttnk-flame:
 	Tooltip@normal:
 		Name: actor-ttnk-flame.name
 
+	# aotmod (2026-07-29): Editor-Vorschau. ConditionalTrait.EnabledByDefault wertet die
+	# RequiresCondition mit ALLEN Variablen = false aus; nur dann rendert der Trait im
+	# Karteneditor. Deshalb gewann bisher der Basis-Trait ("!variante" ist bei 0 wahr) und
+	# der Placer zeigte den Basis-Sprite. Auf diesem Proxy sind die oben unbedingt
+	# granteten Conditions IMMER 1 -> Basis-Traits treffen nie zu (entfernt), und bei der
+	# Zielvariante werden die stets-wahren Terme gekuerzt. Laufzeit-Semantik bleibt gleich.
+	-WithSpriteTurret@normal:
+	-WithFacingSpriteBody@normal:
+	WithFacingSpriteBody@flame:
+		RequiresCondition: !aot-ttnk-toxin
+
 aot-ttnk-toxin:
 	Inherits: TTNK
+	# aotmod (2026-07-29): Varianten-Condition UNBEDINGT granten. Sie kam bisher nur aus dem
+	# von TTNK geerbten GrantConditionOnPrerequisite, das den BESITZER auf das Upgrade prueft.
+	# Im Karteneditor platzierte Creeps-/Neutral-Instanzen erfuellen das nie -> der Aktor erschien
+	# als Basis-Variante (falscher Sprite, falsche Waffe), obwohl der Placer die Variante ist.
+	# Der Proxy IST die Variante: das ist konstituierend und darf nicht am Upgrade-Stand haengen.
+	# Beide Conditions noetig -- mit nur 'aot-ttnk-toxin' bliebe die Basis-Variante MIT aktiv
+	# (deren RequiresCondition prueft auf !aot-ttnk-flame).
+	GrantCondition@variant:
+		Condition: aot-ttnk-flame
+	GrantCondition@variant2:
+		Condition: aot-ttnk-toxin
 	RenderSprites:
 		Image: ttnk
 	Buildable:
@@ -2533,6 +2802,18 @@ aot-ttnk-toxin:
 		Description: Flame Tank upgraded with dual toxic tiberian-sprayers.
 	Tooltip@normal:
 		Name: actor-ttnk-toxin.name
+
+	# aotmod (2026-07-29): Editor-Vorschau. ConditionalTrait.EnabledByDefault wertet die
+	# RequiresCondition mit ALLEN Variablen = false aus; nur dann rendert der Trait im
+	# Karteneditor. Deshalb gewann bisher der Basis-Trait ("!variante" ist bei 0 wahr) und
+	# der Placer zeigte den Basis-Sprite. Auf diesem Proxy sind die oben unbedingt
+	# granteten Conditions IMMER 1 -> Basis-Traits treffen nie zu (entfernt), und bei der
+	# Zielvariante werden die stets-wahren Terme gekuerzt. Laufzeit-Semantik bleibt gleich.
+	-WithSpriteTurret@normal:
+	-WithFacingSpriteBody@normal:
+	-WithFacingSpriteBody@flame:
+	WithFacingSpriteBody@toxin:
+		RequiresCondition: aot-ttnk-toxin || !aot-ttnk-toxin
 
 # === Age of Tiberium (aotmod) - Devil's Tongue Subterranean Flame Tank ===
 # Erbt TTNK (alle Conditions/Waffen/Turret-Traits) aber ersetzt den Locomotor durch den
@@ -2644,6 +2925,13 @@ aot-ttnk-devil:
 
 aot-ttnk-devil-toxin:
 	Inherits: aot-ttnk-devil-base
+	# aotmod (2026-07-29): Varianten-Condition UNBEDINGT granten. Sie kam bisher nur aus dem
+	# von aot-ttnk-devil-base geerbten GrantConditionOnPrerequisite, das den BESITZER auf das Upgrade prueft.
+	# Im Karteneditor platzierte Creeps-/Neutral-Instanzen erfuellen das nie -> der Aktor erschien
+	# als Basis-Variante (falscher Sprite, falsche Waffe), obwohl der Placer die Variante ist.
+	# Der Proxy IST die Variante: das ist konstituierend und darf nicht am Upgrade-Stand haengen.
+	GrantCondition@variant:
+		Condition: aot-ttnk-toxin
 	Buildable:
 		LockedGroup: aot-grp-ttnk
 		BuildPaletteOrder: 30
