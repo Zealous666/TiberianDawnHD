@@ -7001,6 +7001,9 @@ aot-hospital:
 		Icon: aot-hospital
 		ChargeInterval: 7500
 		SupportPowerPaletteOrder: 72
+		# Gleicher Heilsound wie beim Medic (aot-Heal-Waffe, aot-weapons.yaml Report: heal2.aud).
+		# Global statt nur lokal (wie Iron Dome), da die Heilung die ganze Karte betrifft.
+		GlobalActivationSound: heal2.aud
 
 # Bridge-Aktoren für AOT_TEMPERAT: BRIDGE1/2 benutzen Template@165-168 = Cliff-Tiles auf
 # AOT_TEMPERAT. Die richtigen Bridge-Templates liegen hier auf @131-134 / @378-379.
