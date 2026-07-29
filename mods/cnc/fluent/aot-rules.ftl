@@ -251,6 +251,12 @@ actor-aot-forward-hq =
 actor-aot-tesla =
     .name = Tesla Coil
 
+actor-aot-hospital =
+    .name = Civilian Hospital
+    .description = Care under Fire
+
+        Emergency treatment for all troops on the field
+
 actor-aot-ts-ctaray =
     .name = Civilian Array
     .description = Ion Storm Control

@@ -256,7 +256,7 @@ aot-ore-mine:
 		Footprint: xx xx
 		Dimensions: 2,2
 		LocalCenterOffset: 0,0,0
-		TerrainTypes: Clear,Rough,Road,Rock
+		TerrainTypes: Clear,Rough,Road,Rock,Clear.Snow
 	Health:
 		HP: 99999
 	DamageMultiplier:
@@ -6266,7 +6266,7 @@ aot-foundation:
 		# (^Building-Default TerrainTypes = leer -> IsCellBuildable immer false -> ueberall rot).
 		Footprint: xxx xxx xxx
 		Dimensions: 3, 3
-		TerrainTypes: Clear, Road
+		TerrainTypes: Clear, Road, Clear.Snow
 		BuildSounds: constru2.aud, hvydoor1.aud
 		# Teil-Platzierung: erlaubt Bauen auch wenn nicht alle 9 Zellen frei sind. Belegte Zellen
 		# werden rot angezeigt, freie weiss; CanPlaceBuilding gibt trotzdem true. IsCloseEnoughToBase
@@ -6967,6 +6967,41 @@ aot-iron-dome:
 	TimedConditionBar@AOTIRONDOME:
 		Condition: aot-iron-dome
 
+# === Civilian Hospital (TD): neutral-capturable Struktur mit Heal-Superpower ===
+# HOSP existiert in der Engine bereits vollstaendig (engine/mods/cnc/rules/tech.yaml) inkl.
+# fertig kalibrierter Remaster-Sprites (structures-overrides.yaml, RemasteredOffset: 0,-11) -
+# im Gegensatz zum Tesla Coil (RA-Import) reicht hier ein einfaches "Inherits: HOSP", kein
+# Sprite-/Sound-Import noetig.
+# Nach Einnahme: AotHealAlliesPower ("Care under Fire") heilt alle eigenen+verbuendeten
+# Einheiten (kein Gebaeude, kein Ziel-Cursor - analog AotIronDomePower) sofort auf volle HP.
+# 5min Cooldown = 7500 Ticks (5*60*25 bei 25 tps).
+# TooltipDescription@ally/@other entfernt: HOSP's Original-Text bewirbt TD-Vanilla-Selfheal
+# fuer Infanterie, die es in diesem Mod nie gab (reiner Flavor-Text) - mit der neuen Superpower
+# waere er irrefuehrend.
+aot-hospital:
+	Inherits: HOSP
+	# RenderSprites.Image faellt ohne expliziten Wert auf den Aktornamen zurueck ("aot-hospital"
+	# statt "hosp") - die Sequenzen liegen aber unter dem Image-Namen "hosp" (structures-
+	# overrides.yaml). Muss explizit gesetzt werden, sonst "Image has no sequences" (check-yaml).
+	RenderSprites:
+		Image: hosp
+	Tooltip:
+		Name: actor-aot-hospital.name
+	-TooltipDescription@ally:
+	-TooltipDescription@other:
+	MapEditorData:
+		Categories: Civilians
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral
+	RevealsShroud:
+		Range: 4c0
+	AotHealAlliesPower:
+		OrderName: AotHealAlliesPower
+		Description: actor-aot-hospital.description
+		Icon: aot-hospital
+		ChargeInterval: 7500
+		SupportPowerPaletteOrder: 72
+
 # Bridge-Aktoren für AOT_TEMPERAT: BRIDGE1/2 benutzen Template@165-168 = Cliff-Tiles auf
 # AOT_TEMPERAT. Die richtigen Bridge-Templates liegen hier auf @131-134 / @378-379.
 # BRIDGE3/4 haben keine passenden Templates auf AOT_TEMPERAT → nicht unterstützt.
@@ -7223,7 +7258,7 @@ aot-vein-heart:
 	Building:
 		Footprint: xxx xxx xxx
 		Dimensions: 3, 3
-		TerrainTypes: Clear, Rough, Road, Sand, Beach
+		TerrainTypes: Clear, Rough, Road, Sand, Beach, Clear.Snow
 	# Selectable (nicht bloss Interactable) fuer Healthbar/Selection-Ring via SelectionDecorations.
 	Selectable:
 		Bounds: 3072, 3072

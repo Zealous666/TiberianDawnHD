@@ -29,6 +29,7 @@ engine/**
 !engine/OpenRA.Mods.Common/Traits/SupportPowers/AotZoneTrooperDropPower.cs
 !engine/OpenRA.Mods.Common/Traits/SupportPowers/AotAirstrikePower.cs
 !engine/OpenRA.Mods.Common/Traits/SupportPowers/AotIronDomePower.cs
+!engine/OpenRA.Mods.Common/Traits/SupportPowers/AotHealAlliesPower.cs
 !engine/OpenRA.Mods.Common/Traits/OreTransporter.cs
 !engine/OpenRA.Mods.Common/Traits/OreMineDurability.cs
 !engine/OpenRA.Mods.Common/Traits/Minelayer.cs

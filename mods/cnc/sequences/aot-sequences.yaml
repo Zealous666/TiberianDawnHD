@@ -1981,6 +1981,9 @@ icon:
 	aot-iron-dome:
 		Filename: aot-iron-dome-icon.png
 		Length: 1
+	aot-hospital:
+		Filename: aot-hospital-icon.png
+		Length: 1
 	aot-forward-hq:
 		Filename: aot-forward-hq-icon.png
 		Length: 1
