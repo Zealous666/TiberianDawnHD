@@ -5134,6 +5134,28 @@ aot-litning:
 		Length: 4
 		ZOffset: 2047
 
+# === Age of Tiberium (aotmod) - Tesla Coil (RA-Import, neutrales Verteidigungsgebaeude) ===
+# TSLA.ZIP, 20 Frames wie das RA-Original (tsla.shp): 0 idle, 1-9 Ladeanimation, 10 idle
+# (beschaedigt), 11-19 Ladeanimation (beschaedigt). WithTeslaChargeAnimation spielt "active"
+# einmal komplett ab, wenn AttackTesla feuert (siehe aot-structures.yaml). Kein "make"/"icon" -
+# der Turm ist nicht baubar (User-Wunsch: kein Icon noetig) und wird nur ueber den
+# Karteneditor platziert.
+aot-tesla:
+	Defaults:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\TSLA.ZIP
+	idle:
+		Start: 0
+	damaged-idle:
+		Start: 10
+	active:
+		Start: 1
+		Length: 9
+		Tick: 100
+	damaged-active:
+		Start: 11
+		Length: 9
+		Tick: 100
+
 # === Age of Tiberium (aotmod) - Lightpost (baubar ab Age 3) ===
 # Sprite BYTE-IDENTISCH zum Editor-Light-Post aot-ts-galite (gtlite.shp, siehe
 # aot-ts-civilian-sequences.yaml) -- gleiche Scale 0.55, kein Remap-Overlay: der baubare Post

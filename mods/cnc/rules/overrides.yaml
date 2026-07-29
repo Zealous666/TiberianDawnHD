@@ -978,24 +978,19 @@ aot-nod-radar:
 ATWR:
 	-Buildable:
 	# Nur noch im Karteneditor platzierbar (MapEditorData.Categories: Support bleibt erhalten).
-	# Da er dort auch ohne zugehoeriges Stromnetz stehen soll, braucht er keinen Strom mehr:
+	# User-Wunsch 2026-07-29: statt fest stromunabhaengig, jetzt eine Karteneditor-Checkbox
+	# "Requires power" (Standard: an = normales Verhalten wie vor diesem Patch). AotOptionalPower
+	# gewaehrt die Condition "aot-power-required" einmalig bei Erzeugung, exakt nach dem Wert der
+	# Checkbox. Power und GrantConditionOnPowerState@LOWPOWER haengen beide daran - alles danach
+	# (WithColoredOverlay@IDISABLE, AttackTurreted.PauseOnCondition, DetectCloaked !lowpower)
+	# bleibt unveraendert auf der PER-AKTOR-Condition "lowpower", die bei deaktivierter Checkbox
+	# einfach nie gewaehrt wird. Kein einziger Konsument muss dafuer angefasst werden.
+	AotOptionalPower:
+		Condition: aot-power-required
 	Power:
-		Amount: 0
-	# ...und er darf auch nicht mehr durch den Low-Power-Zustand des Besitzers lahmgelegt werden.
-	# Dazu muss BEIDES weg: die Condition-Quelle UND alle drei Konsumenten - sonst meldet
-	# check-yaml "consumes conditions that are not granted: lowpower".
-	-GrantConditionOnPowerState@LOWPOWER:
-	# Roter "abgeschaltet"-Overlay (aus ^DisabledOverlay) entfaellt ersatzlos.
-	-WithColoredOverlay@IDISABLE:
-	# Feuert jetzt auch ohne Strom; nur waehrend des Bauvorgangs noch pausiert.
-	AttackTurreted:
-		PauseOnCondition: build-incomplete
-	# Tarnungserkennung dauerhaft aktiv statt nur bei ausreichender Energie.
-	# ⚠️ Ein leeres "RequiresCondition:" loescht den geerbten Wert NICHT (der Knoten wird beim
-	# Merge ignoriert) - der Trait muss entfernt und neu angelegt werden.
-	-DetectCloaked:
-	DetectCloaked@AOTNOPOWER:
-		Range: 5c0
+		RequiresCondition: aot-power-required
+	GrantConditionOnPowerState@LOWPOWER:
+		RequiresCondition: aot-power-required
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - aot-proc-gdi: PROC für GDI (braucht Advanced Factory) ===

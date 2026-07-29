@@ -4331,7 +4331,8 @@ aot-shipyard:
 		RequiresBaseProvider: false
 	RequiresBuildableArea:
 		AreaTypes: building
-		Adjacent: 4
+		# aotmod (2026-07-27): 4 -> 6, analog zu aot-subpen -- gleicher Uferstreifen, gleiches Problem.
+		Adjacent: 6
 	-GivesBuildableArea:
 	-SpawnActorsOnSell:
 	RevealsShroud:
@@ -4421,7 +4422,11 @@ aot-subpen:
 		RequiresBaseProvider: false
 	RequiresBuildableArea:
 		AreaTypes: building
-		Adjacent: 4
+		# aotmod (2026-07-27): 4 -> 6. Der Uferstreifen (Fels/Strand) laesst die Mauerkette nicht bis
+		# ans Wasser; gemessen auf aot_hammerfest blieb der naechste Pen-Platz 5 Zellen von
+		# erreichbarem Land entfernt (Diagnose: 'closest site is 5 cell(s) ... needs <= 4').
+		# 6 deckt das mit Reserve ab. Gilt fuer Spieler und KI gleichermassen.
+		Adjacent: 6
 	-GivesBuildableArea:
 	-SpawnActorsOnSell:
 	ProvidesPrerequisite:
@@ -4783,7 +4788,7 @@ aot-silo-age0:
 	Buildable:
 		LockedGroup: aot-grp-silo
 		BuildPaletteOrder: 30
-		Prerequisites: anypower, ~!aot-age1
+		Prerequisites: fact, ~!aot-age1
 		Queue: Building.GDI, Building.Nod
 		Description: actor-silo.description
 		Icon: aot-icon-age0
@@ -4801,7 +4806,7 @@ aot-silo-age1:
 	Buildable:
 		LockedGroup: aot-grp-silo
 		BuildPaletteOrder: 30
-		Prerequisites: anypower, ~aot-age1, ~!aot-age2
+		Prerequisites: fact, ~aot-age1, ~!aot-age2
 		Queue: Building.GDI, Building.Nod
 		Description: actor-silo.description
 		Icon: aot-icon-age1
@@ -4824,7 +4829,7 @@ aot-silo-age2:
 	Buildable:
 		LockedGroup: aot-grp-silo
 		BuildPaletteOrder: 30
-		Prerequisites: anypower, ~aot-age2
+		Prerequisites: fact, ~aot-age2
 		Queue: Building.GDI, Building.Nod
 		Description: actor-silo.description
 		Icon: aot-icon-age2
@@ -7409,4 +7414,77 @@ aot-lightpost-nod:
 		Icon: icon
 		LockedGroup: aot-grp-lightpost
 		Description: Lights the surrounding area at night and detects nearby cloaked units. Requires power to operate.
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Tesla Coil (RA-Import, neutrales Verteidigungsgebaeude) ===
+# User-Wunsch 2026-07-29: zivile/neutrale Verteidigungsstruktur, nicht baubar (kein Icon
+# noetig), nur ueber den Karteneditor platzierbar. Stats 1:1 von RA's TSLA (engine/mods/ra/
+# rules/structures.yaml), Sprites+Sounds aus dem RA-Remaster-Client extrahiert (siehe
+# ra-remastered-assets.md): TSLA.ZIP fuer die Sprites (aot-sequences.yaml), tesla1.aud/
+# tslachg2.aud aus sounds.mix (~/Library/Application Support/OpenRA/Content/ra/v2/, per
+# --aot-mix extrahiert -> mods/cnc/bits/aot-tesla-fire.aud/aot-tesla-charge.aud). Der Blitz
+# selbst nutzt das bereits importierte aot-litning-Bild (LITNING.ZIP) - siehe aot-weapons.yaml.
+#
+# Neutral + AttackAnything: RequiresSpecificOwners haelt den Aktor dauerhaft beim Neutral-
+# Spieler - bewusst KEIN ^TechBuilding, dieser Turm soll (anders als aot-ts-ctaray) nicht
+# einnehmbar sein. AutoTarget.InitialStance/-AI = AttackAnything ist PFLICHT fuer einen
+# neutralen Angreifer: der Neutral-Spieler hat von Haus aus KEINE Feinde (derselbe Trick wie
+# bei ^AotAnt in aot-critters.yaml) - ohne die Stance wuerde der Turm nie feuern.
+#
+# Power-Checkbox (User-Wunsch, identisches AotOptionalPower-Pattern wie ATWR in overrides.yaml):
+# Standard = an (RA-Original zieht -80 Power), ABER der Neutral-Spieler hat in aller Regel KEIN
+# eigenes Kraftwerk -> mit aktivierter Checkbox waere der Turm auf den meisten Karten dauerhaft
+# "Low Power" und wuerde nie feuern. Kartenersteller, die ihn als funktionierende Gefahr statt
+# als reines Ruinen-/Deko-Gebaeude einsetzen wollen, muessen die Checkbox bewusst ausschalten.
+aot-tesla:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x
+		Dimensions: 1,1
+	Selectable:
+		Bounds: 1024, 1024
+	Health:
+		HP: 40000
+	Armor:
+		Type: Heavy
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral
+	# Muss mindestens der Waffenreichweite entsprechen (7c0), sonst sieht AutoTarget seine
+	# eigenen Ziele nicht (derselbe Bug wie bei aot-ftur, siehe ftur-system.md).
+	RevealsShroud:
+		Range: 7c0
+	AutoTarget:
+		InitialStance: AttackAnything
+		InitialStanceAI: AttackAnything
+	AutoTargetPriority@DEFAULT:
+		ValidTargets: Infantry, Vehicle, Structure
+		InvalidTargets: NoAutoTarget
+	WithTeslaChargeAnimation:
+	Armament:
+		Weapon: aot-TeslaZap
+		LocalOffset: 0,0,896
+	AttackTesla:
+		PauseOnCondition: lowpower
+		ChargeAudio: aot-tesla-charge.aud
+		MaxCharges: 3
+		ReloadDelay: 120
+	DetectCloaked:
+		Range: 6c0
+		RequiresCondition: !lowpower
+	# Fehlt bei ^CivBuilding (anders als bei ^Support/^DisabledOverlay) komplett -> muss hier
+	# selbst granted werden, damit AttackTesla/DetectCloaked oben ueberhaupt etwas zum Konsumieren
+	# haben. Gleiches Gating wie Power selbst: nur aktiv, wenn die Checkbox unten "an" ist.
+	GrantConditionOnPowerState@LOWPOWER:
+		Condition: lowpower
+		ValidPowerStates: Low, Critical
+		RequiresCondition: aot-power-required
+	AotOptionalPower:
+		Condition: aot-power-required
+	Power:
+		Amount: -80
+		RequiresCondition: aot-power-required
+	Tooltip:
+		Name: actor-aot-tesla.name
+	MapEditorData:
+		Categories: Civilians
 # === Ende aotmod ===

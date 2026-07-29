@@ -248,6 +248,9 @@ actor-aot-forward-hq =
     .name = Forward HQ
     .description = Paratrooper Drop
 
+actor-aot-tesla =
+    .name = Tesla Coil
+
 actor-aot-ts-ctaray =
     .name = Civilian Array
     .description = Ion Storm Control

@@ -1480,6 +1480,28 @@ aot-VeinGas:
 	Warhead@3Spawn: AotSpawnActor
 		Actor: aot-gascloud
 
+# === Age of Tiberium (aotmod) - Tesla Coil (RA-Import, neutrales Verteidigungsgebaeude) ===
+# Stats 1:1 von RA's TeslaZap/^TeslaWeapon (engine/mods/ra/weapons/other.yaml), User-Wunsch
+# 2026-07-29. Projektil-Bild "aot-litning" ist bereits importiert (LITNING.ZIP, siehe
+# IonStormBolt unten) und identisch mit RA's eigener "litning"-Sequenz -> kein Zweitimport
+# noetig, nur der Bild-Name muss dem Projectile-Default (Image: "litning") explizit
+# ueberschrieben werden.
+aot-TeslaZap:
+	ReloadDelay: 3
+	Range: 7c0
+	Report: aot-tesla-fire.aud
+	Projectile: TeslaZap
+		Image: aot-litning
+	ValidTargets: Ground, Water, GroundActor, WaterActor
+	Warhead@1Dam: SpreadDamage
+		Spread: 42
+		Damage: 10000
+		ValidTargets: GroundActor, WaterActor
+		Versus:
+			None: 1000
+			Wood: 60
+		DamageTypes: Prone50Percent, TriggerProne, ElectricityDeath
+
 # === Age of Tiberium (aotmod) - Ion Storm Blitz (Civilian Array Superpower) ===
 # Schadenswerte 1:1 vom Obelisk (engine/mods/cnc/weapons/other.yaml "Laser"), User-Vorgabe:
 # "die blitze machen auch den gleichen schaden wie der obelisk" + "infanterie wird gegrillt
