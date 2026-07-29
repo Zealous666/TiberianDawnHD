@@ -95,6 +95,7 @@ engine/**
 !engine/OpenRA.Mods.Common/Traits/Render/WithGateSpriteBody.cs
 !engine/OpenRA.Mods.Common/Traits/Render/WithMoveAnimation.cs
 !engine/OpenRA.Mods.Common/Traits/Render/WithSpriteBody.cs
+!engine/OpenRA.Mods.Common/Traits/Render/RenderSprites.cs
 !engine/OpenRA.Mods.Common/TraitsInterfaces.cs
 !engine/OpenRA.Mods.Common/Widgets/TerrainTemplatePreviewWidget.cs
 !engine/OpenRA.Mods.Common/UtilityCommands/
