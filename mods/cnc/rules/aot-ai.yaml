@@ -593,7 +593,8 @@ Player:
 		# (1 vehicle per transport), regroups on the far shore, then continues the attack.
 		NavalProductionTypes: aot-shipyard
 		FerryTypes: aot-transport-hover-proxy
-		FerryCount: 2
+		FerryCount: 3
+		FerryMaxTotal: 3
 		ScoutTypes: aot-jeep-base, aot-jeep-humvee, aot-jeep-wolverine, aot-apc-amphibious
 		# Scouts only start once Radar/HQ exists (User 2026-07-21).
 		RadarTypes: aot-hq-base, aot-hq-base-age2, aot-hq-ion, aot-hq-ion-age2
@@ -620,6 +621,11 @@ Player:
 		ProtectionScanRadius: 10
 		ProtectionResponseRatio: 2
 		ProtectionMinResponse: 2
+		# Module 0 OreT Boost + startup priority (User 2026-07-22): one extra ORET ordered directly
+		# (bypasses Ops claiming entirely, see ExcludeFromOpsTypes above), purely for early cashflow.
+		# The first Regular Attack Wave waits for this + the first Derrick scan + every Scout group
+		# before firing -- cashflow and reconnaissance before the first real offensive.
+		OreBoostTypes: aot-oret-lite
 
 	AotOperationsBotModule@nod:
 		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
@@ -649,7 +655,15 @@ Player:
 		# batches (1 vehicle per transport), regroups on the far shore, then continues the attack.
 		NavalProductionTypes: aot-subpen
 		FerryTypes: aot-transport-base, aot-transport-gun-proxy
-		FerryCount: 2
+		# 3 Vessels fahren als EIN Konvoi (laden -> gemeinsam ueberfahren -> gemeinsam anlanden).
+		FerryCount: 3
+		FerryMaxTotal: 3
+		# Eskorte: pro Vessel 1 U-Boot. Es begleitet NICHT, sondern sichert den Landepunkt und
+		# verweilt dort. Ab Age 1 (STEC) kommt zusaetzlich ein Missile Sub dazu.
+		FerryEscortTypes: aot-sub-cargo-proxy, aot-sub-base
+		FerryEscortPerVessel: 1
+		FerryEscortSecondaryTypes: aot-msub-drone-proxy, aot-msub-mine-proxy, aot-msub-base
+		FerryEscortSecondaryCount: 1
 		# Both variants inherit aot-transport's actual Locomotor (aot-units.yaml) -- verifies the chosen
 		# embark/landing cell's adjacent water is really ship-navigable, not just terrain-adjacent to
 		# Water (User 2026-07-22: rock-enclosed inlets can pass the naive terrain check but trap a ship
@@ -689,6 +703,11 @@ Player:
 		ProtectionScanRadius: 10
 		ProtectionResponseRatio: 2
 		ProtectionMinResponse: 2
+		# Module 0 OreT Boost + startup priority (User 2026-07-22): one extra ORET ordered directly
+		# (bypasses Ops claiming entirely, see ExcludeFromOpsTypes above), purely for early cashflow.
+		# The first Regular Attack Wave waits for this + the first Derrick scan + every Scout group
+		# before firing -- cashflow and reconnaissance before the first real offensive.
+		OreBoostTypes: aot-oret-lite
 
 
 	# =========================================================================

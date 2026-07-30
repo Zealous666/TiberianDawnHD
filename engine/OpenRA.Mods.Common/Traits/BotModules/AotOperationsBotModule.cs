@@ -100,6 +100,48 @@ namespace OpenRA.Mods.Common.Traits
 		// off by arbitrary extra units.
 		public virtual bool AcceptsReinforcements => false;
 
+		// Only AotTransitMission may hold ships. A transport or escort that turns up at any other
+		// mission (a production order that outlived a crossing, say) goes straight back to the shared
+		// pool, where the transit service picks it up. Filing it as an ordinary combat unit strands it
+		// with a mission that will never command it again -- and since the fleet is globally capped,
+		// that starves every later crossing (User 2026-07-27: three transports idling on different
+		// shores while waves and scouts waited in the base).
+		protected bool ReturnStrayNavalSupport(Actor a)
+		{
+			if (!Ops.IsNavalSupport(a))
+				return false;
+
+			Ops.ReleaseToPool(this, [a]);
+			return true;
+		}
+
+		int stallFingerprint;
+		int stallTicks;
+
+		// Progress watchdog. Every order this AI issues is gated on IsIdle -- deliberately, so it does
+		// not cancel running activities. The blind spot is a unit that is BUSY but getting nowhere
+		// (blocked path, target it cannot reach, a transport wedged against another): it never goes idle,
+		// so it is never re-ordered and the whole mission quietly stops. Callers pass a cheap fingerprint
+		// of "what should change if we were making progress"; when that stands still long enough this
+		// returns true once, so the caller can break the deadlock (usually a Stop, which makes everything
+		// idle again and lets the normal logic re-issue orders next tick).
+		protected bool NoProgress(int fingerprint, int limit)
+		{
+			if (fingerprint != stallFingerprint)
+			{
+				stallFingerprint = fingerprint;
+				stallTicks = 0;
+				return false;
+			}
+
+			stallTicks += Ops.Info.MissionInterval;
+			if (stallTicks < limit)
+				return false;
+
+			stallTicks = 0;
+			return true;
+		}
+
 		protected void Log(string message)
 		{
 			OpenRA.Log.Write("debug", $"[AotOps][{Ops.Player.PlayerName}][{Name}] {message}");
@@ -136,6 +178,24 @@ namespace OpenRA.Mods.Common.Traits
 		public readonly bool EnableWaves = true;
 		public readonly bool EnableScouts = true;
 		public readonly bool EnableDerricks = true;
+		public readonly bool EnableOreBoost = true;
+
+		// ---- Module 0: OreT Boost (User 2026-07-22) ----
+		[ActorReference]
+		[Desc("Ore Transporter variant chain. A single SECOND one is ordered directly (bypasses the",
+			"Ops claim/production pipeline entirely -- ORET is excluded from Ops via ExcludeFromOpsTypes",
+			"and manages itself, same as the free-spawned starter). One-shot: fired once, early, purely",
+			"for extra cashflow at match start -- never repeated, and NOT replaced if later destroyed",
+			"(that would make it a standing rule, not a one-time boost).")]
+		public readonly string[] OreBoostTypes = [];
+
+		[Desc("Startup priority (User 2026-07-22): the OreT boost, the first Derrick scan, and every",
+			"Scout group (if scouting is even possible on this map) all get a head start before the",
+			"first Regular Attack Wave is allowed to fire -- cashflow and reconnaissance before the",
+			"first real offensive. Only gates the VERY FIRST wave; every later wave/air-raid is",
+			"unaffected. Safety net: if this many ticks have passed since the match started and the",
+			"gate still isn't satisfied (e.g. radar was never built), the first wave fires anyway.")]
+		public readonly int StartupPriorityTimeout = 6000;
 
 		// ---- Module 1: Starting Unit Operations (ported approved choke behaviour) ----
 		[Desc("Ground units held as stationary reserve at the chokepoint (approved behaviour).")]
@@ -267,11 +327,30 @@ namespace OpenRA.Mods.Common.Traits
 		public readonly string[] FerryTypes = [];
 
 		[Desc("Number of transports built (and reused across waves) to ferry a wave across water.")]
-		public readonly int FerryCount = 2;
+		public readonly int FerryCount = 3;
+
+		[Desc("Ticks the convoy waits for a full load before departing with what it has. Prevents one",
+			"stuck unit from freezing the whole shuttle service.")]
+		public readonly int FerryLoadTimeout = 900;
+
+		[ActorReference]
+		[Desc("Escort chain: one per transport. These do NOT shadow the convoy -- they take station at",
+			"the landing point and hold it, securing the beachhead (user spec 2026-07-27).")]
+		public readonly string[] FerryEscortTypes = [];
+
+		[Desc("Escorts requested per transport.")]
+		public readonly int FerryEscortPerVessel = 1;
+
+		[ActorReference]
+		[Desc("Heavier escort chain, added once it becomes buildable (e.g. a missile sub from Age 1).")]
+		public readonly string[] FerryEscortSecondaryTypes = [];
+
+		[Desc("How many of the heavier escort to add once buildable.")]
+		public readonly int FerryEscortSecondaryCount = 1;
 
 		[Desc("Global cap on transports across ALL ferry missions at once. FerryCount is per mission,",
 			"so without this each concurrent ferrying mission builds its own fleet.")]
-		public readonly int FerryMaxTotal = 2;
+		public readonly int FerryMaxTotal = 3;
 
 		// Was 14, independent of every other coastal-search radius in this AI (NavalSiteSearchRadius=20,
 		// MaxBridgeLength=24) -- confirmed root cause 2026-07-22 of a wave never requesting naval
@@ -284,6 +363,13 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Radius in cells to search for a coastal embark/landing cell around the reference point.")]
 		public readonly int FerrySearchRadius = 24;
 
+		[Desc("Radius searched for the EMBARK shore. Much wider than FerrySearchRadius on purpose: troops",
+			"walk to the coast, so the boarding beach need not be next door -- it only has to be on the",
+			"ships' water and reachable over land. With the old shared radius of 24 the search saw only",
+			"river banks near the base and missed the actual beach a few cells further out, reporting",
+			"'no embark cell' although the fleet could have sailed there easily (User 2026-07-27).")]
+		public readonly int FerryEmbarkSearchRadius = 48;
+
 		[Desc("Locomotor name of FerryTypes (e.g. \"aot-lst\") -- used to verify the chosen embark/landing",
 			"cell's adjacent water is actually ship-navigable, not just orthogonally Water-typed terrain",
 			"(a rock-enclosed inlet can satisfy the terrain check but be unreachable by a real ship, leaving",
@@ -294,6 +380,97 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Ferry phase timeout; proceeds with whoever made it ashore, or cancels the wave if",
 			"nobody did.")]
 		public readonly int FerryTimeout = 9000;
+
+		// ---- Transit service ("oeffentlicher Nahverkehr") -- see memory/ai-transit-system.md ----
+		// Stage 1: the registry below is surveyed and logged only; no traffic runs off it yet.
+		[Desc("Ticks between transit stop surveys (quays, boarding lanes, staging grounds).")]
+		public readonly int TransitSurveyInterval = 500;
+
+		[Desc("Closest a staging ground (\"Verfuegungsraum\") may sit to its quay, in walking cells.",
+			"This lower bound is what actually decongests the beach: everyone who is not next in",
+			"line waits here instead of crowding the boarding lane.")]
+		public readonly int StagingMinDistance = 6;
+
+		[Desc("Furthest a staging ground may sit from its quay, in walking cells. Keeps calling a",
+			"group forward from being a journey of its own.")]
+		public readonly int StagingMaxDistance = 14;
+
+		[Desc("Minimum contiguous free cells for a staging ground to be usable.")]
+		public readonly int StagingMinCells = 12;
+
+		[Desc("Cap on the contiguous free area measured around a staging candidate. Bounds the cost",
+			"and stops one huge plain from making every candidate on it score identically.")]
+		public readonly int StagingMaxCells = 80;
+
+		[Desc("Radius in cells the staging free-area flood may spread from its centre.")]
+		public readonly int StagingRadius = 6;
+
+		[Desc("Minimum distance a HOME staging ground keeps from the base centre, so the waiting",
+			"army does not squat on the base builder's plots.")]
+		public readonly int StagingBaseClearance = 8;
+
+		[Desc("Squared distance within which a unit counts as having reached its staging/boarding cell.",
+			"4 == 2 cells of slack.")]
+		public readonly int TransitArriveRadius2 = 4;
+
+		[Desc("Squared distance within which a vessel counts as DOCKED at its berth. Deliberately",
+			"looser than TransitArriveRadius2: EnterTransport walks the passenger to the ship and",
+			"Unload puts them off wherever it lies, so exact cell precision is a demand the engine",
+			"never makes -- and in a tight bay three hulls cannot all satisfy it at once.")]
+		public readonly int TransitDockRadius2 = 16;
+
+		[Desc("Minimum distance between two berths at the same stop, so vessels do not wedge each",
+			"other in one corner of the bay. The spread runs ALONG the shore, never out to sea:",
+			"every berth must stay alongside walkable ground or nobody can board.")]
+		public readonly int TransitBerthSpacing = 3;
+
+		[Desc("How far along the coast a stop looks for quay cells (water alongside walkable land).")]
+		public readonly int TransitBerthSearchRadius = 10;
+
+		[Desc("Ticks of waiting after which a transit ticket's effective priority rises by one step",
+			"(nine steps max). Stops a scout booking starving behind a stream of attack waves.")]
+		public readonly int TicketAgeBoostTicks = 1500;
+
+		[Desc("Ticks a transit ticket may make NO progress at all before it is failed back to its",
+			"owner. Any boarding or landing resets it, so a long crossing never trips it.")]
+		public readonly int TicketTimeoutTicks = 9000;
+
+		[Desc("Squared distance from a berth within which a waiting unit counts as standing in the",
+			"boarding lane. The load timer only starts once somebody is actually there.")]
+		public readonly int TransitBoardingRadius2 = 36;
+
+		[Desc("Ticks with no vessel inbound before units called forward to a boarding lane are sent",
+			"back to the staging ground. The grace period stops them yo-yoing in the normal gap",
+			"between one vessel departing and the next being assigned.")]
+		public readonly int TransitRecallGraceTicks = 500;
+
+		[Desc("Failed approaches, counted across ALL vessels, after which a berth is struck off its",
+			"stop for good. The naval flood only proves a cell is water our ships can path through,",
+			"not that a hull can sit there -- a one-cell notch passes the flood and defeats every",
+			"ship in practice. A stop never drops its last berth.")]
+		public readonly int TransitBerthFailureLimit = 3;
+
+		[Desc("Berths a wedged vessel tries at its current stop before giving up on the leg. A blocked",
+			"ramp is usually a local problem -- another berth along the same coast works fine, and",
+			"sailing home with a full hold because one exit was crowded is a wild overreaction.")]
+		public readonly int TransitBerthSwapLimit = 2;
+
+		[Desc("Nudge radius used when unloading. Wider than for loading: the far ramp is where every",
+			"earlier landing gathered.")]
+		public readonly int TransitUnloadNudgeRadius = 2;
+
+		[Desc("Idle approach attempts a vessel makes at one berth before trying a different one.")]
+		public readonly int TransitApproachRetries = 3;
+
+		[Desc("Ticks a vessel is barred from re-taking a booking it just gave up on. Without this the",
+			"dispatcher hands the same one straight back and the vessel retries the same bad berth.")]
+		public readonly int TransitReassignBarTicks = 1000;
+
+		[Desc("Ticks a vessel may lie docked with an empty hold and nothing left to order aboard",
+			"before it gives its booking back and becomes free again. Two vessels serving one booking",
+			"is normal -- the first takes everyone who fits, and the second must not be mistaken for",
+			"a wedged ship and barred from further work.")]
+		public readonly int TransitEmptyLoadTicks = 300;
 
 		// ---- Module 3: Scout Expeditions ----
 		[ActorReference]
@@ -416,6 +593,11 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Ticks between mission ticks.")]
 		public readonly int MissionInterval = 25;
 
+		[Desc("A mission that shows no measurable progress for this long is nudged out of its stuck",
+			"activity (Stop), so the normal per-tick logic can re-issue its orders. Recovery, not",
+			"abandonment -- the separate timeouts still decide when to give up for good.")]
+		public readonly int StallRecoveryTicks = 750;
+
 		[Desc("Ticks a unit may sit unused in the shared pool before it is folded into an active",
 			"combat mission. Without this, any unit whose type no mission happens to ask for parks in",
 			"the base for the rest of the match.")]
@@ -432,6 +614,10 @@ namespace OpenRA.Mods.Common.Traits
 		public IBotChokepointProvider ChokeProvider { get; private set; }
 		public IBotBaseApproachProvider ApproachProvider { get; private set; }
 		AotBaseBuilderBotModule builder;
+
+		// Stage 1 of the ferry rebuild: surveys quays/boarding lanes/staging grounds and logs them.
+		// Nothing consumes it yet -- see memory/ai-transit-system.md.
+		public AotTransitService Transit { get; private set; }
 
 		public readonly List<AotMission> Missions = [];
 		readonly Dictionary<Actor, AotMission> owned = [];
@@ -451,6 +637,11 @@ namespace OpenRA.Mods.Common.Traits
 		int waveIndex;
 		int waveCooldownTicks;
 		int waveFailureStreak;
+
+		// Module 0: OreT Boost + startup priority gate (see Info.OreBoostTypes/StartupPriorityTimeout).
+		bool oreBoostDone;
+		bool derrickFirstScanDone;
+		int ticksSinceStart;
 
 		// Once the fixed 3-attempt ladder (primary -> secondary -> air raid) has fired its first
 		// air raid, every later escalation decision is instead chosen at random each time (User
@@ -498,6 +689,8 @@ namespace OpenRA.Mods.Common.Traits
 			// (same pattern AotBaseBuilderBotModule itself uses to resolve its planner).
 			var builders = self.Owner.PlayerActor.TraitsImplementing<AotBaseBuilderBotModule>().ToList();
 			builder = builders.FirstOrDefault(b => b.Info.Faction == Info.Faction) ?? builders.FirstOrDefault();
+
+			Transit = new AotTransitService(this);
 		}
 
 		// Any mission that needs ships/subs/vessels calls this once it knows it needs them (e.g. a wave
@@ -532,6 +725,9 @@ namespace OpenRA.Mods.Common.Traits
 
 		public bool HasNavalProduction() =>
 			World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld && Info.NavalProductionTypes.Contains(a.Info.Name));
+
+		// See AotBaseBuilderBotModule.NavalSite -- the water our ships actually operate in.
+		public CPos? NavalSite() => builder?.NavalSite();
 
 		public bool HasRadar() =>
 			World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld && Info.RadarTypes.Contains(a.Info.Name));
@@ -716,6 +912,9 @@ namespace OpenRA.Mods.Common.Traits
 
 			ClaimNewUnits(bot);
 
+			ticksSinceStart++;
+			TryOreBoost(bot);
+
 			if (--productionTicks <= 0)
 			{
 				productionTicks = Info.ProductionInterval;
@@ -733,6 +932,8 @@ namespace OpenRA.Mods.Common.Traits
 				rallyCheckTicks = Info.RallyCheckInterval;
 				EnsureInfantryRallyPoints(bot);
 			}
+
+			Transit?.Tick();
 
 			Schedule(bot);
 			SweepIdlePool(bot);
@@ -879,6 +1080,13 @@ namespace OpenRA.Mods.Common.Traits
 		// Role tag for naval ferry transports -- exempt from the production cash reserve, see PumpProduction.
 		public const string FerryRole = "ferry";
 
+		// Escorts are a SEPARATE role on purpose. They used to share FerryRole, which meant they blocked
+		// the transports' request slot and inherited their cash-reserve exemption -- so a sub could be
+		// paid for before the transport that actually unblocks a crossing. Escorts are optional: they
+		// join over time when there is spare money (user spec 2026-07-27, "nicht auf den bau der uboote
+		// warten bis er los legt").
+		public const string FerryEscortRole = "ferry-escort";
+
 		public void QueueRequest(AotMission mission, string role, string[] chain, int count)
 		{
 			if (count <= 0 || chain.Length == 0)
@@ -892,9 +1100,42 @@ namespace OpenRA.Mods.Common.Traits
 			requests.RemoveAll(r => r.Mission == mission);
 		}
 
+		// Drop a mission's OUTSTANDING transport/escort orders. A ferry is released as soon as its
+		// crossing is done, but its production requests kept running -- the ships then arrived at a
+		// mission that no longer had a ferry, were filed as ordinary combat units and never reached the
+		// pool again. With FerryMaxTotal exhausted, every later mission waited forever (confirmed
+		// 2026-07-27: a finished derrick squad held all three transports while a wave sat at ships=0).
+		public void CancelFerryRequests(AotMission mission)
+		{
+			requests.RemoveAll(r => r.Mission == mission && (r.Role == FerryRole || r.Role == FerryEscortRole));
+		}
+
+		// Every naval asset still booked to this mission, whether or not the mission still tracks it.
+		// A safety net against leaks: anything that slipped out of a convoy's own lists would otherwise
+		// stay owned forever and never reach the pool again.
+		public void ReleaseAllNavalSupport(AotMission mission)
+		{
+			var strays = owned.Where(kv => kv.Value == mission && IsNavalSupport(kv.Key))
+				.Select(kv => kv.Key)
+				.ToList();
+			if (strays.Count > 0)
+				ReleaseToPool(mission, strays);
+		}
+
+		// Is this a convoy asset (transport or escort) rather than a fighting unit?
+		public bool IsNavalSupport(Actor a) =>
+			Info.FerryTypes.Contains(a.Info.Name)
+			|| Info.FerryEscortTypes.Contains(a.Info.Name)
+			|| Info.FerryEscortSecondaryTypes.Contains(a.Info.Name);
+
 		public int OpenRequests(AotMission mission)
 		{
 			return requests.Where(r => r.Mission == mission).Sum(r => r.Remaining);
+		}
+
+		public int OpenRequests(AotMission mission, string role)
+		{
+			return requests.Where(r => r.Mission == mission && r.Role == role).Sum(r => r.Remaining);
 		}
 
 		// How many more transports may be produced right now, across the WHOLE AI.
@@ -921,6 +1162,47 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			var queuesByCategory = AIUtils.FindQueuesByCategory(Player);
 			return FirstBuildable(chain, queuesByCategory).Name;
+		}
+
+		// Module 0: OreT Boost -- a single one-time extra Ore Transporter for early cashflow (User
+		// 2026-07-22). Fires a bare StartProduction order directly, bypassing the Ops claim/request
+		// pipeline entirely: ORET is excluded from Ops via ExcludeFromOpsTypes (it must never be
+		// commandeered as a combat unit) and manages itself once built, exactly like the free-spawned
+		// starter ORET. Retries every tick until buildable (e.g. waits for the Light Factory), then never
+		// fires again -- and if this bonus ORET is later destroyed, it is NOT replaced (that would make
+		// it a standing rule instead of a one-time boost).
+		void TryOreBoost(IBot bot)
+		{
+			if (oreBoostDone || !Info.EnableOreBoost || Info.OreBoostTypes.Length == 0)
+				return;
+
+			var queuesByCategory = AIUtils.FindQueuesByCategory(Player);
+			var (name, queue) = FirstBuildable(Info.OreBoostTypes, queuesByCategory);
+			if (name == null || queue == null)
+				return;
+
+			bot.QueueOrder(Order.StartProduction(queue.Actor, name, 1));
+			oreBoostDone = true;
+			Log($"ore boost: extra {name} ordered (one-time, early cashflow)");
+		}
+
+		// Startup priority gate for the first Regular Attack Wave (User 2026-07-22): cashflow (OreT
+		// boost) and reconnaissance (first Derrick scan, every Scout group) get a head start. Vacuously
+		// satisfied for whichever of these is disabled or inapplicable (e.g. a single-spawn map has no
+		// scouting to wait for), so this can never gate on something that will never happen. The
+		// StartupPriorityTimeout safety net additionally guarantees this can never deadlock the whole
+		// offensive (e.g. radar destroyed before ever being built).
+		bool StartupPriorityMet()
+		{
+			if (ticksSinceStart >= Info.StartupPriorityTimeout)
+				return true;
+
+			var oreBoostSatisfied = !Info.EnableOreBoost || Info.OreBoostTypes.Length == 0 || oreBoostDone;
+			var derricksSatisfied = !Info.EnableDerricks || derrickFirstScanDone;
+			var scoutsSatisfied = !Info.EnableScouts || Intel.AllSpawns.Count <= 1
+				|| (scoutAssignments.Count > 0 && scoutGroupsLaunched.Count >= scoutAssignments.Count);
+
+			return oreBoostSatisfied && derricksSatisfied && scoutsSatisfied;
 		}
 
 		(string Name, ProductionQueue Queue) FirstBuildable(string[] chain, ILookup<string, ProductionQueue> queuesByCategory)
@@ -1109,7 +1391,11 @@ namespace OpenRA.Mods.Common.Traits
 			// (attempt 4 onward) the fixed ladder is abandoned for good -- randomEscalationPhase
 			// picks, each time, at random between a ground wave via a random choke and another air
 			// raid, so the enemy stops being predictable once it has escalated once already.
-			if (Info.EnableWaves && !Missions.OfType<AotRegularWaveMission>().Any() && !Missions.OfType<AotAirRaidMission>().Any())
+			// Startup priority (User 2026-07-22): only the very FIRST wave waits on this -- every later
+			// wave/air-raid (waveIndex > 0) is unaffected. OreT boost + first Derrick scan + every Scout
+			// group (cashflow and reconnaissance) get a head start before the first real offensive.
+			if (Info.EnableWaves && !Missions.OfType<AotRegularWaveMission>().Any() && !Missions.OfType<AotAirRaidMission>().Any()
+				&& (waveIndex > 0 || StartupPriorityMet()))
 			{
 				if (--waveCooldownTicks <= 0)
 				{
@@ -1172,6 +1458,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (Info.EnableDerricks && --derrickTicks <= 0)
 			{
 				derrickTicks = Info.DerrickCheckInterval;
+				derrickFirstScanDone = true;
 				var baseCentre = BaseCentre();
 				var pursued = Missions.OfType<AotDerrickMission>().ToList();
 				var freeSlots = Info.DerrickMaxTargets - pursued.Count;
