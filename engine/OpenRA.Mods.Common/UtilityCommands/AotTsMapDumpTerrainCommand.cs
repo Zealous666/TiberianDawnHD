@@ -52,7 +52,14 @@ namespace OpenRA.Mods.Common.UtilityCommands
 								level = 9;
 							if (level < 1)
 								level = 1;
-							c = (char)('0' + level);
+
+							// ResourceIndex 1 = Tiberium (green) -> '1'-'9', 2 = BlueTiberium -> 'a'-'i', sonst 'x'.
+							if (res.Type == 1)
+								c = (char)('0' + level);
+							else if (res.Type == 2)
+								c = (char)('a' + level - 1);
+							else
+								c = 'x';
 						}
 					}
 

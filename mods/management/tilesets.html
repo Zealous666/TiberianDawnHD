@@ -205,7 +205,7 @@ const DEFAULT_CHECKS = {
   "aot-temperat-ms-5": true,
   "aot-temperat-ms-6": true,
   "aot-temperat-ms-7": true,
-  "aot-temperat-ms-8": false,
+  "aot-temperat-ms-8": true,
   "aot-temperat-ms-9": true,
   "aot-snow-ms-0": true,
   "aot-snow-ms-1": true,
@@ -215,7 +215,7 @@ const DEFAULT_CHECKS = {
   "aot-snow-ms-5": true,
   "aot-snow-ms-6": true,
   "aot-snow-ms-7": true,
-  "aot-snow-ms-8": false,
+  "aot-snow-ms-8": true,
   "aot-snow-ms-9": true,
   "aot-winter-ms-0": true,
   "aot-winter-ms-1": true,
@@ -224,6 +224,12 @@ const DEFAULT_CHECKS = {
   "aot-winter-ms-4": true,
   "aot-winter-ms-5": true,
   "aot-winter-ms-6": true,
+  "aot-desert-ms-0": true,
+  "aot-desert-ms-1": true,
+  "aot-desert-ms-2": true,
+  "aot-desert-ms-3": true,
+  "aot-desert-ms-4": true,
+  "aot-desert-ms-5": true,
 };
 
 const tilesets = [
@@ -302,25 +308,28 @@ const tilesets = [
     tilesetId: "AOT_DESERT",
     phase: 1,
     meta: [
-      { label: "Basis", value: "TD Desert (engine/mods/cnc/tilesets/desert.yaml)" },
-      { label: "Templates", value: "178 – unverändert von TD" },
-      { label: "Tile-Dateien", value: ".des – aus TD Remaster-Content" },
-      { label: "Hinweis", value: "Kein RA-Äquivalent mit .des-Format vorhanden" },
+      { label: "Basis", value: "TD Desert (engine/mods/cnc/tilesets/desert.yaml), eigene Instanz" },
+      { label: "Templates", value: "168/178 – 10 ohne Remaster-Asset im MEG ausgelassen" },
+      { label: "Tile-Dateien", value: ".des – DDS-Pfade direkt aus TEXTURES_TD_SRGB.MEG aufgelöst" },
+      { label: "Hinweis", value: "Desert-exklusive Bäume/Zivilgebäude (T04/T09/T18, V20-V37) per overrides.yaml auf AOT_DESERT freigeschaltet" },
     ],
     milestones: [
-      "desert.yaml aus cnchd/tilesets/ als aot-desert.yaml kopieren",
-      "Tileset-ID auf AOT_DESERT setzen",
-      "RemasteredFilenames-Blöcke prüfen",
-      "TileSets-Eintrag in mod.yaml: cnchd|tilesets/aot-desert.yaml",
-      "Alten desert.yaml-Eintrag ersetzen",
-      "Im Editor laden und validieren",
+      "aot-desert.yaml aus desert.yaml dupliziert (eigene Instanz, TD desert.yaml bleibt unverändert)",
+      "Tileset-ID auf AOT_DESERT gesetzt",
+      "RemasteredFilenames direkt aus TEXTURES_TD_SRGB.MEG generiert (168/178, verwaiste MultiBrush/FromTemplates-Referenzen bereinigt)",
+      "Jumpjet + Subterranean Terrain-Typen ergänzt",
+      "TileSets-Eintrag + Palette (palettes.yaml) eingetragen",
+      "Im Editor geladen und validiert",
     ]
   },
+];
+
+const phase2 = [
   {
     id: "aot-interior",
     title: "Interior",
     tilesetId: "AOT_INTERIOR",
-    phase: 1,
+    phase: 2,
     meta: [
       { label: "Basis", value: "RA Interior (engine/mods/ra/tilesets/interior.yaml)" },
       { label: "Templates", value: "142 – .int-Dateien" },
@@ -338,19 +347,18 @@ const tilesets = [
       "Test-Map: typische Innenraum-Layouts (Flure, Räume, Wände) validieren",
     ]
   },
-];
-
-const phase2 = [
   {
     id: "aot-jungle",
     title: "Jungle",
     tilesetId: "AOT_JUNGLE",
     phase: 2,
+    scrapped: true,
+    scrappedReason: "Verworfen (2026-07-25): C&C Remastered Collection liefert kein Jungle-Theater aus. Verifiziert per Binär-Scan aller 5 Textur-MEGs (TD/RA/COMMON/SRGB/PATCHES) — keine JUNGLE-Pfade. Zusätzlich im offiziellen EA-Repo (CnC_Remastered_Collection, CnCTDRAMapEditor/{TiberianDawn,RedAlert}/TheaterTypes.cs) bestätigt: TD kennt nur Desert/Temperate/Winter, RA nur Temperate/Snow/Interior. Ein THEATER_JUNGLE-Enum existiert nur als Legacy-Rest der Original-Engine ohne zugehörige Remaster-Assets. Unter der 'nur Remaster-Assets'-Regel nicht baubar.",
     meta: [
-      { label: "Basis", value: "TD Remastered Jungle (DATA\\ART\\TEXTURES\\SRGB\\TIBERIAN_DAWN\\TERRAIN\\JUNGLE\\)" },
+      { label: "Basis", value: "TD Remastered Jungle — existiert NICHT (siehe scrappedReason)" },
       { label: "Templates", value: "~150+ – vollständig neu zu definieren" },
-      { label: "Tile-Dateien", value: ".jun – kein bestehendes YAML in OpenRA" },
-      { label: "Aufwand", value: "Hoch – kein Template-YAML vorhanden, alle Tiles manuell kartieren" },
+      { label: "Tile-Dateien", value: ".jun – kein bestehendes YAML in OpenRA, keine DDS im Remaster" },
+      { label: "Aufwand", value: "Nicht durchführbar – keine Remaster-Assets vorhanden" },
     ],
     milestones: [
       "Remaster-Jungle-DDS-Dateien inventarisieren (welche Tiles existieren?)",
@@ -389,7 +397,8 @@ function buildCard(ts) {
   const pct = total ? Math.round((doneCount / total) * 100) : 0;
 
   const card = document.createElement("div");
-  card.className = "card" + (isPhase2 ? " phase2" : "");
+  card.className = "card" + (isPhase2 ? " phase2" : "") + (ts.scrapped ? " scrapped" : "");
+  if (ts.scrapped) card.style.opacity = "0.55";
 
   const head = document.createElement("div");
   head.className = "card-head";
@@ -403,7 +412,25 @@ function buildCard(ts) {
   badge.className = "badge " + (isPhase2 ? "phase2" : "id");
   badge.textContent = ts.tilesetId;
   head.appendChild(badge);
+
+  if (ts.scrapped) {
+    const scrapBadge = document.createElement("span");
+    scrapBadge.className = "badge";
+    scrapBadge.style.background = "#7a1f1f";
+    scrapBadge.style.color = "#fff";
+    scrapBadge.textContent = "SCRAPPED";
+    head.appendChild(scrapBadge);
+  }
   card.appendChild(head);
+
+  if (ts.scrapped) {
+    const reason = document.createElement("div");
+    reason.className = "card-meta";
+    reason.style.color = "#e08080";
+    reason.style.fontStyle = "italic";
+    reason.textContent = ts.scrappedReason;
+    card.appendChild(reason);
+  }
 
   const meta = document.createElement("div");
   meta.className = "card-meta";

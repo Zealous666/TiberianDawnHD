@@ -103,6 +103,13 @@ namespace OpenRA.Mods.Common.Traits
 
 		readonly List<CPos> bridgeWallCells = [];
 
+		// Which step the standing wall chain belongs to. The chain is shared state, and selling it is
+		// tied to "a building was placed" -- so a chain built for the naval pen was torn down again as
+		// soon as ANY other step finished, and the pen step restarted from zero forever (confirmed
+		// in-game 2026-07-27: exactly 6 segments, sold, rebuilt, endlessly). Only the owning step may
+		// sell its own bridge.
+		AotPlanStep bridgeOwner;
+
 		// Fence execution: remaining node cells of the fence step currently being built.
 		AotPlanStep fenceStep;
 		readonly Queue<CPos> fenceQueue = new();
@@ -139,6 +146,16 @@ namespace OpenRA.Mods.Common.Traits
 			Info.NavalPenTypes.Length > 0
 			&& world.Actors.Any(a => a.Owner == player && !a.IsDead && a.IsInWorld && Info.NavalPenTypes.Contains(a.Info.Name));
 
+		// Where ships will actually appear: the finished pen if there is one, otherwise the planned
+		// site. The ferry seeds its water search from here so embark and landing are guaranteed to be
+		// on the SAME body of water the ships can use.
+		public CPos? NavalSite()
+		{
+			var pen = world.Actors.FirstOrDefault(a => a.Owner == player && !a.IsDead && a.IsInWorld
+				&& Info.NavalPenTypes.Contains(a.Info.Name));
+			return pen?.Location ?? navalStep?.TopLeft;
+		}
+
 		// Sticky: once any Operations mission has ever needed naval production, keep guaranteeing it exists
 		// for the rest of the match (a later loss triggers an automatic rebuild -- see BotTick).
 		public void RequestNavalProduction() => navalRequested = true;
@@ -148,7 +165,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (Info.NavalPenTypes.Length == 0 || intel == null || !intel.Ready)
 				return null;
 
-			var site = FindNavalSite();
+			var (site, anchor) = FindNavalSite();
 			if (site == null)
 			{
 				if (logImmediately)
@@ -162,7 +179,14 @@ namespace OpenRA.Mods.Common.Traits
 			Log.Write("debug", logImmediately
 				? $"[AotBuild] Naval site planned -> {site.Value} (proactive, not yet requested)"
 				: $"[AotBuild] Naval production requested -> site {site.Value}");
-			return new AotPlanStep { Kind = AotStepKind.Building, Role = "NAVAL", Variants = Info.NavalPenTypes, TopLeft = site.Value };
+			return new AotPlanStep
+			{
+				Kind = AotStepKind.Building, Role = "NAVAL", Variants = Info.NavalPenTypes,
+				TopLeft = site.Value,
+
+				// The chain must end at the exact land cell this site was validated against.
+				BridgeTarget = anchor
+			};
 		}
 
 		// Anchor on the nearest coastal cell reachable by land from the base (same concept as a wave's
@@ -188,6 +212,17 @@ namespace OpenRA.Mods.Common.Traits
 				.Min();
 		}
 
+		// Cells no wall can ever occupy because a structure stands there. Own buildings count too --
+		// they are already buildable-area seeds, so the flood does not need to pass through them.
+		// Only FOREIGN structures are permanent obstacles. Counting our own too was a serious mistake:
+		// the base is ringed by its own fences, and WallReach floods outward from our buildings -- so the
+		// flood was trapped inside our own perimeter and never reached the coast. Whether it worked at
+		// all then depended on a chance gap in the ring, which is exactly the "sometimes it builds a sub
+		// pen, sometimes not" the user reported (2026-07-27). Our own buildings grant buildable area
+		// anyway, so passing through them is legitimate; a neutral Ore Mine or an enemy structure is not.
+		bool IsPermanentlyBlocked(CPos c) =>
+			world.ActorMap.GetActorsAt(c).Any(a => !a.IsDead && a.Owner != player && a.Info.HasTraitInfo<BuildingInfo>());
+
 		// Land cells a wall chain could EVER reach from our existing buildings, with the number of
 		// wall segments needed. One flood fill replaces the old chain of single-point checks (nearest
 		// coastal cell -> 6-cell spiral -> one BFS path -> one reach test): that chain gave up entirely
@@ -209,7 +244,13 @@ namespace OpenRA.Mods.Common.Traits
 			bool Usable(CPos c) =>
 				world.Map.Contains(c)
 				&& (resourceLayer == null || resourceLayer.GetResource(c).Type == null)
-				&& wbi.TerrainTypes.Contains(world.Map.GetTerrainInfo(c).Type);
+				&& wbi.TerrainTypes.Contains(world.Map.GetTerrainInfo(c).Type)
+
+				// A STRUCTURE on the cell is permanent -- no wall will ever go there. Terrain alone said
+				// "reachable" and the chain then dead-ended at e.g. a neutral Ore Mine, one segment in,
+				// forever (User 2026-07-25, Hammerfest). Mobile units are deliberately NOT checked here:
+				// those move on, and nudging handles them when the chain is actually built.
+				&& !IsPermanentlyBlocked(c);
 
 			var reach = new Dictionary<CPos, int>();
 			var q = new Queue<CPos>();
@@ -252,57 +293,124 @@ namespace OpenRA.Mods.Common.Traits
 		// Size of the connected water body containing `seed`, capped at `cap` (we only care whether it
 		// is the open sea or a puddle). Used to avoid planning naval production on a pond that leads
 		// nowhere.
-		int WaterBodySize(CPos seed, int cap)
+		static readonly CVec[] Orthogonal = { new(1, 0), new(-1, 0), new(0, 1), new(0, -1) };
+
+		bool IsWaterCell(CPos c)
 		{
-			bool IsWater(CPos c)
-			{
-				if (!world.Map.Contains(c))
-					return false;
+			if (!world.Map.Contains(c))
+				return false;
 
-				var t = world.Map.GetTerrainInfo(c).Type;
-				return t == "Water" || t == "River";
-			}
+			var t = world.Map.GetTerrainInfo(c).Type;
+			return t == "Water" || t == "River";
+		}
 
-			if (!IsWater(seed))
-				return 0;
+		// Water cells our GROUND troops could actually board from: they touch a coastal cell that is both
+		// walkable and reachable over land from our own base.
+		//
+		// Without this a pen was happily planned on a stretch of water the army can never get to -- on
+		// aot_hammerfest the site landed on the western lake, which is cut off from the base by a river,
+		// so every crossing then failed with "no embark cell". Ships could sail there; soldiers could not
+		// walk there (User 2026-07-27, who spotted exactly this).
+		HashSet<CPos> EmbarkableWater(CPos centre, int radius)
+		{
+			var result = new HashSet<CPos>();
+			if (intel == null)
+				return result;
+
+			for (var dy = -radius; dy <= radius; dy++)
+				for (var dx = -radius; dx <= radius; dx++)
+				{
+					var c = centre + new CVec(dx, dy);
+					if (!world.Map.Contains(c) || !intel.IsPassable(c) || !intel.IsReachable(c) || !intel.IsCoastal(c))
+						continue;
+
+					foreach (var d in Orthogonal)
+						if (IsWaterCell(c + d))
+							result.Add(c + d);
+				}
+
+			return result;
+		}
+
+		// Size of the connected water body containing `seed`, and whether that same body can be boarded
+		// from friendly soil. One flood answers both; the result is cached for every cell it visits, so
+		// all further candidates on the same water are free.
+		//
+		// The flood is deliberately NOT capped. An earlier 400-cell limit (meant only to bucket "sea vs
+		// puddle") silently truncated the connectivity test: on a 6636-cell sea the search ran out of
+		// budget long before reaching the boardable beach, so a perfectly good site was rejected as
+		// unloadable and the planner picked one 23 wall segments away instead of 8 -- both on the SAME
+		// water (User 2026-07-27: "es ist doch egal wo er das pen baut, die vessels koennten doch zum
+		// einstiegsplatz fahren"). Connectivity must never be judged from a partial flood.
+		(int Size, bool Loadable) WaterInfo(CPos seed, HashSet<CPos> embarkable,
+			Dictionary<CPos, (int Size, bool Loadable)> cache)
+		{
+			if (cache.TryGetValue(seed, out var known))
+				return known;
+
+			if (!IsWaterCell(seed))
+				return (0, false);
 
 			var seen = new HashSet<CPos> { seed };
 			var q = new Queue<CPos>();
 			q.Enqueue(seed);
-			while (q.Count > 0 && seen.Count < cap)
+			var loadable = embarkable.Contains(seed);
+			while (q.Count > 0)
 			{
 				var c = q.Dequeue();
-				foreach (var dir in new[] { new CVec(1, 0), new CVec(-1, 0), new CVec(0, 1), new CVec(0, -1) })
+				foreach (var dir in Orthogonal)
 				{
 					var n = c + dir;
-					if (IsWater(n) && seen.Add(n))
-						q.Enqueue(n);
+					if (!IsWaterCell(n) || !seen.Add(n))
+						continue;
+
+					if (embarkable.Contains(n))
+						loadable = true;
+
+					q.Enqueue(n);
 				}
 			}
 
-			return seen.Count;
+			var info = (seen.Count, loadable);
+			foreach (var c in seen)
+				cache[c] = info;
+
+			return info;
 		}
 
 		// Best site for the naval production building: every placeable footprint in range is scored,
 		// instead of committing to a single anchor. A site counts as reachable when some footprint tile
 		// lies within the building's own buildable-area reach of a cell the wall chain can get to.
-		CPos? FindNavalSite()
+		(CPos? Site, CPos? Anchor) FindNavalSite()
 		{
 			var variant = Info.NavalPenTypes.FirstOrDefault(v => world.Map.Rules.Actors.ContainsKey(v));
 			if (variant == null)
-				return null;
+				return (null, null);
 
 			var ai = world.Map.Rules.Actors[variant];
 			var bi = ai.TraitInfoOrDefault<BuildingInfo>();
 			if (bi == null)
-				return null;
+				return (null, null);
 
 			var adjacent = BuildableReachFor(ai);
 			var reach = WallReach();
 			if (reach == null || reach.Count == 0)
 			{
 				Log.Write("debug", "[AotBuild] Naval site: no wall-reachable land at all (no own buildings?)");
-				return null;
+				return (null, null);
+			}
+
+			// Water that actually leads to the enemy. A pen on a landlocked pond is useless for the one
+			// job it exists for -- confirmed in-game: the site landed on a "medium" body the ferry could
+			// never use, so every wave reported "no landing cell on our ships' water" and launched with
+			// no target at all.
+			HashSet<CPos> enemyWater = null;
+			if (Info.NavalLocomotor != null && intel.EnemySpawns.Count > 0)
+			{
+				var enemyRef = intel.EnemySpawns.MinBy(sp => (sp - intel.BaseCentre).LengthSquared);
+				var enemyShore = intel.FindCoastalCellNear(enemyRef, 24, requireOwnReachable: false, Info.NavalLocomotor);
+				if (enemyShore != null)
+					enemyWater = intel.NavalWaterFrom(enemyShore.Value, Info.NavalLocomotor);
 			}
 
 			// Everything the wall chain plus the building's own reach can cover.
@@ -314,10 +422,16 @@ namespace OpenRA.Mods.Common.Traits
 			// size is a PREFERENCE, never a filter -- a small sea must still be usable if it is all
 			// there is (a hard filter here is exactly how earlier attempts blocked naval production
 			// entirely).
+			// Which water can our army actually board from? A pen we cannot load at is worthless, so this
+			// outranks everything else.
+			var embarkable = EmbarkableWater(centre, radius);
+			var waterCache = new Dictionary<CPos, (int Size, bool Loadable)>();
+
 			CPos? best = null;
-			var bestKey = (Body: -1, Offshore: -1, Steps: int.MaxValue, Dist: int.MaxValue);
+			CPos? bestAnchor = null;
+			var bestKey = (Loadable: -1, Reaches: -1, Body: -1, Offshore: -1, Steps: int.MaxValue, Dist: int.MaxValue);
 			var placeable = 0;
-			var bodySizes = new Dictionary<CPos, int>();
+			var candidates = new List<CPos>();
 
 			for (var dy = -radius; dy <= radius; dy++)
 				for (var dx = -radius; dx <= radius; dx++)
@@ -327,15 +441,18 @@ namespace OpenRA.Mods.Common.Traits
 						continue;
 
 					placeable++;
+					candidates.Add(c);
 
 					// Closest wall-reachable cell to any footprint tile.
 					var offshore = int.MaxValue;
 					var steps = int.MaxValue;
+					CPos? anchor = null;
 					foreach (var t in bi.Tiles(c))
 						for (var oy = -adjacent; oy <= adjacent; oy++)
 							for (var ox = -adjacent; ox <= adjacent; ox++)
 							{
-								if (!reach.TryGetValue(t + new CVec(ox, oy), out var st))
+								var land = t + new CVec(ox, oy);
+								if (!reach.TryGetValue(land, out var st))
 									continue;
 
 								var gap = Math.Max(Math.Abs(ox), Math.Abs(oy));
@@ -343,46 +460,64 @@ namespace OpenRA.Mods.Common.Traits
 								{
 									offshore = gap;
 									steps = st;
+									anchor = land;
 								}
 							}
 
 					if (offshore == int.MaxValue)
 						continue;
 
+					// Does this site sit on the water that leads to the enemy?
+					var reaches = enemyWater == null ? 1
+						: bi.Tiles(c).Any(enemyWater.Contains) ? 1 : 0;
+
 					var probe = bi.Tiles(c).First();
-					if (!bodySizes.TryGetValue(probe, out var body))
-					{
-						body = WaterBodySize(probe, 400);
-						bodySizes[probe] = body;
-					}
+					var (body, loadable) = WaterInfo(probe, embarkable, waterCache);
 
 					// Bucket the body size so a marginally bigger puddle cannot outrank a much better
 					// placement on the same sea.
 					var bodyBucket = body >= 400 ? 2 : body >= 60 ? 1 : 0;
 					var dist = (c - centre).LengthSquared;
-					var better = best == null
-						|| bodyBucket > bestKey.Body
-						|| (bodyBucket == bestKey.Body && offshore > bestKey.Offshore)
-						|| (bodyBucket == bestKey.Body && offshore == bestKey.Offshore && steps < bestKey.Steps)
-						|| (bodyBucket == bestKey.Body && offshore == bestKey.Offshore && steps == bestKey.Steps && dist < bestKey.Dist);
-					if (better)
+					// Cheap first, far out second. Ranking offshore ABOVE chain length picked a site that
+					// needed 23 wall segments just to gain one more cell of clearance (Hammerfest) --
+					// absurdly expensive and right at MaxBridgeLength, so it never completed. Staying off
+					// the shore matters (it stops the pen sealing a one-cell inlet), but only as a
+					// tiebreaker among sites that are similarly cheap to connect.
+					// Reaching the enemy outranks everything: that is the only reason this building exists.
+					// Then cheap to connect, then as far off the shore as that allows.
+					var key = (loadable ? 1 : 0, reaches, bodyBucket, -steps, offshore, -dist);
+					var cur = (bestKey.Loadable, bestKey.Reaches, bestKey.Body, -bestKey.Steps, bestKey.Offshore, -bestKey.Dist);
+					if (best == null || key.CompareTo(cur) > 0)
 					{
 						best = c;
-						bestKey = (bodyBucket, offshore, steps, dist);
+						bestAnchor = anchor;
+						bestKey = (loadable ? 1 : 0, reaches, bodyBucket, offshore, steps, dist);
 					}
 				}
 
 			if (best == null)
 			{
+				// Say BY HOW MUCH we missed. A large gap means the shore strip itself is out of bounds for
+				// the chain -- walls need Clear/Road, so a wide Beach apron puts the water permanently out
+				// of reach and no amount of bridging will help. That is a map/rules matter, not a bug, and
+				// the number is what tells the two apart.
+				var nearestMiss = int.MaxValue;
+				foreach (var c in candidates)
+					foreach (var r in reach.Keys)
+						nearestMiss = Math.Min(nearestMiss, Math.Max(Math.Abs(r.X - c.X), Math.Abs(r.Y - c.Y)));
+
 				Log.Write("debug", $"[AotBuild] Naval site: none usable -- {placeable} placeable footprint(s) within {radius} of {centre}, " +
-					$"wall chain reaches {reach.Count} land cell(s) (max {Info.MaxBridgeLength} segments), building reach {adjacent}");
-				return null;
+					$"wall chain reaches {reach.Count} land cell(s) (max {Info.MaxBridgeLength} segments), building reach {adjacent}, " +
+					$"closest site is {(nearestMiss == int.MaxValue ? "n/a" : nearestMiss.ToString())} cell(s) from reachable land " +
+					$"(needs <= {adjacent})");
+				return (null, null);
 			}
 
-			Log.Write("debug", $"[AotBuild] Naval site {best.Value}: {bestKey.Offshore} cell(s) offshore (max {adjacent}), " +
+			Log.Write("debug", $"[AotBuild] Naval site {best.Value}: anchor={bestAnchor}, {bestKey.Offshore} cell(s) offshore (max {adjacent}), " +
 				$"{bestKey.Steps} wall segment(s) from base, water body {bestKey.Body switch { 2 => "sea", 1 => "medium", _ => "small" }}, " +
+				$"reachesEnemy={bestKey.Reaches == 1}, troopsCanBoard={bestKey.Loadable == 1}, " +
 				$"{placeable} candidate(s) considered");
-			return best;
+			return (best, bestAnchor);
 		}
 
 		ProductionQueue QueueFor(string actorType)
@@ -854,15 +989,21 @@ namespace OpenRA.Mods.Common.Traits
 			if (wallQueue == null)
 				return false;
 
-			var target = step.Kind == AotStepKind.Fence && fenceQueue.Count > 0 ? fenceQueue.Peek() : step.TopLeft;
+			// A step with a BridgeTarget (the naval pen) is bridged to THAT land cell, not to the site
+			// itself: the site was validated as "within building reach of this anchor", so the chain has
+			// to actually arrive there. Aiming at the water site let the chain stop at a different shore
+			// cell and fall one tile short forever (build/sell loop, confirmed in-game 2026-07-27).
+			var target = step.Kind == AotStepKind.Fence && fenceQueue.Count > 0 ? fenceQueue.Peek()
+				: step.BridgeTarget ?? step.TopLeft;
 
 			// A target on water (the naval pen) can never be walled up to; that last stretch is covered
 			// by the building's own buildable-area reach, so exempt it from the wall-terrain constraint.
 			var stepInfo = step.Variants
 				.Select(v => world.Map.Rules.Actors.TryGetValue(v, out var vi) ? vi : null)
 				.FirstOrDefault(vi => vi != null);
-			var freeRadius = stepInfo != null ? BuildableReachFor(stepInfo) : 0;
-			var frontier = BridgeFrontier(target, freeRadius);
+			// Bridging to a land anchor needs no water exemption -- that is a plain land route.
+			var freeRadius = step.BridgeTarget != null ? 0 : stepInfo != null ? BuildableReachFor(stepInfo) : 0;
+			var frontier = BridgeFrontier(target, freeRadius, includeTarget: step.BridgeTarget != null);
 			if (frontier == null)
 				return false;
 
@@ -952,7 +1093,7 @@ namespace OpenRA.Mods.Common.Traits
 						break;
 					}
 
-					if (!InBounds(n) || !ResourceFree(n))
+					if (!InBounds(n) || !ResourceFree(n) || IsPermanentlyBlocked(n))
 						continue;
 
 					// A wall chain can only follow terrain a wall may actually stand on. Without this the BFS
@@ -984,7 +1125,12 @@ namespace OpenRA.Mods.Common.Traits
 			return path;
 		}
 
-		CPos? BridgeFrontier(CPos target, int freeRadius = 0)
+		// includeTarget: normally the target cell is the BUILDING site and must stay free, so the path
+		// deliberately excludes it. For a naval step the target is the wall ANCHOR -- the chain has to
+		// end ON it, otherwise it stops one cell short and the pen never enters buildable area
+		// (confirmed 2026-07-27: chain parked at 30,15 with anchor 31,15, frontier NULL, naval step
+		// silently abandoned while the rhythm carried on).
+		CPos? BridgeFrontier(CPos target, int freeRadius = 0, bool includeTarget = false)
 		{
 			var wai = world.Map.Rules.Actors[Info.WallType];
 			var wbi = wai.TraitInfoOrDefault<BuildingInfo>();
@@ -997,6 +1143,9 @@ namespace OpenRA.Mods.Common.Traits
 
 			// Walk from our building toward the target; the frontier is the FURTHEST cell along the path
 			// that is placeable and still inside the current buildable area.
+			if (includeTarget)
+				path.Add(target);
+
 			CPos? best = null;
 			foreach (var c in path)
 			{
@@ -1043,6 +1192,7 @@ namespace OpenRA.Mods.Common.Traits
 
 			Log.Write("debug", $"[AotBuild] Sold wall bridge ({sold} segments)");
 			bridgeWallCells.Clear();
+			bridgeOwner = null;
 		}
 
 		// ---------------------------------------------------------------- fences
@@ -1210,6 +1360,7 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				Log.Write("debug", $"[AotBuild] Placed bridge wall at {pendingCell} ({bridgeWallCells.Count + 1} segments)");
 				bridgeWallCells.Add(pendingCell);
+				bridgeOwner = pending;
 				pendingIsBridgeWall = false;
 				pending = null;
 				return;
@@ -1217,7 +1368,8 @@ namespace OpenRA.Mods.Common.Traits
 
 			Log.Write("debug", $"[AotBuild] Place {pending.Role} ({pendingType}) at {pendingCell}");
 
-			if (bridgeWallCells.Count > 0)
+			// Only tear down the chain that was built FOR this step.
+			if (bridgeWallCells.Count > 0 && bridgeOwner == pending)
 				SellBridge(bot);
 
 			// Fence steps stay open until every node is placed (NextFenceCell marks them Done).

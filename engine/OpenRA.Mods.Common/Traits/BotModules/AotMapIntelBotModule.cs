@@ -118,8 +118,42 @@ namespace OpenRA.Mods.Common.Traits
 				var yard = OwnYard();
 				if (yard != null)
 					BaseCentre = yard.Location;
+
+				// Re-evaluated periodically so a defeated enemy stops attracting waves.
+				RefreshEnemySpawns();
 				RefreshReachability();
 			}
+		}
+
+		// Spawn MARKERS are just map decoration: an 8-spawn map played by two people has six that never
+		// host anybody. Treating all of them as enemy positions made waves march off to an empty corner
+		// and sit there -- and because ChooseTarget had "found a target", the naval ferry branch never
+		// ran at all, so the real enemy across the water was never attacked (User 2026-07-25, Polar
+		// Panic: "es muss natuerlich bewertet werden, wo der gegner tatsaechlich angreifen will").
+		// Scouts derive their tour from the same list, which is why they loitered there too.
+		//
+		// Use the actual assigned home locations of live hostile players instead. Defeated players drop
+		// out on their own (Player.Spectating turns true once WinState is set). Falls back to the raw
+		// markers if no player can be resolved, so the AI is never left without any notion of where to go.
+		void RefreshEnemySpawns()
+		{
+			var live = World.Players
+				.Where(p => p != Player && !p.NonCombatant && !p.Spectating
+					&& Player.RelationshipWith(p) == PlayerRelationship.Enemy)
+				.Select(p => p.HomeLocation)
+				.Where(h => World.Map.Contains(h) && h != OwnSpawn)
+				.Distinct()
+				.ToList();
+
+			var next = live.Count > 0 ? live : AllSpawns.Where(s => s != OwnSpawn).ToList();
+			if (next.Count == EnemySpawns.Count && !next.Except(EnemySpawns).Any())
+				return;
+
+			EnemySpawns.Clear();
+			EnemySpawns.AddRange(next);
+			Log.Write("debug", $"[AotIntel][{Player.PlayerName}] enemy spawns -> {EnemySpawns.Count} " +
+				$"({(live.Count > 0 ? "live players" : "map markers, no player resolved")}): " +
+				$"{string.Join(" ", EnemySpawns)}");
 		}
 
 		void Initialize(Actor yard)
@@ -132,8 +166,7 @@ namespace OpenRA.Mods.Common.Traits
 					AllSpawns.Add(new ActorReference(n.Key, n.Value).GetValue<LocationInit, CPos>());
 
 			OwnSpawn = AllSpawns.Count > 0 ? AllSpawns.MinBy(s => (s - BaseCentre).LengthSquared) : BaseCentre;
-			EnemySpawns.Clear();
-			EnemySpawns.AddRange(AllSpawns.Where(s => s != OwnSpawn));
+			RefreshEnemySpawns();
 
 			var b = World.Map.Bounds;
 			var tl = new MPos(b.Left, b.Top).ToCPos(World.Map);
@@ -301,6 +334,62 @@ namespace OpenRA.Mods.Common.Traits
 		// actually stand on. Computed fresh per call (not cached/refreshed on a timer, unlike the ground
 		// set above) -- this is only called a handful of times per match at specific decision points
 		// (naval site planning, ferry embark/landing search), never every tick, so the cost is negligible.
+		// The best place to put troops ashore on the far side: of ALL coast our ships can reach, the
+		// stretch closest to `target`.
+		//
+		// Searching for a beach "within FerrySearchRadius of the enemy spawn" was wrong: a landing does
+		// not have to happen next door to the enemy. On the test map the only reachable far shore lies
+		// ~95 cells from the enemy base -- from there the wave simply walks the rest (User 2026-07-27:
+		// "es gibt kein Wasser-Weg bis zur Base, aber es gibt einen Wasser-Weg zu einem Beach, von dem
+		// der Feind ueber Land meine entfernte Base haette angreifen koennen"). The old radius rejected
+		// exactly that shore, so every wave reported "no landing cell" and launched with no target.
+		//
+		// Real Beach terrain first (ships can actually unload there), any walkable coast as fallback.
+		public CPos? FindLandingShoreToward(CPos target, string navalLocomotor, CPos navalSeed)
+		{
+			var water = NavalWaterFrom(navalSeed, navalLocomotor);
+			if (water.Count == 0)
+				return null;
+
+			CPos? beachBest = null, anyBest = null;
+			var beachDist = int.MaxValue;
+			var anyDist = int.MaxValue;
+
+			foreach (var c in water)
+				foreach (var d in OrthogonalDirections)
+				{
+					var land = c + d;
+					if (!World.Map.Contains(land) || water.Contains(land) || !IsPassable(land))
+						continue;
+
+					var dist = (land - target).LengthSquared;
+					if (IsBeach(land))
+					{
+						if (dist < beachDist)
+						{
+							beachDist = dist;
+							beachBest = land;
+						}
+					}
+					else if (dist < anyDist)
+					{
+						anyDist = dist;
+						anyBest = land;
+					}
+				}
+
+			return beachBest ?? anyBest;
+		}
+
+		// Water a ship using `navalLocomotor` can reach from `seed`. Used to check whether a candidate
+		// naval site actually lies on the water that leads to the enemy.
+		public HashSet<CPos> NavalWaterFrom(CPos seed, string navalLocomotor)
+		{
+			var navalLoco = navalLocomotor == null ? null
+				: World.WorldActor.TraitsImplementing<Locomotor>().FirstOrDefault(l => l.Info.Name == navalLocomotor);
+			return navalLoco == null ? [] : NavalReachableFrom(seed, navalLoco);
+		}
+
 		HashSet<CPos> NavalReachableFrom(CPos seed, Locomotor navalLoco)
 		{
 			var result = new HashSet<CPos>();
@@ -352,6 +441,154 @@ namespace OpenRA.Mods.Common.Traits
 		// waiting units (confirmed 2026-07-22: ship parked dist2=5/8 from embark, tanks stood right at
 		// the shore, EnterTransport never found anyone in interaction range -- the ship needs to be told
 		// to go to the water cell that TOUCHES the shore, not the shore cell itself).
+		// Why did a coastal search come up empty? Reports how many candidates survive each filter, so a
+		// failure names its own cause instead of inviting guesswork.
+		public string DescribeCoastalSearch(CPos target, int radius, bool requireOwnReachable, string navalLocomotor, CPos? navalSeed)
+		{
+			HashSet<CPos> sea = null;
+			if (navalLocomotor != null && navalSeed != null)
+				sea = NavalWaterFrom(navalSeed.Value, navalLocomotor);
+
+			int coastal = 0, passable = 0, reachableCount = 0, onOurWater = 0, beaches = 0;
+			for (var dy = -radius; dy <= radius; dy++)
+				for (var dx = -radius; dx <= radius; dx++)
+				{
+					var c = target + new CVec(dx, dy);
+					if (!World.Map.Contains(c) || !IsCoastal(c))
+						continue;
+
+					coastal++;
+					if (!IsPassable(c))
+						continue;
+
+					passable++;
+					if (requireOwnReachable && !IsReachable(c))
+						continue;
+
+					reachableCount++;
+					if (sea != null && !OrthogonalDirections.Any(d => sea.Contains(c + d)))
+						continue;
+
+					onOurWater++;
+					if (IsBeach(c))
+						beaches++;
+				}
+
+			return $"coastal={coastal} passable={passable} ownReachable={reachableCount} " +
+				$"onOurWater={onOurWater} ofThoseBeach={beaches} (seaCells={sea?.Count ?? -1}, seed={navalSeed})";
+		}
+
+		// Where a crossing should put its troops ASHORE: the earliest point we can leave the water that
+		// still has a land route to `target`. Ranked by SEA distance from the embark dock, so the water
+		// leg is as short as possible and the group walks the rest.
+		//
+		// The old rule was "the coastal cell nearest the target", which steamed the convoy the whole way
+		// down the coast and unloaded it directly in front of the enemy's defences (User 2026-07-27:
+		// "das ist gern mal direkt vor gegnerischen stellungen anstelle moeglichst frueh ab wo der
+		// landweg wieder moeglich ist um see-wege zu verkuerzen").
+		public CPos? FindLandingShore(CPos embarkDock, CPos target, string navalLocomotor, CPos? navalSeed)
+		{
+			var navalLoco = navalLocomotor == null ? null
+				: World.WorldActor.TraitsImplementing<Locomotor>().FirstOrDefault(l => l.Info.Name == navalLocomotor);
+			if (navalLoco == null)
+				return null;
+
+			var water = NavalReachableFrom(navalSeed ?? embarkDock, navalLoco);
+			if (water.Count == 0 || !water.Contains(embarkDock))
+				return null;
+
+			// Sea distance from the embark berth to every reachable water cell.
+			var seaDist = new Dictionary<CPos, int> { [embarkDock] = 0 };
+			var q = new Queue<CPos>();
+			q.Enqueue(embarkDock);
+			while (q.Count > 0)
+			{
+				var c = q.Dequeue();
+				foreach (var d in OrthogonalDirections)
+				{
+					var n = c + d;
+					if (water.Contains(n) && seaDist.TryAdd(n, seaDist[c] + 1))
+						q.Enqueue(n);
+				}
+			}
+
+			// Land connected to the target on foot -- one flood, so every candidate can be tested cheaply.
+			var targetLand = new HashSet<CPos>();
+			CPos? landSeed = null;
+			for (var r = 0; r <= 8 && landSeed == null; r++)
+				foreach (var c in AotOpsUtils.Ring(target, r))
+					if (IsPassable(c))
+					{
+						landSeed = c;
+						break;
+					}
+
+			if (landSeed == null)
+				return null;
+
+			targetLand.Add(landSeed.Value);
+			q.Enqueue(landSeed.Value);
+			while (q.Count > 0)
+			{
+				var c = q.Dequeue();
+				foreach (var d in OrthogonalDirections)
+				{
+					var n = c + d;
+					if (IsPassable(n) && targetLand.Add(n))
+						q.Enqueue(n);
+				}
+			}
+
+			// Shortest sea leg first; a real beach beats a generic shore at equal distance.
+			CPos? best = null;
+			var bestSea = int.MaxValue;
+			var bestBeach = false;
+			foreach (var (cell, dist) in seaDist)
+				foreach (var d in OrthogonalDirections)
+				{
+					var land = cell + d;
+					if (!IsPassable(land) || !targetLand.Contains(land))
+						continue;
+
+					var beach = IsBeach(land);
+					if (dist < bestSea || (dist == bestSea && beach && !bestBeach))
+					{
+						best = land;
+						bestSea = dist;
+						bestBeach = beach;
+					}
+				}
+
+			return best;
+		}
+
+		// Several DISTINCT dock cells along the same stretch of shore -- one per transport. A convoy
+		// whose ships were all ordered to the same single cell had exactly one ship dock while the rest
+		// milled about outside (User 2026-07-27: "manchmal wird nur 1 vessel verwendet und das andere
+		// idlet herum"). Ordered by distance to the shore cell, so slot 0 is the prime berth.
+		public List<CPos> DockCellsFor(CPos coastalCell, string navalLocomotor, CPos? navalSeed, int count)
+		{
+			var result = new List<CPos>();
+			if (navalLocomotor == null || count <= 0)
+				return result;
+
+			var navalLoco = World.WorldActor.TraitsImplementing<Locomotor>().FirstOrDefault(l => l.Info.Name == navalLocomotor);
+			if (navalLoco == null)
+				return result;
+
+			var reachable = NavalReachableFrom(navalSeed ?? coastalCell, navalLoco);
+			for (var r = 1; r <= 4 && result.Count < count; r++)
+				foreach (var c in AotOpsUtils.Ring(coastalCell, r))
+					if (reachable.Contains(c) && !result.Contains(c))
+					{
+						result.Add(c);
+						if (result.Count >= count)
+							break;
+					}
+
+			return result;
+		}
+
 		public CPos? DockCellFor(CPos coastalCell, string navalLocomotor, CPos? navalSeed = null)
 		{
 			if (navalLocomotor == null)
@@ -405,7 +642,7 @@ namespace OpenRA.Mods.Common.Traits
 		// crowd each other's approach.
 		const int ExcludeRadius2 = 36;
 
-		public CPos? FindCoastalCellNear(CPos target, int radius, bool requireOwnReachable, string navalLocomotor = null, IReadOnlyCollection<CPos> exclude = null, CPos? navalSeed = null)
+		public CPos? FindCoastalCellNear(CPos target, int radius, bool requireOwnReachable, string navalLocomotor = null, IReadOnlyCollection<CPos> exclude = null, CPos? navalSeed = null, bool strictNavalSeed = false)
 		{
 			var navalLoco = navalLocomotor != null
 				? World.WorldActor.TraitsImplementing<Locomotor>().FirstOrDefault(l => l.Info.Name == navalLocomotor)
@@ -427,6 +664,13 @@ namespace OpenRA.Mods.Common.Traits
 				var viaSea = SearchCoastal(target, radius, requireOwnReachable, seaSet, exclude);
 				if (viaSea != null)
 					return viaSea;
+
+				// Strict: the caller needs THIS water specifically (a ferry can only use the water its
+				// transports are built on). Falling back to "some other coast" would stage troops at a
+				// pond the ships can never enter -- observed on Hammerfest, where a wave gathered at a
+				// tiny southern lake that happens to point at the enemy.
+				if (strictNavalSeed)
+					return null;
 			}
 
 			var localSet = navalLoco != null ? NavalReachableFrom(target, navalLoco) : null;

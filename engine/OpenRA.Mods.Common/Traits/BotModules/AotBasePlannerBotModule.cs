@@ -28,6 +28,12 @@ namespace OpenRA.Mods.Common.Traits
 		public List<CPos> FenceNodes = []; // fence: LineBuild node cells (corners + side mids)
 		public List<CPos> FencePerimeter = []; // fence: every ring cell (LineBuild's legitimate fill-in) -- used to tell an intended ring segment apart from a stray inter-ring bridge LineBuild auto-connected
 		public bool Done;
+
+		// Building steps that sit on water (the naval pen): the LAND cell the wall chain has to reach
+		// for this site to end up inside buildable area. The site was validated against exactly this
+		// cell, so the bridge must aim at it -- aiming at the site itself let the chain stop at a
+		// different, closer shore cell and fall one tile short, forever (see FindNavalSite).
+		public CPos? BridgeTarget;
 	}
 
 	[TraitLocation(SystemActors.Player)]

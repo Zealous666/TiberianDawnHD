@@ -50,12 +50,6 @@
 
 ## Design / Konzept
 
-- [ ] Techtree & Buildorder
-  file:///Users/moritzgiuliani/Documents/openRA%20Projekte/TiberianDawnHD/mods/management/kanban-board.html
-  - [x] chrome webinterface
-  - [x] techtree web tool
-  - [x] build order web tool
-  - [x] terrain web status
 - [ ] Upscaling Building sprites (TS)
   Tiberian Sun voxel assets
   - [x] GDI powerplant turbines
@@ -101,6 +95,12 @@
   - [x] Sub Terrain Flame Tank Upgrade
   - [x] Sub Terrain Transport
   - [x] Concrete Plates (Grey Smudge?)
+- [ ] Techtree & Buildorder
+  file:///Users/moritzgiuliani/Documents/openRA%20Projekte/TiberianDawnHD/mods/management/kanban-board.html
+  - [x] chrome webinterface
+  - [x] techtree web tool
+  - [x] build order web tool
+  - [x] terrain web status
 
 ## Rules / Balancing
 
@@ -169,8 +169,8 @@
   - [ ] Age 2
   - [ ] Age 3
   - [ ] Anti air "inseln"
-  - [ ] gaps für generators
-  - [ ] Pen /nur strategisch
+  - [x] gaps für generators
+  - [x] Pen /nur strategisch
   - [ ] Remote Defense posts
   - [ ] Smudge Foundations (age2)
   - [ ] res-base: 2x NUKE, stealth, silo & Refinery (umzäunt & gate, 2 tick tanks
@@ -178,9 +178,9 @@
 - [ ] Defenses
   - [x] Choke points
   - [x] Trees & Buildings
-  - [ ] Ground Defense NOD
   - [ ] Grounde Defense GDI
   - [ ] AA NOD
+  - [ ] Ground Defense NOD
   - [ ] AA GDI
   - [ ] Shore Site defense (vereinzelte turrets? see patrouillen ab age 1)
   - [ ] Defense squadds (wenn angriff)
@@ -206,6 +206,11 @@
   - [ ] Strategische Map-Objectives sichern
   - [ ] super weapons (mine rockets auf chockepoints)
   - [ ] Fastmover-Patrols (GDI only)
+  - [ ] APC infantry raids (GDI)
+  - [ ] Buggy & Bike raids (NOD)
+  - [x] Ferry System
+  - [ ] age-spezifische regular waves (NOD)
+  - [ ] age-spezifische regular waves (GDI)
 - [ ] Difficulties
   - [ ] Moderate (nur kleinere angriffswellen, hauptsächlich eingraben)
   - [ ] Advanced (schiffe, helis, ständige angriffe)

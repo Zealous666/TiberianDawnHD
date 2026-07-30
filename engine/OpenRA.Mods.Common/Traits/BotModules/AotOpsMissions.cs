@@ -80,7 +80,14 @@ namespace OpenRA.Mods.Common.Traits
 					&& !Ops.Info.ChokeClearExcludeTypes.Contains(a.Info.Name)
 					&& !a.Info.HasTraitInfo<BridgeInfo>()
 					&& !a.Info.HasTraitInfo<GroundLevelBridgeInfo>()
-					&& !a.Info.HasTraitInfo<LegacyBridgeHutInfo>())
+					&& !a.Info.HasTraitInfo<LegacyBridgeHutInfo>()
+
+					// An actor whose whole job is to BE terrain (grown ice cells, which carry
+					// ChangesTerrain: Ice) is scenery, not a blocking obstacle -- and shooting it away
+					// destroys the very surface units want to walk on. Matched by trait, not by name,
+					// so future terrain actors are covered automatically (User 2026-07-25: AI was
+					// clearing ice floes in chokepoints on Polar Panic).
+					&& !a.Info.HasTraitInfo<ChangesTerrainInfo>())
 				.OrderBy(a => (a.Location - target).LengthSquared)
 				.ToList();
 
@@ -106,7 +113,7 @@ namespace OpenRA.Mods.Common.Traits
 	// ======================================================================
 	public sealed class AotStartingUnitsMission : AotMissionWithOrders
 	{
-		enum Phase { ChokeHold, ArcoRaid, CrateWait, FinalAttack, HoldCentre }
+		enum Phase { ChokeHold, ArcoRaid, CrateWait, Ferrying, FinalAttack, HoldCentre }
 
 		Phase phase = Phase.ChokeHold;
 		readonly HashSet<Actor> chokeReserve = [];
@@ -124,8 +131,24 @@ namespace OpenRA.Mods.Common.Traits
 		int stallTicks;
 		Actor finalTarget;
 
+		// The starting force could never leave the home landmass: its ARCO search filters on
+		// Intel.IsReachable and the final attack needs a reachable enemy, so on a water map it cleared
+		// the choke, found "0 arco target(s)", reported "no reachable enemy" and held the map centre
+		// for the rest of the match. It books a crossing like every other mission now (user decision
+		// 2026-07-29: the WHOLE force crosses, choke reserve included).
+		AotTransitTicket ticket;
+		bool ashore;
+
 		public AotStartingUnitsMission(AotOperationsBotModule ops)
 			: base(ops, "starting-units") { }
+
+		public override void OnUnitAssigned(Actor a)
+		{
+			if (ReturnStrayNavalSupport(a))
+				return;
+
+			base.OnUnitAssigned(a);
+		}
 
 		public override void Tick(IBot bot)
 		{
@@ -140,12 +163,15 @@ namespace OpenRA.Mods.Common.Traits
 				case Phase.ChokeHold: TickChokeHold(bot); break;
 				case Phase.ArcoRaid: TickArcoRaid(bot); break;
 				case Phase.CrateWait: TickCrateWait(bot); break;
+				case Phase.Ferrying: TickFerrying(bot); break;
 				case Phase.FinalAttack: TickFinalAttack(bot); break;
 				case Phase.HoldCentre: TickHoldCentre(bot); break;
 			}
 
-			// The secondary/beach guard holds its post through every phase.
-			if (phase != Phase.ChokeHold && secondaryReserve.Count > 0)
+			// The secondary/beach guard holds its post through every phase EXCEPT the crossing and
+			// everything after it: its post is a chokepoint at HOME, so ordering the landed force back
+			// to it would send half of them walking into the sea.
+			if (phase != Phase.ChokeHold && phase != Phase.Ferrying && !ashore && secondaryReserve.Count > 0)
 			{
 				secondaryReserve.RemoveWhere(a => Ops.CannotOrder(a));
 				var secTarget = SecondaryTarget();
@@ -282,7 +308,10 @@ namespace OpenRA.Mods.Common.Traits
 			}
 		}
 
-		List<Actor> RaidGroup() => chokeReserve.Where(a => !Ops.CannotOrder(a)).ToList();
+		// Once the force has shipped out there are no reserves left to speak of -- the beach guard has
+		// no beach to guard on this side of the water, so everyone joins the attack.
+		List<Actor> RaidGroup() =>
+			(ashore ? Units : chokeReserve).Where(a => !Ops.CannotOrder(a)).ToList();
 
 		void BuildArcoTargets()
 		{
@@ -397,16 +426,27 @@ namespace OpenRA.Mods.Common.Traits
 			var centre = Centroid(group);
 			if (finalTarget == null || finalTarget.IsDead || !finalTarget.IsInWorld)
 			{
-				finalTarget = Ops.Intel.NearestEnemyYard(centre);
+				// Once ashore the force is OUTSIDE our own base-side reachable set by definition, so
+				// demanding ground reachability finds nothing and the mission concludes there is no
+				// enemy at all -- it then walks off toward the map centre, which is across the water,
+				// and piles up on the coast (2026-07-29: "10 unit(s) ashore -> resuming the attack"
+				// followed immediately by "no reachable enemy -> holding map centre"). Same relaxation
+				// the wave and scout missions already apply after landing.
+				finalTarget = Ops.Intel.NearestEnemyYard(centre, requireReachable: !ashore);
 				if (finalTarget == null)
 				{
-					var spawn = Ops.Intel.NearestEnemySpawn(centre);
+					var spawn = Ops.Intel.NearestEnemySpawn(centre, requireReachable: !ashore);
 					if (spawn.HasValue)
 					{
 						Log($"final attack -> enemy spawn {spawn.Value}");
 						AttackMoveGroup(bot, group, spawn.Value);
 						return;
 					}
+
+					// Nothing reachable ON FOOT -- but the enemy may simply be across water. Book a
+					// crossing for the whole force instead of settling on the map centre forever.
+					if (!ashore && TryStartCrossing())
+						return;
 
 					Log("no reachable enemy -> holding map centre");
 					phase = Phase.HoldCentre;
@@ -421,497 +461,67 @@ namespace OpenRA.Mods.Common.Traits
 					bot.QueueOrder(new Order("AttackMove", a, Target.FromCell(Ops.World, finalTarget.Location), false));
 		}
 
+		// The whole starting force ships out together, choke reserve included -- so the reserves stop
+		// being reserves and become the landing party.
+		bool TryStartCrossing()
+		{
+			if (Ops.Info.FerryTypes.Length == 0 || Ops.Intel.EnemySpawns.Count == 0)
+				return false;
+
+			var target = Ops.Intel.EnemySpawns.MinBy(s => (s - Ops.BaseCentre()).LengthSquared);
+
+			// Expansion priority: ahead of scouting, behind a formed attack wave -- the starting force
+			// is valuable but it is not the main effort.
+			ticket = Ops.Transit.Request(this, Units, target, AotTransitPriority.Expansion);
+			if (ticket == null)
+				return false;
+
+			// Deliberately NOT clearing chokeReserve: RaidGroup() is built from it, so emptying it here
+			// would leave the final attack with nobody once the force is ashore.
+			phase = Phase.Ferrying;
+			Log($"no land route to the enemy -> whole force crossing as ticket #{ticket.Id} " +
+				$"(landing={ticket.To?.Shore})");
+			return true;
+		}
+
+		void TickFerrying(IBot bot)
+		{
+			if (ticket == null || ticket.Cancelled)
+			{
+				phase = Phase.HoldCentre;
+				return;
+			}
+
+			if (ticket.Complete || (ticket.Failed && ticket.Delivered.Count > 0))
+			{
+				// Ashore: from here reachability from our own base says nothing useful, so the final
+				// attack re-targets from where the force actually stands.
+				ashore = true;
+				Log($"{ticket.Delivered.Count} unit(s) ashore -> resuming the attack");
+				ticket = null;
+				finalTarget = null;
+				phase = Phase.FinalAttack;
+				return;
+			}
+
+			if (ticket.Failed)
+			{
+				Log("could not get the starting force across -> holding map centre");
+				ticket = null;
+				phase = Phase.HoldCentre;
+			}
+		}
+
 		void TickHoldCentre(IBot bot)
 		{
 			var group = RaidGroup();
-			if (group.Count > 0)
-				HoldAt(bot, group, Ops.Intel.MapCentreFallback, Ops.Info.GuardLeashRadius);
-		}
-	}
-
-	// ======================================================================
-	// Shared naval-ferry helper (User 2026-07-22: "nimm die Routine auch in die Scout-Infanterie
-	// auf, auch die sollten mit den Vessels übersetzen wollen um ihren Auftrag zu beginnen").
-	// Transports are tracked separately from the passenger units they carry, reused across
-	// missions via the pool. Any mission whose units need to cross water with no ground route can
-	// own one of these and drive it every tick; it never touches the mission's own Phase enum or
-	// Outcome directly, it just reports back InProgress/Ashore/Failed so the caller decides what
-	// that means for its own state machine. This is a fresh, standalone extraction of the exact
-	// embark/dock/board/disembark logic proven out (through several rounds of on-the-ground
-	// debugging) in AotRegularWaveMission -- that mission's own fields/methods are deliberately
-	// left untouched rather than refactored to share this, since it was mid-verification when this
-	// was written and a refactor risks reintroducing bugs that were just fixed.
-	// ======================================================================
-	static class FerryUtils
-	{
-		// Ask our own units standing on the cells around `ship` to step aside, using the engine's own
-		// nudge path (NotifyBlocker -> INotifyBlockingMove -> an idle friendly Mobile queues a Nudge).
-		//
-		// Nothing does this on its own for a transport: the engine only nudges when something PATHS
-		// THROUGH an idle blocker, and a passenger stepping off a ship does not path -- it just needs
-		// an adjacent cell to be free. So a couple of units loitering at the ramp silently stall the
-		// whole unload even though free cells exist a tile further out (User 2026-07-24: "landingdock
-		// hat schon freie nachbarzellen ... es blockieren höchstens andere einheiten").
-		public static void NudgeAround(Actor ship, int radius = 1)
-		{
-			var cells = new List<CPos>();
-			for (var dy = -radius; dy <= radius; dy++)
-				for (var dx = -radius; dx <= radius; dx++)
-				{
-					if (dx == 0 && dy == 0)
-						continue;
-
-					var c = ship.Location + new CVec(dx, dy);
-					if (ship.World.Map.Contains(c))
-						cells.Add(c);
-				}
-
-			ship.NotifyBlocker(cells);
-		}
-	}
-
-	sealed class FerryHelper
-	{
-		public enum Result { InProgress, Ashore, Failed }
-
-		// Once the ship is within this squared-distance of its dock cell, treat it as "docked":
-		// stop nudging it (so it holds still for loading/unloading) and let the engine's Passenger
-		// activity handle boarding. Must be TIGHT (2 == 1 cell): the dock cell is the water cell
-		// orthogonally touching the troops' beach, so only there is a land unit actually adjacent
-		// enough to board. With 2 cells of slack the ship parked short at a cliff neighbour and
-		// declared itself docked, and no unit could ever reach it (User 2026-07-23: "vessel fährt
-		// wieder an falsche Stelle"; log showed idle@35,11 dist2=4 docked but pending stuck at 5).
-		public const int DockedRadius2 = 2;
-
-		readonly AotMission owner;
-		readonly AotOperationsBotModule ops;
-		readonly Action<string> log;
-
-		readonly List<Actor> ferries = [];
-		readonly HashSet<Actor> inTransit = [];
-		readonly HashSet<Actor> boarded = [];
-		readonly HashSet<Actor> ferriedAshore = [];
-		CPos? embarkCell;
-		CPos? landingCell;
-		CPos? embarkDock;
-		CPos? landingDock;
-		int ferryTicks;
-		int ferryDiagLog;
-		bool ferryRequested;
-
-		// Where TryStart was anchored, kept so the embark point can be re-derived once a real ship
-		// exists (see RevalidateDock).
-		CPos startBaseCentre;
-		bool dockRevalidated;
-
-		public IReadOnlyCollection<Actor> FerriedAshore => ferriedAshore;
-		public CPos? LandingCell => landingCell;
-
-		// True once an actual transport has been assigned to this ferry. Callers use it to avoid
-		// marching a group to the beach to stand around waiting for a ship that does not exist yet.
-		public bool HasShip => ferries.Count > 0;
-
-		// Ships that have already begun the crossing with a load. Once a ship commits it must not turn
-		// back just because another passenger showed up at the home shore -- without this latch a ship
-		// that was already almost at the far shore sailed all the way back (observed 2026-07-24:
-		// dist2ToLanding=4 with cargo=1, then back to embark because inTransit went 0 -> 1).
-		readonly HashSet<Actor> crossing = [];
-
-		// A few cells inland from the landing cell, in the direction pointing away from the water, so
-		// disembarked units clear the exit instead of parking on it.
-		CPos? DisembarkRally()
-		{
-			if (landingCell == null)
-				return null;
-
-			var dock = landingDock ?? landingCell;
-			var inland = landingCell.Value - dock.Value;
-			if (inland == CVec.Zero)
-				return landingCell;
-
-			var rally = landingCell.Value + inland * 3;
-			return ops.World.Map.Contains(rally) ? rally : landingCell;
-		}
-
-		public FerryHelper(AotMission owner, AotOperationsBotModule ops, Action<string> log)
-		{
-			this.owner = owner;
-			this.ops = ops;
-			this.log = log;
-		}
-
-		// Call from the owning mission's OnUnitAssigned override for any actor whose type is in
-		// Ops.Info.FerryTypes, BEFORE falling back to base.OnUnitAssigned for everything else.
-		public bool TryClaim(Actor a)
-		{
-			if (!ops.Info.FerryTypes.Contains(a.Info.Name))
-				return false;
-
-			ferries.Add(a);
-			return true;
-		}
-
-		public void Release()
-		{
-			if (ferries.Count > 0)
-			{
-				ops.ReleaseToPool(owner, ferries.ToList());
-				ferries.Clear();
-			}
-
-			// Free the embark cell so a later/other mission can reuse this stretch of shore once
-			// this one no longer needs it.
-			if (embarkCell != null)
-			{
-				ops.ReleaseEmbarkCell(embarkCell.Value);
-				embarkCell = null;
-			}
-		}
-
-		// No ground path to the far shore: find a coastal embark/landing cell so the passengers can
-		// stage at the coast. Transports are requested lazily in Tick() once naval production
-		// exists -- until then the group just holds at the beach. Returns false only if ferrying
-		// could never work at all (no chain configured, no coast found).
-		// Once a real transport exists, its own position is the ground truth for "which water do our
-		// ships actually operate in". Re-derive the embark shore and dock from THAT, requiring a dock
-		// in the ship's own water component (no fallback here on purpose).
-		//
-		// This is what finally kills the recurring "ship parks two cells away and never docks" bug:
-		// seeding the reachability flood from the shore instead can start the flood inside a one-cell
-		// inlet that the Sub Pen walls off from the open sea. The flood then "proves" that inlet
-		// reachable and hands it back as the dock, while no ship can ever sail into it (confirmed
-		// 2026-07-24: derrick-47 embarkDock=35,13, two transports both idle at 35,11/36,11, dist²=4,
-		// pending=5, nobody ever boarded).
-		void RevalidateDock()
-		{
-			if (dockRevalidated || ferries.Count == 0 || ops.Info.FerryLocomotor == null || embarkCell == null)
+			if (group.Count == 0)
 				return;
 
-			dockRevalidated = true;
-			var seed = ferries[0].Location;
-
-			var shore = ops.Intel.FindCoastalCellNear(startBaseCentre, ops.Info.FerrySearchRadius,
-				requireOwnReachable: true, ops.Info.FerryLocomotor, ops.ClaimedEmbarkCells, navalSeed: seed);
-			if (shore == null)
-				return;
-
-			var dock = ops.Intel.DockCellFor(shore.Value, ops.Info.FerryLocomotor, navalSeed: seed);
-			if (dock == null || dock == shore)
-				return;
-
-			if (shore.Value != embarkCell.Value)
-			{
-				ops.ReleaseEmbarkCell(embarkCell.Value);
-				ops.ClaimEmbarkCell(shore.Value);
-			}
-
-			if (shore.Value != embarkCell.Value || dock.Value != (embarkDock ?? embarkCell.Value))
-				log($"embark re-derived from ship water: {embarkCell} -> {shore.Value} (dock {embarkDock} -> {dock.Value})");
-
-			embarkCell = shore;
-			embarkDock = dock;
-		}
-
-		public bool TryStart(CPos baseCentre, CPos farShoreRef)
-		{
-			if (ops.Info.FerryTypes.Length == 0)
-				return false;
-
-			startBaseCentre = baseCentre;
-
-			landingCell = ops.Intel.FindCoastalCellNear(farShoreRef, ops.Info.FerrySearchRadius, requireOwnReachable: false, ops.Info.FerryLocomotor);
-
-			// Steer away from embark cells other concurrent ferry missions already claimed, so
-			// missions spread across different stretches of shore instead of piling everyone onto
-			// the same dock (User 2026-07-23: "alle Küstenzellen sind von anderen Transport-
-			// Wartegästen belegt").
-			if (landingCell == null)
-			{
-				log("naval ferry unavailable: no coastal embark/landing cell found nearby");
-				return false;
-			}
-
-			// Embark shore MUST share the same navigable sea as the landing shore -- seed the naval
-			// reachability from landingCell so a beach whose only water access is a pen-blocked inlet is
-			// rejected (the ship could never sail there from the crossing sea; see FindCoastalCellNear).
-			// Also steer away from cells other concurrent ferry missions already claimed, so missions
-			// spread across different stretches of shore instead of piling everyone onto the same dock
-			// (User 2026-07-23: "alle Küstenzellen sind von anderen Transport-Wartegästen belegt").
-			embarkCell = ops.Intel.FindCoastalCellNear(baseCentre, ops.Info.FerrySearchRadius, requireOwnReachable: true, ops.Info.FerryLocomotor, ops.ClaimedEmbarkCells, navalSeed: landingCell.Value);
-
-			if (embarkCell == null)
-			{
-				log("naval ferry unavailable: no coastal embark/landing cell found nearby");
-				return false;
-			}
-
-			ops.ClaimEmbarkCell(embarkCell.Value);
-
-			// embarkCell/landingCell are LAND cells (that is what makes them valid staging points) --
-			// a ship can never actually enter them. The dock cell is the specific WATER cell touching
-			// that shore the ship itself must be ordered to, so it ends up truly adjacent to the
-			// waiting units. Both docks are seeded from the crossing sea (landingCell) so they lie on
-			// water the ship can actually reach and sail between.
-			embarkDock = ops.Info.FerryLocomotor != null ? ops.Intel.DockCellFor(embarkCell.Value, ops.Info.FerryLocomotor, navalSeed: landingCell.Value) ?? embarkCell : embarkCell;
-			landingDock = ops.Info.FerryLocomotor != null ? ops.Intel.DockCellFor(landingCell.Value, ops.Info.FerryLocomotor, navalSeed: landingCell.Value) ?? landingCell : landingCell;
-
-			// Idempotent/cheap to call every time a group starts ferrying.
-			ops.RequestNavalProduction();
-			return true;
-		}
-
-		public Result Tick(IBot bot, HashSet<Actor> units)
-		{
-			ferries.RemoveAll(ops.CannotOrder);
-
-			// Credit disembarkation BEFORE pruning dead units from `boarded`. A unit that made it off the
-			// ship and was then immediately killed (e.g. by defenses waiting right at the landing zone)
-			// genuinely crossed the water -- the ferry's job was done. Checking CannotOrder first (the old
-			// order) silently erased that credit: the dead unit vanished from `boarded` before ever being
-			// promoted to `ferriedAshore`, even though it was no longer in any ship's cargo by the time it
-			// died. Confirmed 2026-07-22: cargo count dropped to 0 (someone left the ship) but
-			// ferriedAshore stayed 0, and the mission timed out with "nobody made it across" despite units
-			// having genuinely boarded and left the home shore.
-			foreach (var u in boarded.ToList())
-			{
-				if (!ferries.Any(s => s.TraitOrDefault<Cargo>()?.Passengers.Contains(u) == true))
-				{
-					boarded.Remove(u);
-					ferriedAshore.Add(u);
-					log($"unit {u.Info.Name}@{u.Location} disembarked -> ferriedAshore={ferriedAshore.Count} (alive={!ops.CannotOrder(u)})");
-				}
-			}
-
-			// A unit riding the ferry is alive but not in the world -- only real death removes it here,
-			// otherwise boarding would erase it from tracking mid-crossing (see Ops.IsGone).
-			ferriedAshore.RemoveWhere(ops.IsGone);
-			inTransit.RemoveWhere(ops.IsGone);
-			boarded.RemoveWhere(ops.IsGone);
-
-			if (!ferryRequested)
-			{
-				if (ops.HasNavalProduction())
-				{
-					// Keep trying every tick, not just once: the fleet is globally capped and shared, so the
-					// ship this group needs is often busy with another mission and only frees up later. The
-					// old one-shot attempt made every mission that found the fleet fully allocated queue
-					// nothing, and the check below then cancelled it instantly (User 2026-07-24: derrick
-					// squad crossed, all other groups never even tried).
-					if (ferries.Count < ops.Info.FerryCount)
-					{
-						var fromPool = ops.TakeFromPool(ops.Info.FerryTypes, ops.Info.FerryCount - ferries.Count);
-						ops.AssignFromPool(owner, fromPool);
-					}
-
-					// Top up with fresh production only within the global cap.
-					if (ferries.Count < ops.Info.FerryCount && ops.OpenRequests(owner) == 0)
-					{
-						var want = Math.Min(ops.Info.FerryCount - ferries.Count, ops.FerryBudget());
-						if (want > 0)
-							ops.QueueRequest(owner, AotOperationsBotModule.FerryRole, ops.Info.FerryTypes, want);
-					}
-
-					if (!ferryRequested)
-					{
-						ferryRequested = true;
-						log("naval production ready -> transports requested");
-					}
-				}
-			}
-
-			// Only run the watchdog once this group actually has a ship (or one on the way). While it is
-			// merely queued behind another mission it is waiting, not stalling, and must not time out.
-			if (ferryRequested && (ferries.Count > 0 || ops.OpenRequests(owner) > 0))
-				ferryTicks += ops.Info.MissionInterval;
-
-			// Give up only when no transport can ever arrive -- none owned anywhere, none queued.
-			if (ferryRequested && ferries.Count == 0 && ops.OpenRequests(owner) == 0 && ferriedAshore.Count == 0
-				&& ops.OwnedFerryCount() == 0)
-			{
-				log("no transports available -> ferry cancelled");
-				return Result.Failed;
-			}
-
-			// Pin the embark point to water our ships can genuinely reach, now that one exists.
-			RevalidateDock();
-
-			var pending = units.Where(a => !ops.CannotOrder(a) && !ferriedAshore.Contains(a) && !inTransit.Contains(a) && !boarded.Contains(a)).ToList();
-
-			foreach (var u in pending)
-				if (u.IsIdle && (u.Location - embarkCell.Value).LengthSquared > 9)
-					bot.QueueOrder(new Order("AttackMove", u, Target.FromCell(ops.World, embarkCell.Value), false));
-
-			var logThisTick = ++ferryDiagLog % 8 == 0;
-			var embarkDockCell = embarkDock ?? embarkCell.Value;
-			var landingDockCell = landingDock ?? landingCell.Value;
-
-			// Units whose EnterTransport we issued THIS tick. The order only resolves on a later
-			// world tick, so the unit is still IsIdle right now -- without this guard the retry pass
-			// below would demote it back to pending and re-issue next tick, churning RideTransport
-			// forever and never letting it board.
-			var orderedThisTick = new HashSet<Actor>();
-
-			foreach (var ship in ferries)
-			{
-				var cargo = ship.TraitOrDefault<Cargo>();
-				if (cargo == null)
-					continue;
-
-				// Stay in loading mode until the ship is full (weight-based: 1 tank OR 5 infantry
-				// both hit MaxWeight) or nobody is left to board. Otherwise the moment the FIRST unit
-				// boards, cargo != empty would flip us to depart mode and the ship would sail off with
-				// a partial load, stranding units still walking over.
-				var full = !cargo.HasSpace(1);
-				var stillLoading = !full && (pending.Count > 0 || inTransit.Count > 0);
-
-				// Commit latch: once a loaded ship sets off it must finish the delivery. Without this a
-				// ship already almost at the far shore turned around because another passenger showed up
-				// back home (observed 2026-07-24: dist2ToLanding=4 with cargo=1, then all the way back).
-				// It rejoins the loading cycle only after unloading (cargo empty again).
-				if (cargo.IsEmpty())
-					crossing.Remove(ship);
-				else if (!stillLoading)
-					crossing.Add(ship);
-
-				if (!crossing.Contains(ship) && (cargo.IsEmpty() || stillLoading))
-				{
-					var distToEmbark = (ship.Location - embarkDockCell).LengthSquared;
-					var docked = distToEmbark <= DockedRadius2;
-
-					// Don't fight the engine. While still approaching, nudge the ship toward the dock
-					// ONLY when it has gone fully idle -- never every tick. Re-issuing Move each tick
-					// cancels the in-progress path and keeps shoving the ship out from under passengers
-					// mid-board, so nobody ever completes EnterTransport (the erratic "ship jitters at
-					// the beach, no one boards" behaviour). Once docked, leave the ship completely alone.
-					if (!docked)
-					{
-						if (ship.IsIdle)
-							bot.QueueOrder(new Order("Move", ship, Target.FromCell(ops.World, embarkDockCell), false));
-					}
-					else
-					{
-						// Clear the ramp so a boarding unit can actually reach the ship.
-						FerryUtils.NudgeAround(ship);
-
-						// Ship is parked at the dock. Order EVERY waiting unit to board -- NOT only the
-						// idle ones. In a crowd the units are perpetually stuck in an AttackMove toward a
-						// blocked embark cell, so an IsIdle filter finds nobody and inTransit never leaves
-						// 0 (observed 2026-07-23: pending=5 inTransit=0 forever). EnterTransport queues the
-						// engine's own RideTransport activity, which replaces that AttackMove and handles
-						// approach + retry itself -- issue it once per unit and then trust it; moving the
-						// unit out of `pending` also stops the AttackMove loop above from fighting it.
-						foreach (var u in pending.ToList())
-						{
-							bot.QueueOrder(new Order("EnterTransport", u, Target.FromActor(ship), false));
-							inTransit.Add(u);
-							orderedThisTick.Add(u);
-							pending.Remove(u);
-						}
-					}
-
-					if (logThisTick)
-						log($"ferry ship {ship.Info.Name}@{ship.Location}: idle={ship.IsIdle} activity={ship.CurrentActivity?.GetType().Name ?? "none"} " +
-							$"dist2ToEmbark={distToEmbark} docked={docked} embarkDock={embarkDockCell} pending={pending.Count} inTransit={inTransit.Count}");
-				}
-				else
-				{
-					var distToLanding = (ship.Location - landingDockCell).LengthSquared;
-					var atLanding = distToLanding <= DockedRadius2;
-
-					// Same discipline as the embark side: nudge toward the landing dock only while idle
-					// and still approaching, then hold still and unload once there.
-					if (!atLanding)
-					{
-						if (ship.IsIdle)
-							bot.QueueOrder(new Order("Move", ship, Target.FromCell(ops.World, landingDockCell), false));
-					}
-					else
-					{
-						// Free the ramp first, then unload -- idle units loitering next to the ship silently
-						// stall the whole unload even when free cells exist one tile further out.
-						FerryUtils.NudgeAround(ship);
-						bot.QueueOrder(new Order("Unload", ship, false));
-					}
-
-					if (logThisTick)
-						log($"ferry ship {ship.Info.Name}@{ship.Location}: idle={ship.IsIdle} activity={ship.CurrentActivity?.GetType().Name ?? "none"} " +
-							$"dist2ToLanding={distToLanding} atLanding={atLanding} landingDock={landingDockCell} cargo={cargo.Passengers.Count()}");
-				}
-			}
-
-			// Confirm actual boarding before treating "not currently in any ship's cargo" as
-			// disembarked -- otherwise "just issued the order, hasn't boarded yet" and "boarded,
-			// crossed, disembarked" are indistinguishable, crediting units as landed while they never
-			// left the home shore.
-			foreach (var u in inTransit.ToList())
-			{
-				if (ferries.Any(s => s.TraitOrDefault<Cargo>()?.Passengers.Contains(u) == true))
-				{
-					inTransit.Remove(u);
-					boarded.Add(u);
-
-					// Genuine progress: a unit boarded. Reset the watchdog so a ferry that legitimately
-					// needs several trips is never killed mid-progress -- the timeout measures time since
-					// the LAST progress, so it still fires when the ship is truly stuck and nobody boards.
-					ferryTicks = 0;
-				}
-			}
-
-			// Retry failed boarding attempts -- EnterTransport is a one-shot order; if it ends
-			// (unit idle again) without the unit ever showing up in cargo, that attempt failed and
-			// the unit goes back to the pending pool for a fresh try next tick.
-			foreach (var u in inTransit.ToList())
-				if (u.IsIdle && !orderedThisTick.Contains(u))
-					inTransit.Remove(u);
-
-			foreach (var u in boarded.ToList())
-			{
-				if (!ferries.Any(s => s.TraitOrDefault<Cargo>()?.Passengers.Contains(u) == true))
-				{
-					boarded.Remove(u);
-					ferriedAshore.Add(u);
-					ferryTicks = 0; // a unit completed the crossing -- progress, reset the watchdog.
-
-					// Clear the exit. A unit that just stepped off otherwise stays parked right on the
-					// landing cell and blocks the next passenger from disembarking (User 2026-07-24:
-					// "sie blockieren sich am exit-punkt und nudgen sich nicht zur seite"). The engine's
-					// nudge cannot fix this -- it only fires when something paths THROUGH an idle blocker,
-					// and a disembarking passenger does not path, it just needs the cell free. So actively
-					// send every new arrival a few cells inland.
-					var rally = DisembarkRally();
-					if (rally != null)
-						bot.QueueOrder(new Order("AttackMove", u, Target.FromCell(ops.World, rally.Value), false));
-				}
-			}
-
-			// Riders are NOT lost -- counting them via CannotOrder made a fully loaded ferry look like a
-			// wiped-out group and cancelled the crossing (User 2026-07-24: embark but never disembark).
-			var stillToGo = units.Count(a => !ops.IsGone(a) && !ferriedAshore.Contains(a));
-			if (stillToGo == 0)
-			{
-				if (ferriedAshore.Count == 0)
-				{
-					log("wave lost (wiped out crossing, or while waiting for naval production)");
-					return Result.Failed;
-				}
-
-				log($"ferry complete: {ferriedAshore.Count} unit(s) landed");
-				return Result.Ashore;
-			}
-
-			if (ferryRequested && ferryTicks >= ops.Info.FerryTimeout)
-			{
-				if (ferriedAshore.Count > 0)
-				{
-					log($"ferry timeout -> proceeding with {ferriedAshore.Count} unit(s) already ashore");
-					return Result.Ashore;
-				}
-
-				log("ferry timeout, nobody made it across -> cancelled");
-				return Result.Failed;
-			}
-
-			return Result.InProgress;
+			// The map centre is a HOME-side fallback. A force that has crossed cannot walk there, so
+			// sending it that way just marches it into the sea; it holds where it landed instead.
+			var anchor = ashore ? Centroid(group) : Ops.Intel.MapCentreFallback;
+			HoldAt(bot, group, anchor, Ops.Info.GuardLeashRadius);
 		}
 	}
 
@@ -923,7 +533,15 @@ namespace OpenRA.Mods.Common.Traits
 	public sealed class AotRegularWaveMission : AotMissionWithOrders
 	{
 		// Spare units are welcome: a wave is a loose formation, extra bodies simply join the attack.
-		public override bool AcceptsReinforcements => true;
+		//
+		// EXCEPT once the wave has crossed water. A reinforcement is produced at home and has no land
+		// route to a wave standing on the far shore, so it just stands in the base -- but it counts as
+		// part of the wave, so it drags the group centroid back home, makes the straggler and stall
+		// logic fire forever, and the whole wave is eventually abandoned as "stuck" while it is in
+		// fact fighting perfectly well (2026-07-29: "landed as one group" followed by ten rounds of
+		// "wave stalled at 135,149", which is the AI's own base). It also blocked the next wave from
+		// ever being scheduled, since the scheduler only starts one when no wave is running.
+		public override bool AcceptsReinforcements => !ashore;
 
 		enum Phase { Forming, Ferrying, Executing, Retreating }
 
@@ -944,68 +562,12 @@ namespace OpenRA.Mods.Common.Traits
 		CPos? routeWaypoint;
 		bool waypointReached;
 
-		// Naval ferry (no land route to the enemy): transports are tracked separately from the
-		// combat Units they carry, reused across waves via the pool.
-		readonly List<Actor> ferries = [];
-		readonly HashSet<Actor> inTransit = [];
-		readonly HashSet<Actor> boarded = [];
-		readonly HashSet<Actor> ferriedAshore = [];
-
-		// Ships that have begun a crossing with a load -- see FerryHelper.crossing for why the latch
-		// exists (a committed ship must not sail back for a late passenger).
-		readonly HashSet<Actor> crossing = [];
-		bool dockRevalidated;
-
-		// Re-derive the embark shore/dock from a real ship's own water once one exists -- see
-		// FerryHelper.RevalidateDock for why seeding from the shore can hand back an inlet no ship
-		// can ever enter.
-		void RevalidateDock()
-		{
-			if (dockRevalidated || ferries.Count == 0 || Ops.Info.FerryLocomotor == null || embarkCell == null)
-				return;
-
-			dockRevalidated = true;
-			var seed = ferries[0].Location;
-
-			var shore = Ops.Intel.FindCoastalCellNear(Ops.BaseCentre(), Ops.Info.FerrySearchRadius,
-				requireOwnReachable: true, Ops.Info.FerryLocomotor, navalSeed: seed);
-			if (shore == null)
-				return;
-
-			var dock = Ops.Intel.DockCellFor(shore.Value, Ops.Info.FerryLocomotor, navalSeed: seed);
-			if (dock == null || dock == shore)
-				return;
-
-			if (shore.Value != embarkCell.Value || dock.Value != (embarkDock ?? embarkCell.Value))
-				Log($"embark re-derived from ship water: {embarkCell} -> {shore.Value} (dock {embarkDock} -> {dock.Value})");
-
-			embarkCell = shore;
-			embarkDock = dock;
-		}
-		CPos? embarkCell;
-		CPos? ferryLandingCell;
-		CPos? embarkDock;
-		CPos? landingDock;
-		int ferryTicks;
-		int ferryDiagLog;
-		bool ferryRequested;
+		// Naval crossing (no land route to the enemy). The wave owns no ships at all: it books a ticket
+		// with the module's transit service and waits for it to be fully delivered. That "fully" is
+		// what makes the wave land CLOSED -- the vessels shuttle independently, the wave simply does
+		// not attack until its last unit is ashore. See ai-transit-system.md.
+		AotTransitTicket ticket;
 		bool ashore;
-
-		// A few cells inland from the landing cell so disembarked units clear the exit instead of
-		// parking on it and blocking the next passenger -- see FerryHelper.DisembarkRally.
-		CPos? DisembarkRally()
-		{
-			if (ferryLandingCell == null)
-				return null;
-
-			var dock = landingDock ?? ferryLandingCell;
-			var inland = ferryLandingCell.Value - dock.Value;
-			if (inland == CVec.Zero)
-				return ferryLandingCell;
-
-			var rally = ferryLandingCell.Value + inland * 3;
-			return Ops.World.Map.Contains(rally) ? rally : ferryLandingCell;
-		}
 
 		public AotRegularWaveMission(AotOperationsBotModule ops, int index, bool useSecondaryRoute)
 			: base(ops, $"wave-{index}")
@@ -1016,25 +578,25 @@ namespace OpenRA.Mods.Common.Traits
 
 		public override void OnUnitAssigned(Actor a)
 		{
-			if (Ops.Info.FerryTypes.Contains(a.Info.Name))
-				ferries.Add(a);
-			else
-				base.OnUnitAssigned(a);
-		}
-
-		// Return every transport this wave holds to the shared pool.
-		void ReleaseFerries()
-		{
-			if (ferries.Count == 0)
+			// The transit service owns every ship now; a vessel filed here would be stranded.
+			if (ReturnStrayNavalSupport(a))
 				return;
 
-			Ops.ReleaseToPool(this, ferries.ToList());
-			ferries.Clear();
+			base.OnUnitAssigned(a);
+
+			// A reinforcement that turns up while the wave is CROSSING has to cross as well -- put it
+			// on the booking. Without this it counts as part of the wave but stays at home: it drags
+			// the group centroid back across the water, so the straggler logic decides the wave is
+			// scattered and keeps ordering it to regroup instead of attacking, forever (2026-07-29:
+			// "landed as one group" at 46,114, then "wave stalled at 79,129", which is halfway home).
+			if (ticket != null && !ticket.Finished && !ticket.Delivered.Contains(a))
+				ticket.Waiting.Add(a);
 		}
 
 		void FinishWave()
 		{
-			ReleaseFerries();
+			Ops.Transit.Cancel(ticket);
+			ticket = null;
 
 			Finish();
 		}
@@ -1210,8 +772,8 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				phase = Phase.Ferrying;
 				Log($"launch: {initialCount} unit(s), eco={ecoWave}, no ground route to the enemy -> " +
-					$"staging at embark={embarkCell} (landing={ferryLandingCell}), " +
-					$"{(Ops.HasNavalProduction() ? "requesting transports" : "waiting for naval production")}");
+					$"crossing booked as ticket #{ticket.Id} (landing={ticket.To?.Shore}), " +
+					$"{(Ops.HasNavalProduction() ? "vessels requested" : "waiting for naval production")}");
 			}
 			else
 			{
@@ -1276,310 +838,74 @@ namespace OpenRA.Mods.Common.Traits
 		// the coast. Transports are requested lazily in TickFerrying once naval production exists --
 		// until then the wave just waits at the beach (user spec). Returns false (wave proceeds/ends
 		// normally) only if ferrying could never work at all (no chain configured, no coast found).
+		// No ground path to the enemy: hand the wave to the shared convoy helper, which finds the
+		// embark/landing shore on our ships' own water and requests transports plus escorts.
 		bool TryStartFerry()
 		{
-			if (Ops.Info.FerryTypes.Length == 0)
-				return false;
-
-			if (Ops.Intel.EnemySpawns.Count == 0)
+			if (Ops.Info.FerryTypes.Length == 0 || Ops.Intel.EnemySpawns.Count == 0)
 				return false;
 
 			var enemyRef = Ops.Intel.EnemySpawns.MinBy(s => (s - Ops.BaseCentre()).LengthSquared);
-			ferryLandingCell = Ops.Intel.FindCoastalCellNear(enemyRef, Ops.Info.FerrySearchRadius, requireOwnReachable: false, Ops.Info.FerryLocomotor);
 
-			if (ferryLandingCell == null)
-			{
-				Log("naval ferry unavailable: no coastal embark/landing cell found nearby");
-				return false;
-			}
-
-			// Embark shore must share the same navigable sea as the landing shore -- seed reachability
-			// from ferryLandingCell so a beach walled off from the crossing sea (e.g. behind the Sub Pen)
-			// is rejected rather than picked and then never reached (see FindCoastalCellNear).
-			embarkCell = Ops.Intel.FindCoastalCellNear(Ops.BaseCentre(), Ops.Info.FerrySearchRadius, requireOwnReachable: true, Ops.Info.FerryLocomotor, navalSeed: ferryLandingCell.Value);
-
-			if (embarkCell == null)
-			{
-				Log("naval ferry unavailable: no coastal embark/landing cell found nearby");
-				return false;
-			}
-
-			// embarkCell/ferryLandingCell are LAND cells (that is what makes them valid staging points for
-			// ground units) -- a ship can never actually enter them. The dock cell is the specific WATER
-			// cell touching that shore that the ship itself should be ordered to, so it ends up truly
-			// adjacent to the waiting units instead of wherever the pathfinder's own "close enough"
-			// tolerance happens to stop for an unreachable land target (confirmed 2026-07-22: ships parked
-			// 2+ cells short of the shore, tanks waited right at the water's edge, nobody ever boarded).
-			// Falls back to the land cell itself if no locomotor is configured (old terrain-only behaviour).
-			embarkDock = Ops.Info.FerryLocomotor != null ? Ops.Intel.DockCellFor(embarkCell.Value, Ops.Info.FerryLocomotor, navalSeed: ferryLandingCell.Value) ?? embarkCell : embarkCell;
-			landingDock = Ops.Info.FerryLocomotor != null ? Ops.Intel.DockCellFor(ferryLandingCell.Value, Ops.Info.FerryLocomotor, navalSeed: ferryLandingCell.Value) ?? ferryLandingCell : ferryLandingCell;
-
-			// This mission needs naval production to exist -- ask the base builder to guarantee it (built
-			// on demand, outside the fixed Rhythm; user spec 2026-07-22). Idempotent/cheap to call every
-			// time a wave starts ferrying.
-			Ops.RequestNavalProduction();
-
-			return true;
+			// Highest priority class: a wave outranks scouts and expansion squads at the quay, so it is
+			// not cut in half by a scout squad boarding between two of its tanks.
+			ticket = Ops.Transit.Request(this, Units, enemyRef, AotTransitPriority.AttackWave);
+			return ticket != null;
 		}
 
 		void TickFerrying(IBot bot)
 		{
-			ferries.RemoveAll(Ops.CannotOrder);
-			// Only real death removes a rider here -- see Ops.IsGone.
-			ferriedAshore.RemoveWhere(Ops.IsGone);
-			inTransit.RemoveWhere(Ops.IsGone);
-			boarded.RemoveWhere(Ops.IsGone);
-
-			if (Ops.HasNavalProduction())
+			// The transit service moves the wave: staging ground -> boarding lane -> ships -> the far
+			// staging ground, where it gathers. Nothing here touches a ship.
+			if (ticket == null || ticket.Cancelled)
 			{
-				// Retry every tick, not once: the globally capped fleet is shared, so a transport this
-				// wave needs is often busy elsewhere and only frees up later (see FerryHelper).
-				if (ferries.Count < Ops.Info.FerryCount)
-				{
-					var fromPool = Ops.TakeFromPool(Ops.Info.FerryTypes, Ops.Info.FerryCount - ferries.Count);
-					Ops.AssignFromPool(this, fromPool);
-				}
-
-
-				// Top up with fresh production only within the GLOBAL cap (see Ops.FerryBudget).
-				if (ferries.Count < Ops.Info.FerryCount && Ops.OpenRequests(this) == 0)
-				{
-					var want = Math.Min(Ops.Info.FerryCount - ferries.Count, Ops.FerryBudget());
-					if (want > 0)
-						Ops.QueueRequest(this, AotOperationsBotModule.FerryRole, Ops.Info.FerryTypes, want);
-				}
-
-				if (!ferryRequested)
-				{
-					ferryRequested = true;
-					Log("naval production ready -> transports requested");
-				}
-			}
-
-			// Else: no Sub Pen/Shipyard yet. No timeout here -- the wave just holds at the coast until
-			// one is eventually built.
-
-			// Watchdog only once this wave actually has a ship (or one on the way) -- while merely queued
-			// behind another mission it is waiting, not stalling, and must not time out.
-			if (ferryRequested && (ferries.Count > 0 || Ops.OpenRequests(this) > 0))
-				ferryTicks += Ops.Info.MissionInterval;
-
-			// Pin the embark point to water our ships can genuinely reach, now that one exists.
-			RevalidateDock();
-
-			// Give up only when no transport can ever arrive -- none owned anywhere, none queued.
-			if (ferryRequested && ferries.Count == 0 && Ops.OpenRequests(this) == 0 && ferriedAshore.Count == 0
-				&& Ops.OwnedFerryCount() == 0)
-			{
-				Log("no transports available -> ferry cancelled, wave dissolved");
 				Outcome = AotMissionOutcome.Failure;
 				FinishWave();
 				return;
 			}
 
-			var pending = Units.Where(a => !Ops.CannotOrder(a) && !ferriedAshore.Contains(a) && !inTransit.Contains(a) && !boarded.Contains(a)).ToList();
-
-			// Walk not-yet-embarked units to the coast.
-			foreach (var u in pending)
-				if (u.IsIdle && (u.Location - embarkCell.Value).LengthSquared > 9)
-					bot.QueueOrder(new Order("AttackMove", u, Target.FromCell(Ops.World, embarkCell.Value), false));
-
-			// Throttled per-ship diagnostic (User 2026-07-22: transport visibly never approached the
-			// shore -- IsIdle/distance/current-activity make the exact reason visible on the next test
-			// instead of guessing further, same pattern as the earlier AotBuild production stall diags).
-			var logThisTick = ++ferryDiagLog % 8 == 0;
-
-			// The ship itself must be ordered to the WATER cell touching the shore (embarkDock/landingDock),
-			// never to embarkCell/ferryLandingCell directly -- those are LAND cells a ship can never enter,
-			// so a "Move" order aimed at them only gets the ship generically "close" via the pathfinder's
-			// own stopping tolerance for an unreachable destination, not truly adjacent to the waiting
-			// units (see TryStartFerry for the full story). Units still walk to the LAND cell, since that
-			// is what they can actually stand on.
-			var embarkDockCell = embarkDock ?? embarkCell.Value;
-			var landingDockCell = landingDock ?? ferryLandingCell.Value;
-
-			// See FerryHelper: guards freshly-issued EnterTransport orders (not yet resolved this
-			// tick, so the unit is still IsIdle) from being demoted+re-issued, which churns forever.
-			var orderedThisTick = new HashSet<Actor>();
-
-			foreach (var ship in ferries)
+			if (ticket.Complete)
 			{
-				var cargo = ship.TraitOrDefault<Cargo>();
-				if (cargo == null)
-					continue;
-
-				// Stay in loading mode until the ship is full (weight-based: 1 tank OR 5 infantry
-				// both hit MaxWeight) or nobody is left to board. Otherwise the moment the FIRST unit
-				// boards, cargo != empty would flip us to depart mode and the ship would sail off with
-				// a partial load, stranding units still walking over.
-				var full = !cargo.HasSpace(1);
-				var stillLoading = !full && (pending.Count > 0 || inTransit.Count > 0);
-
-				// Commit latch: once a loaded ship sets off it must finish the delivery. Without this a
-				// ship already almost at the far shore turned around because another passenger showed up
-				// back home (observed 2026-07-24: dist2ToLanding=4 with cargo=1, then all the way back).
-				// It rejoins the loading cycle only after unloading (cargo empty again).
-				if (cargo.IsEmpty())
-					crossing.Remove(ship);
-				else if (!stillLoading)
-					crossing.Add(ship);
-
-				if (!crossing.Contains(ship) && (cargo.IsEmpty() || stillLoading))
-				{
-					var distToEmbark = (ship.Location - embarkDockCell).LengthSquared;
-					var docked = distToEmbark <= FerryHelper.DockedRadius2;
-
-					// Don't fight the engine. Nudge the ship toward the dock ONLY while idle and still
-					// approaching -- re-issuing Move every tick cancels the in-progress path and shoves
-					// the ship out from under passengers mid-board, so nobody completes EnterTransport
-					// (the erratic "jitters at the beach, no one boards" behaviour). Once docked, hold
-					// still and order EVERY idle waiting unit to board at once, like a player selecting
-					// the whole group and right-clicking the transport.
-					if (!docked)
-					{
-						if (ship.IsIdle)
-							bot.QueueOrder(new Order("Move", ship, Target.FromCell(Ops.World, embarkDockCell), false));
-					}
-					else
-					{
-						// Clear the ramp so a boarding unit can actually reach the ship.
-						FerryUtils.NudgeAround(ship);
-
-						// Order EVERY waiting unit (not only idle ones): in a crowd units are stuck in an
-						// AttackMove to a blocked embark cell and never go idle, so an IsIdle filter boards
-						// nobody. EnterTransport's RideTransport activity replaces that move and handles
-						// approach+retry itself; issue once per unit and trust it.
-						foreach (var u in pending.ToList())
-						{
-							bot.QueueOrder(new Order("EnterTransport", u, Target.FromActor(ship), false));
-							inTransit.Add(u);
-							orderedThisTick.Add(u);
-							pending.Remove(u);
-						}
-					}
-
-					if (logThisTick)
-						Log($"ferry ship {ship.Info.Name}@{ship.Location}: idle={ship.IsIdle} activity={ship.CurrentActivity?.GetType().Name ?? "none"} " +
-							$"dist2ToEmbark={distToEmbark} docked={docked} embarkDock={embarkDockCell} pending={pending.Count} inTransit={inTransit.Count}");
-				}
-				else
-				{
-					var distToLanding = (ship.Location - landingDockCell).LengthSquared;
-					var atLanding = distToLanding <= FerryHelper.DockedRadius2;
-
-					// Same discipline as the embark side: nudge only while idle and approaching, then
-					// hold still and unload once at the landing dock.
-					if (!atLanding)
-					{
-						if (ship.IsIdle)
-							bot.QueueOrder(new Order("Move", ship, Target.FromCell(Ops.World, landingDockCell), false));
-					}
-					else
-					{
-						// Free the ramp first, then unload -- idle units loitering next to the ship silently
-						// stall the whole unload even when free cells exist one tile further out.
-						FerryUtils.NudgeAround(ship);
-						bot.QueueOrder(new Order("Unload", ship, false));
-					}
-
-					if (logThisTick)
-						Log($"ferry ship {ship.Info.Name}@{ship.Location}: idle={ship.IsIdle} activity={ship.CurrentActivity?.GetType().Name ?? "none"} " +
-							$"dist2ToLanding={distToLanding} atLanding={atLanding} landingDock={landingDockCell} cargo={cargo.Passengers.Count()}");
-				}
-			}
-
-			// Confirm actual boarding: EnterTransport is an ORDER, not an instant state change -- the unit
-			// still has to walk to the ship and be picked up, which takes at least one more tick. Promote
-			// inTransit -> boarded only once the unit is physically observed inside a ferry's Cargo.
-			foreach (var u in inTransit.ToList())
-			{
-				if (ferries.Any(s => s.TraitOrDefault<Cargo>()?.Passengers.Contains(u) == true))
-				{
-					inTransit.Remove(u);
-					boarded.Add(u);
-					ferryTicks = 0; // progress: a unit boarded -- reset the watchdog (multi-trip safe).
-				}
-			}
-
-			// Retry failed boarding attempts. EnterTransport is issued once (StartStep-style, matching
-			// every other one-shot order in this AI) and never retried on its own -- if the activity ends
-			// (unit goes idle again) without the unit ever showing up in the ship's Cargo, that attempt
-			// failed (ship not actually reachable/adjacent at interaction range, even though it satisfied
-			// the coarser "within 3 cells" distance check used to decide when to TRY boarding -- confirmed
-			// 2026-07-22: `pending=0 inTransit=5` sat frozen with the ship `idle=True activity=none` for
-			// 14+ consecutive diagnostic samples, cargo never stopped being empty, wave eventually timed
-			// out). Demoting back to `pending` lets the normal walk-to-embark/EnterTransport loop above
-			// try again next tick (ship may have moved, or a retry may simply succeed this time) instead of
-			// leaving the unit permanently stuck in limbo.
-			foreach (var u in inTransit.ToList())
-			{
-				if (u.IsIdle && !orderedThisTick.Contains(u))
-					inTransit.Remove(u);
-			}
-
-			// Detect disembarked units: confirmed aboard a ferry at some earlier tick, no longer aboard any
-			// now. Checking this against `inTransit` directly (as before) could not tell "just issued the
-			// EnterTransport order, hasn't actually boarded yet" apart from "boarded, crossed, disembarked"
-			// -- both look identical as "not currently in any ship's Passengers list". On the very next
-			// MissionInterval tick after EnterTransport was queued (before boarding physically completed),
-			// every unit failed this check and was credited as having landed near the enemy while still
-			// standing at the home embark point (confirmed 2026-07-22: log claimed "ferry complete: 5
-			// unit(s) landed" one tick after the transport was even claimed -- nowhere near enough time to
-			// actually cross open water -- while the units visibly never left the home shore in-game).
-			foreach (var u in boarded.ToList())
-			{
-				if (!ferries.Any(s => s.TraitOrDefault<Cargo>()?.Passengers.Contains(u) == true))
-				{
-					boarded.Remove(u);
-					ferriedAshore.Add(u);
-					ferryTicks = 0; // progress: a unit completed the crossing -- reset the watchdog.
-
-					// Clear the exit so the next passenger can step off -- see FerryHelper for why the
-					// engine's nudge cannot do this on its own.
-					var rally = DisembarkRally();
-					if (rally != null)
-						bot.QueueOrder(new Order("AttackMove", u, Target.FromCell(Ops.World, rally.Value), false));
-				}
-			}
-
-			var stillToGo = Units.Count(a => !Ops.IsGone(a) && !ferriedAshore.Contains(a));
-			if (stillToGo == 0)
-			{
-				if (ferriedAshore.Count == 0)
-				{
-					Log("wave lost (wiped out crossing, or while waiting for naval production)");
-					Outcome = AotMissionOutcome.Failure;
-					FinishWave();
-					return;
-				}
-
-				ReleaseFerries();
+				// On the far shore now -- outside our own base-side reachable set by definition, so the
+				// target search must stop demanding ground reachability from here on.
 				ashore = true;
+				ticket = null;
 				ChooseTarget();
 				phase = Phase.Executing;
-				Log($"ferry complete: {ferriedAshore.Count} unit(s) landed near the enemy, target={DescribeTarget()}");
+				Log($"landed as one group -> target={DescribeTarget()}");
 				return;
 			}
 
-			if (ferryRequested && ferryTicks >= Ops.Info.FerryTimeout)
+			if (ticket.Failed)
 			{
-				if (ferriedAshore.Count > 0)
+				// Some of the wave may already be across. Fighting on with a fraction beats abandoning
+				// units on a foreign shore with no orders -- that is how they ended up standing around.
+				if (ticket.Delivered.Count > 0)
 				{
-					ReleaseFerries();
+					// Anyone still on our side will never reach the fight, and keeping them on the
+					// roster drags the group centroid back home -- which makes the straggler and stall
+					// logic fire forever instead of attacking. Hand them back to the pool.
+					var stranded = Units.Where(u => !ticket.Delivered.Contains(u)).ToList();
+					if (stranded.Count > 0)
+					{
+						Ops.ReleaseToPool(this, stranded);
+						foreach (var u in stranded)
+							Units.Remove(u);
+					}
+
+					Log($"crossing failed with {ticket.Delivered.Count} unit(s) ashore -> attacking " +
+						$"short-handed ({stranded.Count} left behind, returned to the pool)");
 					ashore = true;
+					ticket = null;
 					ChooseTarget();
 					phase = Phase.Executing;
-					Log($"ferry timeout -> proceeding with {ferriedAshore.Count} unit(s) already ashore");
+					return;
 				}
-				else
-				{
-					Log("ferry timeout, nobody made it across -> wave cancelled");
-					Outcome = AotMissionOutcome.Failure;
-					FinishWave();
-				}
+
+				Outcome = AotMissionOutcome.Failure;
+				FinishWave();
 			}
 		}
-
 		void TickExecuting(IBot bot)
 		{
 			if (Units.Count == 0)
@@ -1664,6 +990,19 @@ namespace OpenRA.Mods.Common.Traits
 			}
 
 			var goal = routeWaypoint.HasValue && !waypointReached ? routeWaypoint.Value : targetActor?.Location ?? targetCell.Value;
+
+			// Nothing moved and nobody died for a long time -- the wave is wedged rather than fighting.
+			// Break the stuck activities so the loop below can give everyone a fresh order; the executing
+			// timeout still decides when to give up entirely.
+			if (NoProgress(Units.Count * 31 + centre.X * 7 + centre.Y, Ops.Info.StallRecoveryTicks))
+			{
+				Log($"wave stalled at {centre} -> re-issuing attack orders toward {goal}");
+				foreach (var a in Units.Where(u => !Ops.CannotOrder(u)))
+					bot.QueueOrder(new Order("Stop", a, false));
+
+				return;
+			}
+
 			foreach (var a in Units)
 				if (a.IsIdle)
 					bot.QueueOrder(new Order("AttackMove", a, Target.FromCell(Ops.World, goal), false));
@@ -1735,16 +1074,22 @@ namespace OpenRA.Mods.Common.Traits
 		int waypointCursor;
 		CPos post;
 
-		// Naval ferry (User 2026-07-22): a spawn with no ground route gets crossed to instead of
-		// just skipped, exactly like a regular attack wave -- see FerryHelper. Lazily created only
-		// once a spawn is actually found unreachable by land, and reused across every such spawn
-		// this group ever tours (transports are pooled/reused, not rebuilt per spawn).
-		FerryHelper ferry;
+		// Naval crossing (User 2026-07-22): a spawn with no ground route gets crossed to instead of
+		// just skipped. Stage 2 of the ferry rebuild: this mission no longer owns transports at all --
+		// it books a ticket with the module's transit service and waits. See ai-transit-system.md.
+		AotTransitTicket ticket;
 		bool ashoreForCurrentSpawn;
 
-		// Ferry started (transport requested) but the group is still doing useful scouting on our own
-		// side until a ship actually shows up -- see TickTouring's no-ground-route branch.
+		// Ticket booked but still HELD: the group keeps scouting reachable ground on our own side
+		// until a vessel is genuinely assigned -- see TickTouring's no-ground-route branch.
 		bool ferryArmed;
+
+		// Which spawn the booked crossing is FOR. Booking advances spawnCursor on purpose (so the
+		// squad tours other spawns while it waits for a ship), which means the cursor no longer points
+		// at the spawn we are crossing to. Without remembering it here, a squad that landed went
+		// straight to Posting and held station on the beach instead of sweeping the spawn it had just
+		// crossed the sea for -- confirmed 2026-07-29: all five scouts ashore, standing still.
+		int ferrySpawnIndex = -1;
 
 		public AotScoutMission(AotOperationsBotModule ops, int groupIndex, List<CPos> spawns)
 			: base(ops, $"scouts-{groupIndex}")
@@ -1781,7 +1126,8 @@ namespace OpenRA.Mods.Common.Traits
 
 		public override void OnUnitAssigned(Actor a)
 		{
-			if (ferry != null && ferry.TryClaim(a))
+			// The transit service owns every ship now; a vessel filed here would be stranded.
+			if (ReturnStrayNavalSupport(a))
 				return;
 
 			base.OnUnitAssigned(a);
@@ -1791,16 +1137,18 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			if (Units.Count == 0 && Ops.OpenRequests(this) == 0)
 			{
-				ferry?.Release();
+				Ops.Transit.Cancel(ticket);
+				ticket = null;
 				Done = true;
 				return;
 			}
 
-			// A transport finally exists for the spawn we couldn't reach by land -- stop whatever
-			// touring/holding we were doing meanwhile and go make the crossing.
-			if (ferryArmed && phase != Phase.Ferrying && ferry != null && ferry.HasShip)
+			// A vessel is genuinely on its way for the spawn we couldn't reach by land -- release the
+			// hold so the service can walk the squad to the staging ground, and stop touring.
+			if (ferryArmed && phase != Phase.Ferrying && ticket != null && ticket.VesselAssigned)
 			{
-				Log("transport available -> heading to the beach to cross");
+				Log("transport assigned -> handing the squad to the transit service");
+				ticket.Hold = false;
 				phase = Phase.Ferrying;
 			}
 
@@ -1838,31 +1186,65 @@ namespace OpenRA.Mods.Common.Traits
 				case Phase.Touring: TickTouring(bot); break;
 
 				case Phase.Ferrying:
-					var result = ferry.Tick(bot, Units);
-					if (result == FerryHelper.Result.Ashore)
+					// The service moves the squad from here: staging ground -> boarding lane -> ship ->
+					// far staging ground. This mission only watches its ticket.
+					if (ticket == null || ticket.Cancelled)
+					{
+						ferryArmed = false;
+						phase = Phase.Touring;
+					}
+					else if (ticket.Complete)
 					{
 						// Ashore on the FAR side now, outside our own base-side reachable set by
 						// definition -- resume touring the same spawn from here with the reachability
 						// requirement dropped, exactly like AotRegularWaveMission's `ashore` flag.
+						Log($"crossed: {ticket.Delivered.Count} unit(s) ashore -> sweeping the spawn we crossed for");
 						ashoreForCurrentSpawn = true;
 						ferryArmed = false;
 						currentWaypoints = null;
+						ticket = null;
 
-						// Hand the transports back at once -- the fleet is globally capped and other groups are
-						// queued behind it. A fresh FerryHelper is created if a later spawn needs another crossing.
-						ferry.Release();
-						ferry = null;
+						// Rewind to the spawn this crossing was for. Booking had already advanced the
+						// cursor past it so the squad could tour meanwhile.
+						if (ferrySpawnIndex >= 0)
+						{
+							spawnCursor = ferrySpawnIndex;
+							ferrySpawnIndex = -1;
+						}
+
 						phase = Phase.Touring;
 					}
-					else if (result == FerryHelper.Result.Failed)
+					else if (ticket.Failed)
 					{
-						// Couldn't get anyone across -- give up on this one spawn (not the whole
-						// mission) and move on to the next, same as the pre-existing "no waypoints"
-						// skip behaviour for a spawn with no ground route at all.
+						// Part of the squad is already across: scout with those rather than abandoning
+						// them on a foreign shore with no orders -- that is exactly how units ended up
+						// standing around. Same rule the attack wave uses.
+						if (ticket.Delivered.Count > 0)
+						{
+							Log($"crossing failed with {ticket.Delivered.Count} unit(s) ashore -> sweeping short-handed");
+							ashoreForCurrentSpawn = true;
+							currentWaypoints = null;
+							ferryArmed = false;
+							ticket = null;
+
+							if (ferrySpawnIndex >= 0)
+							{
+								spawnCursor = ferrySpawnIndex;
+								ferrySpawnIndex = -1;
+							}
+
+							phase = Phase.Touring;
+							break;
+						}
+
+						// Nobody made it -- give up on this one spawn (not the whole mission) and move
+						// on to the next, same as the pre-existing "no waypoints" skip behaviour.
+						Log("crossing failed -> skipping this spawn");
 						spawnCursor++;
 						currentWaypoints = null;
 						ashoreForCurrentSpawn = false;
 						ferryArmed = false;
+						ticket = null;
 						phase = Phase.Touring;
 					}
 
@@ -1902,19 +1284,20 @@ namespace OpenRA.Mods.Common.Traits
 					// attempted once per spawn (not yet ashore there) so a genuinely land-locked-with-
 					// no-coast spawn doesn't retry the ferry search forever.
 					//
-					// Arm the ferry (which requests the transport) but do NOT switch to Ferrying yet:
-					// marching to the beach now would just park the squad there doing nothing for as
-					// long as the AI takes to afford a ship -- on a poor spawn that can be the whole
-					// match (User 2026-07-24: "mindestens die scouts sollten ja zügig los marschieren
-					// während solche gebäude gebaut werden"). Keep touring reachable ground instead;
-					// Tick() flips to Ferrying the moment a transport actually exists.
+					// Book a HELD ticket: it requests a vessel right away, but the service must not walk
+					// the squad to the staging ground yet -- doing so would park it there doing nothing
+					// for as long as the AI takes to afford a ship, on a poor spawn the whole match
+					// (User 2026-07-24: "mindestens die scouts sollten ja zügig los marschieren während
+					// solche gebäude gebaut werden"). Keep touring reachable ground instead; Tick()
+					// releases the hold the moment a vessel is actually assigned.
 					if (!ashoreForCurrentSpawn && !ferryArmed)
 					{
-						ferry ??= new FerryHelper(this, Ops, Log);
-						if (ferry.TryStart(Ops.BaseCentre(), spawn))
+						ticket = Ops.Transit.Request(this, Units, spawn, AotTransitPriority.Scout, hold: true);
+						if (ticket != null)
 						{
 							ferryArmed = true;
-							Log("no ground route -> transport requested, scouting reachable ground meanwhile");
+							ferrySpawnIndex = spawnCursor;
+							Log("no ground route -> crossing booked, scouting reachable ground meanwhile");
 						}
 					}
 
@@ -1946,8 +1329,15 @@ namespace OpenRA.Mods.Common.Traits
 				return;
 			}
 
-			if (live.All(a => a.IsIdle))
-				AttackMoveGroup(bot, live, target);
+			// Order whoever is ready, rather than waiting for the WHOLE squad to fall idle. Demanding
+			// all-idle meant a single straggler -- one unit still walking in from the landing point, or
+			// caught in a nudge -- held the entire group in place, which is why a squad that had fully
+			// landed still stood on the beach doing nothing (User 2026-07-29: "die scouts landen an und
+			// stehen erstmal lange rum ... es waren alle 5 drüben"). Cohesion is preserved anyway: the
+			// waypoint only advances on the group's CENTROID, so the leaders wait up at each stop.
+			var ready = live.Where(a => a.IsIdle).ToList();
+			if (ready.Count > 0)
+				AttackMoveGroup(bot, ready, target);
 		}
 
 		// requireReachable: true for the normal own-base-side sweep (a cell must be in the AI's own
@@ -2000,10 +1390,9 @@ namespace OpenRA.Mods.Common.Traits
 		Phase phase = Phase.Forming;
 		int formingTicks;
 
-		// Derricks across water are now valid targets (User 2026-07-24) -- the squad crosses with a
-		// transport exactly like a scout group or an attack wave. Lazily created: only a derrick with
-		// no land route ever builds a ferry.
-		FerryHelper ferry;
+		// Derricks across water are valid targets (User 2026-07-24) -- the squad books a crossing with
+		// the transit service exactly like a scout group or an attack wave, and owns no ships itself.
+		AotTransitTicket ticket;
 		bool ashore;
 
 		public AotDerrickMission(AotOperationsBotModule ops, Actor derrick)
@@ -2025,10 +1414,10 @@ namespace OpenRA.Mods.Common.Traits
 
 		List<Actor> Escorts() => Units.Where(a => !Ops.Info.EngineerTypes.Contains(a.Info.Name) && !Ops.CannotOrder(a)).ToList();
 
-		// Transports belong to the ferry, not to the capture squad -- see FerryHelper.TryClaim.
 		public override void OnUnitAssigned(Actor a)
 		{
-			if (ferry != null && ferry.TryClaim(a))
+			// The transit service owns every ship now; a vessel filed here would be stranded.
+			if (ReturnStrayNavalSupport(a))
 				return;
 
 			base.OnUnitAssigned(a);
@@ -2039,14 +1428,16 @@ namespace OpenRA.Mods.Common.Traits
 			if (Derrick.IsDead || !Derrick.IsInWorld)
 			{
 				Log("derrick destroyed -> mission over");
-				ferry?.Release();
+				Ops.Transit.Cancel(ticket);
+				ticket = null;
 				Finish();
 				return;
 			}
 
 			if (Units.Count == 0 && Ops.OpenRequests(this) == 0)
 			{
-				ferry?.Release();
+				Ops.Transit.Cancel(ticket);
+				ticket = null;
 				Done = true;
 				return;
 			}
@@ -2072,26 +1463,38 @@ namespace OpenRA.Mods.Common.Traits
 
 				case Phase.Ferrying:
 				{
-					var result = ferry.Tick(bot, Units);
-					if (result == FerryHelper.Result.Ashore)
+					if (ticket == null || ticket.Cancelled)
+					{
+						Log("crossing lost -> mission over");
+						Finish();
+					}
+					else if (ticket.Complete)
 					{
 						// On the far shore now -- outside our own base-side reachable set by definition,
 						// so the move leg must stop asking for ground reachability from here on.
 						ashore = true;
-
-						// Free the transports immediately: this mission ends in PERMANENT guard duty, so holding
-						// them would lock the globally capped fleet away for the rest of the match.
-						ferry.Release();
-						ferry = null;
-
+						ticket = null;
 						phase = Phase.Moving;
 						Log("ashore -> resuming approach to the derrick");
 					}
-					else if (result == FerryHelper.Result.Failed)
+					else if (ticket.Failed)
 					{
-						Log("could not ferry the capture squad across -> mission over");
-						ferry.Release();
-						Finish();
+						// The engineer is what the squad is FOR: without it ashore there is nothing to
+						// capture with, so a partial delivery is only worth continuing if it made it.
+						var engineerAshore = ticket.Delivered.Any(a => Ops.Info.EngineerTypes.Contains(a.Info.Name));
+						if (engineerAshore)
+						{
+							Log($"crossing failed but the engineer is ashore ({ticket.Delivered.Count} unit(s)) -> continuing");
+							ashore = true;
+							ticket = null;
+							phase = Phase.Moving;
+						}
+						else
+						{
+							Log("could not get the capture squad across -> mission over");
+							ticket = null;
+							Finish();
+						}
 					}
 
 					break;
@@ -2153,15 +1556,15 @@ namespace OpenRA.Mods.Common.Traits
 			// side and reachability from our own base no longer says anything useful.
 			if (!ashore && !Ops.Intel.IsReachable(Derrick.Location))
 			{
-				ferry ??= new FerryHelper(this, Ops, Log);
-				if (ferry.TryStart(Ops.BaseCentre(), Derrick.Location))
+				ticket = Ops.Transit.Request(this, Units, Derrick.Location, AotTransitPriority.Expansion);
+				if (ticket != null)
 				{
 					phase = Phase.Ferrying;
-					Log($"no ground route to derrick @ {Derrick.Location} -> ferrying the capture squad across");
+					Log($"no ground route to derrick @ {Derrick.Location} -> crossing booked as ticket #{ticket.Id}");
 					return;
 				}
 
-				Log($"derrick @ {Derrick.Location} is unreachable and no ferry route exists -> mission over");
+				Log($"derrick @ {Derrick.Location} is unreachable and no crossing exists -> mission over");
 				Finish();
 				return;
 			}
@@ -2486,7 +1889,13 @@ namespace OpenRA.Mods.Common.Traits
 			if (available.Count == 0)
 				return;
 
-			var want = Math.Clamp(threats.Count * Ops.Info.ProtectionResponseRatio, Ops.Info.ProtectionMinResponse, available.Count);
+			// NOT Math.Clamp: it throws when min > max, and that is exactly what happens once the
+			// garrison is smaller than ProtectionMinResponse (default 2). With a single defender left,
+			// Clamp(value, 2, 1) crashed the match -- reported 2026-07-27 right after the player killed
+			// most of the AI's units. Availability is the hard ceiling; the minimum only applies as far
+			// as there are units to send.
+			var want = Math.Min(available.Count,
+				Math.Max(Ops.Info.ProtectionMinResponse, threats.Count * Ops.Info.ProtectionResponseRatio));
 			var threatCentre = ThreatCentroid(threats);
 			var responders = available.OrderBy(a => (a.Location - threatCentre).LengthSquared).Take(want).ToList();
 
