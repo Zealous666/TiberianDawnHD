@@ -81,3 +81,19 @@ T03.Transformable:
 T13.Transformable:
 	TransformsNearResources:
 		Delay: 15000, 20000
+
+# Blossom-Tree-Wachstum (SeedsResource) von 55/55/110 auf 100 Ticks fuer alle drei
+# (User-Wunsch 2026-07-30). trees.yaml selbst ist Teil der Engine-Kopie und gitignored
+# (siehe .gitignore) -- ein direkter Edit dort ginge beim naechsten Engine-Neubezug
+# verloren, deshalb hier ueberschrieben, gleiches Muster wie T03/T13.Transformable oben.
+SPLIT2:
+	SeedsResource:
+		Interval: 100
+
+SPLIT3:
+	SeedsResource:
+		Interval: 100
+
+SPLITBLUE:
+	SeedsResource:
+		Interval: 100

@@ -811,6 +811,14 @@ aot-HoverAAGun:
 			Concrete: 30
 		DamageTypes: Prone50Percent, TriggerProne, DefaultDeath
 
+# Mammoth-Kanone: Blockable defaultet auf true (Bullet.cs) - ein Mammoth in Fire Position
+# hinter eigener Pillbox/GuardTower/CamoPillbox/Wall konnte dadurch nicht ueber sie hinweg
+# feuern und detonierte stattdessen an der eigenen Verteidigung. Gleicher Fund/Fix wie bei
+# FTUR (siehe aot-FturFlame oben, 2026-07-05: "muss ueber Zaeune feuern - kommt nicht durch").
+120mmDual:
+	Projectile: Bullet
+		Blockable: false
+
 aot-HoverAAGun.AA:
 	Inherits: APCGun.AA
 	Burst: 2
