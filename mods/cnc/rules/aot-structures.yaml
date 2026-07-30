@@ -271,8 +271,28 @@ aot-ore-mine:
 		DockAngle: 0
 		DockOffset: 0,-1c512,0
 	WithBuildingBib:
+	# Vergroesserte Nicht-bebaubar-Zone: spawnt bei Spielstart einen unsichtbaren Begleit-Aktor
+	# (aot-ore-mine-keepout, 8x8) zentriert auf die 2x2-Mine (Offset -3,-3 = 3-Zellen-Ring rundherum).
+	# Bewusst ueber einen SEPARATEN Aktor statt groesserer Building.Dimensions: sonst wuerden Bib
+	# (WithBuildingBib leitet Breite/Zeilen aus Dimensions ab) und Render-Zentrum mitwandern.
+	SpawnCompanionActor:
+		Actor: aot-ore-mine-keepout
+		Offset: -3,-3
 	MapEditorData:
 		Categories: Neutral
+# === Ende aotmod ===
+
+# aot-ore-mine-keepout: unsichtbarer, passierbarer Sperr-Footprint fuer die Ore Mine.
+# Reiner 8x8-'='-Footprint (OccupiedPassable): registriert in BuildingInfluence -> blockiert
+# jede Bauplatzierung im Ring, ist aber NICHT in OccupiedTiles -> Einheiten/Sammler fahren durch.
+# Kein Sprite/Bib/Health/Selection -> aendert Optik, Bib und Zentrierung der Mine nicht.
+# Wird von SpawnCompanionActor (auf der Mine) zur Laufzeit erzeugt, nie im Editor platziert.
+aot-ore-mine-keepout:
+	Building:
+		Footprint: ======== ======== ======== ======== ======== ======== ======== ========
+		Dimensions: 8,8
+		AllowInvalidPlacement: true
+	Interactable:
 # === Ende aotmod ===
 
 
