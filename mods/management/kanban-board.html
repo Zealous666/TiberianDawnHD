@@ -138,7 +138,6 @@
     padding: 10px 12px;
     font-size: 13.5px;
     line-height: 1.4;
-    cursor: grab;
     border: 1px solid var(--border);
     white-space: pre-wrap;
     word-break: break-word;
@@ -157,6 +156,21 @@
   }
   .card:hover .del { display: inline; }
   .card .del:hover { color: #e26060; }
+  /* Eigener Griff statt der ganzen Karte -- Text soll normal markierbar bleiben. */
+  .card .drag-handle {
+    position: absolute;
+    top: 4px;
+    left: 6px;
+    display: none;
+    color: var(--text-dim);
+    cursor: grab;
+    font-size: 13px;
+    line-height: 1;
+    user-select: none;
+  }
+  .card:hover .drag-handle { display: inline; }
+  .card .drag-handle:hover { color: var(--text); }
+  .card .drag-handle:active { cursor: grabbing; }
   .card-title {
     font-weight: 500;
   }
@@ -261,6 +275,27 @@
   }
   .checklist-item:hover .del-item { display: inline; }
   .checklist-item .del-item:hover { color: #e26060; }
+  /* --- Drag & Drop der Checklisten-Punkte (Reihenfolge innerhalb einer Karte) --- */
+  .checklist-item .grip {
+    visibility: hidden;
+    flex-shrink: 0;
+    color: var(--text-dim);
+    font-size: 11px;
+    line-height: 1.35;
+    cursor: grab;
+    user-select: none;
+    /* Negativer Rand: der Griff schiebt Checkbox und Text nicht zur Seite, sondern
+       erscheint links im vorhandenen Karten-Innenabstand. Sonst wuerde die ganze
+       Liste beim Hovern springen. */
+    margin-left: -9px;
+    width: 9px;
+  }
+  .checklist-item:hover .grip { visibility: visible; }
+  .checklist-item .grip:active { cursor: grabbing; }
+  .checklist-item.dragging-item { opacity: 0.4; }
+  /* Einfuegemarke ober-/unterhalb der Zeile, unter der der Zeiger gerade steht. */
+  .checklist-item.drop-above { box-shadow: inset 0 2px 0 0 var(--accent); }
+  .checklist-item.drop-below { box-shadow: inset 0 -2px 0 0 var(--accent); }
   .checklist-add-btn {
     background: none;
     border: none;
@@ -534,11 +569,20 @@ function renderColumn(col) {
   const cardsWrap = document.createElement("div");
   cardsWrap.className = "cards";
   cardsWrap.dataset.colId = col.id;
-  cardsWrap.ondragover = (e) => { e.preventDefault(); cardsWrap.classList.add("drag-over"); };
+  cardsWrap.ondragover = (e) => {
+    // Beim Sortieren innerhalb einer Checkliste darf die Spalte nicht als Dropziel
+    // aufleuchten -- sonst sieht es aus, als wuerde die ganze Karte verschoben.
+    if (dragChecklistItem) return;
+    e.preventDefault();
+    cardsWrap.classList.add("drag-over");
+  };
   cardsWrap.ondragleave = () => cardsWrap.classList.remove("drag-over");
   cardsWrap.ondrop = (e) => {
-    e.preventDefault();
     cardsWrap.classList.remove("drag-over");
+    // Checklisten-Punkt ausserhalb seiner Liste fallengelassen: nichts tun. Ohne diese
+    // Sperre kaeme unten die Item-ID als Karten-ID an.
+    if (dragChecklistItem) { dragChecklistItem = null; clearChecklistDropMarks(); return; }
+    e.preventDefault();
     const cardId = e.dataTransfer.getData("text/plain");
     moveCard(cardId, col.id);
   };
@@ -586,8 +630,31 @@ function renderCard(card, colId) {
 
   const el = document.createElement("div");
   el.className = "card";
-  el.draggable = true;
+  // Nur ueber den Griff ziehbar (siehe unten), nicht mehr die ganze Karte -- sonst laesst
+  // sich der Kartentext nicht mehr per Maus markieren/selektieren.
+  el.draggable = false;
   el.dataset.cardId = card.id;
+
+  const handle = document.createElement("span");
+  handle.className = "drag-handle";
+  handle.textContent = "⠿";
+  handle.title = "Zum Verschieben ziehen";
+  // Waehrend des Griffs gedrueckt gehalten wird, ist die Karte ziehbar; bei einem reinen
+  // Klick (mousedown+mouseup ohne Drag) wird das im mouseup-Handler wieder zurueckgesetzt,
+  // sonst bliebe die Karte danach ueberall ziehbar haengen. { once: true } auf document,
+  // damit sich der Listener nach jedem Griff selbst entfernt -- ohne das wuerde bei jedem
+  // render() (das den Kartenbaum komplett neu aufbaut) ein weiterer Listener anwachsen.
+  handle.onmousedown = (e) => {
+    e.stopPropagation();
+    el.draggable = true;
+    document.addEventListener("mouseup", () => {
+      // Erst nach diesem Tick pruefen: ein tatsaechlich gestarteter Drag setzt "dragging"
+      // synchron in dragstart, aber die dragend-Bereinigung laeuft nicht immer vor diesem
+      // mouseup. Ohne den setTimeout wuerde ein echter Drag hier faelschlich abgebrochen.
+      setTimeout(() => { if (!el.classList.contains("dragging")) el.draggable = false; }, 0);
+    }, { once: true });
+  };
+  el.appendChild(handle);
 
   const view = document.createElement("div");
   view.className = "card-view";
@@ -624,9 +691,40 @@ function renderCard(card, colId) {
     e.dataTransfer.setData("text/plain", card.id);
     setTimeout(() => el.classList.add("dragging"), 0);
   };
-  el.ondragend = () => el.classList.remove("dragging");
+  el.ondragend = () => {
+    el.classList.remove("dragging");
+    el.draggable = false; // Griff losgelassen -> Karte wieder unziehbar, bis erneut gepackt wird.
+  };
 
   return el;
+}
+
+// Laufender Checklisten-Drag: { cardId, itemId }. Bewusst eine Variable statt dataTransfer --
+// dessen Inhalt ist waehrend dragover aus Sicherheitsgruenden nicht lesbar, wir muessen aber
+// schon dort unterscheiden koennen, ob gerade eine Karte oder ein Checklisten-Punkt gezogen
+// wird (nur dann darf die Spalte den Drop NICHT als Kartenverschiebung behandeln).
+let dragChecklistItem = null;
+
+function moveChecklistItem(card, fromId, toId, placeAfter) {
+  const from = card.checklist.findIndex(i => i.id === fromId);
+  if (from < 0 || fromId === toId) return false;
+
+  const [moved] = card.checklist.splice(from, 1);
+  // Zielindex NACH dem Entfernen neu suchen: durch das splice oben verschieben sich
+  // alle Positionen hinter der Ursprungsposition um eins.
+  const to = card.checklist.findIndex(i => i.id === toId);
+  if (to < 0) {
+    card.checklist.splice(from, 0, moved); // Ziel weg -> Ausgangszustand wiederherstellen
+    return false;
+  }
+
+  card.checklist.splice(placeAfter ? to + 1 : to, 0, moved);
+  return true;
+}
+
+function clearChecklistDropMarks() {
+  document.querySelectorAll(".checklist-item.drop-above, .checklist-item.drop-below")
+    .forEach(n => n.classList.remove("drop-above", "drop-below"));
 }
 
 function renderChecklist(card, colId) {
@@ -644,6 +742,61 @@ function renderChecklist(card, colId) {
     card.checklist.forEach(item => {
       const row = document.createElement("div");
       row.className = "checklist-item";
+      row.draggable = true;
+      row.dataset.itemId = item.id;
+
+      const grip = document.createElement("span");
+      grip.className = "grip";
+      grip.textContent = "⠿";
+      grip.title = "Zum Sortieren ziehen";
+      row.appendChild(grip);
+
+      row.ondragstart = (e) => {
+        // PFLICHT: die Karte selbst ist draggable. Ohne stopPropagation wuerde ihr
+        // ondragstart mitfeuern, die Karten-ID in dataTransfer schreiben und der
+        // Spalten-Drop die ganze Karte verschieben.
+        e.stopPropagation();
+        dragChecklistItem = { cardId: card.id, itemId: item.id };
+        // Firefox startet einen Drag nur, wenn dataTransfer befuellt ist.
+        e.dataTransfer.setData("text/plain", item.id);
+        e.dataTransfer.effectAllowed = "move";
+        setTimeout(() => row.classList.add("dragging-item"), 0);
+      };
+
+      row.ondragend = () => {
+        dragChecklistItem = null;
+        row.classList.remove("dragging-item");
+        clearChecklistDropMarks();
+      };
+
+      row.ondragover = (e) => {
+        if (!dragChecklistItem || dragChecklistItem.cardId !== card.id) return;
+        e.preventDefault();
+        e.stopPropagation(); // sonst markiert sich die Spalte als Karten-Dropziel
+        e.dataTransfer.dropEffect = "move";
+
+        clearChecklistDropMarks();
+        if (item.id === dragChecklistItem.itemId) return;
+
+        // Obere/untere Haelfte der Zeile entscheidet, ob davor oder dahinter einsortiert wird.
+        const r = row.getBoundingClientRect();
+        const after = e.clientY > r.top + r.height / 2;
+        row.classList.add(after ? "drop-below" : "drop-above");
+      };
+
+      row.ondrop = (e) => {
+        if (!dragChecklistItem || dragChecklistItem.cardId !== card.id) return;
+        e.preventDefault();
+        e.stopPropagation();
+
+        const r = row.getBoundingClientRect();
+        const after = e.clientY > r.top + r.height / 2;
+        const changed = moveChecklistItem(card, dragChecklistItem.itemId, item.id, after);
+
+        dragChecklistItem = null;
+        clearChecklistDropMarks();
+        if (changed) { save(); render(); }
+      };
 
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
@@ -658,6 +811,10 @@ function renderChecklist(card, colId) {
       label.className = "checklist-text" + (item.done ? " done" : "");
       label.textContent = item.text;
       label.onclick = () => {
+        // Solange das Textfeld offen ist, darf die Zeile nicht ziehbar sein: sonst faengt
+        // der Drag das Markieren von Text im Eingabefeld ab. render() baut die Zeile
+        // danach ohnehin neu auf, der Wert wird also nicht dauerhaft zurueckgesetzt.
+        row.draggable = false;
         const input = document.createElement("input");
         input.type = "text";
         input.className = "checklist-text-input";
