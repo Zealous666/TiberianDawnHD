@@ -179,13 +179,22 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Global self-defense (User 2026-07-30/31): staged units -- pooled/idle, Module 1's chokepoint/",
 			"secondary reserve while it's actually standing post, or a Derrick's permanent guard -- react",
 			"to threats INCLUDING aircraft (a Hind overhead is very much a threat to an AA-capable unit",
-			"standing in the base). Pooled and reserve units react to any threat anywhere in the flooded",
-			"base region (Intel.IsReachable), not a local radius; a Derrick's guard (often outside that",
-			"region entirely) uses this radius around its own post instead. Deliberately does NOT cover",
-			"anything else mid-mission (forming/moving/executing/retreating waves, scouts, air raids, a",
-			"Derrick squad still in transit) -- interrupting a unit about to depart for its own mission is",
-			"exactly what must NOT happen. 0 disables the whole pass.")]
+			"standing in the base). Pooled and reserve units react to any threat within SelfDefenseRegion",
+			"Radius of BaseCentre() (AND still ground-reachable), not a tiny per-unit radius; a Derrick's",
+			"guard (often outside that region entirely) uses THIS radius around its own post instead.",
+			"Deliberately does NOT cover anything else mid-mission (forming/moving/executing/retreating",
+			"waves, scouts, air raids, a Derrick squad still in transit) -- interrupting a unit about to",
+			"depart for its own mission is exactly what must NOT happen. 0 disables the whole pass.")]
 		public readonly int SelfDefenseScanRadius = 8;
+
+		[Desc("Global self-defense region radius (cells) around BaseCentre() (User 2026-07-31 fix): Intel.",
+			"IsReachable is NOT 'the base' -- it's an UNCAPPED flood-fill of the entire walkable landmass,",
+			"which on an open map can reach most of the map, including near enemy bases. Using it alone as",
+			"the self-defense threat scope made every AI's reserve react to ANY enemy unit anywhere on that",
+			"landmass, and in a multi-bot match every bot's reserve reacting to every other bot's units the",
+			"same way turned into map-wide AI-vs-AI free-for-alls the instant this shipped. Threats and",
+			"pool/reserve candidates are both additionally required to be within this radius of the base.")]
+		public readonly int SelfDefenseRegionRadius = 40;
 
 		[Desc("Emergency defense production (User 2026-07-31): while the base is under attack (any threat",
 			"detected in the self-defense region scan above) and nothing of this chain is currently in",
@@ -1060,24 +1069,36 @@ namespace OpenRA.Mods.Common.Traits
 			if (Info.SelfDefenseScanRadius <= 0)
 				return;
 
-			// Pool + Module 1's standing reserve: react to ANY threat anywhere in the flooded base region
-			// (User 2026-07-30: "die gesamte geflutete base-region sollte immer ... als schützenswert
-			// gelten"), not just a small radius around each individual unit -- a per-unit radius meant an
-			// idle unit standing even a little way from the actual breach never reacted at all (User
-			// 2026-07-31 report: infantry stood doing nothing while the base was under attack elsewhere).
-			// Confirmed via live log that the pool is essentially ALWAYS empty (every combat unit is
-			// permanently claimed by some mission) -- the chokepoint/secondary reserve, previously
-			// excluded as "mid-mission", turned out to BE the units standing idle in every report; the
-			// user explicitly asked to include it too ("es bringt nichts, wenn die reserve dann genau da
-			// nicht als reserve eingreift wenn schon alles andere tot ist"). Reuses Module 5's own
-			// proportional-response knobs (ProtectionResponseRatio/MinResponse) so a single scout doesn't
-			// empty the whole reserve.
-			var poolCandidates = pool.Where(a => !CannotOrder(a) && Intel.IsReachable(a.Location)).ToList();
+			// Pool + Module 1's standing reserve: react to ANY threat within the base REGION (User
+			// 2026-07-30: "die gesamte geflutete base-region sollte immer ... als schützenswert gelten"),
+			// not just a small radius around each individual unit -- a per-unit radius meant an idle unit
+			// standing even a little way from the actual breach never reacted at all (User 2026-07-31
+			// report: infantry stood doing nothing while the base was under attack elsewhere). Confirmed
+			// via live log that the pool is essentially ALWAYS empty (every combat unit is permanently
+			// claimed by some mission) -- the chokepoint/secondary reserve, previously excluded as
+			// "mid-mission", turned out to BE the units standing idle in every report; the user explicitly
+			// asked to include it too. Reuses Module 5's own proportional-response knobs
+			// (ProtectionResponseRatio/MinResponse) so a single scout doesn't empty the whole reserve.
+			//
+			// IMPORTANT (User 2026-07-31 follow-up: "die defense logik scheint die ganze map zu flooten,
+			// alle gegner fangen direkt an übereinander herzufallen"): Intel.IsReachable is NOT "the base"
+			// -- it's an uncapped flood-fill of the ENTIRE walkable landmass (AotMapIntelBotModule.
+			// RefreshReachability has no distance/budget cap at all, unlike the base planner's own Pocket).
+			// Using it alone as the threat scope meant this reacted to any enemy anywhere on that landmass,
+			// and in a multi-bot match every bot's reserve doing that to every OTHER bot's units the same
+			// way turned into map-wide AI-vs-AI free-for-alls. Both candidates and threats are now also
+			// bounded to SelfDefenseRegionRadius of BaseCentre() -- reachability still applies on top (so
+			// nobody's ordered to swim), it just isn't the only bound anymore.
+			var baseCentre = BaseCentre();
+			var regionRadiusSq = Info.SelfDefenseRegionRadius * Info.SelfDefenseRegionRadius;
+			bool InBaseRegion(CPos c) => Intel.IsReachable(c) && (c - baseCentre).LengthSquared <= regionRadiusSq;
+
+			var poolCandidates = pool.Where(a => !CannotOrder(a) && InBaseRegion(a.Location)).ToList();
 			foreach (var s in Missions.OfType<AotStartingUnitsMission>())
-				poolCandidates.AddRange(s.ReserveUnits().Where(a => Intel.IsReachable(a.Location)));
+				poolCandidates.AddRange(s.ReserveUnits().Where(a => InBaseRegion(a.Location)));
 
 			var threats = World.Actors
-				.Where(e => AotOpsUtils.IsPreferredEnemyUnit(Player, e, true) && e.CanBeViewedByPlayer(Player) && Intel.IsReachable(e.Location))
+				.Where(e => AotOpsUtils.IsPreferredEnemyUnit(Player, e, true) && e.CanBeViewedByPlayer(Player) && InBaseRegion(e.Location))
 				.ToList();
 
 			// Throttled diagnostic (User 2026-07-31 report: "infantry stand around doing nothing"):
