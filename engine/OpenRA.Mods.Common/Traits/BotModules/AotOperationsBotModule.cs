@@ -205,12 +205,14 @@ namespace OpenRA.Mods.Common.Traits
 		public readonly int SelfDefenseRegionRadius = 40;
 
 		[Desc("Emergency defense production (User 2026-07-31): while the base is under attack (any threat",
-			"detected in the self-defense region scan above) and nothing of this chain is currently in",
-			"production, rush a batch straight off RocketInfantryTypes (cheap, fast, anti-everything) --",
-			"bypassing the normal cash reserve/production-pause gates entirely, the same way TryOreBoost",
-			"does. Produced units are NOT claimed by any mission, so they fall into the shared pool and are",
-			"picked up by the self-defense pass itself the very next cycle, sending them straight at the",
-			"threat. Repeats in fresh batches for as long as the base remains under attack. 0 disables it.")]
+			"detected in the self-defense region scan above) and Module 5 (Base Defense) has no emergency",
+			"batch outstanding, request a batch of RocketInfantryTypes (cheap, fast, anti-everything) --",
+			"exempt from the cash reserve (an active attack can't wait for cash to build back up), but",
+			"otherwise queued through the normal, FAIR requests pipeline like everything else. An earlier",
+			"version fired a raw StartProduction order that cut ahead of every other pending request on the",
+			"same production queue -- confirmed to permanently starve Module 4's Derrick mission (its",
+			"mandatory Engineer request shares that queue) for an entire match. Repeats in fresh batches for",
+			"as long as the base remains under attack. 0 disables it; requires EnableBaseDefense.")]
 		public readonly int EmergencyDefenseBatchSize = 5;
 
 		// ---- Feature flags (one per operation type, individually testable) ----
@@ -1327,6 +1329,16 @@ namespace OpenRA.Mods.Common.Traits
 		// warten bis er los legt").
 		public const string FerryEscortRole = "ferry-escort";
 
+		// Role tag for emergency defense production (see TryEmergencyDefenseProduction) -- exempt from
+		// the cash reserve for the same reason as FerryRole (an active attack can't wait for cash to
+		// build back up), but goes through the normal requests queue instead of a raw StartProduction
+		// order like it originally did (User 2026-07-31: that bypassed EVERY other request's priority
+		// entirely, cutting to the front of the shared Infantry queue on every single attack and
+		// permanently starving longer-standing requests sharing that queue -- confirmed via log: 13
+		// batches of 5 fired this match alone, and the Derrick mission's mandatory Engineer request,
+		// stuck behind them the whole time, was claimed ZERO times all session).
+		public const string EmergencyDefenseRole = "emergency-defense";
+
 		public void QueueRequest(AotMission mission, string role, string[] chain, int count)
 		{
 			if (count <= 0 || chain.Length == 0)
@@ -1447,33 +1459,37 @@ namespace OpenRA.Mods.Common.Traits
 		}
 
 		// Emergency defense production (User 2026-07-31): the base is under attack, so rush a batch of
-		// RocketInfantryTypes straight off the production queue. Fires a bare StartProduction order
-		// directly, same pattern as TryOreBoost -- bypasses the cash reserve/production-pause gates in
-		// PumpProduction entirely (an emergency doesn't wait its turn), and the produced troopers are
-		// NOT claimed by any mission, so they land in the shared pool and get swept up by
-		// GlobalUnitSelfDefense's own pool dispatch the very next cycle. Only fires a fresh batch once
-		// nothing of this chain is currently queued anywhere, so it naturally repeats in batches for as
-		// long as GlobalUnitSelfDefense keeps calling it (i.e. for as long as the base stays under
-		// attack) without needing its own separate cooldown/state tracking.
+		// RocketInfantryTypes.
+		//
+		// FIX (User 2026-07-31 follow-up, "seit wir die rocket für defense rein genommen haben ... tauchte
+		// er nicht auf"): this originally fired a bare StartProduction order directly (same pattern as
+		// TryOreBoost), bypassing PumpProduction's whole requests queue -- which meant it cut to the FRONT
+		// of the shared Infantry queue on every single attack, ahead of every already-pending request that
+		// happened to share it. Confirmed via log: 13 batches of 5 fired in one match, and Module 4's
+		// Derrick mission -- whose mandatory Engineer request (EngineerTypes) shares that exact queue --
+		// never got claimed even ONCE all session, permanently stuck in Forming as a direct result. Now
+		// goes through the normal QueueRequest/PumpProduction pipeline like everything else (still exempt
+		// from the cash reserve via EmergencyDefenseRole, since an active attack can't wait for cash to
+		// build back up), so it takes its turn in the SAME fair, insertion-order queue as any other
+		// mission's request instead of always winning outright. Owned by Module 5 (Base Defense) if
+		// enabled -- the natural home for "extra defenders"; its own ScanAndRespond/MaintainGarrison
+		// already knows how to use them. Only queues a fresh batch once its own emergency requests are
+		// fully spent (OpenRequests == 0), so it naturally repeats in batches for as long as
+		// GlobalUnitSelfDefense keeps calling it (i.e. for as long as the base stays under attack).
 		void TryEmergencyDefenseProduction(IBot bot)
 		{
 			if (Info.EmergencyDefenseBatchSize <= 0 || Info.RocketInfantryTypes.Length == 0)
 				return;
 
-			var queuesByCategory = AIUtils.FindQueuesByCategory(Player);
-			var alreadyQueued = queuesByCategory.SelectMany(g => g)
-				.Any(q => q.AllQueued().Any(i => Info.RocketInfantryTypes.Contains(i.Item)));
-			if (alreadyQueued)
+			var garrison = Missions.OfType<AotBaseDefenseMission>().FirstOrDefault();
+			if (garrison == null)
 				return;
 
-			var (name, queue) = FirstBuildable(Info.RocketInfantryTypes, queuesByCategory);
-			if (name == null || queue == null)
+			if (OpenRequests(garrison, EmergencyDefenseRole) > 0)
 				return;
 
-			for (var i = 0; i < Info.EmergencyDefenseBatchSize; i++)
-				bot.QueueOrder(Order.StartProduction(queue.Actor, name, 1));
-
-			Log($"emergency defense: base under attack -> rushing {Info.EmergencyDefenseBatchSize}x {name}");
+			QueueRequest(garrison, EmergencyDefenseRole, Info.RocketInfantryTypes, Info.EmergencyDefenseBatchSize);
+			Log($"emergency defense: base under attack -> requesting {Info.EmergencyDefenseBatchSize}x reinforcements");
 		}
 
 		// Startup priority gate for the first Regular Attack Wave (User 2026-07-22): cashflow (OreT
@@ -1550,7 +1566,7 @@ namespace OpenRA.Mods.Common.Traits
 
 			foreach (var request in requests)
 			{
-				if (!reserveMet && request.Role != FerryRole)
+				if (!reserveMet && request.Role != FerryRole && request.Role != EmergencyDefenseRole)
 					continue;
 
 				// Reconcile leaked orders: nothing of this chain is anywhere in production anymore.
