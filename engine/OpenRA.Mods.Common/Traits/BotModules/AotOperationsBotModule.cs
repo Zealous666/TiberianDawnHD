@@ -204,16 +204,27 @@ namespace OpenRA.Mods.Common.Traits
 			"for the preferred Pocket-based region once a planner exists).")]
 		public readonly int SelfDefenseRegionRadius = 40;
 
-		[Desc("Emergency defense production (User 2026-07-31): while the base is under attack (any threat",
-			"detected in the self-defense region scan above) and Module 5 (Base Defense) has no emergency",
-			"batch outstanding, request a batch of RocketInfantryTypes (cheap, fast, anti-everything) --",
-			"exempt from the cash reserve (an active attack can't wait for cash to build back up), but",
-			"otherwise queued through the normal, FAIR requests pipeline like everything else. An earlier",
-			"version fired a raw StartProduction order that cut ahead of every other pending request on the",
-			"same production queue -- confirmed to permanently starve Module 4's Derrick mission (its",
-			"mandatory Engineer request shares that queue) for an entire match. Repeats in fresh batches for",
-			"as long as the base remains under attack. 0 disables it; requires EnableBaseDefense.")]
+		[Desc("Emergency defense production (User 2026-07-31): while the base is under attack, reinforce",
+			"with RocketInfantryTypes (cheap, fast, anti-everything) -- exempt from the cash reserve (an",
+			"active attack can't wait for cash to build back up), but queued through the normal, FAIR",
+			"requests pipeline like everything else. An earlier version fired a raw StartProduction order",
+			"that cut ahead of every other pending request on the same production queue -- confirmed to",
+			"permanently starve Module 4's Derrick mission (its mandatory Engineer request shares that",
+			"queue) for an entire match.",
+			"",
+			"This is the MAXIMUM per batch, not a fixed package: the batch is sized to the number of",
+			"attackers actually detected (1 enemy scout -> 1 trooper), capped here. Originally a flat 5",
+			"per batch regardless of threat size, re-ordered indefinitely for as long as any single enemy",
+			"stood in the region -- 65 troopers in one observed match (User 2026-07-31: 'das scheint etwas",
+			"den rahmen zu sprengen'). 0 disables it; requires EnableBaseDefense.")]
 		public readonly int EmergencyDefenseBatchSize = 5;
+
+		[Desc("Hard ceiling on how many RocketInfantryTypes units the AI may own at once before emergency",
+			"defense stops producing more. The batch guard alone only prevents two batches being in flight",
+			"simultaneously -- it does nothing to stop batch after batch accumulating over a long siege,",
+			"which is what let the count run away. Counted player-wide, so troopers already committed",
+			"elsewhere (e.g. a Derrick squad's escort) count toward it too -- deliberately conservative.")]
+		public readonly int EmergencyDefenseMaxAlive = 10;
 
 		// ---- Feature flags (one per operation type, individually testable) ----
 		public readonly bool EnableStartingUnits = true;
@@ -1213,7 +1224,7 @@ namespace OpenRA.Mods.Common.Traits
 			// responder was actually available this cycle -- the base can be under attack with the
 			// reserve already fully committed, which is exactly when reinforcements matter most.
 			if (threats.Count > 0)
-				TryEmergencyDefenseProduction(bot);
+				TryEmergencyDefenseProduction(bot, threats.Count);
 
 			// Derrick guard: local radius around its OWN post instead -- a captured derrick often sits
 			// far outside the base region entirely, so the region-wide check above would never cover it.
@@ -1493,7 +1504,7 @@ namespace OpenRA.Mods.Common.Traits
 		// already knows how to use them. Only queues a fresh batch once its own emergency requests are
 		// fully spent (OpenRequests == 0), so it naturally repeats in batches for as long as
 		// GlobalUnitSelfDefense keeps calling it (i.e. for as long as the base stays under attack).
-		void TryEmergencyDefenseProduction(IBot bot)
+		void TryEmergencyDefenseProduction(IBot bot, int threatCount)
 		{
 			if (Info.EmergencyDefenseBatchSize <= 0 || Info.RocketInfantryTypes.Length == 0)
 				return;
@@ -1505,8 +1516,25 @@ namespace OpenRA.Mods.Common.Traits
 			if (OpenRequests(garrison, EmergencyDefenseRole) > 0)
 				return;
 
-			QueueRequest(garrison, EmergencyDefenseRole, Info.RocketInfantryTypes, Info.EmergencyDefenseBatchSize);
-			Log($"emergency defense: base under attack -> requesting {Info.EmergencyDefenseBatchSize}x reinforcements");
+			// Standing ceiling: without this, a batch was re-ordered every time the previous one finished
+			// for as long as ANY enemy remained in the region, with no upper bound at all (User
+			// 2026-07-31: 65 troopers observed in a single match). Counted player-wide -- see
+			// EmergencyDefenseMaxAlive.
+			var alive = World.Actors.Count(a => a.Owner == Player && !a.IsDead && a.IsInWorld
+				&& Info.RocketInfantryTypes.Contains(a.Info.Name));
+			var headroom = Info.EmergencyDefenseMaxAlive - alive;
+			if (headroom <= 0)
+				return;
+
+			// Sized to the actual attack, not a flat package: one enemy scout wandering in no longer buys
+			// a full batch. Still capped by EmergencyDefenseBatchSize and by the standing ceiling above.
+			var want = Math.Min(Math.Min(threatCount, Info.EmergencyDefenseBatchSize), headroom);
+			if (want <= 0)
+				return;
+
+			QueueRequest(garrison, EmergencyDefenseRole, Info.RocketInfantryTypes, want);
+			Log($"emergency defense: {threatCount} attacker(s) in the base region -> requesting {want}x " +
+				$"reinforcement(s) (alive={alive}/{Info.EmergencyDefenseMaxAlive})");
 		}
 
 		// Startup priority gate for the first Regular Attack Wave (User 2026-07-22): cashflow (OreT
