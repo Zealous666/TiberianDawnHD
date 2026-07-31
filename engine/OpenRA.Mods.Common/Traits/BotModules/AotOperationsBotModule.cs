@@ -187,13 +187,21 @@ namespace OpenRA.Mods.Common.Traits
 			"depart for its own mission is exactly what must NOT happen. 0 disables the whole pass.")]
 		public readonly int SelfDefenseScanRadius = 8;
 
-		[Desc("Global self-defense region radius (cells) around BaseCentre() (User 2026-07-31 fix): Intel.",
-			"IsReachable is NOT 'the base' -- it's an UNCAPPED flood-fill of the entire walkable landmass,",
-			"which on an open map can reach most of the map, including near enemy bases. Using it alone as",
-			"the self-defense threat scope made every AI's reserve react to ANY enemy unit anywhere on that",
-			"landmass, and in a multi-bot match every bot's reserve reacting to every other bot's units the",
-			"same way turned into map-wide AI-vs-AI free-for-alls the instant this shipped. Threats and",
-			"pool/reserve candidates are both additionally required to be within this radius of the base.")]
+		[Desc("Global self-defense region (User 2026-07-31 fix): Intel.IsReachable is NOT 'the base' -- it's",
+			"an UNCAPPED flood-fill of the entire walkable landmass, which on an open map can reach most of",
+			"the map, including near enemy bases. Using it alone as the self-defense threat scope made every",
+			"AI's reserve react to ANY enemy unit anywhere on that landmass, and in a multi-bot match every",
+			"bot doing that to every other bot's units turned into map-wide AI-vs-AI free-for-alls. The base",
+			"region is properly defined now: the base PLANNER's own Pocket (the actual packed base footprint",
+			"it already computed and used to place every building/chokepoint) dilated by this many cells --",
+			"the dilation covers the chokepoint/gate approaches just OUTSIDE the Pocket by design (defence",
+			"has to cover the point of actual contact, not just the buildings behind it). Only used when a",
+			"planner instance exists for this faction; see SelfDefenseRegionRadius for the fallback.")]
+		public readonly int SelfDefenseRegionMargin = 12;
+
+		[Desc("Global self-defense region FALLBACK radius (cells) around BaseCentre() -- only used for a",
+			"faction with no AotBasePlannerBotModule instance yet (GDI, for now; see SelfDefenseRegionMargin",
+			"for the preferred Pocket-based region once a planner exists).")]
 		public readonly int SelfDefenseRegionRadius = 40;
 
 		[Desc("Emergency defense production (User 2026-07-31): while the base is under attack (any threat",
@@ -684,6 +692,8 @@ namespace OpenRA.Mods.Common.Traits
 		public IBotChokepointProvider ChokeProvider { get; private set; }
 		public IBotBaseApproachProvider ApproachProvider { get; private set; }
 		AotBaseBuilderBotModule builder;
+		AotBasePlannerBotModule planner;
+		HashSet<CPos> selfDefenseRegionCache;
 
 		// Stage 1 of the ferry rebuild: surveys quays/boarding lanes/staging grounds and logs them.
 		// Nothing consumes it yet -- see memory/ai-transit-system.md.
@@ -760,6 +770,12 @@ namespace OpenRA.Mods.Common.Traits
 			// (same pattern AotBaseBuilderBotModule itself uses to resolve its planner).
 			var builders = self.Owner.PlayerActor.TraitsImplementing<AotBaseBuilderBotModule>().ToList();
 			builder = builders.FirstOrDefault(b => b.Info.Faction == Info.Faction) ?? builders.FirstOrDefault();
+
+			// Same resolution, for the self-defense region (User 2026-07-31: reuse the planner's own
+			// Pocket instead of a guessed radius). null for a faction with no planner instance yet (GDI,
+			// for now) -- GlobalUnitSelfDefense falls back to SelfDefenseRegionRadius in that case.
+			var planners = self.Owner.PlayerActor.TraitsImplementing<AotBasePlannerBotModule>().ToList();
+			planner = planners.FirstOrDefault(p => p.Info.Faction == Info.Faction) ?? planners.FirstOrDefault();
 
 			Transit = new AotTransitService(this);
 		}
@@ -1064,6 +1080,53 @@ namespace OpenRA.Mods.Common.Traits
 		// the reported symptom (Hinds raiding undisturbed despite AA units standing around) -- the normal
 		// IsPreferredEnemyUnit excludes aircraft everywhere else in this file, which would otherwise make
 		// this pass blind to the exact threat it exists to answer.
+		// The actual base region for global self-defense (User 2026-07-31: "der base-planner flutet doch
+		// am anfang den bau-bereich und entscheidet, wo chockepoint ist ... ich spreche von diesem
+		// gebiet"). Reuses the planner's own Pocket -- the exact packed base footprint it already
+		// computed -- dilated by SelfDefenseRegionMargin cells so the chokepoint/gate approaches just
+		// OUTSIDE the Pocket (DetectGates deliberately blocks a patch around every gate so the packer
+		// doesn't spill past it) are covered too; defence has to cover the point of actual contact, not
+		// just the buildings behind it. The dilated set is computed once and cached: the Pocket itself
+		// never changes after Plan() runs, so recomputing every tick would be pure waste. Falls back to a
+		// plain radius around BaseCentre() for a faction with no planner instance yet (GDI, for now).
+		bool InBaseRegion(CPos c)
+		{
+			if (!Intel.IsReachable(c))
+				return false;
+
+			if (planner == null || planner.Pocket.Count == 0)
+			{
+				var baseCentre = BaseCentre();
+				return (c - baseCentre).LengthSquared <= Info.SelfDefenseRegionRadius * Info.SelfDefenseRegionRadius;
+			}
+
+			selfDefenseRegionCache ??= DilateCells(planner.Pocket, Info.SelfDefenseRegionMargin);
+			return selfDefenseRegionCache.Contains(c);
+		}
+
+		// Multi-source BFS outward from every seed cell, `steps` rings deep -- cheap way to "grow" an
+		// arbitrary cell set by a fixed margin without checking every cell's distance to every seed.
+		static HashSet<CPos> DilateCells(HashSet<CPos> seeds, int steps)
+		{
+			var region = new HashSet<CPos>(seeds);
+			var frontier = new List<CPos>(seeds);
+			for (var i = 0; i < steps; i++)
+			{
+				var next = new List<CPos>();
+				foreach (var c in frontier)
+					foreach (var d in CVec.Directions)
+					{
+						var n = c + d;
+						if (region.Add(n))
+							next.Add(n);
+					}
+
+				frontier = next;
+			}
+
+			return region;
+		}
+
 		void GlobalUnitSelfDefense(IBot bot)
 		{
 			if (Info.SelfDefenseScanRadius <= 0)
@@ -1087,12 +1150,7 @@ namespace OpenRA.Mods.Common.Traits
 			// Using it alone as the threat scope meant this reacted to any enemy anywhere on that landmass,
 			// and in a multi-bot match every bot's reserve doing that to every OTHER bot's units the same
 			// way turned into map-wide AI-vs-AI free-for-alls. Both candidates and threats are now also
-			// bounded to SelfDefenseRegionRadius of BaseCentre() -- reachability still applies on top (so
-			// nobody's ordered to swim), it just isn't the only bound anymore.
-			var baseCentre = BaseCentre();
-			var regionRadiusSq = Info.SelfDefenseRegionRadius * Info.SelfDefenseRegionRadius;
-			bool InBaseRegion(CPos c) => Intel.IsReachable(c) && (c - baseCentre).LengthSquared <= regionRadiusSq;
-
+			// bounded to InBaseRegion (still reachability-gated on top, so nobody's ordered to swim).
 			var poolCandidates = pool.Where(a => !CannotOrder(a) && InBaseRegion(a.Location)).ToList();
 			foreach (var s in Missions.OfType<AotStartingUnitsMission>())
 				poolCandidates.AddRange(s.ReserveUnits().Where(a => InBaseRegion(a.Location)));
