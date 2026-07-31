@@ -3285,6 +3285,13 @@ AFLT:
 # Doppel-Aktor-Pattern analog PYLE. FIX muss das Prerequisite "fix" explizit bereitstellen.
 FIX:
 	-Buildable:
+	# Engine-Default ist HasMinibib:true -> WithBuildingBib rendert nur rows=1, also
+	# ausschliesslich die Frames 0-2 des 6-Frame-Bibs (BIB2 = 3 breit x 2 Zeilen).
+	# Die untere Bib-Zeile wurde dadurch nie gezeichnet ("unten abgeschnitten").
+	# false => rows=2, bibOffset = Dimensions.Y-2 = 1 -> exakt dasselbe Layout wie FACT.
+	# Leerer Wert wuerde den geerbten true NICHT loeschen, daher explizit false.
+	WithBuildingBib:
+		HasMinibib: false
 	GrantConditionOnPrerequisite@aotage1:
 		Condition: aot-age1-active
 		Prerequisites: aot-age1

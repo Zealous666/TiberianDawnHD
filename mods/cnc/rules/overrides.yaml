@@ -868,6 +868,11 @@ Player:
 # Ohne diesen Remove erscheint die leere Support-Queue immer als Sub-Tab #1 im
 # Special-Vehicles-Tab und blockiert die Auto-Selektion der Vehicle.GDI-Queue.
 FACT:
+	# Engine-Default ist RepairActors:fix - diesen Aktor gibt es durch das
+	# FIX-Proxy-Pattern nicht mehr, daher konnte der undeployte MCV nicht
+	# zur Reparatur geschickt werden (analog ^Vehicle weiter oben).
+	TransformsIntoRepairable:
+		RepairActors: aot-fix-age0, aot-fix-age1, aot-fix-age2, aot-fix-age1-nod, aot-fix-age2-nod
 	ProductionQueue@GDIBuilding:
 		ShowLockedItems: True
 	ProductionQueue@NodBuilding:

@@ -300,8 +300,27 @@ fix:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\FIX.ZIP
 	make:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\FIXMAKE.ZIP
+	# Wie FACT: BIB2 = 3 breit x 2 Zeilen (6 Frames). Engine-Default war der
+	# Minibib mbFIX.tem mit Offset 0,-9 - der wuerde BIB2 nach oben verschieben,
+	# daher explizit auf 0,0 zuruecksetzen (leerer Wert loescht geerbtes nicht).
 	bib:
-		RemasteredFilename: blank.png
+		Filename: bib2.tem
+		TilesetFilenames:
+			DESERT: bib2.des
+			WINTER: bib2.win
+			SNOW: bib2.sno
+			TEMPERAT: bib2.tem
+			JUNGLE: bib2.jun
+		Length: *
+		Offset: 0,0
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\TEMPERATE\BIB2\BIB2.TEM-{0:D4}.DDS
+			Count: 6
+		RemasteredTilesetFilenamesPattern:
+			WINTER: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\BIB2.WIN\BIB2.WIN-{0:D4}.DDS
+				Count: 6
+			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\BIB2.DES\BIB2.DES-{0:D4}.DDS
+				Count: 6
+		RemasteredPremultiplied: false
 	icon:
 		RemasteredFilename:
 

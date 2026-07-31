@@ -2456,10 +2456,12 @@ fix:
 	aot-ra-idle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\FIX.ZIP
 		RemasteredLength: 1
+		ZOffset: -1c511
 	damaged-aot-ra-idle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\FIX.ZIP
 		RemasteredStart: 7
 		RemasteredLength: 1
+		ZOffset: -1c511
 	aot-ra-make:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\FIXMAKE.ZIP
 		RemasteredLength: 14
@@ -2479,23 +2481,27 @@ fix:
 		Length: 1
 		Scale: 0.046
 		Offset: 0, 0
+		ZOffset: -1c511
 	damaged-aot-age2-nod-idle:
 		Filename: aot-gadept-gemini-idle.png
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.046
+		ZOffset: -1c511
 	aot-age2-nod-idle-remap:
 		Filename: aot-gadept-gemini-idle-remap.png
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.046
 		Offset: 0, 0
+		ZOffset: -1c511
 	damaged-aot-age2-nod-idle-remap:
 		Filename: aot-gadept-gemini-idle-remap.png
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.046
 		Offset: 0, 0
+		ZOffset: -1c511
 	aot-age2-nod-make:
 		Filename: aot-gtdept-make.png
 		RemasteredFilename:
