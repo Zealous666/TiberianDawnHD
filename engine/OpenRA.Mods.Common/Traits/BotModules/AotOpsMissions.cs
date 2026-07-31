@@ -1506,6 +1506,17 @@ namespace OpenRA.Mods.Common.Traits
 				("mg", ops.Info.MgInfantryTypes),
 				("mg", ops.Info.MgInfantryTypes),
 			];
+
+			// FIX (User 2026-07-31, "alle AI ... noch nicht ein infanterist produziert"): the OLD
+			// constructor queued all its requests immediately, so by the first Tick() call
+			// Ops.OpenRequests(this) was already > 0. Moving requests into TickSquadForming (only
+			// reached via TickForming, inside the Phase.Forming switch case) meant the mission's own
+			// early self-termination check in Tick() -- "Units.Count == 0 && OpenRequests(this) == 0",
+			// evaluated BEFORE that switch -- fired on tick ONE, before the squad ever got a chance to
+			// request its first unit: both sides were trivially true for a mission that had just been
+			// constructed. Confirmed via log: 5 different derricks "acquired" in one session, none ever
+			// producing a single unit. Requesting the first slot here, synchronously, closes that gap.
+			TickSquadForming();
 		}
 
 		// Requests the NEXT squad slot only once the previous one has actually arrived (or is skipped,
