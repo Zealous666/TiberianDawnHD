@@ -1089,7 +1089,12 @@ namespace OpenRA.Mods.Common.Traits
 
 			if (poolCandidates.Count > 0 && threats.Count > 0)
 			{
-				var want = Math.Clamp(threats.Count * Info.ProtectionResponseRatio, Info.ProtectionMinResponse, poolCandidates.Count);
+				// Math.Clamp(value, min, max) throws ArgumentException when min > max -- crashed in-game
+				// (User 2026-07-31) the moment poolCandidates.Count dropped below ProtectionMinResponse
+				// (e.g. only 1 candidate left but the configured floor is 2). Never valid to ask for more
+				// responders than actually exist, so cap with Min() first instead of trusting Clamp's own
+				// bounds to always be ordered.
+				var want = Math.Min(poolCandidates.Count, Math.Max(Info.ProtectionMinResponse, threats.Count * Info.ProtectionResponseRatio));
 				var responders = poolCandidates
 					.OrderBy(a => threats.Min(t => (a.Location - t.Location).LengthSquared))
 					.Take(want)
