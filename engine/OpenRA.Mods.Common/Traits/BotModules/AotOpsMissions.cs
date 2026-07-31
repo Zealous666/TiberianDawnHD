@@ -2083,10 +2083,15 @@ namespace OpenRA.Mods.Common.Traits
 					&& (Ops.Info.ProtectionTypes.Count == 0 || Ops.Info.ProtectionTypes.Contains(a.Info.Name)))
 				.ToList();
 
+			// includeAir: true (User 2026-07-31, screenshot: idle Rocket Troopers ignoring attacking
+			// Hinds) -- this scan was blind to aircraft the whole time, the exact same class of bug
+			// already fixed for GlobalUnitSelfDefense's pool-based scan but never carried over here.
+			// Module 5's garrison holds Rocket Troopers specifically so it can answer air raids; without
+			// this they were never even considered threats worth responding to.
 			var threats = new HashSet<Actor>();
 			foreach (var b in buildings)
 				foreach (var a in Ops.World.FindActorsInCircle(b.CenterPosition, WDist.FromCells(Ops.Info.ProtectionScanRadius)))
-					if (AotOpsUtils.IsPreferredEnemyUnit(Ops.Player, a) && a.CanBeViewedByPlayer(Ops.Player))
+					if (AotOpsUtils.IsPreferredEnemyUnit(Ops.Player, a, includeAir: true) && a.CanBeViewedByPlayer(Ops.Player))
 						threats.Add(a);
 
 			if (threats.Count == 0)
