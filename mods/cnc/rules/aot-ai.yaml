@@ -708,6 +708,13 @@ Player:
 		WaveSlot5Types: aot-v2-base
 		WaveSlot5Min: 1, 0, 0, 0
 		WaveSlot5Max: 1, 0, 0, 0
+		# Cash-conditional Age0 wave size (User 2026-07-31: "wenn in age 0 über 2000 credits: dann
+		# sollte welle größer sein: 3-4 TTNK, 2-3 V2. wenn unter 2000, dann so wie jetzt konfiguriert").
+		WaveWealthyCashThreshold: 2000
+		WaveSlot3MinWealthy: 3
+		WaveSlot3MaxWealthy: 4
+		WaveSlot5MinWealthy: 2
+		WaveSlot5MaxWealthy: 3
 		AntiInfantryTypes: aot-ttnk-flame, aot-v2-napalm, aot-bggy-laser, aot-bggy-base
 		AntiTankTypes: aot-ltnk-tick, aot-ltnk-laser, aot-ltnk-base, aot-ttnk-base
 		# Naval ferry (User 2026-07-21): if there is no ground route to the enemy, a wave builds/

@@ -328,6 +328,22 @@ namespace OpenRA.Mods.Common.Traits
 		public readonly int[] WaveSlot5Min = [];
 		public readonly int[] WaveSlot5Max = [];
 
+		[Desc("Cash+ore threshold above which Age0 waves use the WEALTHY min/max below instead of the",
+			"normal WaveSlot3/5Min/Max[0] (User 2026-07-31: 'wenn in age 0 über 2000 credits: dann sollte",
+			"welle größer sein'). Checked once per wave composition, Age0 only -- Age1+ already scales via",
+			"budget escalation and doesn't need this.")]
+		public readonly int WaveWealthyCashThreshold = 2000;
+
+		[Desc("Age0 TTNK (WaveSlot3) min/max used instead of WaveSlot3Min/Max[0] once cash+ore exceeds",
+			"WaveWealthyCashThreshold. -1 = not configured, keeps the normal Age0 value.")]
+		public readonly int WaveSlot3MinWealthy = -1;
+		public readonly int WaveSlot3MaxWealthy = -1;
+
+		[Desc("Age0 V2 (WaveSlot5) min/max used instead of WaveSlot5Min/Max[0] once cash+ore exceeds",
+			"WaveWealthyCashThreshold. -1 = not configured, keeps the normal Age0 value.")]
+		public readonly int WaveSlot5MinWealthy = -1;
+		public readonly int WaveSlot5MaxWealthy = -1;
+
 		[Desc("Base vehicles per wave for age tier 0, 1, 2, 3. Still used for the adaptive share below;",
 			"the slot system's own Min/Max control the static composition directly instead.")]
 		public readonly int[] WaveVehiclesPerAge = [6, 8, 10, 12];
@@ -841,6 +857,8 @@ namespace OpenRA.Mods.Common.Traits
 			var yard = constructionYards.Actors.FirstOrDefault(a => a.Owner == Player && !a.IsDead && a.IsInWorld);
 			return yard?.Location ?? (Intel?.Ready == true ? Intel.BaseCentre : CPos.Zero);
 		}
+
+		public int AvailableCash() => playerResources.GetCashAndResources();
 
 		public int AgeTier()
 		{

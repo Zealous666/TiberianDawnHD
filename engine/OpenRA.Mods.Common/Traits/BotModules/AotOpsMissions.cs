@@ -744,10 +744,29 @@ namespace OpenRA.Mods.Common.Traits
 		List<(string Name, string[] Chain, int Count)> ComposeSlots(
 			List<(string Name, string[] Chain, int[] Min, int[] Max)> slots, int tier, double mult, int maxStatic)
 		{
+			var info = Ops.Info;
+
+			// "Wealthy" Age0 override (User 2026-07-31: "wenn in age 0 über 2000 credits: dann sollte
+			// welle größer sein: 3-4 TTNK, 2-3 V2" -- since narrowed to 2 TTNK / 1 V2 as the wealthy
+			// numbers too, see FIX history). Age1+ already scales via budget escalation below and never
+			// needs this. -1 on either bound means that slot's override isn't configured -- keep the
+			// normal per-tier value.
+			var wealthy = tier == 0 && Ops.AvailableCash() > info.WaveWealthyCashThreshold;
+
 			var resolved = new List<(string Name, string[] Chain, int Cost, int Min, int Max)>();
 			foreach (var s in slots)
 			{
 				var max = tier < s.Max.Length ? s.Max[tier] : s.Max.Length > 0 ? s.Max[^1] : 0;
+				var min = tier < s.Min.Length ? s.Min[tier] : 0;
+
+				if (wealthy)
+				{
+					if (s.Name == "slot3" && info.WaveSlot3MinWealthy >= 0 && info.WaveSlot3MaxWealthy >= 0)
+						(min, max) = (info.WaveSlot3MinWealthy, info.WaveSlot3MaxWealthy);
+					else if (s.Name == "slot5" && info.WaveSlot5MinWealthy >= 0 && info.WaveSlot5MaxWealthy >= 0)
+						(min, max) = (info.WaveSlot5MinWealthy, info.WaveSlot5MaxWealthy);
+				}
+
 				if (max <= 0)
 					continue;
 
@@ -755,7 +774,7 @@ namespace OpenRA.Mods.Common.Traits
 				if (variant == null)
 					continue;
 
-				var min = Math.Min(tier < s.Min.Length ? s.Min[tier] : 0, max);
+				min = Math.Min(min, max);
 				var cost = Ops.World.Map.Rules.Actors[variant].TraitInfoOrDefault<ValuedInfo>()?.Cost ?? 500;
 				resolved.Add((s.Name, s.Chain, cost, min, max));
 			}
