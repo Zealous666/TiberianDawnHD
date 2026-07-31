@@ -1414,6 +1414,12 @@ namespace OpenRA.Mods.Common.Traits
 
 		List<Actor> Escorts() => Units.Where(a => !Ops.Info.EngineerTypes.Contains(a.Info.Name) && !Ops.CannotOrder(a)).ToList();
 
+		// The permanent guard at a CAPTURED derrick (User 2026-07-30): the one mid-mission exception to
+		// the global self-defense pass -- everything still forming/transiting/capturing is excluded like
+		// every other mission, but a standing guard post is conceptually the same as Base Defense's own
+		// garrison, just anchored somewhere other than the base.
+		public List<Actor> HoldingEscorts() => phase == Phase.Holding ? Escorts() : [];
+
 		public override void OnUnitAssigned(Actor a)
 		{
 			// The transit service owns every ship now; a vessel filed here would be stranded.

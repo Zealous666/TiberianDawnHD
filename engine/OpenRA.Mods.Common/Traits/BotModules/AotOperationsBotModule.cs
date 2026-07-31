@@ -39,7 +39,10 @@ namespace OpenRA.Mods.Common.Traits
 			}
 		}
 
-		public static bool IsPreferredEnemyUnit(Player player, Actor a)
+		// includeAir=true is for self-defense threat detection (a Hind overhead is very much a threat to
+		// an AA-capable unit standing in the base) -- every other caller wants ground-only targeting
+		// (attack-move destinations, capture candidates, etc.), where "Air" was always excluded.
+		public static bool IsPreferredEnemyUnit(Player player, Actor a, bool includeAir = false)
 		{
 			if (a == null || a.IsDead || !a.IsInWorld
 				|| player.RelationshipWith(a.Owner) != PlayerRelationship.Enemy
@@ -47,7 +50,7 @@ namespace OpenRA.Mods.Common.Traits
 				return false;
 
 			var targetTypes = a.GetEnabledTargetTypes();
-			if (targetTypes.IsEmpty || targetTypes.Contains("Air"))
+			if (targetTypes.IsEmpty || (!includeAir && targetTypes.Contains("Air")))
 				return false;
 
 			var hasModifier = false;
@@ -172,6 +175,14 @@ namespace OpenRA.Mods.Common.Traits
 		[ActorReference]
 		[Desc("Actor types never claimed for missions (economy, MCVs, special vehicles).")]
 		public readonly HashSet<string> ExcludeFromOpsTypes = [];
+
+		[Desc("Global self-defense (User 2026-07-30): radius (cells) around a staged unit -- pooled/idle,",
+			"or a Derrick's permanent guard -- scanned for threats, INCLUDING aircraft (a Hind overhead is",
+			"very much a threat to an AA-capable unit standing in the base). Deliberately does NOT cover",
+			"anything mid-mission (forming/moving/executing/retreating waves, scouts, air raids, a Derrick",
+			"squad still in transit) -- interrupting a unit that is about to depart for its own mission is",
+			"exactly what must NOT happen. 0 disables the whole pass.")]
+		public readonly int SelfDefenseScanRadius = 8;
 
 		// ---- Feature flags (one per operation type, individually testable) ----
 		public readonly bool EnableStartingUnits = true;
@@ -972,6 +983,46 @@ namespace OpenRA.Mods.Common.Traits
 						Missions.Remove(m);
 					}
 				}
+
+				GlobalUnitSelfDefense(bot);
+			}
+		}
+
+		// Global self-defense (User 2026-07-30): "einheiten die irgendwo in der base stehen ... sollten
+		// nicht abbrechen [wenn mid-mission], ausser derrick escort" -- the shared POOL (idle survivors,
+		// units staged between missions) plus a Derrick's permanent guard get a reflex to fight back,
+		// regardless of what they're nominally about to do next. Deliberately excludes every other
+		// mission's own units (forming/moving/executing/retreating waves, scouts en route, air raids,
+		// a Derrick squad still in transit) -- interrupting a unit that is about to depart for its own
+		// mission is exactly what must NOT happen, per the user's follow-up. Runs right after
+		// Missions.Tick() each cycle, so a ForceAttack order here overrides whatever a mission just
+		// decided for that unit -- no "paused task" bookkeeping needed: the instant no threat remains,
+		// the owning system's normal order resumes on its own next cycle. Pool candidates are restricted
+		// to the flooded base region (Intel.IsReachable) per the user's own framing ("die gesamte
+		// geflutete base-region"); a Derrick's guard is exempt from that check since it stands watch
+		// somewhere else entirely by definition. includeAir=true on the threat scan is the actual fix for
+		// the reported symptom (Hinds raiding undisturbed despite AA units standing around) -- the normal
+		// IsPreferredEnemyUnit excludes aircraft everywhere else in this file, which would otherwise make
+		// this pass blind to the exact threat it exists to answer.
+		void GlobalUnitSelfDefense(IBot bot)
+		{
+			if (Info.SelfDefenseScanRadius <= 0)
+				return;
+
+			var candidates = pool.Where(a => !CannotOrder(a) && Intel.IsReachable(a.Location)).ToList();
+			foreach (var d in Missions.OfType<AotDerrickMission>())
+				candidates.AddRange(d.HoldingEscorts());
+
+			foreach (var a in candidates)
+			{
+				var threat = World.FindActorsInCircle(a.CenterPosition, WDist.FromCells(Info.SelfDefenseScanRadius))
+					.Where(e => AotOpsUtils.IsPreferredEnemyUnit(Player, e, true) && e.CanBeViewedByPlayer(Player))
+					.OrderBy(e => (e.Location - a.Location).LengthSquared)
+					.FirstOrDefault();
+				if (threat == null)
+					continue;
+
+				bot.QueueOrder(new Order("ForceAttack", a, Target.FromActor(threat), false));
 			}
 		}
 
@@ -1232,6 +1283,19 @@ namespace OpenRA.Mods.Common.Traits
 		void PumpProduction(IBot bot)
 		{
 			if (requests.Count == 0)
+				return;
+
+			// Army production PAUSES ENTIRELY while the Age-1 Refinery is still being built (user spec
+			// 2026-07-31): observed the AI put up its Age-1 Airfield but never the Refinery behind it,
+			// because unit production kept winning the cash race against the Rhythm builder tick after
+			// tick. Deliberately no FerryRole exemption here (unlike the reserve check below): that
+			// exemption exists because cash can sit under the reserve INDEFINITELY on a poor spawn,
+			// permanently stalling a mission -- this pause is bounded by "until the Refinery is built",
+			// which is the very thing it exists to speed up, so a mission's transport waiting through it
+			// is a short, deliberate delay, not a deadlock. `requests` keeps accumulating as normal;
+			// this only withholds the StartProduction orders that actually spend cash, so everything
+			// fires the instant the Refinery completes.
+			if (builder != null && builder.Info.Faction == Info.Faction && builder.Age1RefineryPending())
 				return;
 
 			// The cash reserve keeps the AI from spending its last credits on ordinary units. It must
