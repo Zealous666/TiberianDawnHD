@@ -610,11 +610,6 @@ namespace OpenRA.Mods.Common.Traits
 		[ActorReference]
 		public readonly string[] MgInfantryTypes = [];
 
-		[ActorReference]
-		[Desc("4th squad slot, built last (User 2026-07-31: 1 rocketeer, 1 engineer, 1 flame, 1 mg, in",
-			"exactly that order). Empty chain = skipped entirely (e.g. GDI has no equivalent unit).")]
-		public readonly string[] FlameInfantryTypes = [];
-
 		[Desc("Ticks between scans for ADDITIONAL uncontrolled derricks, beyond the very first squad",
 			"(map-wide, 10 min default). The first squad is NOT gated by this -- it starts the instant",
 			"a barracks/hand exists (see DerrickSecondSquadAgeTier for why a second one waits longer).")]

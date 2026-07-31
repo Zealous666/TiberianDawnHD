@@ -1475,7 +1475,12 @@ namespace OpenRA.Mods.Common.Traits
 		// FIX 2026-07-31h) starve the mandatory engineer for an entire match once something else kept
 		// cutting in. Sequential requesting means each step only enters the queue once the previous one
 		// is actually in Units, so there's never more than one open request from this mission at a time.
-		// An empty chain (e.g. GDI has no FlameInfantryTypes equivalent) is skipped, not requested.
+		//
+		// CORRECTION (User 2026-07-31, same day): the Flame Trooper slot needs `anyhq` (Radar/HQ) --
+		// unlike Rocket/Engineer/MG, which only need the barracks itself -- so it would have blocked the
+		// WHOLE sequential chain (nothing after an unmet step ever gets requested) until Radar exists,
+		// deadlocking the entire squad far longer than intended. Replaced with a second MG instead: 1
+		// rocketeer, 1 engineer, 1 mg, 1 mg -- every slot buildable off the barracks alone.
 		readonly (string Role, string[] Chain)[] squadOrder;
 		int squadStep;
 
@@ -1498,7 +1503,7 @@ namespace OpenRA.Mods.Common.Traits
 			[
 				("rocket", ops.Info.RocketInfantryTypes),
 				("engineer", ops.Info.EngineerTypes),
-				("flame", ops.Info.FlameInfantryTypes),
+				("mg", ops.Info.MgInfantryTypes),
 				("mg", ops.Info.MgInfantryTypes),
 			];
 		}
@@ -1506,6 +1511,10 @@ namespace OpenRA.Mods.Common.Traits
 		// Requests the NEXT squad slot only once the previous one has actually arrived (or is skipped,
 		// for an empty chain) -- see squadOrder above. Called every Forming tick; a no-op once the whole
 		// squad has been requested (squadStep reaches the end).
+		//
+		// Counts occurrences rather than a plain Units.Any() check: two steps (both "mg") share the exact
+		// same chain, so a naive Any() would see the FIRST MG that arrives and immediately consider the
+		// SECOND step already satisfied too, silently dropping the squad to 3 units.
 		void TickSquadForming()
 		{
 			while (squadStep < squadOrder.Length)
@@ -1517,7 +1526,9 @@ namespace OpenRA.Mods.Common.Traits
 					continue;
 				}
 
-				if (Units.Any(a => chain.Contains(a.Info.Name)))
+				var wantedSoFar = squadOrder.Take(squadStep + 1).Count(s => s.Chain == chain);
+				var haveSoFar = Units.Count(a => chain.Contains(a.Info.Name));
+				if (haveSoFar >= wantedSoFar)
 				{
 					squadStep++;
 					continue;

@@ -733,8 +733,8 @@ Player:
 		EngineerTypes: aot-e6-nod
 		RocketInfantryTypes: aot-e3-nod
 		MgInfantryTypes: aot-e1-nod
-		# Derrick squad 4th slot, built last (User 2026-07-31): 1 rocketeer, 1 engineer, 1 flame, 1 mg.
-		FlameInfantryTypes: aot-e4-nod-flame, aot-e4-nod-toxic
+		# Derrick squad composition (User 2026-07-31, corrected same day -- Flame Trooper needs Radar,
+		# which would have deadlocked the sequential build): 1 rocketeer, 1 engineer, 1 mg, 1 mg.
 		# Escalation (User 2026-07-22): after 2 failed waves at the primary choke, the next wave
 		# routes via a secondary approach instead (if one exists); after 3 failed waves total (with
 		# a Helipad built) 4 Hinds raid the enemy construction yard directly, then the loop resets
