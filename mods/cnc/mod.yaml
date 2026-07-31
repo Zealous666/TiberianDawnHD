@@ -398,6 +398,7 @@ Notifications:
 
 Music:
 	cnc|audio/music.yaml
+	cnchd|audio/music-remastered.yaml
 
 Hotkeys:
 	common|hotkeys/game.yaml

@@ -93,6 +93,9 @@ namespace OpenRA.Mods.Cnc.Traits
 			var wasBunkered = bunkered;
 			bunkered = info.BunkeredCondition.Evaluate(conditions);
 
+			if (AotSamDebug.Enabled && wasBunkered != bunkered)
+				AotSamDebug.Trace($"tick={self.World.WorldTick} actor={self.Info.Name} owner={self.Owner.PlayerName} BunkeredConditionChanged: {wasBunkered} -> {bunkered}");
+
 			// Leaving bunkered mode mid-close/transition: snap back to a plain open turret.
 			if (wasBunkered && !bunkered && state != PopupState.Open)
 			{
@@ -102,7 +105,40 @@ namespace OpenRA.Mods.Cnc.Traits
 			}
 		}
 
+		// Traits/PausableConditionalTrait.cs: fires exactly when IsTraitPaused flips, driven by
+		// PauseOnCondition (lowpower || build-incomplete on this actor). If the "SAM keeps firing
+		// while dimmed" report is real, the crucial question is whether these fire at all during
+		// the observed low-power window -- if they don't, "lowpower" never reached IsTraitPaused
+		// here despite the visual dimming (which reads the same condition via ^DisabledOverlay,
+		// but through a completely separate trait), pointing at a condition-plumbing gap instead
+		// of a logic bug in CanAttack below.
+		protected override void TraitPaused(Actor self)
+		{
+			if (AotSamDebug.Enabled)
+				AotSamDebug.Trace($"tick={self.World.WorldTick} actor={self.Info.Name} owner={self.Owner.PlayerName} TraitPaused (bunkered={bunkered} state={state})");
+
+			base.TraitPaused(self);
+		}
+
+		protected override void TraitResumed(Actor self)
+		{
+			if (AotSamDebug.Enabled)
+				AotSamDebug.Trace($"tick={self.World.WorldTick} actor={self.Info.Name} owner={self.Owner.PlayerName} TraitResumed (bunkered={bunkered} state={state})");
+
+			base.TraitResumed(self);
+		}
+
 		protected override bool CanAttack(Actor self, in Target target)
+		{
+			var result = CanAttackInner(self, target);
+
+			if (AotSamDebug.Enabled)
+				AotSamDebug.Trace($"tick={self.World.WorldTick} actor={self.Info.Name} owner={self.Owner.PlayerName} CanAttack -> {result} (bunkered={bunkered} state={state} IsTraitPaused={IsTraitPaused} IsTraitDisabled={IsTraitDisabled})");
+
+			return result;
+		}
+
+		bool CanAttackInner(Actor self, in Target target)
 		{
 			if (!bunkered)
 				return base.CanAttack(self, target);

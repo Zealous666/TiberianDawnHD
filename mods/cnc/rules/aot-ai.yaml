@@ -80,6 +80,10 @@ Player:
 		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
 		Faction: nod
 		ConstructionYardTypes: fact, fact.gdi, fact.nod
+		# Kept in sync with AotOperationsBotModule@nod's ChokeClearRadius below (User 2026-08-01): the
+		# gate-defence cluster search stops treating trees within this radius of the primary choke as
+		# blocking, since ClearNearbyObstacles bulldozes exactly this radius at runtime.
+		TreeClearRadius: 5
 		OreMineTypes: aot-ore-mine
 		NukeTypes: aot-nuke-age0, aot-nuke-age1, aot-nuke-age2-nod
 		Nuk2Types: aot-nuk2-age0, aot-nuk2-age1, aot-nuk2-age2

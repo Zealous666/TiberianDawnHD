@@ -107,6 +107,7 @@ engine/**
 !engine/OpenRA.Mods.Cnc/Traits/AutoDisguiseOnSpawn.cs
 !engine/OpenRA.Mods.Cnc/Traits/Attack/
 !engine/OpenRA.Mods.Cnc/Traits/Attack/AotAttackPopupOrTurreted.cs
+!engine/OpenRA.Mods.Cnc/Traits/Attack/AotSamDebug.cs
 !engine/OpenRA.Mods.Cnc/Traits/Render/
 !engine/OpenRA.Mods.Cnc/Traits/Render/WithCargo.cs
 !engine/OpenRA.Mods.Common/Traits/Cargo.cs
@@ -119,6 +120,10 @@ engine/**
 !engine/OpenRA.Mods.Common/Traits/BotModules/AotMapIntelBotModule.cs
 !engine/OpenRA.Mods.Common/Traits/BotModules/AotOperationsBotModule.cs
 !engine/OpenRA.Mods.Common/Traits/BotModules/AotOpsMissions.cs
+
+# aotmod: Transit-Dienst ("oeffentlicher Nahverkehr") -- Ferry-Neubau, 2026-07-29
+!engine/OpenRA.Mods.Common/Traits/BotModules/AotTransitService.cs
+!engine/OpenRA.Mods.Common/Traits/BotModules/AotTransitTraffic.cs
 
 # Gepatchte Base-cnc-Notifications (SpyPlaneReady für die NOD-Spy-Plane-Superpower)
 !engine/mods/

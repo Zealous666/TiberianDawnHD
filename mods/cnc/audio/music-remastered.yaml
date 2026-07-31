@@ -147,3 +147,199 @@ recn226m: Recon
 voic226m: Voice Rhythm
 	Filename: DATA\AUDIO\MUSIC\TDR_MUS_VOICE_RHYTHM
 	Extension: WAV
+
+# Red Alert Remastered tracks
+await_r: Afterlife (Await)
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_AWAITING
+	Extension: WAV
+	VolumeModifier: 0.7
+bigf226m: Bigfoot
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_BIG_FOOT
+	Extension: WAV
+	VolumeModifier: 0.7
+crus226m: Crush
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_CRUSH
+	Extension: WAV
+	VolumeModifier: 0.7
+dense_r: Dense
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_DENSE
+	Extension: WAV
+	VolumeModifier: 0.7
+fac1226m: Face to the Enemy 1
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_FACE_THE_ENEMY_1
+	Extension: WAV
+	VolumeModifier: 0.85
+fac2226m: Face to the Enemy 2
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_FACE_THE_ENEMY_2
+	Extension: WAV
+	VolumeModifier: 0.7
+fogger1a: Fogger
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_FOGGER
+	Extension: WAV
+	VolumeModifier: 0.8
+hell226m: Hell March
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_HELL_MARCH
+	Extension: WAV
+	VolumeModifier: 0.7
+mud1a: Mud
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_MUD
+	Extension: WAV
+	VolumeModifier: 0.7
+radio2: Radio 2
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_RADIO_2
+	Extension: WAV
+	VolumeModifier: 0.7
+credits: Reload Fire (Credits)
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_RELOAD_FIRE
+	Extension: WAV
+	VolumeModifier: 0.9
+	Hidden: true
+rollout: Roll Out
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_ROLL_OUT
+	Extension: WAV
+	VolumeModifier: 0.7
+run1226m: Run (For Your Life)
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_RUN
+	Extension: WAV
+	VolumeModifier: 0.7
+smsh226m: Smash
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_SMASH
+	Extension: WAV
+	VolumeModifier: 0.7
+snake: Snake
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_SNAKE
+	Extension: WAV
+	VolumeModifier: 0.7
+terminat: Terminate
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_TERMINATE
+	Extension: WAV
+	VolumeModifier: 0.7
+tren226m: Trenches
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_TRENCHES
+	Extension: WAV
+	VolumeModifier: 0.7
+twin: Twin Cannon
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_TWIN_CANNON
+	Extension: WAV
+	VolumeModifier: 0.7
+vector1a: Vector
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_VECTOR
+	Extension: WAV
+	VolumeModifier: 0.7
+work226m: Workmen
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_WORKMEN
+	Extension: WAV
+	VolumeModifier: 0.7
+score: Militant Force (Scores)
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_MILITANT_FORCE
+	Extension: WAV
+	VolumeModifier: 0.7
+	Hidden: true
+intro: Intro
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_INTRO_MENU
+	Extension: WAV
+	VolumeModifier: 0.9
+	Hidden: true
+map: Map
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_MAP_THEME
+	Extension: WAV
+	VolumeModifier: 0.6
+	Hidden: true
+
+# Red Alert Counterstrike tracks
+araziod: Arazoid
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_ARAZOID
+	Extension: WAV
+	VolumeModifier: 0.8
+backstab: Backstab
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_BACKSTAB
+	Extension: WAV
+	VolumeModifier: 0.9
+chaos2: Chaos
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_CHAOS
+	Extension: WAV
+	VolumeModifier: 0.9
+shut_it: Shut It
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_SHUT_IT
+	Extension: WAV
+	VolumeModifier: 0.9
+2nd_hand: The Second Hand
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_THE_SECOND_HAND
+	Extension: WAV
+	VolumeModifier: 0.9
+twinmix1: Twin Cannon (Remix)
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_TWIN_CANNON_RETALIATION_REMIX
+	Extension: WAV
+	VolumeModifier: 0.9
+under3: Underlying Thoughts
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_UNDERLYING_THOUGHTS
+	Extension: WAV
+	VolumeModifier: 0.95
+vr2: Voice Rhythm 2
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_VOICE_RHYTHM_2
+	Extension: WAV
+	VolumeModifier: 0.95
+
+# Red Alert Aftermath tracks
+await: Afterlife (Await)
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_AWAITING
+	Extension: WAV
+	VolumeModifier: 0.7
+bog: Bog
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_BOG
+	Extension: WAV
+	VolumeModifier: 0.9
+float_v2: Floating
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_FLOATING
+	Extension: WAV
+	VolumeModifier: 0.7
+gloom: Gloom
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_GLOOM
+	Extension: WAV
+	VolumeModifier: 0.7
+grndwire: Groundwire
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_GROUNDWIRE
+	Extension: WAV
+	VolumeModifier: 0.7
+rpt: Running Through Pipes
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_RUNNING_THROUGH_PIPES
+	Extension: WAV
+	VolumeModifier: 0.7
+search: The Search
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_THE_SEARCH
+	Extension: WAV
+	VolumeModifier: 0.7
+traction: Traction
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_TRACTION
+	Extension: WAV
+	VolumeModifier: 0.7
+wastelnd: Wasteland
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_WASTELAND
+	Extension: WAV
+	VolumeModifier: 0.7
+
+# Red Alert Remastered bonus remixes
+ra-crus-remix: Crush (Retaliation Mix)
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_CRUSH_RETALIATION_REMIX
+	Extension: WAV
+	VolumeModifier: 0.7
+ra-hell-remix: Hell March (Retaliation Mix)
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_HELL_MARCH_RETALIATION_REMIX
+	Extension: WAV
+	VolumeModifier: 0.7
+ra-mud-remix: Mud (Retaliation Mix)
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_MUD_RETALIATION_REMIX
+	Extension: WAV
+	VolumeModifier: 0.7
+ra-nomercy-remix: No Mercy (Retaliation Mix)
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_NO_MERCY_RETALIATION_REMIX
+	Extension: WAV
+	VolumeModifier: 0.7
+ra-radio2-remix: Radio 2 (Retaliation Mix)
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_RADIO_2_RETALIATION_REMIX
+	Extension: WAV
+	VolumeModifier: 0.7
+ra-work-remix: Workmen (Retaliation Mix)
+	Filename: DATA\AUDIO\MUSIC\RAR_MUS_WORKMEN_RETALIATION_REMIX
+	Extension: WAV
+	VolumeModifier: 0.7

@@ -34,6 +34,31 @@ namespace OpenRA.Mods.Common.Traits
 		// cell, so the bridge must aim at it -- aiming at the site itself let the chain stop at a
 		// different, closer shore cell and fall one tile short, forever (see FindNavalSite).
 		public CPos? BridgeTarget;
+
+		// Defence steps (SAM/FTUR/GUN/OBELISK + their gate fences) run through their OWN independent
+		// chooser (AotBaseBuilderBotModule.ChooseStep(defense: true)), separate from the core economy/tech
+		// Rhythm -- user spec 2026-07-31, after the single shared strict-first-open queue meant a single
+		// unplaceable SAM site could permanently block every core building queued behind it (PROC, TECH,
+		// the next Age's whole build-out). Only Defence steps ever time out and get skipped (StuckTicks/
+		// Skipped below); a core step must NEVER be silently abandoned -- it may gate an Age upgrade.
+		public bool Defense;
+
+		// Ticks StartStep has found this step's target genuinely unplaceable (both PermanentlyBlocked's
+		// TryResite AND OutOfReachOnly's TryBridgeStep failed to make progress this attempt). Reset to 0
+		// the moment either recovery succeeds, or the step is finally built. ONLY consulted for Defense
+		// steps -- see AotBaseBuilderBotModuleInfo.DefenseStepTimeoutTicks.
+		public int StuckTicks;
+
+		// Set once a Defense step's timeout fires: Done becomes true (so ChooseStep moves past it) but
+		// Skipped marks that nothing was actually built, so RebuildScan must never reopen it -- retrying a
+		// site that was already given up on would just restart the same stuck cycle forever.
+		public bool Skipped;
+
+		// Which Age tier (0-3) this step belongs to, set from BuildRhythm's own section boundaries.
+		// Consumed by AotBaseBuilderBotModule.AgeRhythmComplete(tier) to gate the age-UPGRADE purchase
+		// on "this tier's entire planned Rhythm is done" (user spec 2026-07-31), so it stops competing
+		// for cash with a base that is still mid-build.
+		public int Age;
 	}
 
 	[TraitLocation(SystemActors.Player)]
@@ -69,6 +94,14 @@ namespace OpenRA.Mods.Common.Traits
 
 		[Desc("Building/fence cells keep this margin to resource-spreading actors.")]
 		public readonly int GrowthSourceMargin = 4;
+
+		[Desc("Radius around the PRIMARY chokepoint within which trees/scenery the AI will actually",
+			"clear at runtime (AotOperationsBotModule.ChokeClearRadius) do NOT count as blocking the",
+			"gate-defence cluster's own placement search. Should match ChokeClearRadius for the",
+			"assumption to hold; kept as an independent value since planner and Operations are",
+			"separate trait instances. Never applied to secondary approaches -- their trees are never",
+			"actually cleared at runtime, so they must keep blocking exactly as before.")]
+		public readonly int TreeClearRadius = 5;
 
 		[Desc("Building/fence cells keep this margin to already-grown resource cells.")]
 		public readonly int ResourceMargin = 2;
@@ -195,14 +228,31 @@ namespace OpenRA.Mods.Common.Traits
 
 		HashSet<CPos> actorCells;
 
+		// Cells within Info.TreeClearRadius of the MAIN chokepoint occupied by an actor the AI will
+		// actually go clear at runtime (TickChokeHold -> ClearNearbyObstacles, primary choke only --
+		// user spec 2026-08-01). Populated ONCE, right after defenceChokepoint is found in Plan(), so
+		// it plays no part in choke DETECTION itself (Wall()/RayToWall still see the map as it stands
+		// today -- deliberately: a corridor that only looks wide once trees are gone is not a
+		// circularity worth untangling, and treating trees as walls during detection is if anything the
+		// safer, more conservative choice). It DOES relax Passable/Buildable for everything computed
+		// AFTER that point -- concretely just the gate-cluster's own LocalFlood/PlaceIn search -- so the
+		// defence cluster is no longer planned as if trees the AI is about to bulldoze were permanent.
+		// Deliberately NEVER populated for secondary approaches: ClearNearbyObstacles only ever runs at
+		// the primary choke, so a secondary gate's trees genuinely are never cleared and must keep
+		// blocking the planner exactly as before.
+		HashSet<CPos> clearableTreeCells = [];
+
 		bool Passable(CPos c) =>
 			world.Map.Contains(c)
 			&& loco.MovementCostForCell(c) != PathGraph.MovementCostForUnreachableCell
-			&& !actorCells.Contains(c);
+			&& (!actorCells.Contains(c) || clearableTreeCells.Contains(c));
 
 		bool Buildable(CPos c)
 		{
-			if (!world.Map.Contains(c) || actorCells.Contains(c))
+			if (!world.Map.Contains(c))
+				return false;
+
+			if (actorCells.Contains(c) && !clearableTreeCells.Contains(c))
 				return false;
 
 			var t = world.Map.GetTerrainInfo(c).Type;
@@ -498,7 +548,7 @@ namespace OpenRA.Mods.Common.Traits
 				// e.g. the SAM roleDims.ContainsKey guard in Plan()).
 				if (!world.Map.Rules.Actors.TryGetValue(variants[0], out var ai))
 				{
-					Log.Write("debug", $"[AotPlan] WARNING: role {role} references unknown actor '{variants[0]}' — skipped");
+					Log.Write("debug", $"[AotPlan][{player.PlayerName}] WARNING: role {role} references unknown actor '{variants[0]}' — skipped");
 					continue;
 				}
 
@@ -515,7 +565,7 @@ namespace OpenRA.Mods.Common.Traits
 				{
 					var vbi = world.Map.Rules.Actors[v].TraitInfoOrDefault<BuildingInfo>();
 					if (vbi != null && (vbi.Dimensions.X != bi.Dimensions.X || vbi.Dimensions.Y != bi.Dimensions.Y))
-						Log.Write("debug", $"[AotPlan] WARNING: {v} dims differ from {variants[0]} — plan uses {variants[0]}'s footprint");
+						Log.Write("debug", $"[AotPlan][{player.PlayerName}] WARNING: {v} dims differ from {variants[0]} — plan uses {variants[0]}'s footprint");
 				}
 			}
 
@@ -646,6 +696,31 @@ namespace OpenRA.Mods.Common.Traits
 
 			defenceChokepoint = DetectChokepoint(enemies);
 			DetectApproaches(enemies);
+
+			// See clearableTreeCells' own comment for the full reasoning. Populated ONLY around the
+			// primary choke, ONLY now that its location is finally known -- everything computed above
+			// this point (Pocket included) already ran against the strict, tree-blocking obstacle set,
+			// so this cannot retroactively change anything already decided; it only relaxes what runs
+			// AFTER it (the gate-cluster's own local search, right below).
+			if (defenceChokepoint != null)
+			{
+				var choke = defenceChokepoint.Value;
+				var r = Info.TreeClearRadius;
+				foreach (var a in world.Actors)
+				{
+					if (a.IsDead || !a.IsInWorld || !a.Owner.NonCombatant
+						|| !a.Info.HasTraitInfo<HealthInfo>() || a.Info.HasTraitInfo<ChangesTerrainInfo>())
+						continue;
+
+					var bi = a.Info.TraitInfoOrDefault<BuildingInfo>();
+					if (bi == null)
+						continue;
+
+					foreach (var c in bi.Tiles(a.Location))
+						if (Math.Max(Math.Abs(c.X - choke.X), Math.Abs(c.Y - choke.Y)) <= r)
+							clearableTreeCells.Add(c);
+				}
+			}
 
 			var mines = world.Actors
 				.Where(a => !a.IsDead && a.IsInWorld && Info.OreMineTypes.Contains(a.Info.Name))
@@ -814,7 +889,7 @@ namespace OpenRA.Mods.Common.Traits
 					}
 				}
 
-				Log.Write("debug", $"[AotPlan] FAILED to place {name} — no valid position in pocket");
+				Log.Write("debug", $"[AotPlan][{player.PlayerName}] FAILED to place {name} — no valid position in pocket");
 				return null;
 			}
 
@@ -903,7 +978,7 @@ namespace OpenRA.Mods.Common.Traits
 					}
 				}
 
-				Log.Write("debug", $"[AotPlan] FAILED to place {name} — no valid position in local area");
+				Log.Write("debug", $"[AotPlan][{player.PlayerName}] FAILED to place {name} — no valid position in local area");
 				return null;
 			}
 
@@ -932,6 +1007,24 @@ namespace OpenRA.Mods.Common.Traits
 				}
 
 				return order.Take(budget).ToHashSet();
+			}
+
+			// Centre cell of an already-placed block, for anchoring a search right beside it.
+			static CPos BlockAnchor(Placement p) => p.Pos + new CVec(p.V.W / 2, p.V.H / 2);
+
+			// SAM Sites clustered tight around named blocks (user spec 2026-07-31: air raids used to walk
+			// straight through the middle of the base because the old 5 SAM Sites were scattered loosely
+			// via the ordinary Pocket-wide Place(), with no guarantee any of them actually covered a given
+			// building). PlaceIn's own collision check (ValidIn -> builtCells/bruttoCells) already makes it
+			// impossible to land ON TOP of the anchor block or its fence ring -- both are reserved in
+			// bruttoCells the moment the block itself is placed (ReserveFenceRingFor for fenced blocks, the
+			// block's own W×H rectangle regardless of fencing). The tight LocalFlood radius + "closest cell
+			// to the anchor" bias is what turns that baseline guarantee into "genuinely touching it" rather
+			// than "somewhere in the general area", which is all Place()'s own base-wide spread term gives.
+			Placement PlaceAdjacent(string name, CPos anchor, int radius = 9, int budget = 260)
+			{
+				var area = LocalFlood(anchor, radius, budget);
+				return PlaceIn(area, name, SingleVariants("SAM"), c => -Dist(c, anchor), useSpread: false);
 			}
 
 			var gateList = gates;
@@ -977,25 +1070,52 @@ namespace OpenRA.Mods.Common.Traits
 			// every other plan step already relies on, instead of a bespoke local-area search that kept
 			// mis-firing on tight/rocky necks). Two Turrets attach directly beside it in Age 1 (left/right
 			// or above/below, matching the flanking axis), THEN the whole 3-building cluster gets fenced.
-			// SAM Sites are unrelated to the choke -- scattered through the base via the ordinary Pocket-
-			// wide Place() (natural spread, no special anchor), 2 in Age 0 and 3 more in Age 2. One Obelisk
-			// sits directly behind the cluster (toward the yard) in Age 3. All of this is wired into the
-			// Rhythm now, at plan time, even though most of it only becomes buildable many ages later --
-			// matches how every other age-gated step in this Rhythm already works.
-			Placement pSam1 = null, pSam2 = null, pSam3 = null, pSam4 = null, pSam5 = null;
+			// One Obelisk sits directly behind the cluster (toward the yard) in Age 3. All of this is wired
+			// into the Rhythm now, at plan time, even though most of it only becomes buildable many ages
+			// later -- matches how every other age-gated step in this Rhythm already works.
+			//
+			// SAM Sites (user spec 2026-07-31, replacing the old base-wide scatter): each one sits
+			// IMMEDIATELY beside a specific named block instead of loosely somewhere in the base -- the old
+			// scatter left gaps an air raid could walk straight through with nothing reacting nearby.
+			//   Age 0: 2x beside the construction yard (outside its YardFence).
+			//   Age 1: 2x beside the tech pair, 1x beside the production pair, 2x beside power cluster 1 --
+			//          all queued immediately after the Refinery in the Rhythm (see BuildRhythm).
+			//   Age 2: 2x behind the gate defence cluster (with the Obelisk, once it exists) + 1x beside
+			//          the Temple of Nod.
+			//   Age 3: 1x beside the Shrine.
+			// Anchors are taken from Placements already resolved above (pTech/pProd/pNuke/pTmpl/pShrn);
+			// the gate-cluster-anchored pair is placed further down, once pGateCluster itself exists.
+			Placement pSamYard1 = null, pSamYard2 = null;
+			Placement pSamTech1 = null, pSamTech2 = null, pSamProd1 = null, pSamPower1a = null, pSamPower1b = null;
+			Placement pSamTemple = null, pSamShrine = null;
+			Placement pSamDefence1 = null, pSamDefence2 = null; // resolved further down, once pGateCluster exists
 			if (Info.SamTypes.Length > 0 && roleDims.ContainsKey("SAM"))
 			{
-				// Pull toward the yard (user spec: "müssen in Base verteilt sein und nicht am Rand") --
-				// with a zero bias, Place()'s own spread term (maximise distance from every existing
-				// placement) has no counterweight and happily pushes SAM Sites out to the Pocket's edge,
-				// past the developed base entirely. A real bias term keeps them within the base footprint
-				// while spread still keeps the 5 of them from stacking on top of each other.
-				double SamBias((double X, double Y) c) => -0.6 * Dist(c, yard);
-				pSam1 = Place("SAM1", SingleVariants("SAM"), SamBias);
-				pSam2 = Place("SAM2", SingleVariants("SAM"), SamBias);
-				pSam3 = Place("SAM3", SingleVariants("SAM"), SamBias);
-				pSam4 = Place("SAM4", SingleVariants("SAM"), SamBias);
-				pSam5 = Place("SAM5", SingleVariants("SAM"), SamBias);
+				pSamYard1 = PlaceAdjacent("SAM_Yard1", yard);
+				pSamYard2 = PlaceAdjacent("SAM_Yard2", yard);
+
+				if (pTech != null)
+				{
+					var techAnchor = BlockAnchor(pTech);
+					pSamTech1 = PlaceAdjacent("SAM_Tech1", techAnchor);
+					pSamTech2 = PlaceAdjacent("SAM_Tech2", techAnchor);
+				}
+
+				if (pProd != null)
+					pSamProd1 = PlaceAdjacent("SAM_Prod1", BlockAnchor(pProd));
+
+				if (pNuke != null)
+				{
+					var powerAnchor = BlockAnchor(pNuke);
+					pSamPower1a = PlaceAdjacent("SAM_Power1a", powerAnchor);
+					pSamPower1b = PlaceAdjacent("SAM_Power1b", powerAnchor);
+				}
+
+				if (pTmpl != null)
+					pSamTemple = PlaceAdjacent("SAM_Temple", BlockAnchor(pTmpl));
+
+				if (pShrn != null)
+					pSamShrine = PlaceAdjacent("SAM_Shrine", BlockAnchor(pShrn));
 			}
 
 			// Gate defence: a full bulk CLUSTER (user spec) -- Turret-FlameTurret-Turret in a single row or
@@ -1017,6 +1137,20 @@ namespace OpenRA.Mods.Common.Traits
 				bool NearChoke((double X, double Y) c) => Dist(c, choke) <= 5;
 				pGateCluster = PlaceIn(chokeArea, "GateCluster", GateClusterVariants(preferHorizontal),
 					c => -Dist(c, choke), useSpread: false, extraFilter: NearChoke);
+
+				// The 2 Age-2 SAM Sites that go BEHIND the gate cluster (user spec) -- same "behind"
+				// direction the Age-3 Obelisk uses (Cardinal(yard - clusterCentre), i.e. back towards the
+				// yard so the site faces out through the defended gate rather than the wrong way), just
+				// anchored further back (radius pushes past the Obelisk's own eventual spot at ~4 cells
+				// behind) so the two never contest the same ground.
+				if (pGateCluster != null)
+				{
+					var clusterCentre = BlockAnchor(pGateCluster);
+					var behindDefence = Cardinal(new CVec(yard.X - clusterCentre.X, yard.Y - clusterCentre.Y));
+					var defenceSamAnchor = clusterCentre + (behindDefence * 7);
+					pSamDefence1 = PlaceAdjacent("SAM_Defence1", defenceSamAnchor);
+					pSamDefence2 = PlaceAdjacent("SAM_Defence2", defenceSamAnchor);
+				}
 
 				// Secondary approaches (user spec): the SAME cluster shape at every other classified
 				// approach into the base, each with its own local flanking axis (narrower of the two
@@ -1053,116 +1187,134 @@ namespace OpenRA.Mods.Common.Traits
 			}
 
 			BuildRhythm(pNuke, pSilo, pProd, pNuk2a, pTech, pFix, pProc, pProc2, pAfld, pTmpl, pHpad, pShrn, pMslo, pSgen1, pSgen2,
-				pSam1, pSam2, pSam3, pSam4, pSam5, pGateCluster, secondaryClusters);
+				pSamYard1, pSamYard2, pSamTech1, pSamTech2, pSamProd1, pSamPower1a, pSamPower1b,
+				pSamDefence1, pSamDefence2, pSamTemple, pSamShrine, pGateCluster, secondaryClusters);
 
-			Log.Write("debug", $"[AotPlan] yard={yard} pocket={Pocket.Count} gates=[{string.Join(" ", gates)}] main={MainGate} " +
+			Log.Write("debug", $"[AotPlan][{player.PlayerName}] yard={yard} pocket={Pocket.Count} gates=[{string.Join(" ", gates)}] main={MainGate} " +
 				$"placed={placements.Count}/15 rhythm={Rhythm.Count} steps");
 		}
 
 		// ------------------------------------------------------------------ rhythm
 
-		void AddBuilding(Placement p, int index, string role)
-		{
-			if (p == null)
-				return;
-
-			var (off, r) = p.V.Buildings[index];
-			Rhythm.Add(new AotPlanStep
-			{
-				Kind = AotStepKind.Building,
-				Role = role ?? r,
-				Variants = RoleVariants(r),
-				TopLeft = p.Pos + off
-			});
-		}
-
-		// Mixed clusters: address the n-th building of a given role, independent of variant layout order.
-		void AddBuildingByRole(Placement p, string role, int occurrence)
-		{
-			if (p == null)
-				return;
-
-			var seen = 0;
-			for (var i = 0; i < p.V.Buildings.Count; i++)
-			{
-				if (p.V.Buildings[i].Role != role)
-					continue;
-
-				if (seen++ == occurrence)
-				{
-					AddBuilding(p, i, role);
-					return;
-				}
-			}
-		}
-
-		void AddFence(string label, int x, int y, int w, int h)
-		{
-			// Ring node cells (corners + side mids); LineBuild spans the sides between nearby nodes.
-			var nodes = new List<CPos>
-			{
-				new(x, y), new(x + w - 1, y), new(x + w - 1, y + h - 1), new(x, y + h - 1),
-				new(x + (w / 2), y), new(x + w - 1, y + (h / 2)),
-				new(x + (w / 2), y + h - 1), new(x, y + (h / 2))
-			};
-			// Full ring boundary -- every cell LineBuild is legitimately allowed to fill in between this
-			// ring's own nodes. Anything the executor later finds outside the union of ALL fences' rings
-			// is a stray inter-ring bridge (LineBuild auto-connected to the nearest wall of ANY fence,
-			// not just this one) and gets sold -- see AotBaseBuilderBotModule.PruneStrayFenceSegments.
-			var perimeter = new List<CPos>();
-			for (var dx = 0; dx < w; dx++)
-			{
-				perimeter.Add(new CPos(x + dx, y));
-				perimeter.Add(new CPos(x + dx, y + h - 1));
-			}
-
-			for (var dy = 0; dy < h; dy++)
-			{
-				perimeter.Add(new CPos(x, y + dy));
-				perimeter.Add(new CPos(x + w - 1, y + dy));
-			}
-
-			Rhythm.Add(new AotPlanStep
-			{
-				Kind = AotStepKind.Fence,
-				Role = label,
-
-				// Fence steps drive off FenceNodes, but TopLeft is still read as a fallback target (the
-				// wall bridge when the node queue is empty) and by the block diagnostics. Leaving it at
-				// the default made both aim at 0,0 -- confirmed 2026-07-24 in-game: "Waiting (target
-				// blocked): PowerFence at 0,0" and "Diag Nuk2aFence@0,0 ... inPocket=False".
-				TopLeft = new CPos(x, y),
-				Variants = Info.WallTypes,
-				FenceNodes = nodes.Distinct().ToList(),
-				FencePerimeter = perimeter.Distinct().ToList()
-			});
-		}
-
-		void AddFenceFor(Placement p, string label)
-		{
-			if (p == null)
-				return;
-
-			AddFence(label, p.Pos.X, p.Pos.Y, p.V.W, p.V.H);
-		}
-
 		void BuildRhythm(Placement nuke, Placement silo, Placement prod, Placement nuk2a, Placement tech,
 			Placement fix, Placement proc, Placement proc2, Placement afld, Placement tmpl, Placement hpad,
 			Placement shrn, Placement mslo, Placement sgen1, Placement sgen2,
-			Placement sam1, Placement sam2, Placement sam3, Placement sam4, Placement sam5,
+			Placement samYard1, Placement samYard2, Placement samTech1, Placement samTech2, Placement samProd1,
+			Placement samPower1a, Placement samPower1b, Placement samDefence1, Placement samDefence2,
+			Placement samTemple, Placement samShrine,
 			Placement gateCluster, List<Placement> secondaryClusters)
 		{
+			// Which Age tier (0-3) a step belongs to -- bumped at each "AGE N" section boundary below.
+			// Every AddBuilding/AddFence/AddAt call in between picks it up automatically (all four are
+			// LOCAL to BuildRhythm now, purely so they can close over this). Consumed by
+			// AotBaseBuilderBotModule.AgeRhythmComplete(tier) (user spec 2026-07-31): the age-UPGRADE
+			// purchase now waits for the current tier's ENTIRE planned Rhythm -- core and defence alike --
+			// to finish before it may even be attempted, so it stops competing for cash against a base
+			// that is still mid-build.
+			var currentAge = 0;
+
+			void AddBuilding(Placement p, int index, string role, bool defense = false)
+			{
+				if (p == null)
+					return;
+
+				var (off, r) = p.V.Buildings[index];
+				Rhythm.Add(new AotPlanStep
+				{
+					Kind = AotStepKind.Building,
+					Role = role ?? r,
+					Variants = RoleVariants(r),
+					TopLeft = p.Pos + off,
+					Defense = defense,
+					Age = currentAge
+				});
+			}
+
+			// Mixed clusters: address the n-th building of a given role, independent of variant layout order.
+			void AddBuildingByRole(Placement p, string role, int occurrence, bool defense = false)
+			{
+				if (p == null)
+					return;
+
+				var seen = 0;
+				for (var i = 0; i < p.V.Buildings.Count; i++)
+				{
+					if (p.V.Buildings[i].Role != role)
+						continue;
+
+					if (seen++ == occurrence)
+					{
+						AddBuilding(p, i, role, defense);
+						return;
+					}
+				}
+			}
+
+			void AddFence(string label, int x, int y, int w, int h, bool defense = false)
+			{
+				// Ring node cells (corners + side mids); LineBuild spans the sides between nearby nodes.
+				var nodes = new List<CPos>
+				{
+					new(x, y), new(x + w - 1, y), new(x + w - 1, y + h - 1), new(x, y + h - 1),
+					new(x + (w / 2), y), new(x + w - 1, y + (h / 2)),
+					new(x + (w / 2), y + h - 1), new(x, y + (h / 2))
+				};
+				// Full ring boundary -- every cell LineBuild is legitimately allowed to fill in between this
+				// ring's own nodes. Anything the executor later finds outside the union of ALL fences' rings
+				// is a stray inter-ring bridge (LineBuild auto-connected to the nearest wall of ANY fence,
+				// not just this one) and gets sold -- see AotBaseBuilderBotModule.PruneStrayFenceSegments.
+				var perimeter = new List<CPos>();
+				for (var dx = 0; dx < w; dx++)
+				{
+					perimeter.Add(new CPos(x + dx, y));
+					perimeter.Add(new CPos(x + dx, y + h - 1));
+				}
+
+				for (var dy = 0; dy < h; dy++)
+				{
+					perimeter.Add(new CPos(x, y + dy));
+					perimeter.Add(new CPos(x + w - 1, y + dy));
+				}
+
+				Rhythm.Add(new AotPlanStep
+				{
+					Kind = AotStepKind.Fence,
+					Role = label,
+
+					// Fence steps drive off FenceNodes, but TopLeft is still read as a fallback target (the
+					// wall bridge when the node queue is empty) and by the block diagnostics. Leaving it at
+					// the default made both aim at 0,0 -- confirmed 2026-07-24 in-game: "Waiting (target
+					// blocked): PowerFence at 0,0" and "Diag Nuk2aFence@0,0 ... inPocket=False".
+					TopLeft = new CPos(x, y),
+					Variants = Info.WallTypes,
+					FenceNodes = nodes.Distinct().ToList(),
+					FencePerimeter = perimeter.Distinct().ToList(),
+					Defense = defense,
+					Age = currentAge
+				});
+			}
+
+			void AddFenceFor(Placement p, string label, bool defense = false)
+			{
+				if (p == null)
+					return;
+
+				AddFence(label, p.Pos.X, p.Pos.Y, p.V.W, p.V.H, defense);
+			}
+
 			// Gate defence steps place directly at the validated chokepoint's own coordinates -- these are
 			// instance fields (defenceChokepoint/-Axis/-PathDir), not Plan()-local packer state, so no
 			// Placement/parameter is needed for them the way the packer-driven bulks above are.
-			void AddAt(string role, CPos pos)
+			void AddAt(string role, CPos pos, bool defense = false)
 			{
 				var variants = RoleVariants(role);
 				if (variants.Length == 0)
 					return;
 
-				Rhythm.Add(new AotPlanStep { Kind = AotStepKind.Building, Role = role, Variants = variants, TopLeft = pos });
+				Rhythm.Add(new AotPlanStep { Kind = AotStepKind.Building, Role = role, Variants = variants, TopLeft = pos, Defense = defense, Age = currentAge });
 			}
+
+			currentAge = 0;
 
 			// AGE 0 — mixed power cluster (2×NUK2 + 2×NUKE, columns): the first NUKE comes first (NUK2
 			// requires an existing nuke), the second NUKE closes the cluster. Yard fenced right after the
@@ -1182,26 +1334,30 @@ namespace OpenRA.Mods.Common.Traits
 
 			// Gate defence master plan (user spec, conceptualised fully now even though most of it only
 			// becomes buildable many ages later -- same as every other age-gated step in this Rhythm):
-			//   Age 0: the cluster's Flame Turret (middle of the row/column) + 2x SAM Site scattered in
-			//          the base. The cluster itself -- Turret-FlameTurret-Turret in one row or column,
-			//          fenced as a single ring, exactly like the power cluster -- is already fully planned
-			//          NOW (gateCluster, computed in Plan()), only the middle building is queued this age.
-			//   Age 1: the 2 Turrets flanking the already-standing Flame Turret, THEN the fence ring around
-			//          all 3.
-			//   Age 2: 3x further SAM Site scattered in the base.
+			//   Age 0: the cluster's Flame Turret (middle of the row/column). The cluster itself --
+			//          Turret-FlameTurret-Turret in one row or column, fenced as a single ring, exactly
+			//          like the power cluster -- is already fully planned NOW (gateCluster, computed in
+			//          Plan()), only the middle building is queued this age.
+			//   Age 1: the 2 Turrets flanking the already-standing Flame Turret, THEN the fence ring
+			//          around all 3.
 			//   Age 3: 1x Obelisk of Light directly behind the cluster (toward the yard, away from the
 			//          chokepoint -- an Obelisk facing the wrong way is a wasted superweapon) + the same
 			//          3-building fenced cluster at every other classified approach.
-			AddBuilding(gateCluster, 1, "FTUR");
+			AddBuilding(gateCluster, 1, "FTUR", defense: true);
 
-			AddBuilding(sam1, 0, "SAM");
-			AddBuilding(sam2, 0, "SAM");
+			// SAM Sites, Age 0 (user spec 2026-07-31): 2x directly beside the construction yard, outside
+			// its YardFence -- see the anchored placement in Plan() for why (air cover for the one
+			// building that can never be rebuilt if lost).
+			AddBuilding(samYard1, 0, "SAM", defense: true);
+			AddBuilding(samYard2, 0, "SAM", defense: true);
 
 			// Helipad closes out Age 0 -- deliberately last, after the gate turret (user spec).
 			AddBuilding(hpad, 0, "HPAD");
 
 			// STEC moved to the very end of Age 0 (user spec).
 			AddBuilding(tech, 1, "STEC");
+
+			currentAge = 1;
 
 			// AGE 1 — the builder naturally waits at the first entry whose variants are not buildable yet.
 			// AFLD is the first Age-1-only building (age-gated via Prerequisites); the strict rhythm
@@ -1217,9 +1373,22 @@ namespace OpenRA.Mods.Common.Traits
 			// to "top priority" as the game's own rules allow.
 			AddBuilding(afld, 0, "AFLD");
 			AddBuilding(proc, 0, "PROC");
-			AddBuilding(gateCluster, 0, "GUN");
-			AddBuilding(gateCluster, 2, "GUN");
-			AddFenceFor(gateCluster, "GateFence");
+
+			// SAM Sites, Age 1 (user spec 2026-07-31): queued IMMEDIATELY after the Refinery, ahead of
+			// the Age-1 GUN turrets below and everything else in Age 1 -- 2x beside the tech pair, 1x
+			// beside the production pair, 2x beside power cluster 1. Each was placed right next to its
+			// named block in Plan() (PlaceAdjacent). Listed before the GUN turrets so the Defence
+			// chooser (strict first-open within its OWN queue, same as core) reaches these first; the
+			// Refinery itself is core and stays first on ITS queue regardless.
+			AddBuilding(samTech1, 0, "SAM", defense: true);
+			AddBuilding(samTech2, 0, "SAM", defense: true);
+			AddBuilding(samProd1, 0, "SAM", defense: true);
+			AddBuilding(samPower1a, 0, "SAM", defense: true);
+			AddBuilding(samPower1b, 0, "SAM", defense: true);
+
+			AddBuilding(gateCluster, 0, "GUN", defense: true);
+			AddBuilding(gateCluster, 2, "GUN", defense: true);
+			AddFenceFor(gateCluster, "GateFence", defense: true);
 
 			for (var i = 0; i < 4; i++)
 				AddBuilding(nuk2a, i, "NUK2");
@@ -1227,19 +1396,33 @@ namespace OpenRA.Mods.Common.Traits
 			AddBuilding(tmpl, 0, "TMPL");
 			AddBuilding(mslo, 0, "MSLO");
 
-			// AGE 2 -- second Refinery FIRST if the base still has room for one (optional, user spec: Place()
-			// already just returns null/no-ops when nothing fits, so this needs no separate space check).
-			// NO third power cluster (user spec: Age 0's mixed cluster + Age 1's NUK2a quad are enough) --
-			// the old Age-2 NUK2b quad + its fence are dropped entirely. SHRN moved to almost the very end
-			// (user spec), right before the Stealth Generators -- it's still directly ahead of them since
-			// SGEN's own Buildable.Prerequisites requires aot-shrine to already exist.
+			currentAge = 2;
+
+			// SAM Sites, Age 2 (user spec 2026-07-31): FIRST in Age 2, ahead of every other Age-2
+			// building -- 2x behind the gate defence cluster (same side the Age-3 Obelisk will occupy),
+			// 1x beside the Temple of Nod. Being listed first here is what it takes for the SAM/GUN/FTUR
+			// Defence chooser to reach them right after Age 1's own defence steps finish; it does NOT
+			// delay the second Refinery below in any way, since core and defence now run through two
+			// fully independent choosers (see AotBaseBuilderBotModule.ChooseStep) -- "SAM first" and
+			// "Refinery first" are both simultaneously true, one on each queue.
+			AddBuilding(samDefence1, 0, "SAM", defense: true);
+			AddBuilding(samDefence2, 0, "SAM", defense: true);
+			AddBuilding(samTemple, 0, "SAM", defense: true);
+
+			// Second Refinery FIRST among Age 2's CORE steps if the base still has room for one
+			// (optional, user spec: Place() already just returns null/no-ops when nothing fits, so this
+			// needs no separate space check). NO third power cluster (user spec: Age 0's mixed cluster +
+			// Age 1's NUK2a quad are enough) -- the old Age-2 NUK2b quad + its fence are dropped
+			// entirely. SHRN moved to almost the very end (user spec), right before the Stealth
+			// Generators -- it's still directly ahead of them since SGEN's own Buildable.Prerequisites
+			// requires aot-shrine to already exist.
 			AddBuilding(proc2, 0, "PROC");
-			AddBuilding(sam3, 0, "SAM");
-			AddBuilding(sam4, 0, "SAM");
-			AddBuilding(sam5, 0, "SAM");
+
 			AddBuilding(shrn, 0, "SHRN");
 			AddBuilding(sgen1, 0, "SGEN");
 			AddBuilding(sgen2, 0, "SGEN");
+
+			currentAge = 3;
 
 			// AGE 3 -- previously upgrade-only; the Obelisk + secondary-approach clusters are the new
 			// base-rhythm additions here (user spec). Obelisk sits directly behind the gate cluster's
@@ -1255,15 +1438,18 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				var fturPos = gateCluster.Pos + gateCluster.V.Buildings[1].Off;
 				var behind = Cardinal(new CVec(yard.X - fturPos.X, yard.Y - fturPos.Y));
-				AddAt("OBELISK", fturPos + (behind * 4));
+				AddAt("OBELISK", fturPos + (behind * 4), defense: true);
 			}
+
+			// SAM Sites, Age 3 (user spec 2026-07-31): 1x beside the Shrine.
+			AddBuilding(samShrine, 0, "SAM", defense: true);
 
 			foreach (var cluster in secondaryClusters)
 			{
-				AddBuilding(cluster, 0, "GUN");
-				AddBuilding(cluster, 1, "FTUR");
-				AddBuilding(cluster, 2, "GUN");
-				AddFenceFor(cluster, $"SecondaryFence_{cluster.Pos.X}_{cluster.Pos.Y}");
+				AddBuilding(cluster, 0, "GUN", defense: true);
+				AddBuilding(cluster, 1, "FTUR", defense: true);
+				AddBuilding(cluster, 2, "GUN", defense: true);
+				AddFenceFor(cluster, $"SecondaryFence_{cluster.Pos.X}_{cluster.Pos.Y}", defense: true);
 			}
 		}
 
@@ -1460,14 +1646,14 @@ namespace OpenRA.Mods.Common.Traits
 
 			if (choke.HasValue)
 			{
-				Log.Write("debug", $"[AotPlan] Choke(defence)=two-sided {choke.Value} width={bestWidth} axis={defenceChokeAxis} " +
+				Log.Write("debug", $"[AotPlan][{player.PlayerName}] Choke(defence)=two-sided {choke.Value} width={bestWidth} axis={defenceChokeAxis} " +
 					$"plusDist={defenceChokeAxisPlusDist} minusDist={defenceChokeAxisMinusDist}");
 				return choke.Value;
 			}
 
 			var front1 = path.FirstOrDefault(c => (c - yard).Length >= Info.BaseFrontExtent);
 			var frontLine = front1 != default ? front1 : FallbackFrontLine(enemies);
-			Log.Write("debug", $"[AotPlan] Choke(defence)=frontline {frontLine} (open terrain, no two-sided neck)");
+			Log.Write("debug", $"[AotPlan][{player.PlayerName}] Choke(defence)=frontline {frontLine} (open terrain, no two-sided neck)");
 			return frontLine;
 		}
 
@@ -1648,7 +1834,7 @@ namespace OpenRA.Mods.Common.Traits
 
 			approaches.Clear();
 			approaches.AddRange(kept);
-			Log.Write("debug", "[AotPlan] Approaches(defence): " + string.Join(", ", approaches.Select(a => $"{a.Type}@{a.Gate}")));
+			Log.Write("debug", "[AotPlan][{player.PlayerName}] Approaches(defence): " + string.Join(", ", approaches.Select(a => $"{a.Type}@{a.Gate}")));
 		}
 	}
 }

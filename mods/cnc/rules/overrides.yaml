@@ -495,24 +495,29 @@ RMBO:
 			Ice: 90
 			Veins: 100
 			Clear.Snow: 100
+			# User-Wunsch 2026-07-30: Strassenbonus von vanilla 125 auf 150 angehoben.
+			Road: 150
 	Locomotor@HEAVYWHEELED:
 		Crushes: crate, infantry, mine
 		TerrainSpeeds:
 			Ice: 90
 			Veins: 100
 			Clear.Snow: 100
+			Road: 150
 	Locomotor@TRACKED:
 		Crushes: wall, crate, infantry, mine
 		TerrainSpeeds:
 			Ice: 95
 			Veins: 100
 			Clear.Snow: 100
+			Road: 150
 	Locomotor@HEAVYTRACKED:
 		Crushes: wall, heavywall, crate, infantry, mine
 		TerrainSpeeds:
 			Ice: 95
 			Veins: 100
 			Clear.Snow: 100
+			Road: 150
 	Locomotor@LANDINGCRAFT:
 		TerrainSpeeds:
 			Clear.Snow: 100

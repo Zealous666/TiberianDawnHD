@@ -1617,7 +1617,7 @@ STEC:
 		PauseOnCondition: lowpower
 		Prerequisites: ~techlevel.superweapons
 		Icon: aot-spyplane
-		ChargeInterval: 3750
+		ChargeInterval: 7500
 		QuantizedFacings: 8
 		Name: Spy Plane
 		Description: A Yak recon plane flies over the target area and reveals it for a short time.
@@ -1801,7 +1801,9 @@ aot-stec-age2:
 # Sprite-Wechsel ab Age 2 zu TS NAMISL (Nod Missile Silo) — siehe [[nuke-silo-system]], gleiches
 # Zwei-Layer-Schema (Body silbergrau + House-Color-Overlay 176-191) wie beim NUKE-Turbinen-Upgrade.
 # Superpower "Tiberium Strike" = Duplikat von TMPLs NukePower (structures.yaml), Warhead ersetzt
-# durch aot-TiberiumStrike (toxisch statt nuklear, siehe aot-weapons.yaml). ChargeInterval 250 = 10s TESTWERT.
+# durch aot-TiberiumStrike (toxisch statt nuklear, siehe aot-weapons.yaml).
+# Cooldowns final abgestimmt (User 2026-07-30): Mine Cluster 10min, Enhanced 15min,
+# Tiberium Missile 15min, Atom Bomb 20min (vorher 250/250/250/11250 = 10s/10s/10s/7,5min TESTWERTe).
 MSLO:
 	Inherits: ^BaseBuilding
 	Inherits@shape: ^2x2Shape
@@ -1892,7 +1894,7 @@ MSLO:
 		IconImage: mslo
 		Icon: aot-minecluster-icon
 		Cursor: nuke
-		ChargeInterval: 250
+		ChargeInterval: 15000
 		Name: Mine Cluster Missile
 		Description: Scatters anti-personnel mines across the target area.
 		SelectTargetSpeechNotification: SelectTarget
@@ -1917,7 +1919,7 @@ MSLO:
 		IconImage: mslo
 		Icon: aot-minecluster-icon
 		Cursor: nuke
-		ChargeInterval: 250
+		ChargeInterval: 22500
 		Name: Mine Cluster Missile (Enhanced)
 		Description: Scatters 10 anti-personnel + 5 anti-vehicle mines across the target area.
 		SelectTargetSpeechNotification: SelectTarget
@@ -1942,7 +1944,7 @@ MSLO:
 		IconImage: mslo
 		Icon: aot-tiberiummissile-icon
 		Cursor: nuke
-		ChargeInterval: 250
+		ChargeInterval: 22500
 		Name: Tiberium Missile
 		Description: Launches a toxic Tiberium warhead. Devastating against infantry, far less effective against structures.
 		SelectTargetSpeechNotification: SelectTarget
@@ -1967,7 +1969,7 @@ MSLO:
 		IconImage: mslo
 		Icon: aot-atombomb-icon
 		Cursor: nuke
-		ChargeInterval: 11250
+		ChargeInterval: 30000
 		Name: Atom Bomb
 		Description: Launches a nuclear missile at the target location. Devastating against everything.
 		EndChargeSpeechNotification: NuclearWeaponAvailable
@@ -2599,7 +2601,7 @@ aot-tmpl-age2:
 # GDI → Age.GDI, NOD → Age.Nod (Queue auf Player-Aktor, Faction-Split via Factions: gdi/nod).
 # Sichtbarkeit: Age-1 sofort (grau ohne ATEC/STEC), Age-2/3 per ~aot-ageN-Kette.
 # ATEC (GDI) / STEC (NOD) sind Pflicht-Voraussetzung für ALLE drei Ages.
-# BuildDuration: 50000 Ticks = 20 min Bauzeit (entspricht dem ehemaligen ChargeInterval).
+# BuildDuration: 37500 Ticks = 15 min Bauzeit (User-Wunsch 2026-07-30, vorher 50000/20min).
 # Nach Abschluss: AotAgeActivationNotification → globale Chat-Nachricht an alle Spieler.
 # ProvidesPrerequisite: aot-ageN DIREKT (kein -purchased-Zwischenschritt mehr).
 aot-age1-upgrade-gdi:
@@ -2613,7 +2615,7 @@ aot-age1-upgrade-gdi:
 		Prerequisites: atec, ~!aot-age1
 		Queue: Age.GDI
 		BuildLimit: 1
-		BuildDuration: 50000
+		BuildDuration: 37500
 		MoveIntoWorld: false
 		Description: Unlocks the Tiberium era with new units, buildings and the capability to harvest Tiberium.
 	ProvidesPrerequisite:
@@ -2634,7 +2636,7 @@ aot-age1-upgrade-nod:
 		Prerequisites: stec, ~!aot-age1
 		Queue: Age.Nod
 		BuildLimit: 1
-		BuildDuration: 50000
+		BuildDuration: 37500
 		MoveIntoWorld: false
 		Description: Unlocks the Tiberium era with new units, buildings and the capability to harvest Tiberium.
 	ProvidesPrerequisite:
@@ -2655,7 +2657,7 @@ aot-age2-upgrade-gdi:
 		Prerequisites: ~aot-age1, atec, aot-age1, aot-proc-gdi, ~!aot-age2
 		Queue: Age.GDI
 		BuildLimit: 1
-		BuildDuration: 50000
+		BuildDuration: 37500
 		MoveIntoWorld: false
 		Description: Moves forward in the Tiberium technologies with new upgrades and additional equipment.
 	ProvidesPrerequisite:
@@ -2676,7 +2678,7 @@ aot-age2-upgrade-nod:
 		Prerequisites: ~aot-age1, stec, aot-age1, aot-proc-nod, ~!aot-age2
 		Queue: Age.Nod
 		BuildLimit: 1
-		BuildDuration: 50000
+		BuildDuration: 37500
 		MoveIntoWorld: false
 		Description: Moves forward in the Tiberium technologies with new upgrades and additional equipment.
 	ProvidesPrerequisite:
@@ -2697,7 +2699,7 @@ aot-age3-upgrade-gdi:
 		Prerequisites: ~aot-age2, atec, aot-age2, aot-orbc, ~!aot-age3
 		Queue: Age.GDI
 		BuildLimit: 1
-		BuildDuration: 50000
+		BuildDuration: 37500
 		MoveIntoWorld: false
 		Description: Upgrades to the most advanced Tiberium units, buildings and upgrades.
 	ProvidesPrerequisite:
@@ -2718,7 +2720,7 @@ aot-age3-upgrade-nod:
 		Prerequisites: ~aot-age2, stec, aot-age2, aot-shrine, ~!aot-age3
 		Queue: Age.Nod
 		BuildLimit: 1
-		BuildDuration: 50000
+		BuildDuration: 37500
 		MoveIntoWorld: false
 		Description: Upgrades to the most advanced Tiberium units, buildings and upgrades.
 	ProvidesPrerequisite:
@@ -4188,6 +4190,12 @@ aot-upgrade-gunboat-destroyer:
 # (aot-gun-base/aot-gun-laser) fuer Bau-Icon-Wechsel, Condition-Switch direkt auf
 # GUN fuer bereits gebaute Tuerme (1:1 das HTNK/LTNK-Muster).
 GUN:
+	# User-Fund 2026-07-30: "lowpower" in AttackTurreted.PauseOnCondition unten war zunaechst
+	# wirkungslos -- GUN erbt nur ^Support, das im Gegensatz zu SAM/OBLI/STEC etc. KEIN
+	# ^DisabledOverlay einbindet. Ohne diesen Trait wird "lowpower" auf GUN nie gewaehrt (check-yaml:
+	# "consumes conditions that are not granted"), die Pause-Bedingung konnte also nie zutreffen.
+	# Bringt als Nebeneffekt auch die erwartete Abdunklung bei Stromausfall (wie bei SAM/STEC).
+	Inherits@IDISABLE: ^DisabledOverlay
 	-Buildable:
 	# User-Wunsch (2026-07-26): Verteidigungsgebaeude nicht durch Engineer/Saboteur einnehmbar.
 	# -Capturable: entfernt den von ^BaseBuilding geerbten Trait komplett -> gilt fuer BEIDE
@@ -4219,8 +4227,12 @@ GUN:
 	# ignorierte AttackTurreted es KOMPLETT, sobald der Laser aktiv war - das
 	# Geschuetz griff schlicht nie an, ohne Crash/Fehlermeldung (stiller Bug, von
 	# check-yaml nicht erkennbar). Muss explizit in die Armaments-Liste.
+	# User-Fund 2026-07-30: GUN schoss bei Low Power ungebremst weiter (SAM/OBLI/Pillbox
+	# pausieren dort korrekt, siehe aot-sam-*/AotAttackPopupOrTurreted und OBLI in
+	# structures.yaml). PauseOnCondition ersetzt den geerbten Wert komplett statt ihn zu
+	# ergaenzen -- "lowpower" muss deshalb hier explizit rein, nicht nur build-incomplete.
 	AttackTurreted:
-		PauseOnCondition: build-incomplete
+		PauseOnCondition: lowpower || build-incomplete
 		Turrets: primary, laser
 		Armaments: primary, laser
 
@@ -4911,7 +4923,7 @@ ORBC:
 		PlayerExperience: 10
 	AotOrcaTransportPower:
 		Prerequisites: aot-orbc
-		ChargeInterval: 2250
+		ChargeInterval: 15000
 		IconImage: icon
 		Icon: aot-orcatransport
 		Name: Orca Transport
@@ -4938,7 +4950,7 @@ ORBC:
 		IconImage: icon
 		Icon: aot-ion-strike
 		Cursor: ioncannon
-		ChargeInterval: 9000
+		ChargeInterval: 22500
 		Name: Ion Cannon Strike
 		Description: Calls in a devastating ion cannon strike on the target location.
 		BeginChargeSpeechNotification: IonCannonCharging
@@ -4964,7 +4976,7 @@ ORBC:
 		Prerequisites: ~techlevel.superweapons
 		IconImage: icon
 		Icon: aot-zone-drop
-		ChargeInterval: 2250
+		ChargeInterval: 15000
 		Name: Zone Trooper Drop
 		Description: Deploys a squad of Zone Troopers via dropship at the target location.
 		Dropship: aot-dropship
@@ -5067,7 +5079,7 @@ SLAB:
 	SupportPowerChargeBar:
 	AotSatellitePower:
 		Prerequisites: aot-slab
-		ChargeInterval: 250
+		ChargeInterval: 30000
 		RequiresCondition: !satellite-used
 		PauseOnCondition: lowpower
 		Icon: aot-satellite
@@ -5077,7 +5089,7 @@ SLAB:
 	AotFirestormMatrixPower:
 		OrderName: AotFirestormMatrix
 		Prerequisites: aot-firestorm-defense-upgrade
-		ChargeInterval: 1500
+		ChargeInterval: 7500
 		ActiveDuration: 750
 		PauseOnCondition: lowpower
 		Icon: aot-fs-matrix
@@ -6342,6 +6354,18 @@ aot-foundation-cell:
 	# OccupiesSpace: false = blockiert keine Bewegung (Bib ist reiner Boden-Overlay).
 	Immobile:
 		OccupiesSpace: false
+	# User-Wunsch 2026-07-30: Fortified Foundation (klein wie gross -- beide Groessen
+	# spawnen denselben aot-foundation-cell, siehe AotPlaceFoundation.CellActor) soll
+	# denselben Strassen-Geschwindigkeitsbonus geben wie echte Road-Zellen.
+	# ChangesTerrain setzt map.CustomTerrain[cell] auf den angegebenen Typ, solange
+	# dieser Aktor existiert (Requires<ImmobileInfo> -- bereits erfuellt) und macht die
+	# Zelle damit fuer JEDE terrain-abhaengige Abfrage (Locomotor.TerrainSpeeds,
+	# Buildable.TerrainTypes, Minimap-Farbe...) ununterscheidbar von echter Strasse.
+	# Bereits vorher TerrainTypes-kompatibel (Clear, Road, Clear.Snow ueberall erlaubt),
+	# daher keine Regression bei Bebaubarkeit oder Subterranean-Blockade (die laeuft
+	# ohnehin separat ueber AotFoundationLayer.Contains(cell), nicht ueber den Terraintyp).
+	ChangesTerrain:
+		TerrainType: Road
 	RenderSprites:
 		Palette: staticterrain
 	AotFoundationCellBody:

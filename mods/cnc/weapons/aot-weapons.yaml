@@ -5,6 +5,23 @@ aot-satellite-launch:
 	ValidTargets: Air
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - HeliAGGun (HIND/Harpy): Zielpunkt-Fix ===
+# User-Fund 2026-07-30: HIND traf Werften/Sub Pens ueberhaupt nicht (Einschlag sichtbar direkt
+# auf dem Gebaeude, aber 0 Schaden), gegen Landgebaeude (WEAP) dagegen schon -- nur der
+# Explosions-Einschlag erschien dort sichtbar ~3 Zellen neben dem Ziel.
+# Ursache: ohne TargetActorCenter zielt Armament.cs (Zeile ~305) auf
+# "target.Positions.ClosestToIgnoringPath(MuzzlePosition())" -- den zur MUENDUNG naechsten
+# Punkt der registrierten Trefferzonen. Bei einem schwebenden Helikopter liegt die Muendung
+# weit ueber dem Ziel; bei dicht bebauten Landzielen (WEAP) landet der "naechste Punkt" noch
+# irgendwo auf dem Gebaeude selbst, bei einer isolierten Werft im offenen Wasser verfehlt er
+# sie komplett -> Warhead findet dort keinen Akteur, Schaden bleibt aus (Notification "Building
+# under attack" feuert trotzdem, die reagiert nur auf den Treffer-Versuch, nicht auf > 0 Schaden).
+# Gleicher Fix wie bei ArtilleryShell/aot-8Inch (siehe dort): immer auf die echte Aktor-Mitte
+# zielen statt auf einen variablen, muendungsabhaengigen Punkt.
+HeliAGGun:
+	TargetActorCenter: true
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - Recon Jeep HUMVEE: stärkeres MG ===
 # Tier 1: MachineGunH-Basis, Damage 1150→1500 (~30% mehr), gleiche Versus-Werte.
 aot-JeepHumvee:
