@@ -695,11 +695,10 @@ Player:
 		WaveSlot2Min: 0, 1, 1, 2
 		WaveSlot2Max: 0, 2, 3, 4
 		WaveSlot3Types: aot-ttnk-toxin, aot-ttnk-flame, aot-ttnk-base
-		WaveSlot3Min: 1, 1, 2, 2
-		# Age0 max lowered 2 -> 1 (User 2026-07-31: "wellen-größe in age-0 reduzieren, lieber öfter" --
-		# cash was stretched thin). Min stays 1, so Age0 TTNK is pinned at exactly 1, immune to budget
-		# escalation too.
-		WaveSlot3Max: 1, 2, 4, 5
+		# Age0 raised back to 2 (User 2026-07-31, same day: "wellen sind dann doch zu klein. mach 2
+		# TTNK und 1 V2" -- pinned at exactly 2, immune to budget escalation).
+		WaveSlot3Min: 2, 1, 2, 2
+		WaveSlot3Max: 2, 2, 4, 5
 		WaveSlot4Types: aot-ltnk-tick, aot-ltnk-laser, aot-ltnk-base
 		WaveSlot4Min: 0, 2, 2, 3
 		WaveSlot4Max: 0, 3, 5, 7
