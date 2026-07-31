@@ -665,7 +665,14 @@ namespace OpenRA.Mods.Common.Traits
 			// in flight above already had its cash spent and keeps going) -- bounded by
 			// AotDerrickMission.StillFormingWithinTimeout's own DerrickFormingTimeout, so a genuinely
 			// stuck squad (no reachable derrick at all) can never block base construction forever.
-			if (ops != null && ops.Info.Faction == Info.Faction && ops.FirstDerrickSquadPending())
+			//
+			// MUST NOT fire while the Age-1 Refinery is the pending step: that one pauses Ops' army
+			// production in the other direction, so the two gates would wait on each other forever --
+			// the squad can't be built (production paused), so the pause never lifts, so the Refinery
+			// that would lift the production pause never gets built. Observed in-game 2026-07-31: base
+			// construction stopped dead the moment the barracks finished and never resumed. The
+			// Refinery always wins that tie -- it is itself the economy step both sides depend on.
+			if (ops != null && ops.Info.Faction == Info.Faction && !Age1RefineryPending() && ops.FirstDerrickSquadPending())
 				return;
 
 			// On-demand naval production takes priority over the Rhythm: an Operations mission is blocked
@@ -812,7 +819,19 @@ namespace OpenRA.Mods.Common.Traits
 		public bool Age1RefineryPending()
 		{
 			var step = planner.Rhythm.FirstOrDefault(s => s.Age == 1 && s.Role == "PROC");
-			return step != null && !step.Done;
+			if (step == null || step.Done)
+				return false;
+
+			// ONLY while the Refinery is genuinely the step being worked on right now, i.e. it is the
+			// first still-open step in Rhythm order (exactly what ChooseStep picks). Without this the
+			// method returned true from tick 0 of the match -- an Age-1 step is obviously not done during
+			// Age 0 -- which paused AotOperationsBotModule's ENTIRE army production for the whole of Age 0
+			// and beyond. Since Ops owns all combat unit production exclusively (UnitBuilderBotModule was
+			// stripped of it 2026-07-22), that meant literally zero units all match: confirmed in-game
+			// 2026-07-31 ("barracks werden gebaut aber ich sehe keine infanterie") and in the log, where
+			// `produce` never appeared once across a full session. The pause is meant to win one specific
+			// cash race, not to gate the early game.
+			return planner.Rhythm.FirstOrDefault(s => !s.Done) == step;
 		}
 
 		// Mirrors AotOperationsBotModule.FirstBuildable: is this SPECIFIC actor currently offered by any
