@@ -29,6 +29,16 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Interval in ticks between 'Silos Needed' warnings when no delivery dock exists.")]
 		public readonly int NoDockWarningInterval = 1500;
 
+		[Desc("Stall recovery (User 2026-07-31): if the transporter is EMPTY (travelling toward a mine)",
+			"and CurrentActivity is set but its position hasn't changed in this many ticks, the activity",
+			"is cancelled so Tick can pick a fresh target next tick. Covers two observed cases: a fresh",
+			"spawn stuck at a congested factory exit, and a queued MoveToDock whose target mine died",
+			"(destroyed, or tapped out by another transporter) between being queued and arriving -- either",
+			"way CurrentActivity stays non-null forever with nothing actually happening, and the ITick",
+			"guard above then never re-runs FindNearestDock. Only applies while Empty: Loading and",
+			"waiting-for-silo-space are legitimate reasons to sit still and must never be interrupted.")]
+		public readonly int StallRecoveryTicks = 150;
+
 		[NotificationReference("Speech")]
 		[Desc("Speech notification to play when full but no delivery dock is available.")]
 		public readonly string NoDockNotification = "SilosNeeded";
@@ -48,6 +58,11 @@ namespace OpenRA.Mods.Common.Traits
 		IStoresResources storesResources;
 		IMove move;
 		readonly Actor self;
+
+		// Stall recovery, see StallRecoveryTicks.
+		CPos lastPos;
+		int stallTicks;
+		bool stallTracking;
 
 		public override BitSet<DockType> GetDockType =>
 			state == TransportState.Full ? UnloadType : OreLoadType;
@@ -103,7 +118,35 @@ namespace OpenRA.Mods.Common.Traits
 		// sensitive dock search); the CurrentActivity guard prevents re-queueing while already moving.
 		void ITick.Tick(Actor self)
 		{
-			if (IsTraitDisabled || self.CurrentActivity != null)
+			if (IsTraitDisabled)
+				return;
+
+			// Stall recovery -- see StallRecoveryTicks. Only while Empty: Loading and waiting-for-silo-
+			// space are legitimate reasons for CurrentActivity to sit non-null without the actor moving,
+			// and must never be interrupted here.
+			if (state == TransportState.Empty && self.CurrentActivity != null)
+			{
+				if (stallTracking && self.Location == lastPos)
+				{
+					if (++stallTicks >= Info.StallRecoveryTicks)
+					{
+						stallTicks = 0;
+						OpenRA.Log.Write("debug", $"[OreTransporter] {self.Owner.PlayerName} #{self.ActorID} stalled at {self.Location} " +
+							$"(activity={self.CurrentActivity?.GetType().Name}) -> cancelling to re-target");
+						self.CancelActivity();
+					}
+				}
+				else
+				{
+					lastPos = self.Location;
+					stallTicks = 0;
+					stallTracking = true;
+				}
+			}
+			else
+				stallTracking = false;
+
+			if (self.CurrentActivity != null)
 				return;
 
 			if (state == TransportState.Full)
