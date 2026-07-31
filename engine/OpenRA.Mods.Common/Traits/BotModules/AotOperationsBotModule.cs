@@ -213,18 +213,27 @@ namespace OpenRA.Mods.Common.Traits
 			"queue) for an entire match.",
 			"",
 			"This is the MAXIMUM per batch, not a fixed package: the batch is sized to the number of",
-			"attackers actually detected (1 enemy scout -> 1 trooper), capped here. Originally a flat 5",
+			"attackers actually detected (1 enemy scout -> 1 defender), capped here. Originally a flat 5",
 			"per batch regardless of threat size, re-ordered indefinitely for as long as any single enemy",
 			"stood in the region -- 65 troopers in one observed match (User 2026-07-31: 'das scheint etwas",
 			"den rahmen zu sprengen'). 0 disables it; requires EnableBaseDefense.")]
 		public readonly int EmergencyDefenseBatchSize = 5;
 
-		[Desc("Hard ceiling on how many RocketInfantryTypes units the AI may own at once before emergency",
-			"defense stops producing more. The batch guard alone only prevents two batches being in flight",
-			"simultaneously -- it does nothing to stop batch after batch accumulating over a long siege,",
-			"which is what let the count run away. Counted player-wide, so troopers already committed",
-			"elsewhere (e.g. a Derrick squad's escort) count toward it too -- deliberately conservative.")]
-		public readonly int EmergencyDefenseMaxAlive = 10;
+		[Desc("Emergency defense mixes cheap gunners (MgInfantryTypes) with rocket troopers",
+			"(RocketInfantryTypes) at a 2:1 ratio (User 2026-07-31), rather than troopers alone. These two",
+			"are the standing ceilings per type: once that many are alive, no more of THAT type are",
+			"produced (the other type can still be topped up). The 2:1 ratio and these caps are the same",
+			"statement -- 10 gunners to 5 troopers -- so the force converges on the intended mix as it",
+			"fills up. Counted player-wide, so units already committed elsewhere (a Derrick squad's",
+			"escort, say) count toward the ceiling too: deliberately conservative.",
+			"",
+			"The batch guard alone only prevents two batches being in flight simultaneously -- it does",
+			"nothing to stop batch after batch accumulating over a long siege, which is what let the count",
+			"run away in the first place. These ceilings are what actually bounds it.")]
+		public readonly int EmergencyDefenseMaxGunners = 10;
+
+		[Desc("See EmergencyDefenseMaxGunners -- the rocket-trooper half of the same 2:1 mix.")]
+		public readonly int EmergencyDefenseMaxTroopers = 5;
 
 		// ---- Feature flags (one per operation type, individually testable) ----
 		public readonly bool EnableStartingUnits = true;
@@ -1309,12 +1318,29 @@ namespace OpenRA.Mods.Common.Traits
 
 		void ClaimNewUnits(IBot bot)
 		{
+			// Zero-starting-unit spawn: the first units the base produces -- whatever mission originally
+			// ordered them -- are diverted here FIRST, ahead of every other mission's own claim, until a
+			// usable chokepoint-clearing crew exists (user spec 2026-08-01, see
+			// AotStartingUnitsMission.NeedsBootstrapCrew for the full reasoning). Deliberately steals
+			// ahead of the request-matching below: a request that "loses" a unit this way simply stays
+			// open and gets satisfied by the next matching unit produced, no cash wasted, no unit lost --
+			// only delayed by however long the bootstrap crew takes to assemble.
+			var bootstrap = Missions.OfType<AotStartingUnitsMission>().FirstOrDefault(m => m.NeedsBootstrapCrew);
+
 			foreach (var a in World.ActorsHavingTrait<IPositionable>()
 				.Where(a => a.Owner == Player && !knownUnits.Contains(a)).ToList())
 			{
 				knownUnits.Add(a);
 				if (!IsEligibleCombatUnit(a))
 					continue;
+
+				if (bootstrap != null && bootstrap.NeedsBootstrapCrew)
+				{
+					owned[a] = bootstrap;
+					bootstrap.OnUnitAssigned(a);
+					Log($"claim {a.Info.Name}@{a.Location} -> {bootstrap.Name} (bootstrap clearing crew, {bootstrap.Units.Count}/{Info.ChokepointReserveSize})");
+					continue;
+				}
 
 				// Multiple concurrent missions can share an actor type (e.g. Scout's Role A and
 				// Derrick's MG escort both use the same infantry). Prefer a request that actually
@@ -1504,37 +1530,55 @@ namespace OpenRA.Mods.Common.Traits
 		// already knows how to use them. Only queues a fresh batch once its own emergency requests are
 		// fully spent (OpenRequests == 0), so it naturally repeats in batches for as long as
 		// GlobalUnitSelfDefense keeps calling it (i.e. for as long as the base stays under attack).
+		// Role tags for the two emergency defense request lines -- kept distinct from each other (rather
+		// than sharing EmergencyDefenseRole) so OpenRequests/QueueRequest track gunner and trooper batches
+		// independently: they have separate ceilings and can run out of headroom at different times.
+		const string EmergencyGunnerRole = EmergencyDefenseRole + "-gunner";
+		const string EmergencyTrooperRole = EmergencyDefenseRole + "-trooper";
+
 		void TryEmergencyDefenseProduction(IBot bot, int threatCount)
 		{
-			if (Info.EmergencyDefenseBatchSize <= 0 || Info.RocketInfantryTypes.Length == 0)
+			if (Info.EmergencyDefenseBatchSize <= 0)
 				return;
 
 			var garrison = Missions.OfType<AotBaseDefenseMission>().FirstOrDefault();
 			if (garrison == null)
 				return;
 
-			if (OpenRequests(garrison, EmergencyDefenseRole) > 0)
+			// Mixed 2:1 gunners-to-troopers (User 2026-07-31), each with its OWN standing ceiling and its
+			// OWN "one batch in flight" guard -- so e.g. gunners can keep topping up after hitting the
+			// trooper ceiling, instead of one shared count blocking both. threatCount is split at the same
+			// 2:1 ratio the ceilings themselves express (10:5), then each half is still capped by
+			// EmergencyDefenseBatchSize and by its own remaining headroom.
+			var wantGunners = threatCount * 2 / 3;
+			var wantTroopers = threatCount - wantGunners;
+
+			RequestEmergencyBatch(garrison, EmergencyGunnerRole, Info.MgInfantryTypes, wantGunners, Info.EmergencyDefenseMaxGunners, "gunner");
+			RequestEmergencyBatch(garrison, EmergencyTrooperRole, Info.RocketInfantryTypes, wantTroopers, Info.EmergencyDefenseMaxTroopers, "trooper");
+		}
+
+		void RequestEmergencyBatch(AotMission garrison, string role, string[] chain, int wanted, int ceiling, string label)
+		{
+			if (wanted <= 0 || chain.Length == 0)
+				return;
+
+			if (OpenRequests(garrison, role) > 0)
 				return;
 
 			// Standing ceiling: without this, a batch was re-ordered every time the previous one finished
 			// for as long as ANY enemy remained in the region, with no upper bound at all (User
-			// 2026-07-31: 65 troopers observed in a single match). Counted player-wide -- see
-			// EmergencyDefenseMaxAlive.
-			var alive = World.Actors.Count(a => a.Owner == Player && !a.IsDead && a.IsInWorld
-				&& Info.RocketInfantryTypes.Contains(a.Info.Name));
-			var headroom = Info.EmergencyDefenseMaxAlive - alive;
+			// 2026-07-31: 65 troopers observed in a single match).
+			var alive = World.Actors.Count(a => a.Owner == Player && !a.IsDead && a.IsInWorld && chain.Contains(a.Info.Name));
+			var headroom = ceiling - alive;
 			if (headroom <= 0)
 				return;
 
-			// Sized to the actual attack, not a flat package: one enemy scout wandering in no longer buys
-			// a full batch. Still capped by EmergencyDefenseBatchSize and by the standing ceiling above.
-			var want = Math.Min(Math.Min(threatCount, Info.EmergencyDefenseBatchSize), headroom);
+			var want = Math.Min(Math.Min(wanted, Info.EmergencyDefenseBatchSize), headroom);
 			if (want <= 0)
 				return;
 
-			QueueRequest(garrison, EmergencyDefenseRole, Info.RocketInfantryTypes, want);
-			Log($"emergency defense: {threatCount} attacker(s) in the base region -> requesting {want}x " +
-				$"reinforcement(s) (alive={alive}/{Info.EmergencyDefenseMaxAlive})");
+			QueueRequest(garrison, role, chain, want);
+			Log($"emergency defense: requesting {want}x {label} reinforcement(s) (alive={alive}/{ceiling})");
 		}
 
 		// Startup priority gate for the first Regular Attack Wave (User 2026-07-22): cashflow (OreT

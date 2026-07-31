@@ -139,6 +139,27 @@ namespace OpenRA.Mods.Common.Traits
 		AotTransitTicket ticket;
 		bool ashore;
 
+		// Set on the FIRST Tick() call: true only if this mission started with literally zero units,
+		// i.e. the spawn has no starting army at all. A normal spawn flips this false immediately and
+		// nothing below ever engages -- ZERO behaviour change for the common case.
+		bool? startedEmpty;
+		int bootstrapWaitTicks;
+
+		// True while THIS spawn started with no units and is still short of a usable clearing crew --
+		// consulted by AotOperationsBotModule.ClaimNewUnits, which diverts freshly produced combat
+		// units here FIRST, ahead of every other mission's own claim, until satisfied.
+		//
+		// Why this exists (user spec 2026-08-01): the base planner now treats trees within
+		// ChokeClearRadius of the chokepoint as clearable rather than permanently blocking (matching
+		// what TickChokeHold's ClearNearbyObstacles actually does at runtime) -- but that assumption
+		// only holds if SOMEONE actually goes and clears them. On a normal spawn the starting army
+		// already does this in Phase.ChokeHold. On a spawn with NO starting units, nothing ever would:
+		// this mission used to see Units.Count==0 on its very first tick and finish immediately, and
+		// the idle-pool sweep that could eventually reinforce it only fires after a long delay and
+		// prefers attack waves anyway. Without a deliberate fallback, the planner's assumption would
+		// silently fail on exactly this spawn type.
+		public bool NeedsBootstrapCrew => startedEmpty == true && !Done && Units.Count < Ops.Info.ChokepointReserveSize;
+
 		public AotStartingUnitsMission(AotOperationsBotModule ops)
 			: base(ops, "starting-units") { }
 
@@ -163,6 +184,33 @@ namespace OpenRA.Mods.Common.Traits
 
 		public override void Tick(IBot bot)
 		{
+			startedEmpty ??= Units.Count == 0;
+
+			if (startedEmpty.Value && Units.Count < Ops.Info.ChokepointReserveSize)
+			{
+				// Waiting for ClaimNewUnits to hand over a bootstrap crew. Bounded by
+				// StartupPriorityTimeout so a spawn that can genuinely never afford a full reserve
+				// (destroyed barracks, no cash at all) does not wait forever: past the timeout, proceed
+				// with whatever partial crew exists, or give up cleanly if that is still nobody.
+				bootstrapWaitTicks += Ops.Info.MissionInterval;
+				if (bootstrapWaitTicks < Ops.Info.StartupPriorityTimeout)
+					return;
+
+				if (Units.Count == 0)
+				{
+					Log("bootstrap timed out with no clearing crew ever assembled -> giving up");
+					Done = true;
+					return;
+				}
+
+				Log($"bootstrap timed out with a partial crew ({Units.Count}/{Ops.Info.ChokepointReserveSize}) -> proceeding anyway");
+
+				// Committed to the partial crew now: stop asking ClaimNewUnits to divert more units
+				// here (NeedsBootstrapCrew reads startedEmpty), and skip straight to the normal path on
+				// every future tick instead of re-logging this same decision forever.
+				startedEmpty = false;
+			}
+
 			if (Units.Count == 0)
 			{
 				Done = true;
@@ -1950,10 +1998,14 @@ namespace OpenRA.Mods.Common.Traits
 				ScanAndRespond(bot);
 			}
 
-			// Everyone not currently dispatched holds the muster point, out of the builders' way.
+			// Everyone not currently dispatched holds at the actual chokepoint, not the halfway muster
+			// point (User 2026-07-31, screenshot: a lone FTUR sat at the choke while a large idle
+			// infantry blob sat elsewhere in the base, not defending the gate at all). Falls back to the
+			// muster point only when there's genuinely no chokepoint to hold (e.g. GDI has no planner
+			// instance yet).
 			var holding = Units.Where(a => !responding.Contains(a)).ToList();
 			if (holding.Count > 0)
-				HoldAt(bot, holding, Ops.GarrisonMusterPoint(), Ops.Info.GuardLeashRadius);
+				HoldAt(bot, holding, Ops.ChokeProvider?.Chokepoint ?? Ops.GarrisonMusterPoint(), Ops.Info.GuardLeashRadius);
 		}
 
 		void MaintainGarrison()
