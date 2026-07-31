@@ -47,6 +47,35 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Ticks between rebuild scans (detects destroyed plan buildings).")]
 		public readonly int RebuildScanInterval = 250;
 
+		[Desc("Ticks a DEFENCE step (SAM/FTUR/GUN/OBELISK + their gate fences) may sit genuinely",
+			"unplaceable -- re-site AND bridge both failing every attempt -- before it is skipped for",
+			"good (user spec 2026-07-31). Defence runs through its own independent chooser, separate",
+			"from the core economy/tech Rhythm, precisely so this timeout can never affect core: a",
+			"core step must NEVER be silently abandoned, since a later Age upgrade may depend on it.")]
+		public readonly int DefenseStepTimeoutTicks = 6000;
+
+		[ActorReference]
+		[Desc("Age-upgrade actors, age-ordered (index 0 unlocks Age 1, index 1 Age 2, index 2 Age 3).",
+			"Fired directly by THIS module the moment the corresponding Age tier's entire planned",
+			"Rhythm (core + defence) is done, or AgeUpgradeFallbackTimeoutTicks elapses -- bypassing",
+			"the generic BaseBuilderBotModule@aotupgrades weighted-random pick entirely for these",
+			"actors (user spec 2026-07-31: the age-jump used to compete for cash against a base that",
+			"was still mid-build, e.g. an Airfield going up in Age 1 while the Refinery never got its",
+			"turn). Leave empty to disable -- the generic upgrades module keeps handling it as before.")]
+		public readonly string[] AgeUpgradeTypes = [];
+
+		[Desc("Ticks an Age-upgrade may wait for its tier's Rhythm to fully complete before firing",
+			"anyway. Mirrors the reasoning for DefenseStepTimeoutTicks one level up: a single",
+			"permanently-stuck CORE building (which, unlike a defence step, is never skipped) must",
+			"not be able to freeze Age progression forever.")]
+		public readonly int AgeUpgradeFallbackTimeoutTicks = 15000;
+
+		[Desc("Prerequisites marking Age tiers 1-3, age-ordered. Same convention as",
+			"AotOperationsBotModuleInfo.AgePrerequisites -- kept as an independent copy here rather",
+			"than shared, since this module must be able to compute the current Age tier even when no",
+			"Operations module exists for this faction.")]
+		public readonly string[] AgePrerequisites = ["aot-age1", "aot-age2", "aot-age3"];
+
 		[Desc("Minimum Chebyshev spacing between the two gate turrets.")]
 		public readonly int TurretSpacing = 3;
 
@@ -74,8 +103,10 @@ namespace OpenRA.Mods.Common.Traits
 
 		AotBasePlannerBotModule planner;
 		AotMapIntelBotModule intel;
+		AotOperationsBotModule ops;
 		PowerManager playerPower;
 		PlayerResources playerResources;
+		TechTree techTree;
 
 		int ticks;
 		int rebuildTicks;
@@ -119,6 +150,16 @@ namespace OpenRA.Mods.Common.Traits
 		const int FenceNodeMaxWaits = 12;
 		int fenceNodeWaits;
 
+		// Age-upgrade cash priority (user spec 2026-07-31): index i tracks Info.AgeUpgradeTypes[i], i.e.
+		// the jump INTO Age (i+1). ageUpgradeFired[i] latches once the direct StartProduction order is
+		// sent, mirroring TryOreBoost's "retry every tick until buildable, then never again" shape --
+		// the production queue keeps the item queued-but-paused on its own if cash is short at that
+		// exact tick, so firing once is enough. ageUpgradeWaitTicks[i] only accumulates while the
+		// upgrade is otherwise buildable (its own stec/proc/shrine-style prerequisites already met) but
+		// its tier's Rhythm is not yet complete -- this is what AgeUpgradeFallbackTimeoutTicks measures.
+		readonly bool[] ageUpgradeFired = new bool[3];
+		readonly int[] ageUpgradeWaitTicks = new int[3];
+
 		public AotBaseBuilderBotModule(Actor self, AotBaseBuilderBotModuleInfo info)
 			: base(info)
 		{
@@ -135,9 +176,35 @@ namespace OpenRA.Mods.Common.Traits
 			planner = planners.FirstOrDefault(p => p.Info.Faction == Info.Faction) ?? planners.FirstOrDefault();
 			playerPower = self.Owner.PlayerActor.TraitOrDefault<PowerManager>();
 			playerResources = self.Owner.PlayerActor.TraitOrDefault<PlayerResources>();
+			techTree = self.Owner.PlayerActor.Trait<TechTree>();
 
 			// Faction-agnostic, one instance per player -- same resolution AotOperationsBotModule uses.
 			intel = self.Owner.PlayerActor.TraitsImplementing<AotMapIntelBotModule>().FirstOrDefault();
+
+			// Back-reference for FirstDerrickSquadPending() (User 2026-07-31) -- mirrors how Ops itself
+			// resolves this module (builder), just in the other direction.
+			var opsModules = self.Owner.PlayerActor.TraitsImplementing<AotOperationsBotModule>().ToList();
+			ops = opsModules.FirstOrDefault(o => o.Info.Faction == Info.Faction) ?? opsModules.FirstOrDefault();
+		}
+
+		// Mirrors AotOperationsBotModule.AgeTier() exactly (same AgePrerequisites convention).
+		// EXISTS HERE because none of the individual defence actors (SAM in particular: Buildable.
+		// Prerequisites is just "anypower, aot-nod-radar", no age gate at all) carry their own
+		// age-tier prerequisite -- before the Core/Defence split, that never mattered, because sharing
+		// ONE strict list meant an Age-1 SAM simply could not be reached until everything positioned
+		// ahead of it (all of Age 0, including AFLD/PROC) was Done, purely from list position. Splitting
+		// Defence onto its own independent chooser removed that implicit brake and put nothing in its
+		// place: confirmed 2026-08-01 -- the AI built nearly every SAM site (Age 0 through Age 3) while
+		// still in Age 0, burning the early cash the split was supposed to protect. ChooseStep(defense:
+		// true) now filters on AotPlanStep.Age <= AgeTier() to restore exactly the gate every OTHER
+		// age-gated Rhythm step already gets from its own Buildable.Prerequisites.
+		int AgeTier()
+		{
+			for (var i = Info.AgePrerequisites.Length - 1; i >= 0; i--)
+				if (techTree.HasPrerequisites([Info.AgePrerequisites[i]]))
+					return i + 1;
+
+			return 0;
 		}
 
 		// ---------------------------------------------------------------- on-demand naval production
@@ -169,16 +236,16 @@ namespace OpenRA.Mods.Common.Traits
 			if (site == null)
 			{
 				if (logImmediately)
-					Log.Write("debug", "[AotBuild] Naval site planning: NO coastal site found near the base -- naval production will never be available if requested");
+					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Naval site planning: NO coastal site found near the base -- naval production will never be available if requested");
 				else if (++navalWaitLog % 8 == 0)
-					Log.Write("debug", "[AotBuild] Naval production requested but no coastal site found near the base yet");
+					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Naval production requested but no coastal site found near the base yet");
 
 				return null;
 			}
 
 			Log.Write("debug", logImmediately
-				? $"[AotBuild] Naval site planned -> {site.Value} (proactive, not yet requested)"
-				: $"[AotBuild] Naval production requested -> site {site.Value}");
+				? $"[AotBuild][{player.PlayerName}] Naval site planned -> {site.Value} (proactive, not yet requested)"
+				: $"[AotBuild][{player.PlayerName}] Naval production requested -> site {site.Value}");
 			return new AotPlanStep
 			{
 				Kind = AotStepKind.Building, Role = "NAVAL", Variants = Info.NavalPenTypes,
@@ -396,7 +463,7 @@ namespace OpenRA.Mods.Common.Traits
 			var reach = WallReach();
 			if (reach == null || reach.Count == 0)
 			{
-				Log.Write("debug", "[AotBuild] Naval site: no wall-reachable land at all (no own buildings?)");
+				Log.Write("debug", $"[AotBuild][{player.PlayerName}] Naval site: no wall-reachable land at all (no own buildings?)");
 				return (null, null);
 			}
 
@@ -506,14 +573,14 @@ namespace OpenRA.Mods.Common.Traits
 					foreach (var r in reach.Keys)
 						nearestMiss = Math.Min(nearestMiss, Math.Max(Math.Abs(r.X - c.X), Math.Abs(r.Y - c.Y)));
 
-				Log.Write("debug", $"[AotBuild] Naval site: none usable -- {placeable} placeable footprint(s) within {radius} of {centre}, " +
+				Log.Write("debug", $"[AotBuild][{player.PlayerName}] Naval site: none usable -- {placeable} placeable footprint(s) within {radius} of {centre}, " +
 					$"wall chain reaches {reach.Count} land cell(s) (max {Info.MaxBridgeLength} segments), building reach {adjacent}, " +
 					$"closest site is {(nearestMiss == int.MaxValue ? "n/a" : nearestMiss.ToString())} cell(s) from reachable land " +
 					$"(needs <= {adjacent})");
 				return (null, null);
 			}
 
-			Log.Write("debug", $"[AotBuild] Naval site {best.Value}: anchor={bestAnchor}, {bestKey.Offshore} cell(s) offshore (max {adjacent}), " +
+			Log.Write("debug", $"[AotBuild][{player.PlayerName}] Naval site {best.Value}: anchor={bestAnchor}, {bestKey.Offshore} cell(s) offshore (max {adjacent}), " +
 				$"{bestKey.Steps} wall segment(s) from base, water body {bestKey.Body switch { 2 => "sea", 1 => "medium", _ => "small" }}, " +
 				$"reachesEnemy={bestKey.Reaches == 1}, troopsCanBoard={bestKey.Loadable == 1}, " +
 				$"{placeable} candidate(s) considered");
@@ -569,6 +636,10 @@ namespace OpenRA.Mods.Common.Traits
 				PruneStrayFenceSegments(bot);
 			}
 
+			// Independent of `pending`/the Rhythm chooser entirely -- this fires its own StartProduction
+			// order directly (see TryFireAgeUpgrades) and never touches the single build-in-flight slot.
+			TryFireAgeUpgrades(bot);
+
 			// Plan the site ONCE, eagerly, the moment map intel is ready -- regardless of whether anything
 			// has actually asked for naval production yet, and regardless of whatever else is currently
 			// mid-build (`pending`). Must run BEFORE the `pending != null` early-return below: during normal
@@ -587,6 +658,15 @@ namespace OpenRA.Mods.Common.Traits
 				TickPending(bot);
 				return;
 			}
+
+			// Cashflow priority for the very first Derrick squad (User 2026-07-31: "sobald barracks
+			// steht, direkt bei engineer-squad sein und erst danach weitere gebäude gebaut werden ...
+			// mit timeout, falls das nicht klappt"). Only withholds NEW construction (a build already
+			// in flight above already had its cash spent and keeps going) -- bounded by
+			// AotDerrickMission.StillFormingWithinTimeout's own DerrickFormingTimeout, so a genuinely
+			// stuck squad (no reachable derrick at all) can never block base construction forever.
+			if (ops != null && ops.Info.Faction == Info.Faction && ops.FirstDerrickSquadPending())
+				return;
 
 			// On-demand naval production takes priority over the Rhythm: an Operations mission is blocked
 			// waiting for it. Re-evaluated every tick against HasNavalProduction(), so a destroyed pen is
@@ -609,11 +689,27 @@ namespace OpenRA.Mods.Common.Traits
 				}
 			}
 
-			var step = ChooseStep();
-			if (step == null)
-				return;
+			// Core (economy/tech) and Defence (SAM/FTUR/GUN/OBELISK + gate fences) run through TWO fully
+			// independent choosers now (user spec 2026-07-31), not one shared strict queue. Before this,
+			// a single unplaceable defence site (a SAM squeezed tight against a block that later got
+			// encroached, say) sat as the Rhythm's one "current" step forever -- and since ChooseStep was
+			// strictly first-open, EVERY core building queued behind it (the next Refinery, the Age's
+			// remaining Rhythm, potentially an Age-upgrade prerequisite) never got built either. Core still
+			// gets first refusal on the shared production slot each tick (only one build can be in flight
+			// at a time regardless), but its own progression no longer depends in any way on defence ever
+			// resolving -- and defence gets its own timeout precisely because it no longer can hold core
+			// hostage by being retried forever (see StartStep).
+			var coreStep = ChooseStep(defense: false);
+			if (coreStep != null)
+			{
+				StartStep(bot, coreStep);
+				if (pending != null)
+					return;
+			}
 
-			StartStep(bot, step);
+			var defenseStep = ChooseStep(defense: true);
+			if (defenseStep != null)
+				StartStep(bot, defenseStep);
 		}
 
 		// Destroyed plan buildings reopen their steps; the rhythm order then rebuilds them first.
@@ -629,15 +725,40 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			foreach (var step in planner.Rhythm)
 			{
-				if (!step.Done || step.Kind != AotStepKind.Building)
+				// Skipped (defence-timeout) steps never got built in the first place -- there is nothing
+				// to "lose", so re-checking them here would just find no building at TopLeft and flip
+				// Done back to false every scan, forever retrying the exact site the timeout just gave up
+				// on. Skipped is permanent by design (see AotPlanStep.Skipped).
+				if (!step.Done || step.Skipped || step.Kind != AotStepKind.Building)
 					continue;
 
 				var alive = world.ActorsHavingTrait<Building>()
 					.Any(a => a.Owner == player && !a.IsDead && a.Location == step.TopLeft && step.Variants.Contains(a.Info.Name));
 				if (!alive)
 				{
+					// A destroyed FTUR whose OWN variants have since become permanently unbuildable (the
+					// Turret upgrade removes FTUR from the build menu for good, aot-structures.yaml:
+					// ~!aot-turret-upgrade) would otherwise reopen as an FTUR step that can NEVER be
+					// satisfied again -- the Defence timeout would eventually skip it, leaving a
+					// permanent hole in the gate rather than what the SAME upgrade branch actually
+					// intends to stand there: a Gun Turret (user question 2026-08-01: "ist
+					// sichergestellt, dass nach Upgrade der GUN als Ersatz fuer zerstoerte FTUR gebaut
+					// wird" -- it was not, until this). BuildableVariant still sees the OLD (FTUR)
+					// Variants here, so a false-negative from a merely transient gate is not possible --
+					// this step already built successfully once, so the only realistic reason its own
+					// variants would stop being offered now is the one-way Turret upgrade.
+					if (step.Role == "FTUR" && step.Defense && planner.Info.GunTypes.Length > 0
+						&& BuildableVariant(step).Type == null)
+					{
+						step.Role = "GUN";
+						step.Variants = planner.Info.GunTypes;
+						Log.Write("debug", $"[AotBuild][{player.PlayerName}] Destroyed FTUR at {step.TopLeft} " +
+							"can no longer be rebuilt (Turret upgrade taken) -> converting slot to GUN");
+					}
+
 					step.Done = false;
-					Log.Write("debug", $"[AotBuild] Plan building {step.Role} at {step.TopLeft} lost -> rebuild");
+					step.StuckTicks = 0;
+					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Plan building {step.Role} at {step.TopLeft} lost -> rebuild");
 				}
 			}
 		}
@@ -670,19 +791,119 @@ namespace OpenRA.Mods.Common.Traits
 
 			foreach (var a in stray)
 			{
-				Log.Write("debug", $"[AotBuild] Selling stray fence segment at {a.Location} (outside every ring's perimeter)");
+				Log.Write("debug", $"[AotBuild][{player.PlayerName}] Selling stray fence segment at {a.Location} (outside every ring's perimeter)");
 				bot.QueueOrder(new Order("Sell", a, Target.FromActor(a), false));
 			}
 		}
 
-		AotPlanStep ChooseStep()
+		// True once EVERY planned Rhythm step (core AND defence) for the given Age tier is Done. A
+		// timed-out defence step already counts as Done (Skipped is set alongside it), so this can
+		// never hang on an unplaceable SAM -- only a permanently-stuck CORE step (which never times
+		// out, by design) can keep it false forever, which is exactly what
+		// AgeUpgradeFallbackTimeoutTicks exists to route around in TryFireAgeUpgrades.
+		public bool AgeRhythmComplete(int age) => planner.Rhythm.Where(s => s.Age == age).All(s => s.Done);
+
+		// Specifically the Age-1 Refinery, not the whole tier's Rhythm (unlike AgeRhythmComplete): user
+		// spec 2026-07-31, after observing the AI build its Age-1 Airfield but never the Refinery behind
+		// it, because AotOperationsBotModule's own unit production kept competing for the same cash. A
+		// missing step (Place() never found room, or this isn't Nod) is vacuously "not pending" -- there
+		// is nothing to wait on. Age 1 only, by design: the OPTIONAL second Refinery in Age 2 is a nice-
+		// to-have that army production must never be made to wait on.
+		public bool Age1RefineryPending()
 		{
-			var open = planner.Rhythm.Where(s => !s.Done).ToList();
+			var step = planner.Rhythm.FirstOrDefault(s => s.Age == 1 && s.Role == "PROC");
+			return step != null && !step.Done;
+		}
+
+		// Mirrors AotOperationsBotModule.FirstBuildable: is this SPECIFIC actor currently offered by any
+		// of its own declared queue categories, right now (Prerequisites/BuildLimit/etc. all already
+		// factored in by BuildableItems()). Deliberately NOT QueueFor()/Info.BuildingQueues -- the
+		// age-upgrade actors live on Age.Nod, a category this module's own Rhythm queues never touch.
+		(string Type, ProductionQueue Queue) FindAgeUpgradeQueue(string actorType)
+		{
+			if (!world.Map.Rules.Actors.TryGetValue(actorType, out var ai))
+				return (null, null);
+
+			var bi = ai.TraitInfoOrDefault<BuildableInfo>();
+			if (bi == null)
+				return (null, null);
+
+			var queuesByCategory = AIUtils.FindQueuesByCategory(player);
+			foreach (var category in bi.Queue)
+				foreach (var queue in queuesByCategory[category])
+					if (queue.BuildableItems().Any(i => i.Name == actorType))
+						return (actorType, queue);
+
+			return (null, null);
+		}
+
+		// Age-upgrade cash priority (user spec 2026-07-31): fires each configured age-upgrade the
+		// moment its OWN prerequisites are met (stec/proc/shrine etc., untouched) AND its tier's entire
+		// Rhythm is done -- bypassing BaseBuilderBotModule@aotupgrades' weighted-random pick, which
+		// could previously buy the age-jump via sheer chance while the base was still mid-build,
+		// starving both the Rhythm builder AND unit production of cash at the same time (observed:
+		// Airfield up in Age 1, Refinery never built). Same "retry until buildable, then never again"
+		// shape as TryOreBoost -- the production queue keeps a paused item queued on its own if cash is
+		// short at the exact firing tick, so a single StartProduction order is enough.
+		void TryFireAgeUpgrades(IBot bot)
+		{
+			for (var i = 0; i < Info.AgeUpgradeTypes.Length && i < ageUpgradeFired.Length; i++)
+			{
+				if (ageUpgradeFired[i] || string.IsNullOrEmpty(Info.AgeUpgradeTypes[i]))
+					continue;
+
+				var (name, queue) = FindAgeUpgradeQueue(Info.AgeUpgradeTypes[i]);
+				if (name == null || queue == null)
+				{
+					// Not even otherwise-buildable yet (its own prerequisites, e.g. stec, still missing)
+					// -- nothing to time out against.
+					ageUpgradeWaitTicks[i] = 0;
+					continue;
+				}
+
+				var rhythmComplete = AgeRhythmComplete(i);
+				if (!rhythmComplete)
+				{
+					ageUpgradeWaitTicks[i] += Info.Interval;
+					if (ageUpgradeWaitTicks[i] < Info.AgeUpgradeFallbackTimeoutTicks)
+						continue;
+
+					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Age-{i + 1} upgrade fallback timeout reached " +
+						$"({ageUpgradeWaitTicks[i]} ticks, Rhythm still incomplete) -> firing anyway");
+				}
+
+				bot.QueueOrder(Order.StartProduction(queue.Actor, name, 1));
+				ageUpgradeFired[i] = true;
+				Log.Write("debug", $"[AotBuild][{player.PlayerName}] Age-{i + 1} upgrade ({name}) fired directly -- " +
+					(rhythmComplete ? "Age Rhythm complete" : "fallback timeout"));
+			}
+		}
+
+		// Two fully independent strict-first-open queues over the SAME Rhythm list, split by
+		// AotPlanStep.Defense (see BotTick for why). Core (defense: false) keeps its original,
+		// unmodified semantics -- including the power-emergency pull-forward, which only ever matches
+		// NUKE/NUK2 core steps anyway. Defence (defense: true) is otherwise identical (still strictly
+		// first-open within its own sub-sequence -- the SAM/GUN staging order in BuildRhythm still
+		// matters) but its steps are the only ones StartStep will ever time out and skip.
+		//
+		// Defence ALSO filters on AotPlanStep.Age <= AgeTier() -- core steps never needed this, since
+		// AFLD/PROC/the age-upgrades etc. all carry their own age-tier Buildable.Prerequisites. SAM in
+		// particular has none at all (just "anypower, aot-nod-radar"), so before this filter the
+		// independent Defence queue raced straight through every Age's SAM sites while still in Age 0
+		// (confirmed 2026-08-01: nearly all 11 SAM sites built before the base ever left Age 0, burning
+		// exactly the early cash this whole rework was meant to protect). Before the Core/Defence split
+		// this was never an issue -- sharing ONE strict list meant an Age-1 SAM simply could not be
+		// reached until everything positioned ahead of it (all of Age 0) was Done, purely from list
+		// position; splitting Defence onto its own chooser removed that implicit brake without
+		// replacing it, until now.
+		AotPlanStep ChooseStep(bool defense)
+		{
+			var ageTier = defense ? AgeTier() : 0;
+			var open = planner.Rhythm.Where(s => !s.Done && s.Defense == defense && (!defense || s.Age <= ageTier)).ToList();
 			if (open.Count == 0)
 				return null;
 
-			// Power emergency: pull the next unbuilt power step forward.
-			if (playerPower != null && playerPower.ExcessPower < Info.MinimumExcessPower)
+			if (!defense && playerPower != null && playerPower.ExcessPower < Info.MinimumExcessPower)
 			{
 				var power = open.FirstOrDefault(s => s.Kind == AotStepKind.Building && (s.Role == "NUKE" || s.Role == "NUK2")
 					&& BuildableVariant(s).Type != null);
@@ -701,7 +922,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (type == null)
 			{
 				if (++waitLog % 8 == 0)
-					Log.Write("debug", $"[AotBuild] Waiting (age gate / prerequisites): {step.Role}");
+					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Waiting (age gate / prerequisites): {step.Role}");
 
 				return;
 			}
@@ -721,30 +942,57 @@ namespace OpenRA.Mods.Common.Traits
 					// building nearby instead of deadlocking the whole plan; this ALSO clears the reason
 					// bridging gave up (CanPlaceBuilding was false at the target), so re-try bridging next.
 					if (PermanentlyBlocked(type, step.TopLeft) && TryResite(step, type))
+					{
+						step.StuckTicks = 0;
 						return;
+					}
 				}
 
 				// Out of buildable-area reach? Bridge along the actual path. Transient blockers are asked
 				// to step aside (own units on the site), then we wait.
 				if (OutOfReachOnly(step, type) && TryBridgeStep(bot, step))
+				{
+					step.StuckTicks = 0;
 					return;
+				}
+
+				// Both recovery attempts (re-site, bridge) failed to make progress THIS attempt -- for a
+				// core step that is simply "wait, try again next tick", exactly as before: a core step
+				// must never be silently abandoned, since a later Age upgrade or another core step may
+				// depend on it (user spec 2026-07-31). A DEFENCE step, on the other hand, now has its own
+				// timeout: it already cannot block core (separate chooser, see BotTick), but without a
+				// timeout it would still sit here retrying forever and never free up its OWN queue for
+				// the next defence site behind it.
+				if (step.Defense)
+				{
+					step.StuckTicks += Info.Interval;
+					if (step.StuckTicks >= Info.DefenseStepTimeoutTicks)
+					{
+						step.Done = true;
+						step.Skipped = true;
+						Log.Write("debug", $"[AotBuild][{player.PlayerName}] Defence step {step.Role} at {step.TopLeft} unplaceable " +
+							$"after {step.StuckTicks} ticks (re-site and bridge both failed) -> skipped permanently");
+						return;
+					}
+				}
 
 				if (++waitLog % 8 == 0)
 				{
-					Log.Write("debug", $"[AotBuild] Waiting (target blocked): {step.Role} at {step.TopLeft}");
+					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Waiting (target blocked): {step.Role} at {step.TopLeft}");
 					DiagnoseBlock(step, type);
 				}
 
 				return;
 			}
 
+			step.StuckTicks = 0;
 			pending = step;
 			pendingType = type;
 			pendingCell = cell.Value;
 			pendingIsBridgeWall = false;
 			pendingWaitLog = 0;
 			bot.QueueOrder(Order.StartProduction(queue.Actor, type, 1));
-			Log.Write("debug", $"[AotBuild] Start {step.Role} ({type}) -> {pendingCell}");
+			Log.Write("debug", $"[AotBuild][{player.PlayerName}] Start {step.Role} ({type}) -> {pendingCell}");
 		}
 
 		CPos? ResolveCell(AotPlanStep step, string type)
@@ -821,7 +1069,7 @@ namespace OpenRA.Mods.Common.Traits
 				return;
 
 			notifier.NotifyBlocker(blockers);
-			Log.Write("debug", $"[AotBuild] Nudging {blockers.Count} own unit(s) off {type} site at {cell}");
+			Log.Write("debug", $"[AotBuild][{player.PlayerName}] Nudging {blockers.Count} own unit(s) off {type} site at {cell}");
 		}
 
 		// Prints every fact needed to conclusively identify why a step's target is stuck, instead of
@@ -837,21 +1085,21 @@ namespace OpenRA.Mods.Common.Traits
 			var target = step.TopLeft;
 			var canPlace = world.CanPlaceBuilding(target, ai, bi, null);
 			var closeEnough = bi.IsCloseEnoughToBase(world, player, ai, target);
-			Log.Write("debug", $"[AotBuild] Diag {step.Role}@{target}: CanPlaceBuilding={canPlace} IsCloseEnoughToBase={closeEnough} inPocket={planner.Pocket.Contains(target)}");
+			Log.Write("debug", $"[AotBuild][{player.PlayerName}] Diag {step.Role}@{target}: CanPlaceBuilding={canPlace} IsCloseEnoughToBase={closeEnough} inPocket={planner.Pocket.Contains(target)}");
 
 			foreach (var t in bi.Tiles(target))
 			{
 				var terrain = world.Map.GetTerrainInfo(t).Type;
 				var res = world.WorldActor.TraitOrDefault<IResourceLayer>()?.GetResource(t).Type;
 				var actors = world.ActorMap.GetActorsAt(t).Select(a => $"{a.Info.Name}(owner={a.Owner.ResolvedPlayerName},mobile={a.Info.HasTraitInfo<MobileInfo>()})").ToList();
-				Log.Write("debug", $"[AotBuild] Diag tile {t}: terrain={terrain} resource={res ?? "none"} inPocket={planner.Pocket.Contains(t)} actors=[{string.Join(",", actors)}]");
+				Log.Write("debug", $"[AotBuild][{player.PlayerName}] Diag tile {t}: terrain={terrain} resource={res ?? "none"} inPocket={planner.Pocket.Contains(t)} actors=[{string.Join(",", actors)}]");
 			}
 
 			diagBridge = true;
 			var frontier = BridgeFrontier(target);
 			diagBridge = false;
 			var ownCount = world.ActorsHavingTrait<Building>().Count(a => a.Owner == player && !a.IsDead);
-			Log.Write("debug", $"[AotBuild] Diag bridge: ownBuildings={ownCount} frontier={(frontier.HasValue ? frontier.Value.ToString() : "NULL")}");
+			Log.Write("debug", $"[AotBuild][{player.PlayerName}] Diag bridge: ownBuildings={ownCount} frontier={(frontier.HasValue ? frontier.Value.ToString() : "NULL")}");
 		}
 
 		// PERMANENT block: something on the footprint that NudgeBlockers cannot clear — either a resource
@@ -950,12 +1198,12 @@ namespace OpenRA.Mods.Common.Traits
 						if (!world.CanPlaceBuilding(c, ai, bi, null))
 							continue;
 
-						Log.Write("debug", $"[AotBuild] Re-sited {step.Role}: {step.TopLeft} -> {c} (resources grew onto plan)");
+						Log.Write("debug", $"[AotBuild][{player.PlayerName}] Re-sited {step.Role}: {step.TopLeft} -> {c} (resources grew onto plan)");
 						step.TopLeft = c;
 						return true;
 					}
 
-			Log.Write("debug", $"[AotBuild] Re-site FAILED for {step.Role} at {step.TopLeft}");
+			Log.Write("debug", $"[AotBuild][{player.PlayerName}] Re-site FAILED for {step.Role} at {step.TopLeft}");
 			return false;
 		}
 
@@ -1013,7 +1261,7 @@ namespace OpenRA.Mods.Common.Traits
 			pendingIsBridgeWall = true;
 			pendingWaitLog = 0;
 			bot.QueueOrder(Order.StartProduction(wallQueue.Actor, Info.WallType, 1));
-			Log.Write("debug", $"[AotBuild] Bridge wall #{bridgeWallCells.Count + 1} -> {pendingCell} (toward {target} for {step.Role})");
+			Log.Write("debug", $"[AotBuild][{player.PlayerName}] Bridge wall #{bridgeWallCells.Count + 1} -> {pendingCell} (toward {target} for {step.Role})");
 			return true;
 		}
 
@@ -1167,12 +1415,12 @@ namespace OpenRA.Mods.Common.Traits
 				if (diagBridge)
 				{
 					var actors = world.ActorMap.GetActorsAt(c).Select(a => $"{a.Info.Name}(owner={a.Owner.ResolvedPlayerName},mobile={a.Info.HasTraitInfo<MobileInfo>()})");
-					Log.Write("debug", $"[AotBuild] Diag frontier blocked cell {c}: actors=[{string.Join(",", actors)}]");
+					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Diag frontier blocked cell {c}: actors=[{string.Join(",", actors)}]");
 				}
 			}
 
 			if (best == null && diagBridge)
-				Log.Write("debug", $"[AotBuild] Diag frontier: target={target} pathLen={path.Count} (nudged blockers along path, see above)");
+				Log.Write("debug", $"[AotBuild][{player.PlayerName}] Diag frontier: target={target} pathLen={path.Count} (nudged blockers along path, see above)");
 
 			return best;
 		}
@@ -1190,7 +1438,7 @@ namespace OpenRA.Mods.Common.Traits
 					sold++;
 				}
 
-			Log.Write("debug", $"[AotBuild] Sold wall bridge ({sold} segments)");
+			Log.Write("debug", $"[AotBuild][{player.PlayerName}] Sold wall bridge ({sold} segments)");
 			bridgeWallCells.Clear();
 			bridgeOwner = null;
 		}
@@ -1246,7 +1494,7 @@ namespace OpenRA.Mods.Common.Traits
 
 				if (++fenceNodeWaits >= FenceNodeMaxWaits)
 				{
-					Log.Write("debug", $"[AotBuild] Fence node {c} still blocked after {fenceNodeWaits} tries -> skipping (ring keeps a gap)");
+					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Fence node {c} still blocked after {fenceNodeWaits} tries -> skipping (ring keeps a gap)");
 					fenceQueue.Dequeue();
 					fenceNodeWaits = 0;
 					continue;
@@ -1257,7 +1505,7 @@ namespace OpenRA.Mods.Common.Traits
 
 			// All nodes handled -> fence complete.
 			step.Done = true;
-			Log.Write("debug", $"[AotBuild] Fence complete: {step.Role}");
+			Log.Write("debug", $"[AotBuild][{player.PlayerName}] Fence complete: {step.Role}");
 			return null;
 		}
 
@@ -1276,7 +1524,7 @@ namespace OpenRA.Mods.Common.Traits
 			var queued = queue.AllQueued().Where(i => i.Item == pendingType).ToList();
 			if (queued.Count == 0)
 			{
-				Log.Write("debug", $"[AotBuild] Lost production of {pendingType}, retrying");
+				Log.Write("debug", $"[AotBuild][{player.PlayerName}] Lost production of {pendingType}, retrying");
 				bot.QueueOrder(Order.StartProduction(queue.Actor, pendingType, 1));
 				return;
 			}
@@ -1307,7 +1555,7 @@ namespace OpenRA.Mods.Common.Traits
 					// !Done && !Paused && power is Normal is the cash branch: costThisFrame computed but
 					// pr.TakeCash(costThisFrame, true) fails, i.e. GetCashAndResources() < costThisFrame.
 					// excessPower alone never proves "nothing is blocking" -- log actual spendable cash too.
-					Log.Write("debug", $"[AotBuild] Still building {pending.Role} ({pendingType}): " +
+					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Still building {pending.Role} ({pendingType}): " +
 						$"started={item?.Started} paused={item?.Paused} remainingTime={item?.RemainingTime}/{item?.TotalTime} " +
 						$"remainingCost={item?.RemainingCost} excessPower={playerPower?.ExcessPower} " +
 						$"cash={playerResources?.Cash} ore={playerResources?.Resources} " +
@@ -1318,7 +1566,7 @@ namespace OpenRA.Mods.Common.Traits
 				{
 					for (var i = 0; i < ourIndex; i++)
 					{
-						Log.Write("debug", $"[AotBuild] Cancelling stuck queue blocker ahead of {pendingType}: {allItems[i].Item}");
+						Log.Write("debug", $"[AotBuild][{player.PlayerName}] Cancelling stuck queue blocker ahead of {pendingType}: {allItems[i].Item}");
 						bot.QueueOrder(Order.CancelProduction(queue.Actor, allItems[i].Item, 1));
 					}
 
@@ -1358,7 +1606,7 @@ namespace OpenRA.Mods.Common.Traits
 
 			if (pendingIsBridgeWall)
 			{
-				Log.Write("debug", $"[AotBuild] Placed bridge wall at {pendingCell} ({bridgeWallCells.Count + 1} segments)");
+				Log.Write("debug", $"[AotBuild][{player.PlayerName}] Placed bridge wall at {pendingCell} ({bridgeWallCells.Count + 1} segments)");
 				bridgeWallCells.Add(pendingCell);
 				bridgeOwner = pending;
 				pendingIsBridgeWall = false;
@@ -1366,7 +1614,7 @@ namespace OpenRA.Mods.Common.Traits
 				return;
 			}
 
-			Log.Write("debug", $"[AotBuild] Place {pending.Role} ({pendingType}) at {pendingCell}");
+			Log.Write("debug", $"[AotBuild][{player.PlayerName}] Place {pending.Role} ({pendingType}) at {pendingCell}");
 
 			// Only tear down the chain that was built FOR this step.
 			if (bridgeWallCells.Count > 0 && bridgeOwner == pending)

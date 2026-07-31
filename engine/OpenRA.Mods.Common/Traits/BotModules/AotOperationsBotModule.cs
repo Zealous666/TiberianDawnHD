@@ -610,8 +610,21 @@ namespace OpenRA.Mods.Common.Traits
 		[ActorReference]
 		public readonly string[] MgInfantryTypes = [];
 
-		[Desc("Ticks between scans for uncontrolled derricks (map-wide, 10 min).")]
+		[ActorReference]
+		[Desc("4th squad slot, built last (User 2026-07-31: 1 rocketeer, 1 engineer, 1 flame, 1 mg, in",
+			"exactly that order). Empty chain = skipped entirely (e.g. GDI has no equivalent unit).")]
+		public readonly string[] FlameInfantryTypes = [];
+
+		[Desc("Ticks between scans for ADDITIONAL uncontrolled derricks, beyond the very first squad",
+			"(map-wide, 10 min default). The first squad is NOT gated by this -- it starts the instant",
+			"a barracks/hand exists (see DerrickSecondSquadAgeTier for why a second one waits longer).")]
 		public readonly int DerrickCheckInterval = 15000;
+
+		[Desc("Age tier (see AgePrerequisites) at which the AI starts looking for a SECOND (or further)",
+			"derrick target (User 2026-07-31: 'prüfung, ob weitere derrick squads gebaut werden in",
+			"age-2 verlagern'). The very first squad is exempt from this -- it always starts as soon as",
+			"a barracks/hand exists, regardless of age.")]
+		public readonly int DerrickSecondSquadAgeTier = 2;
 
 		[Desc("Maximum number of derricks to capture and hold at the same time.",
 			"This caps derrick TARGETS, not squads: a captured derrick keeps its slot",
@@ -723,6 +736,7 @@ namespace OpenRA.Mods.Common.Traits
 		// Module 0: OreT Boost + startup priority gate (see Info.OreBoostTypes/StartupPriorityTimeout).
 		bool oreBoostDone;
 		bool derrickFirstScanDone;
+		bool derrickFirstSquadTriggered;
 		int ticksSinceStart;
 		int selfDefenseDiagTicks;
 
@@ -786,6 +800,14 @@ namespace OpenRA.Mods.Common.Traits
 		// switching to naval ferrying). Sticky on the builder side: guarantees naval production exists for
 		// the rest of the match, rebuilding it if lost.
 		public void RequestNavalProduction() => builder?.RequestNavalProduction();
+
+		// Priority pause for AotBaseBuilderBotModule (User 2026-07-31, see AotDerrickMission.
+		// StillFormingWithinTimeout): true while the FIRST derrick squad ever started is still being
+		// assembled and within its forming timeout. Only ever the first Missions entry of this type
+		// matters here -- once it moves past Forming (or times out), building construction resumes at
+		// full priority regardless of any LATER (Age-2+) derrick squads still forming.
+		public bool FirstDerrickSquadPending() =>
+			Missions.OfType<AotDerrickMission>().FirstOrDefault()?.StillFormingWithinTimeout == true;
 
 		protected override void TraitEnabled(Actor self)
 		{
@@ -1771,37 +1793,62 @@ namespace OpenRA.Mods.Common.Traits
 				}
 			}
 
-			// Module 4: derrick engineer squads (periodic 10-minute check, map-wide, capped
-			// at DerrickMaxTargets DERRICKS held/pursued — not squads. A captured derrick's
-			// mission never finishes (permanent guard), so it keeps occupying its slot.
-			if (Info.EnableDerricks && --derrickTicks <= 0)
+			// Module 4: derrick engineer squads. The FIRST squad (User 2026-07-31: "sobald barracks
+			// steht, direkt bei engineer-squad sein") starts the instant a barracks/hand exists,
+			// completely independent of the periodic scan timer below -- previously even the first
+			// attempt waited out the initial ~60s derrickTicks delay for no reason. ADDITIONAL squads
+			// (2nd, 3rd...) stay on the periodic 10-minute scan, but now also gated behind Age 2 (User
+			// 2026-07-31: "prüfung, ob weitere derrick squads gebaut werden in age-2 verlagern") -- early
+			// game cash goes to the first squad and base development, not a second capture attempt.
+			if (Info.EnableDerricks)
 			{
-				derrickTicks = Info.DerrickCheckInterval;
-				derrickFirstScanDone = true;
-				var baseCentre = BaseCentre();
-				var pursued = Missions.OfType<AotDerrickMission>().ToList();
-				var freeSlots = Info.DerrickMaxTargets - pursued.Count;
-
-				if (freeSlots > 0)
+				if (!derrickFirstSquadTriggered && HasBarracks())
 				{
-					// A derrick with no land route used to be filtered out here entirely, so a squad was
-					// never even formed for it. The capture squad can now cross with a transport
-					// (User 2026-07-24), so those count as candidates too -- still ranked behind every
-					// walkable derrick, and only when a ferry chain is configured at all.
-					var candidates = Intel.UncontrolledDerricksAnywhere()
-						.Where(d => !pursued.Any(m => m.Derrick == d))
-						.Where(d => Intel.IsReachable(d.Location) || Info.FerryTypes.Length > 0)
-						.OrderBy(d => Intel.IsReachable(d.Location) ? 0 : 1)
-						.ThenBy(d => (d.Location - baseCentre).LengthSquared)
-						.Take(freeSlots);
-
-					foreach (var derrick in candidates)
-					{
-						Missions.Add(new AotDerrickMission(this, derrick));
-						Log($"derrick target acquired -> {derrick.Info.Name}@{derrick.Location} " +
-							$"({pursued.Count + 1}/{Info.DerrickMaxTargets} derricks held/pursued)");
-					}
+					derrickFirstSquadTriggered = true;
+					derrickFirstScanDone = true;
+					StartDerrickPursuit(1);
 				}
+
+				if (--derrickTicks <= 0)
+				{
+					derrickTicks = Info.DerrickCheckInterval;
+					derrickFirstScanDone = true;
+
+					if (AgeTier() >= Info.DerrickSecondSquadAgeTier)
+						StartDerrickPursuit(Info.DerrickMaxTargets - Missions.OfType<AotDerrickMission>().Count());
+				}
+			}
+		}
+
+		bool HasBarracks() =>
+			World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld && Info.InfantryRallyTypes.Contains(a.Info.Name));
+
+		// A captured derrick's mission never finishes (permanent guard), so it keeps occupying its slot
+		// -- freeSlots therefore caps derrick TARGETS, not squads.
+		void StartDerrickPursuit(int freeSlots)
+		{
+			if (freeSlots <= 0)
+				return;
+
+			var baseCentre = BaseCentre();
+			var pursued = Missions.OfType<AotDerrickMission>().ToList();
+
+			// A derrick with no land route used to be filtered out here entirely, so a squad was
+			// never even formed for it. The capture squad can now cross with a transport
+			// (User 2026-07-24), so those count as candidates too -- still ranked behind every
+			// walkable derrick, and only when a ferry chain is configured at all.
+			var candidates = Intel.UncontrolledDerricksAnywhere()
+				.Where(d => !pursued.Any(m => m.Derrick == d))
+				.Where(d => Intel.IsReachable(d.Location) || Info.FerryTypes.Length > 0)
+				.OrderBy(d => Intel.IsReachable(d.Location) ? 0 : 1)
+				.ThenBy(d => (d.Location - baseCentre).LengthSquared)
+				.Take(freeSlots);
+
+			foreach (var derrick in candidates)
+			{
+				Missions.Add(new AotDerrickMission(this, derrick));
+				Log($"derrick target acquired -> {derrick.Info.Name}@{derrick.Location} " +
+					$"({pursued.Count + 1}/{Info.DerrickMaxTargets} derricks held/pursued)");
 			}
 		}
 

@@ -1467,6 +1467,18 @@ namespace OpenRA.Mods.Common.Traits
 		Phase phase = Phase.Forming;
 		int formingTicks;
 
+		// Fixed squad composition, built in EXACTLY this order (User 2026-07-31): "engineer-squads
+		// sollte nurnoch bestehen aus: 1 rocketeer, 1 engineer, 1 flame, 1 mg (genau in der reihenfolge
+		// zu bauen)". Replaces the old "engineer(1) + rocket(2) + mg(2) all requested at once" mix --
+		// requesting all 5 in parallel meant they competed for the same single-slot production queue in
+		// insertion order with no regard for which role actually mattered, and DID (confirmed via log,
+		// FIX 2026-07-31h) starve the mandatory engineer for an entire match once something else kept
+		// cutting in. Sequential requesting means each step only enters the queue once the previous one
+		// is actually in Units, so there's never more than one open request from this mission at a time.
+		// An empty chain (e.g. GDI has no FlameInfantryTypes equivalent) is skipped, not requested.
+		readonly (string Role, string[] Chain)[] squadOrder;
+		int squadStep;
+
 		// Derricks across water are valid targets (User 2026-07-24) -- the squad books a crossing with
 		// the transit service exactly like a scout group or an attack wave, and owns no ships itself.
 		AotTransitTicket ticket;
@@ -1482,9 +1494,40 @@ namespace OpenRA.Mods.Common.Traits
 			// single cell -- see AllocateInfantryStagingCell.
 			stagingCell = ops.AllocateInfantryStagingCell();
 
-			ops.QueueRequest(this, "engineer", ops.Info.EngineerTypes, 1);
-			ops.QueueRequest(this, "rocket", ops.Info.RocketInfantryTypes, 2);
-			ops.QueueRequest(this, "mg", ops.Info.MgInfantryTypes, 2);
+			squadOrder =
+			[
+				("rocket", ops.Info.RocketInfantryTypes),
+				("engineer", ops.Info.EngineerTypes),
+				("flame", ops.Info.FlameInfantryTypes),
+				("mg", ops.Info.MgInfantryTypes),
+			];
+		}
+
+		// Requests the NEXT squad slot only once the previous one has actually arrived (or is skipped,
+		// for an empty chain) -- see squadOrder above. Called every Forming tick; a no-op once the whole
+		// squad has been requested (squadStep reaches the end).
+		void TickSquadForming()
+		{
+			while (squadStep < squadOrder.Length)
+			{
+				var (role, chain) = squadOrder[squadStep];
+				if (chain.Length == 0)
+				{
+					squadStep++;
+					continue;
+				}
+
+				if (Units.Any(a => chain.Contains(a.Info.Name)))
+				{
+					squadStep++;
+					continue;
+				}
+
+				if (Ops.OpenRequests(this, role) == 0)
+					Ops.QueueRequest(this, role, chain, 1);
+
+				return;
+			}
 		}
 
 		Actor Engineer() => Units.FirstOrDefault(a => Ops.Info.EngineerTypes.Contains(a.Info.Name));
@@ -1496,6 +1539,14 @@ namespace OpenRA.Mods.Common.Traits
 		// every other mission, but a standing guard post is conceptually the same as Base Defense's own
 		// garrison, just anchored somewhere other than the base.
 		public List<Actor> HoldingEscorts() => phase == Phase.Holding ? Escorts() : [];
+
+		// Priority pause for AotBaseBuilderBotModule (User 2026-07-31: "sobald barracks steht, direkt bei
+		// engineer-squad sein und erst danach weitere gebäude gebaut werden (cashflow!) mit timeout,
+		// falls das nicht klappt") -- true while this squad is still being assembled AND within the
+		// timeout, so building construction briefly steps aside for the very first derrick squad's cash
+		// instead of racing it. Bounded by DerrickFormingTimeout so a genuinely stuck squad (e.g. no
+		// reachable derrick at all) can never block base construction forever.
+		public bool StillFormingWithinTimeout => phase == Phase.Forming && formingTicks < Ops.Info.DerrickFormingTimeout;
 
 		public override void OnUnitAssigned(Actor a)
 		{
@@ -1592,6 +1643,8 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			formingTicks += Ops.Info.MissionInterval;
 
+			TickSquadForming();
+
 			// Actively gather every unit at this mission's OWN staging cell each tick -- pool-reused
 			// units (left over from an earlier mission) never walked there in the first place, and
 			// this mission's cell is distinct from other concurrently forming missions' cells (see
@@ -1612,7 +1665,7 @@ namespace OpenRA.Mods.Common.Traits
 					}
 				}
 
-			// Wait for the full 5-man squad at the barracks rally point; the engineer is mandatory.
+			// Wait for the full 4-man squad at the barracks rally point; the engineer is mandatory.
 			// The timeout is a last-resort safety net only (shared actor types with other missions,
 			// e.g. Scout, can genuinely delay production well past a short timeout) -- escorts may
 			// launch short-handed if it's ever hit.
