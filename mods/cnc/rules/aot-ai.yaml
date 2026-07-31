@@ -672,6 +672,13 @@ Player:
 		WaveLightShare: 30
 		WaveSupportShare: 20
 		WaveRetreatLossPercent: 0
+		# Smaller, more frequent Age0 waves (User 2026-07-31: "wellen-größe in age-0 reduzieren, lieber
+		# öfter aber momentan hat er oft ein geld problem"). WaveVehiclesPerAge only feeds the adaptive
+		# share on top of the wave-slot static composition (see below) -- lowering just index 0 shrinks
+		# that share for Age0 without touching Age1-3. WaveCooldown is a single global value (no per-tier
+		# knob exists), lowered from the 1500 default to fire waves noticeably more often at every tier.
+		WaveVehiclesPerAge: 4, 8, 10, 12
+		WaveCooldown: 900
 		# Wave slots (User 2026-07-31, replaces the role/share split above for Regular Attack Waves):
 		# 4 independent, SIMULTANEOUS unit lines per wave instead of one chain always winning the whole
 		# "tank" role -- the old chain mixed TTNK (never age-gated, always buildable via `lite` alone)
@@ -689,15 +696,19 @@ Player:
 		WaveSlot2Max: 0, 2, 3, 4
 		WaveSlot3Types: aot-ttnk-toxin, aot-ttnk-flame, aot-ttnk-base
 		WaveSlot3Min: 1, 1, 2, 2
-		WaveSlot3Max: 2, 2, 4, 5
+		# Age0 max lowered 2 -> 1 (User 2026-07-31: "wellen-größe in age-0 reduzieren, lieber öfter" --
+		# cash was stretched thin). Min stays 1, so Age0 TTNK is pinned at exactly 1, immune to budget
+		# escalation too.
+		WaveSlot3Max: 1, 2, 4, 5
 		WaveSlot4Types: aot-ltnk-tick, aot-ltnk-laser, aot-ltnk-base
 		WaveSlot4Min: 0, 2, 2, 3
 		WaveSlot4Max: 0, 3, 5, 7
 		# V2: Age0-only stand-in for the old Support role (matches prior "TTNK + V2" Age0 behaviour) --
 		# excluded from Age1+ like Howitzer/Heavy Arty above, per the user's exhaustive Age1 slot list.
+		# Age0 max lowered 2 -> 1, same reasoning as WaveSlot3 above.
 		WaveSlot5Types: aot-v2-base
 		WaveSlot5Min: 1, 0, 0, 0
-		WaveSlot5Max: 2, 0, 0, 0
+		WaveSlot5Max: 1, 0, 0, 0
 		AntiInfantryTypes: aot-ttnk-flame, aot-v2-napalm, aot-bggy-laser, aot-bggy-base
 		AntiTankTypes: aot-ltnk-tick, aot-ltnk-laser, aot-ltnk-base, aot-ttnk-base
 		# Naval ferry (User 2026-07-21): if there is no ground route to the enemy, a wave builds/

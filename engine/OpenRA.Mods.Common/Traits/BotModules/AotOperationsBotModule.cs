@@ -407,8 +407,10 @@ namespace OpenRA.Mods.Common.Traits
 			"escalation tier.")]
 		public readonly string[] AirRaidHelicopterTypes = [];
 
-		[Desc("Number of helicopters built for an air raid.")]
-		public readonly int AirRaidCount = 4;
+		[Desc("Number of helicopters built for an air raid, per age tier [0,1,2,3] (User 2026-07-31: the",
+			"first, Age-0 raid is smaller -- full strength only from Age 1). Indexed by AgeTier() at the",
+			"time the raid is composed; the last entry covers any tier beyond the array's length.")]
+		public readonly int[] AirRaidCountPerAge = [2, 4, 4, 4];
 
 		[Desc("Air raid forming timeout; launches short-handed if hit.")]
 		public readonly int AirRaidFormingTimeout = 9000;

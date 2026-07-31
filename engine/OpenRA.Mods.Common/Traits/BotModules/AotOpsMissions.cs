@@ -1824,7 +1824,7 @@ namespace OpenRA.Mods.Common.Traits
 	// ======================================================================
 	// Air Raid (escalation tier, User 2026-07-22): once ground waves have failed
 	// WaveAirRaidAfterFailures times in a row (primary + secondary route attempts) and a helipad
-	// is owned, build AirRaidCount helicopters and send them straight at the enemy construction
+	// is owned, build AirRaidCountPerAge[tier] helicopters and send them straight at the enemy construction
 	// yard, ignoring ground reachability. Success/failure feeds back into the same streak that
 	// picked this tier, so the escalation loop resets to ground waves either way (see
 	// AotOperationsBotModule's mission-completion handling).
@@ -1851,10 +1851,13 @@ namespace OpenRA.Mods.Common.Traits
 				return;
 			}
 
-			var fromPool = ops.TakeFromPool(ops.Info.AirRaidHelicopterTypes, ops.Info.AirRaidCount);
+			var perAge = ops.Info.AirRaidCountPerAge;
+			var count = perAge.Length > 0 ? perAge[Math.Min(ops.AgeTier(), perAge.Length - 1)] : 4;
+
+			var fromPool = ops.TakeFromPool(ops.Info.AirRaidHelicopterTypes, count);
 			ops.AssignFromPool(this, fromPool);
-			if (ops.Info.AirRaidCount - fromPool.Count > 0)
-				ops.QueueRequest(this, "airraid", ops.Info.AirRaidHelicopterTypes, ops.Info.AirRaidCount - fromPool.Count);
+			if (count - fromPool.Count > 0)
+				ops.QueueRequest(this, "airraid", ops.Info.AirRaidHelicopterTypes, count - fromPool.Count);
 		}
 
 		public override void Tick(IBot bot)
