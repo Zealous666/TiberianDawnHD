@@ -142,6 +142,17 @@ namespace OpenRA.Mods.Common.Traits
 		public AotStartingUnitsMission(AotOperationsBotModule ops)
 			: base(ops, "starting-units") { }
 
+		// The standing guard (User 2026-07-31: "chockepoints sind ja zu verteidigen, es bringt nichts,
+		// wenn die reserve dann genau da nicht als reserve eingreift wenn schon alles andere tot ist") --
+		// exposed for the global self-defense pass. Only meaningful while the reserve is actually
+		// standing post: once the force has crossed water (ashore) or moved into FinalAttack/HoldCentre,
+		// these sets stop being a "post" and are just the active force, already covered by their own
+		// mission logic.
+		public IEnumerable<Actor> ReserveUnits() =>
+			phase is Phase.ChokeHold or Phase.ArcoRaid or Phase.CrateWait
+				? chokeReserve.Concat(secondaryReserve).Where(a => !Ops.CannotOrder(a))
+				: [];
+
 		public override void OnUnitAssigned(Actor a)
 		{
 			if (ReturnStrayNavalSupport(a))

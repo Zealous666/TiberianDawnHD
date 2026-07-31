@@ -176,13 +176,25 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Actor types never claimed for missions (economy, MCVs, special vehicles).")]
 		public readonly HashSet<string> ExcludeFromOpsTypes = [];
 
-		[Desc("Global self-defense (User 2026-07-30): radius (cells) around a staged unit -- pooled/idle,",
-			"or a Derrick's permanent guard -- scanned for threats, INCLUDING aircraft (a Hind overhead is",
-			"very much a threat to an AA-capable unit standing in the base). Deliberately does NOT cover",
-			"anything mid-mission (forming/moving/executing/retreating waves, scouts, air raids, a Derrick",
-			"squad still in transit) -- interrupting a unit that is about to depart for its own mission is",
+		[Desc("Global self-defense (User 2026-07-30/31): staged units -- pooled/idle, Module 1's chokepoint/",
+			"secondary reserve while it's actually standing post, or a Derrick's permanent guard -- react",
+			"to threats INCLUDING aircraft (a Hind overhead is very much a threat to an AA-capable unit",
+			"standing in the base). Pooled and reserve units react to any threat anywhere in the flooded",
+			"base region (Intel.IsReachable), not a local radius; a Derrick's guard (often outside that",
+			"region entirely) uses this radius around its own post instead. Deliberately does NOT cover",
+			"anything else mid-mission (forming/moving/executing/retreating waves, scouts, air raids, a",
+			"Derrick squad still in transit) -- interrupting a unit about to depart for its own mission is",
 			"exactly what must NOT happen. 0 disables the whole pass.")]
 		public readonly int SelfDefenseScanRadius = 8;
+
+		[Desc("Emergency defense production (User 2026-07-31): while the base is under attack (any threat",
+			"detected in the self-defense region scan above) and nothing of this chain is currently in",
+			"production, rush a batch straight off RocketInfantryTypes (cheap, fast, anti-everything) --",
+			"bypassing the normal cash reserve/production-pause gates entirely, the same way TryOreBoost",
+			"does. Produced units are NOT claimed by any mission, so they fall into the shared pool and are",
+			"picked up by the self-defense pass itself the very next cycle, sending them straight at the",
+			"threat. Repeats in fresh batches for as long as the base remains under attack. 0 disables it.")]
+		public readonly int EmergencyDefenseBatchSize = 5;
 
 		// ---- Feature flags (one per operation type, individually testable) ----
 		public readonly bool EnableStartingUnits = true;
@@ -1048,45 +1060,57 @@ namespace OpenRA.Mods.Common.Traits
 			if (Info.SelfDefenseScanRadius <= 0)
 				return;
 
-			// Pool: react to ANY threat anywhere in the flooded base region (User 2026-07-30: "die
-			// gesamte geflutete base-region sollte immer ... als schützenswert gelten"), not just a
-			// small radius around each individual unit -- a per-unit radius meant an idle unit standing
-			// even a little way from the actual breach never reacted at all (User 2026-07-31 report:
-			// infantry stood doing nothing while the base was under attack elsewhere). Reuses Module 5's
-			// own proportional-response knobs (ProtectionResponseRatio/MinResponse) so a single scout
-			// doesn't empty the entire pool.
+			// Pool + Module 1's standing reserve: react to ANY threat anywhere in the flooded base region
+			// (User 2026-07-30: "die gesamte geflutete base-region sollte immer ... als schützenswert
+			// gelten"), not just a small radius around each individual unit -- a per-unit radius meant an
+			// idle unit standing even a little way from the actual breach never reacted at all (User
+			// 2026-07-31 report: infantry stood doing nothing while the base was under attack elsewhere).
+			// Confirmed via live log that the pool is essentially ALWAYS empty (every combat unit is
+			// permanently claimed by some mission) -- the chokepoint/secondary reserve, previously
+			// excluded as "mid-mission", turned out to BE the units standing idle in every report; the
+			// user explicitly asked to include it too ("es bringt nichts, wenn die reserve dann genau da
+			// nicht als reserve eingreift wenn schon alles andere tot ist"). Reuses Module 5's own
+			// proportional-response knobs (ProtectionResponseRatio/MinResponse) so a single scout doesn't
+			// empty the whole reserve.
 			var poolCandidates = pool.Where(a => !CannotOrder(a) && Intel.IsReachable(a.Location)).ToList();
+			foreach (var s in Missions.OfType<AotStartingUnitsMission>())
+				poolCandidates.AddRange(s.ReserveUnits().Where(a => Intel.IsReachable(a.Location)));
+
+			var threats = World.Actors
+				.Where(e => AotOpsUtils.IsPreferredEnemyUnit(Player, e, true) && e.CanBeViewedByPlayer(Player) && Intel.IsReachable(e.Location))
+				.ToList();
 
 			// Throttled diagnostic (User 2026-07-31 report: "infantry stand around doing nothing"):
-			// without this, the log gives no way to tell whether the pool is genuinely empty (units are
-			// all mid-mission -- e.g. Module 1's chokepoint reserve, deliberately excluded per the
-			// user's own earlier spec) versus non-empty but somehow not reacting.
+			// without this, the log gives no way to tell whether the candidate set is genuinely empty
+			// (units are all mid-mission in some OTHER way -- a wave forming, a scout en route) versus
+			// non-empty but somehow not reacting.
 			if (++selfDefenseDiagTicks % 8 == 0)
-				Log($"self-defense diag: pool={pool.Count} reachableCandidates={poolCandidates.Count}");
+				Log($"self-defense diag: pool={pool.Count} reachableCandidates={poolCandidates.Count} threats={threats.Count}");
 
-			if (poolCandidates.Count > 0)
+			if (poolCandidates.Count > 0 && threats.Count > 0)
 			{
-				var threats = World.Actors
-					.Where(e => AotOpsUtils.IsPreferredEnemyUnit(Player, e, true) && e.CanBeViewedByPlayer(Player) && Intel.IsReachable(e.Location))
+				var want = Math.Clamp(threats.Count * Info.ProtectionResponseRatio, Info.ProtectionMinResponse, poolCandidates.Count);
+				var responders = poolCandidates
+					.OrderBy(a => threats.Min(t => (a.Location - t.Location).LengthSquared))
+					.Take(want)
 					.ToList();
 
-				if (threats.Count > 0)
+				foreach (var a in responders)
 				{
-					var want = Math.Clamp(threats.Count * Info.ProtectionResponseRatio, Info.ProtectionMinResponse, poolCandidates.Count);
-					var responders = poolCandidates
-						.OrderBy(a => threats.Min(t => (a.Location - t.Location).LengthSquared))
-						.Take(want)
-						.ToList();
-
-					foreach (var a in responders)
-					{
-						var target = threats.OrderBy(t => (a.Location - t.Location).LengthSquared).First();
-						bot.QueueOrder(new Order("ForceAttack", a, Target.FromActor(target), false));
-					}
-
-					Log($"self-defense: {threats.Count} threat(s) in the base region -> dispatching {responders.Count}/{poolCandidates.Count} pooled unit(s)");
+					var target = threats.OrderBy(t => (a.Location - t.Location).LengthSquared).First();
+					bot.QueueOrder(new Order("ForceAttack", a, Target.FromActor(target), false));
 				}
+
+				Log($"self-defense: {threats.Count} threat(s) in the base region -> dispatching {responders.Count}/{poolCandidates.Count} pooled unit(s)");
 			}
+
+			// Emergency defense production (User 2026-07-31: "wenn der gegner in eine base einfällt ...
+			// sollte er sofort anfangen rocket trooper zu bauen in 5er wellen solange gegner noch in base
+			// sind"). Checked against the SAME region-wide threat set as above, independent of whether any
+			// responder was actually available this cycle -- the base can be under attack with the
+			// reserve already fully committed, which is exactly when reinforcements matter most.
+			if (threats.Count > 0)
+				TryEmergencyDefenseProduction(bot);
 
 			// Derrick guard: local radius around its OWN post instead -- a captured derrick often sits
 			// far outside the base region entirely, so the region-wide check above would never cover it.
@@ -1336,6 +1360,36 @@ namespace OpenRA.Mods.Common.Traits
 			bot.QueueOrder(Order.StartProduction(queue.Actor, name, 1));
 			oreBoostDone = true;
 			Log($"ore boost: extra {name} ordered (one-time, early cashflow)");
+		}
+
+		// Emergency defense production (User 2026-07-31): the base is under attack, so rush a batch of
+		// RocketInfantryTypes straight off the production queue. Fires a bare StartProduction order
+		// directly, same pattern as TryOreBoost -- bypasses the cash reserve/production-pause gates in
+		// PumpProduction entirely (an emergency doesn't wait its turn), and the produced troopers are
+		// NOT claimed by any mission, so they land in the shared pool and get swept up by
+		// GlobalUnitSelfDefense's own pool dispatch the very next cycle. Only fires a fresh batch once
+		// nothing of this chain is currently queued anywhere, so it naturally repeats in batches for as
+		// long as GlobalUnitSelfDefense keeps calling it (i.e. for as long as the base stays under
+		// attack) without needing its own separate cooldown/state tracking.
+		void TryEmergencyDefenseProduction(IBot bot)
+		{
+			if (Info.EmergencyDefenseBatchSize <= 0 || Info.RocketInfantryTypes.Length == 0)
+				return;
+
+			var queuesByCategory = AIUtils.FindQueuesByCategory(Player);
+			var alreadyQueued = queuesByCategory.SelectMany(g => g)
+				.Any(q => q.AllQueued().Any(i => Info.RocketInfantryTypes.Contains(i.Item)));
+			if (alreadyQueued)
+				return;
+
+			var (name, queue) = FirstBuildable(Info.RocketInfantryTypes, queuesByCategory);
+			if (name == null || queue == null)
+				return;
+
+			for (var i = 0; i < Info.EmergencyDefenseBatchSize; i++)
+				bot.QueueOrder(Order.StartProduction(queue.Actor, name, 1));
+
+			Log($"emergency defense: base under attack -> rushing {Info.EmergencyDefenseBatchSize}x {name}");
 		}
 
 		// Startup priority gate for the first Regular Attack Wave (User 2026-07-22): cashflow (OreT
