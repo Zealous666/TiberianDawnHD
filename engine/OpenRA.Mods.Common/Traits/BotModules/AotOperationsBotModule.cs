@@ -235,12 +235,50 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Support/artillery role variant chain (all exclusive branches).")]
 		public readonly string[] WaveSupportTypes = [];
 
-		[Desc("Role shares in percent (tank, light, support).")]
+		[Desc("Role shares in percent (tank, light, support). Ignored once any WaveSlotNTypes below is",
+			"configured -- see WaveSlot1-4 (User 2026-07-31).")]
 		public readonly int WaveTankShare = 60;
 		public readonly int WaveLightShare = 25;
 		public readonly int WaveSupportShare = 15;
 
-		[Desc("Base vehicles per wave for age tier 0, 1, 2, 3.")]
+		// ---- Module 2b: Wave slots (User 2026-07-31) ----
+		// Replaces the tank/light/support share split above with up to 4 independent, SIMULTANEOUS unit
+		// slots per wave -- the old design picked exactly ONE winning variant per role via FirstBuildable,
+		// so two genuinely different vehicle lines sharing a role chain (e.g. NOD's Tank role mixing TTNK
+		// and LTNK) could never both appear: whichever line had an always-buildable base variant (TTNK,
+		// gated only by `lite`) permanently starved the other (LTNK, `~aot-age1`-gated) out, even long
+		// after the other unlocked. A slot is still an AGE-ORDERED chain internally (its own upgrade
+		// variants stay mutually exclusive, e.g. aot-bike-laser over aot-bike-base), but different slots
+		// are fully independent and all fill in the same wave together. Only used when at least one
+		// WaveSlotNTypes is non-empty; a faction with none configured keeps the legacy share behaviour
+		// above unchanged (GDI, for now).
+		[ActorReference]
+		[Desc("Slot 1 variant chain (age-ordered, first currently buildable wins within the slot).")]
+		public readonly string[] WaveSlot1Types = [];
+		[Desc("Slot 1 minimum count per age tier [0,1,2,3] -- always requested if the slot is buildable.")]
+		public readonly int[] WaveSlot1Min = [];
+		[Desc("Slot 1 maximum count per age tier [0,1,2,3] -- ceiling even with full budget escalation.",
+			"0 for a tier disables the slot entirely that tier (e.g. still tech-locked).")]
+		public readonly int[] WaveSlot1Max = [];
+
+		[ActorReference] public readonly string[] WaveSlot2Types = [];
+		public readonly int[] WaveSlot2Min = [];
+		public readonly int[] WaveSlot2Max = [];
+
+		[ActorReference] public readonly string[] WaveSlot3Types = [];
+		public readonly int[] WaveSlot3Min = [];
+		public readonly int[] WaveSlot3Max = [];
+
+		[ActorReference] public readonly string[] WaveSlot4Types = [];
+		public readonly int[] WaveSlot4Min = [];
+		public readonly int[] WaveSlot4Max = [];
+
+		[ActorReference] public readonly string[] WaveSlot5Types = [];
+		public readonly int[] WaveSlot5Min = [];
+		public readonly int[] WaveSlot5Max = [];
+
+		[Desc("Base vehicles per wave for age tier 0, 1, 2, 3. Still used for the adaptive share below;",
+			"the slot system's own Min/Max control the static composition directly instead.")]
 		public readonly int[] WaveVehiclesPerAge = [6, 8, 10, 12];
 
 		[Desc("Prerequisites that mark age tiers 1-3.")]
@@ -1208,6 +1246,26 @@ namespace OpenRA.Mods.Common.Traits
 		public int OwnedFerryCount() =>
 			World.Actors.Count(a => a.Owner == Player && !a.IsDead && a.IsInWorld
 				&& Info.FerryTypes.Contains(a.Info.Name));
+
+		// Up to 5 independent wave slots (User 2026-07-31, see WaveSlot1-5 above). Empty ones (no Types
+		// configured) are skipped -- a faction with none defined falls back to the legacy tank/light/
+		// support share split in AotRegularWaveMission.Compose (GDI, for now).
+		public List<(string Name, string[] Chain, int[] Min, int[] Max)> WaveSlots()
+		{
+			var list = new List<(string, string[], int[], int[])>();
+			void Add(string name, string[] types, int[] min, int[] max)
+			{
+				if (types.Length > 0)
+					list.Add((name, types, min, max));
+			}
+
+			Add("slot1", Info.WaveSlot1Types, Info.WaveSlot1Min, Info.WaveSlot1Max);
+			Add("slot2", Info.WaveSlot2Types, Info.WaveSlot2Min, Info.WaveSlot2Max);
+			Add("slot3", Info.WaveSlot3Types, Info.WaveSlot3Min, Info.WaveSlot3Max);
+			Add("slot4", Info.WaveSlot4Types, Info.WaveSlot4Min, Info.WaveSlot4Max);
+			Add("slot5", Info.WaveSlot5Types, Info.WaveSlot5Min, Info.WaveSlot5Max);
+			return list;
+		}
 
 		public string FirstBuildable(string[] chain)
 		{

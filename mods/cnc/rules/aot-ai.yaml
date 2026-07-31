@@ -129,6 +129,12 @@ Player:
 		# really ship-navigable, not just terrain-adjacent to Water (User 2026-07-22: rock-enclosed
 		# inlets can pass the naive terrain check but trap a ship a few cells short forever).
 		NavalLocomotor: aot-lst
+		# Age-upgrade cash priority (User 2026-07-31): fired directly by this module once each tier's
+		# Rhythm is complete, bypassing BaseBuilderBotModule@aotupgrades' weighted-random pick for
+		# these 3 actors entirely -- see AgeUpgradeFallbackTimeoutTicks default (15000) for the
+		# permanently-stuck-core-building escape valve. Removed from that module's own
+		# BuildingFractions below so nothing can double-fire them.
+		AgeUpgradeTypes: aot-age1-upgrade-nod, aot-age2-upgrade-nod, aot-age3-upgrade-nod
 
 	# CHOKEPOINT-FORTIFIER: für V1 DEAKTIVIERT (baute Streu-Zäune, konkurrierte um
 	# die Building-Queue). Kommt als V2 zurück, integriert mit AotBaseBuilder.
@@ -402,18 +408,29 @@ Player:
 			aot-age2-upgrade-nod: 1
 			aot-age3-upgrade-nod: 1
 		BuildingFractions:
-			# === AGE-UPGRADES — User 2026-07-22: NIEDRIGSTE Priorität innerhalb dieser Queue (unter
+			# === AGE-UPGRADES GDI — User 2026-07-22: NIEDRIGSTE Priorität innerhalb dieser Queue (unter
 			# jedem anderen Upgrade, Wert < der niedrigste Kampf-Upgrade-Wert unten) — alle sonst
 			# verfügbaren Upgrades der aktuellen Age sollen zuerst dran sein, ehe der Age-Sprung
 			# selbst gekauft wird. BuildingFractions ist gewichtete Zufallsauswahl, keine strikte
 			# Reihenfolge — mit diesem Gewicht wird das Age-Upgrade nur noch selten gezogen,
 			# solange andere Kandidaten in der Queue verfügbar sind, aber keine harte Garantie.
+			# NOD hat KEINE Einträge mehr hier (User 2026-07-31): AotBaseBuilderBotModule@nod feuert
+			# aot-age{1,2,3}-upgrade-nod jetzt direkt selbst (AgeUpgradeTypes), hart an "Rhythm der
+			# aktuellen Age fertig" gekoppelt statt an gewichteten Zufall -- siehe dort.
 			aot-age1-upgrade-gdi: 3
 			aot-age2-upgrade-gdi: 3
 			aot-age3-upgrade-gdi: 3
-			aot-age1-upgrade-nod: 3
-			aot-age2-upgrade-nod: 3
-			aot-age3-upgrade-nod: 3
+			# === Verteidigungs-Enabler NOD (hohe Prio, User 2026-07-31): aot-upgrade-turret schaltet
+			# das GUN erst frei UND ist Voraussetzung fuer das Laser Turret. Der Base-Planner platziert
+			# im Age-1-Rhythm direkt danach zwei GUN-Türme am Gate-Cluster (siehe AotBasePlannerBotModule
+			# .GateClusterVariants) — bleibt das Upgrade ungekauft, blockiert dieser Rhythm-Schritt den
+			# GESAMTEN Rest von Age 1 dahinter ("builder wartet an erster nicht baubarer Stelle").
+			# aot-upgrade-ftur-napalm ist ABSICHTLICH NICHT gelistet: BaseBuilderQueueManager waehlt nur
+			# aus Namen, die hier als Key stehen — ein fehlender Eintrag heisst "die KI kauft das nie".
+			# Das ist der einzige Hebel, um die KI zwingend auf den Turret-Zweig festzulegen (die beiden
+			# Upgrades schliessen sich in den Rules gegenseitig aus, ~!aot-nitro-napalm-upgrade /
+			# ~!aot-turret-upgrade).
+			aot-upgrade-turret: 45
 			# === Superwaffen-Enabler (hohe Prio — sonst existiert die Power nie) ===
 			aot-upgrade-ion-cannon: 40
 			aot-upgrade-zonetrooper-drop: 30
@@ -641,6 +658,9 @@ Player:
 		ChokepointHoldRadius: 4
 		ChokeClearRadius: 5
 		ChokeClearExcludeTypes: aot-ore-mine, arco, v19
+		# Legacy role/share fields (User 2026-07-31): kept only for Module 5 Base Defense's reserve
+		# garrison (AotBaseDefenseMission.RequestMixedRoles still reads these) -- Regular Attack Waves
+		# themselves now use WaveSlot1-5 below instead, see the comment there.
 		WaveTankTypes: aot-ttnk-toxin, aot-ttnk-flame, aot-ltnk-tick, aot-ltnk-laser, aot-ttnk-base, aot-ltnk-base
 		WaveLightTypes: aot-bike-laser, aot-bggy-laser, aot-bike-base, aot-bggy-base
 		WaveSupportTypes: aot-arty-heavy, aot-arty-howitzer, aot-v2-napalm, aot-v2-toxic, aot-v2-base
@@ -648,6 +668,32 @@ Player:
 		WaveLightShare: 30
 		WaveSupportShare: 20
 		WaveRetreatLossPercent: 0
+		# Wave slots (User 2026-07-31, replaces the role/share split above for Regular Attack Waves):
+		# 4 independent, SIMULTANEOUS unit lines per wave instead of one chain always winning the whole
+		# "tank" role -- the old chain mixed TTNK (never age-gated, always buildable via `lite` alone)
+		# and LTNK (`~aot-age1`-gated) in one slot, so LTNK could structurally never win once unlocked.
+		# Per-tier [Age0, Age1, Age2, Age3] Min (floor, always requested if buildable) and Max (ceiling,
+		# even with full budget escalation). Age1 target (user spec): 1-2 Bike, 1-2 Buggy, 1-2 TTNK,
+		# 2-3 LTNK. Age2/3: same 4 lines, just more of each as budget allows ("ab Age2 einfach mehr von
+		# jeder Einheit, wenn Cashflow passt") -- Howitzer/Heavy Arty return later via a SEPARATE
+		# operation type, deliberately excluded from Regular Waves from Age1 onward.
+		WaveSlot1Types: aot-bike-laser, aot-bike-base
+		WaveSlot1Min: 0, 1, 1, 2
+		WaveSlot1Max: 0, 2, 3, 4
+		WaveSlot2Types: aot-bggy-laser, aot-bggy-base
+		WaveSlot2Min: 0, 1, 1, 2
+		WaveSlot2Max: 0, 2, 3, 4
+		WaveSlot3Types: aot-ttnk-toxin, aot-ttnk-flame, aot-ttnk-base
+		WaveSlot3Min: 1, 1, 2, 2
+		WaveSlot3Max: 2, 2, 4, 5
+		WaveSlot4Types: aot-ltnk-tick, aot-ltnk-laser, aot-ltnk-base
+		WaveSlot4Min: 0, 2, 2, 3
+		WaveSlot4Max: 0, 3, 5, 7
+		# V2: Age0-only stand-in for the old Support role (matches prior "TTNK + V2" Age0 behaviour) --
+		# excluded from Age1+ like Howitzer/Heavy Arty above, per the user's exhaustive Age1 slot list.
+		WaveSlot5Types: aot-v2-base
+		WaveSlot5Min: 1, 0, 0, 0
+		WaveSlot5Max: 2, 0, 0, 0
 		AntiInfantryTypes: aot-ttnk-flame, aot-v2-napalm, aot-bggy-laser, aot-bggy-base
 		AntiTankTypes: aot-ltnk-tick, aot-ltnk-laser, aot-ltnk-base, aot-ttnk-base
 		# Naval ferry (User 2026-07-21): if there is no ground route to the enemy, a wave builds/

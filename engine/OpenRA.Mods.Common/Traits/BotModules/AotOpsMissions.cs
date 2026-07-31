@@ -631,8 +631,109 @@ namespace OpenRA.Mods.Common.Traits
 				Math.Pow(1.0 + info.WaveBudgetEscalationPercent / 100.0, index - 1),
 				info.WaveBudgetCapPercent / 100.0);
 
-			// Resolve the currently buildable variant + cost per role.
-			var roles = new List<(string Role, string[] Chain, int Share, string Variant, int Cost)>();
+			// Adaptive block counters the observed enemy; everything else is the "static" composition,
+			// filled either by the new per-slot system (User 2026-07-31) or, if a faction hasn't
+			// configured any slots yet, the legacy tank/light/support share split (GDI, for now).
+			var adaptCount = n * info.WaveAdaptiveSharePercent / 100;
+			var maxStatic = Math.Max(0, info.WaveMaxUnits - adaptCount);
+
+			var slots = Ops.WaveSlots();
+			var picked = slots.Count > 0
+				? ComposeSlots(slots, tier, mult, maxStatic)
+				: ComposeRoles(n - adaptCount, mult, maxStatic);
+
+			if (picked == null)
+			{
+				Log("no wave role buildable yet -> wave skipped");
+				FinishWave();
+				return;
+			}
+
+			var adaptChain = AdaptiveChain();
+
+			Log($"compose tier={tier} n={n} mult={mult:F2} " +
+				$"static=[{string.Join(", ", picked.Select(p => $"{p.Name}:{p.Count}"))}] adaptive={adaptCount}");
+
+			// Pool first (leftovers from earlier waves), then production.
+			foreach (var p in picked)
+			{
+				if (p.Count <= 0)
+					continue;
+
+				var fromPool = Ops.TakeFromPool(p.Chain, p.Count);
+				Ops.AssignFromPool(this, fromPool);
+				if (p.Count - fromPool.Count > 0)
+					Ops.QueueRequest(this, p.Name, p.Chain, p.Count - fromPool.Count);
+			}
+
+			if (adaptCount > 0 && adaptChain.Length > 0)
+			{
+				var fromPool = Ops.TakeFromPool(adaptChain, adaptCount);
+				Ops.AssignFromPool(this, fromPool);
+				if (adaptCount - fromPool.Count > 0)
+					Ops.QueueRequest(this, "adaptive", adaptChain, adaptCount - fromPool.Count);
+			}
+
+			ecoWave = Ops.World.LocalRandom.Next(100) < info.WaveEcoTargetPercent;
+		}
+
+		// New slot system (User 2026-07-31): each slot is an independent unit chain with its own
+		// per-age-tier Min (always requested if buildable) and Max (hard ceiling, even with full budget
+		// escalation) -- replaces the old single-winner-per-role design, where two distinct vehicle
+		// lines sharing one role chain (NOD's Tank role mixing TTNK and LTNK) could never both appear:
+		// whichever line had an always-buildable base variant permanently starved the other out.
+		List<(string Name, string[] Chain, int Count)> ComposeSlots(
+			List<(string Name, string[] Chain, int[] Min, int[] Max)> slots, int tier, double mult, int maxStatic)
+		{
+			var resolved = new List<(string Name, string[] Chain, int Cost, int Min, int Max)>();
+			foreach (var s in slots)
+			{
+				var max = tier < s.Max.Length ? s.Max[tier] : s.Max.Length > 0 ? s.Max[^1] : 0;
+				if (max <= 0)
+					continue;
+
+				var variant = Ops.FirstBuildable(s.Chain);
+				if (variant == null)
+					continue;
+
+				var min = Math.Min(tier < s.Min.Length ? s.Min[tier] : 0, max);
+				var cost = Ops.World.Map.Rules.Actors[variant].TraitInfoOrDefault<ValuedInfo>()?.Cost ?? 500;
+				resolved.Add((s.Name, s.Chain, cost, min, max));
+			}
+
+			if (resolved.Count == 0)
+				return null;
+
+			var counts = resolved.ToDictionary(r => r.Name, r => r.Min);
+
+			// Budget escalation: fill every slot toward its OWN Max, proportionally, biggest deficit
+			// first -- "ab Age2 einfach mehr von jeder Einheit, wenn Cashflow passt" (User 2026-07-31).
+			var baseBudget = resolved.Sum(r => counts[r.Name] * r.Cost);
+			var budget = (int)(baseBudget * mult);
+			var spent = baseBudget;
+			while (spent < budget && counts.Values.Sum() < maxStatic)
+			{
+				var candidates = resolved.Where(r => counts[r.Name] < r.Max).ToList();
+				if (candidates.Count == 0)
+					break;
+
+				var pick = candidates.MinBy(r => counts[r.Name] * 1.0 / r.Max);
+				if (spent + pick.Cost > budget)
+					break;
+
+				counts[pick.Name]++;
+				spent += pick.Cost;
+			}
+
+			return resolved.Select(r => (r.Name, r.Chain, counts[r.Name])).ToList();
+		}
+
+		// Legacy role/share composition (unchanged behaviour) -- used only while a faction has no
+		// WaveSlot1-5 configured (GDI, for now; see AotOperationsBotModule.WaveSlots).
+		List<(string Name, string[] Chain, int Count)> ComposeRoles(int staticCount, double mult, int maxStatic)
+		{
+			var info = Ops.Info;
+			var roles = new List<(string Role, string[] Chain, int Share, int Cost)>();
 			foreach (var (role, chain, share) in new[]
 			{
 				("tank", info.WaveTankTypes, info.WaveTankShare),
@@ -645,30 +746,21 @@ namespace OpenRA.Mods.Common.Traits
 					continue;
 
 				var cost = Ops.World.Map.Rules.Actors[variant].TraitInfoOrDefault<ValuedInfo>()?.Cost ?? 500;
-				roles.Add((role, chain, share, variant, cost));
+				roles.Add((role, chain, share, cost));
 			}
 
 			if (roles.Count == 0)
-			{
-				Log("no wave role buildable yet -> wave skipped");
-				FinishWave();
-				return;
-			}
+				return null;
 
-			// Static core (75%) split by shares; adaptive block (25%) counters the observed enemy.
-			var adaptCount = n * info.WaveAdaptiveSharePercent / 100;
-			var staticCount = n - adaptCount;
 			var totalShare = roles.Sum(r => r.Share);
 			var counts = roles.ToDictionary(r => r.Role, r => Math.Max(0, staticCount * r.Share / Math.Max(1, totalShare)));
 			while (counts.Values.Sum() < staticCount)
 				counts[roles[0].Role]++;
 
-			// Budget escalation: scale the composition up round-robin (biggest share deficit first)
-			// until the escalated budget is spent or the hard unit cap is reached.
 			var baseBudget = roles.Sum(r => counts[r.Role] * r.Cost);
 			var budget = (int)(baseBudget * mult);
 			var spent = baseBudget;
-			while (spent < budget && counts.Values.Sum() + adaptCount < info.WaveMaxUnits)
+			while (spent < budget && counts.Values.Sum() < maxStatic)
 			{
 				var role = roles.MinBy(r => counts[r.Role] * 100.0 / Math.Max(1, r.Share));
 				if (spent + role.Cost > budget)
@@ -678,33 +770,7 @@ namespace OpenRA.Mods.Common.Traits
 				spent += role.Cost;
 			}
 
-			var adaptChain = AdaptiveChain();
-
-			Log($"compose tier={tier} n={n} mult={mult:F2} budget={budget} " +
-				$"static=[{string.Join(", ", roles.Select(r => $"{r.Role}:{counts[r.Role]}x{r.Variant}"))}] adaptive={adaptCount}");
-
-			// Pool first (leftovers from earlier waves), then production.
-			foreach (var r in roles)
-			{
-				var want = counts[r.Role];
-				if (want <= 0)
-					continue;
-
-				var fromPool = Ops.TakeFromPool(r.Chain, want);
-				Ops.AssignFromPool(this, fromPool);
-				if (want - fromPool.Count > 0)
-					Ops.QueueRequest(this, r.Role, r.Chain, want - fromPool.Count);
-			}
-
-			if (adaptCount > 0 && adaptChain.Length > 0)
-			{
-				var fromPool = Ops.TakeFromPool(adaptChain, adaptCount);
-				Ops.AssignFromPool(this, fromPool);
-				if (adaptCount - fromPool.Count > 0)
-					Ops.QueueRequest(this, "adaptive", adaptChain, adaptCount - fromPool.Count);
-			}
-
-			ecoWave = Ops.World.LocalRandom.Next(100) < info.WaveEcoTargetPercent;
+			return roles.Select(r => (r.Role, r.Chain, counts[r.Role])).ToList();
 		}
 
 		string[] AdaptiveChain()
