@@ -691,6 +691,7 @@ namespace OpenRA.Mods.Common.Traits
 		bool oreBoostDone;
 		bool derrickFirstScanDone;
 		int ticksSinceStart;
+		int selfDefenseDiagTicks;
 
 		// Once the fixed 3-attempt ladder (primary -> secondary -> air raid) has fired its first
 		// air raid, every later escalation decision is instead chosen at random each time (User
@@ -1047,20 +1048,62 @@ namespace OpenRA.Mods.Common.Traits
 			if (Info.SelfDefenseScanRadius <= 0)
 				return;
 
-			var candidates = pool.Where(a => !CannotOrder(a) && Intel.IsReachable(a.Location)).ToList();
-			foreach (var d in Missions.OfType<AotDerrickMission>())
-				candidates.AddRange(d.HoldingEscorts());
+			// Pool: react to ANY threat anywhere in the flooded base region (User 2026-07-30: "die
+			// gesamte geflutete base-region sollte immer ... als schützenswert gelten"), not just a
+			// small radius around each individual unit -- a per-unit radius meant an idle unit standing
+			// even a little way from the actual breach never reacted at all (User 2026-07-31 report:
+			// infantry stood doing nothing while the base was under attack elsewhere). Reuses Module 5's
+			// own proportional-response knobs (ProtectionResponseRatio/MinResponse) so a single scout
+			// doesn't empty the entire pool.
+			var poolCandidates = pool.Where(a => !CannotOrder(a) && Intel.IsReachable(a.Location)).ToList();
 
-			foreach (var a in candidates)
+			// Throttled diagnostic (User 2026-07-31 report: "infantry stand around doing nothing"):
+			// without this, the log gives no way to tell whether the pool is genuinely empty (units are
+			// all mid-mission -- e.g. Module 1's chokepoint reserve, deliberately excluded per the
+			// user's own earlier spec) versus non-empty but somehow not reacting.
+			if (++selfDefenseDiagTicks % 8 == 0)
+				Log($"self-defense diag: pool={pool.Count} reachableCandidates={poolCandidates.Count}");
+
+			if (poolCandidates.Count > 0)
 			{
-				var threat = World.FindActorsInCircle(a.CenterPosition, WDist.FromCells(Info.SelfDefenseScanRadius))
-					.Where(e => AotOpsUtils.IsPreferredEnemyUnit(Player, e, true) && e.CanBeViewedByPlayer(Player))
-					.OrderBy(e => (e.Location - a.Location).LengthSquared)
-					.FirstOrDefault();
-				if (threat == null)
-					continue;
+				var threats = World.Actors
+					.Where(e => AotOpsUtils.IsPreferredEnemyUnit(Player, e, true) && e.CanBeViewedByPlayer(Player) && Intel.IsReachable(e.Location))
+					.ToList();
 
-				bot.QueueOrder(new Order("ForceAttack", a, Target.FromActor(threat), false));
+				if (threats.Count > 0)
+				{
+					var want = Math.Clamp(threats.Count * Info.ProtectionResponseRatio, Info.ProtectionMinResponse, poolCandidates.Count);
+					var responders = poolCandidates
+						.OrderBy(a => threats.Min(t => (a.Location - t.Location).LengthSquared))
+						.Take(want)
+						.ToList();
+
+					foreach (var a in responders)
+					{
+						var target = threats.OrderBy(t => (a.Location - t.Location).LengthSquared).First();
+						bot.QueueOrder(new Order("ForceAttack", a, Target.FromActor(target), false));
+					}
+
+					Log($"self-defense: {threats.Count} threat(s) in the base region -> dispatching {responders.Count}/{poolCandidates.Count} pooled unit(s)");
+				}
+			}
+
+			// Derrick guard: local radius around its OWN post instead -- a captured derrick often sits
+			// far outside the base region entirely, so the region-wide check above would never cover it.
+			foreach (var d in Missions.OfType<AotDerrickMission>())
+			{
+				foreach (var a in d.HoldingEscorts())
+				{
+					var threat = World.FindActorsInCircle(a.CenterPosition, WDist.FromCells(Info.SelfDefenseScanRadius))
+						.Where(e => AotOpsUtils.IsPreferredEnemyUnit(Player, e, true) && e.CanBeViewedByPlayer(Player))
+						.OrderBy(e => (e.Location - a.Location).LengthSquared)
+						.FirstOrDefault();
+					if (threat == null)
+						continue;
+
+					bot.QueueOrder(new Order("ForceAttack", a, Target.FromActor(threat), false));
+					Log($"self-defense: derrick guard engaging {threat.Info.Name}@{threat.Location}");
+				}
 			}
 		}
 
