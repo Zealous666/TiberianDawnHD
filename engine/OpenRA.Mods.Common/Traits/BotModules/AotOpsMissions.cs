@@ -768,11 +768,25 @@ namespace OpenRA.Mods.Common.Traits
 				}
 
 				if (max <= 0)
+				{
+					Log($"{s.Name} skipped: Max=0 at tier {tier}");
 					continue;
+				}
 
 				var variant = Ops.FirstBuildable(s.Chain);
 				if (variant == null)
+				{
+					// Diagnostic (User 2026-07-31: "ist er WIRKLICH in der Lage, das zu aktivieren?" --
+					// LTNK never appeared in a whole session's log despite AFLD existing and Age1 being
+					// active). Distinguishes "nothing in the chain is a known actor at all" (a typo in
+					// the chain) from "every variant's Prerequisites currently fail" (the real, expected
+					// case while e.g. waiting on AFLD or an age gate) -- the latter is otherwise
+					// indistinguishable from the former without reading FirstBuildable's own source.
+					var known = s.Chain.Where(c => Ops.World.Map.Rules.Actors.ContainsKey(c)).ToList();
+					Log($"{s.Name} skipped: nothing buildable in [{string.Join(", ", s.Chain)}] " +
+						$"(known actors: [{string.Join(", ", known)}], tier={tier})");
 					continue;
+				}
 
 				min = Math.Min(min, max);
 				var cost = Ops.World.Map.Rules.Actors[variant].TraitInfoOrDefault<ValuedInfo>()?.Cost ?? 500;
