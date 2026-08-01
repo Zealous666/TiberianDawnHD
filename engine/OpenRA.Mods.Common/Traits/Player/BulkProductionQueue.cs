@@ -103,8 +103,24 @@ namespace OpenRA.Mods.Common.Traits
 				else if (HasDeliveryStarted() && DeliveryDelay == 0)
 				{
 					PlayDeliveryProgressNotifications();
-					DeliveryHasArrived();
-					DeliveryDelay--;
+
+					// aotmod fix (User 2026-08-01: "ein einziger LTNK vorhanden, keiner je auf der world
+					// erschienen" -- a StartProduction order was accepted and the item entered the cart,
+					// but no unit ever spawned). DeliveryHasArrived() used to fire exactly once here, then
+					// DeliveryDelay-- moved it to -1 -- neither branch above ever matches -1, so there was
+					// NO retry, ever. DeliveryHasArrived's own producer lookup filters out any
+					// ProductionBulkAirdrop that IsTraitPaused (e.g. a momentary low-power pause, which
+					// this very queue's own LowPowerModifier implies is a real, expected condition) and
+					// then calls `p.Trait?.DeliverOrder(...)` -- a plain null-conditional that silently
+					// no-ops if no producer qualified at that EXACT tick. The cargo was neither delivered
+					// nor refunded, and deliveryProcessStarted stayed true forever, which permanently
+					// blocks BuildableItems() (requires !deliveryProcessStarted) -- the entire Starport
+					// queue died silently, for the rest of the match, the instant one delivery attempt
+					// caught the base at low power. Now only advances past DeliveryDelay==0 (stopping the
+					// retry loop) once a delivery has actually succeeded; otherwise it retries every tick
+					// until a producer is actually available.
+					if (DeliveryHasArrived())
+						DeliveryDelay--;
 				}
 			}
 
@@ -273,7 +289,11 @@ namespace OpenRA.Mods.Common.Traits
 				TextNotificationsManager.AddTransientLine(self.Owner, info.StartDeliveryTextNotification);
 		}
 
-		protected void DeliveryHasArrived()
+		// Returns false (and does nothing) if no producer currently qualifies -- e.g. every
+		// ProductionBulkAirdrop is IsTraitPaused from low power at this exact tick. The caller (Tick())
+		// keeps retrying every subsequent tick in that case, instead of silently discarding the cargo
+		// and locking the queue up forever (aotmod fix, see call site for the full story).
+		protected bool DeliveryHasArrived()
 		{
 			var producers = self.World.ActorsWithTrait<ProductionBulkAirdrop>()
 				.Where(x => x.Actor.Owner == self.Owner
@@ -283,7 +303,11 @@ namespace OpenRA.Mods.Common.Traits
 				.OrderByDescending(x => x.Actor.Trait<PrimaryBuilding>().IsPrimary)
 				.ThenByDescending(x => x.Actor.ActorID);
 			var p = producers.FirstOrDefault();
-			p.Trait?.DeliverOrder(p.Actor, ActorsReadyForDelivery, Info.Type, this);
+			if (p.Trait == null)
+				return false;
+
+			p.Trait.DeliverOrder(p.Actor, ActorsReadyForDelivery, Info.Type, this);
+			return true;
 		}
 
 		public void ReturnOrder(string itemName = null, uint numberToCancel = 1)

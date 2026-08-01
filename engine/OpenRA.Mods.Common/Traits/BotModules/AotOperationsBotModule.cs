@@ -1712,6 +1712,23 @@ namespace OpenRA.Mods.Common.Traits
 					request.LastOrderTick = World.WorldTick;
 					Log($"produce {name} for {request.Mission.Name} ({request.Role})");
 
+					// Diagnostic (User 2026-08-01: "es ist ein einziger LTNK vorhanden, keiner je auf der
+					// world erschienen" -- StartProduction was ordered but ClaimNewUnits's "claim
+					// aot-ltnk-..." never fires even once, for either mission-claim OR the pool fallback,
+					// meaning the actor never actually gets created at all). PumpProduction only ever
+					// OPTIMISTICALLY increments Ordered after QueueOrder -- it never confirms the engine
+					// actually accepted it. BulkProductionQueue.ResolveOrder silently no-ops (no error,
+					// nothing queued) if PayUpFront's cost check fails at the exact tick the order
+					// resolves, which can be a few ticks after this FirstBuildable check ran, so cash
+					// spent by something else in between is invisible here otherwise. Logs cost vs. cash
+					// at the moment of ordering to test that directly.
+					if (queue is BulkProductionQueue bulk)
+					{
+						var cost = World.Map.Rules.Actors[name].TraitInfoOrDefault<ValuedInfo>()?.Cost ?? 0;
+						Log($"  starport order diag: {name} cost={cost} cashAndOre={playerResources.GetCashAndResources()} " +
+							$"cartBefore={bulk.GetActorsReadyForDelivery().Count} deliveryInProgress={bulk.HasDeliveryStarted()}");
+					}
+
 					if (queue is not BulkProductionQueue)
 					{
 						usedQueues.Add(queue);
