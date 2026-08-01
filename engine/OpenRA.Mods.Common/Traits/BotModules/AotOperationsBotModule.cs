@@ -408,6 +408,13 @@ namespace OpenRA.Mods.Common.Traits
 			"another air raid -- rather than following this fixed ladder again (User 2026-07-22).")]
 		public readonly int WaveAirRaidAfterFailures = 2;
 
+		[Desc("Once the fixed ladder above has been abandoned for good (randomEscalationPhase, after the",
+			"first air raid), this is the chance PER ATTEMPT that it's an air raid instead of a ground",
+			"wave (User 2026-07-31: '1 hindwelle auf 3 bodenwellen', i.e. a 1:3 ratio -- 25% per attempt",
+			"converges to that average while keeping the actual sequence unpredictable, rather than a",
+			"rigid 'every 4th attempt' pattern the enemy could read). Was a flat 50/50 coin flip before.")]
+		public readonly int RandomAirRaidChancePercent = 25;
+
 		[ActorReference]
 		[Desc("Helipad actor types. The air-raid escalation tier only triggers once one is owned.")]
 		public readonly HashSet<string> HelipadTypes = [];
@@ -1816,9 +1823,10 @@ namespace OpenRA.Mods.Common.Traits
 			// attempt 1 = primary choke; if it fails, attempt 2 = secondary choke (Wave-
 			// SecondaryRouteAfterFailures=1); if that also fails, attempt 3 = an air raid instead of
 			// a ground wave (WaveAirRaidAfterFailures=2, only once a helipad exists). From then on
-			// (attempt 4 onward) the fixed ladder is abandoned for good -- randomEscalationPhase
-			// picks, each time, at random between a ground wave via a random choke and another air
-			// raid, so the enemy stops being predictable once it has escalated once already.
+			// (attempt 4 onward) the fixed ladder is abandoned for good -- randomEscalationPhase picks,
+			// each time, at random (RandomAirRaidChancePercent, User 2026-07-31: ~1:3 air-raid-to-
+			// ground-wave ratio) between a ground wave via a random choke and another air raid, so the
+			// enemy stops being predictable once it has escalated once already.
 			// Startup priority (User 2026-07-22): only the very FIRST wave waits on this -- every later
 			// wave/air-raid (waveIndex > 0) is unaffected. OreT boost + first Derrick scan + every Scout
 			// group (cashflow and reconnaissance) get a head start before the first real offensive.
@@ -1835,7 +1843,7 @@ namespace OpenRA.Mods.Common.Traits
 
 					if (randomEscalationPhase)
 					{
-						doAirRaid = canAirRaid && World.LocalRandom.Next(2) == 0;
+						doAirRaid = canAirRaid && World.LocalRandom.Next(100) < Info.RandomAirRaidChancePercent;
 						useSecondaryRoute = !doAirRaid && World.LocalRandom.Next(2) == 0;
 					}
 					else
