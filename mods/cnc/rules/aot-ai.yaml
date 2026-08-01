@@ -665,9 +665,19 @@ Player:
 		# Legacy role/share fields (User 2026-07-31): kept only for Module 5 Base Defense's reserve
 		# garrison (AotBaseDefenseMission.RequestMixedRoles still reads these) -- Regular Attack Waves
 		# themselves now use WaveSlot1-5 below instead, see the comment there.
-		WaveTankTypes: aot-ttnk-toxin, aot-ttnk-flame, aot-ltnk-tick, aot-ltnk-laser, aot-ttnk-base, aot-ltnk-base
+		# Starport-routed variants removed 2026-08-01 (User: "LTNK nie zu sehen, obwohl AFLD+Age1
+		# stehen"): confirmed via new diagnostic logging that the SHARED Starport BulkProductionQueue
+		# (MaxCapacity 5, see overrides.yaml) was sitting permanently full -- Module 5's CONTINUOUS
+		# garrison refill kept pulling aot-ttnk-flame/toxin (ex-WaveTankTypes) and aot-v2-napalm/toxic +
+		# Arty (ex-WaveSupportTypes) through it nonstop, so a wave's one-shot Compose() almost always hit
+		# the queue while full (BuildableItems() returns COMPLETELY empty when a bulk queue is full, not
+		# just for the item that filled it). Trimmed to the LightVehicle.Nod-routed fallback variant for
+		# each role (always buildable, no Starport contention) -- Module 5's garrison mix is otherwise
+		# unaffected (still Tank+Light+Support), it just never touches the shared queue anymore, freeing
+		# it for actual wave composition.
+		WaveTankTypes: aot-ttnk-base
 		WaveLightTypes: aot-bike-laser, aot-bggy-laser, aot-bike-base, aot-bggy-base
-		WaveSupportTypes: aot-arty-heavy, aot-arty-howitzer, aot-v2-napalm, aot-v2-toxic, aot-v2-base
+		WaveSupportTypes: aot-v2-base
 		WaveTankShare: 50
 		WaveLightShare: 30
 		WaveSupportShare: 20
