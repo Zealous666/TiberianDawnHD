@@ -859,7 +859,13 @@ Player:
 		MaxCapacity: 5
 		QueueLimit: 5
 		PayUpFront: true
-		DeliveryDelay: 500
+		# Lowered 500 -> 200 (User 2026-08-01, option 2 of two proposed fixes for LTNK contention): the
+		# 5-slot cart fills up fast once TTNK-Flame is researched (both TTNK-Flame and LTNK route through
+		# this same queue), and a wave's one-shot Compose() sees a COMPLETELY empty BuildableItems() list
+		# while the cart is full or delivering -- confirmed via diagnostic log (cart=5, buildableNow=0)
+		# blocking the very next wave's composition. A shorter delivery cycle frees the shared queue up
+		# faster so back-to-back waves are less likely to collide.
+		DeliveryDelay: 200
 		LowPowerModifier: 150
 		BlockedAudio: NoBuild
 		BlockedTextNotification: notification-unable-to-build-more
