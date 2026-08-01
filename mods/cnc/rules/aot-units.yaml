@@ -809,6 +809,16 @@ aot-mtnk-pred:
 	Tooltip:
 		Name: Medium Tank (Predator)
 
+	# aotmod (2026-08-01): Bau-Menue-Tooltip. ProductionTooltipLogic wertet KEINE Conditions
+	# aus, sondern nimmt TraitInfos<TooltipInfo>().FirstOrDefault(info => info.EnabledByDefault)
+	# -- und EnabledByDefault ist bei allen Variablen = false wahr, also auch fuer den geerbten
+	# Tooltip@normal ("Medium Tank", Bedingung "!predator && !titan"). Welcher der beiden
+	# gewinnt, haengt damit allein an der Trait-Reihenfolge: hier schlug der Basis-Tooltip den
+	# proxy-eigenen, das Baumenue zeigte trotz Predator-Icon weiter "Medium Tank". Am fertig
+	# gebauten Aktor stimmt es, weil dort die Conditions echt ausgewertet werden. Basis-Tooltip
+	# entfernen macht den proxy-eigenen zum einzigen EnabledByDefault-Kandidaten.
+	-Tooltip@normal:
+
 	# aotmod (2026-07-29): Editor-Vorschau. ConditionalTrait.EnabledByDefault wertet die
 	# RequiresCondition mit ALLEN Variablen = false aus; nur dann rendert der Trait im
 	# Karteneditor. Deshalb gewann bisher der Basis-Trait ("!variante" ist bei 0 wahr) und
@@ -844,6 +854,10 @@ aot-mtnk-rail:
 	Tooltip:
 		Name: Medium Tank (Railgun)
 
+	# aotmod (2026-08-01): siehe aot-mtnk-pred -- Basis-Tooltip entfernen, sonst gewinnt er
+	# im Baumenue (EnabledByDefault) gegen den proxy-eigenen Namen.
+	-Tooltip@normal:
+
 	# aotmod (2026-07-29): Editor-Vorschau. ConditionalTrait.EnabledByDefault wertet die
 	# RequiresCondition mit ALLEN Variablen = false aus; nur dann rendert der Trait im
 	# Karteneditor. Deshalb gewann bisher der Basis-Trait ("!variante" ist bei 0 wahr) und
@@ -875,6 +889,10 @@ aot-mtnk-titn:
 		Description: GDI Titan Mech — upgraded Medium Tank chassis with independent turret.
 	Tooltip:
 		Name: Titan Mech
+
+	# aotmod (2026-08-01): siehe aot-mtnk-pred -- Basis-Tooltip entfernen, sonst gewinnt er
+	# im Baumenue (EnabledByDefault) gegen den proxy-eigenen Namen.
+	-Tooltip@normal:
 
 	# aotmod (2026-07-29): Editor-Vorschau. ConditionalTrait.EnabledByDefault wertet die
 	# RequiresCondition mit ALLEN Variablen = false aus; nur dann rendert der Trait im
@@ -919,6 +937,11 @@ aot-mtnk-titn-rail:
 		Description: GDI Titan Mech with Railgun.
 	Tooltip:
 		Name: Titan Mech (Railgun)
+
+	# aotmod (2026-08-01): siehe aot-mtnk-pred -- Basis-Tooltip entfernen, sonst gewinnt er
+	# im Baumenue (EnabledByDefault) gegen den proxy-eigenen Namen.
+	-Tooltip@normal:
+
 	# aotmod (2026-07-29): Editor-Vorschau. ConditionalTrait.EnabledByDefault wertet die
 	# RequiresCondition mit ALLEN Variablen = false aus; nur dann rendert der Trait im
 	# Karteneditor. Deshalb gewann bisher der Basis-Trait ("!variante" ist bei 0 wahr) und
@@ -1377,6 +1400,10 @@ aot-jeep-humvee:
 	Tooltip:
 		Name: GDI HUMVEE
 
+	# aotmod (2026-08-01): siehe aot-mtnk-pred -- Basis-Tooltip entfernen, sonst haengt der
+	# im Baumenue gezeigte Name allein an der Trait-Reihenfolge (beide EnabledByDefault).
+	-Tooltip@base:
+
 	# aotmod (2026-07-29): Editor-Vorschau. ConditionalTrait.EnabledByDefault wertet die
 	# RequiresCondition mit ALLEN Variablen = false aus; nur dann rendert der Trait im
 	# Karteneditor. Deshalb gewann bisher der Basis-Trait ("!variante" ist bei 0 wahr) und
@@ -1405,11 +1432,19 @@ aot-jeep-wolverine:
 		ShowWhenLocked: False
 		Queue: LightVehicle.GDI
 		BuildPaletteOrder: 3
-		Prerequisites: lite, pyle, ~!aot-apc-upgrade, ~aot-wolverine-upgrade
+		# aot-humvee-upgrade zusaetzlich zu aot-wolverine-upgrade: Verteidigung in der Tiefe.
+		# aot-upgrade-wolverine (aot-structures.yaml) verlangt HUMVEE bereits beim Kauf, aber
+		# dieser Proxy soll auch fuer sich genommen korrekt sein, nicht nur ueber den Kauf-Weg.
+		Prerequisites: lite, pyle, aot-humvee-upgrade, ~!aot-apc-upgrade, ~aot-wolverine-upgrade
 		Icon: aot-wolverine-icon
 		Description: Wolverine Mech. Fast anti-infantry walker.
 	Tooltip:
 		Name: Wolverine
+
+	# aotmod (2026-08-01): siehe aot-mtnk-pred -- Basis-Tooltip entfernen, sonst haengt der
+	# im Baumenue gezeigte Name allein an der Trait-Reihenfolge (beide EnabledByDefault).
+	-Tooltip@base:
+
 	# aotmod (2026-07-29): Editor-Vorschau. ConditionalTrait.EnabledByDefault wertet die
 	# RequiresCondition mit ALLEN Variablen = false aus; nur dann rendert der Trait im
 	# Karteneditor. Deshalb gewann bisher der Basis-Trait ("!variante" ist bei 0 wahr) und
@@ -5169,6 +5204,24 @@ aot-dropship:
 # Bezugsdaten aus engine/mods/ts/rules/aircraft.yaml (Sounds, Cargo-Konvention).
 aot-orcatran:
 	Inherits: ^Helicopter
+	# User-Fund 2026-07-30: war selectable und liess sich vom Spieler umlenken -- ^Helicopter
+	# bringt via Inherits@selection: ^SelectableCombatUnit volle Steuerbarkeit mit, gedacht fuer
+	# echte, kaufbare Einheiten. Dieser Aktor existiert nur als Lieferflieger der Orca-Transport-
+	# Superpower und darf wie aot-dropship (Zone Trooper Drop) nicht anklickbar/umlenkbar sein.
+	# ^Plane (dropships Basis) faellt hier aus: kein VTOL/Hover, aber genau das braucht dieser
+	# Aktor fuer die echte Landung (siehe Kommentar unten). Deshalb ^Helicopter behalten, aber
+	# Selectable entfernt und Befehle per RejectsOrders komplett blockiert.
+	# ^Helicopter bringt Selectable ueber ^SelectableCombatUnit -> ^Selectable, das ZUSAETZLICH
+	# SelectionDecorations/WithSpriteControlGroupDecoration/DrawLineToTarget buendelt -- alle
+	# drei haengen an Interactable und crashen ("failed to initialize"), wenn nur Selectable
+	# alleine entfernt wird. Interactable: explizit ergaenzt, exakt wie bei aot-dropship (Zone
+	# Trooper Drop) -- macht den Aktor weiterhin von Flak treffbar, aber nicht anklickbar.
+	-Selectable:
+	-SelectionDecorations:
+	-WithSpriteControlGroupDecoration:
+	-DrawLineToTarget:
+	Interactable:
+	RejectsOrders:
 	-WithFacingSpriteBody:
 	RenderSprites:
 		Image: aot-orcatran-test

@@ -923,7 +923,10 @@ aot-upgrade-minelayer:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - GDI Wolverine Mech Upgrade ===
-# Sichtbar ab Age 2 (unabhängig von HUMVEE). Verschwindet wenn APC-Upgrade gewählt wurde.
+# User-Fund 2026-07-30: war kaufbar OHNE HUMVEE-Upgrade, solange nur APC nicht gewaehlt war
+# (der alte Kommentar hier sagte das sogar explizit "unabhaengig von HUMVEE" -- falsches Design).
+# Wolverine ist NACHFOLGER des HUMVEE-Pfads, kein eigenstaendiger dritter Zweig -> braucht
+# aot-humvee-upgrade als echte Voraussetzung, nicht nur den Ausschluss von APC.
 aot-upgrade-wolverine:
 	Tooltip:
 		Name: Wolverine Upgrade
@@ -931,7 +934,7 @@ aot-upgrade-wolverine:
 	Buildable:
 		LockedGroup: aot-grp-up-apcbranch
 		BuildPaletteOrder: 55
-		Prerequisites: lite, ~pyle, ~aot-age2, aot-age2, ~!aot-apc-upgrade
+		Prerequisites: lite, ~pyle, ~aot-age2, aot-age2, aot-humvee-upgrade, ~!aot-apc-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false

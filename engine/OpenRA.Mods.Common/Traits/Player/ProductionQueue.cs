@@ -265,21 +265,25 @@ namespace OpenRA.Mods.Common.Traits
 
 		public void PrerequisitesAvailable(string key)
 		{
+			AotProductionQueueDebug.Trace(Actor.Info.Name, key, "-> Buildable = true");
 			Producible[Actor.World.Map.Rules.Actors[key]].Buildable = true;
 		}
 
 		public void PrerequisitesUnavailable(string key)
 		{
+			AotProductionQueueDebug.Trace(Actor.Info.Name, key, "-> Buildable = false");
 			Producible[Actor.World.Map.Rules.Actors[key]].Buildable = false;
 		}
 
 		public void PrerequisitesItemHidden(string key)
 		{
+			AotProductionQueueDebug.Trace(Actor.Info.Name, key, "-> Visible = false");
 			Producible[Actor.World.Map.Rules.Actors[key]].Visible = false;
 		}
 
 		public void PrerequisitesItemVisible(string key)
 		{
+			AotProductionQueueDebug.Trace(Actor.Info.Name, key, "-> Visible = true, WasEverVisible = true");
 			var ps = Producible[Actor.World.Map.Rules.Actors[key]];
 			ps.Visible = true;
 			ps.WasEverVisible = true;
