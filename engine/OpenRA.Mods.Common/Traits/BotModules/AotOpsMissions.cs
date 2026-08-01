@@ -785,6 +785,29 @@ namespace OpenRA.Mods.Common.Traits
 					var known = s.Chain.Where(c => Ops.World.Map.Rules.Actors.ContainsKey(c)).ToList();
 					Log($"{s.Name} skipped: nothing buildable in [{string.Join(", ", s.Chain)}] " +
 						$"(known actors: [{string.Join(", ", known)}], tier={tier})");
+
+					// Follow-up diagnostic (User 2026-08-01: LTNK's own Prerequisites check out -- Age1 +
+					// AFLD both confirmed present in-game -- yet it's still never buildable). LTNK/TTNK-
+					// flame/toxin/V2-napalm/toxic/Arty all share the SAME single Starport
+					// (BulkProductionQueue) category: unlike a regular queue (one item building, still
+					// visible as "buildable" for the NEXT slot), BuildableItems() on a Bulk queue returns
+					// EMPTY while its cart is full OR a delivery is in flight -- for the ENTIRE ~60s
+					// DeliveryDelay. If something ELSE sharing this queue (Module 5's continuous garrison
+					// refill, another wave's own request) happens to have it in that state at the exact
+					// moment THIS wave composes (once, not retried), every Starport-routed slot silently
+					// loses its one shot for the whole wave. Dumps the queue's own state to confirm.
+					foreach (var category in known
+						.Select(c => Ops.World.Map.Rules.Actors[c].TraitInfoOrDefault<BuildableInfo>())
+						.Where(bi => bi != null)
+						.SelectMany(bi => bi.Queue)
+						.Distinct())
+					{
+						var bulk = Ops.Player.PlayerActor.TraitsImplementing<BulkProductionQueue>()
+							.FirstOrDefault(q => q.Info.Type == category);
+						if (bulk != null)
+							Log($"  starport diag [{category}]: cart={bulk.GetActorsReadyForDelivery().Count} " +
+								$"deliveryInProgress={bulk.HasDeliveryStarted()} buildableNow={bulk.BuildableItems().Count()}");
+					}
 					continue;
 				}
 
