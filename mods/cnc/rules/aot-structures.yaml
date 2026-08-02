@@ -6421,10 +6421,8 @@ aot-upgrade-laser-fence:
 
 	Buildable:
 		BuildPaletteOrder: 65
-		# Korrektur (2026-08-01, User-Wunsch): sichtbar ab Age 1, baubar sobald Secret Shrine
-		# steht. ("nod-gate" Verwechslung rueckgaengig gemacht -- gemeint war das GEBAEUDE
-		# aot-gate-nod, nicht dieses Upgrade, siehe dort.)
-		Prerequisites: ~aot-age1, aot-age1, aot-shrine
+		# Sichtbar ab Age 2 (User-Wunsch 2026-08-01), baubar sobald Secret Shrine steht.
+		Prerequisites: ~aot-age2, aot-age2, aot-shrine
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
