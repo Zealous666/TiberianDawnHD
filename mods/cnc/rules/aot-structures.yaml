@@ -1088,7 +1088,7 @@ aot-upgrade-apc2:
 		Description: Transforms all APCs into amphibious but unarmed APCs. Lockouts the Mine Layer.
 
 	Valued:
-		Cost: 300
+		Cost: 550
 
 	RenderSprites:
 		Image: aot-upgrade-apc2
@@ -1117,7 +1117,7 @@ aot-upgrade-minelayer:
 		Description: Transforms all APCs into unarmed Mine Layers with anti-tank mines. Lockouts the Amphibious APC.
 
 	Valued:
-		Cost: 300
+		Cost: 550
 
 	RenderSprites:
 		Image: aot-upgrade-minelayer
@@ -1195,7 +1195,7 @@ aot-upgrade-ltnk-tick:
 		Description: Replaces the Light Tank chassis with a Tick Tank hull. Enables dig-in mode.
 
 	Valued:
-		Cost: 300
+		Cost: 550
 
 	RenderSprites:
 		Image: aot-upgrade-ltnk-tick
@@ -1232,7 +1232,7 @@ aot-upgrade-ttnk-subterrain:
 		Description: Upgrades the Flame Tank and Toxin Tank to subterranean variants that can tunnel underground. Also unlocks the Subterranean Infantry Transport.
 
 	Valued:
-		Cost: 1500
+		Cost: 2850
 
 	RenderSprites:
 		Image: aot-upgrade-ttnk-subterrain
@@ -1264,7 +1264,7 @@ aot-upgrade-e4-toxic:
 		Description: Upgrades all Flamethrowers, Flame Tanks, Flame Towers, Napalm Rocket Launchers, and the Nod Avatar with toxic weaponry for improved damage vs. all ground targets. Toxic rockets leave a lingering tiberium gas field on impact.
 
 	Valued:
-		Cost: 400
+		Cost: 1100
 
 	RenderSprites:
 		Image: aot-upgrade-e4-toxic
@@ -1302,7 +1302,7 @@ aot-upgrade-v2-howitzer:
 		Description: Transforms Napalm Rocket Launcher into a Howitzer for later Heavy Artillery usage. Lockout of Toxic Rocket Launchers.
 
 	Valued:
-		Cost: 600
+		Cost: 800
 
 	RenderSprites:
 		Image: arty
@@ -1325,7 +1325,7 @@ aot-upgrade-heavy-artillery:
 		Description: Upgrades the Mobile Howitzer with heavy siege artillery. Adds deploy capability and devastating firepower vs. structures.
 
 	Valued:
-		Cost: 800
+		Cost: 2250
 
 	RenderSprites:
 		Image: aot-upgrade-heavy-artillery
@@ -1353,7 +1353,7 @@ aot-upgrade-ion-cannon:
 		Description: Upgrades Orbital Command with an Uplink to call Ion Cannon Strikes.
 
 	Valued:
-		Cost: 1500
+		Cost: 2850
 
 	RenderSprites:
 		Image: aot-upgrade-ion-cannon
@@ -1381,7 +1381,7 @@ aot-upgrade-infantry-railgun:
 		Description: Equips GDI infantry with experimental railgun technology. Required for Zone Trooper deployment.
 
 	Valued:
-		Cost: 1000
+		Cost: 2800
 
 	RenderSprites:
 		Image: aot-upgrade-infantry-railgun
@@ -1408,7 +1408,7 @@ aot-upgrade-zonetrooper-drop:
 		Description: Upgrades Orbital Command to deploy Zone Troopers via orbital drop pods.
 
 	Valued:
-		Cost: 2000
+		Cost: 5600
 
 	RenderSprites:
 		Image: aot-upgrade-zonetrooper-drop
@@ -2951,7 +2951,7 @@ aot-upgrade-mtnk-railgun:
 		Description: Equips the Predator Main Tank and Mammoth Tank with high-powered railguns. Requires the Predator Upgrade - incompatible with the Titan chassis path.
 
 	Valued:
-		Cost: 1000
+		Cost: 2800
 
 	RenderSprites:
 		Image: aot-upgrade-mtnk-railgun
@@ -3003,7 +3003,7 @@ aot-upgrade-mtnk-titan-railgun:
 		Description: Upgrades the Titan Mech with Railgun for higher damage.
 
 	Valued:
-		Cost: 1000
+		Cost: 2800
 
 	RenderSprites:
 		Image: aot-upgrade-mtnk-titan-railgun
@@ -3175,7 +3175,7 @@ aot-upgrade-nod-parabombs:
 		Description: Unlocks the Parabombs support power: a heavy bomber flies over the target and drops five toxic parabombs, each leaving a lingering gas cloud. Requires the Spy Plane and Toxic upgrades.
 
 	Valued:
-		Cost: 1000
+		Cost: 2800
 
 	RenderSprites:
 		Image: aot-upgrade-nod-parabombs
@@ -3206,7 +3206,7 @@ aot-upgrade-nod-banshee:
 		Description: Unlocks the Banshee Airstrike, replacing the MiG Airstrike: three Banshee fighters make two passes firing plasma salvos that leave toxic gas clouds. Requires Age 3 and a Temple of Nod.
 
 	Valued:
-		Cost: 1000
+		Cost: 2800
 
 	RenderSprites:
 		Image: aot-upgrade-nod-banshee
@@ -3232,7 +3232,7 @@ aot-upgrade-harpy:
 		Description: Upgrades all HINDs to Harpy attack helicopters. Increases damage output and fire rate. Reloads ammunition automatically while airborne. Grants stealth capability when not engaged.
 
 	Valued:
-		Cost: 300
+		Cost: 800
 
 	RenderSprites:
 		Image: aot-upgrade-harpy
@@ -3258,7 +3258,7 @@ aot-upgrade-orca:
 		Description: Upgrades all Apaches to ORCA gunships. Adds anti-air missile capability.
 
 	Valued:
-		Cost: 300
+		Cost: 800
 
 	RenderSprites:
 		Image: aot-upgrade-orca
@@ -3287,7 +3287,7 @@ aot-upgrade-tran-doorgunner:
 		Description: actor-aot-upgrade-tran-doorgunner.description
 
 	Valued:
-		Cost: 400
+		Cost: 750
 
 	RenderSprites:
 		Image: aot-upgrade-tran-doorgunner
@@ -3318,7 +3318,7 @@ aot-upgrade-tran-carryall:
 		Description: actor-aot-upgrade-tran-carryall.description
 
 	Valued:
-		Cost: 600
+		Cost: 1150
 
 	RenderSprites:
 		Image: aot-upgrade-tran-carryall
@@ -3347,7 +3347,7 @@ aot-upgrade-tran-parachute:
 		Description: actor-aot-upgrade-tran-parachute.description
 
 	Valued:
-		Cost: 400
+		Cost: 750
 
 	RenderSprites:
 		Image: aot-upgrade-tran-parachute
@@ -3375,7 +3375,7 @@ aot-upgrade-firehawk:
 		Description: Replaces all A-10 fighters with Firehawks. Swaps Vulcan cannons and napalm for triple-double rocket salvos, effective against ground and air targets.
 
 	Valued:
-		Cost: 3000
+		Cost: 8400
 
 	RenderSprites:
 		Image: aot-upgrade-firehawk
@@ -4243,7 +4243,7 @@ aot-upgrade-nuke-turbine:
 		Description: Upgrades all GDI Power Plants with Turbine Technology, doubling energy output.
 
 	Valued:
-		Cost: 600
+		Cost: 1150
 
 	RenderSprites:
 		Image: aot-upgrade-nuke-turbine
@@ -4273,7 +4273,7 @@ aot-upgrade-cruiser-railgun:
 		Description: Replaces both Battle Cruiser turrets with 4 high-powered Railguns. Shorter range, no minimum distance, very precise.
 
 	Valued:
-		Cost: 2000
+		Cost: 5600
 
 	RenderSprites:
 		Image: aot-upgrade-cruiser-railgun
@@ -4299,7 +4299,7 @@ aot-upgrade-cruiser-carrier:
 		Description: Replaces both Battle Cruiser turrets with two Helibays. Deploy the carrier to allow nearby aircraft to land and resupply.
 
 	Valued:
-		Cost: 2000
+		Cost: 5600
 
 	RenderSprites:
 		Image: aot-upgrade-cruiser-carrier
@@ -4345,7 +4345,7 @@ aot-upgrade-gunboat-destroyer:
 		Description: Upgrades all Frigates into Destroyers with rockets, depth charges, and anti-air.
 
 	Valued:
-		Cost: 1500
+		Cost: 2850
 
 	RenderSprites:
 		Image: aot-upgrade-gunboat-destroyer
@@ -4731,7 +4731,7 @@ aot-upgrade-sub-cargo:
 		Description: actor-aot-upgrade-sub-cargo.description
 
 	Valued:
-		Cost: 400
+		Cost: 750
 
 	RenderSprites:
 		Image: aot-upgrade-sub-cargo
@@ -4760,7 +4760,7 @@ aot-upgrade-stnk-cargo:
 		Description: actor-aot-upgrade-stnk-cargo.description
 
 	Valued:
-		Cost: 400
+		Cost: 1100
 
 	RenderSprites:
 		Image: aot-upgrade-stnk-cargo
@@ -4816,7 +4816,7 @@ aot-upgrade-msub-mine:
 		Description: actor-aot-upgrade-msub-mine.description
 
 	Valued:
-		Cost: 500
+		Cost: 1400
 
 	RenderSprites:
 		Image: aot-upgrade-msub-mine
@@ -4843,7 +4843,7 @@ aot-upgrade-msub-drone:
 		Description: actor-aot-upgrade-msub-drone.description
 
 	Valued:
-		Cost: 700
+		Cost: 1950
 
 	RenderSprites:
 		Image: aot-upgrade-msub-drone
@@ -5684,6 +5684,24 @@ OBLI:
 # "Cloaked SAM"-Upgrade (Age 2) ergaenzt Stealth-Tarnung analog zum U-Boot
 # (siehe sub-system.md), pausiert bei Angriff/Beschaedigung/Low-Power.
 SAM:
+	# Bau-Vorschau (User-Fund 2026-08-02: "SAM ist in Age 0 definitiv das bunkered/cloaked
+	# Preview statt des RA-Sprites", Icon war korrekt).
+	# Ursache: SAM nutzt schon in der Vanilla-Definition KEINE Aktor-Vorschau, sondern
+	# SequencePlaceBuildingPreview mit der festen Sequenz "place"
+	# (engine/mods/cnc/rules/structures.yaml) -- und "place" ist dort Frame 0 von SAM.SHP,
+	# also das geschlossene TD-Pop-up-Silo. Als der RA-Look 2026-07-05 zum Age-0-Default
+	# wurde, blieb diese Vorschau-Sequenz unveraendert auf der alten TD-Optik stehen.
+	# Deshalb hier NUR die Sequenz umgebogen (kein -ActorPreviewPlaceBuildingPreview: --
+	# das entfernt Vanilla bereits selbst, ein zweites Entfernen ist ein harter YAML-Fehler:
+	# "There are no elements with key ... to remove").
+	# "ra-turret" statt "ra-idle": letzteres ist laut Sequenzdatei nur ein Platzhalter-Frame
+	# aus der RA-Bau-Animation, der sichtbare RA-SAM steckt im Turret-Sprite.
+	# ⚠️ Bekannte Grenze: SAM ist EIN Aktor mit Laufzeit-Conditions (kein Proxy-Split pro Age),
+	# eine feste Sequenz kann daher nur EINEN Zustand zeigen -- nach dem Bunkered-Upgrade bleibt
+	# die Vorschau beim RA-Look. Fuer einen zustandsabhaengigen Bau-Ghost braeuchte es einen
+	# Proxy-Split wie bei aot-nuke-age0/-age1/-age2.
+	SequencePlaceBuildingPreview:
+		Sequence: ra-turret
 	Buildable:
 		BuildPaletteOrder: 110
 		Queue: Building.Nod
@@ -5865,7 +5883,7 @@ aot-upgrade-sam-cloak:
 		Description: Grants SAM sites stealth technology. Cloaked while not firing, above 50% health, and not low on power.
 
 	Valued:
-		Cost: 500
+		Cost: 950
 
 	RenderSprites:
 		Image: aot-upgrade-sam-cloak
@@ -5894,7 +5912,7 @@ aot-upgrade-avatar-laser:
 		Description: Replaces the Nod Avatar's cyborg chaingun with a devastating laser cannon.
 
 	Valued:
-		Cost: 1000
+		Cost: 2800
 
 	RenderSprites:
 		Image: aot-upgrade-avatar-laser
@@ -6394,7 +6412,7 @@ aot-upgrade-firestorm-defense:
 		Description: Enables the Firestorm Generator in the Science lab and reinforces all GDI walls with Firestorm-powergrids
 
 	Valued:
-		Cost: 800
+		Cost: 1500
 
 	RenderSprites:
 		Image: aot-upgrade-firestorm-defense
@@ -6631,7 +6649,7 @@ aot-upgrade-laser-fence:
 		Description: Upgrades fences with Laser-barriers, unlocks additional laser defense capabilities, and upgrades Light Tank with a Scorpio Laser turret aswell as Lasers for Harpy and Buggy.
 
 	Valued:
-		Cost: 800
+		Cost: 1500
 
 	RenderSprites:
 		Image: aot-upgrade-laser-fence
