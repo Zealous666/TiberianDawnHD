@@ -1744,8 +1744,13 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				if (queue.GetActorsReadyForDelivery().Count > 0 && !queue.HasDeliveryStarted())
 				{
-					bot.QueueOrder(new Order("PurchaseOrder", queue.Actor, false));
-					Log("starport flush: delivery ordered");
+					// TargetString MUST carry the queue type: BulkProductionQueue.ResolveOrder's
+					// PurchaseOrder case compares order.TargetString == info.Type and silently ignores
+					// the order otherwise. Without it the flush fired forever (281x in one match,
+					// User 2026-08-02: "es ist noch nichtmal ein Transportflugzeug gelandet") while
+					// deliveryInProgress stayed False and the full cart blocked the queue for good.
+					bot.QueueOrder(new Order("PurchaseOrder", queue.Actor, false) { TargetString = queue.Info.Type });
+					Log($"starport flush: delivery ordered ({queue.Info.Type}, cart={queue.GetActorsReadyForDelivery().Count})");
 				}
 			}
 		}
