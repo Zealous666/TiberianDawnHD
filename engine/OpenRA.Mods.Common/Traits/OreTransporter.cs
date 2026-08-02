@@ -71,10 +71,20 @@ namespace OpenRA.Mods.Common.Traits
 		// distance. Used for both legs of the cycle instead of DockClientManager.ClosestDock, whose
 		// pathfinding-based search returns null (and strands the transporter) for distant targets.
 		// A mine is destroyed the instant its store empties, so any live OreLoad host has resources.
+		//
+		// Straight-line distance ALONE is not enough (User 2026-08-01: "er hat seinen ORET mit dem
+		// Yard Stacheldraht eingebaut" -- the transporter sat motionless at its spawn cell from tick
+		// one and the yard fence simply closed around it later). The nearest mine by air can be
+		// unreachable on foot (across water, behind a cliff): MoveTo then finds no path, the stall
+		// watchdog cancels, and this method hands back the very same unreachable mine again --
+		// an infinite retarget loop that never moves the transporter a single cell. Candidates are
+		// therefore checked for an actual ground path and unreachable ones skipped, so the search
+		// falls through to the nearest mine that can genuinely be driven to.
 		TraitPair<IDockHost>? FindNearestDock(BitSet<DockType> type)
 		{
 			TraitPair<IDockHost>? best = null;
 			var bestDist = long.MaxValue;
+			var mobile = self.TraitOrDefault<Mobile>();
 			foreach (var pair in self.World.ActorsWithTrait<IDockHost>())
 			{
 				var host = pair.Trait;
@@ -82,6 +92,10 @@ namespace OpenRA.Mods.Common.Traits
 					continue;
 
 				if (!CanDockAt(pair.Actor, host, false, true))
+					continue;
+
+				if (mobile != null && !mobile.PathFinder.PathExistsForLocomotor(
+					mobile.Locomotor, self.Location, self.World.Map.CellContaining(host.DockPosition)))
 					continue;
 
 				var dist = (pair.Actor.CenterPosition - self.CenterPosition).HorizontalLengthSquared;
@@ -133,6 +147,33 @@ namespace OpenRA.Mods.Common.Traits
 						stallTicks = 0;
 						OpenRA.Log.Write("debug", $"[OreTransporter] {self.Owner.PlayerName} #{self.ActorID} stalled at {self.Location} " +
 							$"(activity={self.CurrentActivity?.GetType().Name}) -> cancelling to re-target");
+
+						// Diagnostic (User 2026-08-01: "aber es waren Minen ganz in der Naehe!"). The stall
+						// line above says the transporter is not moving, never WHY -- an unreachable target,
+						// a blocked spawn cell and a blocked dock cell all look identical from outside. Dumps
+						// the chosen target, whether a ground path to it exists at all, and which of the eight
+						// neighbouring cells are currently enterable, so the next stalled game names its own
+						// cause instead of leaving it to guesswork.
+						var mob = self.TraitOrDefault<Mobile>();
+						var target = FindNearestDock(GetDockType);
+						if (mob != null)
+						{
+							var free = CVec.Directions.Count(d => mob.CanEnterCell(self.Location + d, null, BlockedByActor.All));
+							var targetInfo = "NONE";
+							if (target.HasValue)
+							{
+								var tc = self.World.Map.CellContaining(target.Value.Trait.DockPosition);
+								targetInfo = $"{target.Value.Actor.Info.Name}@{tc} " +
+									$"pathExists={mob.PathFinder.PathExistsForLocomotor(mob.Locomotor, self.Location, tc)}";
+							}
+
+							OpenRA.Log.Write("debug", $"  oret diag: target={targetInfo} freeNeighbourCells={free}/8 " +
+								$"blockedBy=[{string.Join(", ", CVec.Directions
+									.Where(d => !mob.CanEnterCell(self.Location + d, null, BlockedByActor.All))
+									.SelectMany(d => self.World.ActorMap.GetActorsAt(self.Location + d))
+									.Select(a => a.Info.Name).Distinct())}]");
+						}
+
 						self.CancelActivity();
 					}
 				}
@@ -184,6 +225,20 @@ namespace OpenRA.Mods.Common.Traits
 				var dockCell = self.World.Map.CellContaining(host.DockPosition);
 				self.QueueActivity(move.MoveTo(dockCell, 1));
 				self.QueueActivity(new MoveToDock(self, mine.Value.Actor, host));
+				return;
+			}
+
+			// Empty with no reachable mine: without this the transporter simply queues nothing and sits
+			// there silently -- no activity means the stall watchdog above never fires either, so the
+			// whole failure becomes invisible in the log (it only ever showed the retarget loop, which
+			// needs an activity to exist). Throttled through the same counter as the "no delivery dock"
+			// case so it reports the situation once in a while instead of every tick.
+			if (--noDockWarningTicks <= 0)
+			{
+				noDockWarningTicks = Info.NoDockWarningInterval;
+				var reachable = self.TraitOrDefault<Mobile>() != null;
+				OpenRA.Log.Write("debug", $"[OreTransporter] {self.Owner.PlayerName} #{self.ActorID} at {self.Location}: " +
+					$"empty but NO reachable ore mine found (mobile={reachable}) -- idling");
 			}
 		}
 

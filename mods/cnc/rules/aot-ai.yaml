@@ -178,7 +178,7 @@ Player:
 		# (Custom-Engine-Erweiterung BaseBuilderBotModule.SilosNearOreMines). Damit kann
 		# der ORET sofort abliefern. Siehe memory/ai-system.md.
 		SilosNearOreMines: 1
-		ProductionTypes: aot-lite-gdi, aot-lite-nod, weap, afld, aot-pyle-age0, aot-pyle-age1, aot-pyle-age2, aot-hand-age0, aot-hand-age1, aot-hand-age2, aflt, aot-hpad-gdi, aot-hpad-nod, hpad
+		ProductionTypes: aot-lite-gdi, aot-lite-nod, weap, afld, aot-pyle-age0, aot-pyle-age1, aot-pyle-age2, aot-hand-age0, aot-hand-age1, aot-hand-age2, aflt, aot-hpad-gdi, aot-hpad-nod, hpad, aot-kennel-nod
 		NavalProductionTypes: aot-shipyard, aot-subpen
 		TechTypes: aot-atec-age0, aot-atec-age1, aot-atec-age2, aot-stec-age0, aot-stec-age1, aot-stec-age2, aot-hq-base, aot-hq-base-age2, aot-hq-ion, aot-hq-ion-age2, aot-nod-radar-age0, aot-nod-radar-age1, aot-nod-radar-age2, aot-tmpl-age1, aot-tmpl-age2, aot-shrine, orbc, aot-slab-age1, aot-slab-age2, aot-mslo-age1, aot-mslo-age2, eye
 		# Mauern (aot-wall-gdi/nod, sbag/cycl/brik) NICHT hier — der AotChokeFortifierBotModule verwaltet
@@ -448,32 +448,31 @@ Player:
 			aot-upgrade-nod-parabombs: 20
 			aot-upgrade-firestorm-defense: 25
 			# === Kampf-Upgrades GDI ===
-			aot-upgrade-htnk-rocket: 20
+			# aot-upgrade-gdi-advtech (2026-08-01, User-Briefing): Age-1-Gatekeeper, hohe Prio
+			# analog zu aot-upgrade-turret (NOD) -- soll direkt nach WEAP gekauft werden.
+			aot-upgrade-gdi-advtech: 45
 			aot-upgrade-mtnk-predator: 20
 			aot-upgrade-mtnk-railgun: 20
 			aot-upgrade-mtnk-titan: 18
 			aot-upgrade-mtnk-titan-railgun: 18
-			aot-upgrade-humvee: 15
-			aot-upgrade-apc: 15
 			aot-upgrade-apc2: 12
-			aot-upgrade-wolverine: 12
 			aot-upgrade-minelayer: 10
 			aot-upgrade-orca: 15
 			aot-upgrade-firehawk: 18
 			aot-upgrade-guard-tower: 15
 			aot-upgrade-nuke-turbine: 15
-			aot-upgrade-hover-mlrs: 15
-			aot-upgrade-hover-aa: 15
 			aot-upgrade-tran-carryall: 8
 			aot-upgrade-tran-doorgunner: 8
-			aot-upgrade-intelligence-office: 10
 			aot-upgrade-foundation-gdi: 8
 			aot-upgrade-cruiser-carrier: 10
 			aot-upgrade-cruiser-railgun: 10
 			aot-upgrade-gunboat-frigate: 8
 			aot-upgrade-gunboat-destroyer: 8
 			# === Kampf-Upgrades NOD ===
-			aot-upgrade-ttnk: 20
+			# aot-upgrade-nod-secrettech (2026-08-01, User-Briefing): Age-1-Gatekeeper, hohe Prio
+			# analog zu aot-upgrade-turret -- soll direkt nach AFLD gekauft werden.
+			aot-upgrade-nod-secrettech: 45
+			aot-upgrade-nod-forbidden: 20
 			aot-upgrade-ttnk-subterrain: 15
 			aot-upgrade-ltnk-tick: 18
 			aot-upgrade-laser-fence: 15
@@ -488,10 +487,8 @@ Player:
 			aot-upgrade-msub-drone: 12
 			aot-upgrade-transport-gun: 8
 			aot-upgrade-v2-howitzer: 12
-			aot-upgrade-v2-napalm: 12
 			aot-upgrade-heavy-artillery: 10
 			aot-upgrade-tran-parachute: 8
-			aot-upgrade-guard-dog-kennel: 8
 			aot-upgrade-foundation-nod: 8
 
 	# =========================================================================

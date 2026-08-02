@@ -196,18 +196,51 @@ namespace OpenRA.Mods.Common.Traits
 			}
 		}
 
+		// Diagnostic (User 2026-08-01: "AI baut keine Gebaeude mehr" + the ops log showing
+		// "no chokepoint provider -> skipping to ArcoRaid"). Both symptoms share one possible
+		// root: EnsurePlanned() bails out through one of its four silent early returns and no
+		// plan is ever produced -- there was no way to tell WHICH one from the outside. Logged
+		// once per distinct reason (planBailReason) so a stuck planner names its own cause
+		// instead of spamming every tick.
+		string planBailReason;
+
+		void BailPlan(string reason)
+		{
+			if (planBailReason == reason)
+				return;
+
+			planBailReason = reason;
+			Log.Write("debug", $"[AotPlanner] {player.PlayerName}: not planning -- {reason}");
+		}
+
 		public void EnsurePlanned()
 		{
 			if (planned || IsTraitDisabled)
+			{
+				if (!planned)
+					BailPlan("trait disabled");
+
 				return;
+			}
 
 			if (Info.Faction != null && player.Faction.InternalName != Info.Faction)
+			{
+				BailPlan($"faction mismatch (player={player.Faction.InternalName}, module wants {Info.Faction})");
 				return;
+			}
 
 			var conyard = world.ActorsHavingTrait<Building>()
 				.FirstOrDefault(a => a.Owner == player && !a.IsDead && Info.ConstructionYardTypes.Contains(a.Info.Name));
 			if (conyard == null)
+			{
+				var owned = world.ActorsHavingTrait<Building>()
+					.Where(a => a.Owner == player && !a.IsDead)
+					.Select(a => a.Info.Name)
+					.Distinct();
+				BailPlan($"no construction yard (ConstructionYardTypes=[{string.Join(", ", Info.ConstructionYardTypes)}], " +
+					$"owned buildings=[{string.Join(", ", owned)}])");
 				return;
+			}
 
 			yard = conyard.Location;
 			var cbi = conyard.Info.TraitInfoOrDefault<BuildingInfo>();
@@ -218,10 +251,17 @@ namespace OpenRA.Mods.Common.Traits
 				.FirstOrDefault(l => l.Info.Name == Info.NavalLocomotor);
 			resourceLayer = world.WorldActor.TraitOrDefault<IResourceLayer>();
 			if (loco == null)
+			{
+				BailPlan($"ground locomotor '{Info.GroundLocomotor}' not found");
 				return;
+			}
 
 			Plan();
 			planned = true;
+			Log.Write("debug", $"[AotPlanner] {player.PlayerName}: planned at yard={yard} " +
+				$"rhythmSteps={Rhythm.Count} pocket={Pocket.Count} gates={Gates.Count} " +
+				$"choke={(defenceChokepoint.HasValue ? defenceChokepoint.Value.ToString() : "NONE")} " +
+				$"approaches={approaches.Count}");
 		}
 
 		// ------------------------------------------------------------------ analysis (exact port)

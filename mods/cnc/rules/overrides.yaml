@@ -1021,7 +1021,7 @@ aot-proc-gdi:
 	Buildable:
 		BuildPaletteOrder: 160
 		LockedGroup: aot-grp-proc
-		Prerequisites: ~aot-age1, aot-age1, ~!aot-age2, aot-weap, silo
+		Prerequisites: ~aot-age1, aot-age1, ~!aot-age2, aot-weap, silo, aot-gdi-advtech-upgrade
 		Queue: Building.GDI
 	WithSpriteBody@ts:
 		Sequence: aot-age2-nod-idle
@@ -1047,7 +1047,7 @@ aot-proc-gdi-age2:
 	Buildable:
 		BuildPaletteOrder: 160
 		LockedGroup: aot-grp-proc
-		Prerequisites: ~aot-age2, aot-age2, aot-weap, silo
+		Prerequisites: ~aot-age2, aot-age2, aot-weap, silo, aot-gdi-advtech-upgrade
 		Queue: Building.GDI
 	-WithSpriteBody@base:
 	-WithMakeAnimation@base:
@@ -1080,7 +1080,7 @@ aot-proc-nod:
 	Buildable:
 		BuildPaletteOrder: 160
 		LockedGroup: aot-grp-proc
-		Prerequisites: ~aot-age1, aot-age1, ~!aot-age2, afld, silo
+		Prerequisites: ~aot-age1, aot-age1, ~!aot-age2, afld, silo, aot-nod-secrettech-upgrade
 		Queue: Building.Nod
 	WithSpriteBody@ts:
 		Sequence: aot-age2-nod-idle
@@ -1106,7 +1106,7 @@ aot-proc-nod-age2:
 	Buildable:
 		BuildPaletteOrder: 160
 		LockedGroup: aot-grp-proc
-		Prerequisites: ~aot-age2, aot-age2, afld, silo
+		Prerequisites: ~aot-age2, aot-age2, afld, silo, aot-nod-secrettech-upgrade
 		Queue: Building.Nod
 	-WithSpriteBody@base:
 	-WithMakeAnimation@base:
@@ -1135,9 +1135,13 @@ APC:
 	AotIceUnbreakable:
 	# Veins: kein DoT (leicht genug), analog zum Eis-AotIceUnbreakable. Proxies erben es.
 	-DamagedByTerrain@VEINS:
+	# User-Briefing 2026-08-01: kein eigenes Kauf-Upgrade mehr (aot-upgrade-apc entfernt) -- sicht-
+	# und baubar ab Age 1 (unabhaengig von GDI Advanced Technologies), sofern eigene Infantry-
+	# Produktion (barracks, von PYLE/HAND automatisch bereitgestellt) vorhanden ist. Kein
+	# Ausschluss mehr mit HUMVEE.
 	Buildable:
 		ShowWhenLocked: False
-		Prerequisites: lite, ~aot-apc-upgrade, ~!aot-humvee-upgrade, ~!aot-amphibious-upgrade, ~!aot-minelayer-upgrade
+		Prerequisites: lite, barracks, ~aot-age1, aot-age1, ~!aot-amphibious-upgrade, ~!aot-minelayer-upgrade
 		Queue: LightVehicle.GDI
 		Description: Armored Personnel Carrier. Can carry 5 soldiers.
 		BuildPaletteOrder: 4
@@ -1154,25 +1158,27 @@ MTNK:
 
 
 MSAM:
+	# User-Briefing 2026-08-01: MSAM-Freischaltung jetzt an aot-gdi-advtech-upgrade gebunden
+	# (statt nur an WEAP-Gebaeude). Hover-MLRS/-AA sind keine eigenen Kauf-Upgrades mehr, beide
+	# haengen an aot-heavy-ordonance-upgrade (GDI Heavy Ordonance) -- der Retrofit auf bereits
+	# gebaute MSAM transformiert unbedingt auf Hover-MLRS (Standard); Hover-AA ist NUR ein
+	# Baumenue-Zusatzoption (kein Retrofit-Ziel), zusaetzlich an aot-orbc gebunden.
 	Buildable:
 		LockedGroup: aot-grp-msam
-		Prerequisites: anyhq, ~techlevel.medium, ~aot-age1, aot-age1, weap, ~!aot-hover-mlrs-upgrade, ~!aot-hover-aa-upgrade
+		Prerequisites: anyhq, ~techlevel.medium, ~aot-age1, aot-age1, weap, aot-gdi-advtech-upgrade, ~!aot-heavy-ordonance-upgrade, ~!aot-mtnk-titan-upgrade
 		Queue: Vehicle.GDI
 		BuildPaletteOrder: 20
-	GrantConditionOnPrerequisite@HOVER_MLRS:
-		Condition: aot-hover-mlrs-upgrade
-		Prerequisites: aot-hover-mlrs-upgrade
-	GrantConditionOnPrerequisite@HOVER_AA:
-		Condition: aot-hover-aa-upgrade
-		Prerequisites: aot-hover-aa-upgrade
+	# GrantConditionOnPrerequisite noetig: AotTransformsOnTerrain.RequiresCondition liest eine
+	# RUNTIME-Condition (vom Trait-System), keinen TechTree-Prerequisite-String -- ohne diesen
+	# Trait waere aot-heavy-ordonance-upgrade auf MSAM nie gegrantet ("consumes conditions that
+	# are not granted").
+	GrantConditionOnPrerequisite@HEAVYORD:
+		Condition: aot-heavy-ordonance-upgrade
+		Prerequisites: aot-heavy-ordonance-upgrade
 	AotTransformsOnTerrain@HOVER_MLRS:
 		IntoActor: aot-msam-hover-mlrs
 		TerrainTypes: Clear, Rough, Road, Bridge, Tiberium, BlueTiberium, Beach, Water, Rock, Clear.Snow
-		RequiresCondition: aot-hover-mlrs-upgrade
-	AotTransformsOnTerrain@HOVER_AA:
-		IntoActor: aot-msam-hover-aa
-		TerrainTypes: Clear, Rough, Road, Bridge, Tiberium, BlueTiberium, Beach, Water, Rock, Clear.Snow
-		RequiresCondition: aot-hover-aa-upgrade
+		RequiresCondition: aot-heavy-ordonance-upgrade
 	# Fire Position (Phase 3) Garrison-Waffe. 227mm ist bereits Blockable:false,
 	# daher keine eigene Garrison-Waffenvariante noetig (direkte Wiederverwendung).
 	Armament@garrisoned:

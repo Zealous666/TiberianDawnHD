@@ -262,6 +262,10 @@ aot-ore-mine:
 	DamageMultiplier:
 		Modifier: 0
 	StoresResources:
+		# Capacity ist hier kein Erz-Vorrat, sondern die Anzahl Fuhren, die die Mine uebersteht
+		# (OreMineDurability.OnTrip zieht pro Fuhre 1 ab, unabhaengig von ORET.OreLoadAmount) --
+		# User-Wunsch 2026-08-01: bleibt bei 50 Fuhren, aber 250 -> 500 Erz pro Fuhre
+		# (aot-units.yaml, ORET.OreLoadAmount). Gesamtertrag 12500 -> 25000 pro Mine.
 		Capacity: 50
 		Resources: Tiberium
 	OreMineDurability:
@@ -767,105 +771,160 @@ aot-age3:
 		Name: Age 3
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - Guard Dog Kennel (NOD, Age 0) ===
-# Schaltet den Guard Dog in der Hand of Nod frei (sichtbar aber ausgegraut ohne dieses Upgrade).
-aot-upgrade-guard-dog-kennel:
+# === Age of Tiberium (aotmod) - NOD Kennel (aot-kennel-nod) ===
+# User-Briefing 2026-08-01: ersetzt das bisherige Upgrade aot-upgrade-guard-dog-kennel. Guard
+# Dogs werden jetzt in einem eigenen Gebaeude mit eigener Produktions-Queue gebaut, nicht mehr
+# in der normalen Infantry-Queue. RA-Remaster-Sprite importiert (RA Soviet KENN.ZIP/
+# KENNMAKE.ZIP, MEG-Pfad verifiziert), Stats 1:1 vom RA-Original (200 Cost, 30000 HP, Wood,
+# 2x1-Footprint). Baumenue-Icon: eigenes Custom-Icon (kenl_base.png, User-geliefert
+# 2026-08-01). Bauordnung nach Helipad, vor STEC (BuildPaletteOrder 135).
+aot-kennel-nod:
+	# User-Fund 2026-08-01: ^Building allein (im Gegensatz zu ^BaseBuilding) hat kein
+	# Building.TerrainTypes, kein RequiresBuildableArea und kein RequiresBaseProvider -> auf
+	# KEINEM Tileset platzierbar (die Building-Terraintyp-Liste ist implizit leer). ^BaseBuilding
+	# liefert `TerrainTypes: Clear,Road,Clear.Snow` (inkl. AOT_WINTER-Sonderfall, siehe Kommentar
+	# dort in engine/mods/cnc/rules/defaults.yaml) + die Bauzonen-Pruefung -- PFLICHT fuer jedes
+	# platzierbare Gebaeude in diesem Mod, nicht nur ^Building.
+	Inherits: ^BaseBuilding
+	# Kein "dead"-Rubble-Frame im RA-KENN-Remaster-Sprite (nur idle/damaged-idle/make) ->
+	# WithDeathAnimation (von ^BaseBuilding geerbt) wuerde beim Zerstoeren crashen.
+	-WithDeathAnimation:
+	# Vanilla-RA-Konvention: Kennel erweitert die Bauzone nicht.
+	-GivesBuildableArea:
+	# Von ^BaseBuilding geerbtes SpawnActorsOnSell spawnt Standard-Infanterie (e6,e1,e1,e1) --
+	# fuer den Dog-Producer soll beim Verkauf stattdessen ein Dog rauskommen (User-Wunsch 2026-08-01).
+	SpawnActorsOnSell:
+		ActorTypes: aot-dog-nod
+		GuaranteedActorTypes: aot-dog-nod
+	# User-Fund 2026-08-01: PrimaryBuilding (vom Vanilla-RA-KENN uebernommen) erzeugt einen
+	# "PrimaryProducer"-Befehl mit Cursor: deploy -- das war der gruene "Deploy"-Mauszeiger.
+	# PYLE/HAND (die anderen Infanterie-Producer in diesem Mod) haben diese Trait NICHT, sie
+	# ist hier nicht noetig (nur EIN Kennel-Typ, kein Mehrfach-Gebaeude-Disambiguierungsbedarf
+	# wie bei AFLD/Starport). Entfernt.
+	RenderSprites:
+		Image: aot-kennel-nod
+	Selectable:
+		Bounds: 1024, 1024
+	Building:
+		Footprint: xx
+		Dimensions: 2,1
+	Health:
+		HP: 30000
+	Armor:
+		Type: Wood
+	RevealsShroud:
+		Range: 4c0
+	RallyPoint:
+		ForceSetType: Dog.Nod
+	CommandBarBlacklist:
+		DisableStop: false
+	Exit@0:
+		SpawnOffset: -280,400,0
+		ExitCell: -1,1
+		ProductionTypes: Dog.Nod
+		Priority: 3
+	Exit@1:
+		SpawnOffset: -280,400,0
+		ExitCell: 0,1
+		ProductionTypes: Dog.Nod
+		Priority: 2
+	Exit@2:
+		SpawnOffset: -280,400,0
+		ExitCell: -1,0
+		ProductionTypes: Dog.Nod
+		Priority: 2
+	Exit@fallback1:
+		SpawnOffset: -280,400,0
+		ExitCell: -1,-1
+		ProductionTypes: Dog.Nod
+	Exit@fallback2:
+		SpawnOffset: -280,400,0
+		ExitCell: 0,-1
+		ProductionTypes: Dog.Nod
+	Exit@fallback3:
+		SpawnOffset: -280,400,0
+		ExitCell: 1,-1
+		ProductionTypes: Dog.Nod
+	Exit@fallback4:
+		SpawnOffset: -280,400,0
+		ExitCell: 1,0
+		ProductionTypes: Dog.Nod
+	Exit@fallback5:
+		SpawnOffset: -280,400,0
+		ExitCell: 1,1
+		ProductionTypes: Dog.Nod
+	Production:
+		Produces: Dog.Nod
+	ProductionQueue:
+		Type: Dog.Nod
+		DisplayOrder: 3
+		Group: Dog
+		LowPowerModifier: 150
+		ReadyAudio: UnitReady
+		ReadyTextNotification: notification-unit-ready
+		BlockedAudio: NoBuild
+		BlockedTextNotification: notification-unable-to-build-more
+		LimitedAudio: BuildingInProgress
+		LimitedTextNotification: notification-unable-to-comply-building-in-progress
+		QueuedAudio: Training
+		OnHoldAudio: OnHold
+		CancelledAudio: Cancelled
+	ProductionBar:
+		ProductionType: Dog.Nod
+	Power:
+		Amount: -10
 	Tooltip:
-		Name: Guard Dog Kennel
+		Name: Kennel
+	Valued:
+		Cost: 200
+	Buildable:
+		# User-Briefing 2026-08-01: Bauordnung nach Helipad (130), vor STEC (140).
+		# Voraussetzung: eigene Infantry-Produktion (barracks, von PYLE/HAND automatisch
+		# bereitgestellt) statt nur "anypower".
+		# Zusaetzlich Radar Dome (User-Wunsch 2026-08-01): "aot-nod-radar" ist der spezifische
+		# String des NOD Radar Dome (aot-nod-radar.ProvidesPrerequisite@buildingname) -- bewusst
+		# NICHT "anyhq", das der Dome ebenfalls liefert, denn anyhq gilt auch fuer das GDI-HQ.
+		BuildPaletteOrder: 135
+		Prerequisites: barracks, aot-nod-radar
+		Queue: Building.Nod
+		Icon: icon
+		Description: Trains Guard Dogs in their own production queue.
+
+	ProvidesPrerequisite@buildingname:
+		Prerequisite: aot-kennel-nod
+
+# Intelligence Office (aot-upgrade-intelligence-office) entfernt (2026-08-01, User-Briefing):
+# Undercover Spy ist jetzt direkt baubar sobald ATEC steht, kein eigenes Kauf-Upgrade mehr.
+
+# === Age of Tiberium (aotmod) - GDI Advanced Technologies (Age-1-Gatekeeper) ===
+# User-Briefing 2026-08-01: konsolidiert das bisherige HUMVEE-Upgrade (aot-upgrade-humvee,
+# entfernt) und APC-Upgrade (aot-upgrade-apc, entfernt) sowie das Mammoth-Rocket-Upgrade
+# (aot-upgrade-htnk-rocket, entfernt) zu EINEM Kauf-Akt: JEEP->HUMVEE wird unbedingt (kein
+# Kauf-Ausschluss mehr mit APC), Mammoth->Rocket unbedingt, MSAM in WEAP freigeschaltet,
+# Refinery freigeschaltet. Der APC selbst braucht KEIN Upgrade mehr (siehe APC: in
+# overrides.yaml) - nur noch dieses Gatekeeper-Upgrade + eigene Infantry-Produktion (barracks).
+# Icon: wiederverwendet WEAP's eigenes Icon (Image: weap, Sequenz "icon" -> weap_base.png,
+# siehe aot-sequences.yaml).
+aot-upgrade-gdi-advtech:
+	Tooltip:
+		Name: GDI Advanced Tiberium Tech
+
+	Buildable:
+		BuildPaletteOrder: 20
+		Prerequisites: ~aot-age1, aot-age1, weap
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Upgrades the Recon Jeep to HUMVEE armor, equips the Mammoth Tank with rockets, unlocks the Rocket Launcher in the Advanced War Factory, and unlocks the Tiberium Refinery.
 
 	Valued:
 		Cost: 300
 
-	Buildable:
-		BuildPaletteOrder: 10
-		Prerequisites: stec
-		Queue: Upgrade.Nod
-		BuildLimit: 1
-		MoveIntoWorld: false
-		Description: Establishes a training kennel. Unlocks Guard Dogs at the Hand of Nod.
+	RenderSprites:
+		Image: proc
 
 	ProvidesPrerequisite:
-		Prerequisite: aot-guard-dog-kennel
-
-	RenderSprites:
-		Image: aot-dog-nod
-
-	Interactable:
-
-# === Age of Tiberium (aotmod) - Intelligence Office (GDI, Age 0) ===
-# Schaltet den Undercover Spy in den GDI Barracks frei (sichtbar aber ausgegraut ohne dieses Upgrade).
-aot-upgrade-intelligence-office:
-	Tooltip:
-		Name: Intelligence Office
-
-	Valued:
-		Cost: 500
-
-	Buildable:
-		BuildPaletteOrder: 10
-		Prerequisites: atec
-		Queue: Upgrade.GDI
-		BuildLimit: 1
-		MoveIntoWorld: false
-		Description: Establishes covert training facilities. Unlocks Undercover Spies at the Barracks.
-
-	ProvidesPrerequisite:
-		Prerequisite: aot-intelligence-office
-
-	RenderSprites:
-		Image: aot-spy-gdi
-
-	Interactable:
-
-# === Age of Tiberium (aotmod) - Recon Jeep: HUMVEE Upgrade ===
-# Tier 1 / Entweder-Oder mit APC Upgrade (!aot-apc-upgrade).
-# Schaltet HUMVEE-Sprite + stärkeres MG auf dem JEEP frei.
-aot-upgrade-humvee:
-	Tooltip:
-		Name: HUMVEE Upgrade
-
-	Buildable:
-		BuildPaletteOrder: 20
-		Prerequisites: ~lite, ~aot-age1, aot-age1, lite, pyle, fix, ~!aot-apc-upgrade
-		Queue: Upgrade.GDI
-		BuildLimit: 1
-		MoveIntoWorld: false
-		Description: Upgrades the Recon Jeep with HUMVEE armor and a stronger machine gun. Can carry 1 soldier. Excludes the APC Upgrade.
-
-	Valued:
-		Cost: 100
-
-	RenderSprites:
-		Image: aot-upgrade-humvee
-
-	ProvidesPrerequisite:
-		Prerequisite: aot-humvee-upgrade
-
-	Interactable:
-
-# === Age of Tiberium (aotmod) - Recon Jeep: APC Upgrade ===
-# Tier 1 / Entweder-Oder mit HUMVEE Upgrade (!aot-humvee-upgrade).
-# Schaltet den GDI APC in der Fahrzeugproduktion frei und sperrt weitere Jeeps.
-aot-upgrade-apc:
-	Tooltip:
-		Name: APC Upgrade
-
-	Buildable:
-		BuildPaletteOrder: 21
-		Prerequisites: ~lite, ~aot-age1, aot-age1, lite, pyle, fix, ~!aot-humvee-upgrade
-		Queue: Upgrade.GDI
-		BuildLimit: 1
-		MoveIntoWorld: false
-		Description: Unlocks the APC with 5 cargo slots. Excludes the HUMVEE Upgrade.
-
-	Valued:
-		Cost: 200
-
-	RenderSprites:
-		Image: aot-upgrade-apc
-
-	ProvidesPrerequisite:
-		Prerequisite: aot-apc-upgrade
+		Prerequisite: aot-gdi-advtech-upgrade
 
 	Interactable:
 
@@ -874,13 +933,14 @@ aot-upgrade-apc2:
 		Name: Amphibious APC Upgrade
 
 	Buildable:
+		ShowWhenLocked: False
 		LockedGroup: aot-grp-up-apcbranch
 		BuildPaletteOrder: 55
-		Prerequisites: ~atec, lite, ~pyle, ~aot-age2, aot-age2, aot-apc-upgrade, ~!aot-humvee-upgrade, ~!aot-minelayer-upgrade
+		Prerequisites: ~aot-age2, aot-age2, ~!aot-minelayer-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
-		Description: Upgrades the APC with a hover drive. Can move on land and water. Unarmed.
+		Description: Transforms all APCs into amphibious but unarmed APCs. Lockouts the Mine Layer.
 
 	Valued:
 		Cost: 300
@@ -902,13 +962,14 @@ aot-upgrade-minelayer:
 		Name: Mine Layer Upgrade
 
 	Buildable:
+		ShowWhenLocked: False
 		LockedGroup: aot-grp-up-apcbranch
 		BuildPaletteOrder: 55
-		Prerequisites: ~aot-weap, weap, ~aot-age2, aot-age2, aot-apc-upgrade, ~aot-apc-upgrade
+		Prerequisites: ~aot-age2, aot-age2, ~!aot-amphibious-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
-		Description: Unlocks the Mine Layer APC. Deploys 5 anti-vehicle mines, rearms at the Repair Facility.
+		Description: Transforms all APCs into unarmed Mine Layers with anti-tank mines. Lockouts the Amphibious APC.
 
 	Valued:
 		Cost: 300
@@ -922,110 +983,54 @@ aot-upgrade-minelayer:
 	Interactable:
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - GDI Wolverine Mech Upgrade ===
-# User-Fund 2026-07-30: war kaufbar OHNE HUMVEE-Upgrade, solange nur APC nicht gewaehlt war
-# (der alte Kommentar hier sagte das sogar explizit "unabhaengig von HUMVEE" -- falsches Design).
-# Wolverine ist NACHFOLGER des HUMVEE-Pfads, kein eigenstaendiger dritter Zweig -> braucht
-# aot-humvee-upgrade als echte Voraussetzung, nicht nur den Ausschluss von APC.
-aot-upgrade-wolverine:
-	Tooltip:
-		Name: Wolverine Upgrade
-
-	Buildable:
-		LockedGroup: aot-grp-up-apcbranch
-		BuildPaletteOrder: 55
-		Prerequisites: lite, ~pyle, ~aot-age2, aot-age2, aot-humvee-upgrade, ~!aot-apc-upgrade
-		Queue: Upgrade.GDI
-		BuildLimit: 1
-		MoveIntoWorld: false
-		Description: Unlocks the Wolverine Mech. Fast anti-infantry walker. Requires Age 2.
-
-	Valued:
-		Cost: 250
-
-	RenderSprites:
-		Image: aot-upgrade-wolverine
-
-	ProvidesPrerequisite:
-		Prerequisite: aot-wolverine-upgrade
-
-	Interactable:
+# Wolverine Upgrade (aot-upgrade-wolverine) entfernt (2026-08-01, User-Briefing): Wolverine ist
+# jetzt eine unbedingte Folge von aot-mtnk-titan-upgrade (GDI Mech Armaments) -- alle HUMVEEs
+# transformieren automatisch, kein eigener Kauf-Akt mehr, kein Bezug zum APC-Baum. Siehe JEEP:
+# und aot-jeep-humvee/-wolverine in aot-units.yaml.
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - MSAM: Hover MLRS Upgrade ===
-aot-upgrade-hover-mlrs:
-	Tooltip:
-		Name: Hover MLRS Upgrade
-
-	Buildable:
-		BuildPaletteOrder: 70
-		Prerequisites: anyhq, ~aot-age2, aot-age2, ~!aot-hover-aa-upgrade
-		Queue: Upgrade.GDI
-		BuildLimit: 1
-		MoveIntoWorld: false
-		Description: Upgrades the Rocket Launcher with a hover drive. Can move on land and water. Keeps rocket armament.
-
-	Valued:
-		Cost: 400
-
-	RenderSprites:
-		Image: aot-upgrade-hover-mlrs
-
-	ProvidesPrerequisite:
-		Prerequisite: aot-hover-mlrs-upgrade
-
-	Interactable:
+# Hover MLRS Upgrade (aot-upgrade-hover-mlrs) und Hover AA Upgrade (aot-upgrade-hover-aa)
+# entfernt (2026-08-01): beide sind jetzt Folgen von aot-heavy-ordonance-upgrade (siehe GDI
+# Heavy Ordonance) statt eigener Kauf-Actors. Hover MSAM (Standard) transformiert sich
+# unbedingt; Hover AA ist zusaetzlich an aot-orbc (Orbital Command) gebunden -- siehe
+# aot-msam-hover-mlrs/aot-msam-hover-aa in aot-units.yaml und MSAM: in overrides.yaml.
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - MSAM: Hover AA Upgrade ===
-aot-upgrade-hover-aa:
+# === Age of Tiberium (aotmod) - NOD Secret Technologies (Age-1-Gatekeeper) ===
+# User-Briefing 2026-08-01: konsolidiert das bisherige Flame-Tank-Upgrade (aot-upgrade-ttnk)
+# und das V2-Napalm-Upgrade (aot-upgrade-v2-napalm, entfernt) zu EINEM Kauf-Akt. Behaelt beide
+# alten Condition-Namen (aot-ttnk-flame-upgrade, aot-napalm-upgrade) bei, damit die zahlreichen
+# bestehenden Konsumenten (TTNK-Varianten, V2-Varianten, Toxic-/Subterrain-Ketten) unveraendert
+# bleiben -- zusaetzlich neue Sammel-Condition aot-nod-secrettech-upgrade fuer neue Konsumenten
+# (Stealth Tank, Refinery). Flame Tank und Napalm-V2 bleiben in LITE (Queue-Umzug auf Starport
+# entfernt, siehe aot-ttnk-flame / aot-v2-napalm in aot-units.yaml).
+# Icon: wiederverwendet Airfields eigenes Icon (Image: afld, Sequenz "icon" -> afldicnh.tem).
+aot-upgrade-nod-secrettech:
 	Tooltip:
-		Name: Hover AA Upgrade
-
-	Buildable:
-		BuildPaletteOrder: 71
-		Prerequisites: anyhq, ~aot-age2, aot-age2, ~!aot-hover-mlrs-upgrade
-		Queue: Upgrade.GDI
-		BuildLimit: 1
-		MoveIntoWorld: false
-		Description: Replaces the Rocket Launcher turret with an AA cannon. Devastating vs aircraft. Hover drive included.
-
-	Valued:
-		Cost: 400
-
-	RenderSprites:
-		Image: aot-upgrade-hover-aa
-
-	ProvidesPrerequisite:
-		Prerequisite: aot-hover-aa-upgrade
-
-	Interactable:
-# === Ende aotmod ===
-
-# === Age of Tiberium (aotmod) - TTNK Flame Tank Upgrade ===
-aot-upgrade-ttnk:
-	Tooltip:
-		Name: Flame Tank Upgrade
+		Name: NOD Tiberium Secrets
 
 	Buildable:
 		BuildPaletteOrder: 20
-		Prerequisites: ~stec, ~aot-age1, aot-age1, stec, afld
+		Prerequisites: ~aot-age1, aot-age1, afld
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
-		# "Unlocks Toxin/Stealth" Verweis entfernt (2026-07-04): separate Toxin-/
-		# Stealth-Tank-Upgrades geloescht, Toxin kommt jetzt ueber das konsolidierte
-		# aot-upgrade-e4-toxic (siehe dort), Stealth komplett entfernt.
-		Description: Upgrades the Heavy Tank with two powerful flamethrowers.
+		Description: Upgrades the Heavy Tank with flamethrowers, replaces the V2 Rocket Launcher's warhead with napalm, unlocks the Stealth Tank, and unlocks the Tiberium Refinery.
 
 	Valued:
-		Cost: 500
+		Cost: 300
 
 	RenderSprites:
-		Image: aot-upgrade-ttnk
+		Image: proc
 
 	ProvidesPrerequisite:
 		Prerequisite: aot-ttnk-flame-upgrade
+
+	ProvidesPrerequisite@napalm:
+		Prerequisite: aot-napalm-upgrade
+
+	ProvidesPrerequisite@secrettech:
+		Prerequisite: aot-nod-secrettech-upgrade
 
 	Interactable:
 
@@ -1105,7 +1110,7 @@ aot-upgrade-e4-toxic:
 
 	Buildable:
 		BuildPaletteOrder: 80
-		Prerequisites: ~aot-age3, tmpl, stec, aot-shrine
+		Prerequisites: ~aot-age3, tmpl, stec, aot-shrine, ~!aot-howitzer-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -1124,51 +1129,36 @@ aot-upgrade-e4-toxic:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - V2 Rocket Launcher Upgrades (Age 1, NOD Ausschluss-Paar) ===
-# Beide sichtbar ab Age 1 + AFLD + TMPL. Gegenseitiger Ausschluss via ~!.
-# Napalm-Pfad: V2 wird zu 2-Raketen-Burst mit Napalm-Schaden (Age-3 Toxic-Erweiterung via
-# aot-toxic-upgrade, kein eigenes separates Upgrade noetig).
-# Howitzer-Pfad: V2 deaktiviert, ARTY (TD Artillery) in LITE freigeschalten.
-# Age-3-Fortsetzung fuer Howitzer ("Heavy Artillery Upgrade") noch NICHT gebaut.
-aot-upgrade-v2-napalm:
-	Tooltip:
-		Name: actor-aot-upgrade-v2-napalm.name
-
-	Buildable:
-		BuildPaletteOrder: 35
-		Prerequisites: ~aot-age1, aot-age1, afld, tmpl, ~!aot-howitzer-upgrade
-		Queue: Upgrade.Nod
-		BuildLimit: 1
-		MoveIntoWorld: false
-		Description: Upgrades the V2 Rocket Launcher with dual napalm warheads. Fires two rockets in rapid succession. Highly effective vs. infantry.
-
-	Valued:
-		Cost: 600
-
-	RenderSprites:
-		Image: aot-upgrade-v2-napalm
-
-	ProvidesPrerequisite:
-		Prerequisite: aot-napalm-upgrade
-
-	Interactable:
-
+# Napalm-Pfad (aot-upgrade-v2-napalm) entfernt (2026-08-01): jetzt Teil von NOD Secret
+# Technologies (siehe oben), behaelt aber die Condition aot-napalm-upgrade bei -> Howitzer-Pfad
+# unten unveraendert.
+# Howitzer-Pfad, umbenannt zu "Artillery Ballistics" (User-Briefing 2026-08-01): V2 hat durch
+# NOD Secret Technologies bereits Napalm -- dieses Upgrade ist jetzt ein FOLGE-Upgrade darauf
+# (Age 2, kein eigenes Age1/AFLD/TMPL-Gate mehr), das den Napalm-Werfer deaktiviert und ARTY
+# freischaltet. Schliesst Toxic Rocket Launchers in BEIDE Richtungen aus (~!aot-toxic-upgrade
+# hier, ~!aot-howitzer-upgrade auf aot-upgrade-e4-toxic) -- "Lockout" laut Spec. Icon
+# wiederverwendet den Howitzer-Sprite (Image: arty, Sequenz aot-arty-howitzer-icon).
 aot-upgrade-v2-howitzer:
 	Tooltip:
-		Name: actor-aot-upgrade-v2-howitzer.name
+		Name: Artillery Ballistics
 
 	Buildable:
 		BuildPaletteOrder: 36
-		Prerequisites: ~aot-age1, aot-age1, afld, tmpl, ~!aot-napalm-upgrade
+		# User-Briefing 2026-08-01 (zweiter Durchgang): sichtbar ab Age 1, baubar sobald Temple
+		# steht -- exakt wie Laser Technologies. Funktionale Voraussetzungen (Napalm ueber NOD
+		# Secret Technologies, Toxic-Ausschluss) bleiben bestehen.
+		Prerequisites: ~aot-age1, aot-age1, tmpl, aot-nod-secrettech-upgrade, ~!aot-toxic-upgrade
+		Icon: aot-arty-howitzer-icon
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
-		Description: Replaces the V2 Rocket Launcher with the Howitzer. Direct-fire medium artillery effective vs. armor and structures.
+		Description: Transforms Napalm Rocket Launcher into a Howitzer for later Heavy Artillery usage. Lockout of Toxic Rocket Launchers.
 
 	Valued:
 		Cost: 600
 
 	RenderSprites:
-		Image: aot-upgrade-v2-howitzer
+		Image: arty
 
 	ProvidesPrerequisite:
 		Prerequisite: aot-howitzer-upgrade
@@ -2740,17 +2730,22 @@ gdi-hq:
 		Name: Radar
 
 # === Age of Tiberium (aotmod) - MTNK Predator Upgrade ===
+# === Age of Tiberium (aotmod) - GDI Heavy Ordonance (Age-2-Gatekeeper) ===
+# User-Briefing 2026-08-01: konsolidiert das bisherige Predator-Upgrade mit dem Hover-MLRS-
+# und Hover-AA-Upgrade (beide entfernt, siehe oben). Zweites ProvidesPrerequisite@heavyord
+# liefert die neue Sammel-Condition fuer MSAM-Hover-Varianten, ohne aot-mtnk-predator-upgrade
+# (weiterhin von aot-mtnk-pred / Tank-Railguns benutzt) umzubenennen.
 aot-upgrade-mtnk-predator:
 	Tooltip:
-		Name: Predator Upgrade
+		Name: GDI Heavy Ordonance
 
 	Buildable:
 		BuildPaletteOrder: 45
-		Prerequisites: ~atec, ~lite, ~techlevel.medium, ~aot-age2, aot-age2, ~!aot-mtnk-titan-upgrade
+		Prerequisites: ~aot-age2, aot-age2, aot-slab, ~!aot-mtnk-titan-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
-		Description: Upgrades the Main Tank with a Predator turret for a faster fire rate. Enables Tank Railguns for Medium Tank and Mammoth Tank. Incompatible with the Titan and Juggernaut path.
+		Description: Upgrades the Medium Tank with the Predator Turret, transforms the Rocket Launcher into a Hover Rocket Launcher and unlocks the Hover AA. Lockout of GDI Mech Armament.
 
 	Valued:
 		Cost: 500
@@ -2760,6 +2755,9 @@ aot-upgrade-mtnk-predator:
 
 	ProvidesPrerequisite:
 		Prerequisite: aot-mtnk-predator-upgrade
+
+	ProvidesPrerequisite@heavyord:
+		Prerequisite: aot-heavy-ordonance-upgrade
 
 	Interactable:
 
@@ -2771,6 +2769,7 @@ aot-upgrade-mtnk-railgun:
 		Name: Tank Railguns
 
 	Buildable:
+		ShowWhenLocked: False
 		LockedGroup: aot-grp-up-tank2
 		BuildPaletteOrder: 90
 		Prerequisites: ~atec, ~lite, ~techlevel.medium, ~aot-mtnk-predator-upgrade, ~aot-age3, aot-mtnk-predator-upgrade, aot-age3
@@ -2790,18 +2789,20 @@ aot-upgrade-mtnk-railgun:
 
 	Interactable:
 
-# === Age of Tiberium (aotmod) - MTNK Titan Upgrade ===
+# === Age of Tiberium (aotmod) - GDI Mech Armaments (Age-2-Gatekeeper) ===
+# User-Briefing 2026-08-01: bisheriges Titan-Upgrade, umbenannt + Juggernaut-Unlock jetzt
+# zusaetzlich an aot-orbc gebunden (siehe aot-jugg in aot-units.yaml).
 aot-upgrade-mtnk-titan:
 	Tooltip:
-		Name: Titan Upgrade
+		Name: GDI Mech Armaments
 
 	Buildable:
 		BuildPaletteOrder: 46
-		Prerequisites: ~atec, ~lite, ~techlevel.medium, ~aot-age2, aot-age2, ~!aot-mtnk-predator-upgrade
+		Prerequisites: ~aot-age2, aot-age2, aot-slab, ~!aot-mtnk-predator-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
-		Description: Upgrades the Main Tank to a TS-style Titan Mech chassis with independent turret rotation. Enables Titan Railguns and the Juggernaut Artillery. Incompatible with Predator upgrades and Tank Railguns.
+		Description: Transforms the Medium Tank into a Titan battle mech, the HMVEE into a Wolverine anti-infantry mech and unlocks the Juggernaut artillery. Lockout of GDI Heavy Ordonance.
 
 	Valued:
 		Cost: 500
@@ -2820,6 +2821,7 @@ aot-upgrade-mtnk-titan-railgun:
 		Name: Titan Railgun Upgrade
 
 	Buildable:
+		ShowWhenLocked: False
 		LockedGroup: aot-grp-up-tank2
 		BuildPaletteOrder: 90
 		Prerequisites: ~atec, ~lite, ~techlevel.medium, ~aot-mtnk-titan-upgrade, ~aot-age3, aot-mtnk-titan-upgrade, aot-age3
@@ -2840,30 +2842,8 @@ aot-upgrade-mtnk-titan-railgun:
 	Interactable:
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - HTNK Rocket Upgrade ===
-aot-upgrade-htnk-rocket:
-	Tooltip:
-		Name: Rocket Upgrade
-
-	Buildable:
-		BuildPaletteOrder: 50
-		Prerequisites: ~aot-weap, ~aot-age2, aot-age2, atec
-		Queue: Upgrade.GDI
-		BuildLimit: 1
-		MoveIntoWorld: false
-		Description: Equips the Mammoth Tank with dual rocket launchers for additional anti-air and ground firepower.
-
-	Valued:
-		Cost: 750
-
-	RenderSprites:
-		Image: aot-upgrade-htnk-rocket
-
-	ProvidesPrerequisite:
-		Prerequisite: aot-htnk-rocket-upgrade
-
-	Interactable:
-
+# HTNK Rocket Upgrade (aot-upgrade-htnk-rocket) entfernt (2026-08-01): Mammoth->Rocket ist
+# jetzt eine unbedingte Folge von aot-gdi-advtech-upgrade (siehe GDI Advanced Technologies).
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - HPAD: Proxy-Aktoren für GDI/NOD-Icons ===
@@ -2996,6 +2976,7 @@ aot-upgrade-nod-parabombs:
 		Name: Parabombs
 
 	Buildable:
+		ShowWhenLocked: False
 		LockedGroup: aot-grp-up-air3
 		BuildPaletteOrder: 95
 		Prerequisites: ~stec, ~aot-age3, ~aot-nod-spyplane-upgrade, ~!aot-nod-airstrike-upgrade, aot-age3, aot-nod-spyplane-upgrade, aot-toxic-upgrade
@@ -3026,6 +3007,7 @@ aot-upgrade-nod-banshee:
 		Name: Banshee Airstrike Upgrade
 
 	Buildable:
+		ShowWhenLocked: False
 		LockedGroup: aot-grp-up-air3
 		BuildPaletteOrder: 95
 		Prerequisites: ~stec, ~aot-age3, ~aot-nod-airstrike-upgrade, aot-age3, tmpl
@@ -4313,6 +4295,11 @@ aot-gun-base:
 	RenderSprites:
 		Image: gun
 	Buildable:
+		# User-Fund 2026-08-01: ShowWhenLocked ist per Default TRUE (BuildableInfo.cs) -- ohne
+		# expliziten False-Wert zeigt das LockedGroup-Slot ein permanentes Platzhalter-Icon,
+		# auch wenn aot-turret-upgrade fuer diese Partie NIE erreichbar ist (schliesst sich mit
+		# Nitro Napalm/aot-nitro-napalm-upgrade gegenseitig aus, siehe aot-upgrade-turret unten).
+		ShowWhenLocked: False
 		LockedGroup: aot-grp-gun
 		BuildPaletteOrder: 170
 		# Voraussetzung von "barracks" (Infanterie-Produktion) auf "lite"
@@ -4327,6 +4314,7 @@ aot-gun-laser:
 	RenderSprites:
 		Image: gun
 	Buildable:
+		ShowWhenLocked: False
 		LockedGroup: aot-grp-gun
 		BuildPaletteOrder: 170
 		Prerequisites: ~aot-turret-upgrade, aot-turret-upgrade, lite, ~aot-laser-fence-upgrade
@@ -4816,6 +4804,11 @@ SILO:
 		BodyNames: body-ts
 		Condition: build-incomplete
 		Sequence: aot-ts-make
+	# Kapazitaet verdoppelt (User-Wunsch 2026-08-01): Vanilla-SILO liefert 3000
+	# (engine/mods/cnc/rules/structures.yaml). Hier zentral ueberschrieben, damit alle drei
+	# Age-Proxies (aot-silo-age0/-age1/-age2) es erben.
+	StoresPlayerResources:
+		Capacity: 6000
 
 aot-silo-age0:
 	Inherits: SILO
@@ -5223,6 +5216,34 @@ aot-slab-age2:
 		RequiresCondition: aot-fs-matrix-active && !build-incomplete
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - NOD Forbidden Knowledge (Age-2-Gatekeeper) ===
+# User-Briefing 2026-08-01: schaltet Cyborg, Chameleon Spy und (zusammen mit aot-shrine)
+# Cyborg Commando frei. Icon: wiederverwendet aot-shrine's eigenes Icon (Image: aot-shrine,
+# Sequenz "icon").
+aot-upgrade-nod-forbidden:
+	Tooltip:
+		Name: NOD Forbidden Knowledge
+
+	Buildable:
+		BuildPaletteOrder: 60
+		Prerequisites: ~tmpl, ~aot-age2, aot-age2, tmpl
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Description: Unlocks the Cyborg, the Chameleon Spy, and (together with the Secret Shrine) the Cyborg Commando.
+
+	Valued:
+		Cost: 500
+
+	RenderSprites:
+		Image: aot-shrine
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-nod-forbidden-upgrade
+
+	Interactable:
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - Nod Shrine (aot-shrine) ===
 # NOD-exklusives Prestige-Gebaeude, sichtbar erst ab Age 2 (~aot-age2), baubar sobald STEC + TMPL stehen.
 # TS NTPYRA ("NOD Pyramid") Sprite-Import, Zwei-Layer-Compositing wie STEC/MSLO/ORBC (siehe [[ts-assets]]).
@@ -5300,7 +5321,7 @@ aot-shrine:
 	Buildable:
 		Queue: Building.Nod
 		BuildPaletteOrder: 200
-		Prerequisites: ~aot-age2, stec, tmpl
+		Prerequisites: ~aot-age2, stec, tmpl, aot-nod-forbidden-upgrade
 		BuildLimit: 1
 		Icon: icon
 		Description: Ancient Nod relic. Unlocks NOD's most powerful combat systems and superweapons.
@@ -6398,9 +6419,10 @@ aot-upgrade-laser-fence:
 
 	Buildable:
 		BuildPaletteOrder: 65
-		# Sichtbar ab Age 2, baubar sobald Age 2 + Secret Shrine (aot-shrine) stehen
-		# (User-Wunsch 2026-07-05, ersetzt die vorherige Age1+TMPL-Gate).
-		Prerequisites: ~aot-age2, aot-shrine
+		# User-Briefing 2026-08-01: Shrine-Gate entfernt (Shrine haengt inzwischen selbst an NOD
+		# Forbidden Knowledge + STEC + TMPL und war damit faktisch ein spaetes Age-2/Age-3-Gate).
+		# Korrektur (2026-08-01, zweiter Durchgang): sichtbar ab Age 1, baubar sobald Temple steht.
+		Prerequisites: ~aot-age1, aot-age1, tmpl
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -6766,6 +6788,11 @@ aot-ftur-flame:
 	RenderSprites:
 		Image: aot-ftur
 	Buildable:
+		# ShowWhenLocked ist per Default TRUE (BuildableInfo.cs) -- nach dem Turret-Upgrade wird
+		# die GESAMTE Gruppe aot-grp-ftur unbaubar (~!aot-turret-upgrade auf beiden Proxies), und
+		# ohne expliziten False-Wert bleibt der Slot als totes Platzhalter-Icon stehen (User-Fund
+		# 2026-08-01). Identischer Fall wie bei aot-gun-base/-laser weiter oben.
+		ShowWhenLocked: False
 		LockedGroup: aot-grp-ftur
 		BuildPaletteOrder: 100
 		Prerequisites: barracks, ~!aot-turret-upgrade, ~!aot-ftur-toxic-ready
@@ -6783,6 +6810,9 @@ aot-ftur-toxic:
 	RenderSprites:
 		Image: aot-ftur
 	Buildable:
+		# Siehe aot-ftur-flame: ohne ShowWhenLocked False bleibt nach dem Turret-Upgrade ein
+		# totes Platzhalter-Icon der Gruppe aot-grp-ftur im Baumenue stehen.
+		ShowWhenLocked: False
 		LockedGroup: aot-grp-ftur
 		BuildPaletteOrder: 100
 		Prerequisites: barracks, ~!aot-turret-upgrade, ~aot-ftur-toxic-ready
@@ -6812,6 +6842,7 @@ aot-upgrade-ftur-napalm:
 	Tooltip:
 		Name: Nitro Napalm
 	Buildable:
+		ShowWhenLocked: False
 		LockedGroup: aot-grp-up-noddefense
 		BuildPaletteOrder: 26
 		Prerequisites: ~aot-age1, aot-age1, barracks, ~!aot-turret-upgrade
@@ -6830,6 +6861,7 @@ aot-upgrade-turret:
 	Tooltip:
 		Name: Turret
 	Buildable:
+		ShowWhenLocked: False
 		LockedGroup: aot-grp-up-noddefense
 		BuildPaletteOrder: 27
 		Prerequisites: ~aot-age1, aot-age1, lite, ~!aot-nitro-napalm-upgrade

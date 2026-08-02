@@ -663,6 +663,30 @@ aot-apc2:
 		Scale: 0.35
 # === Ende aotmod ===
 
+# === NOD Kennel (aot-kennel-nod): RA Soviet KENN sprite ===
+# KENN.ZIP: idle=0, damaged-idle=1. KENNMAKE.ZIP: 20-Frame Bau-Animation (0-19).
+# MEG-Pfad verifiziert 2026-08-01 (TEXTURES_RA_SRGB.MEG, STRUCTURES\KENN.ZIP + KENNMAKE.ZIP).
+# Icon: eigenes Custom-Icon (kenl_base.png, User-geliefert 2026-08-01, aus
+# "mods/management/asset wip/kenl/icon/kenl_base.png" nach mods/cnc/bits/ kopiert).
+aot-kennel-nod:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\KENN.ZIP
+		RemasteredLength: 1
+		Scale: 0.85
+	damaged-idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\KENN.ZIP
+		RemasteredStart: 1
+		RemasteredLength: 1
+		Scale: 0.85
+	make:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\KENNMAKE.ZIP
+		RemasteredLength: 20
+		Scale: 0.85
+	icon:
+		Filename: kenl_base.png
+		Length: 1
+		RemasteredFilename:
+
 # === Construction Yard (FACT): RA sprites für Age 0 ===
 # RA FACT.ZIP Frame-Layout: idle=0, build=1-25, damaged-idle=26, damaged-build=27-51
 fact:

@@ -15,8 +15,8 @@ aot-dog-nod:
 		AddToArmyValue: true
 	Buildable:
 		BuildPaletteOrder: 50
-		Prerequisites: barracks, aot-guard-dog-kennel
-		Queue: Infantry.Nod
+		Prerequisites: aot-kennel-nod
+		Queue: Dog.Nod
 		Description: Fast anti-infantry unit. Instantly kills enemy soldiers.
 	Health:
 		HP: 1800
@@ -96,7 +96,7 @@ aot-spy-nod:
 		Voice: Move
 	Buildable:
 		BuildPaletteOrder: 60
-		Prerequisites: ~aot-age1, hand, anyhq
+		Prerequisites: ~aot-age2, aot-nod-forbidden-upgrade, hand, anyhq
 		Queue: Infantry.Nod
 		Description: Cloaked infiltrator. Infiltrates enemy structures to steal credits, reveal their vision, reset support powers, or cut power.
 	Health:
@@ -159,7 +159,7 @@ aot-spy-gdi:
 		Voice: Move
 	Buildable:
 		BuildPaletteOrder: 60
-		Prerequisites: barracks, aot-intelligence-office
+		Prerequisites: barracks, atec
 		Queue: Infantry.GDI
 		Description: Disguised agent. Infiltrates enemy buildings to steal credits, reveal the map, or reset support powers.
 	Health:
@@ -665,17 +665,19 @@ aot-mcv-age1:
 
 # === Age of Tiberium (aotmod) - Recon Jeep / HUMVEE / Wolverine ===
 # Tier 0: Recon Jeep (kein Upgrade)
-# Tier 1: HUMVEE (aot-humvee-upgrade) — stärkeres MG
-# Tier 2: Wolverine (aot-wolverine-upgrade, ab Age 2 unabhängig von HUMVEE) — TS-Mech-Sprite, hat Priorität über HUMVEE
+# Tier 1: HUMVEE (aot-gdi-advtech-upgrade, seit 2026-08-01 unbedingte Folge von GDI Advanced
+# Technologies statt eigenem Kauf-Upgrade) — stärkeres MG
+# Tier 2: Wolverine (aot-mtnk-titan-upgrade = GDI Mech Armaments, seit 2026-08-01 unbedingte
+# Folge statt eigenem Kauf-Upgrade, kein APC-Bezug mehr) — TS-Mech-Sprite, hat Priorität über HUMVEE
 # Wolverine-Sprite hat Vorrang: aot-jeep-wolverine überschreibt HUMVEE- und Base-Body.
 JEEP:
 	GrantConditionOnPrerequisite@HUMVEE:
 		Condition: aot-jeep-humvee
-		Prerequisites: aot-humvee-upgrade
+		Prerequisites: aot-gdi-advtech-upgrade
 
 	GrantConditionOnPrerequisite@WOLVERINE:
 		Condition: aot-jeep-wolverine
-		Prerequisites: aot-wolverine-upgrade
+		Prerequisites: aot-mtnk-titan-upgrade
 
 	-Tooltip:
 
@@ -1158,7 +1160,7 @@ aot-htnk-base:
 		LockedGroup: aot-grp-htnk
 		Queue: Vehicle.GDI
 		BuildPaletteOrder: 30
-		Prerequisites: ~aot-weap, ~aot-age1, aot-age1, weap, atec, ~!aot-htnk-rocket-upgrade, ~!aot-mtnk-railgun-upgrade
+		Prerequisites: ~aot-weap, ~aot-age1, aot-age1, weap, atec, ~!aot-gdi-advtech-upgrade, ~!aot-mtnk-railgun-upgrade
 		Description: Heavily armored GDI battle tank with dual 120mm cannons.
 	Tooltip:
 		Name: Mammoth Tank
@@ -1178,7 +1180,7 @@ aot-htnk-rocket:
 		LockedGroup: aot-grp-htnk
 		Queue: Vehicle.GDI
 		BuildPaletteOrder: 30
-		Prerequisites: ~aot-age1, aot-age1, ~aot-htnk-rocket-upgrade, ~!aot-mtnk-railgun-upgrade
+		Prerequisites: ~aot-age1, aot-age1, ~aot-gdi-advtech-upgrade, ~!aot-mtnk-railgun-upgrade
 		Icon: aot-htnk-rocket-icon
 		Description: Mammoth Tank equipped with dual rocket launchers for additional anti-air and ground firepower.
 	Tooltip:
@@ -1230,7 +1232,7 @@ aot-htnk-laser:
 HTNK:
 	GrantConditionOnPrerequisite@ROCKET:
 		Condition: aot-htnk-rocket
-		Prerequisites: aot-htnk-rocket-upgrade
+		Prerequisites: aot-gdi-advtech-upgrade
 
 	GrantConditionOnPrerequisite@LASER:
 		Condition: aot-htnk-laser
@@ -1364,8 +1366,12 @@ APC:
 # === Age of Tiberium (aotmod) - Jeep Queue-Proxies (Doppel-Aktor-Pattern) ===
 # aot-jeep-base:      Recon-Jeep-Icon vor jedem Upgrade.
 # aot-jeep-humvee:    HUMVEE-Icon nach HUMVEE-, vor Wolverine-Upgrade.
-# aot-jeep-wolverine: Wolverine-Icon nach Wolverine-Upgrade (unabhängig von HUMVEE).
-# Alle verschwinden wenn APC-Upgrade aktiv (~!aot-apc-upgrade).
+# aot-jeep-wolverine: Wolverine-Icon nach Wolverine-Upgrade.
+# User-Briefing 2026-08-01: APC-Kreuzausschluss (~!aot-apc-upgrade) entfernt -- JEEP-Linie und
+# APC sind unabhaengige Fahrzeuge, kein Entweder-Oder mehr. aot-humvee-upgrade existiert nicht
+# mehr als Kauf-Upgrade, ersetzt durch die unbedingte Condition aot-gdi-advtech-upgrade.
+# aot-wolverine-upgrade existiert ebenfalls nicht mehr -- Wolverine haengt jetzt an
+# aot-mtnk-titan-upgrade (GDI Mech Armaments), kein APC-Bezug.
 aot-jeep-base:
 	Inherits: JEEP
 	RenderSprites:
@@ -1374,7 +1380,7 @@ aot-jeep-base:
 		ShowWhenLocked: False
 		Queue: LightVehicle.GDI
 		BuildPaletteOrder: 3
-		Prerequisites: lite, pyle, ~!aot-humvee-upgrade, ~!aot-wolverine-upgrade, ~!aot-apc-upgrade
+		Prerequisites: lite, pyle, ~!aot-gdi-advtech-upgrade, ~!aot-mtnk-titan-upgrade
 		Description: Fast reconnaissance vehicle.
 	Tooltip:
 		Name: Recon Jeep
@@ -1394,7 +1400,7 @@ aot-jeep-humvee:
 		ShowWhenLocked: False
 		Queue: LightVehicle.GDI
 		BuildPaletteOrder: 3
-		Prerequisites: lite, pyle, ~aot-humvee-upgrade, ~!aot-apc-upgrade, ~!aot-wolverine-upgrade
+		Prerequisites: lite, pyle, ~aot-gdi-advtech-upgrade, ~!aot-mtnk-titan-upgrade
 		Icon: aot-humvee-icon
 		Description: Fast reconnaissance vehicle with HUMVEE armor and stronger machine gun.
 	Tooltip:
@@ -1432,10 +1438,9 @@ aot-jeep-wolverine:
 		ShowWhenLocked: False
 		Queue: LightVehicle.GDI
 		BuildPaletteOrder: 3
-		# aot-humvee-upgrade zusaetzlich zu aot-wolverine-upgrade: Verteidigung in der Tiefe.
-		# aot-upgrade-wolverine (aot-structures.yaml) verlangt HUMVEE bereits beim Kauf, aber
-		# dieser Proxy soll auch fuer sich genommen korrekt sein, nicht nur ueber den Kauf-Weg.
-		Prerequisites: lite, pyle, aot-humvee-upgrade, ~!aot-apc-upgrade, ~aot-wolverine-upgrade
+		# aot-mtnk-titan-upgrade (GDI Mech Armaments) transformiert ALLE HUMVEEs unbedingt --
+		# kein eigenes Kauf-Upgrade, kein APC-Bezug mehr (2026-08-01, User-Briefing).
+		Prerequisites: lite, pyle, ~aot-mtnk-titan-upgrade, aot-mtnk-titan-upgrade
 		Icon: aot-wolverine-icon
 		Description: Wolverine Mech. Fast anti-infantry walker.
 	Tooltip:
@@ -1499,7 +1504,7 @@ aot-apc-amphibious:
 		ShowWhenLocked: False
 		Queue: LightVehicle.GDI
 		BuildPaletteOrder: 4
-		Prerequisites: lite, ~aot-apc-upgrade, ~aot-amphibious-upgrade, ~!aot-humvee-upgrade
+		Prerequisites: lite, barracks, ~aot-amphibious-upgrade
 		Icon: aot-amphibious-icon
 		Description: Amphibious APC. Drives on land and through water. Can carry 5 soldiers. Unarmed.
 	Tooltip:
@@ -1618,7 +1623,7 @@ ORET:
 		Resources: Tiberium
 	DockClientManager:
 	OreTransporter:
-		OreLoadAmount: 250
+		OreLoadAmount: 500
 		OreLoadDelay: 25
 	WithStoresResourcesPipsDecoration:
 		Position: BottomLeft
@@ -2793,9 +2798,8 @@ aot-ttnk-flame:
 	Buildable:
 		LockedGroup: aot-grp-ttnk
 		BuildPaletteOrder: 30
-		Prerequisites: afld, ~aot-ttnk-flame-upgrade, ~!aot-toxic-upgrade, ~!aot-subterrain-upgrade
-		Queue: Starport
-		BuildDuration: 0
+		Prerequisites: lite, ~aot-ttnk-flame-upgrade, ~!aot-toxic-upgrade, ~!aot-subterrain-upgrade
+		Queue: LightVehicle.Nod
 		Icon: aot-flame-icon
 		Description: Upgraded Heavy Tank armed with dual flamethrowers.
 	Tooltip@normal:
@@ -2830,9 +2834,8 @@ aot-ttnk-toxin:
 	Buildable:
 		LockedGroup: aot-grp-ttnk
 		BuildPaletteOrder: 30
-		Prerequisites: afld, ~aot-ttnk-flame-upgrade, ~aot-toxic-upgrade, ~!aot-subterrain-upgrade
-		Queue: Starport
-		BuildDuration: 0
+		Prerequisites: lite, ~aot-ttnk-flame-upgrade, ~aot-toxic-upgrade, ~!aot-subterrain-upgrade
+		Queue: LightVehicle.Nod
 		Icon: aot-toxin-icon
 		Description: Flame Tank upgraded with dual toxic tiberian-sprayers.
 	Tooltip@normal:
@@ -3167,9 +3170,8 @@ aot-v2-napalm:
 	Buildable:
 		LockedGroup: aot-grp-v2
 		BuildPaletteOrder: 40
-		Prerequisites: afld, anyhq, ~aot-napalm-upgrade, ~!aot-toxic-upgrade
-		Queue: Starport
-		BuildDuration: 0
+		Prerequisites: lite, anyhq, ~aot-napalm-upgrade, ~!aot-toxic-upgrade, ~!aot-howitzer-upgrade
+		Queue: LightVehicle.Nod
 		Icon: aot-v2-napalm-icon
 		Description: Napalm-upgraded V2. Fires two rockets in rapid succession. Highly effective vs. infantry.
 	-Tooltip:
@@ -3201,9 +3203,8 @@ aot-v2-toxic:
 	Buildable:
 		LockedGroup: aot-grp-v2
 		BuildPaletteOrder: 40
-		Prerequisites: afld, anyhq, ~aot-napalm-upgrade, ~aot-toxic-upgrade
-		Queue: Starport
-		BuildDuration: 0
+		Prerequisites: lite, anyhq, ~aot-napalm-upgrade, ~aot-toxic-upgrade, ~!aot-howitzer-upgrade
+		Queue: LightVehicle.Nod
 		Icon: aot-v2-toxic-icon
 		Description: Toxic-upgraded V2. Fires two toxic rockets that leave a lingering tiberium gas field at the impact site.
 	# Immer toxic (nur nach Toxic-Upgrade baubar, irreversibel): geerbte konditionale
@@ -3566,7 +3567,7 @@ aot-cyborg:
 	Buildable:
 		Queue: Infantry.NodElite
 		BuildPaletteOrder: 10
-		Prerequisites: ~aot-age2, aot-shrine
+		Prerequisites: ~aot-age2, aot-nod-forbidden-upgrade
 		Icon: icon
 		Description: Cybernetic NOD soldier. Enters crippled mode at critical HP.
 # === Ende aotmod ===
@@ -3609,7 +3610,7 @@ aot-cyc2:
 	Buildable:
 		Queue: Infantry.NodElite
 		BuildPaletteOrder: 20
-		Prerequisites: ~aot-age3, aot-shrine
+		Prerequisites: ~aot-age2, aot-shrine, aot-nod-forbidden-upgrade
 		Icon: icon
 		Description: Elite NOD cyborg with plasma cannon. Devastating vs. all targets. Limit: 1.
 # === Ende aotmod ===
@@ -4099,7 +4100,7 @@ aot-stnk-base:
 		Queue: Starport
 		BuildDuration: 0
 		BuildPaletteOrder: 50
-		Prerequisites: ~aot-age1, tmpl, ~!aot-stnk-cargo-upgrade
+		Prerequisites: ~aot-age1, tmpl, aot-nod-secrettech-upgrade, ~!aot-stnk-cargo-upgrade
 		Icon: aot-stnk-icon
 		Description: actor-stnk.description
 	Tooltip:
@@ -4114,7 +4115,7 @@ aot-stnk-cargo:
 		Queue: Starport
 		BuildDuration: 0
 		BuildPaletteOrder: 50
-		Prerequisites: ~aot-age1, tmpl, ~aot-stnk-cargo-upgrade
+		Prerequisites: ~aot-age1, tmpl, aot-nod-secrettech-upgrade, ~aot-stnk-cargo-upgrade
 		Icon: aot-stnk-cargo-icon
 		Description: actor-stnk.description
 	Tooltip:
@@ -4689,10 +4690,7 @@ aot-msam-hover-mlrs:
 	Mobile:
 		Locomotor: aot-hvr
 		PauseOnCondition: aot-ion-storm-grounded
-	-GrantConditionOnPrerequisite@HOVER_MLRS:
-	-GrantConditionOnPrerequisite@HOVER_AA:
 	-AotTransformsOnTerrain@HOVER_MLRS:
-	-AotTransformsOnTerrain@HOVER_AA:
 	-WithFacingSpriteBody:
 	WithFacingSpriteBody@body:
 		Sequence: aot-hvr-idle
@@ -4725,7 +4723,7 @@ aot-msam-hover-mlrs:
 	Buildable:
 		LockedGroup: aot-grp-msam
 		BuildPaletteOrder: 20
-		Prerequisites: anyhq, ~aot-hover-mlrs-upgrade, ~!aot-hover-aa-upgrade
+		Prerequisites: anyhq, ~aot-heavy-ordonance-upgrade
 		Queue: Vehicle.GDI
 		Icon: aot-hvr-mlrs-icon
 		Description: Hover Rocket Launcher. Amphibious rocket artillery. Strong vs all ground units.
@@ -4745,10 +4743,7 @@ aot-msam-hover-aa:
 	Mobile:
 		Locomotor: aot-hvr
 		PauseOnCondition: aot-ion-storm-grounded
-	-GrantConditionOnPrerequisite@HOVER_MLRS:
-	-GrantConditionOnPrerequisite@HOVER_AA:
 	-AotTransformsOnTerrain@HOVER_MLRS:
-	-AotTransformsOnTerrain@HOVER_AA:
 	-WithFacingSpriteBody:
 	WithFacingSpriteBody@body:
 		Sequence: aot-hvr-idle
@@ -4808,7 +4803,7 @@ aot-msam-hover-aa:
 	Buildable:
 		LockedGroup: aot-grp-msam
 		BuildPaletteOrder: 20
-		Prerequisites: anyhq, ~aot-hover-aa-upgrade, ~!aot-hover-mlrs-upgrade
+		Prerequisites: anyhq, ~aot-heavy-ordonance-upgrade, ~aot-orbc
 		Queue: Vehicle.GDI
 		Icon: aot-hvr-aa-icon
 		Description: Hover AA. Amphibious anti-air platform. Devastating vs aircraft.
@@ -4851,7 +4846,7 @@ aot-jugg:
 		ShowWhenLocked: False
 		Queue: Vehicle.GDI
 		BuildPaletteOrder: 50
-		Prerequisites: ~aot-weap, ~aot-age2, aot-age2, ~aot-mtnk-titan-upgrade, aot-mtnk-titan-upgrade, ~!aot-mtnk-predator-upgrade
+		Prerequisites: ~aot-weap, ~aot-age2, aot-age2, ~aot-mtnk-titan-upgrade, aot-mtnk-titan-upgrade, aot-orbc, ~!aot-mtnk-predator-upgrade
 		Icon: aot-jugg-icon
 		Description: GDI Juggernaut. Siege artillery mech. Deploy to fire. Devastating vs. structures.
 	-Tooltip:
