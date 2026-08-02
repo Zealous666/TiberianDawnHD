@@ -1061,10 +1061,10 @@ namespace OpenRA.Mods.Common.Traits
 			// block's own W×H rectangle regardless of fencing). The tight LocalFlood radius + "closest cell
 			// to the anchor" bias is what turns that baseline guarantee into "genuinely touching it" rather
 			// than "somewhere in the general area", which is all Place()'s own base-wide spread term gives.
-			Placement PlaceAdjacent(string name, CPos anchor, int radius = 9, int budget = 260)
+			Placement PlaceAdjacent(string name, string role, CPos anchor, int radius = 9, int budget = 260)
 			{
 				var area = LocalFlood(anchor, radius, budget);
-				return PlaceIn(area, name, SingleVariants("SAM"), c => -Dist(c, anchor), useSpread: false);
+				return PlaceIn(area, name, SingleVariants(role), c => -Dist(c, anchor), useSpread: false);
 			}
 
 			var gateList = gates;
@@ -1129,33 +1129,34 @@ namespace OpenRA.Mods.Common.Traits
 			Placement pSamTech1 = null, pSamTech2 = null, pSamProd1 = null, pSamPower1a = null, pSamPower1b = null;
 			Placement pSamTemple = null, pSamShrine = null;
 			Placement pSamDefence1 = null, pSamDefence2 = null; // resolved further down, once pGateCluster exists
+			Placement pSilo2 = null; // ditto -- anchored behind the Obelisk's own eventual spot
 			if (Info.SamTypes.Length > 0 && roleDims.ContainsKey("SAM"))
 			{
-				pSamYard1 = PlaceAdjacent("SAM_Yard1", yard);
-				pSamYard2 = PlaceAdjacent("SAM_Yard2", yard);
+				pSamYard1 = PlaceAdjacent("SAM_Yard1", "SAM", yard);
+				pSamYard2 = PlaceAdjacent("SAM_Yard2", "SAM", yard);
 
 				if (pTech != null)
 				{
 					var techAnchor = BlockAnchor(pTech);
-					pSamTech1 = PlaceAdjacent("SAM_Tech1", techAnchor);
-					pSamTech2 = PlaceAdjacent("SAM_Tech2", techAnchor);
+					pSamTech1 = PlaceAdjacent("SAM_Tech1", "SAM", techAnchor);
+					pSamTech2 = PlaceAdjacent("SAM_Tech2", "SAM", techAnchor);
 				}
 
 				if (pProd != null)
-					pSamProd1 = PlaceAdjacent("SAM_Prod1", BlockAnchor(pProd));
+					pSamProd1 = PlaceAdjacent("SAM_Prod1", "SAM", BlockAnchor(pProd));
 
 				if (pNuke != null)
 				{
 					var powerAnchor = BlockAnchor(pNuke);
-					pSamPower1a = PlaceAdjacent("SAM_Power1a", powerAnchor);
-					pSamPower1b = PlaceAdjacent("SAM_Power1b", powerAnchor);
+					pSamPower1a = PlaceAdjacent("SAM_Power1a", "SAM", powerAnchor);
+					pSamPower1b = PlaceAdjacent("SAM_Power1b", "SAM", powerAnchor);
 				}
 
 				if (pTmpl != null)
-					pSamTemple = PlaceAdjacent("SAM_Temple", BlockAnchor(pTmpl));
+					pSamTemple = PlaceAdjacent("SAM_Temple", "SAM", BlockAnchor(pTmpl));
 
 				if (pShrn != null)
-					pSamShrine = PlaceAdjacent("SAM_Shrine", BlockAnchor(pShrn));
+					pSamShrine = PlaceAdjacent("SAM_Shrine", "SAM", BlockAnchor(pShrn));
 			}
 
 			// Gate defence: a full bulk CLUSTER (user spec) -- Turret-FlameTurret-Turret in a single row or
@@ -1188,8 +1189,21 @@ namespace OpenRA.Mods.Common.Traits
 					var clusterCentre = BlockAnchor(pGateCluster);
 					var behindDefence = Cardinal(new CVec(yard.X - clusterCentre.X, yard.Y - clusterCentre.Y));
 					var defenceSamAnchor = clusterCentre + (behindDefence * 7);
-					pSamDefence1 = PlaceAdjacent("SAM_Defence1", defenceSamAnchor);
-					pSamDefence2 = PlaceAdjacent("SAM_Defence2", defenceSamAnchor);
+					pSamDefence1 = PlaceAdjacent("SAM_Defence1", "SAM", defenceSamAnchor);
+					pSamDefence2 = PlaceAdjacent("SAM_Defence2", "SAM", defenceSamAnchor);
+
+					// Second SILO (user spec 2026-08-01): 2-3 cells further back than the Age-3 Obelisk's
+					// OWN spot, on the exact same line -- Cardinal(yard - fturPos) from the middle Flame
+					// Turret, the identical formula BuildRhythm uses for the Obelisk itself, so the two
+					// never drift apart even if the cluster's own layout changes later. Queued as the
+					// LAST Age-0 core step (see BuildRhythm), which -- via the same strict-first-open
+					// ordering AFLD/PROC already rely on -- naturally lands "once Tech Centre stands and
+					// the Age-1 upgrade is about to start" without needing its own age check.
+					var fturPos = pGateCluster.Pos + pGateCluster.V.Buildings[1].Off;
+					var behindObelisk = Cardinal(new CVec(yard.X - fturPos.X, yard.Y - fturPos.Y));
+					var obeliskAnchor = fturPos + (behindObelisk * 4);
+					var silo2Anchor = obeliskAnchor + (behindObelisk * 3);
+					pSilo2 = PlaceAdjacent("SILO2", "SILO", silo2Anchor);
 				}
 
 				// Secondary approaches (user spec): the SAME cluster shape at every other classified
@@ -1226,7 +1240,7 @@ namespace OpenRA.Mods.Common.Traits
 				}
 			}
 
-			BuildRhythm(pNuke, pSilo, pProd, pNuk2a, pTech, pFix, pProc, pProc2, pAfld, pTmpl, pHpad, pShrn, pMslo, pSgen1, pSgen2,
+			BuildRhythm(pNuke, pSilo, pSilo2, pProd, pNuk2a, pTech, pFix, pProc, pProc2, pAfld, pTmpl, pHpad, pShrn, pMslo, pSgen1, pSgen2,
 				pSamYard1, pSamYard2, pSamTech1, pSamTech2, pSamProd1, pSamPower1a, pSamPower1b,
 				pSamDefence1, pSamDefence2, pSamTemple, pSamShrine, pGateCluster, secondaryClusters);
 
@@ -1236,7 +1250,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		// ------------------------------------------------------------------ rhythm
 
-		void BuildRhythm(Placement nuke, Placement silo, Placement prod, Placement nuk2a, Placement tech,
+		void BuildRhythm(Placement nuke, Placement silo, Placement silo2, Placement prod, Placement nuk2a, Placement tech,
 			Placement fix, Placement proc, Placement proc2, Placement afld, Placement tmpl, Placement hpad,
 			Placement shrn, Placement mslo, Placement sgen1, Placement sgen2,
 			Placement samYard1, Placement samYard2, Placement samTech1, Placement samTech2, Placement samProd1,
@@ -1396,6 +1410,15 @@ namespace OpenRA.Mods.Common.Traits
 
 			// STEC moved to the very end of Age 0 (user spec).
 			AddBuilding(tech, 1, "STEC");
+
+			// Second SILO (user spec 2026-08-01): the LAST Age-0 core step, 2-3 cells behind the Age-3
+			// Obelisk's own eventual spot (see the anchor computed in Plan(), right after pGateCluster).
+			// Being last in Age 0's core list means two things fall out for free from the strict
+			// first-open ordering every other step here already relies on: it isn't attempted until
+			// Tech Centre (STEC) stands, and -- since AgeRhythmComplete(0) waits for ALL of Age 0's
+			// Rhythm, not just STEC -- the Age-1 upgrade purchase doesn't fire until this Silo is done
+			// either, so it genuinely finishes right as Age 1 begins rather than merely "around" then.
+			AddBuilding(silo2, 0, "SILO");
 
 			currentAge = 1;
 
