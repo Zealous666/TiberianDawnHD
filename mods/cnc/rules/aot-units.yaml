@@ -3091,6 +3091,17 @@ aot-v2-base:
 		Queue: LightVehicle.Nod
 		Icon: icon
 		Description: Long-range rocket artillery. Fires a single ballistic missile. Effective vs. all ground targets.
+	# User-Wunsch 2026-08-01: bereits gebaute V2/Napalm-V2 sollen sich beim Kauf von Artillery
+	# Ballistics automatisch in den Howitzer verwandeln, analog zum JEEP->HUMVEE-Retrofit. Da
+	# ARTY (Howitzer) ein komplett anderer Basis-Aktor als V2 ist (anderes Chassis/Waffe/
+	# Locomotor), reicht ein Condition-Switch hier NICHT -- braucht einen echten Aktor-Transform
+	# (AotTransformOnPrerequisite, siehe TTNK->Devil's Tongue fuer das gleiche Muster). Kein
+	# RequiresCondition noetig: soll fuer Base-V2 UND Napalm-V2 gleichermassen greifen. Erbt auf
+	# aot-v2-napalm/aot-v2-toxic mit -- IntoActor (aot-arty-howitzer, Inherits: ARTY) erbt NICHT
+	# von aot-v2-base zurueck, also kein Endlos-Transform-Risiko wie bei TTNK-Devil.
+	AotTransformOnPrerequisite:
+		IntoActor: aot-arty-howitzer
+		Prerequisites: aot-howitzer-upgrade
 	# Tooltip-Reihenfolge wichtig: Welt nimmt den ERSTEN aktiven, Sidebar NUR den bedingungslosen (letzter).
 	# -Tooltip: PFLICHT — der von ^Tank GEERBTE Tooltip behielte sonst seine Merge-Position VOR den
 	# konditionalen und würde als erster aktiver Trait immer gewinnen (Name bliebe dauerhaft "V2").

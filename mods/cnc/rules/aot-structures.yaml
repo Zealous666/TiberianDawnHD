@@ -6419,10 +6419,9 @@ aot-upgrade-laser-fence:
 
 	Buildable:
 		BuildPaletteOrder: 65
-		# User-Briefing 2026-08-01: Shrine-Gate entfernt (Shrine haengt inzwischen selbst an NOD
-		# Forbidden Knowledge + STEC + TMPL und war damit faktisch ein spaetes Age-2/Age-3-Gate).
-		# Korrektur (2026-08-01, zweiter Durchgang): sichtbar ab Age 1, baubar sobald Temple steht.
-		Prerequisites: ~aot-age1, aot-age1, tmpl
+		# Korrektur (2026-08-01, dritter Durchgang, User-Wunsch): TMPL wieder raus, Secret Shrine
+		# wieder rein. Sichtbar ab Age 1, baubar sobald Secret Shrine steht.
+		Prerequisites: ~aot-age1, aot-age1, aot-shrine
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
