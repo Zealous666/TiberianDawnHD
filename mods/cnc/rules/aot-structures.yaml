@@ -1,3 +1,26 @@
+# === Age of Tiberium (aotmod) - Verkaufs-Infanterie pro Fraktion (2026-08-02, User-Wunsch) ===
+# Vanilla ^BaseBuilding (engine/mods/cnc/rules/defaults.yaml) spuckt beim Verkauf die
+# GENERISCHEN Aktoren e6,e1,e1,e1 aus -- in diesem Mod existieren dafuer aber eigene
+# Fraktions-Versionen (aot-e1-gdi/-nod, aot-e6-gdi = Engineer, aot-e6-nod = SABOTEUR).
+# SpawnActorsOnSellInfo.Factions filtert nach der Fraktion des VERKAUFENDEN Spielers
+# (SpawnActorsOnSell.cs: correctFaction = Factions.Contains(self.Owner.Faction.InternalName)),
+# daher zwei Instanzen statt Dutzender Einzel-Overrides -- greift damit auch fuer die
+# fraktionsneutral gebauten Gebaeude (Silo, Powerplant, FIX, Foundation ...).
+#
+# ⚠️ WICHTIG fuer kuenftige Gebaeude: die UNBENANNTE Instanz bleibt bewusst die GDI-Variante,
+# damit alle bestehenden "-SpawnActorsOnSell:"-Entfernungen (SILO, OBLI, Shipyard, Sub Pen,
+# beide Gates) weiterhin greifen. Wer das Verkaufs-Spawnen unterdrueckt, muss ZUSAETZLICH
+# "-SpawnActorsOnSell@nod:" setzen -- sonst spuckt das Gebaeude bei NOD-Besitz doch Infanterie aus.
+^BaseBuilding:
+	SpawnActorsOnSell:
+		ActorTypes: aot-e6-gdi, aot-e1-gdi, aot-e1-gdi, aot-e1-gdi
+		GuaranteedActorTypes: aot-e1-gdi
+		Factions: gdi
+	SpawnActorsOnSell@nod:
+		ActorTypes: aot-e6-nod, aot-e1-nod, aot-e1-nod, aot-e1-nod
+		GuaranteedActorTypes: aot-e1-nod
+		Factions: nod
+
 # === Age of Tiberium (aotmod) - Vehicle Factory (LITE) ===
 # Günstigere Fahrzeugfabrik. Nur Powerplant nötig (kein Refinery).
 # Sprite: RA War Factory (WEAP.ZIP), Age 0/1 IDENTISCH für beide Fraktionen.
@@ -909,11 +932,15 @@ aot-kennel-nod:
 	-WithDeathAnimation:
 	# Vanilla-RA-Konvention: Kennel erweitert die Bauzone nicht.
 	-GivesBuildableArea:
-	# Von ^BaseBuilding geerbtes SpawnActorsOnSell spawnt Standard-Infanterie (e6,e1,e1,e1) --
-	# fuer den Dog-Producer soll beim Verkauf stattdessen ein Dog rauskommen (User-Wunsch 2026-08-01).
+	# Von ^BaseBuilding geerbtes SpawnActorsOnSell spawnt Standard-Infanterie -- fuer den
+	# Dog-Producer soll beim Verkauf stattdessen ein Dog rauskommen (User-Wunsch 2026-08-01).
+	# Die unbenannte (GDI-)Instanz wird hier ueberschrieben, die NOD-Instanz muss zusaetzlich
+	# entfernt werden -- sonst kaeme beim NOD-Kennel Dog UND Saboteur+Infanterie raus.
 	SpawnActorsOnSell:
 		ActorTypes: aot-dog-nod
 		GuaranteedActorTypes: aot-dog-nod
+		Factions: gdi, nod
+	-SpawnActorsOnSell@nod:
 	# User-Fund 2026-08-01: PrimaryBuilding (vom Vanilla-RA-KENN uebernommen) erzeugt einen
 	# "PrimaryProducer"-Befehl mit Cursor: deploy -- das war der gruene "Deploy"-Mauszeiger.
 	# PYLE/HAND (die anderen Infanterie-Producer in diesem Mod) haben diese Trait NICHT, sie
@@ -1406,6 +1433,12 @@ ATEC:
 	Production@UPGRADEGDI:
 		Produces: Upgrade.GDI
 		MoveIntoWorld: false
+	# Baufortschritts-Balken unter der Healthbar (User-Wunsch 2026-08-02): zeigt den Fortschritt
+	# des laufenden Upgrades -- u.a. der Age-Aufstiege, die ueber genau diese Queue laufen.
+	# ProductionBar verlangt ein Production-Trait am Aktor (Requires<ProductionInfo>), das hier
+	# direkt darueber steht; die Queue findet es ueber ProductionType == ProductionQueue.Type.
+	ProductionBar@UPGRADEGDI:
+		ProductionType: Upgrade.GDI
 	AotOpensProductionTabOnSelection:
 		Group: Upgrade
 	ProductionQueue@UpgradeGDI:
@@ -1441,8 +1474,13 @@ ATEC:
 	RevealsShroud:
 		Range: 5c0
 	WithBuildingBib:
+	# GDI-Tech: eigene Verkaufs-Liste (kein Engineer, dafuer ein ziviler Wissenschaftler).
+	# Auf aot-Infanterie umgestellt (User-Wunsch 2026-08-02); Factions: gdi wird von der
+	# unbenannten ^BaseBuilding-Instanz geerbt. ATEC ist GDI-exklusiv -> NOD-Instanz raus.
 	SpawnActorsOnSell:
-		ActorTypes: e1, e1, c2
+		ActorTypes: aot-e1-gdi, aot-e1-gdi, c2
+		GuaranteedActorTypes: aot-e1-gdi
+	-SpawnActorsOnSell@nod:
 	Power:
 		Amount: -200
 	GrantConditionOnPrerequisite@aotage1:
@@ -1580,6 +1618,9 @@ STEC:
 	Production@UPGRADENOD:
 		Produces: Upgrade.Nod
 		MoveIntoWorld: false
+	# Siehe ATEC: Baufortschritts-Balken fuer die Upgrade-Queue (inkl. Age-Aufstiege).
+	ProductionBar@UPGRADENOD:
+		ProductionType: Upgrade.Nod
 	AotOpensProductionTabOnSelection:
 		Group: Upgrade
 	ProductionQueue@UpgradeNod:
@@ -1610,8 +1651,13 @@ STEC:
 	RevealsShroud:
 		Range: 5c0
 	WithBuildingBib:
-	SpawnActorsOnSell:
-		ActorTypes: e1, e1, e1
+	# NOD-Tech: eigene Verkaufs-Liste OHNE Saboteur (bewusst nur Infanterie, analog ATEC).
+	# Die unbenannte Instanz ist GDI-gefiltert und greift auf diesem NOD-Gebaeude nie --
+	# daher die NOD-Instanz ueberschreiben statt der unbenannten (User-Wunsch 2026-08-02).
+	-SpawnActorsOnSell:
+	SpawnActorsOnSell@nod:
+		ActorTypes: aot-e1-nod, aot-e1-nod, aot-e1-nod
+		GuaranteedActorTypes: aot-e1-nod
 	Power:
 		Amount: -200
 	InfiltrateForSupportPowerReset:
@@ -3032,6 +3078,23 @@ aot-hpad-nod:
 		Description: Landing pad for helicopters. Required for air unit production.
 	ProvidesPrerequisite@buildingname:
 		Prerequisite: hpad
+	# Bib-Smudge (User-Wunsch 2026-08-02), Ausmasse exakt wie beim NOD Radar (aot-nod-radar):
+	# HPAD ist von Haus aus 2x2 ("xx xx", Dimensions 2,2, kein LocalCenterOffset). Der Bib
+	# braucht eine EIGENE Footprint-Zeile, sonst wird er auf die Gebaeudezellen gemalt und
+	# unten abgeschnitten. Deshalb - identisch zum Radar:
+	#   Footprint: dritte Zeile "==" (befahrbare Smudge-Reihe, blockiert nicht)
+	#   Dimensions: Y 2 -> 3 (WithBuildingBib.cs rechnet bibOffset = Dimensions.Y - rows,
+	#                        mit rows=2 also Reihen 1+2 = untere Gebaeudereihe + Smudge-Reihe)
+	#   LocalCenterOffset: 0,-512,0 -- eine zusaetzliche Zeile verschiebt den geometrischen
+	#                        Mittelpunkt um eine halbe Zelle (512) nach unten; das hebt es
+	#                        wieder auf, damit das Sprite exakt an derselben Stelle bleibt.
+	# Selectable.Bounds bleibt bei 2048,2048 (von HPAD geerbt) - die Auswahlbox soll nur das
+	# echte 2x2-Gebaeude umfassen, nicht die Smudge-Reihe (Radar handhabt es genauso).
+	Building:
+		Footprint: xx xx ==
+		Dimensions: 2,3
+		LocalCenterOffset: 0,-512,0
+	WithBuildingBib:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - NOD Airstrike-Freischaltung ===
@@ -3187,7 +3250,8 @@ aot-upgrade-orca:
 
 	Buildable:
 		BuildPaletteOrder: 100
-		Prerequisites: ~aot-age1, atec, anyhq, hpad
+		# weap (Advanced War Factory) zusaetzlich verlangt (User-Wunsch 2026-08-02).
+		Prerequisites: ~aot-age1, atec, anyhq, hpad, weap
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -3311,7 +3375,7 @@ aot-upgrade-firehawk:
 		Description: Replaces all A-10 fighters with Firehawks. Swaps Vulcan cannons and napalm for triple-double rocket salvos, effective against ground and air targets.
 
 	Valued:
-		Cost: 2000
+		Cost: 3000
 
 	RenderSprites:
 		Image: aot-upgrade-firehawk
@@ -4491,6 +4555,9 @@ aot-shipyard:
 		Adjacent: 6
 	-GivesBuildableArea:
 	-SpawnActorsOnSell:
+	# NOD-Gegenstueck der Verkaufs-Infanterie ebenfalls entfernen (siehe ^BaseBuilding oben):
+	# ohne diese Zeile wuerde dieses Gebaeude bei NOD-Besitz doch Infanterie ausspucken.
+	-SpawnActorsOnSell@nod:
 	RevealsShroud:
 		Range: 4c0
 	ProvidesPrerequisite@buildingname:
@@ -4585,6 +4652,9 @@ aot-subpen:
 		Adjacent: 6
 	-GivesBuildableArea:
 	-SpawnActorsOnSell:
+	# NOD-Gegenstueck der Verkaufs-Infanterie ebenfalls entfernen (siehe ^BaseBuilding oben):
+	# ohne diese Zeile wuerde dieses Gebaeude bei NOD-Besitz doch Infanterie ausspucken.
+	-SpawnActorsOnSell@nod:
 	ProvidesPrerequisite:
 		Prerequisite: aot-subpen
 	RevealsShroud:
@@ -4852,6 +4922,10 @@ SILO:
 # Einheitliches Image (silo) für alle drei Proxies — Sprite-Wechsel via Condition, nicht via Image-Swap.
 SILO:
 	-Buildable:
+	# Vanilla-SILO entfernt bereits die unbenannte Verkaufs-Infanterie
+	# (engine/mods/cnc/rules/structures.yaml); das NOD-Gegenstueck aus ^BaseBuilding
+	# muss hier mit entfernt werden (siehe Kommentar ganz oben in dieser Datei).
+	-SpawnActorsOnSell@nod:
 	# 2x2-Footprint: die smudge-freie Nordreihe des alten 2x3 (xx xx ==) entfernt,
 	# analog zum Gate-Fix (siehe ts-gates-system.md). WithBuildingBib deckt nur die
 	# unteren 2 Reihen ab -> alte Nordreihe "xx" war ohnehin ohne Bib. LocalCenterOffset
@@ -5593,6 +5667,10 @@ OBLI:
 		Queue: Building.Nod
 	# User-Wunsch (2026-07-26): nicht durch Engineer/Saboteur einnehmbar.
 	-Capturable:
+	# Vanilla-OBLI entfernt bereits die unbenannte Verkaufs-Infanterie
+	# (engine/mods/cnc/rules/structures.yaml); das NOD-Gegenstueck aus ^BaseBuilding
+	# muss hier mit entfernt werden (siehe Kommentar ganz oben in dieser Datei).
+	-SpawnActorsOnSell@nod:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - NOD SAM Site (RA-Import, 2026-07-05) ===
@@ -6573,6 +6651,9 @@ aot-gate-gdi:
 	-WithDeathAnimation:
 	# Kein Infanterie-Spawn beim Verkaufen (User-Wunsch: niemand soll rauskommen).
 	-SpawnActorsOnSell:
+	# NOD-Gegenstueck der Verkaufs-Infanterie ebenfalls entfernen (siehe ^BaseBuilding oben):
+	# ohne diese Zeile wuerde dieses Gebaeude bei NOD-Besitz doch Infanterie ausspucken.
+	-SpawnActorsOnSell@nod:
 	# WithMakeAnimation bleibt geerbt (grantet build-incomplete fuer Sellable/
 	# Capturable); make-Sequenz = 1-Frame-Dummy mit derselben PNG.
 	# Nativer Gate-Trait (Engine) uebernimmt Auto-Open/-Close fuer Verbuendete +
@@ -6661,6 +6742,9 @@ aot-gate-nod:
 	-WithDeathAnimation:
 	# Kein Infanterie-Spawn beim Verkaufen (User-Wunsch: niemand soll rauskommen).
 	-SpawnActorsOnSell:
+	# NOD-Gegenstueck der Verkaufs-Infanterie ebenfalls entfernen (siehe ^BaseBuilding oben):
+	# ohne diese Zeile wuerde dieses Gebaeude bei NOD-Besitz doch Infanterie ausspucken.
+	-SpawnActorsOnSell@nod:
 	-WithSpriteBody:
 	WithGateSpriteBody:
 		# Irregulares Flackern (5-35 Ticks = 0.2-1.4s zwischen Umschaltungen) waehrend

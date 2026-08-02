@@ -2227,7 +2227,7 @@ AJET:
 		Condition: aot-firehawk
 		Prerequisites: aot-firehawk-upgrade
 	Valued:
-		Cost: 1200
+		Cost: 2500
 	Tooltip:
 		Name: GDI Fighter
 		RequiresCondition: !aot-firehawk
@@ -2395,6 +2395,8 @@ aot-ajet-firehawk:
 	-Encyclopedia:
 	RenderSprites:
 		Image: aot-ajet
+	Valued:
+		Cost: 3000
 	Buildable:
 		LockedGroup: aot-grp-ajet
 		BuildPaletteOrder: 10

@@ -201,6 +201,26 @@ hpad:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\HPAD.ZIP
 	make:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\HPADMAKE.ZIP
+	# Bib-Smudge (User-Wunsch 2026-08-02, NOD Helipad): 1:1 vom NOD Radar uebernommen
+	# (aot-sequences.yaml, Block "aot-nod-radar"). BIB3 = die 2 Zellen breite Variante,
+	# Count 4 = 2 Reihen x 2 Spalten -- genau was WithBuildingBib bei Dimensions.X=2 und
+	# rows=2 anfordert (WithBuildingBib.cs: rows*width Frames). Nur aot-hpad-nod verdrahtet
+	# den Bib tatsaechlich; das GDI-Helipad bleibt unveraendert ohne Bib.
+	bib:
+		TilesetFilenames:
+			DESERT: bib3.des
+			WINTER: bib3.win
+			SNOW: bib3.sno
+			TEMPERAT: bib3.tem
+		Length: *
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\TEMPERATE\BIB3\BIB3.TEM-{0:D4}.DDS
+			Count: 4
+		RemasteredTilesetFilenamesPattern:
+			WINTER: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\BIB3.WIN\BIB3.WIN-{0:D4}.DDS
+				Count: 4
+			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\BIB3.DES\BIB3.DES-{0:D4}.DDS
+				Count: 4
+		RemasteredPremultiplied: false
 	icon:
 		RemasteredFilename:
 	hpad-blue-icon:
