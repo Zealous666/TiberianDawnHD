@@ -600,18 +600,31 @@ namespace OpenRA.Mods.Common.Traits
 							}
 
 							var isBuilding = unit.HasTraitInfo<BuildingInfo>();
+
+							// aotmod: ReadyAudio/ReadyTextNotification are QUEUE-level, so without this
+							// guard every Age upgrade would announce "Construction complete" on top of
+							// its own AotAgeActivationNotification. See AotSuppressReadyNotification.
+							var announceReady = !unit.HasTraitInfo<AotSuppressReadyNotificationInfo>();
+
 							if (isBuilding && !notified)
 							{
-								Game.Sound.PlayNotification(rules, self.Owner, "Speech", Info.ReadyAudio, self.Owner.Faction.InternalName);
-								TextNotificationsManager.AddTransientLine(self.Owner, Info.ReadyTextNotification);
+								if (announceReady)
+								{
+									Game.Sound.PlayNotification(rules, self.Owner, "Speech", Info.ReadyAudio, self.Owner.Faction.InternalName);
+									TextNotificationsManager.AddTransientLine(self.Owner, Info.ReadyTextNotification);
+								}
+
 								notified = true;
 							}
 							else if (!isBuilding)
 							{
 								if (BuildUnit(unit))
 								{
-									Game.Sound.PlayNotification(rules, self.Owner, "Speech", Info.ReadyAudio, self.Owner.Faction.InternalName);
-									TextNotificationsManager.AddTransientLine(self.Owner, Info.ReadyTextNotification);
+									if (announceReady)
+									{
+										Game.Sound.PlayNotification(rules, self.Owner, "Speech", Info.ReadyAudio, self.Owner.Faction.InternalName);
+										TextNotificationsManager.AddTransientLine(self.Owner, Info.ReadyTextNotification);
+									}
 								}
 								else if (!notified && time > 0)
 								{

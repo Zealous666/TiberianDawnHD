@@ -738,7 +738,8 @@ aot-age1-marker:
 
 aot-age1:
 	Tooltip:
-		Name: Age 1
+		Name: 1st Tiberium Age
+	Interactable:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Age-2-Marker ===
@@ -753,7 +754,8 @@ aot-age2-marker:
 
 aot-age2:
 	Tooltip:
-		Name: Age 2
+		Name: 2nd Tiberium Age
+	Interactable:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Age-3-Marker ===
@@ -768,7 +770,123 @@ aot-age3-marker:
 
 aot-age3:
 	Tooltip:
-		Name: Age 3
+		Name: 3rd Tiberium Age
+	Interactable:
+
+# === Age of Tiberium (aotmod) - Display-Name-Shims fuer Prerequisite-Strings ===
+# ProductionTooltipLogic.ActorName() loest einen Prerequisite-String auf, indem es einen AKTOR
+# mit exakt diesem Namen sucht und dessen Tooltip.Name zurueckgibt. Findet es keinen, zeigt der
+# "Requires:"-Tooltip den nackten Rohstring ("aot-slab" statt "Science Lab"). Nur Klartext-
+# Prereqs landen dort -- '~'/'~!'-Eintraege werden herausgefiltert.
+# Seit der Umstellung auf "Gebaeude-Prereqs nur ausgrauen statt verstecken" (2026-08-01) sind
+# deutlich mehr Prereqs klartext und damit sichtbar -> diese Shims sind jetzt Pflicht.
+# 'Interactable:' ist NOETIG: TooltipInfo verlangt IMouseBoundsInfo, sonst ist der Shim
+# "not constructible" und erzeugt einen check-yaml-Fehler PRO KARTE (34x je Shim).
+# Die Shims sind nicht baubar und werden nie gespawnt -- reine Namens-Nachschlagetabelle.
+# Siehe [[openra-prerequisite-tooltip]].
+aot-slab:
+	Tooltip:
+		Name: Science Lab
+	Interactable:
+
+aot-orbc:
+	Tooltip:
+		Name: Orbital Command
+	Interactable:
+
+aot-mslo:
+	Tooltip:
+		Name: Missile Silo
+	Interactable:
+
+aot-weap:
+	Tooltip:
+		Name: Advanced Factory
+	Interactable:
+
+# KEIN Shim fuer aot-proc-gdi / aot-proc-nod: das sind ECHTE Aktoren (Refinery-Proxies in
+# overrides.yaml). Sie erben PROCs Tooltip (actor-proc.name -> "Tiberium Refinery") und loesen
+# damit bereits korrekt auf. Ein Shim wuerde hier hineinmergen und ein zweites Interactable
+# hinzufuegen -> "TypeDictionary contains multiple instances of InteractableInfo".
+aot-gdi-advtech-upgrade:
+	Tooltip:
+		Name: GDI Advanced Tiberium Tech
+	Interactable:
+
+aot-mtnk-titan-upgrade:
+	Tooltip:
+		Name: GDI Mech Armaments
+	Interactable:
+
+aot-firehawk-upgrade:
+	Tooltip:
+		Name: Firehawk Upgrade
+	Interactable:
+
+aot-nod-secrettech-upgrade:
+	Tooltip:
+		Name: NOD Tiberium Secrets
+	Interactable:
+
+aot-nod-forbidden-upgrade:
+	Tooltip:
+		Name: NOD Forbidden Knowledge
+	Interactable:
+
+# Wird seit 2026-08-01 von "NOD Tiberium Secrets" mitgeliefert (kein eigenes Kauf-Upgrade mehr),
+# deshalb zeigt der Tooltip den Namen des Gatekeepers.
+aot-ttnk-flame-upgrade:
+	Tooltip:
+		Name: NOD Tiberium Secrets
+	Interactable:
+
+aot-turret-upgrade:
+	Tooltip:
+		Name: Turret
+	Interactable:
+
+aot-laser-fence-upgrade:
+	Tooltip:
+		Name: Laser Technologies
+	Interactable:
+
+aot-subterrain-upgrade:
+	Tooltip:
+		Name: Subterranean Upgrade
+	Interactable:
+
+aot-howitzer-upgrade:
+	Tooltip:
+		Name: Artillery Ballistics
+	Interactable:
+
+aot-heavy-artillery-upgrade:
+	Tooltip:
+		Name: Heavy Artillery Upgrade
+	Interactable:
+
+# Nachgezogen 2026-08-01: diese vier waren beim ersten Shim-Durchgang noch '~'-versteckt und
+# fielen daher aus der Scan-Liste. Seit der Umstellung der LINEAREN Ketten auf
+# "sichtbar ab Tier, nur ausgegraut" stehen sie klartext im Tooltip und brauchen einen Shim.
+aot-gunboat-frigate-upgrade:
+	Tooltip:
+		Name: Frigate Enhancement
+	Interactable:
+
+aot-infantry-railgun-upgrade:
+	Tooltip:
+		Name: Infantry Railguns
+	Interactable:
+
+aot-sam-bunkered-upgrade:
+	Tooltip:
+		Name: Bunkered SAM
+	Interactable:
+
+aot-toxic-upgrade:
+	Tooltip:
+		Name: Toxic Weapons Upgrade
+	Interactable:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - NOD Kennel (aot-kennel-nod) ===
@@ -911,14 +1029,14 @@ aot-upgrade-gdi-advtech:
 
 	Buildable:
 		BuildPaletteOrder: 20
-		Prerequisites: ~aot-age1, aot-age1, weap
+		Prerequisites: ~aot-age1, weap
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
 		Description: Upgrades the Recon Jeep to HUMVEE armor, equips the Mammoth Tank with rockets, unlocks the Rocket Launcher in the Advanced War Factory, and unlocks the Tiberium Refinery.
 
 	Valued:
-		Cost: 300
+		Cost: 1000
 
 	RenderSprites:
 		Image: proc
@@ -935,8 +1053,8 @@ aot-upgrade-apc2:
 	Buildable:
 		ShowWhenLocked: False
 		LockedGroup: aot-grp-up-apcbranch
-		BuildPaletteOrder: 55
-		Prerequisites: ~aot-age2, aot-age2, ~!aot-minelayer-upgrade
+		BuildPaletteOrder: 200
+		Prerequisites: ~aot-age2, ~!aot-minelayer-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -964,8 +1082,8 @@ aot-upgrade-minelayer:
 	Buildable:
 		ShowWhenLocked: False
 		LockedGroup: aot-grp-up-apcbranch
-		BuildPaletteOrder: 55
-		Prerequisites: ~aot-age2, aot-age2, ~!aot-amphibious-upgrade
+		BuildPaletteOrder: 205
+		Prerequisites: ~aot-age2, ~!aot-amphibious-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -1013,14 +1131,14 @@ aot-upgrade-nod-secrettech:
 		BuildPaletteOrder: 20
 		# ("nod-gate" Verwechslung rueckgaengig gemacht -- gemeint war das GEBAEUDE
 		# aot-gate-nod, nicht dieses Upgrade, siehe dort.)
-		Prerequisites: ~aot-age1, aot-age1, afld
+		Prerequisites: ~aot-age1, afld
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
 		Description: Upgrades the Heavy Tank with flamethrowers, replaces the V2 Rocket Launcher's warhead with napalm, unlocks the Stealth Tank, and unlocks the Tiberium Refinery.
 
 	Valued:
-		Cost: 300
+		Cost: 1000
 
 	RenderSprites:
 		Image: proc
@@ -1042,8 +1160,8 @@ aot-upgrade-ltnk-tick:
 		Name: Tick Tank Chassis
 
 	Buildable:
-		BuildPaletteOrder: 45
-		Prerequisites: ~stec, ~aot-age2, aot-age2, ~afld, fix
+		BuildPaletteOrder: 200
+		Prerequisites: ~aot-age2, stec, afld, fix
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -1079,8 +1197,8 @@ aot-upgrade-ttnk-subterrain:
 		Name: Subterranean Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 50
-		Prerequisites: ~stec, ~aot-age2, aot-age2, stec
+		BuildPaletteOrder: 240
+		Prerequisites: ~aot-age2, stec
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -1111,7 +1229,7 @@ aot-upgrade-e4-toxic:
 		Name: Toxic Weapons Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 80
+		BuildPaletteOrder: 300
 		Prerequisites: ~aot-age3, tmpl, stec, aot-shrine, ~!aot-howitzer-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
@@ -1145,11 +1263,11 @@ aot-upgrade-v2-howitzer:
 		Name: Artillery Ballistics
 
 	Buildable:
-		BuildPaletteOrder: 36
+		BuildPaletteOrder: 140
 		# User-Briefing 2026-08-01 (zweiter Durchgang): sichtbar ab Age 1, baubar sobald Temple
 		# steht -- exakt wie Laser Technologies. Funktionale Voraussetzungen (Napalm ueber NOD
 		# Secret Technologies, Toxic-Ausschluss) bleiben bestehen.
-		Prerequisites: ~aot-age1, aot-age1, tmpl, aot-nod-secrettech-upgrade, ~!aot-toxic-upgrade
+		Prerequisites: ~aot-age1, tmpl, aot-nod-secrettech-upgrade, ~!aot-toxic-upgrade
 		Icon: aot-arty-howitzer-icon
 		Queue: Upgrade.Nod
 		BuildLimit: 1
@@ -1172,8 +1290,8 @@ aot-upgrade-heavy-artillery:
 		Name: actor-aot-upgrade-heavy-artillery.name
 
 	Buildable:
-		BuildPaletteOrder: 85
-		Prerequisites: ~aot-age3, aot-age3, aot-howitzer-upgrade
+		BuildPaletteOrder: 340
+		Prerequisites: ~aot-age3, aot-howitzer-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -1199,8 +1317,8 @@ aot-upgrade-ion-cannon:
 		Name: Ion Cannon Strike Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 75
-		Prerequisites: ~atec, ~aot-orbc, ~aot-age2, aot-age2
+		BuildPaletteOrder: 240
+		Prerequisites: ~aot-age2, atec, aot-orbc
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		Icon: ioncannon
@@ -1228,8 +1346,8 @@ aot-upgrade-infantry-railgun:
 		Name: Infantry Railguns
 
 	Buildable:
-		BuildPaletteOrder: 80
-		Prerequisites: ~aot-age3, aot-age3, pyle, atec
+		BuildPaletteOrder: 300
+		Prerequisites: ~aot-age3, pyle, atec
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -1254,8 +1372,8 @@ aot-upgrade-zonetrooper-drop:
 		Name: Zone Trooper Drop Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 85
-		Prerequisites: ~atec, ~aot-orbc, ~aot-age3, aot-age3, aot-infantry-railgun-upgrade
+		BuildPaletteOrder: 340
+		Prerequisites: ~aot-age3, atec, aot-orbc, aot-infantry-railgun-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		Icon: icon
@@ -2068,8 +2186,8 @@ aot-upgrade-tiberium-missile:
 		Cost: 1000
 	Buildable:
 		Queue: Upgrade.Nod
-		BuildPaletteOrder: 61
-		Prerequisites: ~stec, ~aot-mslo, ~aot-age2, aot-age2, ~!aot-mine-cluster-enhancement
+		BuildPaletteOrder: 230
+		Prerequisites: ~aot-age2, stec, aot-mslo, ~!aot-mine-cluster-enhancement
 		BuildLimit: 1
 		MoveIntoWorld: false
 		Icon: aot-tiberiummissile-icon
@@ -2087,8 +2205,8 @@ aot-upgrade-atom-bomb:
 		Cost: 2000
 	Buildable:
 		Queue: Upgrade.Nod
-		BuildPaletteOrder: 90
-		Prerequisites: ~stec, ~aot-mslo, ~aot-age3, aot-age3
+		BuildPaletteOrder: 330
+		Prerequisites: ~aot-age3, stec, aot-mslo
 		BuildLimit: 1
 		MoveIntoWorld: false
 		Icon: aot-atombomb-icon
@@ -2106,8 +2224,8 @@ aot-upgrade-mine-cluster-enhancement:
 		Cost: 1200
 	Buildable:
 		Queue: Upgrade.Nod
-		BuildPaletteOrder: 60
-		Prerequisites: ~stec, ~aot-mslo, ~aot-age2, aot-age2, ~!aot-tiberium-missile-upgrade
+		BuildPaletteOrder: 235
+		Prerequisites: ~aot-age2, stec, aot-mslo, ~!aot-tiberium-missile-upgrade
 		BuildLimit: 1
 		MoveIntoWorld: false
 		Icon: aot-minecluster-icon
@@ -2619,6 +2737,7 @@ aot-age1-upgrade-gdi:
 		Image: aot-age1-upgrade
 	AotAgeActivationNotification:
 		AgeName: 1st Tiberium Age
+	AotSuppressReadyNotification:
 
 aot-age1-upgrade-nod:
 	Interactable:
@@ -2640,6 +2759,7 @@ aot-age1-upgrade-nod:
 		Image: aot-age1-upgrade
 	AotAgeActivationNotification:
 		AgeName: 1st Tiberium Age
+	AotSuppressReadyNotification:
 
 aot-age2-upgrade-gdi:
 	Interactable:
@@ -2661,6 +2781,7 @@ aot-age2-upgrade-gdi:
 		Image: aot-age2-upgrade
 	AotAgeActivationNotification:
 		AgeName: 2nd Tiberium Age
+	AotSuppressReadyNotification:
 
 aot-age2-upgrade-nod:
 	Interactable:
@@ -2682,6 +2803,7 @@ aot-age2-upgrade-nod:
 		Image: aot-age2-upgrade
 	AotAgeActivationNotification:
 		AgeName: 2nd Tiberium Age
+	AotSuppressReadyNotification:
 
 aot-age3-upgrade-gdi:
 	Interactable:
@@ -2703,6 +2825,7 @@ aot-age3-upgrade-gdi:
 		Image: aot-age3-upgrade
 	AotAgeActivationNotification:
 		AgeName: 3rd Tiberium Age
+	AotSuppressReadyNotification:
 
 aot-age3-upgrade-nod:
 	Interactable:
@@ -2724,6 +2847,7 @@ aot-age3-upgrade-nod:
 		Image: aot-age3-upgrade
 	AotAgeActivationNotification:
 		AgeName: 3rd Tiberium Age
+	AotSuppressReadyNotification:
 # === Ende aotmod ===
 
 # Prerequisite display name shim — damit Tooltips "Radar" zeigen statt "gdi-hq".
@@ -2742,15 +2866,15 @@ aot-upgrade-mtnk-predator:
 		Name: GDI Heavy Ordonance
 
 	Buildable:
-		BuildPaletteOrder: 45
-		Prerequisites: ~aot-age2, aot-age2, aot-slab, ~!aot-mtnk-titan-upgrade
+		BuildPaletteOrder: 30
+		Prerequisites: ~aot-age2, aot-slab, ~!aot-mtnk-titan-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
 		Description: Upgrades the Medium Tank with the Predator Turret, transforms the Rocket Launcher into a Hover Rocket Launcher and unlocks the Hover AA. Lockout of GDI Mech Armament.
 
 	Valued:
-		Cost: 500
+		Cost: 2500
 
 	RenderSprites:
 		Image: aot-upgrade-mtnk-predator
@@ -2773,8 +2897,8 @@ aot-upgrade-mtnk-railgun:
 	Buildable:
 		ShowWhenLocked: False
 		LockedGroup: aot-grp-up-tank2
-		BuildPaletteOrder: 90
-		Prerequisites: ~atec, ~lite, ~techlevel.medium, ~aot-mtnk-predator-upgrade, ~aot-age3, aot-mtnk-predator-upgrade, aot-age3
+		BuildPaletteOrder: 330
+		Prerequisites: ~aot-age3, ~techlevel.medium, atec, lite, ~aot-mtnk-predator-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -2799,15 +2923,15 @@ aot-upgrade-mtnk-titan:
 		Name: GDI Mech Armaments
 
 	Buildable:
-		BuildPaletteOrder: 46
-		Prerequisites: ~aot-age2, aot-age2, aot-slab, ~!aot-mtnk-predator-upgrade
+		BuildPaletteOrder: 40
+		Prerequisites: ~aot-age2, aot-slab, ~!aot-mtnk-predator-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
 		Description: Transforms the Medium Tank into a Titan battle mech, the HMVEE into a Wolverine anti-infantry mech and unlocks the Juggernaut artillery. Lockout of GDI Heavy Ordonance.
 
 	Valued:
-		Cost: 500
+		Cost: 2500
 
 	RenderSprites:
 		Image: aot-upgrade-mtnk-titan
@@ -2825,8 +2949,8 @@ aot-upgrade-mtnk-titan-railgun:
 	Buildable:
 		ShowWhenLocked: False
 		LockedGroup: aot-grp-up-tank2
-		BuildPaletteOrder: 90
-		Prerequisites: ~atec, ~lite, ~techlevel.medium, ~aot-mtnk-titan-upgrade, ~aot-age3, aot-mtnk-titan-upgrade, aot-age3
+		BuildPaletteOrder: 335
+		Prerequisites: ~aot-age3, ~techlevel.medium, atec, lite, ~aot-mtnk-titan-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -2921,8 +3045,8 @@ aot-upgrade-nod-airstrike:
 		Name: Airstrike
 
 	Buildable:
-		BuildPaletteOrder: 30
-		Prerequisites: ~stec, ~aot-age1, aot-age1, afld, ~!aot-nod-spyplane-upgrade
+		BuildPaletteOrder: 130
+		Prerequisites: ~aot-age1, stec, afld, ~!aot-nod-spyplane-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -2948,8 +3072,8 @@ aot-upgrade-nod-spyplane:
 		Name: Spy Plane Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 31
-		Prerequisites: ~stec, ~aot-age1, aot-age1, afld, ~!aot-nod-airstrike-upgrade
+		BuildPaletteOrder: 135
+		Prerequisites: ~aot-age1, stec, afld, ~!aot-nod-airstrike-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -2980,8 +3104,8 @@ aot-upgrade-nod-parabombs:
 	Buildable:
 		ShowWhenLocked: False
 		LockedGroup: aot-grp-up-air3
-		BuildPaletteOrder: 95
-		Prerequisites: ~stec, ~aot-age3, ~aot-nod-spyplane-upgrade, ~!aot-nod-airstrike-upgrade, aot-age3, aot-nod-spyplane-upgrade, aot-toxic-upgrade
+		BuildPaletteOrder: 350
+		Prerequisites: ~aot-age3, stec, ~aot-nod-spyplane-upgrade, aot-toxic-upgrade, ~!aot-nod-airstrike-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -3011,8 +3135,8 @@ aot-upgrade-nod-banshee:
 	Buildable:
 		ShowWhenLocked: False
 		LockedGroup: aot-grp-up-air3
-		BuildPaletteOrder: 95
-		Prerequisites: ~stec, ~aot-age3, ~aot-nod-airstrike-upgrade, aot-age3, tmpl
+		BuildPaletteOrder: 345
+		Prerequisites: ~aot-age3, stec, tmpl, ~aot-nod-airstrike-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -3037,8 +3161,8 @@ aot-upgrade-harpy:
 		Name: Harpy Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 55
-		Prerequisites: ~stec, anyhq, ~hpad, hpad, ~aot-age2, aot-age2
+		BuildPaletteOrder: 205
+		Prerequisites: ~aot-age2, stec, anyhq, hpad
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -3062,8 +3186,8 @@ aot-upgrade-orca:
 		Name: ORCA Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 30
-		Prerequisites: ~atec, anyhq, ~hpad, hpad, ~aot-age1, aot-age1
+		BuildPaletteOrder: 100
+		Prerequisites: ~aot-age1, atec, anyhq, hpad
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -3090,8 +3214,8 @@ aot-upgrade-tran-doorgunner:
 		Name: actor-aot-upgrade-tran-doorgunner.name
 
 	Buildable:
-		BuildPaletteOrder: 31
-		Prerequisites: anyhq, ~anyhq, ~hpad, hpad, ~aot-age2, aot-age2, ~!aot-tran-carryall-upgrade
+		BuildPaletteOrder: 210
+		Prerequisites: ~aot-age2, anyhq, hpad, ~!aot-tran-carryall-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -3121,8 +3245,8 @@ aot-upgrade-tran-carryall:
 		Name: actor-aot-upgrade-tran-carryall.name
 
 	Buildable:
-		BuildPaletteOrder: 32
-		Prerequisites: anyhq, ~anyhq, ~hpad, hpad, ~aot-age2, aot-age2, ~!aot-tran-doorgunner-upgrade
+		BuildPaletteOrder: 215
+		Prerequisites: ~aot-age2, anyhq, hpad, ~!aot-tran-doorgunner-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -3150,8 +3274,8 @@ aot-upgrade-tran-parachute:
 		Name: actor-aot-upgrade-tran-parachute.name
 
 	Buildable:
-		BuildPaletteOrder: 31
-		Prerequisites: anyhq, ~anyhq, ~hpad, hpad, ~aot-age2, aot-age2
+		BuildPaletteOrder: 215
+		Prerequisites: ~aot-age2, anyhq, hpad
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -3179,8 +3303,8 @@ aot-upgrade-firehawk:
 		Name: Firehawk Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 100
-		Prerequisites: ~aot-age3, atec, aot-age3, aflt, aot-slab
+		BuildPaletteOrder: 320
+		Prerequisites: ~aot-age3, atec, aflt, aot-slab
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -4047,8 +4171,8 @@ aot-upgrade-nuke-turbine:
 		Name: Turbine Technology Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 40
-		Prerequisites: ~atec, ~anypower, ~aot-age2, anypower, aot-age2
+		BuildPaletteOrder: 220
+		Prerequisites: ~aot-age2, atec, anypower
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -4077,8 +4201,8 @@ aot-upgrade-cruiser-railgun:
 		Name: Cruiser Railguns
 
 	Buildable:
-		BuildPaletteOrder: 95
-		Prerequisites: ~aot-age3, aot-age3, aot-shipyard, atec, ~!aot-cruiser-carrier-upgrade
+		BuildPaletteOrder: 310
+		Prerequisites: ~aot-age3, aot-shipyard, atec, ~!aot-cruiser-carrier-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -4103,8 +4227,8 @@ aot-upgrade-cruiser-carrier:
 		Name: Heli Carrier
 
 	Buildable:
-		BuildPaletteOrder: 96
-		Prerequisites: ~aot-age3, aot-age3, aot-shipyard, atec, ~!aot-cruiser-railgun-upgrade
+		BuildPaletteOrder: 315
+		Prerequisites: ~aot-age3, aot-shipyard, atec, ~!aot-cruiser-railgun-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -4126,8 +4250,8 @@ aot-upgrade-gunboat-frigate:
 		Name: Frigate Enhancement
 
 	Buildable:
-		BuildPaletteOrder: 25
-		Prerequisites: ~aot-age1, aot-age1, aot-shipyard, fix
+		BuildPaletteOrder: 120
+		Prerequisites: ~aot-age1, aot-shipyard, fix
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -4149,8 +4273,8 @@ aot-upgrade-gunboat-destroyer:
 		Name: Destroyer Enhancement
 
 	Buildable:
-		BuildPaletteOrder: 60
-		Prerequisites: ~aot-age2, aot-age2, aot-shipyard, fix, aot-gunboat-frigate-upgrade
+		BuildPaletteOrder: 250
+		Prerequisites: ~aot-age2, aot-shipyard, fix, aot-gunboat-frigate-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -4528,8 +4652,8 @@ aot-upgrade-sub-cargo:
 		Name: actor-aot-upgrade-sub-cargo.name
 
 	Buildable:
-		BuildPaletteOrder: 75
-		Prerequisites: aot-subpen, hand, ~aot-age2
+		BuildPaletteOrder: 210
+		Prerequisites: ~aot-age2, aot-subpen, hand
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -4557,7 +4681,7 @@ aot-upgrade-stnk-cargo:
 		Name: actor-aot-upgrade-stnk-cargo.name
 
 	Buildable:
-		BuildPaletteOrder: 100
+		BuildPaletteOrder: 305
 		Prerequisites: ~aot-age3, aot-shrine, tmpl
 		Queue: Upgrade.Nod
 		BuildLimit: 1
@@ -4585,8 +4709,8 @@ aot-upgrade-transport-gun:
 		Name: actor-aot-upgrade-transport-gun.name
 
 	Buildable:
-		BuildPaletteOrder: 40
-		Prerequisites: aot-age1, fix, aot-subpen, ~aot-age1, ~aot-subpen
+		BuildPaletteOrder: 120
+		Prerequisites: ~aot-age1, fix, aot-subpen
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -4613,8 +4737,8 @@ aot-upgrade-msub-mine:
 		Name: actor-aot-upgrade-msub-mine.name
 
 	Buildable:
-		BuildPaletteOrder: 105
-		Prerequisites: aot-subpen, stec, fix, anyhq, ~aot-age3, ~!aot-msub-drone-upgrade
+		BuildPaletteOrder: 310
+		Prerequisites: ~aot-age3, aot-subpen, stec, fix, anyhq, ~!aot-msub-drone-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -4640,8 +4764,8 @@ aot-upgrade-msub-drone:
 		Name: actor-aot-upgrade-msub-drone.name
 
 	Buildable:
-		BuildPaletteOrder: 106
-		Prerequisites: aot-subpen, stec, fix, anyhq, ~aot-age3, ~!aot-msub-mine-upgrade
+		BuildPaletteOrder: 315
+		Prerequisites: ~aot-age3, aot-subpen, stec, fix, anyhq, ~!aot-msub-mine-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -5227,15 +5351,15 @@ aot-upgrade-nod-forbidden:
 		Name: NOD Forbidden Knowledge
 
 	Buildable:
-		BuildPaletteOrder: 60
-		Prerequisites: ~tmpl, ~aot-age2, aot-age2, tmpl
+		BuildPaletteOrder: 30
+		Prerequisites: ~aot-age2, tmpl
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
 		Description: Unlocks Chameleon Spy, Cyborgs and the Secret Shrine.
 
 	Valued:
-		Cost: 500
+		Cost: 2500
 
 	RenderSprites:
 		Image: aot-shrine
@@ -5632,8 +5756,8 @@ aot-upgrade-sam-bunkered:
 		Name: Bunkered SAM
 
 	Buildable:
-		BuildPaletteOrder: 25
-		Prerequisites: ~aot-age1, aot-age1
+		BuildPaletteOrder: 100
+		Prerequisites: ~aot-age1
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -5655,8 +5779,8 @@ aot-upgrade-sam-cloak:
 		Name: Cloaked SAM
 
 	Buildable:
-		BuildPaletteOrder: 70
-		Prerequisites: ~aot-age2, aot-age2, aot-sam-bunkered-upgrade
+		BuildPaletteOrder: 250
+		Prerequisites: ~aot-age2, aot-sam-bunkered-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -5684,7 +5808,7 @@ aot-upgrade-avatar-laser:
 		Name: Avatar Laser Cannon
 
 	Buildable:
-		BuildPaletteOrder: 110
+		BuildPaletteOrder: 320
 		Prerequisites: ~aot-age3, aot-shrine
 		Queue: Upgrade.Nod
 		BuildLimit: 1
@@ -5975,11 +6099,11 @@ aot-upgrade-guard-tower:
 		Name: Guard Tower Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 35
+		BuildPaletteOrder: 110
 		# Ausschluss-Upgrade (2026-07-27): entweder Guard Tower ODER Camo Pillbox,
 		# nie beides - ~! versteckt den Bau-Button sobald das jeweils andere
 		# Upgrade gekauft wurde (siehe openra-prerequisite-syntax.md).
-		Prerequisites: ~aot-age1, aot-age1, aot-slab, ~!aot-camo-pillbox-upgrade
+		Prerequisites: ~aot-age1, aot-slab, ~!aot-camo-pillbox-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -6006,8 +6130,8 @@ aot-upgrade-camo-pillbox:
 		Name: Camo Pillbox Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 36
-		Prerequisites: ~aot-age1, aot-age1, aot-slab, ~!aot-guard-tower-upgrade
+		BuildPaletteOrder: 115
+		Prerequisites: ~aot-age1, aot-slab, ~!aot-guard-tower-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -6184,8 +6308,8 @@ aot-upgrade-firestorm-defense:
 		Name: Firestorm Defense Upgrade
 
 	Buildable:
-		BuildPaletteOrder: 65
-		Prerequisites: ~aot-age2, aot-age2, aot-slab
+		BuildPaletteOrder: 230
+		Prerequisites: ~aot-age2, aot-slab
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -6281,8 +6405,8 @@ aot-upgrade-foundation-gdi:
 	Tooltip:
 		Name: actor-aot-foundation.name
 	Buildable:
-		BuildPaletteOrder: 5
-		Prerequisites: ~atec, atec
+		BuildPaletteOrder: 10
+		Prerequisites: atec
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		Description: actor-aot-upgrade-foundation.description
@@ -6298,8 +6422,8 @@ aot-upgrade-foundation-nod:
 	Tooltip:
 		Name: actor-aot-foundation.name
 	Buildable:
-		BuildPaletteOrder: 5
-		Prerequisites: ~stec, stec
+		BuildPaletteOrder: 10
+		Prerequisites: stec
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		Description: actor-aot-upgrade-foundation.description
@@ -6420,9 +6544,9 @@ aot-upgrade-laser-fence:
 		Name: Laser Technologies
 
 	Buildable:
-		BuildPaletteOrder: 65
+		BuildPaletteOrder: 220
 		# Sichtbar ab Age 2 (User-Wunsch 2026-08-01), baubar sobald Secret Shrine steht.
-		Prerequisites: ~aot-age2, aot-age2, aot-shrine
+		Prerequisites: ~aot-age2, aot-shrine
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -6497,7 +6621,7 @@ aot-gate-gdi:
 		Condition: aot-gate-lowpower
 		ValidPowerStates: Low, Critical
 	Tooltip:
-		Name: GDI Gate
+		Name: GDI Automatic Gate
 	Valued:
 		Cost: 500
 	Health:
@@ -6506,11 +6630,11 @@ aot-gate-gdi:
 		Type: Concrete
 	Buildable:
 		BuildPaletteOrder: 190
-		# Sichtbar UND baubar ab Age 1 (User-Wunsch 2026-07-04): kein separates
-		# Ausgrau-Prerequisite noetig, ~ versteckt bis Age 1, danach sofort baubar.
-		Prerequisites: ~aot-age1
+		# Sichtbar ab Age 1 (~aot-age1), baubar sobald das Science Lab steht
+		# (User-Wunsch 2026-08-01) - aot-slab bleibt klartext, graut also nur aus.
+		Prerequisites: ~aot-age1, aot-slab
 		Queue: Building.GDI
-		Description: Fortified gate. Testbau fuer Wall-Anschluss.
+		Description: Automated gate for walls, opening and closing on friend-or-foe identification.
 	# Footprint/Dimensions unangetastet (siehe REVERT-Historie in ts-gates-system.md,
 	# der breitere Smudge steckt direkt in der Sprite-Grafik, kein WithBuildingBib mehr).
 	Building:
@@ -6844,8 +6968,8 @@ aot-upgrade-ftur-napalm:
 	Buildable:
 		ShowWhenLocked: False
 		LockedGroup: aot-grp-up-noddefense
-		BuildPaletteOrder: 26
-		Prerequisites: ~aot-age1, aot-age1, barracks, ~!aot-turret-upgrade
+		BuildPaletteOrder: 110
+		Prerequisites: ~aot-age1, barracks, ~!aot-turret-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		Description: Nitro-enriched napalm for the Flame Tower - longer reach, and the base for later toxic conversion. Rules out the Turret.
@@ -6863,8 +6987,8 @@ aot-upgrade-turret:
 	Buildable:
 		ShowWhenLocked: False
 		LockedGroup: aot-grp-up-noddefense
-		BuildPaletteOrder: 27
-		Prerequisites: ~aot-age1, aot-age1, lite, ~!aot-nitro-napalm-upgrade
+		BuildPaletteOrder: 115
+		Prerequisites: ~aot-age1, lite, ~!aot-nitro-napalm-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		Description: Unlocks the Gun Turret and the later Laser Turret. Rules out the Flame Tower.
