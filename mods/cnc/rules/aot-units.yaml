@@ -3621,7 +3621,7 @@ aot-cyc2:
 	Buildable:
 		Queue: Infantry.NodElite
 		BuildPaletteOrder: 20
-		Prerequisites: ~aot-age2, aot-shrine, aot-nod-forbidden-upgrade
+		Prerequisites: ~aot-age3, aot-shrine, aot-nod-forbidden-upgrade
 		Icon: icon
 		Description: Elite NOD cyborg with plasma cannon. Devastating vs. all targets. Limit: 1.
 # === Ende aotmod ===

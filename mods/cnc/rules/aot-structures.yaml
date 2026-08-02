@@ -1011,6 +1011,8 @@ aot-upgrade-nod-secrettech:
 
 	Buildable:
 		BuildPaletteOrder: 20
+		# ("nod-gate" Verwechslung rueckgaengig gemacht -- gemeint war das GEBAEUDE
+		# aot-gate-nod, nicht dieses Upgrade, siehe dort.)
 		Prerequisites: ~aot-age1, aot-age1, afld
 		Queue: Upgrade.Nod
 		BuildLimit: 1
@@ -5230,7 +5232,7 @@ aot-upgrade-nod-forbidden:
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
-		Description: Unlocks the Cyborg, the Chameleon Spy, and (together with the Secret Shrine) the Cyborg Commando.
+		Description: Unlocks Chameleon Spy, Cyborgs and the Secret Shrine.
 
 	Valued:
 		Cost: 500
@@ -6419,8 +6421,9 @@ aot-upgrade-laser-fence:
 
 	Buildable:
 		BuildPaletteOrder: 65
-		# Korrektur (2026-08-01, dritter Durchgang, User-Wunsch): TMPL wieder raus, Secret Shrine
-		# wieder rein. Sichtbar ab Age 1, baubar sobald Secret Shrine steht.
+		# Korrektur (2026-08-01, User-Wunsch): sichtbar ab Age 1, baubar sobald Secret Shrine
+		# steht. ("nod-gate" Verwechslung rueckgaengig gemacht -- gemeint war das GEBAEUDE
+		# aot-gate-nod, nicht dieses Upgrade, siehe dort.)
 		Prerequisites: ~aot-age1, aot-age1, aot-shrine
 		Queue: Upgrade.Nod
 		BuildLimit: 1
@@ -6596,11 +6599,11 @@ aot-gate-nod:
 		Type: Concrete
 	Buildable:
 		BuildPaletteOrder: 220
-		# Sichtbar ab Age 1, aber ausgegraut bis das Laser Defense Systems Upgrade
-		# steht (User-Wunsch 2026-07-04) - passt thematisch, da das Tor selbst eine
+		# Sichtbar ab Age 2 (User-Wunsch 2026-08-01, vorher Age 1), aber ausgegraut bis das
+		# Laser Technologies Upgrade steht - passt thematisch, da das Tor selbst eine
 		# Laser-Barriere ist. aot-laser-fence-upgrade = ProvidesPrerequisite-String
 		# von aot-upgrade-laser-fence (siehe dort).
-		Prerequisites: ~aot-age1, aot-laser-fence-upgrade
+		Prerequisites: ~aot-age2, aot-laser-fence-upgrade
 		Queue: Building.Nod
 		Description: Fortified gate. Laser-Barriere statt Fluegel.
 	Building:
