@@ -2260,6 +2260,28 @@ namespace OpenRA.Mods.Common.Traits
 		protected abstract string[] TransportChain { get; }
 		protected abstract int FormingTimeout { get; }
 
+		// ⚠️ NEVER gate a transport order on IsIdle alone. Aircraft rest in a perpetual FlyIdle
+		// activity rather than a null CurrentActivity, so IsIdle is structurally always false for
+		// them -- the order then simply never goes out and the helicopter hovers where it is until
+		// the mission times out. This is the exact trap AotAirRaidMission already documents (root
+		// cause 2026-07-22, hit AGAIN here 2026-08-03: "er hing lange am rand ... ein zweiter hovert
+		// grad in base"). Ground transports are unaffected but share the helper for symmetry.
+		protected static bool ReadyForOrders(Actor a) => a.IsIdle || a.CurrentActivity is FlyIdle;
+
+		// Gets the squad out before the mission lets go of it. Without this an abort while loaded
+		// pools the transport WITH five infantry still inside -- they are in Units, so they count as
+		// released, but physically they are gone (and the loaded transport then gets adopted as a
+		// combat reinforcement, which is how a Chinook ended up following an attack wave).
+		protected void AbortWithUnload(IBot bot)
+		{
+			var transport = Transport();
+			var cargo = transport?.TraitOrDefault<Cargo>();
+			if (transport != null && cargo != null && cargo.PassengerCount > 0)
+				bot.QueueOrder(new Order("Unload", transport, false));
+
+			Finish();
+		}
+
 		protected IEnumerable<Actor> Engineers() =>
 			Units.Where(a => Ops.Info.EngineerTypes.Contains(a.Info.Name) && !Ops.CannotOrder(a));
 
@@ -2414,7 +2436,7 @@ namespace OpenRA.Mods.Common.Traits
 				return;
 			}
 
-			if (transport.IsIdle)
+			if (ReadyForOrders(transport))
 				bot.QueueOrder(new Order("Unload", transport, false));
 
 			if (phaseTicks >= Ops.Info.RaidUnloadTimeout)
@@ -2638,8 +2660,9 @@ namespace OpenRA.Mods.Common.Traits
 					if (phaseTicks >= Ops.Info.HeliRaidDeliverTimeout)
 					{
 						Ops.RaiseHeliRaidDropTier();
-						Log("could not reach the drop zone -> next raid drops further out");
-						Finish();
+						Log($"could not reach the drop zone (stuck on leg {leg}/{route.Count - 1} " +
+							$"at {transport.Location}) -> next raid drops further out");
+						AbortWithUnload(bot);
 						break;
 					}
 
@@ -2653,7 +2676,7 @@ namespace OpenRA.Mods.Common.Traits
 						Log($"edge leg {leg}/{route.Count - 1} -> {CurrentWaypoint}");
 					}
 
-					if (transport.IsIdle)
+					if (ReadyForOrders(transport))
 						MoveUnit(bot, transport, CurrentWaypoint, false);
 
 					break;
@@ -2665,7 +2688,7 @@ namespace OpenRA.Mods.Common.Traits
 				{
 					// Send the empty helicopter home instead of leaving it hovering over enemy AA.
 					var transport = Transport();
-					if (transport != null && transportSurvivedDelivery && transport.IsIdle)
+					if (transport != null && transportSurvivedDelivery && ReadyForOrders(transport))
 						MoveUnit(bot, transport, Ops.BaseCentre(), false);
 
 					TickRaiding(bot);
@@ -2735,7 +2758,7 @@ namespace OpenRA.Mods.Common.Traits
 						break;
 					}
 
-					if (transport.IsIdle)
+					if (ReadyForOrders(transport))
 						MoveUnit(bot, transport, dropCell, false);
 
 					break;

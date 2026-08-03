@@ -1905,7 +1905,14 @@ namespace OpenRA.Mods.Common.Traits
 			if (Info.PoolIdleReinforceTicks <= 0 || pool.Count == 0)
 				return;
 
+			// Raid transports are NOT combat reinforcements (User 2026-08-03: "er hat sich einer
+			// normalen regular wave angeschlossen und fliegt den panzern hinterher, was ueberhaupt
+			// keinen sinn macht"). A raid that aborts hands its transport back to the pool, and from
+			// here it was handed straight to the next attack wave -- an unarmed Chinook attack-moving
+			// into the enemy base behind the tanks. Keep them out of the sweep so they stay available
+			// for the next raid instead.
 			var stale = pool.Where(a => !unitCannotBeOrdered(a)
+				&& !IsRaidTransport(a)
 				&& pooledSince.TryGetValue(a, out var since)
 				&& World.WorldTick - since >= Info.PoolIdleReinforceTicks).ToList();
 			if (stale.Count == 0)
@@ -2086,6 +2093,9 @@ namespace OpenRA.Mods.Common.Traits
 					StartEngineerRaid(true);
 			}
 		}
+
+		public bool IsRaidTransport(Actor a) =>
+			Info.HeliRaidTransportTypes.Contains(a.Info.Name) || Info.GroundRaidTransportTypes.Contains(a.Info.Name);
 
 		bool HasRefinery() =>
 			World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld && Info.RefineryTypes.Contains(a.Info.Name));
