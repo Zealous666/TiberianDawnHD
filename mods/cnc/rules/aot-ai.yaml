@@ -649,6 +649,9 @@ Player:
 		EnableBridgeRepair: True
 		BridgeCheckInterval: 7500
 		BridgeMaxTargets: 1
+		# Erster Bruecken-Scan erst ab Tech-Center (User 2026-08-03): eine Reparatur kostet einen
+		# ganzen Engineer, der frueh besser in die Basis geht.
+		BridgeRequiresTypes: aot-atec-age0, aot-atec-age1, aot-atec-age2
 		# Engineer-Raids, siehe NOD-Instanz weiter unten. GDI nutzt den normalen APC als
 		# Boden-Transport; der Chinook ist derselbe Aktor-Unterbau, nur mit eigenen Upgrade-Proxies.
 		RefineryTypes: proc, aot-proc-gdi, aot-proc-gdi-age2
@@ -801,6 +804,8 @@ Player:
 		EnableBridgeRepair: True
 		BridgeCheckInterval: 7500
 		BridgeMaxTargets: 1
+		# Erster Bruecken-Scan erst ab STEC (User 2026-08-03), siehe GDI-Instanz.
+		BridgeRequiresTypes: aot-stec-age0, aot-stec-age1, aot-stec-age2
 		# Engineer-Raids (User-Briefing 2026-08-03): 3 Engineers + 2 Rocket Trooper. Die Rocket
 		# Trooper sind KEINE Deko -- sie schiessen eine Zaunzelle frei, damit die Engineers an ein
 		# eingezaeuntes Gebaeude kommen (eingezaeunte Ziele sind daher ausdruecklich erlaubt).

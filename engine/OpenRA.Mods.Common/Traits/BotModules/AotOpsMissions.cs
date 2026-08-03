@@ -2358,12 +2358,21 @@ namespace OpenRA.Mods.Common.Traits
 			var len = Math.Max(1, (int)Math.Sqrt((dx * dx) + (dy * dy)));
 			var ideal = new CPos(targetCell.X + (dx * distance / len), targetCell.Y + (dy * distance / len));
 
-			if (Ops.World.Map.Contains(ideal) && Ops.Intel.IsPassable(ideal))
+			// A drop cell must be genuinely FREE, not merely passable terrain (User 2026-08-03: "wenn er
+			// dann einen zielort erreicht hat und dort ein gebäude stand, hat er keinen landeplatz in
+			// der nähe gesucht"). Buildings sit on passable ground, so the old terrain-only test happily
+			// picked a cell inside the enemy base and the transport then had nowhere to set down.
+			bool Free(CPos c) =>
+				Ops.World.Map.Contains(c)
+				&& Ops.Intel.IsPassable(c)
+				&& !Ops.World.ActorMap.GetActorsAt(c).Any(a => a.Info.HasTraitInfo<BuildingInfo>());
+
+			if (Free(ideal))
 				return ideal;
 
-			for (var r = 1; r <= 8; r++)
+			for (var r = 1; r <= 12; r++)
 				foreach (var c in AotOpsUtils.Ring(ideal, r))
-					if (Ops.World.Map.Contains(c) && Ops.Intel.IsPassable(c))
+					if (Free(c))
 						return c;
 
 			return targetCell;
@@ -2425,7 +2434,7 @@ namespace OpenRA.Mods.Common.Traits
 				if (aboard == 0)
 				{
 					Log("nobody boarded -> mission over");
-					Finish();
+					AbortWithUnload(bot);
 					return;
 				}
 
@@ -2435,8 +2444,24 @@ namespace OpenRA.Mods.Common.Traits
 				return;
 			}
 
+			// Bring the TRANSPORT to the squad rather than marching the squad across the base (User
+			// 2026-08-03: "während dem einsteigen wurde eine einheit distracted, und dann der heli nie
+			// los"). A helicopter can set down next to the infantry in seconds, whereas five foot
+			// soldiers walking to a helipad is five chances to be interrupted by a threat response.
+			var muster = Centroid(waiting);
+			if ((transport.Location - muster).LengthSquared > Ops.Info.RaidBoardingRadius2)
+			{
+				if (ReadyForOrders(transport))
+					MoveUnit(bot, transport, muster, false);
+			}
+
+			// Re-issue periodically, not just when idle. A passenger pulled off by a threat response
+			// comes back with SOME activity queued and is therefore never idle again, so an idle-only
+			// check left it standing there and the raid never departed. Re-ordering an EnterTransport
+			// that is already running simply re-targets the same transport, so repeating it is safe.
+			var reissue = phaseTicks % Ops.Info.RaidBoardingReissueTicks < Ops.Info.MissionInterval;
 			foreach (var u in waiting)
-				if (u.IsIdle)
+				if (u.IsIdle || reissue)
 					bot.QueueOrder(new Order("EnterTransport", u, Target.FromActor(transport), false));
 		}
 

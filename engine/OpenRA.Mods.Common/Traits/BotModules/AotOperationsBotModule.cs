@@ -689,6 +689,12 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Ticks between map-wide scans for damaged bridge huts (5 min at 25 ticks/s).")]
 		public readonly int BridgeCheckInterval = 7500;
 
+		[ActorReference]
+		[Desc("Buildings that must exist before the FIRST bridge scan runs (User 2026-08-03: 'erster",
+			"bridge check sollte erst beginnen ab stec gebaut'). Repairing a bridge costs a whole",
+			"engineer, which early on is better spent on the base. Empty = no gate.")]
+		public readonly HashSet<string> BridgeRequiresTypes = [];
+
 		[Desc("Maximum number of bridges being repaired at the same time. One engineer each, and the",
 			"engineer is consumed by the repair, so this directly caps the cost per scan round.")]
 		public readonly int BridgeMaxTargets = 1;
@@ -724,6 +730,14 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Squared cell distance at which a transport counts as arrived at its drop cell.")]
 		public readonly int RaidArriveRadius2 = 16;
 
+		[Desc("Squared cell distance the transport keeps to the squad while loading. Beyond it, the",
+			"transport moves to the squad instead of making the squad walk to the transport.")]
+		public readonly int RaidBoardingRadius2 = 9;
+
+		[Desc("How often a boarding order is re-issued while loading. A passenger interrupted by a",
+			"threat response is never idle again afterwards, so an idle-only re-check left it standing.")]
+		public readonly int RaidBoardingReissueTicks = 100;
+
 		[ActorReference]
 		[Desc("Refinery actor types. Engineer raids only start once one of these is up (User 2026-08-03:",
 			"'ab age 1 nach refinery') -- a raid is a luxury paid for by a working economy.")]
@@ -742,7 +756,7 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Ticks between engineer raid attempts. ONE raid runs at a time and its flavour (heli or",
 			"APC) is drawn at random from whichever are currently possible, so the two never compete",
 			"for the same infantry queue (User 2026-08-03).")]
-		public readonly int EngineerRaidInterval = 9000;
+		public readonly int EngineerRaidInterval = 15000;
 
 		[Desc("Cells BEHIND the enemy construction yard the squad is dropped at, on the first attempt.")]
 		public readonly int HeliRaidDropDistance = 6;
@@ -1626,6 +1640,23 @@ namespace OpenRA.Mods.Common.Traits
 			if (count <= 0 || chain.Length == 0)
 				return;
 
+			// Reuse before rebuilding (User 2026-08-03: "dadurch idleten manchmal mehrere helis in einer
+			// base"). A finished raid hands its transport back to the pool, and transports are kept out
+			// of the idle-pool sweep on purpose so they are not thrown at an attack wave -- but nothing
+			// ever picked them up again either, so the next raid simply built ANOTHER one while the old
+			// one sat in the base. Requests now satisfy themselves from the pool first, which also lets
+			// a squad form out of surviving infantry instead of always waiting on fresh production.
+			var reused = TakeFromPool(chain, count);
+			if (reused.Count > 0)
+			{
+				AssignFromPool(mission, reused);
+				Log($"request {role}: reused {reused.Count} pooled unit(s) for {mission.Name}");
+				count -= reused.Count;
+			}
+
+			if (count <= 0)
+				return;
+
 			requests.Add(new AotProductionRequest { Mission = mission, Role = role, Chain = chain, Remaining = count });
 		}
 
@@ -2149,7 +2180,9 @@ namespace OpenRA.Mods.Common.Traits
 			if (Info.EnableBridgeRepair && --bridgeTicks <= 0)
 			{
 				bridgeTicks = Info.BridgeCheckInterval;
-				StartBridgeRepairs();
+				if (Info.BridgeRequiresTypes.Count == 0 || World.Actors.Any(a => a.Owner == Player
+					&& !a.IsDead && a.IsInWorld && Info.BridgeRequiresTypes.Contains(a.Info.Name)))
+					StartBridgeRepairs();
 			}
 
 			// Engineer raids: ONE at a time, flavour picked at random (User 2026-08-03: "ab age 2
