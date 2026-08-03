@@ -6942,8 +6942,14 @@ aot-ftur:
 	# (beide 1x1 "x"), der Turm steht danach also exakt auf derselben Zelle.
 	# Greift nur fuer Spieler MIT dem Upgrade -- map-platzierte FTURs von Creeps/Neutral
 	# bleiben unangetastet, da Prerequisites pro Spieler ausgewertet werden.
+	# IntoActor ist BEWUSST aot-gun-base und nicht der Vanilla-Aktor "gun": funktional sind beide
+	# identisch (aot-gun-base = "Inherits: GUN" + eigenes Bau-Icon/Buildable, gleiches Sprite),
+	# aber nur aot-gun-base steht in der GunTypes-Liste der KI (aot-ai.yaml). Mit "gun" war der
+	# umgebaute Turm fuer den Base-Builder ein voellig unbekannter Aktor -> RebuildScan hielt den
+	# FTUR-Slot fuer zerstoert, baute daneben einen VIERTEN Turm, und der Soll/Ist-Watchdog zaehlte
+	# den umgebauten Turm gar nicht erst mit (User-Fund 2026-08-02, Screenshots aller Cabal-Basen).
 	AotTransformOnPrerequisite:
-		IntoActor: gun
+		IntoActor: aot-gun-base
 		Prerequisites: aot-turret-upgrade
 	# Nitro Napalm: mehr Waffenreichweite (5c0 -> 6c5) und passend erweiterte Sicht.
 	# RangeMultiplier ist ein eigenstaendiger Modifier-Trait (kein AttackBase-Abkoemmling),

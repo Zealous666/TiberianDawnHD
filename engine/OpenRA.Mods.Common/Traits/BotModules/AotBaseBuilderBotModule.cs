@@ -751,9 +751,33 @@ namespace OpenRA.Mods.Common.Traits
 				if (!step.Done || step.Skipped || step.Kind != AotStepKind.Building)
 					continue;
 
-				var alive = world.ActorsHavingTrait<Building>()
-					.Any(a => a.Owner == player && !a.IsDead && a.Location == step.TopLeft && step.Variants.Contains(a.Info.Name));
-				if (!alive)
+				// An FTUR that took the Turret upgrade is NOT gone -- AotTransformOnPrerequisite rebuilds
+				// it IN PLACE into a Gun Turret on the very same cell (aot-structures.yaml, FTUR:
+				// "IntoActor"), so the actor standing there simply has a different name than the step's
+				// own Variants. Matching Variants alone therefore reported the upgraded turret as
+				// "destroyed" every single scan: the step reopened, converted itself to GUN (below), found
+				// its target cell occupied by the very turret it was looking for, re-sited -- and built a
+				// FOURTH turret beside the finished 3-turret cluster. Confirmed 2026-08-02 across every
+				// Cabal base in one session (user screenshots + "Re-sited GUN: 35,150 -> 35,151" one cell
+				// over, immediately after "converting slot to GUN"). An already-upgraded FTUR slot counts
+				// as alive, and the step is converted permanently so later scans compare against the right
+				// actor list from the start.
+				var accept = step.Role == "FTUR" && step.Defense
+					? step.Variants.Concat(planner.Info.GunTypes).ToArray()
+					: step.Variants;
+
+				var standing = world.ActorsHavingTrait<Building>()
+					.FirstOrDefault(a => a.Owner == player && !a.IsDead && a.Location == step.TopLeft && accept.Contains(a.Info.Name));
+
+				if (standing != null && step.Role == "FTUR" && step.Defense && planner.Info.GunTypes.Contains(standing.Info.Name))
+				{
+					step.Role = "GUN";
+					step.Variants = planner.Info.GunTypes;
+					Log.Write("debug", $"[AotBuild][{player.PlayerName}] FTUR at {step.TopLeft} was upgraded in place " +
+						"to a Gun Turret -> slot now tracked as GUN (no rebuild needed)");
+				}
+
+				if (standing == null)
 				{
 					// A destroyed FTUR whose OWN variants have since become permanently unbuildable (the
 					// Turret upgrade removes FTUR from the build menu for good, aot-structures.yaml:
