@@ -2038,6 +2038,168 @@ namespace OpenRA.Mods.Common.Traits
 	}
 
 	// ======================================================================
+	// Bridge Repair (User-Briefing 2026-08-03, Age 0): "scannt map alle 5min, ob eine Bruecke kaputt
+	// ist. Schickt dann ein engineer los, sie zu reparieren."
+	//
+	// One engineer per damaged bridge hut. The engineer is CONSUMED by the repair (RepairsBridges
+	// uses EnterBehaviour.Dispose), so this mission never has anything to release afterwards --
+	// unlike the derrick squad, whose engineer survivor goes back to the pool.
+	//
+	// Only E6 carries RepairsBridges in this mod, which is exactly what EngineerTypes lists, so the
+	// existing engineer chain is reused as-is. Targets are LegacyBridgeHut actors: its CanRepair
+	// property already encapsulates "damaged AND not already being repaired AND actually connected",
+	// which is the same predicate RepairsBridges.ResolveOrder re-checks before queueing the activity
+	// -- ordering anything else is silently dropped by the engine, so re-using CanRepair keeps the
+	// two ends in agreement. BridgeIsDangling is additionally excluded for the same reason: the
+	// order handler refuses those outright.
+	// ======================================================================
+	public sealed class AotBridgeRepairMission : AotMissionWithOrders
+	{
+		enum Phase { Forming, Moving, Repairing }
+
+		public readonly Actor Hut;
+		Phase phase = Phase.Forming;
+		int formingTicks;
+		int movingTicks;
+
+		public AotBridgeRepairMission(AotOperationsBotModule ops, Actor hut)
+			: base(ops, $"bridge-{hut.ActorID}")
+		{
+			Hut = hut;
+
+			// Requested straight from the constructor, like the derrick squad does since FIX
+			// 2026-07-31k: Tick()'s own "no units and no open requests -> done" check runs before the
+			// phase switch, so a mission that has not asked for anything yet would kill itself on tick 1.
+			if (Ops.Info.EngineerTypes.Length > 0)
+				Ops.QueueRequest(this, "engineer", Ops.Info.EngineerTypes, 1);
+		}
+
+		Actor Engineer() => Units.FirstOrDefault(a => !Ops.CannotOrder(a));
+
+		// Still repairable AND still worth sending someone to.
+		public static bool NeedsRepair(Actor hut)
+		{
+			if (hut == null || hut.IsDead || !hut.IsInWorld)
+				return false;
+
+			var legacy = hut.TraitOrDefault<LegacyBridgeHut>();
+			if (legacy != null)
+				return legacy.CanRepair && !legacy.BridgeIsDangling;
+
+			var modern = hut.TraitOrDefault<BridgeHut>();
+			return modern != null && modern.BridgeDamageState != DamageState.Undamaged && !modern.Repairing;
+		}
+
+		public override void Tick(IBot bot)
+		{
+			if (Hut.IsDead || !Hut.IsInWorld)
+			{
+				Log("bridge hut gone -> mission over");
+				Finish();
+				return;
+			}
+
+			// Someone else (a human ally, or a second squad) got there first, or the span came back up
+			// on its own -- no point walking an engineer into a repair the engine would refuse anyway.
+			if (phase != Phase.Repairing && !NeedsRepair(Hut))
+			{
+				Log("bridge no longer needs repair -> releasing engineer");
+				Outcome = AotMissionOutcome.Success;
+				Finish();
+				return;
+			}
+
+			if (Units.Count == 0 && Ops.OpenRequests(this) == 0)
+			{
+				// The engineer is consumed on a successful repair, so an empty squad in the Repairing
+				// phase is the SUCCESS case, not a failure.
+				if (phase == Phase.Repairing)
+				{
+					Log("engineer consumed -> bridge repair underway");
+					Outcome = AotMissionOutcome.Success;
+					Finish();
+				}
+				else
+				{
+					Log("engineer lost before reaching the bridge -> mission over");
+					Finish();
+				}
+
+				return;
+			}
+
+			switch (phase)
+			{
+				case Phase.Forming:
+				{
+					formingTicks += Ops.Info.MissionInterval;
+					if (Engineer() != null)
+					{
+						phase = Phase.Moving;
+						Log($"engineer en route to {Hut.Info.Name}@{Hut.Location}");
+					}
+					else if (formingTicks >= Ops.Info.BridgeFormingTimeout)
+					{
+						Log("no engineer available in time -> mission over");
+						Finish();
+					}
+
+					break;
+				}
+
+				case Phase.Moving:
+				{
+					movingTicks += Ops.Info.MissionInterval;
+					var engineer = Engineer();
+					if (engineer == null)
+						break;
+
+					if ((engineer.Location - Hut.Location).LengthSquared <= Ops.Info.BridgeArriveRadius2)
+					{
+						phase = Phase.Repairing;
+						break;
+					}
+
+					if (movingTicks >= Ops.Info.BridgeMovingTimeout)
+					{
+						Log($"engineer could not reach {Hut.Location} in time -> mission over");
+						ReleaseEngineer();
+						Finish();
+						break;
+					}
+
+					if (engineer.IsIdle)
+						MoveUnit(bot, engineer, Hut.Location, false);
+
+					break;
+				}
+
+				case Phase.Repairing:
+				{
+					var engineer = Engineer();
+					if (engineer != null && engineer.IsIdle)
+						bot.QueueOrder(new Order("RepairBridge", engineer, Target.FromActor(Hut), false));
+
+					break;
+				}
+			}
+		}
+
+		// Hands a still-living engineer back instead of stranding it wherever the mission gave up.
+		void ReleaseEngineer()
+		{
+			var survivors = Units.Where(a => !Ops.CannotOrder(a)).ToList();
+			if (survivors.Count == 0)
+				return;
+
+			foreach (var a in survivors)
+				Units.Remove(a);
+
+			Ops.ReleaseToPool(this, survivors);
+		}
+	}
+
+	// ======================================================================
 	// Module 5: Base Defense (User 2026-07-22). Permanent standing garrison, created once at game
 	// start and never finishes. Sized roughly to one regular attack wave (WaveVehiclesPerAge
 	// [AgeTier()]); ProtectionMinProduced of that is guaranteed via dedicated production, the rest

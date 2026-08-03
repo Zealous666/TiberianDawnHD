@@ -627,6 +627,12 @@ Player:
 		EngineerTypes: aot-e6-gdi
 		RocketInfantryTypes: aot-e3-gdi
 		MgInfantryTypes: aot-e1-gdi
+		# Brueckenreparatur, siehe NOD-Instanz weiter unten. Fraktionsneutrale Mission -- laeuft
+		# hier bereits mit, sobald GDI ueberhaupt eine Basis bauen kann (aktuell existieren
+		# AotBasePlannerBotModule/AotBaseBuilderBotModule nur als @nod, siehe ai-army-operations.md).
+		EnableBridgeRepair: True
+		BridgeCheckInterval: 7500
+		BridgeMaxTargets: 1
 		# Escalation (User 2026-07-22): after 2 failed waves at the primary choke, the next wave
 		# routes via a secondary approach instead (if one exists); after 3 failed waves total (with
 		# a Helipad built) 4 helicopters raid the enemy construction yard directly, then the loop
@@ -765,6 +771,13 @@ Player:
 		EngineerTypes: aot-e6-nod
 		RocketInfantryTypes: aot-e3-nod
 		MgInfantryTypes: aot-e1-nod
+		# Brueckenreparatur (User-Briefing 2026-08-03, Age 0): alle 5 Minuten map-weiter Scan nach
+		# beschaedigten Bruecken-Huetten, dann EIN Engineer (aot-e6-nod -- nur E6 traegt in diesem
+		# Mod ueberhaupt RepairsBridges). Der Engineer wird von der Reparatur VERBRAUCHT
+		# (EnterBehaviour.Dispose), deshalb bewusst nur eine Bruecke gleichzeitig.
+		EnableBridgeRepair: True
+		BridgeCheckInterval: 7500
+		BridgeMaxTargets: 1
 		# Derrick squad composition (User 2026-07-31, corrected same day -- Flame Trooper needs Radar,
 		# which would have deadlocked the sequential build): 1 rocketeer, 1 engineer, 1 mg, 1 mg.
 		# Escalation (User 2026-07-22): after 2 failed waves at the primary choke, the next wave

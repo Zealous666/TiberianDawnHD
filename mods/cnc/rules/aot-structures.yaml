@@ -7556,9 +7556,13 @@ aot-bridgehut:
 	Targetable:
 		TargetTypes: BridgeHut, C4
 		RequiresForceFire: false
+	# NUR Interactable, kein Selectable (Fix 2026-08-03): SelectableInfo ERBT von InteractableInfo
+	# (Selectable.cs: "class SelectableInfo : InteractableInfo"), beides zusammen legt also zwei
+	# InteractableInfo-Instanzen in den TypeDictionary -> harter check-yaml-Fehler
+	# "TypeDictionary contains multiple instances of type InteractableInfo". Der Engine-BRIDGEHUT
+	# nutzt aus demselben Grund ebenfalls nur Interactable. Anklickbar/zielbar bleibt die Huette,
+	# als Einheit auswaehlbar soll sie ohnehin nicht sein.
 	Interactable:
-		Bounds: 1024, 1024
-	Selectable:
 		Bounds: 1024, 1024
 
 # === AOT Ice Floes (RA-Snow-Eisschollen als Actors) ===

@@ -681,6 +681,30 @@ namespace OpenRA.Mods.Common.Traits
 			"short timeout while the shared production queue works through other requests first.")]
 		public readonly int DerrickFormingTimeout = 9000;
 
+		// ---- Bridge Repair (User-Briefing 2026-08-03, Age 0) ----
+		[Desc("Send a lone engineer to repair damaged bridges (User 2026-08-03: 'scannt map alle 5min,",
+			"ob eine Bruecke kaputt ist. Schickt dann ein engineer los, sie zu reparieren').")]
+		public readonly bool EnableBridgeRepair = true;
+
+		[Desc("Ticks between map-wide scans for damaged bridge huts (5 min at 25 ticks/s).")]
+		public readonly int BridgeCheckInterval = 7500;
+
+		[Desc("Maximum number of bridges being repaired at the same time. One engineer each, and the",
+			"engineer is consumed by the repair, so this directly caps the cost per scan round.")]
+		public readonly int BridgeMaxTargets = 1;
+
+		[Desc("Timeout before a bridge repair mission gives up waiting for its engineer.")]
+		public readonly int BridgeFormingTimeout = 9000;
+
+		[Desc("Timeout for the walk to the bridge hut. A hut is often far outside the base and behind",
+			"contested ground, so this is deliberately generous -- but not unbounded, or a squad sent",
+			"at an unreachable hut would hold its engineer for the rest of the match.")]
+		public readonly int BridgeMovingTimeout = 9000;
+
+		[Desc("Squared cell distance at which the engineer is considered to have arrived at the hut",
+			"and switches to issuing the RepairBridge order (the order itself walks the last stretch).")]
+		public readonly int BridgeArriveRadius2 = 25;
+
 		// ---- Module 5: Base Defense (User 2026-07-22) ----
 		public readonly bool EnableBaseDefense = true;
 
@@ -786,6 +810,7 @@ namespace OpenRA.Mods.Common.Traits
 		bool randomEscalationPhase;
 
 		int derrickTicks;
+		int bridgeTicks;
 		int productionTicks;
 		int starportTicks;
 		int missionTicks;
@@ -853,6 +878,11 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			waveCooldownTicks = Info.WaveInitialDelay + World.LocalRandom.Next(0, 200);
 			derrickTicks = 1500 + World.LocalRandom.Next(0, 200);
+
+			// Staggered like every other periodic scan, so multiple bots don't all sweep the map on the
+			// exact same tick. Deliberately NOT delayed further than one full interval: a bridge can be
+			// down from minute one, and nothing else in the AI ever repairs it.
+			bridgeTicks = World.LocalRandom.Next(0, Info.BridgeCheckInterval);
 			productionTicks = World.LocalRandom.Next(0, Info.ProductionInterval);
 			starportTicks = World.LocalRandom.Next(0, Info.StarportFlushInterval);
 			missionTicks = World.LocalRandom.Next(0, Info.MissionInterval);
@@ -1938,6 +1968,46 @@ namespace OpenRA.Mods.Common.Traits
 					if (AgeTier() >= Info.DerrickSecondSquadAgeTier)
 						StartDerrickPursuit(Info.DerrickMaxTargets - Missions.OfType<AotDerrickMission>().Count());
 				}
+			}
+
+			// Bridge repair (Age 0): periodic map-wide scan, no age gate -- a broken bridge can cut the
+			// only land route to half the map from the very first minute.
+			if (Info.EnableBridgeRepair && --bridgeTicks <= 0)
+			{
+				bridgeTicks = Info.BridgeCheckInterval;
+				StartBridgeRepairs();
+			}
+		}
+
+		void StartBridgeRepairs()
+		{
+			if (Info.EngineerTypes.Length == 0)
+				return;
+
+			var active = Missions.OfType<AotBridgeRepairMission>().ToList();
+			var freeSlots = Info.BridgeMaxTargets - active.Count;
+			if (freeSlots <= 0)
+				return;
+
+			var baseCentre = BaseCentre();
+
+			// Reachability is checked against the hut cell itself: an engineer walks there on foot and
+			// this mission owns no transport (unlike the derrick squad, which can book a crossing).
+			// A hut on the far side of the very gap it would repair is therefore skipped, which is the
+			// intended behaviour -- there is no way to get anyone there until the span is back.
+			var candidates = World.Actors
+				.Where(a => AotBridgeRepairMission.NeedsRepair(a))
+				.Where(a => !active.Any(m => m.Hut == a))
+				.Where(a => Intel.IsReachable(a.Location))
+				.OrderBy(a => (a.Location - baseCentre).LengthSquared)
+				.Take(freeSlots)
+				.ToList();
+
+			foreach (var hut in candidates)
+			{
+				Missions.Add(new AotBridgeRepairMission(this, hut));
+				Log($"damaged bridge found -> {hut.Info.Name}@{hut.Location} " +
+					$"({active.Count + 1}/{Info.BridgeMaxTargets} repairs running)");
 			}
 		}
 
