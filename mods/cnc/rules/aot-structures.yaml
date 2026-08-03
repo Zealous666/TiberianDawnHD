@@ -1417,6 +1417,35 @@ aot-upgrade-zonetrooper-drop:
 		Prerequisite: aot-zonetrooper-drop-upgrade
 
 	Interactable:
+
+# === Age of Tiberium (aotmod) - Carryall Harvester Transport (User-Wunsch 2026-08-01) ===
+# Schaltet die Dune-2000-Faehrlogik fuer Carryalls frei: einmal per "Enter"-Cursor auf einer
+# Refinery aktiviert, holt der Carryall wartende Harvester ab und setzt sie am Ziel ab.
+# Die Transportschleife selbst liefert die Engine (AutoCarryall/AutoCarryable/CarryableHarvester),
+# Aktivierung + Kreisen kommen aus AotCarryallHarvestFerry (TRAN in overrides.yaml).
+# Setzt das Carryall-Upgrade voraus -- ohne Carryall gibt es nichts zu steuern.
+aot-upgrade-carryall-harvest:
+	Tooltip:
+		Name: Carryall Harvester Transport
+
+	Buildable:
+		BuildPaletteOrder: 345
+		Prerequisites: ~aot-age3, aot-age3, aot-tran-carryall-upgrade
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		Icon: icon
+		Description: Assign a carryall to a Refinery and it will transport the corresponding Harvesters between Tiberium Field and the Refinery.
+
+	Valued:
+		Cost: 2500
+
+	RenderSprites:
+		Image: harv
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-carryall-harvest-upgrade
+
+	Interactable:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - ATEC (Allied Tech Centre) ===

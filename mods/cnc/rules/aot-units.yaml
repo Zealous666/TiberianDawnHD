@@ -1991,6 +1991,37 @@ TRUCK:
 # Proxy-Aktor-Pattern wie MCV/JEEP/MTNK: -Buildable: im Basis-Aktor, Buildable im Proxy.
 HARV:
 	-Buildable:
+	# === Carryall Harvester Transport (User-Wunsch 2026-08-01) ===
+	# Harvester-Seite der Dune-2000-Faehrlogik. Beides liegt fertig in Mods.Common:
+	#   CarryableHarvester meldet Transportbedarf an -- in BEIDE Richtungen, also beim Losfahren
+	#     zum Tiberiumfeld UND beim Andocken an die Refinery -- und zieht die Anfrage zurueck,
+	#     sobald der Harvester angekommen ist bzw. erntet. Der Harvester wartet derweil auf der
+	#     Stelle, statt selbst loszufahren.
+	#   AutoCarryable ist die Reservierungs-Seite fuer den Carryall.
+	# '-Carryable:' ist PFLICHT: ^Vehicle (overrides.yaml) setzt bereits ein Carryable, und
+	# AutoCarryable ERBT davon -- beide nebeneinander waere derselbe Trait-Typ zweimal.
+	# Wirksam wird das Ganze erst, wenn ein Carryall die Routine scharf geschaltet hat
+	# (AutoCarryall.AutoCarryCondition), vorher fordert zwar jemand an, aber niemand hoert zu.
+	-Carryable:
+	# ReservedCondition + Mobile.PauseOnCondition (User-Wunsch 2026-08-01): der Harvester haelt an,
+	# SOBALD ein Carryall ihn reserviert hat, statt weiterzufahren bis der Heli ueber ihm haengt.
+	# Vanilla setzt die Bewegung erst bei State.Locked aus (Carryable.LockForPickup), also erst
+	# direkt vor dem Aufnehmen -- bis dahin faehrt er dem anfliegenden Carryall davon.
+	# Die Harvest-Activity bleibt dabei erhalten (nur pausiert) und laeuft nach dem Absetzen weiter.
+	AutoCarryable:
+		ReservedCondition: aot-carry-reserved
+	CarryableHarvester:
+	# ... ABER nicht, solange er noch auf der Refinery steht (User-Fund 2026-08-01: "Carryall
+	# stuckt ueber dem Harvester"). PROCs Footprint ist "_x_ xxx +++ ===" und der Dock-Offset
+	# liegt mitten drin -- nach dem Entladen steht der Harvester also auf einer GEBAEUDEZELLE.
+	# Friert er dort ein, findet der Carryall keinen Platz zum Aufnehmen und haengt endlos
+	# darueber. Mit dieser Ausnahme faehrt der Harvester erst vom Depot herunter und bleibt dann
+	# auf freiem Feld stehen, wo er problemlos aufgenommen werden kann.
+	AotGrantConditionOnActor@REFINERY:
+		Condition: aot-harv-at-refinery
+		ActorTypes: proc, aot-proc-gdi, aot-proc-gdi-age2, aot-proc-nod, aot-proc-nod-age2
+	Mobile:
+		PauseOnCondition: aot-carry-reserved && !aot-harv-at-refinery
 	# === Stealth Harvester (NOD Age-3-Upgrade, User-Wunsch 2026-08-01) ===
 	# Auf HARV statt auf den Proxies: aot-harv (GDI) und aot-harv-nod (NOD) erben beide von hier,
 	# und die Refineries spawnen ihre Gratis-Harvester ebenfalls als diese Aktoren. Freigeschaltet
@@ -2096,10 +2127,32 @@ aot-tran-gdi-cary:
 	Inherits: TRAN
 	RenderSprites:
 		Image: aot-tran-cary
+	# Preis 1000 (User-Wunsch 2026-08-01). TRANs Basispreis (750) galt bisher auch fuer den
+	# Carryall; sobald zusaetzlich die Faehr-Routine gekauft ist, uebernimmt der Proxy darunter.
+	Valued:
+		Cost: 1000
 	Buildable:
 		Queue: Aircraft.GDI
 		BuildPaletteOrder: 10
-		Prerequisites: anyhq, ~aot-tran-carryall-upgrade
+		Prerequisites: anyhq, ~aot-tran-carryall-upgrade, ~!aot-carryall-harvest-upgrade
+		Icon: icon-cary
+		Description: actor-aot-tran-carryall.description
+	Tooltip:
+		Name: actor-aot-tran-carryall.name
+
+# Ersetzt aot-tran-gdi-cary im Baumenue, sobald "Carryall Harvester Transport" gekauft ist --
+# gleiches Icon, gleicher Name, nur teurer (User-Wunsch 2026-08-01: 1500). Eigener Proxy, weil
+# Valued.Cost pro Aktor feststeht und sich nicht per Condition umschalten laesst.
+aot-tran-gdi-cary-ferry:
+	Inherits: TRAN
+	RenderSprites:
+		Image: aot-tran-cary
+	Valued:
+		Cost: 1500
+	Buildable:
+		Queue: Aircraft.GDI
+		BuildPaletteOrder: 10
+		Prerequisites: anyhq, ~aot-tran-carryall-upgrade, ~aot-carryall-harvest-upgrade
 		Icon: icon-cary
 		Description: actor-aot-tran-carryall.description
 	Tooltip:

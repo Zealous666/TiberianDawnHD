@@ -93,6 +93,7 @@ engine/**
 !engine/OpenRA.Mods.Common/Traits/AotFirePositionDebug.cs
 !engine/OpenRA.Mods.Common/Traits/AotProductionQueueDebug.cs
 !engine/OpenRA.Mods.Common/Traits/AotSuppressReadyNotification.cs
+!engine/OpenRA.Mods.Common/Traits/AotCarryallHarvestFerry.cs
 !engine/OpenRA.Mods.Common/Traits/Turreted.cs
 !engine/OpenRA.Mods.Common/Traits/Attack/
 !engine/OpenRA.Mods.Common/Traits/Attack/AttackGarrisoned.cs

@@ -1426,10 +1426,27 @@ TRAN:
 		Condition: aot-tran-carryall-upgrade
 		Prerequisites: aot-tran-carryall-upgrade
 	# Carryall-Trait: inaktiv bis Carryall-Upgrade. Fahrzeug hängt mit LocalOffset Z=-512 unter dem Heli.
-	Carryall:
+	# AutoCarryall statt Carryall (User-Wunsch 2026-08-01, "Carryall Harvester Transport"):
+	# AutoCarryallInfo ERBT von CarryallInfo, das manuelle PickupUnit bleibt also unveraendert --
+	# dazu kommt die fertige Dune-2000-Faehrlogik. AutoCarryCondition schaltet sie NUR ein, wenn
+	# der Spieler die Routine per Enter-Cursor auf einer Refinery scharf gestellt hat
+	# (aot-carryall-ferry-armed, siehe AotCarryallHarvestFerry unten).
+	# Kein "-Carryall:" noetig -- TRAN erbt keinen, der Trait wurde hier erst definiert und ist
+	# jetzt durch AutoCarryall ERSETZT (beide nebeneinander ginge nicht, AutoCarryall IST ein Carryall).
+	AutoCarryall:
 		RequiresCondition: aot-tran-carryall-upgrade
 		LocalOffset: 0, 0, -512
 		AllowDropOff: true
+		AutoCarryCondition: aot-carryall-ferry-armed
+	# Aktivierung + Kreisen am letzten Absetzort. Braucht zusaetzlich das gekaufte Upgrade --
+	# ohne das taucht der Enter-Cursor auf Refineries gar nicht erst auf.
+	AotCarryallHarvestFerry:
+		RequiresCondition: aot-tran-carryall-upgrade && aot-carryall-harvest-upgrade
+		ArmedCondition: aot-carryall-ferry-armed
+		RefineryActors: proc, aot-proc-gdi, aot-proc-gdi-age2, aot-proc-nod, aot-proc-nod-age2
+	GrantConditionOnPrerequisite@carryallharvest:
+		Condition: aot-carryall-harvest-upgrade
+		Prerequisites: aot-carryall-harvest-upgrade
 	# Rotoren nur im Chinook-Modus sichtbar (nicht beim TS-Carryall VXL, das hat Rotoren eingebakt)
 	WithIdleOverlay@ROTOR1AIR:
 		RequiresCondition: airborne && !aot-tran-carryall-upgrade
