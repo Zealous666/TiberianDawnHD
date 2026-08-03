@@ -2481,7 +2481,8 @@ namespace OpenRA.Mods.Common.Traits
 	// ======================================================================
 	public sealed class AotHeliRaidMission : AotEngineerRaidMission
 	{
-		readonly CPos approachWaypoint;
+		readonly List<CPos> route = [];
+		int leg;
 		bool transportSurvivedDelivery;
 
 		public AotHeliRaidMission(AotOperationsBotModule ops, Actor enemyYard)
@@ -2493,17 +2494,99 @@ namespace OpenRA.Mods.Common.Traits
 			var distance = ops.Info.HeliRaidDropDistance + (tier * ops.Info.HeliRaidDropDistanceStep);
 			dropCell = BehindTarget(enemyYard.Location, distance);
 
-			// Approach along the map edge: head for the map corner nearest the drop zone first, then
-			// come in from there. Cheap, needs no path analysis, and reliably avoids flying straight
-			// over the enemy base from our side -- which is the whole point of the manoeuvre.
-			var b = ops.World.Map.Bounds;
-			var cornerX = dropCell.X - b.Left < b.Right - dropCell.X ? b.Left + 1 : b.Right - 2;
-			var cornerY = dropCell.Y - b.Top < b.Bottom - dropCell.Y ? b.Top + 1 : b.Bottom - 2;
-			approachWaypoint = new CPos(cornerX, cornerY);
+			BuildEdgeRoute(ops.BaseCentre());
 
 			Log($"heli raid planned: drop {dropCell} (tier {tier}, {distance} cells behind), " +
-				$"approach via {approachWaypoint}");
+				$"edge route [{string.Join(" -> ", route)}]");
 		}
+
+		// Flies ALONG THE MAP EDGE (User 2026-08-03: "einfach nur zur kartenecke koennte ihn genau
+		// durch eine basis fuehren. ich sagte AM KARTENRAND ENTLANG").
+		//
+		// A single "nearest corner" waypoint was wrong: both the leg out to that corner and the leg
+		// from it to the drop zone are straight lines across open map, and either can cut right
+		// through a base. Instead the route leaves our base to the nearest edge, then follows the
+		// perimeter -- corner by corner, the short way round -- to the edge point nearest the drop
+		// zone, and only then turns inland. The only leg that crosses open ground is the last one.
+		void BuildEdgeRoute(CPos from)
+		{
+			var b = Ops.World.Map.Bounds;
+
+			// One cell inside the bounds: the outermost row/column is often unreachable map border.
+			var left = b.Left + 1;
+			var top = b.Top + 1;
+			var right = b.Right - 2;
+			var bottom = b.Bottom - 2;
+			if (right <= left || bottom <= top)
+			{
+				// Degenerate/tiny map -- nothing sensible to hug, fly direct.
+				route.Add(dropCell);
+				return;
+			}
+
+			var w = right - left;
+			var h = bottom - top;
+			var perimeter = 2 * (w + h);
+
+			// Projects a cell onto the nearest edge and returns both the edge cell and how far along
+			// the perimeter it sits, measured clockwise from the top-left corner.
+			(CPos Cell, int S) ToEdge(CPos c)
+			{
+				var x = Math.Clamp(c.X, left, right);
+				var y = Math.Clamp(c.Y, top, bottom);
+
+				var dLeft = x - left;
+				var dRight = right - x;
+				var dTop = y - top;
+				var dBottom = bottom - y;
+				var best = Math.Min(Math.Min(dLeft, dRight), Math.Min(dTop, dBottom));
+
+				if (best == dTop)
+					return (new CPos(x, top), x - left);
+				if (best == dRight)
+					return (new CPos(right, y), w + (y - top));
+				if (best == dBottom)
+					return (new CPos(x, bottom), w + h + (right - x));
+
+				return (new CPos(left, y), w + h + w + (bottom - y));
+			}
+
+			var start = ToEdge(from);
+			var end = ToEdge(dropCell);
+
+			route.Add(start.Cell);
+
+			// Corner scalars in clockwise order, and the corner cells they belong to.
+			var cornerS = new[] { 0, w, w + h, w + h + w };
+			var cornerCell = new[]
+			{
+				new CPos(left, top), new CPos(right, top), new CPos(right, bottom), new CPos(left, bottom)
+			};
+
+			var cw = ((end.S - start.S) % perimeter + perimeter) % perimeter;
+			var goClockwise = cw <= perimeter - cw;
+
+			// Emit every corner strictly between start and end, in travel direction, so the transport
+			// actually traces the border instead of cutting the chord across the map.
+			for (var i = 0; i < 4; i++)
+			{
+				// Walk the four corners in travel order starting after the start point.
+				var idx = goClockwise ? i : 3 - i;
+				var s = cornerS[idx];
+				var along = goClockwise
+					? ((s - start.S) % perimeter + perimeter) % perimeter
+					: ((start.S - s) % perimeter + perimeter) % perimeter;
+				var total = goClockwise ? cw : perimeter - cw;
+
+				if (along > 0 && along < total)
+					route.Add(cornerCell[idx]);
+			}
+
+			route.Add(end.Cell);
+			route.Add(dropCell);
+		}
+
+		CPos CurrentWaypoint => route[Math.Min(leg, route.Count - 1)];
 
 		protected override string[] TransportChain => Ops.Info.HeliRaidTransportTypes;
 		protected override int FormingTimeout => Ops.Info.HeliRaidFormingTimeout;
@@ -2550,12 +2633,18 @@ namespace OpenRA.Mods.Common.Traits
 						break;
 					}
 
-					if (transport.IsIdle)
+					// Advance leg by leg instead of queueing the whole route at once: a helicopter
+					// that gets pushed off course still resumes at the leg it is actually on, and the
+					// log shows where along the border it currently is.
+					if (leg < route.Count - 1
+						&& (transport.Location - CurrentWaypoint).LengthSquared <= Ops.Info.RaidArriveRadius2)
 					{
-						// Edge waypoint first, drop zone queued behind it.
-						MoveUnit(bot, transport, approachWaypoint, false);
-						MoveUnit(bot, transport, dropCell, true);
+						leg++;
+						Log($"edge leg {leg}/{route.Count - 1} -> {CurrentWaypoint}");
 					}
+
+					if (transport.IsIdle)
+						MoveUnit(bot, transport, CurrentWaypoint, false);
 
 					break;
 				}
