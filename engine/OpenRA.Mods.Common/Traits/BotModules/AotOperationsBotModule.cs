@@ -973,6 +973,8 @@ namespace OpenRA.Mods.Common.Traits
 		int raidTicks;
 		int expansionTicks;
 		int expansionSiteLogTicks;
+		int raidGateLogTicks;
+		bool groundRaidUnlocked;
 
 		// Per-BOT danger memory for heli raids (User 2026-08-03), deliberately NOT per mission: the
 		// whole point is that the NEXT raid benefits from what happened to the last one.
@@ -2346,16 +2348,93 @@ namespace OpenRA.Mods.Common.Traits
 				&& Info.HeliRaidTransportTypes.Length > 0
 				&& FirstBuildable(Info.HeliRaidTransportTypes) != null;
 
-			var groundReady = Info.EnableGroundRaids
+			// LATCHED, not sampled. FirstBuildable goes through BuildableItems(), and for the Starport
+			// -- a BulkProductionQueue -- that reports NOTHING while the cart is full or a delivery is
+			// running. Sampling it at one instant therefore says "no subterranean APC" for reasons that
+			// have nothing to do with the upgrade being bought, and the draw then picked the helicopter
+			// every single time (User 2026-08-03: 19 heli raids, 0 ground raids, 0 sub APCs ever built).
+			// Once the transport has been buildable ONCE the upgrade exists, so remember it.
+			if (Info.EnableGroundRaids
 				&& AgeTier() >= Info.GroundRaidAgeTier
 				&& Info.GroundRaidTransportTypes.Length > 0
-				&& FirstBuildable(Info.GroundRaidTransportTypes) != null;
+				&& FirstBuildable(Info.GroundRaidTransportTypes) != null)
+				groundRaidUnlocked = true;
+
+			var groundReady = groundRaidUnlocked;
+
+			if (--raidGateLogTicks <= 0)
+			{
+				raidGateLogTicks = 4;
+				LogRaidGate(heliReady, groundReady);
+			}
 
 			if (!heliReady && !groundReady)
 				return;
 
 			var ground = groundReady && (!heliReady || World.LocalRandom.Next(2) == 0);
 			StartEngineerRaid(ground);
+		}
+
+		// Analysis tool for the raid gate (User 2026-08-03: "bau auch ein analysetool für ground
+		// engineer apc raid ein ... subterrain apc's oder entsprechende raids gabs keine").
+		//
+		// A flavour that never comes up is invisible from outside: TryStartEngineerRaid just returns.
+		// This spells out, per chain entry, whether the actor exists, which queue it belongs to,
+		// whether that queue is even enabled, and -- for the Starport, which is a BulkProductionQueue
+		// and reports NOTHING buildable while its cart is full or a delivery is running -- the cart
+		// state as well, so a transient block can be told apart from a missing prerequisite.
+		void LogRaidGate(bool heliReady, bool groundReady)
+		{
+			string Describe(string label, string[] chain)
+			{
+				if (chain.Length == 0)
+					return $"{label}=<no chain configured>";
+
+				var parts = new List<string>();
+				foreach (var name in chain)
+				{
+					if (!World.Map.Rules.Actors.TryGetValue(name, out var ai))
+					{
+						parts.Add($"{name}: UNKNOWN ACTOR");
+						continue;
+					}
+
+					var bi = ai.TraitInfoOrDefault<BuildableInfo>();
+					if (bi == null)
+					{
+						parts.Add($"{name}: not buildable at all");
+						continue;
+					}
+
+					var categories = string.Join("/", bi.Queue);
+					var queues = AIUtils.FindQueuesByCategory(Player)
+						.Where(g => bi.Queue.Contains(g.Key))
+						.SelectMany(q => q)
+						.ToList();
+
+					if (queues.Count == 0)
+					{
+						parts.Add($"{name}: no queue owned for [{categories}]");
+						continue;
+					}
+
+					foreach (var q in queues)
+					{
+						var buildable = q.BuildableItems().Any(b => b.Name == name);
+						var extra = "";
+						if (q is BulkProductionQueue bulk)
+							extra = $" cart={bulk.GetActorsReadyForDelivery().Count} " +
+								$"delivering={bulk.HasDeliveryStarted()} queueBuildableTotal={bulk.BuildableItems().Count()}";
+
+						parts.Add($"{name}@{q.Info.Type}: buildable={buildable}{extra}");
+					}
+				}
+
+				return $"{label}=[{string.Join(" | ", parts)}]";
+			}
+
+			Log($"raid gate: age={AgeTier()} refinery={HasRefinery()} heliReady={heliReady} groundReady={groundReady} " +
+				$"{Describe("heli", Info.HeliRaidTransportTypes)} {Describe("ground", Info.GroundRaidTransportTypes)}");
 		}
 
 		public bool IsRaidTransport(Actor a) =>
