@@ -2077,6 +2077,14 @@ namespace OpenRA.Mods.Common.Traits
 		Actor Engineer() => Units.FirstOrDefault(a => !Ops.CannotOrder(a));
 
 		// Still repairable AND still worth sending someone to.
+		//
+		// ⚠️ CanRepair alone is NOT the right bar (User-Beobachtung 2026-08-03: "ein engineer hat eine
+		// bereits reparierte bruecke repariert"). It only asks BridgeDamageState != Undamaged, and
+		// AggregateDamageState returns the WORST span's ordinary DamageState -- so a single stray shot
+		// leaving one span at Light already qualified, even though the bridge looks intact and is fully
+		// drivable. Only a span at Dead is actually gone and makes the crossing impassable, which is
+		// what "kaputt" meant in the briefing. Since the engineer is CONSUMED by the repair, sending
+		// one for cosmetic damage is pure waste.
 		public static bool NeedsRepair(Actor hut)
 		{
 			if (hut == null || hut.IsDead || !hut.IsInWorld)
@@ -2084,10 +2092,12 @@ namespace OpenRA.Mods.Common.Traits
 
 			var legacy = hut.TraitOrDefault<LegacyBridgeHut>();
 			if (legacy != null)
-				return legacy.CanRepair && !legacy.BridgeIsDangling;
+				return legacy.CanRepair
+					&& legacy.BridgeDamageState == DamageState.Dead
+					&& !legacy.BridgeIsDangling;
 
 			var modern = hut.TraitOrDefault<BridgeHut>();
-			return modern != null && modern.BridgeDamageState != DamageState.Undamaged && !modern.Repairing;
+			return modern != null && modern.BridgeDamageState == DamageState.Dead && !modern.Repairing;
 		}
 
 		public override void Tick(IBot bot)
