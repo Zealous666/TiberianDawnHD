@@ -1302,7 +1302,7 @@ aot-upgrade-v2-howitzer:
 		Description: Transforms Napalm Rocket Launcher into a Howitzer for later Heavy Artillery usage. Lockout of Toxic Rocket Launchers.
 
 	Valued:
-		Cost: 800
+		Cost: 1200
 
 	RenderSprites:
 		Image: arty
@@ -3116,7 +3116,7 @@ aot-upgrade-nod-airstrike:
 		Description: Unlocks the Airstrike support power: two MiG jets make two attack passes, each firing two guided rockets at the target. Mutually exclusive with the Spy Plane upgrade.
 
 	Valued:
-		Cost: 750
+		Cost: 1100
 
 	RenderSprites:
 		Image: aot-upgrade-nod-airstrike
@@ -3143,7 +3143,7 @@ aot-upgrade-nod-spyplane:
 		Description: Unlocks the Spy Plane support power: a Yak recon plane flies over a target area and reveals it for a short time. Mutually exclusive with the Airstrike upgrade.
 
 	Valued:
-		Cost: 750
+		Cost: 1100
 
 	RenderSprites:
 		Image: aot-upgrade-nod-spyplane
@@ -3258,7 +3258,7 @@ aot-upgrade-orca:
 		Description: Upgrades all Apaches to ORCA gunships. Adds anti-air missile capability.
 
 	Valued:
-		Cost: 800
+		Cost: 1200
 
 	RenderSprites:
 		Image: aot-upgrade-orca
@@ -4322,7 +4322,7 @@ aot-upgrade-gunboat-frigate:
 		Description: Upgrades all Gunboats into Frigates capable of attacking land targets.
 
 	Valued:
-		Cost: 800
+		Cost: 1200
 
 	RenderSprites:
 		Image: aot-upgrade-gunboat-frigate
@@ -4788,7 +4788,7 @@ aot-upgrade-transport-gun:
 		Description: actor-aot-upgrade-transport-gun.description
 
 	Valued:
-		Cost: 600
+		Cost: 900
 
 	RenderSprites:
 		Image: aot-upgrade-transport-gun
@@ -5860,7 +5860,7 @@ aot-upgrade-sam-bunkered:
 		Description: SAM sites retract underground between shots for increased armor protection.
 
 	Valued:
-		Cost: 400
+		Cost: 600
 
 	RenderSprites:
 		Image: aot-upgrade-sam-bunkered
@@ -6206,7 +6206,7 @@ aot-upgrade-guard-tower:
 		Description: Upgrades all Pillboxes to Guard Towers with extended sight and weapon range (+50%). Exclusive with the Camo Pillbox upgrade.
 
 	Valued:
-		Cost: 500
+		Cost: 750
 
 	RenderSprites:
 		Image: aot-upgrade-guard-tower
@@ -6234,7 +6234,7 @@ aot-upgrade-camo-pillbox:
 		Description: Upgrades all Pillboxes to Camo Pillboxes, cloaked from the enemy until detected or engaging. Exclusive with the Guard Tower upgrade.
 
 	Valued:
-		Cost: 500
+		Cost: 750
 
 	RenderSprites:
 		Image: aot-upgrade-camo-pillbox
@@ -7076,7 +7076,7 @@ aot-upgrade-ftur-napalm:
 		BuildLimit: 1
 		Description: Nitro-enriched napalm for the Flame Tower - longer reach, and the base for later toxic conversion. Rules out the Turret.
 	Valued:
-		Cost: 500
+		Cost: 750
 	RenderSprites:
 		Image: aot-ftur
 	ProvidesPrerequisite:
@@ -7095,7 +7095,7 @@ aot-upgrade-turret:
 		BuildLimit: 1
 		Description: Unlocks the Gun Turret and the later Laser Turret. Rules out the Flame Tower.
 	Valued:
-		Cost: 500
+		Cost: 750
 	RenderSprites:
 		Image: gun
 	ProvidesPrerequisite:

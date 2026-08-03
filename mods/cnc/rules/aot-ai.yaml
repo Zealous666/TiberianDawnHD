@@ -42,7 +42,11 @@ Player:
 		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
 		HarvesterTypes: aot-harv, aot-harv-nod
 		RefineryTypes: proc, aot-proc-gdi, aot-proc-gdi-age2, aot-proc-nod, aot-proc-nod-age2
-		InitialHarvesters: 2
+		# User-Wunsch 2026-08-01: "es gelten nur die, die durch den Kauf von Refineries entstehen"
+		# -- InitialHarvesters ist ein FESTER Mindest-Floor, unabhaengig von der Refinery-Zahl
+		# (harvCountTooLow = harvsNum < InitialHarvesters || harvsNum < refineryCount). Auf 0
+		# gesetzt macht die Refinery-Anzahl zum EINZIGEN Treiber, kein zusaetzlicher Sockel mehr.
+		InitialHarvesters: 0
 
 	# ORET (Ore Transporter): mirrors HarvesterBotModule's own count-vs-reference-building replacement
 	# logic (User 2026-07-22: "genau wie bei HARV, nur zerstoerte nachkaufen, an FACT-Anzahl gekoppelt")

@@ -882,6 +882,10 @@ namespace OpenRA.Mods.Common.Traits
 		// See AotBaseBuilderBotModule.NavalSite -- the water our ships actually operate in.
 		public CPos? NavalSite() => builder?.NavalSite();
 
+		// See AotBasePlannerBotModule.IsInsideGateCluster -- the chokepoint garrison must never hold
+		// position on top of the planned gate-defence cluster's own footprint.
+		public bool IsInsideGateCluster(CPos c) => builder != null && builder.IsInsideGateCluster(c);
+
 		public bool HasRadar() =>
 			World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld && Info.RadarTypes.Contains(a.Info.Name));
 

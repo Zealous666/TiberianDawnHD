@@ -341,8 +341,29 @@ namespace OpenRA.Mods.Common.Traits
 			if (readyUnits.Count == 0)
 				return;
 
-			var inPosition = readyUnits.Where(a => (a.Location - choke.Value).LengthSquared <= holdR2).ToList();
-			var outOfPosition = readyUnits.Where(a => (a.Location - choke.Value).LengthSquared > holdR2).ToList();
+			// Never let the garrison hold position ON TOP of the gate-defence cluster's own reserved
+			// footprint (buildings + fence). Both are independently biased toward the SAME choke cell
+			// (the garrison holds AT the choke; the cluster is placed as close to the choke as
+			// possible), so a unit "correctly" holding its post can end up parked on a planned
+			// building or fence node forever, permanently blocking it -- it LOOKS right (it is exactly
+			// at the choke) while structurally colliding with what gets built there (user-fund
+			// 2026-08-01). Push it toward the base (same "behind" direction the Obelisk/second Silo
+			// use) a few cells at a time; re-issued every check while still inside, same as the
+			// out-of-position push below, so it keeps making progress without needing an IsIdle gate.
+			var insideCluster = readyUnits.Where(a => Ops.IsInsideGateCluster(a.Location)).ToList();
+			if (insideCluster.Count > 0)
+			{
+				var baseCentre = Ops.BaseCentre();
+				foreach (var a in insideCluster)
+				{
+					var behind = AotBasePlannerBotModule.Cardinal(new CVec(baseCentre.X - a.Location.X, baseCentre.Y - a.Location.Y));
+					bot.QueueOrder(new Order("AttackMove", a, Target.FromCell(Ops.World, a.Location + (behind * 3)), false));
+				}
+			}
+
+			var outside = readyUnits.Where(a => !insideCluster.Contains(a)).ToList();
+			var inPosition = outside.Where(a => (a.Location - choke.Value).LengthSquared <= holdR2).ToList();
+			var outOfPosition = outside.Where(a => (a.Location - choke.Value).LengthSquared > holdR2).ToList();
 
 			if (outOfPosition.Count > 0)
 				bot.QueueOrder(new Order("AttackMove", null, Target.FromCell(Ops.World, choke.Value), false, groupedActors: outOfPosition.ToArray()));
@@ -358,8 +379,9 @@ namespace OpenRA.Mods.Common.Traits
 			}
 
 			// Clearing done. Wait until the whole reserve is actually in position for a
-			// few consecutive checks, then hand the group its follow-up mission.
-			if (outOfPosition.Count == 0 && ++clearChecks >= 3)
+			// few consecutive checks, then hand the group its follow-up mission. Units still being
+			// pushed out of the cluster's own footprint do not count as "settled" either.
+			if (outOfPosition.Count == 0 && insideCluster.Count == 0 && ++clearChecks >= 3)
 			{
 				BuildArcoTargets();
 				phase = arcoTargets.Count > 0 ? Phase.ArcoRaid : Phase.FinalAttack;
@@ -2064,7 +2086,26 @@ namespace OpenRA.Mods.Common.Traits
 			// instance yet).
 			var holding = Units.Where(a => !responding.Contains(a)).ToList();
 			if (holding.Count > 0)
-				HoldAt(bot, holding, Ops.ChokeProvider?.Chokepoint ?? Ops.GarrisonMusterPoint(), Ops.Info.GuardLeashRadius);
+			{
+				// Same fix as the starting-units chokeReserve (user-fund 2026-08-01): this garrison
+				// ALSO holds at the raw choke cell, which is exactly where the gate-defence cluster is
+				// independently biased to build -- a unit standing inside the cluster's own footprint
+				// must be pushed clear before HoldAt is allowed to treat it as "in position".
+				var insideCluster = holding.Where(a => Ops.IsInsideGateCluster(a.Location)).ToList();
+				if (insideCluster.Count > 0)
+				{
+					var baseCentre = Ops.BaseCentre();
+					foreach (var a in insideCluster)
+					{
+						var behind = AotBasePlannerBotModule.Cardinal(new CVec(baseCentre.X - a.Location.X, baseCentre.Y - a.Location.Y));
+						bot.QueueOrder(new Order("AttackMove", a, Target.FromCell(Ops.World, a.Location + (behind * 3)), false));
+					}
+				}
+
+				var outside = holding.Where(a => !insideCluster.Contains(a)).ToList();
+				if (outside.Count > 0)
+					HoldAt(bot, outside, Ops.ChokeProvider?.Chokepoint ?? Ops.GarrisonMusterPoint(), Ops.Info.GuardLeashRadius);
+			}
 		}
 
 		void MaintainGarrison()

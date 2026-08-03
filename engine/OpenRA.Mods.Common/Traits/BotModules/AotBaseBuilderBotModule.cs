@@ -730,6 +730,18 @@ namespace OpenRA.Mods.Common.Traits
 		// step in the Rhythm forever.
 		void RebuildScan()
 		{
+			// Periodic watchdog, independent of any specific step firing (user-fund 2026-08-01, "4th
+			// turret" screenshot): if something OUTSIDE this Rhythm is producing GUN/FTUR, the Soll/Ist
+			// log at the "Place" order alone would never catch it -- this catches it here instead,
+			// loudly, on the same cadence RebuildScan already runs at, regardless of source.
+			var plannedGun = planner.Rhythm.Count(s => s.Role == "GUN");
+			var plannedFtur = planner.Rhythm.Count(s => s.Role == "FTUR");
+			var liveGun = world.Actors.Count(a => a.Owner == player && !a.IsDead && a.IsInWorld && planner.Info.GunTypes.Contains(a.Info.Name));
+			var liveFtur = world.Actors.Count(a => a.Owner == player && !a.IsDead && a.IsInWorld && planner.Info.FturTypes.Contains(a.Info.Name));
+			if (liveGun > plannedGun || liveFtur > plannedFtur)
+				Log.Write("debug", $"[AotBuild][{player.PlayerName}] WARNING: extra gate-defence turret(s) outside the Rhythm -- " +
+					$"GUN {liveGun}/{plannedGun} planned, FTUR {liveFtur}/{plannedFtur} planned");
+
 			foreach (var step in planner.Rhythm)
 			{
 				// Skipped (defence-timeout) steps never got built in the first place -- there is nothing
@@ -809,6 +821,9 @@ namespace OpenRA.Mods.Common.Traits
 		// out, by design) can keep it false forever, which is exactly what
 		// AgeUpgradeFallbackTimeoutTicks exists to route around in TryFireAgeUpgrades.
 		public bool AgeRhythmComplete(int age) => planner.Rhythm.Where(s => s.Age == age).All(s => s.Done);
+
+		// See AotBasePlannerBotModule.IsInsideGateCluster for why this needs to exist at all.
+		public bool IsInsideGateCluster(CPos c) => planner != null && planner.IsInsideGateCluster(c);
 
 		// Specifically the Age-1 Refinery, not the whole tier's Rhythm (unlike AgeRhythmComplete): user
 		// spec 2026-07-31, after observing the AI build its Age-1 Airfield but never the Refinery behind
@@ -1634,6 +1649,22 @@ namespace OpenRA.Mods.Common.Traits
 			}
 
 			Log.Write("debug", $"[AotBuild][{player.PlayerName}] Place {pending.Role} ({pendingType}) at {pendingCell}");
+
+			// Soll/Ist tally for gate-defence turrets (user-fund 2026-08-01, "4th turret" screenshot):
+			// PLANNED is however many GUN/FTUR Rhythm steps exist in total (main cluster + however many
+			// secondary clusters got planned -- 2 GUN + 1 FTUR each, so this number is self-consistent
+			// with cluster count without needing it separately). LIVE is what's actually standing right
+			// now. If LIVE ever exceeds PLANNED, something outside this Rhythm is building turrets --
+			// if it stays <= PLANNED, whatever looked like "one too many" is a second (secondary-
+			// approach) cluster the plan always intended, not a bug.
+			if (pending.Role is "GUN" or "FTUR")
+			{
+				var plannedGun = planner.Rhythm.Count(s => s.Role == "GUN");
+				var plannedFtur = planner.Rhythm.Count(s => s.Role == "FTUR");
+				var liveGun = world.Actors.Count(a => a.Owner == player && !a.IsDead && a.IsInWorld && planner.Info.GunTypes.Contains(a.Info.Name));
+				var liveFtur = world.Actors.Count(a => a.Owner == player && !a.IsDead && a.IsInWorld && planner.Info.FturTypes.Contains(a.Info.Name));
+				Log.Write("debug", $"[AotBuild][{player.PlayerName}] Gate-defence tally: GUN {liveGun}/{plannedGun} planned, FTUR {liveFtur}/{plannedFtur} planned");
+			}
 
 			// Only tear down the chain that was built FOR this step.
 			if (bridgeWallCells.Count > 0 && bridgeOwner == pending)

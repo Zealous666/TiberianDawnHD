@@ -156,6 +156,19 @@ namespace OpenRA.Mods.Common.Traits
 		public List<CPos> Gates = [];
 		public CPos? MainGate;                 // gate nearest the enemy — used only for base PACKING
 
+		// The main gate-defence cluster's own reserved rectangle (buildings + fence ring), exposed so
+		// the chokepoint garrison can be kept OUT of it -- both are independently biased toward the
+		// same `choke` cell (garrison holds AT the choke; the cluster is placed as close to it as
+		// possible), so without this a garrison unit "correctly" holding position sits right on top of
+		// a planned building or fence node forever, permanently blocking it (user-fund 2026-08-01).
+		public CPos? GateClusterTopLeft;
+		public CVec GateClusterSize;
+
+		public bool IsInsideGateCluster(CPos c) =>
+			GateClusterTopLeft != null
+			&& c.X >= GateClusterTopLeft.Value.X && c.X < GateClusterTopLeft.Value.X + GateClusterSize.X
+			&& c.Y >= GateClusterTopLeft.Value.Y && c.Y < GateClusterTopLeft.Value.Y + GateClusterSize.Y;
+
 		// Defence provider outputs (validated, user-approved): the two-sided corridor chokepoint that the
 		// squad manager sends primary units to, and the classified approaches (incl. beach) for secondaries.
 		CPos? defenceChokepoint;
@@ -541,6 +554,12 @@ namespace OpenRA.Mods.Common.Traits
 			public string Name;
 			public CPos Pos;
 			public Variant V;
+
+			// Set when PlaceGateCluster could not find ANY position near its anchor that keeps the
+			// choke corridor passable together with the fence -- the buildings still get built, just
+			// without the surrounding wall, since an open passage matters more than a closed ring
+			// (user spec 2026-08-01, "worst case, den zaun weglassen").
+			public bool SkipFence;
 		}
 
 		string[] RoleVariants(string role) => role switch
@@ -865,6 +884,26 @@ namespace OpenRA.Mods.Common.Traits
 			double Dist((double X, double Y) a, CPos b) => Math.Sqrt(((a.X - b.X) * (a.X - b.X)) + ((a.Y - b.Y) * (a.Y - b.Y)));
 			double DistC((double X, double Y) a, (double X, double Y) b) => Math.Sqrt(((a.X - b.X) * (a.X - b.X)) + ((a.Y - b.Y) * (a.Y - b.Y)));
 
+			// Shared bookkeeping every successful placement performs: reserve its footprint, mark its
+			// building cells built, register its centre for future spread scoring, and record it.
+			// Factored out of Place()/PlaceIn() (previously duplicated verbatim in both) so
+			// PlaceGateCluster below can commit through the exact same accounting.
+			Placement Commit(string name, CPos pos, Variant v)
+			{
+				for (var cx = pos.X; cx < pos.X + v.W; cx++)
+					for (var cy = pos.Y; cy < pos.Y + v.H; cy++)
+						bruttoCells.Add(new CPos(cx, cy));
+
+				foreach (var (off, role) in v.Buildings)
+					foreach (var rc in roleCells[role])
+						builtCells.Add(pos + off + rc);
+
+				centres.Add((pos.X + (v.W / 2.0), pos.Y + (v.H / 2.0)));
+				var pl = new Placement { Name = name, Pos = pos, V = v };
+				placements.Add(pl);
+				return pl;
+			}
+
 			bool Valid(CPos pos, Variant v)
 			{
 				var bcells = new HashSet<CPos>();
@@ -912,21 +951,7 @@ namespace OpenRA.Mods.Common.Traits
 					}
 
 					if (best != null)
-					{
-						var pos = best.Value;
-						for (var cx = pos.X; cx < pos.X + v.W; cx++)
-							for (var cy = pos.Y; cy < pos.Y + v.H; cy++)
-								bruttoCells.Add(new CPos(cx, cy));
-
-						foreach (var (off, role) in v.Buildings)
-							foreach (var rc in roleCells[role])
-								builtCells.Add(pos + off + rc);
-
-						centres.Add((pos.X + (v.W / 2.0), pos.Y + (v.H / 2.0)));
-						var pl = new Placement { Name = name, Pos = pos, V = v };
-						placements.Add(pl);
-						return pl;
-					}
+						return Commit(name, best.Value, v);
 				}
 
 				Log.Write("debug", $"[AotPlan][{player.PlayerName}] FAILED to place {name} — no valid position in pocket");
@@ -1001,19 +1026,111 @@ namespace OpenRA.Mods.Common.Traits
 					}
 
 					if (best != null)
+						return Commit(name, best.Value, v);
+				}
+
+				Log.Write("debug", $"[AotPlan][{player.PlayerName}] FAILED to place {name} — no valid position in local area");
+				return null;
+			}
+
+			// Local flood from `from`, treating `blocked` cells as solid, up to `budget` visits. Used to
+			// verify the choke corridor stays passable once a candidate cluster+fence rectangle (the
+			// fence ring is what actually seals a gap, not just the buildings) goes up there -- a
+			// rectangle picked purely for "closest to choke" can otherwise wall off the very passage the
+			// cluster is meant to guard (user spec 2026-08-01, screenshots of a sealed chokepoint).
+			bool Reaches(CPos from, CPos to, HashSet<CPos> blocked, int budget)
+			{
+				if (blocked.Contains(from) || blocked.Contains(to))
+					return false;
+
+				var visited = new HashSet<CPos> { from };
+				var q = new Queue<CPos>();
+				q.Enqueue(from);
+
+				while (q.Count > 0 && budget-- > 0)
+				{
+					var c = q.Dequeue();
+					if (c == to)
+						return true;
+
+					foreach (var d in D4)
 					{
-						var pos = best.Value;
-						for (var cx = pos.X; cx < pos.X + v.W; cx++)
-							for (var cy = pos.Y; cy < pos.Y + v.H; cy++)
-								bruttoCells.Add(new CPos(cx, cy));
+						var n = c + d;
+						if (!blocked.Contains(n) && Passable(n) && visited.Add(n))
+							q.Enqueue(n);
+					}
+				}
 
-						foreach (var (off, role) in v.Buildings)
-							foreach (var rc in roleCells[role])
-								builtCells.Add(pos + off + rc);
+				return false;
+			}
 
-						centres.Add((pos.X + (v.W / 2.0), pos.Y + (v.H / 2.0)));
-						var pl = new Placement { Name = name, Pos = pos, V = v };
-						placements.Add(pl);
+			// Gate cluster placement that ALSO verifies the corridor survives the fence ring that will
+			// stand there (user spec 2026-08-01: "verschieben bis ein Durchgang bleibt" as the primary
+			// strategy). `pathDir` is the corridor's OWN direction (along the enemy's approach, NOT
+			// across it -- see defenceChokePathDir); `baseSide`/`farSide` are fixed reference points well
+			// clear of any candidate rectangle so the connectivity flood always has somewhere solid to
+			// start and end. Candidates are still ranked "closest to the anchor first", exactly like
+			// PlaceIn, but among those tied for best score, only ones that keep the corridor open are
+			// accepted. If literally nothing does (a corridor tighter than the cluster itself), the
+			// closest candidate of any kind is used anyway and flagged Placement.SkipFence -- BuildRhythm
+			// then queues the buildings WITHOUT their fence ring, which is the one thing that can
+			// actually seal a passage; ungated buildings are strictly better than no defence at all.
+			Placement PlaceGateCluster(HashSet<CPos> area, string name, List<Variant> variants, CPos anchor, CVec pathDir)
+			{
+				var reach = Math.Max(area.Count > 0 ? (int)Math.Sqrt(area.Count) : 8, 8) + 4;
+				var baseSide = NearestPassable(anchor - (pathDir * reach), 6) ?? anchor - (pathDir * reach);
+				var farSide = NearestPassable(anchor + (pathDir * reach), 6) ?? anchor + (pathDir * reach);
+
+				var sortedArea = area.OrderBy(c => c.Y).ThenBy(c => c.X).ToList();
+
+				foreach (var v in variants)
+				{
+					CPos? bestConnected = null;
+					var bestConnectedScore = double.MinValue;
+					CPos? bestAny = null;
+					var bestAnyScore = double.MinValue;
+
+					foreach (var p in sortedArea)
+					{
+						if (!ValidIn(area, p, v))
+							continue;
+
+						var c = (p.X + (v.W / 2.0), p.Y + (v.H / 2.0));
+						if (Dist(c, anchor) > 5)
+							continue;
+
+						var score = -Dist(c, anchor);
+
+						if (score > bestAnyScore)
+						{
+							bestAnyScore = score;
+							bestAny = p;
+						}
+
+						if (score <= bestConnectedScore)
+							continue;
+
+						var blocked = new HashSet<CPos>();
+						for (var cx = p.X; cx < p.X + v.W; cx++)
+							for (var cy = p.Y; cy < p.Y + v.H; cy++)
+								blocked.Add(new CPos(cx, cy));
+
+						if (!Reaches(baseSide, farSide, blocked, 1500))
+							continue;
+
+						bestConnectedScore = score;
+						bestConnected = p;
+					}
+
+					if (bestConnected != null)
+						return Commit(name, bestConnected.Value, v);
+
+					if (bestAny != null)
+					{
+						var pl = Commit(name, bestAny.Value, v);
+						pl.SkipFence = true;
+						Log.Write("debug", $"[AotPlan][{player.PlayerName}] {name}: no position near {anchor} keeps the " +
+							"corridor passable with a fence -- built WITHOUT one (worst case, user spec 2026-08-01)");
 						return pl;
 					}
 				}
@@ -1175,9 +1292,14 @@ namespace OpenRA.Mods.Common.Traits
 				var axis = defenceChokeAxis;
 				var chokeArea = LocalFlood(choke, 12, 300);
 				var preferHorizontal = Math.Abs(axis.X) >= Math.Abs(axis.Y);
-				bool NearChoke((double X, double Y) c) => Dist(c, choke) <= 5;
-				pGateCluster = PlaceIn(chokeArea, "GateCluster", GateClusterVariants(preferHorizontal),
-					c => -Dist(c, choke), useSpread: false, extraFilter: NearChoke);
+				pGateCluster = PlaceGateCluster(chokeArea, "GateCluster", GateClusterVariants(preferHorizontal),
+					choke, defenceChokePathDir);
+
+				if (pGateCluster != null)
+				{
+					GateClusterTopLeft = pGateCluster.Pos;
+					GateClusterSize = new CVec(pGateCluster.V.W, pGateCluster.V.H);
+				}
 
 				// The 2 Age-2 SAM Sites that go BEHIND the gate cluster (user spec) -- same "behind"
 				// direction the Age-3 Obelisk uses (Cardinal(yard - clusterCentre), i.e. back towards the
@@ -1231,10 +1353,14 @@ namespace OpenRA.Mods.Common.Traits
 					var secAxis = horizWidth <= vertWidth ? new CVec(0, 1) : new CVec(1, 0);
 					var secArea = LocalFlood(gate, 12, 300);
 					var secPreferHorizontal = Math.Abs(secAxis.X) >= Math.Abs(secAxis.Y);
-					bool NearGate((double X, double Y) c) => Dist(c, gate) <= 5;
 
-					var cluster = PlaceIn(secArea, $"SecondaryCluster_{gate.X}_{gate.Y}", GateClusterVariants(secPreferHorizontal),
-						c => -Dist(c, gate), useSpread: false, extraFilter: NearGate);
+					// secAxis is the FLANKING axis (mirrors defenceChokeAxis); the corridor's own path
+					// runs perpendicular to it, same relationship DetectChokepoint uses
+					// (defenceChokeAxis = perp of defenceChokePathDir, i.e. perp = (-dir.Y, dir.X)).
+					var secPathDir = new CVec(-secAxis.Y, secAxis.X);
+
+					var cluster = PlaceGateCluster(secArea, $"SecondaryCluster_{gate.X}_{gate.Y}",
+						GateClusterVariants(secPreferHorizontal), gate, secPathDir);
 					if (cluster != null)
 						secondaryClusters.Add(cluster);
 				}
@@ -1352,6 +1478,15 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				if (p == null)
 					return;
+
+				// PlaceGateCluster's own worst-case fallback (user spec 2026-08-01): a cluster that
+				// could not find ANY position keeping the choke corridor passable together with a
+				// fence gets built without one -- an open passage matters more than a closed ring.
+				if (p.SkipFence)
+				{
+					Log.Write("debug", $"[AotBuild][{player.PlayerName}] {label}: skipped (cluster has no fence, corridor stayed the priority)");
+					return;
+				}
 
 				AddFence(label, p.Pos.X, p.Pos.Y, p.V.W, p.V.H, defense);
 			}
@@ -1520,7 +1655,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		static int Manhattan(CPos a, CPos b) => Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y);
 
-		static CVec Cardinal(CVec v)
+		public static CVec Cardinal(CVec v)
 		{
 			if (v.X == 0 && v.Y == 0)
 				return new CVec(0, 1);
