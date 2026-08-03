@@ -677,7 +677,7 @@ Player:
 		# unaffected (still Tank+Light+Support), it just never touches the shared queue anymore, freeing
 		# it for actual wave composition.
 		WaveTankTypes: aot-ttnk-base
-		WaveLightTypes: aot-bike-laser, aot-bggy-laser, aot-bike-base, aot-bggy-base
+		WaveLightTypes: aot-bggy-laser, aot-bike-base, aot-bggy-base
 		WaveSupportTypes: aot-v2-base
 		WaveTankShare: 50
 		WaveLightShare: 30
@@ -699,7 +699,7 @@ Player:
 		# 2-3 LTNK. Age2/3: same 4 lines, just more of each as budget allows ("ab Age2 einfach mehr von
 		# jeder Einheit, wenn Cashflow passt") -- Howitzer/Heavy Arty return later via a SEPARATE
 		# operation type, deliberately excluded from Regular Waves from Age1 onward.
-		WaveSlot1Types: aot-bike-laser, aot-bike-base
+		WaveSlot1Types: aot-bike-base
 		WaveSlot1Min: 0, 1, 1, 2
 		WaveSlot1Max: 0, 2, 3, 4
 		WaveSlot2Types: aot-bggy-laser, aot-bggy-base
@@ -778,7 +778,7 @@ Player:
 		RepairTypes: aot-fix-age0, aot-fix-age1-nod, aot-fix-age2-nod
 		# Module 5 Base Defense (User 2026-07-22): standing garrison ~= one regular wave in size,
 		# ProtectionMinProduced guaranteed via production, rest opportunistic from the pool.
-		ProtectionFloorTypes: aot-bike-laser, aot-bggy-laser, aot-bike-base, aot-bggy-base
+		ProtectionFloorTypes: aot-bggy-laser, aot-bike-base, aot-bggy-base
 		ProtectionMinProduced: 3
 		ProtectionScanRadius: 10
 		ProtectionResponseRatio: 2

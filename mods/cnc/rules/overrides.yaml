@@ -1071,6 +1071,10 @@ aot-proc-gdi-age2:
 # === Age of Tiberium (aotmod) - aot-proc-nod: PROC für NOD (braucht Airfield) ===
 aot-proc-nod:
 	Inherits: PROC
+	# Fraktionsrichtiger Gratis-Harvester (siehe PROC in aot-structures.yaml): NOD baut
+	# aot-harv-nod, nicht aot-harv.
+	FreeActor:
+		Actor: aot-harv-nod
 	RenderSprites:
 		Image: proc
 	ProvidesPrerequisite@buildingname:
@@ -1097,6 +1101,10 @@ aot-proc-nod:
 
 aot-proc-nod-age2:
 	Inherits: PROC
+	# Fraktionsrichtiger Gratis-Harvester (siehe PROC in aot-structures.yaml): NOD baut
+	# aot-harv-nod, nicht aot-harv.
+	FreeActor:
+		Actor: aot-harv-nod
 	RenderSprites:
 		Image: proc
 	ProvidesPrerequisite@buildingname:
@@ -1608,33 +1616,18 @@ BIKE:
 		CargoType: GarrisonVehicle
 		Weight: 5
 		CustomPipType: green
-	GrantConditionOnPrerequisite@laserupgrade:
-		Condition: aot-bike-laser
-		Prerequisites: aot-laser-fence-upgrade
+	# User-Wunsch 2026-08-01: Laser-Upgrade fuer die Bike ERSATZLOS entfernt (Condition,
+	# Laser-Armaments und der Laser-Pod-Sprite-Switch). Es gibt nur noch die eine Raketen-Waffe,
+	# die jetzt dauerhaft Boden UND Luft beschiesst (siehe aot-BikeRockets in aot-weapons.yaml).
+	# Damit entfaellt auch der Proxy-Split aot-bike-base/aot-bike-laser (aot-units.yaml).
 	-Armament:
 	Armament:
 		Weapon: aot-BikeRockets
 		LocalOffset: -128, -170, 170, -128, 170, 170
 		LocalYaw: 100, -100
-		RequiresCondition: !aot-bike-laser
-	Armament@laser:
-		Weapon: aot-BikeLaser
-		LocalOffset: -128, -170, 170, -128, 170, 170
-		LocalYaw: 100, -100
-		RequiresCondition: aot-bike-laser
 	Armament@garrisoned:
 		Name: garrisoned
 		Weapon: aot-BikeRockets
-		RequiresCondition: !aot-bike-laser
-	Armament@garrisonedlaser:
-		Name: garrisoned
-		Weapon: aot-BikeLaser
-		RequiresCondition: aot-bike-laser
-	WithFacingSpriteBody:
-		RequiresCondition: !aot-bike-laser
-	WithFacingSpriteBody@laserpods:
-		Sequence: aot-bike-laser-pods
-		RequiresCondition: aot-bike-laser
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Fahrzeuge capturable für Carjacker ===

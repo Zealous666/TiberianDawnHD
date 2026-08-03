@@ -1212,7 +1212,17 @@ namespace OpenRA.Mods.Common.Traits
 
 						var c = step.TopLeft + new CVec(dx, dy);
 						var tiles = bi.Tiles(c).ToList();
-						if (tiles.Any(t => !planner.Pocket.Contains(t) || claimed.Contains(t)))
+
+						// Gate-defence buildings (FTUR/GUN/SAM near the choke) are legitimately sited
+						// just outside Pocket by design (AotBasePlannerBotModule: "the validated
+						// defenceChokepoint can legitimately sit just outside Pocket"). Requiring full
+						// Pocket containment here made every resite attempt for exactly those buildings
+						// fail near-guaranteed -- confirmed 2026-08-02 (user report: destroyed gate FTUR/
+						// GUN never rebuilt, log showed dozens of "Re-site FAILED" with the ORIGINAL site
+						// itself already inPocket=False). Non-defence steps keep the strict check; the r<=8
+						// ring search already bounds how far from the original site a defence building can
+						// drift, so relaxing Pocket containment for them doesn't risk wandering off.
+						if (tiles.Any(t => claimed.Contains(t) || (!step.Defense && !planner.Pocket.Contains(t))))
 							continue;
 
 						if (resourceLayer != null && tiles.Any(t => resourceLayer.GetResource(t).Type != null))

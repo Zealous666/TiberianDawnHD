@@ -3454,37 +3454,23 @@ aot-arty-heavy:
 		DecorationBounds: 1300, 1400
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - BIKE Queue-Proxies (Doppel-Aktor-Pattern) ===
+# === Age of Tiberium (aotmod) - BIKE ===
 # aot-bike-base: sichtbar + baubar ab Age 1 in LITE (NOD), erfordert HAND.
-# aot-bike-laser: ersetzt aot-bike-base sobald Laser Technologies aktiv.
-# Waffe/Icon-Switch steckt in overrides.yaml (BIKE).
+# User-Wunsch 2026-08-01: Laser-Upgrade der Bike ersatzlos entfernt -> aot-bike-laser geloescht,
+# kein Proxy-Split und kein LockedGroup mehr noetig (nur noch EINE Variante). Die Waffe schiesst
+# jetzt dauerhaft Boden UND Luft (aot-BikeRockets, siehe aot-weapons.yaml).
 aot-bike-base:
 	Inherits: BIKE
 	RenderSprites:
 		Image: bike
 	Buildable:
-		LockedGroup: aot-grp-bike
 		Queue: LightVehicle.Nod
 		BuildPaletteOrder: 8
-		Prerequisites: ~aot-age1, lite, hand, ~!aot-laser-fence-upgrade
+		Prerequisites: ~aot-age1, lite, hand
 		Icon: aot-bike-icon
-		Description: Fast NOD recon bike armed with twin rocket launchers. Ground targets only.
+		Description: Fast NOD recon bike armed with twin rocket launchers. Hits ground and air targets.
 	Tooltip:
 		Name: Recon Bike
-
-aot-bike-laser:
-	Inherits: BIKE
-	RenderSprites:
-		Image: bike
-	Buildable:
-		LockedGroup: aot-grp-bike
-		Queue: LightVehicle.Nod
-		BuildPaletteOrder: 8
-		Prerequisites: ~aot-age1, lite, hand, ~aot-laser-fence-upgrade
-		Icon: aot-bike-laser-icon
-		Description: NOD recon bike upgraded with dual laser cannons.
-	Tooltip:
-		Name: Recon Bike (Laser)
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - BGGY Queue-Proxies (Doppel-Aktor-Pattern) ===
@@ -4252,7 +4238,7 @@ aot-msub-base:
 		LockedGroup: aot-grp-msub
 		Queue: Naval.Nod
 		BuildPaletteOrder: 30
-		Prerequisites: aot-subpen, stec, ~aot-age1, ~!aot-msub-mine-upgrade, ~!aot-msub-drone-upgrade
+		Prerequisites: aot-subpen, stec, tmpl, ~aot-age1, ~!aot-msub-mine-upgrade, ~!aot-msub-drone-upgrade
 		Icon: icon
 		Description: actor-aot-msub.description
 	Tooltip:
@@ -4267,7 +4253,7 @@ aot-msub-mine-proxy:
 		LockedGroup: aot-grp-msub
 		Queue: Naval.Nod
 		BuildPaletteOrder: 30
-		Prerequisites: aot-subpen, stec, fix, anyhq, ~aot-age3, ~aot-msub-mine-upgrade, ~!aot-msub-drone-upgrade
+		Prerequisites: aot-subpen, stec, tmpl, fix, anyhq, ~aot-age3, ~aot-msub-mine-upgrade, ~!aot-msub-drone-upgrade
 		Icon: mine-icon
 		Description: actor-aot-msub.description
 	Tooltip:
@@ -4282,7 +4268,7 @@ aot-msub-drone-proxy:
 		LockedGroup: aot-grp-msub
 		Queue: Naval.Nod
 		BuildPaletteOrder: 30
-		Prerequisites: aot-subpen, stec, fix, anyhq, ~aot-age3, ~aot-msub-drone-upgrade, ~!aot-msub-mine-upgrade
+		Prerequisites: aot-subpen, stec, tmpl, fix, anyhq, ~aot-age3, ~aot-msub-drone-upgrade, ~!aot-msub-mine-upgrade
 		Icon: drone-icon
 		Description: actor-aot-msub-drone.description
 	Tooltip:

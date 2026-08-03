@@ -4856,6 +4856,15 @@ aot-upgrade-msub-drone:
 
 # === Age of Tiberium (aotmod) - PROC + SILO: Geldstehlen per Spy ===
 PROC:
+	# aotmod (User-Fund 2026-08-01: "Gegner baut direkt 5 Harvester"): der geerbte FreeActor
+	# spawnte den VANILLA-HARV. Der Mod ersetzt HARV aber durch aot-harv/aot-harv-nod (HARV hat
+	# hier nur noch -Buildable:), und HarvesterBotModule zaehlt AUSSCHLIESSLICH die in
+	# HarvesterTypes gelisteten Aktoren. Der Gratis-Harvester jeder Raffinerie war damit fuer die
+	# KI unsichtbar -> harvsNum lag dauerhaft unter der Raffinerie-Zahl -> sie forderte endlos
+	# "Ersatz" an, obwohl nie einer verloren ging. NOD-Proxies ueberschreiben das unten nochmal
+	# auf aot-harv-nod (fraktionsrichtig).
+	FreeActor:
+		Actor: aot-harv
 	InfiltrateForCash:
 		Percentage: 50
 		PlayerExperience: 10
@@ -7121,8 +7130,12 @@ ARCO:
 
 V19:
 	# Einkommen erhoeht 10 -> 25 (User-Wunsch 2026-07-27).
+	# Tickrate halbiert (User-Wunsch 2026-08-01): Interval war nie gesetzt und lief damit auf dem
+	# Engine-Default von 50 Ticks = alle 2 Sekunden bei Standard-Timestep (40ms), nicht 1x/Sekunde.
+	# 100 Ticks = alle 4 Sekunden -> effektives Einkommen halbiert (25/2s -> 25/4s).
 	CashTrickler:
 		Amount: 25
+		Interval: 100
 		RequiresCondition: enabled
 	AotDropActorOnDeath:
 		Actor: OILCRATE1000

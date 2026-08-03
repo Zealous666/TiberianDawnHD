@@ -82,8 +82,26 @@ namespace OpenRA.Mods.Cnc.Traits
 			wsb = init.Self.TraitsImplementing<WithSpriteBody>().Single(w => w.Info.Name == info.Body);
 		}
 
-		IEnumerable<VariableObserver> IObservesVariables.GetVariableObservers()
+		// aotmod fix (User-Fund 2026-08-01: "SAMs/Bunkered SAMs schiessen auch wenn sie low power
+		// sind -- korrekt abgedunkelt, feuern aber trotzdem"). Das war die Ursache, NICHT die YAML:
+		// diese Methode war als EXPLIZITE Interface-Implementierung
+		// (`IEnumerable<VariableObserver> IObservesVariables.GetVariableObservers()`) geschrieben
+		// statt als `public override`. Die Engine holt die Observer ueber
+		// TraitsImplementing<IObservesVariables>() -- also ueber das Interface -- und dort gewinnt
+		// die explizite Implementierung und ERSETZT die der Basisklasse komplett. Damit wurden die
+		// Observer fuer RequiresCondition UND PauseOnCondition nie registriert: IsTraitPaused und
+		// IsTraitDisabled blieben dauerhaft false, egal welche Conditions anlagen. Die Abdunklung
+		// kommt von ^DisabledOverlay (eigener Trait) und funktionierte deshalb weiter -- das Feuern
+		// wurde nie pausiert. check-yaml konnte das nie finden: die YAML war immer korrekt
+		// (PauseOnCondition: lowpower || build-incomplete, lowpower wird von ^DisabledOverlay
+		// gegrantet), der Fehler lag ausschliesslich im C#.
+		// PFLICHT: als `override` deklarieren und base mit ausgeben -- die Basisklasse warnt in
+		// ConditionalTrait/PausableConditionalTrait genau davor.
+		public override IEnumerable<VariableObserver> GetVariableObservers()
 		{
+			foreach (var observer in base.GetVariableObservers())
+				yield return observer;
+
 			if (info.BunkeredCondition != null)
 				yield return new VariableObserver(BunkeredConditionChanged, info.BunkeredCondition.Variables);
 		}

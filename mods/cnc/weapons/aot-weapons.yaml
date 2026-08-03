@@ -321,16 +321,12 @@ aot-HarpyLaser:
 # Dual-Laser für NOD Recon Bike: je ein Schuss aus linker und rechter Kanone.
 # Erbt aot-LtnkLaser (Balancing), ValidTargets auf Ground/Water beschränkt
 # wie die ursprünglichen BikeRockets.
+# User-Wunsch 2026-08-01: Recon Bike kann ab jetzt IMMER Boden UND Luft beschiessen
+# (Air/Air ergaenzt). Das Laser-Upgrade fuer die Bike wurde ersatzlos entfernt, es gibt nur
+# noch diese eine Waffe -- aot-BikeLaser ist damit weggefallen.
 aot-BikeRockets:
 	Inherits: BikeRockets
-	ValidTargets: Ground, Water
-
-aot-BikeLaser:
-	Inherits: aot-LtnkLaser
-	ValidTargets: Ground, Water
-	Burst: 2
-	BurstDelays: 6
-	ReloadDelay: 55
+	ValidTargets: Ground, Water, Air
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - AJET Waffen ===

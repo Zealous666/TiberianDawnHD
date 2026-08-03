@@ -194,9 +194,25 @@ namespace OpenRA.Mods.Common.Traits
 
 						if (pending == 0)
 							foreach (var queue in AIUtils.FindQueuesByCategory(player).SelectMany(g => g))
+							{
 								foreach (var item in queue.AllQueued())
 									if (Info.HarvesterTypes.Contains(item.Item))
 										pending++;
+
+								// aotmod fix (User 2026-08-01: "gegner baut weiterhin direkt 5 harvester"):
+								// the same hole one layer deeper. Nod's harvester is built in the Starport
+								// queue (BuildDuration 0), and BulkProductionQueue.BuildUnit calls
+								// EndProduction() the moment an item finishes -- it leaves Queue and moves
+								// into ActorsReadyForDelivery, where it waits for the C17 to fly it in.
+								// AllQueued() only reports Queue, so for the whole delivery flight the
+								// harvester is invisible to this guard: every scan saw "none pending", and
+								// the cart filled up to MaxCapacity before the drop, which is exactly why
+								// they arrived five at a time.
+								if (queue is BulkProductionQueue bulk)
+									foreach (var (actor, _, _) in bulk.GetActorsReadyForDelivery())
+										if (Info.HarvesterTypes.Contains(actor.Name))
+											pending++;
+							}
 
 						if (pending == 0)
 							unitBuilder.RequestUnitProduction(bot, Info.HarvesterTypes.Random(world.LocalRandom));
