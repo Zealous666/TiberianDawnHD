@@ -76,8 +76,16 @@ namespace OpenRA.Mods.Common.Activities
 			else
 				enterHut?.Repair(self);
 
-			Game.Sound.PlayNotification(self.World.Map.Rules, self.Owner, "Speech", speechNotification, self.Owner.Faction.InternalName);
-			TextNotificationsManager.AddTransientLine(self.Owner, textNotification);
+			// aotmod (User 2026-08-03: "die 'bridge repaired' meldung muss grundsaetzlich fuer alle
+			// spieler global zu hoeren sein"). Passing the repairing player made both channels check
+			// `player == player.World.LocalPlayer` (Sound.PlayPredefined / AddTransientLine) and drop
+			// the notification for everyone else -- so a bridge the AI put back up was announced to
+			// nobody. A repaired bridge changes the map for ALL sides, unlike a per-player event such
+			// as "construction complete", so both go out with a null player = audible/visible to
+			// everyone. Faction variant still follows the repairing player, which just picks that
+			// side's voice for the shared announcement.
+			Game.Sound.PlayNotification(self.World.Map.Rules, null, "Speech", speechNotification, self.Owner.Faction.InternalName);
+			TextNotificationsManager.AddTransientLine(null, textNotification);
 
 			if (enterBehaviour == EnterBehaviour.Dispose)
 				self.Dispose();
