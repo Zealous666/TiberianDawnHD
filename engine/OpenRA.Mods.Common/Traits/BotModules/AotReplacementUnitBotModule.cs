@@ -36,6 +36,13 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Target floor regardless of reference building count (0 = purely reference-building-driven).")]
 		public readonly int MinimumCount = 0;
 
+		[Desc("Hard ceiling on the target, regardless of how many reference buildings exist",
+			"(0 = no ceiling). Needed since base expansion (User 2026-08-03): a second construction",
+			"yard would otherwise raise the Ore Transporter target to 2, but the expansion is meant to",
+			"get only the transporter its yard spawns for free -- 'die expansion soll keinen eigenen",
+			"oreT bekommen'.")]
+		public readonly int MaximumCount = 0;
+
 		[Desc("Ticks between checks.")]
 		public readonly int ScanInterval = 250;
 
@@ -79,6 +86,9 @@ namespace OpenRA.Mods.Common.Traits
 			var unitCount = world.Actors.Count(a => a.Owner == player && !a.IsDead && Info.UnitTypes.Contains(a.Info.Name));
 			var refCount = world.Actors.Count(a => a.Owner == player && !a.IsDead && Info.ReferenceBuildingTypes.Contains(a.Info.Name));
 			var target = Info.MinimumCount > refCount ? Info.MinimumCount : refCount;
+			if (Info.MaximumCount > 0 && target > Info.MaximumCount)
+				target = Info.MaximumCount;
+
 			if (unitCount >= target)
 				return;
 

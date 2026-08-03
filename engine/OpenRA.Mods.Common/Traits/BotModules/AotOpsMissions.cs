@@ -2789,6 +2789,263 @@ namespace OpenRA.Mods.Common.Traits
 	}
 
 	// ======================================================================
+	// Base Expansion (User-Briefing 2026-08-03, Age 1 after the refinery). "Base expansion ist wichtig,
+	// damit der AI mehr Ressourcen bekommt."
+	//
+	// An MCV plus a six-tank escort drives to a tiberium field away from home, deploys, and the base
+	// builder then puts up a FIXED mini-layout around the new yard (see AotBaseBuilderBotModule.
+	// RequestExpansionLayout -- geometry from the arrangement the user pre-built in the editor). From
+	// Age 2 the escort digs in at six positions around the perimeter, which is what the pre-built
+	// layout's six deployed tick tanks actually were.
+	//
+	// One expansion per bot; if it is lost the mission ends and the next scan starts a fresh one.
+	// The expansion deliberately gets NO ore transporter of its own (user spec) -- only the one the
+	// construction yard spawns for free.
+	// ======================================================================
+	public sealed class AotExpansionMission : AotMissionWithOrders
+	{
+		enum Phase { Forming, Moving, Ferrying, Deploying, Building, Holding }
+
+		public readonly CPos Site;
+		Phase phase = Phase.Forming;
+		int formingTicks;
+		int phaseTicks;
+		Actor yard;
+		AotTransitTicket ticket;
+		bool ashore;
+
+		public AotExpansionMission(AotOperationsBotModule ops, CPos site)
+			: base(ops, "expansion")
+		{
+			Site = site;
+
+			// MCV first: it IS the mission. Escorts are requested alongside because they come from a
+			// different queue (vehicles vs. the MCV's own), so they cost the MCV no waiting time.
+			if (ops.Info.ExpansionMcvTypes.Length > 0)
+				ops.QueueRequest(this, "mcv", ops.Info.ExpansionMcvTypes, 1);
+
+			if (ops.Info.ExpansionEscortTypes.Length > 0 && ops.Info.ExpansionEscortCount > 0)
+				ops.QueueRequest(this, "escort", ops.Info.ExpansionEscortTypes, ops.Info.ExpansionEscortCount);
+
+			Log($"expansion planned at {site}");
+		}
+
+		Actor Mcv() => Units.FirstOrDefault(a => Ops.Info.ExpansionMcvTypes.Contains(a.Info.Name) && !Ops.CannotOrder(a));
+
+		List<Actor> Escorts() =>
+			Units.Where(a => !Ops.Info.ExpansionMcvTypes.Contains(a.Info.Name) && !Ops.CannotOrder(a)).ToList();
+
+		// The six dug-in positions from the pre-built layout, relative to the yard's top-left cell.
+		static readonly CVec[] GuardPosts =
+		[
+			new(4, -2), new(-5, -2), new(4, 3), new(-5, 3), new(4, 8), new(-5, 8)
+		];
+
+		public override void OnUnitAssigned(Actor a)
+		{
+			if (ReturnStrayNavalSupport(a))
+				return;
+
+			base.OnUnitAssigned(a);
+		}
+
+		public override void Tick(IBot bot)
+		{
+			// The yard is the expansion. Losing it ends the mission so the next scan can start over
+			// somewhere else (user spec: "1 base expansion pro AI aber wenn zerstört, neu ansetzen").
+			if (yard != null && (yard.IsDead || !yard.IsInWorld || yard.Owner != Ops.Player))
+			{
+				Log("expansion yard lost -> mission over");
+				Ops.Builder?.ClearExpansionLayout();
+				Finish();
+				return;
+			}
+
+			if (Units.Count == 0 && Ops.OpenRequests(this) == 0 && yard == null)
+			{
+				Ops.Transit.Cancel(ticket);
+				ticket = null;
+				Log("convoy lost before reaching the site -> mission over");
+				Finish();
+				return;
+			}
+
+			switch (phase)
+			{
+				case Phase.Forming:
+				{
+					formingTicks += Ops.Info.MissionInterval;
+					var mcv = Mcv();
+					if (mcv != null && Ops.OpenRequests(this, "mcv") == 0
+						&& (Escorts().Count >= Ops.Info.ExpansionEscortCount
+							|| formingTicks >= Ops.Info.ExpansionEscortWaitTicks))
+					{
+						phase = Phase.Moving;
+						phaseTicks = 0;
+						Log($"convoy departing with {Escorts().Count} escort(s)");
+					}
+					else if (formingTicks >= Ops.Info.ExpansionFormingTimeout)
+					{
+						Log("no MCV for the expansion in time -> mission over");
+						Finish();
+					}
+
+					break;
+				}
+
+				case Phase.Moving: TickMoving(bot); break;
+
+				case Phase.Ferrying:
+				{
+					if (ticket == null || ticket.Cancelled)
+					{
+						Log("crossing lost -> mission over");
+						Finish();
+					}
+					else if (ticket.Complete || ticket.Failed)
+					{
+						// Without the MCV ashore there is nothing to found a base with.
+						var mcvAshore = ticket.Delivered.Any(a => Ops.Info.ExpansionMcvTypes.Contains(a.Info.Name));
+						ticket = null;
+						if (mcvAshore || Mcv() != null)
+						{
+							ashore = true;
+							phase = Phase.Moving;
+							Log("ashore -> resuming approach to the expansion site");
+						}
+						else
+						{
+							Log("could not get the MCV across -> mission over");
+							Finish();
+						}
+					}
+
+					break;
+				}
+
+				case Phase.Deploying:
+				{
+					phaseTicks += Ops.Info.MissionInterval;
+					var mcv = Mcv();
+					if (mcv == null)
+					{
+						Log("MCV lost before deploying -> mission over");
+						Finish();
+						break;
+					}
+
+					// The deployed yard is a NEW actor, so watch for it appearing rather than trying
+					// to track the MCV through its own transformation.
+					yard = Ops.World.Actors.FirstOrDefault(a => a.Owner == Ops.Player && !a.IsDead && a.IsInWorld
+						&& Ops.Info.ConstructionYardTypes.Contains(a.Info.Name)
+						&& (a.Location - Site).LengthSquared <= Ops.Info.ExpansionArriveRadius2);
+
+					if (yard != null)
+					{
+						Ops.Builder?.RequestExpansionLayout(yard.Location);
+						phase = Phase.Building;
+						phaseTicks = 0;
+						Log($"expansion yard up at {yard.Location} -> layout requested");
+						break;
+					}
+
+					if (mcv.IsIdle)
+						bot.QueueOrder(new Order("DeployTransform", mcv, false));
+
+					if (phaseTicks >= Ops.Info.ExpansionDeployTimeout)
+					{
+						Log($"MCV would not deploy at {mcv.Location} -> mission over");
+						Finish();
+					}
+
+					break;
+				}
+
+				case Phase.Building:
+					// Construction is the builder's job from here; this mission only keeps the escort
+					// alive around it. Straight through to holding, which does exactly that.
+					phase = Phase.Holding;
+					break;
+
+				case Phase.Holding: TickHolding(bot); break;
+			}
+		}
+
+		void TickMoving(IBot bot)
+		{
+			phaseTicks += Ops.Info.MissionInterval;
+
+			var mcv = Mcv();
+			if (mcv == null)
+			{
+				Log("MCV lost on the way -> mission over");
+				Finish();
+				return;
+			}
+
+			if ((mcv.Location - Site).LengthSquared <= Ops.Info.ExpansionArriveRadius2)
+			{
+				phase = Phase.Deploying;
+				phaseTicks = 0;
+				return;
+			}
+
+			// No land route: book a crossing exactly like a wave or a derrick squad does. The user
+			// explicitly wants this prioritised -- an expansion on another landmass is usually the
+			// one worth having, because nobody is contesting it.
+			if (!ashore && !Ops.Intel.IsReachable(Site) && ticket == null && Ops.Info.FerryTypes.Length > 0)
+			{
+				ticket = Ops.Transit.Request(this, Units, Site, AotTransitPriority.Expansion);
+				if (ticket != null)
+				{
+					phase = Phase.Ferrying;
+					Log($"no land route to {Site} -> booked a crossing");
+					return;
+				}
+			}
+
+			if (phaseTicks >= Ops.Info.ExpansionMoveTimeout)
+			{
+				Log($"convoy could not reach {Site} -> mission over");
+				Finish();
+				return;
+			}
+
+			if (mcv.IsIdle)
+				MoveUnit(bot, mcv, Site, false);
+
+			var escorts = Escorts();
+			if (escorts.Count > 0)
+				AttackMoveGroup(bot, escorts, Site);
+		}
+
+		// Escort duty at the finished expansion. From Age 2 the tanks dig in at the six perimeter
+		// posts (user spec: "ab age 2, nach tick-tank upgrade, sollen sich die panzer an den
+		// positionen eingraben") -- the deploy order is simply ignored by a tank that has not been
+		// upgraded yet, so no separate upgrade check is needed.
+		void TickHolding(IBot bot)
+		{
+			var escorts = Escorts();
+			if (escorts.Count == 0 || yard == null)
+				return;
+
+			var digIn = Ops.AgeTier() >= Ops.Info.ExpansionDigInAgeTier;
+			for (var i = 0; i < escorts.Count; i++)
+			{
+				var post = yard.Location + GuardPosts[i % GuardPosts.Length];
+				var a = escorts[i];
+				if ((a.Location - post).LengthSquared > Ops.Info.ExpansionPostRadius2)
+				{
+					if (a.IsIdle)
+						MoveUnit(bot, a, post, false);
+				}
+				else if (digIn && a.IsIdle)
+					bot.QueueOrder(new Order("DeployTransform", a, false));
+			}
+		}
+	}
+
+	// ======================================================================
 	// Module 5: Base Defense (User 2026-07-22). Permanent standing garrison, created once at game
 	// start and never finishes. Sized roughly to one regular attack wave (WaveVehiclesPerAge
 	// [AgeTier()]); ProtectionMinProduced of that is guaranteed via dedicated production, the rest

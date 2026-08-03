@@ -60,6 +60,11 @@ Player:
 		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
 		UnitTypes: aot-oret-lite
 		ReferenceBuildingTypes: fact, fact.gdi, fact.nod
+		# Deckel auf 1 (User-Vorgabe 2026-08-03): seit der Base Expansion gibt es einen ZWEITEN
+		# Bauhof, der das Ziel sonst automatisch auf 2 heben wuerde. Die Expansion soll aber nur den
+		# ORET bekommen, den ihr Yard gratis mitliefert -- "diese zusatz-oreT war eine reine,
+		# einmalige main-base angelegenheit".
+		MaximumCount: 1
 
 	ResourceMapBotModule@aot:
 		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
@@ -127,6 +132,17 @@ Player:
 		Faction: nod
 		BuildingQueues: Building.Nod
 		WallType: aot-wall-nod
+		# Base-Expansion-Layout (User-Briefing 2026-08-03). Die GEOMETRIE ist fest im Code verdrahtet
+		# (RequestExpansionLayout), weil sie vom User exakt im Editor vorgebaut wurde -- siehe
+		# memory/ai-base-expansion-layout.md. Hier stehen nur die Aktor-Ketten.
+		# Gebaut wird auf der EIGENEN Queue des Expansions-Bauhofs: ProductionQueue@NodBuilding sitzt
+		# auf FACT, nicht auf dem Spieler -- ein zweiter Bauhof hat also eine zweite Bau-Queue und die
+		# Expansion laeuft echt parallel zur Hauptbasis statt in deren Bauslot zu warten.
+		ExpansionPowerTypes: aot-nuke-age2-nod, aot-nuke-age1, aot-nuke-age0
+		ExpansionRefineryTypes: aot-proc-nod-age2, aot-proc-nod
+		ExpansionSiloTypes: aot-silo-age2, aot-silo-age1, aot-silo-age0
+		ExpansionSamTypes: sam
+		ExpansionGateTypes: aot-gate-nod
 		MinimumExcessPower: 10
 		# On-demand naval production (User-Spec 2026-07-22): NICHT Teil des Rhythmus. Wird nur gebaut,
 		# wenn eine Operation sie via Ops.RequestNavalProduction() anfordert (z.B. ein Wave-Ferry ohne
@@ -802,6 +818,19 @@ Player:
 		# aot-subapc wurde 2026-08-03 aus ExcludeFromOpsTypes ENTFERNT: solange er dort stand, hat
 		# das Ops-Modul ihn nie beansprucht (IsEligibleCombatUnit filtert die Liste vorher raus) und
 		# die Transport-Anforderung des Boden-Raids waere nie erfuellt worden.
+		# Base Expansion (User-Briefing 2026-08-03): 1 pro Bot, ab Age 1 nach Refinery. MCV + 6 Light
+		# Tanks als Eskorte, die sich ab Age 2 (Tick-Tank-Upgrade) an sechs Posten rund um die
+		# Expansion eingraben -- genau die 6 aot-ltnk-deployed aus dem vorgebauten Layout.
+		# Standortwahl ueber ResourceMapBotModule: viel Tiberium, weit genug weg, keine Feindbasis in
+		# der Naehe. Ohne Landweg wird eine Faehre gebucht (Prioritaet Expansion).
+		# ⚠️ aot-mcv-age0/-age1 BLEIBEN in ExcludeFromOpsTypes (sonst wuerde Ops den START-MCV
+		# beanspruchen und er wuerde nie deployen -> keine Basis). Damit die Expansion ihren eigenen
+		# MCV trotzdem bekommt, macht IsEligibleCombatUnit eine gezielte Ausnahme fuer ausgeschlossene
+		# Typen, die eine Mission AKTIV angefordert hat -- siehe Kommentar dort.
+		EnableExpansion: True
+		ExpansionMcvTypes: aot-mcv-age1, aot-mcv-age0
+		ExpansionEscortTypes: aot-ltnk-tick, aot-ltnk-laser, aot-ltnk-base
+		ExpansionEscortCount: 6
 		# Derrick squad composition (User 2026-07-31, corrected same day -- Flame Trooper needs Radar,
 		# which would have deadlocked the sequential build): 1 rocketeer, 1 engineer, 1 mg, 1 mg.
 		# Escalation (User 2026-07-22): after 2 failed waves at the primary choke, the next wave

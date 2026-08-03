@@ -785,6 +785,66 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Timeout for assembling a ground raid squad. See HeliRaidFormingTimeout.")]
 		public readonly int GroundRaidFormingTimeout = 12000;
 
+		// ---- Base expansion (User-Briefing 2026-08-03) ----
+		[Desc("Found a second base at a remote tiberium field (User: 'Base expansion ist wichtig, damit",
+			"der AI mehr Ressourcen bekommt'). One per bot; a lost expansion is re-founded elsewhere.")]
+		public readonly bool EnableExpansion = true;
+
+		[Desc("Age tier at which the expansion unlocks. Also requires a refinery to be standing.")]
+		public readonly int ExpansionAgeTier = 1;
+
+		[Desc("Ticks between expansion attempts (only while none is standing or under way).")]
+		public readonly int ExpansionInterval = 6000;
+
+		[ActorReference]
+		[Desc("MCV chain for the expansion (age-ordered, first buildable wins).")]
+		public readonly string[] ExpansionMcvTypes = [];
+
+		[ActorReference]
+		[Desc("Escort chain for the expansion convoy. From Age 2 these dig in around the finished",
+			"expansion, which is what the six deployed tick tanks in the user's layout were.")]
+		public readonly string[] ExpansionEscortTypes = [];
+
+		[Desc("Escort size (user spec: 6 light tanks).")]
+		public readonly int ExpansionEscortCount = 6;
+
+		[Desc("How long the convoy waits for a full escort before departing with what it has. The MCV",
+			"itself is mandatory; the escort is not worth missing the site over.")]
+		public readonly int ExpansionEscortWaitTicks = 4500;
+
+		[Desc("Timeout for getting an MCV at all.")]
+		public readonly int ExpansionFormingTimeout = 12000;
+
+		[Desc("Timeout for the drive (or crossing) to the site.")]
+		public readonly int ExpansionMoveTimeout = 12000;
+
+		[Desc("Timeout for the MCV to actually turn into a construction yard.")]
+		public readonly int ExpansionDeployTimeout = 1500;
+
+		[Desc("Squared cell distance at which the convoy counts as arrived at the site.")]
+		public readonly int ExpansionArriveRadius2 = 36;
+
+		[Desc("Squared cell distance within which an escort counts as being on its guard post.")]
+		public readonly int ExpansionPostRadius2 = 4;
+
+		[Desc("Age tier from which the escort digs in at its post (user spec: Age 2, after the tick",
+			"tank upgrade). A tank without the upgrade simply ignores the deploy order.")]
+		public readonly int ExpansionDigInAgeTier = 2;
+
+		[Desc("Minimum resource cells an index must hold to be considered as an expansion site.")]
+		public readonly int ExpansionMinResourceCells = 20;
+
+		[Desc("Minimum cell distance from our own base -- an 'expansion' next door adds nothing.")]
+		public readonly int ExpansionMinDistance = 20;
+
+		[Desc("Cell distance around a candidate site that must be free of known enemy buildings",
+			"(user spec: 'frei und sicher ... keine gegnerische base in der nähe').")]
+		public readonly int ExpansionEnemyClearance = 25;
+
+		[Desc("How far off the tiberium field itself the yard is planted. Building on top of the field",
+			"would bury the very resources the expansion came for.")]
+		public readonly int ExpansionSiteOffset = 6;
+
 		// ---- Module 5: Base Defense (User 2026-07-22) ----
 		public readonly bool EnableBaseDefense = true;
 
@@ -892,6 +952,7 @@ namespace OpenRA.Mods.Common.Traits
 		int derrickTicks;
 		int bridgeTicks;
 		int raidTicks;
+		int expansionTicks;
 
 		// Per-BOT danger memory for heli raids (User 2026-08-03), deliberately NOT per mission: the
 		// whole point is that the NEXT raid benefits from what happened to the last one.
@@ -957,6 +1018,11 @@ namespace OpenRA.Mods.Common.Traits
 		// the rest of the match, rebuilding it if lost.
 		public void RequestNavalProduction() => builder?.RequestNavalProduction();
 
+		// The expansion mission hands its finished yard to the builder, which then puts up the fixed
+		// mini-layout on that yard's OWN production queue (a second construction yard owns a second
+		// Building.* queue -- the queue trait sits on FACT, not on the player).
+		public AotBaseBuilderBotModule Builder => builder;
+
 		// Priority pause for AotBaseBuilderBotModule (User 2026-07-31, see AotDerrickMission.
 		// StillFormingWithinTimeout): true while the FIRST derrick squad ever started is still being
 		// assembled and within its forming timeout. Only ever the first Missions entry of this type
@@ -975,6 +1041,7 @@ namespace OpenRA.Mods.Common.Traits
 			// down from minute one, and nothing else in the AI ever repairs it.
 			bridgeTicks = World.LocalRandom.Next(0, Info.BridgeCheckInterval);
 			raidTicks = Info.EngineerRaidInterval + World.LocalRandom.Next(0, 200);
+			expansionTicks = Info.ExpansionInterval + World.LocalRandom.Next(0, 200);
 			productionTicks = World.LocalRandom.Next(0, Info.ProductionInterval);
 			starportTicks = World.LocalRandom.Next(0, Info.StarportFlushInterval);
 			missionTicks = World.LocalRandom.Next(0, Info.MissionInterval);
@@ -1433,7 +1500,15 @@ namespace OpenRA.Mods.Common.Traits
 			if (a.Owner != Player || a.IsDead || !a.IsInWorld)
 				return false;
 
-			if (Info.ExcludeFromOpsTypes.Contains(a.Info.Name))
+			// Excluded types are normally invisible to Ops -- harvesters, ore transporters, the MCV that
+			// McvExpansionManagerBotModule deploys at game start, and so on. But an excluded type that
+			// a mission has EXPLICITLY asked for is a different thing: the expansion mission orders its
+			// own MCV, and without this exception that unit would never be claimed and the mission would
+			// sit forever waiting for a unit standing right next to it. Exactly the failure aot-subapc
+			// had before it was taken off the list (2026-08-03) -- but the MCV cannot simply be removed
+			// the same way, because then Ops would also grab the STARTING MCV and it would never deploy.
+			if (Info.ExcludeFromOpsTypes.Contains(a.Info.Name)
+				&& !requests.Any(r => r.Remaining > 0 && r.Chain.Contains(a.Info.Name)))
 				return false;
 
 			// Ground/naval combat units: mobile, not a harvester. Aircraft (Mobile == null) are
@@ -2095,6 +2170,95 @@ namespace OpenRA.Mods.Common.Traits
 				raidTicks = Info.EngineerRaidInterval;
 				TryStartEngineerRaid();
 			}
+
+			if (Info.EnableExpansion && --expansionTicks <= 0)
+			{
+				expansionTicks = Info.ExpansionInterval;
+				TryStartExpansion();
+			}
+		}
+
+		// One expansion per bot. The mission ends when its yard dies, and the builder's layout is
+		// cleared with it, so the next scan simply founds a new one somewhere else (user spec).
+		void TryStartExpansion()
+		{
+			if (AgeTier() < Info.ExpansionAgeTier || !HasRefinery() || Info.ExpansionMcvTypes.Length == 0)
+				return;
+
+			if (Missions.OfType<AotExpansionMission>().Any() || (builder?.ExpansionPlanned ?? false))
+				return;
+
+			var site = FindExpansionSite();
+			if (site == null)
+				return;
+
+			Missions.Add(new AotExpansionMission(this, site.Value));
+		}
+
+		// Scores tiberium fields from the resource map: plenty of resources, far enough from home to
+		// actually be an expansion, and no enemy base sitting on it. A field with no land route is NOT
+		// excluded -- the user explicitly wants those prioritised, because an expansion nobody can
+		// easily contest is the valuable one; the mission books a crossing for it.
+		CPos? FindExpansionSite()
+		{
+			var resourceMap = Player.PlayerActor.TraitOrDefault<ResourceMapBotModule>();
+			if (resourceMap == null)
+				return null;
+
+			var home = BaseCentre();
+			var enemyBuildings = World.Actors
+				.Where(a => !a.IsDead && a.IsInWorld
+					&& a.Owner != Player
+					&& Player.RelationshipWith(a.Owner) != PlayerRelationship.Ally
+					&& a.Info.HasTraitInfo<BuildingInfo>())
+				.Select(a => a.Location)
+				.ToList();
+
+			CPos? best = null;
+			var bestScore = int.MinValue;
+
+			for (var i = 0; i < resourceMap.GetIndicesLength(); i++)
+			{
+				var indice = resourceMap.GetIndice(i);
+				if (indice == null || indice.ResourceCellsCount < Info.ExpansionMinResourceCells)
+					continue;
+
+				var centre = indice.ResourceCellsCenter;
+				var distHome = (centre - home).Length;
+				if (distHome < Info.ExpansionMinDistance)
+					continue;
+
+				if (indice.EnemyBaseCount > 0)
+					continue;
+
+				if (enemyBuildings.Any(b => (b - centre).Length < Info.ExpansionEnemyClearance))
+					continue;
+
+				// More tiberium is better, closer to home is better (shorter, safer convoy), and an
+				// ore mine on the field is a bonus because the yard's free transporter can work it.
+				var score = indice.ResourceCellsCount
+					- distHome
+					+ (indice.ResourceCreatorLocs.Length * 10);
+
+				if (score > bestScore)
+				{
+					bestScore = score;
+					best = centre;
+				}
+			}
+
+			if (best == null)
+				return null;
+
+			// Settle a few cells OFF the tiberium itself: the layout needs buildable ground, and
+			// building on top of the field would bury the very resources it came for.
+			var site = best.Value;
+			for (var r = Info.ExpansionSiteOffset; r <= Info.ExpansionSiteOffset + 8; r++)
+				foreach (var c in AotOpsUtils.Ring(site, r))
+					if (World.Map.Contains(c) && Intel.IsPassable(c) && World.Map.Resources[c].Type == 0)
+						return c;
+
+			return site;
 		}
 
 		void TryStartEngineerRaid()

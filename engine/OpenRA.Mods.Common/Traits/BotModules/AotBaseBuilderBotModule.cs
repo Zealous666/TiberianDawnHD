@@ -93,6 +93,39 @@ namespace OpenRA.Mods.Common.Traits
 			"Leave empty to skip the check (falls back to the old terrain-only behaviour).")]
 		public readonly string NavalLocomotor = null;
 
+		// ---- Base expansion layout (User-Briefing 2026-08-03) ----
+		// Fixed mini-layout, offsets hardcoded in RequestExpansionLayout from the arrangement the user
+		// pre-built in the editor (see memory/ai-base-expansion-layout.md). Only the ACTOR chains are
+		// configurable -- the geometry is deliberately not, because it was specified exactly.
+		[ActorReference]
+		[Desc("Power plant chain for the expansion (age-ordered, first buildable wins).")]
+		public readonly string[] ExpansionPowerTypes = [];
+
+		[ActorReference]
+		[Desc("Refinery chain for the expansion.")]
+		public readonly string[] ExpansionRefineryTypes = [];
+
+		[ActorReference]
+		[Desc("Silo chain for the expansion.")]
+		public readonly string[] ExpansionSiloTypes = [];
+
+		[ActorReference]
+		[Desc("Anti-air chain for the expansion.")]
+		public readonly string[] ExpansionSamTypes = [];
+
+		[ActorReference]
+		[Desc("Gate chain for the expansion. Occupies two cells, which is why the fence's bottom row",
+			"leaves a two-cell gap at the gate position.")]
+		public readonly string[] ExpansionGateTypes = [];
+
+		[Desc("Age tier from which the expansion's fence and gate are built (user spec: Age 2).")]
+		public readonly int ExpansionFenceAgeTier = 2;
+
+		[Desc("Builder ticks a single expansion building may sit unfinished before it is skipped.",
+			"Bounded on purpose: an expansion must never turn into a retry loop the way a stuck",
+			"main-Rhythm step once did.")]
+		public readonly int ExpansionStepTimeoutTicks = 400;
+
 		public override object Create(ActorInitializer init) { return new AotBaseBuilderBotModule(init.Self, this); }
 	}
 
@@ -226,6 +259,220 @@ namespace OpenRA.Mods.Common.Traits
 		// Sticky: once any Operations mission has ever needed naval production, keep guaranteeing it exists
 		// for the rest of the match (a later loss triggers an automatic rebuild -- see BotTick).
 		public void RequestNavalProduction() => navalRequested = true;
+
+		// ---- Base expansion (User-Briefing 2026-08-03) ----
+		//
+		// The expansion is a FIXED mini-layout, not a second planner run (user decision): the planner
+		// packs exactly one base around exactly one construction yard, and teaching it a second one was
+		// explicitly out of scope. Geometry comes from the layout the user pre-built in the editor and
+		// is recorded in memory/ai-base-expansion-layout.md -- offsets are relative to the new yard's
+		// top-left cell.
+		//
+		// Construction runs through THIS module rather than the mission, so the expansion inherits the
+		// whole existing apparatus: variant selection per age, re-siting when a cell turns out blocked,
+		// wall-bridge routing into buildable area, nudging own units off the site, and stuck detection.
+		// Steps are marked Defense so they use the timeout-capable chooser -- an expansion that cannot
+		// be finished must never wedge the main base's economy queue.
+		readonly List<AotPlanStep> expansionSteps = [];
+		CPos? expansionYard;
+
+		public bool ExpansionPlanned => expansionYard != null;
+
+		public void RequestExpansionLayout(CPos yard)
+		{
+			if (expansionYard == yard)
+				return;
+
+			expansionSteps.Clear();
+			expansionYard = yard;
+
+			void Add(string role, string[] variants, int dx, int dy)
+			{
+				if (variants.Length > 0)
+					expansionSteps.Add(new AotPlanStep
+					{
+						Kind = AotStepKind.Building,
+						Role = "EXP_" + role,
+						Variants = variants,
+						TopLeft = yard + new CVec(dx, dy),
+						Defense = true
+					});
+			}
+
+			Add("NUKE", Info.ExpansionPowerTypes, -3, 0);
+			Add("PROC", Info.ExpansionRefineryTypes, 0, 3);
+			Add("SILO", Info.ExpansionSiloTypes, -3, 5);
+			Add("SAM", Info.ExpansionSamTypes, -1, 3);
+
+			// Fence + gate are Age-2 items (user spec). The gate occupies TWO cells (-1,+7) and (0,+7),
+			// which is why the bottom fence row has a gap there rather than a missing segment.
+			Add("GATE", Info.ExpansionGateTypes, -1, 7);
+
+			// Fence as one step PER CELL rather than a single Fence-kind step: the expansion runs on its
+			// own simple driver (see TickExpansion) which knows nothing about node/perimeter bookkeeping,
+			// and a wall carries LineBuildInfo anyway, so each cell is placed with a LineBuild order and
+			// the engine connects the run itself. Gap at (-1,+7)/(0,+7) is the gate.
+			if (Info.WallType != null)
+			{
+				var perimeter = new List<CPos>();
+				for (var x = -4; x <= 3; x++)
+				{
+					perimeter.Add(yard + new CVec(x, -1));
+					if (x != -1 && x != 0)
+						perimeter.Add(yard + new CVec(x, 7));
+				}
+
+				for (var y = -1; y <= 7; y++)
+				{
+					perimeter.Add(yard + new CVec(-4, y));
+					perimeter.Add(yard + new CVec(3, y));
+				}
+
+				perimeter.Add(yard + new CVec(-2, 8));
+				perimeter.Add(yard + new CVec(1, 8));
+
+				foreach (var c in perimeter.Distinct())
+					expansionSteps.Add(new AotPlanStep
+					{
+						Kind = AotStepKind.Building,
+						Role = "EXP_FENCE",
+						Variants = [Info.WallType],
+						TopLeft = c,
+						Defense = true
+					});
+			}
+
+			Log.Write("debug", $"[AotBuild][{player.PlayerName}] Expansion layout requested at {yard} " +
+				$"({expansionSteps.Count} steps)");
+		}
+
+		public void ClearExpansionLayout()
+		{
+			expansionSteps.Clear();
+			expansionYard = null;
+		}
+
+		// Age-gated exactly like the Rhythm's own defence steps: fence and gate only from Age 2 on
+		// (user spec), everything else as soon as the yard stands.
+		AotPlanStep ChooseExpansionStep()
+		{
+			if (expansionSteps.Count == 0)
+				return null;
+
+			var tier = ops?.AgeTier() ?? 0;
+			foreach (var s in expansionSteps)
+			{
+				if (s.Done || s.Skipped)
+					continue;
+
+				var lateStep = s.Role == "EXP_FENCE" || s.Role == "EXP_GATE";
+				if (lateStep && tier < Info.ExpansionFenceAgeTier)
+					continue;
+
+				return s;
+			}
+
+			return null;
+		}
+
+		// ---- Expansion build driver -------------------------------------------------------------
+		//
+		// Runs in PARALLEL with the main base's build slot, not behind it (User-Einwand 2026-08-03:
+		// "bau einen zweiten builder? sobald der mcv als construction yard platziert ist, ist es ja
+		// auch eine eigene queue"). Verified: ProductionQueue@NodBuilding sits on the FACT actor, not
+		// on the player, so a second construction yard genuinely owns a second Building.* queue.
+		//
+		// That also means the shared QueueFor() is unsafe here -- it takes FirstOrDefault across all
+		// of the player's queues of that category, so with two yards it would pick one arbitrarily and
+		// the expansion could end up building out of the main base's slot (or vice versa). This driver
+		// binds strictly to the queue instance owned by the expansion yard.
+		//
+		// Kept deliberately simple compared to StartStep: no re-siting, no wall-bridge routing. The
+		// layout cells were validated when the site was chosen, and an expansion that cannot complete
+		// must never turn into the kind of stuck retry loop that once starved the main Rhythm.
+		string expansionPendingType;
+		CPos expansionPendingCell;
+		int expansionPendingTicks;
+
+		ProductionQueue ExpansionQueueFor(string actorType, Actor yardActor)
+		{
+			var ai = world.Map.Rules.Actors[actorType];
+			return yardActor.TraitsImplementing<ProductionQueue>()
+				.FirstOrDefault(q => Info.BuildingQueues.Contains(q.Info.Type) && q.CanBuild(ai));
+		}
+
+		void TickExpansion(IBot bot)
+		{
+			if (expansionYard == null || expansionSteps.Count == 0)
+				return;
+
+			var yardActor = world.Actors.FirstOrDefault(a => a.Owner == player && !a.IsDead && a.IsInWorld
+				&& a.Location == expansionYard.Value
+				&& planner != null && planner.Info.ConstructionYardTypes.Contains(a.Info.Name));
+
+			// Yard gone: the mission notices too and finishes, this just stops us building into a hole.
+			if (yardActor == null)
+				return;
+
+			// Anything already standing on its planned cell counts as done -- same idea as the main
+			// Rhythm's rebuild scan, and it makes the driver idempotent across save/reload.
+			foreach (var s in expansionSteps)
+				if (!s.Done && world.ActorMap.GetActorsAt(s.TopLeft).Any(a => a.Owner == player && s.Variants.Contains(a.Info.Name)))
+					s.Done = true;
+
+			if (expansionPendingType != null)
+			{
+				expansionPendingTicks++;
+				var pendingQueue = ExpansionQueueFor(expansionPendingType, yardActor);
+				var item = pendingQueue?.AllQueued().FirstOrDefault(i => i.Item == expansionPendingType && i.Done);
+				if (item != null)
+				{
+					var ai = world.Map.Rules.Actors[expansionPendingType];
+					var orderName = ai.HasTraitInfo<LineBuildInfo>() ? "LineBuild" : "PlaceBuilding";
+					bot.QueueOrder(new Order(orderName, player.PlayerActor, Target.FromCell(world, expansionPendingCell), false)
+					{
+						TargetString = expansionPendingType,
+						ExtraData = pendingQueue.Actor.ActorID,
+						SuppressVisualFeedback = true
+					});
+
+					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Expansion placed {expansionPendingType} at {expansionPendingCell}");
+					expansionPendingType = null;
+					return;
+				}
+
+				// Give up on a single item rather than blocking the whole expansion behind it.
+				if (expansionPendingTicks >= Info.ExpansionStepTimeoutTicks)
+				{
+					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Expansion step {expansionPendingType} timed out -> skipped");
+					var stuck = expansionSteps.FirstOrDefault(s => !s.Done && s.Variants.Contains(expansionPendingType) && s.TopLeft == expansionPendingCell);
+					if (stuck != null)
+						stuck.Skipped = true;
+
+					expansionPendingType = null;
+				}
+
+				return;
+			}
+
+			var step = ChooseExpansionStep();
+			if (step == null)
+				return;
+
+			foreach (var v in step.Variants)
+			{
+				var q = ExpansionQueueFor(v, yardActor);
+				if (q == null)
+					continue;
+
+				bot.QueueOrder(Order.StartProduction(q.Actor, v, 1));
+				expansionPendingType = v;
+				expansionPendingCell = step.TopLeft;
+				expansionPendingTicks = 0;
+				Log.Write("debug", $"[AotBuild][{player.PlayerName}] Expansion building {v} for {step.Role} at {step.TopLeft}");
+				return;
+			}
+		}
 
 		AotPlanStep BuildNavalStep(bool logImmediately)
 		{
@@ -652,6 +899,12 @@ namespace OpenRA.Mods.Common.Traits
 				navalPlanAttempted = true;
 				navalStep = BuildNavalStep(logImmediately: true);
 			}
+
+			// Expansion runs on the expansion yard's OWN queue, so it ticks BEFORE (and independently
+			// of) the main base's single pending slot -- that is the whole point of the second yard
+			// having its own Building.* queue. Putting it after the `pending` early-return would have
+			// made the expansion wait for every main-base building instead.
+			TickExpansion(bot);
 
 			if (pending != null)
 			{
