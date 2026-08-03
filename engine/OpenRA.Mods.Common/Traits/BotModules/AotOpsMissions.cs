@@ -2103,8 +2103,12 @@ namespace OpenRA.Mods.Common.Traits
 			// on its own -- no point walking an engineer into a repair the engine would refuse anyway.
 			if (phase != Phase.Repairing && !NeedsRepair(Hut))
 			{
+				// Outcome bleibt bewusst Unknown: der Wellen-Eskalationszaehler in
+				// AotOperationsBotModule wertet JEDEN gemeldeten Outcome aus (Success setzt
+				// waveFailureStreak zurueck, Failure erhoeht ihn). Nur Wellen- und Luftangriffs-
+				// Missionen duerfen daran drehen -- eine reparierte Bruecke sagt nichts darueber
+				// aus, ob der Angriff am Chokepoint funktioniert.
 				Log("bridge no longer needs repair -> releasing engineer");
-				Outcome = AotMissionOutcome.Success;
 				Finish();
 				return;
 			}
@@ -2115,8 +2119,8 @@ namespace OpenRA.Mods.Common.Traits
 				// phase is the SUCCESS case, not a failure.
 				if (phase == Phase.Repairing)
 				{
+					// Outcome bleibt Unknown -- siehe oben (Wellen-Eskalation nicht verfaelschen).
 					Log("engineer consumed -> bridge repair underway");
-					Outcome = AotMissionOutcome.Success;
 					Finish();
 				}
 				else
