@@ -739,8 +739,10 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Age tier at which heli raids unlock.")]
 		public readonly int HeliRaidAgeTier = 1;
 
-		[Desc("Ticks between heli raid attempts.")]
-		public readonly int HeliRaidInterval = 9000;
+		[Desc("Ticks between engineer raid attempts. ONE raid runs at a time and its flavour (heli or",
+			"APC) is drawn at random from whichever are currently possible, so the two never compete",
+			"for the same infantry queue (User 2026-08-03).")]
+		public readonly int EngineerRaidInterval = 9000;
 
 		[Desc("Cells BEHIND the enemy construction yard the squad is dropped at, on the first attempt.")]
 		public readonly int HeliRaidDropDistance = 6;
@@ -756,8 +758,10 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Timeout for the flight to the drop zone.")]
 		public readonly int HeliRaidDeliverTimeout = 4500;
 
-		[Desc("Timeout for assembling a heli raid squad.")]
-		public readonly int HeliRaidFormingTimeout = 9000;
+		[Desc("Timeout for assembling a heli raid squad. Generous on purpose: the chain is transport",
+			"first, then five infantry one after another, all sharing the base's queues with waves and",
+			"base defence (User 2026-08-03: squads repeatedly ran out of time at 9000).")]
+		public readonly int HeliRaidFormingTimeout = 12000;
 
 		[Desc("Send engineer raids by APC (Age 2).")]
 		public readonly bool EnableGroundRaids = true;
@@ -770,8 +774,6 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Age tier at which ground engineer raids unlock.")]
 		public readonly int GroundRaidAgeTier = 2;
 
-		[Desc("Ticks between ground raid attempts.")]
-		public readonly int GroundRaidInterval = 9000;
 
 		[Desc("Cells behind the enemy construction yard the APC unloads at.")]
 		public readonly int GroundRaidDropDistance = 5;
@@ -780,8 +782,8 @@ namespace OpenRA.Mods.Common.Traits
 			"rather than riding around in a can forever.")]
 		public readonly int GroundRaidDeliverTimeout = 6000;
 
-		[Desc("Timeout for assembling a ground raid squad.")]
-		public readonly int GroundRaidFormingTimeout = 9000;
+		[Desc("Timeout for assembling a ground raid squad. See HeliRaidFormingTimeout.")]
+		public readonly int GroundRaidFormingTimeout = 12000;
 
 		// ---- Module 5: Base Defense (User 2026-07-22) ----
 		public readonly bool EnableBaseDefense = true;
@@ -889,8 +891,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		int derrickTicks;
 		int bridgeTicks;
-		int heliRaidTicks;
-		int groundRaidTicks;
+		int raidTicks;
 
 		// Per-BOT danger memory for heli raids (User 2026-08-03), deliberately NOT per mission: the
 		// whole point is that the NEXT raid benefits from what happened to the last one.
@@ -973,8 +974,7 @@ namespace OpenRA.Mods.Common.Traits
 			// exact same tick. Deliberately NOT delayed further than one full interval: a bridge can be
 			// down from minute one, and nothing else in the AI ever repairs it.
 			bridgeTicks = World.LocalRandom.Next(0, Info.BridgeCheckInterval);
-			heliRaidTicks = Info.HeliRaidInterval + World.LocalRandom.Next(0, 200);
-			groundRaidTicks = Info.GroundRaidInterval + World.LocalRandom.Next(0, 200);
+			raidTicks = Info.EngineerRaidInterval + World.LocalRandom.Next(0, 200);
 			productionTicks = World.LocalRandom.Next(0, Info.ProductionInterval);
 			starportTicks = World.LocalRandom.Next(0, Info.StarportFlushInterval);
 			missionTicks = World.LocalRandom.Next(0, Info.MissionInterval);
@@ -2077,21 +2077,46 @@ namespace OpenRA.Mods.Common.Traits
 				StartBridgeRepairs();
 			}
 
-			// Engineer raids. Both are gated on their age tier AND on a refinery being up (User: "ab
-			// age 1 nach refinery") -- a raid is a luxury paid for by a working economy.
-			if (Info.EnableHeliRaids && --heliRaidTicks <= 0)
+			// Engineer raids: ONE at a time, flavour picked at random (User 2026-08-03: "ab age 2
+			// sollte heli engineer raid & apc raids random abwechseln sobald das subterrain apc
+			// upgrade durchgefuehrt wurde").
+			//
+			// Running both flavours concurrently was actively harmful, not just untidy: each wants
+			// 3 engineers + 2 rocket troopers out of the SAME single-slot infantry queue, alongside
+			// derrick squads and base defence. Confirmed from a 5-bot session -- every ground raid
+			// died on "squad never came together" and its transport was never even requested (the
+			// transport is asked for last, once the squad is complete), so not a single subterranean
+			// APC was ever built.
+			//
+			// Ground is only in the draw once its transport is ACTUALLY buildable, which is the
+			// honest test for "subterrain upgrade done" -- no separate prerequisite bookkeeping.
+			if (--raidTicks <= 0)
 			{
-				heliRaidTicks = Info.HeliRaidInterval;
-				if (AgeTier() >= Info.HeliRaidAgeTier && HasRefinery() && Info.HeliRaidTransportTypes.Length > 0)
-					StartEngineerRaid(false);
+				raidTicks = Info.EngineerRaidInterval;
+				TryStartEngineerRaid();
 			}
+		}
 
-			if (Info.EnableGroundRaids && --groundRaidTicks <= 0)
-			{
-				groundRaidTicks = Info.GroundRaidInterval;
-				if (AgeTier() >= Info.GroundRaidAgeTier && HasRefinery() && Info.GroundRaidTransportTypes.Length > 0)
-					StartEngineerRaid(true);
-			}
+		void TryStartEngineerRaid()
+		{
+			if (!HasRefinery() || Missions.OfType<AotEngineerRaidMission>().Any())
+				return;
+
+			var heliReady = Info.EnableHeliRaids
+				&& AgeTier() >= Info.HeliRaidAgeTier
+				&& Info.HeliRaidTransportTypes.Length > 0
+				&& FirstBuildable(Info.HeliRaidTransportTypes) != null;
+
+			var groundReady = Info.EnableGroundRaids
+				&& AgeTier() >= Info.GroundRaidAgeTier
+				&& Info.GroundRaidTransportTypes.Length > 0
+				&& FirstBuildable(Info.GroundRaidTransportTypes) != null;
+
+			if (!heliReady && !groundReady)
+				return;
+
+			var ground = groundReady && (!heliReady || World.LocalRandom.Next(2) == 0);
+			StartEngineerRaid(ground);
 		}
 
 		public bool IsRaidTransport(Actor a) =>

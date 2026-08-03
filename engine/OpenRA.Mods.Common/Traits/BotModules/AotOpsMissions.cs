@@ -2298,6 +2298,28 @@ namespace OpenRA.Mods.Common.Traits
 		// "do we have one" check would satisfy all three off a single arrival (derrick lesson).
 		void TickSquadForming()
 		{
+			// TRANSPORT FIRST (User 2026-08-03: "heli & subterrain apc nicht als letztes sondern immer
+			// als erstes zu bauen und dann das squad").
+			//
+			// It used to be requested LAST, on the reasoning that it is the expensive part and useless
+			// without a squad to carry. That was backwards. The transport comes out of a DIFFERENT
+			// queue (Aircraft.Nod / Starport) than the infantry, so asking for it up front costs the
+			// squad nothing -- whereas asking for it last meant a squad that never finished assembling
+			// never even got round to requesting it. Confirmed over a 5-bot session: every ground raid
+			// ended on "squad never came together" and not a single subterranean APC was ever built,
+			// because its request sat behind five sequential infantry arrivals that never all landed.
+			//
+			// Waiting for the transport to actually EXIST before asking for infantry also means a raid
+			// that simply cannot get one (no helipad, upgrade not bought) burns no infantry at all,
+			// instead of parking five bodies in the base until the forming timeout.
+			if (TransportChain.Length > 0 && Transport() == null)
+			{
+				if (Ops.OpenRequests(this, "transport") == 0)
+					Ops.QueueRequest(this, "transport", TransportChain, 1);
+
+				return;
+			}
+
 			while (squadStep < squadOrder.Length)
 			{
 				var (role, chain) = squadOrder[squadStep];
@@ -2320,10 +2342,6 @@ namespace OpenRA.Mods.Common.Traits
 
 				return;
 			}
-
-			// Transport last: it is the most expensive item and useless without a squad to carry.
-			if (TransportChain.Length > 0 && Transport() == null && Ops.OpenRequests(this, "transport") == 0)
-				Ops.QueueRequest(this, "transport", TransportChain, 1);
 		}
 
 		protected bool SquadReady() =>
