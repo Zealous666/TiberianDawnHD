@@ -705,6 +705,84 @@ namespace OpenRA.Mods.Common.Traits
 			"and switches to issuing the RepairBridge order (the order itself walks the last stretch).")]
 		public readonly int BridgeArriveRadius2 = 25;
 
+		// ---- Engineer Raids (User-Briefing 2026-08-03) ----
+		// Shared by both flavours: 3 engineers + 2 rocket troopers, delivered either by helicopter
+		// (Age 1) or by APC (Age 2). Rocket troopers shoot a fence cell open for the engineers.
+		[Desc("Number of passengers a full raid squad has (3 engineers + 2 rocket troopers).",
+			"Loading stops early once this many are aboard.")]
+		public readonly int RaidSquadSize = 5;
+
+		[Desc("Timeout for getting the squad aboard the transport.")]
+		public readonly int RaidLoadTimeout = 1500;
+
+		[Desc("Timeout for the unload order to actually empty the transport.")]
+		public readonly int RaidUnloadTimeout = 750;
+
+		[Desc("Timeout for the capture attempt once the squad is on the ground.")]
+		public readonly int RaidExecutingTimeout = 6000;
+
+		[Desc("Squared cell distance at which a transport counts as arrived at its drop cell.")]
+		public readonly int RaidArriveRadius2 = 16;
+
+		[ActorReference]
+		[Desc("Refinery actor types. Engineer raids only start once one of these is up (User 2026-08-03:",
+			"'ab age 1 nach refinery') -- a raid is a luxury paid for by a working economy.")]
+		public readonly HashSet<string> RefineryTypes = [];
+
+		[Desc("Send engineer raids by helicopter (Age 1, after the refinery).")]
+		public readonly bool EnableHeliRaids = true;
+
+		[ActorReference]
+		[Desc("Transport helicopter chain for heli raids (aot-tran-nod / aot-tran-gdi-base).")]
+		public readonly string[] HeliRaidTransportTypes = [];
+
+		[Desc("Age tier at which heli raids unlock.")]
+		public readonly int HeliRaidAgeTier = 1;
+
+		[Desc("Ticks between heli raid attempts.")]
+		public readonly int HeliRaidInterval = 9000;
+
+		[Desc("Cells BEHIND the enemy construction yard the squad is dropped at, on the first attempt.")]
+		public readonly int HeliRaidDropDistance = 6;
+
+		[Desc("Added to HeliRaidDropDistance per danger tier (User 2026-08-03: a raid whose transport",
+			"was lost before unloading comes down further out next time, which reads as the AI having",
+			"learned where the air defence is).")]
+		public readonly int HeliRaidDropDistanceStep = 5;
+
+		[Desc("Maximum danger tier, so repeated losses cannot push the drop zone off the map.")]
+		public readonly int HeliRaidMaxDropTier = 3;
+
+		[Desc("Timeout for the flight to the drop zone.")]
+		public readonly int HeliRaidDeliverTimeout = 4500;
+
+		[Desc("Timeout for assembling a heli raid squad.")]
+		public readonly int HeliRaidFormingTimeout = 9000;
+
+		[Desc("Send engineer raids by APC (Age 2).")]
+		public readonly bool EnableGroundRaids = true;
+
+		[ActorReference]
+		[Desc("Ground transport chain for engineer raids. First buildable wins, so listing the",
+			"subterranean APC ahead of the plain one automatically prefers tunnelling once available.")]
+		public readonly string[] GroundRaidTransportTypes = [];
+
+		[Desc("Age tier at which ground engineer raids unlock.")]
+		public readonly int GroundRaidAgeTier = 2;
+
+		[Desc("Ticks between ground raid attempts.")]
+		public readonly int GroundRaidInterval = 9000;
+
+		[Desc("Cells behind the enemy construction yard the APC unloads at.")]
+		public readonly int GroundRaidDropDistance = 5;
+
+		[Desc("Timeout for the drive to the unload point. On expiry the squad unloads where it stands",
+			"rather than riding around in a can forever.")]
+		public readonly int GroundRaidDeliverTimeout = 6000;
+
+		[Desc("Timeout for assembling a ground raid squad.")]
+		public readonly int GroundRaidFormingTimeout = 9000;
+
 		// ---- Module 5: Base Defense (User 2026-07-22) ----
 		public readonly bool EnableBaseDefense = true;
 
@@ -811,6 +889,18 @@ namespace OpenRA.Mods.Common.Traits
 
 		int derrickTicks;
 		int bridgeTicks;
+		int heliRaidTicks;
+		int groundRaidTicks;
+
+		// Per-BOT danger memory for heli raids (User 2026-08-03), deliberately NOT per mission: the
+		// whole point is that the NEXT raid benefits from what happened to the last one.
+		public int HeliRaidDropTier { get; private set; }
+
+		public void RaiseHeliRaidDropTier()
+		{
+			if (HeliRaidDropTier < Info.HeliRaidMaxDropTier)
+				HeliRaidDropTier++;
+		}
 		int productionTicks;
 		int starportTicks;
 		int missionTicks;
@@ -883,6 +973,8 @@ namespace OpenRA.Mods.Common.Traits
 			// exact same tick. Deliberately NOT delayed further than one full interval: a bridge can be
 			// down from minute one, and nothing else in the AI ever repairs it.
 			bridgeTicks = World.LocalRandom.Next(0, Info.BridgeCheckInterval);
+			heliRaidTicks = Info.HeliRaidInterval + World.LocalRandom.Next(0, 200);
+			groundRaidTicks = Info.GroundRaidInterval + World.LocalRandom.Next(0, 200);
 			productionTicks = World.LocalRandom.Next(0, Info.ProductionInterval);
 			starportTicks = World.LocalRandom.Next(0, Info.StarportFlushInterval);
 			missionTicks = World.LocalRandom.Next(0, Info.MissionInterval);
@@ -1976,6 +2068,52 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				bridgeTicks = Info.BridgeCheckInterval;
 				StartBridgeRepairs();
+			}
+
+			// Engineer raids. Both are gated on their age tier AND on a refinery being up (User: "ab
+			// age 1 nach refinery") -- a raid is a luxury paid for by a working economy.
+			if (Info.EnableHeliRaids && --heliRaidTicks <= 0)
+			{
+				heliRaidTicks = Info.HeliRaidInterval;
+				if (AgeTier() >= Info.HeliRaidAgeTier && HasRefinery() && Info.HeliRaidTransportTypes.Length > 0)
+					StartEngineerRaid(false);
+			}
+
+			if (Info.EnableGroundRaids && --groundRaidTicks <= 0)
+			{
+				groundRaidTicks = Info.GroundRaidInterval;
+				if (AgeTier() >= Info.GroundRaidAgeTier && HasRefinery() && Info.GroundRaidTransportTypes.Length > 0)
+					StartEngineerRaid(true);
+			}
+		}
+
+		bool HasRefinery() =>
+			World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld && Info.RefineryTypes.Contains(a.Info.Name));
+
+		// One raid of each flavour at a time. The enemy construction yard is only the ANCHOR for
+		// picking a drop zone behind the base -- the actual capture target is chosen on arrival from
+		// whatever capturable building is nearest, so a yard that dies mid-flight doesn't abort it.
+		void StartEngineerRaid(bool ground)
+		{
+			if (Info.EngineerTypes.Length == 0)
+				return;
+
+			if (ground ? Missions.OfType<AotGroundRaidMission>().Any() : Missions.OfType<AotHeliRaidMission>().Any())
+				return;
+
+			var yard = Intel.NearestEnemyYard(BaseCentre(), requireReachable: ground);
+			if (yard == null)
+				return;
+
+			if (ground)
+			{
+				Missions.Add(new AotGroundRaidMission(this, yard));
+				Log($"ground engineer raid -> {yard.Info.Name}@{yard.Location}");
+			}
+			else
+			{
+				Missions.Add(new AotHeliRaidMission(this, yard));
+				Log($"heli engineer raid -> {yard.Info.Name}@{yard.Location} (danger tier {HeliRaidDropTier})");
 			}
 		}
 

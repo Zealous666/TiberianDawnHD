@@ -595,7 +595,7 @@ Player:
 		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
 		Faction: gdi
 		ConstructionYardTypes: fact, fact.gdi, fact.nod
-		ExcludeFromOpsTypes: aot-harv, aot-harv-nod, aot-mcv-age0, aot-mcv-age1, aot-surveyor-gdi, aot-surveyor-nod, oret, aot-oret-lite, aot-minelayer, aot-aray, aot-mgap, aot-mstealth, aot-subapc, truck, mcv
+		ExcludeFromOpsTypes: aot-harv, aot-harv-nod, aot-mcv-age0, aot-mcv-age1, aot-surveyor-gdi, aot-surveyor-nod, oret, aot-oret-lite, aot-minelayer, aot-aray, aot-mgap, aot-mstealth, truck, mcv
 		ChokepointReserveSize: 4
 		ChokepointHoldRadius: 4
 		ChokeClearRadius: 5
@@ -633,6 +633,13 @@ Player:
 		EnableBridgeRepair: True
 		BridgeCheckInterval: 7500
 		BridgeMaxTargets: 1
+		# Engineer-Raids, siehe NOD-Instanz weiter unten. GDI nutzt den normalen APC als
+		# Boden-Transport; der Chinook ist derselbe Aktor-Unterbau, nur mit eigenen Upgrade-Proxies.
+		RefineryTypes: proc, aot-proc-gdi, aot-proc-gdi-age2
+		EnableHeliRaids: True
+		HeliRaidTransportTypes: aot-tran-gdi-base
+		EnableGroundRaids: True
+		GroundRaidTransportTypes: apc
 		# Escalation (User 2026-07-22): after 2 failed waves at the primary choke, the next wave
 		# routes via a secondary approach instead (if one exists); after 3 failed waves total (with
 		# a Helipad built) 4 helicopters raid the enemy construction yard directly, then the loop
@@ -664,7 +671,7 @@ Player:
 		# derricks; 500 is the floor, not a target).
 		ProductionMinCash: 500
 		ConstructionYardTypes: fact, fact.gdi, fact.nod
-		ExcludeFromOpsTypes: aot-harv, aot-harv-nod, aot-mcv-age0, aot-mcv-age1, aot-surveyor-gdi, aot-surveyor-nod, oret, aot-oret-lite, aot-minelayer, aot-aray, aot-mgap, aot-mstealth, aot-subapc, truck, mcv
+		ExcludeFromOpsTypes: aot-harv, aot-harv-nod, aot-mcv-age0, aot-mcv-age1, aot-surveyor-gdi, aot-surveyor-nod, oret, aot-oret-lite, aot-minelayer, aot-aray, aot-mgap, aot-mstealth, truck, mcv
 		ChokepointReserveSize: 4
 		ChokepointHoldRadius: 4
 		ChokeClearRadius: 5
@@ -778,6 +785,23 @@ Player:
 		EnableBridgeRepair: True
 		BridgeCheckInterval: 7500
 		BridgeMaxTargets: 1
+		# Engineer-Raids (User-Briefing 2026-08-03): 3 Engineers + 2 Rocket Trooper. Die Rocket
+		# Trooper sind KEINE Deko -- sie schiessen eine Zaunzelle frei, damit die Engineers an ein
+		# eingezaeuntes Gebaeude kommen (eingezaeunte Ziele sind daher ausdruecklich erlaubt).
+		RefineryTypes: proc, aot-proc-nod, aot-proc-nod-age2
+		# Heli-Raid ab Age 1: Chinook fliegt am Kartenrand entlang und setzt HINTER der Feindbasis ab.
+		# Geht der Transporter vor dem Ausladen verloren, steigt die Gefahrenstufe und der naechste
+		# Raid setzt HeliRaidDropDistanceStep Zellen weiter draussen ab -- wirkt, als haette die KI
+		# gelernt, wo die Flugabwehr steht. aot-tran-nod = derselbe Chinook wie GDI.
+		EnableHeliRaids: True
+		HeliRaidTransportTypes: aot-tran-nod
+		# Boden-Raid ab Age 2: NOD hat KEINEN normalen APC -- der Subterranean APC ist der Transport
+		# (Starport-Queue, braucht aot-subterrain-upgrade). Er tunnelt ohnehin an der Front vorbei.
+		EnableGroundRaids: True
+		GroundRaidTransportTypes: aot-subapc
+		# aot-subapc wurde 2026-08-03 aus ExcludeFromOpsTypes ENTFERNT: solange er dort stand, hat
+		# das Ops-Modul ihn nie beansprucht (IsEligibleCombatUnit filtert die Liste vorher raus) und
+		# die Transport-Anforderung des Boden-Raids waere nie erfuellt worden.
 		# Derrick squad composition (User 2026-07-31, corrected same day -- Flame Trooper needs Radar,
 		# which would have deadlocked the sequential build): 1 rocketeer, 1 engineer, 1 mg, 1 mg.
 		# Escalation (User 2026-07-22): after 2 failed waves at the primary choke, the next wave

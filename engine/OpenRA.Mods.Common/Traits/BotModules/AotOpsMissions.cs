@@ -2204,6 +2204,451 @@ namespace OpenRA.Mods.Common.Traits
 	}
 
 	// ======================================================================
+	// Engineer Raid (User-Briefing 2026-08-03). Two delivery flavours, one shared body:
+	//
+	//   Heli  (Age 1, after the refinery): squad + transport helicopter, approaches along the map
+	//         edge to come at the enemy base from BEHIND, drops off, then captures.
+	//   Ground(Age 2): squad + APC, same idea on wheels.
+	//
+	// Squad is 3 engineers + 2 rocket troopers in both cases (User: "wir aendern in 3 engineers, 2
+	// rockettrooper ... analog zum boden-raid!"). The rocket troopers are not escort decoration:
+	// they shoot a single fence cell open so the engineers can reach a walled-in building, which is
+	// why fenced targets are explicitly allowed rather than filtered out.
+	//
+	// Requested sequentially (same reason as the derrick squad, FIX 2026-07-31h): five parallel
+	// requests compete inside one single-slot infantry queue with no regard for which role matters,
+	// and starved the mandatory engineer for a whole match once.
+	// ======================================================================
+	public abstract class AotEngineerRaidMission : AotMissionWithOrders
+	{
+		protected enum Phase { Forming, Loading, Delivering, Unloading, Raiding }
+
+		protected Phase phase = Phase.Forming;
+		protected int formingTicks;
+		protected int phaseTicks;
+		protected CPos dropCell;
+		protected Actor target;
+
+		readonly (string Role, string[] Chain)[] squadOrder;
+		int squadStep;
+
+		protected AotEngineerRaidMission(AotOperationsBotModule ops, string name)
+			: base(ops, name)
+		{
+			squadOrder =
+			[
+				("engineer", ops.Info.EngineerTypes),
+				("engineer", ops.Info.EngineerTypes),
+				("engineer", ops.Info.EngineerTypes),
+				("rocket", ops.Info.RocketInfantryTypes),
+				("rocket", ops.Info.RocketInfantryTypes),
+			];
+
+			TickSquadForming();
+		}
+
+		protected abstract string[] TransportChain { get; }
+		protected abstract int FormingTimeout { get; }
+
+		protected IEnumerable<Actor> Engineers() =>
+			Units.Where(a => Ops.Info.EngineerTypes.Contains(a.Info.Name) && !Ops.CannotOrder(a));
+
+		protected List<Actor> Rockets() =>
+			Units.Where(a => Ops.Info.RocketInfantryTypes.Contains(a.Info.Name) && !Ops.CannotOrder(a)).ToList();
+
+		protected Actor Transport() =>
+			Units.FirstOrDefault(a => TransportChain.Contains(a.Info.Name) && !Ops.CannotOrder(a));
+
+		protected List<Actor> Passengers() =>
+			Units.Where(a => !TransportChain.Contains(a.Info.Name) && !Ops.CannotOrder(a)).ToList();
+
+		// Counts occurrences rather than Any(): three steps share the engineer chain, so a naive
+		// "do we have one" check would satisfy all three off a single arrival (derrick lesson).
+		void TickSquadForming()
+		{
+			while (squadStep < squadOrder.Length)
+			{
+				var (role, chain) = squadOrder[squadStep];
+				if (chain.Length == 0)
+				{
+					squadStep++;
+					continue;
+				}
+
+				var wantedSoFar = squadOrder.Take(squadStep + 1).Count(s => s.Chain == chain);
+				var haveSoFar = Units.Count(a => chain.Contains(a.Info.Name));
+				if (haveSoFar >= wantedSoFar)
+				{
+					squadStep++;
+					continue;
+				}
+
+				if (Ops.OpenRequests(this, role) == 0)
+					Ops.QueueRequest(this, role, chain, 1);
+
+				return;
+			}
+
+			// Transport last: it is the most expensive item and useless without a squad to carry.
+			if (TransportChain.Length > 0 && Transport() == null && Ops.OpenRequests(this, "transport") == 0)
+				Ops.QueueRequest(this, "transport", TransportChain, 1);
+		}
+
+		protected bool SquadReady() =>
+			Engineers().Any() && Transport() != null && Ops.OpenRequests(this) == 0;
+
+		// A cell "behind" the target as seen from our own base: keep going past the target along the
+		// same line, then snap to something actually passable. Distance grows with the danger tier so
+		// a raid that got shot down last time comes down further out (User 2026-08-03).
+		protected CPos BehindTarget(CPos targetCell, int distance)
+		{
+			var from = Ops.BaseCentre();
+			var dx = targetCell.X - from.X;
+			var dy = targetCell.Y - from.Y;
+			var len = Math.Max(1, (int)Math.Sqrt((dx * dx) + (dy * dy)));
+			var ideal = new CPos(targetCell.X + (dx * distance / len), targetCell.Y + (dy * distance / len));
+
+			if (Ops.World.Map.Contains(ideal) && Ops.Intel.IsPassable(ideal))
+				return ideal;
+
+			for (var r = 1; r <= 8; r++)
+				foreach (var c in AotOpsUtils.Ring(ideal, r))
+					if (Ops.World.Map.Contains(c) && Ops.Intel.IsPassable(c))
+						return c;
+
+			return targetCell;
+		}
+
+		// Capture anything of the enemy's that is actually capturable, nearest to the drop first.
+		// Fenced buildings are deliberately NOT excluded -- that is what the rocket troopers are for.
+		protected Actor PickCaptureTarget(CPos near)
+		{
+			return Ops.World.Actors
+				.Where(a => !a.IsDead && a.IsInWorld
+					&& a.Owner != Ops.Player
+					&& Ops.Player.RelationshipWith(a.Owner) != PlayerRelationship.Ally
+					&& a.Info.HasTraitInfo<BuildingInfo>()
+					&& a.Info.HasTraitInfo<CapturableInfo>())
+				.OrderBy(a => (a.Location - near).LengthSquared)
+				.FirstOrDefault();
+		}
+
+		protected void TickForming(IBot bot)
+		{
+			formingTicks += Ops.Info.MissionInterval;
+			TickSquadForming();
+
+			if (SquadReady())
+			{
+				phase = Phase.Loading;
+				phaseTicks = 0;
+				Log($"squad ready ({Passengers().Count} passengers) -> loading");
+			}
+			else if (formingTicks >= FormingTimeout)
+			{
+				Log("squad never came together -> mission over");
+				Finish();
+			}
+		}
+
+		// Loading is identical for both flavours: order everyone aboard, wait until the hold is full
+		// enough (or the timeout gives up on stragglers) -- promotion is observed via PassengerCount,
+		// not by trusting the order, exactly like the naval transit service does.
+		protected void TickLoading(IBot bot)
+		{
+			phaseTicks += Ops.Info.MissionInterval;
+
+			var transport = Transport();
+			if (transport == null)
+			{
+				Log("transport lost while loading -> mission over");
+				Finish();
+				return;
+			}
+
+			var cargo = transport.TraitOrDefault<Cargo>();
+			var aboard = cargo?.PassengerCount ?? 0;
+			var waiting = Passengers();
+
+			if (waiting.Count == 0 || aboard >= Ops.Info.RaidSquadSize || phaseTicks >= Ops.Info.RaidLoadTimeout)
+			{
+				if (aboard == 0)
+				{
+					Log("nobody boarded -> mission over");
+					Finish();
+					return;
+				}
+
+				phase = Phase.Delivering;
+				phaseTicks = 0;
+				Log($"loaded {aboard} -> delivering to {dropCell}");
+				return;
+			}
+
+			foreach (var u in waiting)
+				if (u.IsIdle)
+					bot.QueueOrder(new Order("EnterTransport", u, Target.FromActor(transport), false));
+		}
+
+		protected void TickUnloading(IBot bot)
+		{
+			phaseTicks += Ops.Info.MissionInterval;
+
+			var transport = Transport();
+			var cargo = transport?.TraitOrDefault<Cargo>();
+			if (transport == null || cargo == null || cargo.PassengerCount == 0)
+			{
+				phase = Phase.Raiding;
+				phaseTicks = 0;
+				Log("squad ashore -> raiding");
+				return;
+			}
+
+			if (transport.IsIdle)
+				bot.QueueOrder(new Order("Unload", transport, false));
+
+			if (phaseTicks >= Ops.Info.RaidUnloadTimeout)
+			{
+				Log("unload timed out -> raiding with whoever got out");
+				phase = Phase.Raiding;
+				phaseTicks = 0;
+			}
+		}
+
+		// Engineers walk in and capture; rocket troopers force-fire whatever blocks the way (the fence
+		// cell). Same force-fire pattern the derrick squad uses -- plain AttackMove never shoots a wall.
+		protected void TickRaiding(IBot bot)
+		{
+			phaseTicks += Ops.Info.MissionInterval;
+
+			var engineers = Engineers().ToList();
+			if (engineers.Count == 0)
+			{
+				Log("no engineers left -> mission over");
+				Finish();
+				return;
+			}
+
+			if (target == null || target.IsDead || !target.IsInWorld || target.Owner == Ops.Player)
+			{
+				target = PickCaptureTarget(dropCell);
+				if (target == null)
+				{
+					Log("nothing capturable in reach -> mission over");
+					Finish();
+					return;
+				}
+
+				Log($"capture target -> {target.Info.Name}@{target.Location}");
+			}
+
+			var blockers = Ops.World.FindActorsInCircle(Ops.World.Map.CenterOfCell(target.Location), WDist.FromCells(3))
+				.Where(a => !a.IsDead && a.IsInWorld
+					&& a.Info.HasTraitInfo<LineBuildInfo>()
+					&& a.Info.HasTraitInfo<HealthInfo>()
+					&& a.Owner != Ops.Player
+					&& Ops.Player.RelationshipWith(a.Owner) != PlayerRelationship.Ally)
+				.OrderBy(a => (a.Location - target.Location).LengthSquared)
+				.ToList();
+
+			var rockets = Rockets();
+			if (blockers.Count > 0 && rockets.Count > 0)
+				for (var i = 0; i < rockets.Count; i++)
+					if (rockets[i].IsIdle)
+						ForceAttack(bot, rockets[i], blockers[i % blockers.Count]);
+
+			foreach (var e in engineers)
+				if (e.IsIdle)
+					bot.QueueOrder(new Order("CaptureActor", e, Target.FromActor(target), true));
+
+			if (phaseTicks >= Ops.Info.RaidExecutingTimeout)
+			{
+				Log("raid timed out -> mission over");
+				Finish();
+			}
+		}
+	}
+
+	// ======================================================================
+	// Heli Engineer Raid (Age 1, after the refinery). Flies the squad around the map edge so it
+	// arrives behind the enemy base rather than straight through its air defence.
+	//
+	// Danger analysis (User 2026-08-03: "wenn beim ersten anlauf beim yard von AA abgeschossen wird,
+	// dann beim 2. versuch entfernter absetzen. dann wirkt es natuerlicher"): the drop distance is
+	// NOT a per-mission constant but a per-BOT tier held on the Ops module. Losing the transport (or
+	// taking it home badly damaged) before the squad is out raises the tier, so the next raid comes
+	// down further away on its own.
+	// ======================================================================
+	public sealed class AotHeliRaidMission : AotEngineerRaidMission
+	{
+		readonly CPos approachWaypoint;
+		bool transportSurvivedDelivery;
+
+		public AotHeliRaidMission(AotOperationsBotModule ops, Actor enemyYard)
+			: base(ops, $"heli-raid-{enemyYard.ActorID}")
+		{
+			target = null;
+
+			var tier = ops.HeliRaidDropTier;
+			var distance = ops.Info.HeliRaidDropDistance + (tier * ops.Info.HeliRaidDropDistanceStep);
+			dropCell = BehindTarget(enemyYard.Location, distance);
+
+			// Approach along the map edge: head for the map corner nearest the drop zone first, then
+			// come in from there. Cheap, needs no path analysis, and reliably avoids flying straight
+			// over the enemy base from our side -- which is the whole point of the manoeuvre.
+			var b = ops.World.Map.Bounds;
+			var cornerX = dropCell.X - b.Left < b.Right - dropCell.X ? b.Left + 1 : b.Right - 2;
+			var cornerY = dropCell.Y - b.Top < b.Bottom - dropCell.Y ? b.Top + 1 : b.Bottom - 2;
+			approachWaypoint = new CPos(cornerX, cornerY);
+
+			Log($"heli raid planned: drop {dropCell} (tier {tier}, {distance} cells behind), " +
+				$"approach via {approachWaypoint}");
+		}
+
+		protected override string[] TransportChain => Ops.Info.HeliRaidTransportTypes;
+		protected override int FormingTimeout => Ops.Info.HeliRaidFormingTimeout;
+
+		public override void Tick(IBot bot)
+		{
+			if (Units.Count == 0 && Ops.OpenRequests(this) == 0)
+			{
+				Finish();
+				return;
+			}
+
+			switch (phase)
+			{
+				case Phase.Forming: TickForming(bot); break;
+				case Phase.Loading: TickLoading(bot); break;
+
+				case Phase.Delivering:
+				{
+					phaseTicks += Ops.Info.MissionInterval;
+					var transport = Transport();
+					if (transport == null)
+					{
+						// Shot down with the squad aboard: exactly the case the tier exists for.
+						Ops.RaiseHeliRaidDropTier();
+						Log("transport lost on approach -> next raid drops further out");
+						Finish();
+						return;
+					}
+
+					if ((transport.Location - dropCell).LengthSquared <= Ops.Info.RaidArriveRadius2)
+					{
+						transportSurvivedDelivery = true;
+						phase = Phase.Unloading;
+						phaseTicks = 0;
+						break;
+					}
+
+					if (phaseTicks >= Ops.Info.HeliRaidDeliverTimeout)
+					{
+						Ops.RaiseHeliRaidDropTier();
+						Log("could not reach the drop zone -> next raid drops further out");
+						Finish();
+						break;
+					}
+
+					if (transport.IsIdle)
+					{
+						// Edge waypoint first, drop zone queued behind it.
+						MoveUnit(bot, transport, approachWaypoint, false);
+						MoveUnit(bot, transport, dropCell, true);
+					}
+
+					break;
+				}
+
+				case Phase.Unloading: TickUnloading(bot); break;
+
+				case Phase.Raiding:
+				{
+					// Send the empty helicopter home instead of leaving it hovering over enemy AA.
+					var transport = Transport();
+					if (transport != null && transportSurvivedDelivery && transport.IsIdle)
+						MoveUnit(bot, transport, Ops.BaseCentre(), false);
+
+					TickRaiding(bot);
+					break;
+				}
+			}
+		}
+	}
+
+	// ======================================================================
+	// Ground Engineer Raid (Age 2). Same squad, delivered by APC (or Subterranean APC, whichever the
+	// chain resolves to first -- the sub APC simply tunnels past the front line, which needs no extra
+	// logic here). Drives to a staging cell behind the enemy base, unloads and captures.
+	//
+	// Unlike the heli version there is no drop-distance tier: a ground transport that dies has been
+	// stopped by the front line, not by air defence, and dropping further out would not help.
+	// ======================================================================
+	public sealed class AotGroundRaidMission : AotEngineerRaidMission
+	{
+		public AotGroundRaidMission(AotOperationsBotModule ops, Actor enemyYard)
+			: base(ops, $"ground-raid-{enemyYard.ActorID}")
+		{
+			target = null;
+			dropCell = BehindTarget(enemyYard.Location, ops.Info.GroundRaidDropDistance);
+			Log($"ground raid planned: unload at {dropCell}");
+		}
+
+		protected override string[] TransportChain => Ops.Info.GroundRaidTransportTypes;
+		protected override int FormingTimeout => Ops.Info.GroundRaidFormingTimeout;
+
+		public override void Tick(IBot bot)
+		{
+			if (Units.Count == 0 && Ops.OpenRequests(this) == 0)
+			{
+				Finish();
+				return;
+			}
+
+			switch (phase)
+			{
+				case Phase.Forming: TickForming(bot); break;
+				case Phase.Loading: TickLoading(bot); break;
+
+				case Phase.Delivering:
+				{
+					phaseTicks += Ops.Info.MissionInterval;
+					var transport = Transport();
+					if (transport == null)
+					{
+						Log("transport destroyed on the way -> mission over");
+						Finish();
+						return;
+					}
+
+					if ((transport.Location - dropCell).LengthSquared <= Ops.Info.RaidArriveRadius2)
+					{
+						phase = Phase.Unloading;
+						phaseTicks = 0;
+						break;
+					}
+
+					if (phaseTicks >= Ops.Info.GroundRaidDeliverTimeout)
+					{
+						Log("could not reach the unload point -> unloading where we stand");
+						phase = Phase.Unloading;
+						phaseTicks = 0;
+						break;
+					}
+
+					if (transport.IsIdle)
+						MoveUnit(bot, transport, dropCell, false);
+
+					break;
+				}
+
+				case Phase.Unloading: TickUnloading(bot); break;
+				case Phase.Raiding: TickRaiding(bot); break;
+			}
+		}
+	}
+
+	// ======================================================================
 	// Module 5: Base Defense (User 2026-07-22). Permanent standing garrison, created once at game
 	// start and never finishes. Sized roughly to one regular attack wave (WaveVehiclesPerAge
 	// [AgeTier()]); ProtectionMinProduced of that is guaranteed via dedicated production, the rest
