@@ -1623,7 +1623,7 @@ ORET:
 		Resources: Tiberium
 	DockClientManager:
 	OreTransporter:
-		OreLoadAmount: 500
+		OreLoadAmount: 400
 		OreLoadDelay: 25
 	WithStoresResourcesPipsDecoration:
 		Position: BottomLeft

@@ -287,9 +287,11 @@ aot-ore-mine:
 	StoresResources:
 		# Capacity ist hier kein Erz-Vorrat, sondern die Anzahl Fuhren, die die Mine uebersteht
 		# (OreMineDurability.OnTrip zieht pro Fuhre 1 ab, unabhaengig von ORET.OreLoadAmount) --
-		# User-Wunsch 2026-08-01: bleibt bei 50 Fuhren, aber 250 -> 500 Erz pro Fuhre
-		# (aot-units.yaml, ORET.OreLoadAmount). Gesamtertrag 12500 -> 25000 pro Mine.
-		Capacity: 50
+		# User-Wunsch 2026-08-01: 250 -> 500 Erz pro Fuhre (aot-units.yaml, ORET.OreLoadAmount).
+		# User-Wunsch 2026-08-03: Einkommen pro Zeit runter UND Mine frueher erschoepft. Beides
+		# zusammen: OreLoadAmount 500 -> 400 (Rate -20%, aot-units.yaml) und Fuhren 50 -> 40
+		# (Laufzeit -20%). Multipliziert sich zu 40 x 400 = 16000 statt bisher 25000.
+		Capacity: 40
 		Resources: Tiberium
 	OreMineDurability:
 		ResourceType: Tiberium
