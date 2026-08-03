@@ -3026,6 +3026,10 @@ aot-upgrade-mtnk-titan-railgun:
 # gleichzeitige Landungen/Rearms. NOD-Helipad (aot-hpad-nod) bleibt unverändert 2x2.
 aot-hpad-gdi:
 	Inherits: HPAD
+	# Preis verdoppelt 1000 -> 2000 (User-Wunsch 2026-08-01). Beide Helipad-Proxies erbten
+	# bisher HPADs 1000 und hatten kein eigenes Valued.
+	Valued:
+		Cost: 2000
 	RenderSprites:
 		Image: aot-hpad4
 	Building:
@@ -3068,6 +3072,11 @@ aot-hpad-gdi:
 
 aot-hpad-nod:
 	Inherits: HPAD
+	# Preis 1000 -> 3000 (User-Wunsch 2026-08-01, 4000 war zu viel). Teurer als GDIs Helipad,
+	# weil NOD es nur zum BAU braucht: NOD-Flugeinheiten laden on-the-fly nach, GDI muss zum
+	# Helipad zurueck. Der Aufschlag steckt zusaetzlich in den NOD-Heli-Preisen selbst.
+	Valued:
+		Cost: 3000
 	RenderSprites:
 		Image: hpad
 	Buildable:

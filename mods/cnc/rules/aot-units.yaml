@@ -1649,6 +1649,9 @@ aot-oret-lite:
 # === Age of Tiberium (aotmod) - LTNK Queue-Proxies (Doppel-Aktor-Pattern) ===
 aot-ltnk-base:
 	Inherits: LTNK
+	# Light Tank: Preis 1000 (User-Freigabe 2026-08-01, Staffelung Basis/+25%/+50%).
+	Valued:
+		Cost: 1000
 	RenderSprites:
 		Image: ltnk
 	Buildable:
@@ -1663,6 +1666,9 @@ aot-ltnk-base:
 
 aot-ltnk-tick:
 	Inherits: LTNK
+	# Tick Tank: Preis 1250 (User-Freigabe 2026-08-01, Staffelung Basis/+25%/+50%).
+	Valued:
+		Cost: 1250
 	# aotmod (2026-07-29): Varianten-Condition UNBEDINGT granten. Sie kam bisher nur aus dem
 	# von LTNK geerbten GrantConditionOnPrerequisite, das den BESITZER auf das Upgrade prueft.
 	# Im Karteneditor platzierte Creeps-/Neutral-Instanzen erfuellen das nie -> der Aktor erschien
@@ -1700,6 +1706,9 @@ aot-ltnk-tick:
 
 aot-ltnk-laser:
 	Inherits: LTNK
+	# Laser Tick Tank: Preis 1500 (User-Freigabe 2026-08-01, Staffelung Basis/+25%/+50%).
+	Valued:
+		Cost: 1500
 	# aotmod (2026-07-29): Varianten-Condition UNBEDINGT granten. Sie kam bisher nur aus dem
 	# von LTNK geerbten GrantConditionOnPrerequisite, das den BESITZER auf das Upgrade prueft.
 	# Im Karteneditor platzierte Creeps-/Neutral-Instanzen erfuellen das nie -> der Aktor erschien
@@ -2093,6 +2102,10 @@ aot-apache-husk:
 
 aot-apache-base:
 	Inherits: ORCA
+	# GDI Basis-Heli: Preis 1500 (User-Wunsch 2026-08-01). Vorher erbten alle Heli-Proxies
+	# stumm die 1200 ihres Basis-Aktors.
+	Valued:
+		Cost: 1500
 	AmmoPool:
 		Ammo: 5
 	Buildable:
@@ -2106,6 +2119,10 @@ aot-apache-base:
 
 aot-orca-upgraded:
 	Inherits: ORCA
+	# GDI nach ORCA-Upgrade: Preis 2000 (User-Wunsch 2026-08-01). Vorher erbten alle Heli-Proxies
+	# stumm die 1200 ihres Basis-Aktors.
+	Valued:
+		Cost: 2000
 	AmmoPool:
 		Ammo: 5
 	Buildable:
@@ -2126,6 +2143,10 @@ aot-orca-upgraded:
 
 aot-hind-base:
 	Inherits: HELI
+	# NOD Basis-Heli: Preis 2000 (User-Wunsch 2026-08-01). Vorher erbten alle Heli-Proxies
+	# stumm die 1200 ihres Basis-Aktors.
+	Valued:
+		Cost: 2000
 	AmmoPool:
 		Ammo: 6
 	ReloadAmmoPool:
@@ -2181,6 +2202,10 @@ aot-harpy-husk:
 
 aot-harpy-upgraded:
 	Inherits: HELI
+	# NOD nach Harpy-Upgrade: Preis 2500 (User-Wunsch 2026-08-01). Vorher erbten alle Heli-Proxies
+	# stumm die 1200 ihres Basis-Aktors.
+	Valued:
+		Cost: 2500
 	AmmoPool:
 		Ammo: 6
 	ReloadAmmoPool:
@@ -2198,6 +2223,10 @@ aot-harpy-upgraded:
 
 aot-harpy-upgraded-laser:
 	Inherits: HELI
+	# NOD Harpy + Laser: Preis 3000 (User-Wunsch 2026-08-01). Vorher erbten alle Heli-Proxies
+	# stumm die 1200 ihres Basis-Aktors.
+	Valued:
+		Cost: 3000
 	AmmoPool:
 		Ammo: 6
 	ReloadAmmoPool:
@@ -3083,7 +3112,7 @@ aot-v2-base:
 	Inherits@EXPERIENCE: ^GainsExperience
 	Inherits@AUTOTARGET: ^AutoTargetGroundAssaultMove
 	Valued:
-		Cost: 700
+		Cost: 1000
 	UpdatesPlayerStatistics:
 		AddToArmyValue: true
 	Buildable:
@@ -3180,6 +3209,9 @@ aot-v2-base:
 
 aot-v2-napalm:
 	Inherits: aot-v2-base
+	# Napalm Rocket Launcher: Preis 1250 (User-Freigabe 2026-08-01, Staffelung Basis/+25%/+50%).
+	Valued:
+		Cost: 1250
 	Buildable:
 		LockedGroup: aot-grp-v2
 		BuildPaletteOrder: 40
@@ -3213,6 +3245,9 @@ aot-v2-napalm:
 # aot-v2-toxic: ersetzt aot-v2-napalm im Baumenü nach dem Toxic-Upgrade (eigenes Icon/Name/Beschreibung)
 aot-v2-toxic:
 	Inherits: aot-v2-napalm
+	# Toxic Rocket Launcher: Preis 1500 (User-Freigabe 2026-08-01, Staffelung Basis/+25%/+50%).
+	Valued:
+		Cost: 1500
 	Buildable:
 		LockedGroup: aot-grp-v2
 		BuildPaletteOrder: 40
@@ -3236,6 +3271,9 @@ aot-v2-toxic:
 # Buildable nur bereit wenn aot-howitzer-upgrade aktiv.
 aot-arty-howitzer:
 	Inherits: ARTY
+	# Howitzer: Preis 1000 (User-Freigabe 2026-08-01, Staffelung Basis/+25%/+50%).
+	Valued:
+		Cost: 1000
 	RenderSprites:
 		Image: arty
 	Buildable:
@@ -3339,7 +3377,7 @@ aot-arty-heavy:
 	Inherits@EXPERIENCE: ^GainsExperience
 	Inherits@AUTOTARGET: ^AutoTargetGround
 	Valued:
-		Cost: 1200
+		Cost: 1500
 	UpdatesPlayerStatistics:
 		AddToArmyValue: true
 	Buildable:
@@ -4092,6 +4130,10 @@ aot-sub-cargo-proxy:
 # Icon-Wechsel im Baumenue, analog aot-sub-base/aot-sub-cargo-proxy.
 aot-stnk-base:
 	Inherits: STNK
+	# Basis-Stealth-Tank: Preis 1000 (User-Wunsch 2026-08-01). Beide Proxies erbten bisher stumm
+	# die 900 von STNK.
+	Valued:
+		Cost: 1000
 	RenderSprites:
 		Image: stnk
 	Buildable:
@@ -4107,6 +4149,10 @@ aot-stnk-base:
 
 aot-stnk-cargo:
 	Inherits: STNK
+	# nach Cargo-Upgrade: Preis 1500 (User-Wunsch 2026-08-01). Beide Proxies erbten bisher stumm
+	# die 900 von STNK.
+	Valued:
+		Cost: 1500
 	RenderSprites:
 		Image: stnk
 	Buildable:
