@@ -845,15 +845,20 @@ namespace OpenRA.Mods.Common.Traits
 			"tank upgrade). A tank without the upgrade simply ignores the deploy order.")]
 		public readonly int ExpansionDigInAgeTier = 2;
 
-		[Desc("Minimum resource cells an index must hold to be considered as an expansion site.")]
-		public readonly int ExpansionMinResourceCells = 20;
+		[Desc("Minimum resource cells an index must hold to be considered as an expansion site. The",
+			"resource map splits the world into fixed-stride indices, so one visible field can be cut",
+			"across several of them -- this is NOT the size of the field a player would see.")]
+		public readonly int ExpansionMinResourceCells = 12;
 
 		[Desc("Minimum cell distance from our own base -- an 'expansion' next door adds nothing.")]
 		public readonly int ExpansionMinDistance = 20;
 
 		[Desc("Cell distance around a candidate site that must be free of known enemy buildings",
-			"(user spec: 'frei und sicher ... keine gegnerische base in der nähe').")]
-		public readonly int ExpansionEnemyClearance = 25;
+			"(user spec: 'frei und sicher ... keine gegnerische base in der nähe'). Deliberately modest:",
+			"on a crowded 6-player map almost every tiberium field is within sight of SOMEBODY, and at",
+			"25 cells this filter rejected every candidate on Forest Fire (User 2026-08-03). The",
+			"per-index EnemyBaseCount check above already keeps the expansion out of an enemy's own base.")]
+		public readonly int ExpansionEnemyClearance = 12;
 
 		[Desc("How far off the tiberium field itself the yard is planted. Building on top of the field",
 			"would bury the very resources the expansion came for.")]
@@ -967,6 +972,7 @@ namespace OpenRA.Mods.Common.Traits
 		int bridgeTicks;
 		int raidTicks;
 		int expansionTicks;
+		int expansionSiteLogTicks;
 
 		// Per-BOT danger memory for heli raids (User 2026-08-03), deliberately NOT per mission: the
 		// whole point is that the NEXT raid benefits from what happened to the last one.
@@ -2250,25 +2256,49 @@ namespace OpenRA.Mods.Common.Traits
 			CPos? best = null;
 			var bestScore = int.MinValue;
 
+			// Rejection counters: with no site found the whole mission is silently skipped, and there
+			// was no way to tell an empty map from an over-strict filter (User 2026-08-03: "nicht
+			// einmal wurde irgend etwas richtung base expansion gebaut ... gibt es andere gründe?").
+			int tooSmall = 0, tooClose = 0, enemyBase = 0, enemyNear = 0, considered = 0;
+
 			for (var i = 0; i < resourceMap.GetIndicesLength(); i++)
 			{
 				var indice = resourceMap.GetIndice(i);
-				if (indice == null || indice.ResourceCellsCount < Info.ExpansionMinResourceCells)
+				if (indice == null || indice.ResourceCellsCount == 0)
 					continue;
+
+				if (indice.ResourceCellsCount < Info.ExpansionMinResourceCells)
+				{
+					tooSmall++;
+					continue;
+				}
 
 				var centre = indice.ResourceCellsCenter;
 				var distHome = (centre - home).Length;
 				if (distHome < Info.ExpansionMinDistance)
+				{
+					tooClose++;
 					continue;
+				}
 
 				if (indice.EnemyBaseCount > 0)
+				{
+					enemyBase++;
 					continue;
+				}
 
 				if (enemyBuildings.Any(b => (b - centre).Length < Info.ExpansionEnemyClearance))
+				{
+					enemyNear++;
 					continue;
+				}
 
-				// More tiberium is better, closer to home is better (shorter, safer convoy), and an
-				// ore mine on the field is a bonus because the yard's free transporter can work it.
+				considered++;
+
+				// More tiberium is better, closer to home is better (shorter, safer convoy). The bonus
+				// is for BLOSSOM TREES (ResourceCreatorTypes = split2/split3/splitblue), not ore mines:
+				// a regrowing field keeps paying out, and ore mines mostly sit at enemy spawns anyway
+				// (User 2026-08-03). Purely a bonus -- a plain big field is a perfectly good site.
 				var score = indice.ResourceCellsCount
 					- distHome
 					+ (indice.ResourceCreatorLocs.Length * 10);
@@ -2281,7 +2311,19 @@ namespace OpenRA.Mods.Common.Traits
 			}
 
 			if (best == null)
+			{
+				if (--expansionSiteLogTicks <= 0)
+				{
+					expansionSiteLogTicks = 8;
+					Log($"no expansion site: rejected {tooSmall} too small (<{Info.ExpansionMinResourceCells} cells), " +
+						$"{tooClose} too close to home (<{Info.ExpansionMinDistance}), {enemyBase} with an enemy base, " +
+						$"{enemyNear} within {Info.ExpansionEnemyClearance} of an enemy building");
+				}
+
 				return null;
+			}
+
+			Log($"expansion site chosen near {best.Value} (score {bestScore}, {considered} candidate(s))");
 
 			// Settle a few cells OFF the tiberium itself: the layout needs buildable ground, and
 			// building on top of the field would bury the very resources it came for.
