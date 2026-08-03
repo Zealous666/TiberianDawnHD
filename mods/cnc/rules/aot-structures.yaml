@@ -2122,6 +2122,10 @@ MSLO:
 		CircleSequence: circles
 		SupportPowerPaletteOrder: 35
 	AotAtomBombPower@atombomb:
+		# Superwaffen-Timer links unten fuer ALLE Spieler sichtbar (User-Wunsch 2026-08-01,
+		# klassisches C&C-Feature). Default waere None = kein Timer. Bewusst NUR hier und bei
+		# der Ion Cannon gesetzt -- alle anderen Powers bleiben ungetimed.
+		DisplayTimerRelationships: Ally, Neutral, Enemy
 		RequiresCondition: aot-atom-bomb-active
 		PauseOnCondition: lowpower
 		Prerequisites: ~techlevel.superweapons
@@ -3471,6 +3475,12 @@ AFLT:
 # Doppel-Aktor-Pattern analog PYLE. FIX muss das Prerequisite "fix" explizit bereitstellen.
 FIX:
 	-Buildable:
+	# User-Wunsch 2026-08-01: repariertes Fahrzeug bleibt nach Abschluss noch ~2 Sekunden stehen
+	# (50 Ticks bei Standard-Timestep 40ms), statt im selben Tick loszufahren. Gibt u.a. das
+	# Zeitfenster, es dort noch zu verkaufen. RepairsUnits selbst wird von der Engine geerbt,
+	# hier nur das neue Feld ergaenzt (Feld-Merge, kein "-Trait:" noetig).
+	RepairsUnits:
+		LingerAfterRepair: 50
 	# Engine-Default ist HasMinibib:true -> WithBuildingBib rendert nur rows=1, also
 	# ausschliesslich die Frames 0-2 des 6-Frame-Bibs (BIB2 = 3 breit x 2 Zeilen).
 	# Die untere Bib-Zeile wurde dadurch nie gezeichnet ("unten abgeschnitten").
@@ -5158,6 +5168,10 @@ ORBC:
 		Condition: aot-ion-cannon-active
 		Prerequisites: aot-ion-cannon-upgrade
 	IonCannonPower:
+		# Superwaffen-Timer links unten fuer ALLE Spieler sichtbar (User-Wunsch 2026-08-01,
+		# klassisches C&C-Feature). Default waere None = kein Timer. Bewusst NUR hier und bei
+		# der Atom Bomb gesetzt -- alle anderen Powers bleiben ungetimed.
+		DisplayTimerRelationships: Ally, Neutral, Enemy
 		RequiresCondition: aot-ion-cannon-active
 		PauseOnCondition: lowpower
 		Prerequisites: ~techlevel.superweapons
@@ -5937,6 +5951,37 @@ aot-upgrade-avatar-laser:
 
 	ProvidesPrerequisite:
 		Prerequisite: aot-avatar-laser-upgrade
+
+	Interactable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - NOD Stealth Harvester (User-Wunsch 2026-08-01) ===
+# Tarnt den Harvester dauerhaft, mit zwei Ausnahmen: waehrend des Erntens und waehrend des
+# Abladens an der Raffinerie -- jeweils mit dem ueblichen CloakDelay bis zum Wieder-Tarnen.
+# Sichtbar ab Age 3, baubar sobald der Secret Shrine steht.
+# Icon: Harvester-Sprite (Image: harv), wie gewuenscht.
+aot-upgrade-stealth-harvester:
+	Tooltip:
+		Name: Stealth Harvester
+
+	Buildable:
+		BuildPaletteOrder: 325
+		Prerequisites: ~aot-age3, aot-age3, aot-shrine
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		# Kein "MoveIntoWorld: false" wie bei den aelteren Upgrades: das Feld existiert auf
+		# Buildable gar nicht (wirkungslos) und erzeugt pro Vorkommen einen check-yaml-Fehler.
+		Icon: icon
+		Description: Cloaks all Harvesters. They decloak while harvesting and while unloading at the refinery.
+
+	Valued:
+		Cost: 2000
+
+	RenderSprites:
+		Image: harv
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-stealth-harvester-upgrade
 
 	Interactable:
 # === Ende aotmod ===

@@ -1220,6 +1220,21 @@ Container@PLAYER_WIDGETS:
 					HoldText: supportpowers-support-powers-palette.hold
 					HotkeyPrefix: SupportPower
 					HotkeyCount: 6
+		# === Age of Tiberium (aotmod) - Superwaffen-Timer (User-Wunsch 2026-08-01) ===
+		# Klassisches C&C-Feature: laufende Superwaffen-Timer ALLER Spieler, links unten,
+		# jeweils in der Spielerfarbe (blinkt weiss sobald bereit). Das Widget bringt die
+		# Engine bereits mit (SupportPowerTimerWidget), es war im cnc-Mod nur nie eingebunden.
+		# WELCHE Powers hier auftauchen, entscheidet NICHT dieses Widget, sondern
+		# SupportPowerInfo.DisplayTimerRelationships pro Power (Default: None = unsichtbar).
+		# Gesetzt ist es bewusst NUR auf Ion Cannon Strike (ORBC) und Atom Bomb (MSLO) --
+		# siehe aot-structures.yaml.
+		# Order: Ascending -> die Zeilen wachsen nach OBEN weg, damit sie nicht in die
+		# Command Bar darunter laufen (deren Hintergrund ist 44px hoch + 5px Rand).
+		SupportPowerTimer@SUPPORT_POWER_TIMER:
+			X: 14
+			Y: WINDOW_HEIGHT - 75
+			Order: Ascending
+			ShowPlayerName: False
 		Image@COMMAND_BAR_BACKGROUND:
 			X: 5
 			Y: WINDOW_HEIGHT - HEIGHT - 5

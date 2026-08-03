@@ -1631,7 +1631,43 @@ BIKE:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Fahrzeuge capturable für Carjacker ===
+# === Age of Tiberium (aotmod) - Tarn-Kiste: Darstellung (User-Fund 2026-08-01) ===
+# "Nicht getarnt/halb-transparent, sondern gruen gefaerbt." Ursache identisch zum Stealth
+# Harvester: CloakStyle: Palette ruft WithPalette und greift NUR bei IPalettedRenderable. Die
+# HD-/Remaster-Sprites sind echte RGBA-Grafiken ohne Palette -- der Aufruf laeuft ins Leere, die
+# Einheit bleibt voll eingefaerbt und man sieht die Spielerfarbe (bei NOD gruen).
+# Alpha nutzt WithAlpha und wirkt unabhaengig vom Sprite-Format (so macht es auch das Cloaked SAM).
+# CloakedPalette wird dadurch nicht mehr gebraucht.
+^AcceptsCloakCrate:
+	Cloak:
+		CloakStyle: Alpha
+
 ^Vehicle:
+	# === Age of Tiberium (aotmod) - Fahrzeug am Repair Depot verkaufen (User-Wunsch 2026-08-01) ===
+	# Verhalten wie in RA1/TS: ein Fahrzeug, das auf dem Depot steht, kann per Sell-Button fuer
+	# 50% verkauft werden. OpenRA kann das NICHT von Haus aus -- Issue #3798 wurde 2013 als
+	# "not planned" geschlossen, Sellable sitzt normalerweise nur auf Gebaeuden.
+	# Es braucht aber KEINEN eigenen C#-Trait, alle Bausteine existieren bereits:
+	#   - SellableInfo ist ein ConditionalTraitInfo -> RequiresCondition gated den Verkauf
+	#   - AotGrantConditionOnActor setzt genau diese Condition, solange das Fahrzeug auf dem Depot steht
+	#   - RefundPercent ist ohnehin 50 (Default) -- der halbe Preis, den du willst
+	#   - "sell-vehicle" ist ein FERTIGER, kleinerer Verkaufs-Cursor in engine/mods/cnc/cursors.yaml
+	#     (Start 154) -- exakt der aus dem Original, bisher im Mod nirgends benutzt
+	# Praesenz-basiert statt dock-basiert (User-Fund 2026-08-01: "Sell-Cursor wieder weg, ich
+	# verkaufe jedesmal das FIX", getestet mit 100%-HP-Fahrzeug). GrantConditionOnClientDock haengt
+	# an INotifyDockClient.Docked -- und das feuert in Resupply nur hinter "activeResupplyTypes > 0",
+	# also NIE fuer ein unbeschaedigtes Fahrzeug. Ausserdem widerruft Undocked die Condition, sobald
+	# die Activity endet, das geparkte Fahrzeug waere nach der Verweildauer wieder unverkaeuflich.
+	# AotGrantConditionOnActor prueft stattdessen schlicht, ob das Fahrzeug auf einer Zelle des
+	# Depots steht -- unabhaengig von Reparaturbedarf und Activity-Zustand.
+	AotGrantConditionOnActor@DEPOT:
+		Condition: aot-docked-at-depot
+		ActorTypes: aot-fix-age0, aot-fix-age1, aot-fix-age2, aot-fix-age1-nod, aot-fix-age2-nod
+	Sellable:
+		RequiresCondition: aot-docked-at-depot
+		RefundPercent: 50
+		Cursor: sell-vehicle
+		SellSounds: cashturn.aud
 	# === Tiberian Veins: langsamer DoT auf dem Geflecht (wie Tiberium bei Infanterie) ===
 	# Analog zum Eis-Einbrechen, aber nicht abrupt: solange das Fahrzeug auf Terrain "Veins"
 	# steht, alle 16 Ticks etwas Schaden. Die leichten Fahrzeuge (JEEP/BGGY/BIKE/APC + Proxies)
@@ -1656,6 +1692,11 @@ BIKE:
 		CustomPipType: green
 	Repairable:
 		RepairActors: aot-fix-age0, aot-fix-age1, aot-fix-age2, aot-fix-age1-nod, aot-fix-age2-nod
+		# Ohne das kaeme man mit einem UNBESCHAEDIGTEN Fahrzeug gar nicht erst aufs Depot (Vanilla
+		# laesst den Repair-Befehl nur zu, wenn es etwas zu reparieren/aufzumunitionieren gibt) --
+		# und damit auch nie zum Verkauf (siehe Sellable weiter oben). Ist nichts zu tun, parkt
+		# das Fahrzeug dort, statt sofort wieder abzufahren.
+		AllowUndamagedDocking: true
 	GrantConditionOnDamageState@AOTREPAIR:
 		Condition: aot-vehicle-damaged
 		ValidDamageStates: Light, Medium, Heavy, Critical

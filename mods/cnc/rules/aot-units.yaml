@@ -1991,6 +1991,31 @@ TRUCK:
 # Proxy-Aktor-Pattern wie MCV/JEEP/MTNK: -Buildable: im Basis-Aktor, Buildable im Proxy.
 HARV:
 	-Buildable:
+	# === Stealth Harvester (NOD Age-3-Upgrade, User-Wunsch 2026-08-01) ===
+	# Auf HARV statt auf den Proxies: aot-harv (GDI) und aot-harv-nod (NOD) erben beide von hier,
+	# und die Refineries spawnen ihre Gratis-Harvester ebenfalls als diese Aktoren. Freigeschaltet
+	# wird es aber nur ueber das NOD-Upgrade, GDI kann es nicht kaufen.
+	# UncloakOn deckt exakt die beiden gewuenschten Ausnahmen ab:
+	#   Harvest = beim Einsammeln auf dem Feld (aotmod-Erweiterung von Cloak.cs -- das Ernten ist
+	#             KEIN Dock-Vorgang und hatte vorher gar keinen Trigger)
+	#   Dock    = beim Abladen an der Raffinerie
+	# Damage/Attack bewusst NICHT gesetzt: der Harvester soll unter Beschuss getarnt bleiben.
+	GrantConditionOnPrerequisite@stealthharv:
+		Condition: aot-harv-stealth
+		Prerequisites: aot-stealth-harvester-upgrade
+	Cloak:
+		RequiresCondition: aot-harv-stealth
+		InitialDelay: 85
+		CloakDelay: 85
+		CloakSound: trans1.aud
+		UncloakSound: trans1.aud
+		# CloakStyle: Alpha statt Palette (User-Fund 2026-08-01: "nicht getarnt/halb-transparent,
+		# sondern gruen gefaerbt"). Palette ruft WithPalette und greift NUR bei IPalettedRenderable
+		# -- die HD-/Remaster-Sprites sind echte RGBA-Grafiken ohne Palette, der Aufruf laeuft dort
+		# ins Leere und die Einheit bleibt voll eingefaerbt (bei NOD gruen). Alpha nutzt WithAlpha
+		# und wirkt unabhaengig vom Sprite-Format -- so macht es auch das Cloaked SAM.
+		CloakStyle: Alpha
+		UncloakOn: Harvest, Dock
 
 aot-harv:
 	Inherits: HARV
@@ -5700,7 +5725,7 @@ aot-surveyor-nod:
 		BuildPaletteOrder: 80
 		Prerequisites: ~aot-age3, fix
 		Icon: icon
-		Description: Mobile forward base. Deploy to create a NOD Outpost — extends construction range by 6 cells, cloaks nearby friendly units when stealth field is active. No power cost when deployed.
+		Description: Mobile forward base. Deploy to create a NOD Outpost — extends construction range by 6 cells. Its stealth field cloaks nearby friendly units and structures while active, drawing 90 power.
 
 # === GDI Outpost (deployed Surveyor GDI) ===
 # Garrison 10 Infanterie, Bauzone 6 Zellen, kein Power.
@@ -5925,7 +5950,7 @@ aot-outpost-nod:
 		CloakSound: trans1.aud
 		UncloakSound: trans1.aud
 
-	# Tarnfeld: tarnt verbuendete Einheiten (nicht Gebaeude) im Umkreis, identisch zu aot-mstealth.
+	# Tarnfeld EINHEITEN: aot-stealth-field-mobile, darauf reagieren die Einheiten-Templates.
 	ProximityExternalCondition@STEALTH:
 		Condition: aot-stealth-field-mobile
 		Range: 8c341
@@ -5934,6 +5959,23 @@ aot-outpost-nod:
 		RequiresCondition: aot-nod-outpost-active
 		EnableSound: cloak5.aud
 		DisableSound: cloak5.aud
+
+	# Tarnfeld GEBAEUDE (User-Wunsch 2026-08-01): ^Building reagiert ausschliesslich auf
+	# aot-stealth-field, nicht auf die -mobile-Variante -- deshalb ein ZWEITES Feld mit exakt
+	# demselben Radius und Schalter. Genau dieselbe Condition, die auch der stationaere
+	# aot-sgen sendet. Ohne Sound, sonst spielt der Toggle beide Felder uebereinander ab.
+	ProximityExternalCondition@STEALTHBUILDINGS:
+		Condition: aot-stealth-field
+		Range: 8c341
+		ValidRelationships: Ally
+		AffectsParent: true
+		RequiresCondition: aot-nod-outpost-active
+
+	# Stromkosten (User-Wunsch 2026-08-01): so viel wie ein Obelisk (-90). Faellt nur an, solange
+	# das Tarnfeld laeuft -- der undeployte Outpost bleibt kostenlos.
+	Power:
+		Amount: -90
+		RequiresCondition: aot-nod-outpost-active
 
 	# Tarnfeld-Radius als Kreis (bei Selektion, nur wenn aktiv)
 	WithRangeCircle@stealth:

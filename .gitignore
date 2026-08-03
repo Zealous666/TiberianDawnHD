@@ -83,6 +83,13 @@ engine/**
 !engine/OpenRA.Mods.Common/Activities/Air/Land.cs
 !engine/OpenRA.Mods.Common/Activities/Air/ReturnToBase.cs
 !engine/OpenRA.Mods.Common/Traits/Air/Aircraft.cs
+# aotmod 2026-08-01: Repair-Depot-Verweildauer, Fahrzeugverkauf am Depot, Stealth Harvester
+!engine/OpenRA.Mods.Common/Traits/RepairsUnits.cs
+!engine/OpenRA.Mods.Common/Traits/Repairable.cs
+!engine/OpenRA.Mods.Common/Traits/Cloak.cs
+!engine/OpenRA.Mods.Common/Activities/Resupply.cs
+!engine/OpenRA.Mods.Common/Orders/
+!engine/OpenRA.Mods.Common/Orders/GlobalButtonOrderGenerator.cs
 !engine/OpenRA.Mods.Common/Traits/AotFirePositionDebug.cs
 !engine/OpenRA.Mods.Common/Traits/AotProductionQueueDebug.cs
 !engine/OpenRA.Mods.Common/Traits/AotSuppressReadyNotification.cs
@@ -119,6 +126,9 @@ engine/**
 
 # aotmod: AI Operations Framework (Army/Kampf-KI, 2026-07-21)
 !engine/OpenRA.Mods.Common/Traits/BotModules/
+# aotmod: Consideration.ActorTypes -- Superwaffen koennen gezielt einzelne Gebaeude anvisieren
+!engine/OpenRA.Mods.Common/Traits/BotModules/BotModuleLogic/
+!engine/OpenRA.Mods.Common/Traits/BotModules/BotModuleLogic/SupportPowerDecision.cs
 !engine/OpenRA.Mods.Common/Traits/BotModules/AotMapIntelBotModule.cs
 !engine/OpenRA.Mods.Common/Traits/BotModules/AotOperationsBotModule.cs
 !engine/OpenRA.Mods.Common/Traits/BotModules/AotOpsMissions.cs
@@ -233,3 +243,4 @@ mods/cnc/rules/structures.yaml
 /debug-logs/
 /debug-*.sh
 /recolor-*.py
+!engine/OpenRA.Mods.Common/Widgets/SupportPowerTimerWidget.cs

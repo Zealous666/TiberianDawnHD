@@ -799,20 +799,18 @@ Player:
 		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
 		Decisions:
 			# --- Ion Cannon Strike (orbc) ---
+			# Zielt auf das Construction Yard (User-Wunsch 2026-08-01). ActorTypes ist eine
+			# aotmod-Erweiterung von Consideration (SupportPowerDecision.cs) -- Types allein kennt
+			# nur grobe Kategorien und kann kein einzelnes Gebaeude auswaehlen.
 			IonCannon:
 				OrderName: IonCannonPowerInfoOrder
 				MinimumAttractiveness: 1000
 				FineScanRadius: 2
 				Consideration@1:
 					Against: Enemy
-					Types: Air, Tank, Vehicle, Infantry, Water
-					Attractiveness: 2
-					TargetMetric: Value
-					CheckRadius: 2c0
-				Consideration@2:
-					Against: Enemy
 					Types: Structure
-					Attractiveness: 1
+					ActorTypes: fact, fact.gdi, fact.nod
+					Attractiveness: 5
 					TargetMetric: Value
 					CheckRadius: 2c0
 				Consideration@3:
@@ -822,13 +820,16 @@ Player:
 					TargetMetric: Value
 					CheckRadius: 3c0
 			# --- Tiberium/Nuke Strike (tmpl Tiberium Strike, mslo Mine Cluster) ---
+			# Mine Cluster streut Minen -> auf feindliche VERTEIDIGUNGSANLAGEN (User-Wunsch
+			# 2026-08-01: "die stehen i.d.R. an Chokepoints"). SAMs bewusst NICHT in der Liste.
 			NukeStrike:
 				OrderName: NukePowerInfoOrder
-				MinimumAttractiveness: 3000
+				MinimumAttractiveness: 1000
 				Consideration@1:
 					Against: Enemy
 					Types: Structure
-					Attractiveness: 1
+					ActorTypes: aot-pillbox-base, aot-pillbox-guard, aot-gun-base, aot-gun-laser, aot-ftur-flame, aot-ftur-toxic, obli, aot-fireposition, atwr, gtwr
+					Attractiveness: 5
 					TargetMetric: Value
 					CheckRadius: 5c0
 				Consideration@2:
@@ -838,13 +839,52 @@ Player:
 					TargetMetric: Value
 					CheckRadius: 7c0
 			# --- Tiberium Missile (mslo, aufgerüstet) ---
+			# Zielt auf Kraftwerke (User-Wunsch 2026-08-01).
 			TiberiumMissile:
 				OrderName: AotTiberiumMissilePowerInfoOrder
-				MinimumAttractiveness: 3000
+				MinimumAttractiveness: 1000
 				Consideration@1:
 					Against: Enemy
 					Types: Structure
-					Attractiveness: 1
+					ActorTypes: aot-nuke-age0, aot-nuke-age1, aot-nuke-age2, aot-nuke-age2-nod, aot-nuke-turbine, aot-nuke-turbine-age2, aot-nuk2-age0, aot-nuk2-age1, aot-nuk2-age2
+					Attractiveness: 5
+					TargetMetric: Value
+					CheckRadius: 5c0
+				Consideration@2:
+					Against: Ally
+					Types: Air, Ground, Water
+					Attractiveness: -10
+					TargetMetric: Value
+					CheckRadius: 7c0
+			# --- Atom Bomb (mslo) --- NEU 2026-08-01: hatte bisher GAR KEINE Decision, die KI hat
+			# die Superwaffe also nie gezuendet (OrderName wird aus dem Info-Klassennamen
+			# abgeleitet, siehe AotNukePowerVariants.cs). Zielt auf das Construction Yard.
+			AtomBomb:
+				OrderName: AotAtomBombPowerInfoOrder
+				MinimumAttractiveness: 1000
+				Consideration@1:
+					Against: Enemy
+					Types: Structure
+					ActorTypes: fact, fact.gdi, fact.nod
+					Attractiveness: 5
+					TargetMetric: Value
+					CheckRadius: 5c0
+				Consideration@2:
+					Against: Ally
+					Types: Air, Ground, Water
+					Attractiveness: -10
+					TargetMetric: Value
+					CheckRadius: 7c0
+			# --- Mine Cluster Enhanced (mslo) --- ebenfalls NEU: gleiche Luecke wie bei der Atom
+			# Bomb. Zielt wie die Basis-Variante auf feindliche Verteidigungsanlagen.
+			MineClusterEnhanced:
+				OrderName: AotMineClusterEnhancedPowerInfoOrder
+				MinimumAttractiveness: 1000
+				Consideration@1:
+					Against: Enemy
+					Types: Structure
+					ActorTypes: aot-pillbox-base, aot-pillbox-guard, aot-gun-base, aot-gun-laser, aot-ftur-flame, aot-ftur-toxic, obli, aot-fireposition, atwr, gtwr
+					Attractiveness: 5
 					TargetMetric: Value
 					CheckRadius: 5c0
 				Consideration@2:

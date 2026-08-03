@@ -58,6 +58,13 @@ namespace OpenRA.Mods.Common.Traits
 		readonly Lazy<IHealth> health;
 		readonly SellableInfo info;
 
+		// aotmod (User-Fund 2026-08-01: "die Einheit faehrt beim Verkauf erst vom FIX und
+		// verschwindet dann"). Sell() ruft CancelActivity(), und ein laufendes Resupply raeumt
+		// sich beim Abbruch auf, indem es den Aktor aus dem Gebaeude-Footprint faehrt (HACK dort).
+		// Beim Verkauf ist das unerwuenscht -- die Einheit soll sofort verschwinden. Resupply
+		// fragt dieses Flag ab und ueberspringt dann den Wegfahr-Move.
+		public bool IsSelling { get; private set; }
+
 		public Sellable(Actor self, SellableInfo info)
 			: base(info)
 		{
@@ -77,6 +84,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (IsTraitDisabled)
 				return;
 
+			IsSelling = true;
 			self.CancelActivity();
 
 			foreach (var s in info.SellSounds)
