@@ -2252,6 +2252,7 @@ namespace OpenRA.Mods.Common.Traits
 		readonly (string Role, string[] Chain)[] squadOrder;
 		int squadStep;
 		bool squadFunded;
+		bool squadOrdered;
 
 		protected AotEngineerRaidMission(AotOperationsBotModule ops, string name)
 			: base(ops, name)
@@ -2323,36 +2324,31 @@ namespace OpenRA.Mods.Common.Traits
 			// Waiting for the transport to actually EXIST before asking for infantry also means a raid
 			// that simply cannot get one (no helipad, upgrade not bought) burns no infantry at all,
 			// instead of parking five bodies in the base until the forming timeout.
-			if (TransportChain.Length > 0 && Transport() == null)
-			{
-				if (Ops.OpenRequests(this, "transport") == 0)
-					Ops.QueueRequest(this, "transport", TransportChain, 1);
-
+			// ORDER THE WHOLE SQUAD AT ONCE, once the cash for it is banked (User 2026-08-04: "leg da
+			// ebenfalls ein spar-paket an ... was cash für heli und die 5 infanteristen vorhält ehe er
+			// bestellt"). Requesting one slot at a time meant the transport was finished long before
+			// the infantry and simply hovered while engineers trickled out of the barracks one by one
+			// -- observed across all three bots: helicopters hovering, engineers standing around, and
+			// nothing ever departing. The saving gate above guarantees the credits are already there,
+			// so there is nothing left to stagger.
+			if (squadOrdered)
 				return;
+
+			squadOrdered = true;
+
+			if (TransportChain.Length > 0 && Transport() == null && Ops.OpenRequests(this, "transport") == 0)
+				Ops.QueueRequest(this, "transport", TransportChain, 1);
+
+			foreach (var group in squadOrder.Where(o => o.Chain.Length > 0).GroupBy(o => o.Role))
+			{
+				var chain = group.First().Chain;
+				var wanted = group.Count();
+				var have = Units.Count(a => chain.Contains(a.Info.Name));
+				if (wanted > have)
+					Ops.QueueRequest(this, group.Key, chain, wanted - have);
 			}
 
-			while (squadStep < squadOrder.Length)
-			{
-				var (role, chain) = squadOrder[squadStep];
-				if (chain.Length == 0)
-				{
-					squadStep++;
-					continue;
-				}
-
-				var wantedSoFar = squadOrder.Take(squadStep + 1).Count(s => s.Chain == chain);
-				var haveSoFar = Units.Count(a => chain.Contains(a.Info.Name));
-				if (haveSoFar >= wantedSoFar)
-				{
-					squadStep++;
-					continue;
-				}
-
-				if (Ops.OpenRequests(this, role) == 0)
-					Ops.QueueRequest(this, role, chain, 1);
-
-				return;
-			}
+			Log($"funded ({Ops.AvailableCash()}) -> ordering transport + {squadOrder.Length} squad member(s) at once");
 		}
 
 		protected bool SquadReady() =>
