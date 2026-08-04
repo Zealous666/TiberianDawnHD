@@ -69,6 +69,24 @@ World:
 	Targetable:
 		TargetTypes: Trees
 	HitShape:
+	# Rodung Phase 2 (User-Wunsch 2026-08-04): die Tiberium-Missile macht mit ihrem
+	# baum-exklusiven Warhead (aot-weapons.yaml, aot-TiberiumStrike/Warhead@7Trees) alle
+	# Baeume im 5-Zellen-Umkreis zu Husks; den Rest erledigt sporadisch das freigesetzte Gas.
+	# Technisch dasselbe Muster wie bei Infanterie/Fahrzeugen/Gebaeuden (overrides.yaml): die
+	# Gaswolke grantet per ProximityExternalCondition "aot-tiberium-gassed", AotDamagedByCondition
+	# tickt daraufhin Schaden. Kontaktdauer bis zum Aufloesen: 5 Sekunden (User-Korrektur nach
+	# Test 2026-08-04 -- die urspruenglichen 40s waren wirkungslos, weil die Wolken zu schnell
+	# weiterwandern). 4000 alle 25 Ticks (= 1s) = 24000 nach 6 Treffern. AotDamagedByCondition
+	# schlaegt beim ersten Tick sofort zu (damageTicks startet auf 0), die Treffer liegen also bei
+	# Tick 1/26/51/76/101/126 -- der Husk faellt nach rund 5 Sekunden Kontakt. Bewusst NUR am Husk,
+	# nicht an ^Tree: wie stehende Baeume sonst zerstoert werden, bleibt unangetastet.
+	ExternalCondition@AOTGAS:
+		Condition: aot-tiberium-gassed
+	AotDamagedByCondition:
+		RequiresCondition: aot-tiberium-gassed
+		Damage: 4000
+		DamageInterval: 25
+		DamageTypes: TiberiumDeath
 
 # T03.Transformable/T13.Transformable mutieren zu Blossom Trees (TransformsNearResources),
 # sobald Tiberium angrenzt. Default-Delay war 1000-3000 Ticks (= 40-120s bei Timestep 40ms) -
