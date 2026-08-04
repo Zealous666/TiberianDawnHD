@@ -159,6 +159,17 @@ Player:
 		# permanently-stuck-core-building escape valve. Removed from that module's own
 		# BuildingFractions below so nothing can double-fire them.
 		AgeUpgradeTypes: aot-age1-upgrade-nod, aot-age2-upgrade-nod, aot-age3-upgrade-nod
+		# Techtree-Gatekeeper (User 2026-08-02): KEINE optionalen Kampf-Upgrades, sondern harte
+		# Voraussetzungen fuer spaetere PLAN-Gebaeude:
+		#   aot-upgrade-nod-forbidden  -> aot-nod-forbidden-upgrade -> Shrine (aot-shrine) baubar
+		#   aot-upgrade-laser-fence    -> aot-laser-fence-upgrade   -> Obelisk (OBLI) baubar
+		# Als gewichteter Zufallskauf (Gewicht 20 bzw. 15) fuehrte das zum harten Deadlock: SHRN ist
+		# ein CORE-Schritt, und Core-Schritte laufen strikt first-open OHNE Timeout -- ein Bot, der
+		# aot-upgrade-nod-forbidden nie zog, blieb ab Age 2 dauerhaft auf "Waiting (age gate /
+		# prerequisites): SHRN" stehen (618 Zeilen in einer Session). Ueber 5 Nod-Bots wurde in
+		# derselben Session KEIN einziger Obelisk gebaut. Reihenfolge = Abhaengigkeitsreihenfolge.
+		# Beide unten aus BuildingFractions entfernt, damit nichts doppelt feuert.
+		GatekeeperUpgradeTypes: aot-upgrade-nod-forbidden, aot-upgrade-laser-fence
 
 	# CHOKEPOINT-FORTIFIER: für V1 DEAKTIVIERT (baute Streu-Zäune, konkurrierte um
 	# die Building-Queue). Kommt als V2 zurück, integriert mit AotBaseBuilder.
@@ -492,10 +503,12 @@ Player:
 			# aot-upgrade-nod-secrettech (2026-08-01, User-Briefing): Age-1-Gatekeeper, hohe Prio
 			# analog zu aot-upgrade-turret -- soll direkt nach AFLD gekauft werden.
 			aot-upgrade-nod-secrettech: 45
-			aot-upgrade-nod-forbidden: 20
+			# aot-upgrade-nod-forbidden und aot-upgrade-laser-fence stehen BEWUSST NICHT mehr hier:
+			# sie sind Techtree-Gatekeeper (Shrine bzw. Obelisk) und werden jetzt gezielt ueber
+			# AotBaseBuilderBotModule.GatekeeperUpgradeTypes gefeuert, sobald sie baubar sind.
+			# Ein zusaetzlicher Eintrag hier wuerde sie doppelt kaufen (siehe dort, 2026-08-02).
 			aot-upgrade-ttnk-subterrain: 15
 			aot-upgrade-ltnk-tick: 18
-			aot-upgrade-laser-fence: 15
 			aot-upgrade-sam-bunkered: 15
 			aot-upgrade-sam-cloak: 12
 			aot-upgrade-harpy: 15

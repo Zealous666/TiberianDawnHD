@@ -70,6 +70,19 @@ namespace OpenRA.Mods.Common.Traits
 			"not be able to freeze Age progression forever.")]
 		public readonly int AgeUpgradeFallbackTimeoutTicks = 15000;
 
+		[ActorReference]
+		[Desc("Techtree GATEKEEPER upgrades: upgrades that are not optional combat perks but hard",
+			"prerequisites for later PLAN buildings (Nod: aot-upgrade-nod-forbidden unlocks the Shrine,",
+			"aot-upgrade-laser-fence unlocks the Obelisk). Fired directly the moment each becomes",
+			"buildable, in the listed order -- no Rhythm gate, since the whole point is that the Rhythm",
+			"CANNOT proceed without them. Leaving these to the weighted-random pick of",
+			"BaseBuilderBotModule@aotupgrades deadlocked the base outright (user-fund 2026-08-02: SHRN is",
+			"a CORE step, and core steps never time out, so a bot that never happened to roll",
+			"aot-upgrade-nod-forbidden sat on 'Waiting (age gate / prerequisites): SHRN' forever -- 618",
+			"such lines in one session, and across 5 Nod bots the Obelisk was never built even once).",
+			"Must be removed from that module's BuildingFractions so nothing double-fires.")]
+		public readonly string[] GatekeeperUpgradeTypes = [];
+
 		[Desc("Prerequisites marking Age tiers 1-3, age-ordered. Same convention as",
 			"AotOperationsBotModuleInfo.AgePrerequisites -- kept as an independent copy here rather",
 			"than shared, since this module must be able to compute the current Age tier even when no",
@@ -193,6 +206,10 @@ namespace OpenRA.Mods.Common.Traits
 		readonly bool[] ageUpgradeFired = new bool[3];
 		readonly int[] ageUpgradeWaitTicks = new int[3];
 
+		// Same latch, for Info.GatekeeperUpgradeTypes -- sized at Created time since that list is
+		// mod-configured rather than fixed at 3 like the Age tiers.
+		bool[] gatekeeperFired;
+
 		public AotBaseBuilderBotModule(Actor self, AotBaseBuilderBotModuleInfo info)
 			: base(info)
 		{
@@ -218,6 +235,8 @@ namespace OpenRA.Mods.Common.Traits
 			// resolves this module (builder), just in the other direction.
 			var opsModules = self.Owner.PlayerActor.TraitsImplementing<AotOperationsBotModule>().ToList();
 			ops = opsModules.FirstOrDefault(o => o.Info.Faction == Info.Faction) ?? opsModules.FirstOrDefault();
+
+			gatekeeperFired = new bool[Info.GatekeeperUpgradeTypes.Length];
 		}
 
 		// Mirrors AotOperationsBotModule.AgeTier() exactly (same AgePrerequisites convention).
@@ -886,6 +905,7 @@ namespace OpenRA.Mods.Common.Traits
 			// Independent of `pending`/the Rhythm chooser entirely -- this fires its own StartProduction
 			// order directly (see TryFireAgeUpgrades) and never touches the single build-in-flight slot.
 			TryFireAgeUpgrades(bot);
+			TryFireGatekeeperUpgrades(bot);
 
 			// Plan the site ONCE, eagerly, the moment map intel is ready -- regardless of whether anything
 			// has actually asked for naval production yet, and regardless of whatever else is currently
@@ -1187,6 +1207,29 @@ namespace OpenRA.Mods.Common.Traits
 				ageUpgradeFired[i] = true;
 				Log.Write("debug", $"[AotBuild][{player.PlayerName}] Age-{i + 1} upgrade ({name}) fired directly -- " +
 					(rhythmComplete ? "Age Rhythm complete" : "fallback timeout"));
+			}
+		}
+
+		// Techtree gatekeepers (user spec 2026-08-02). Unlike the Age upgrades these get NO Rhythm gate:
+		// the buildings they unlock ARE Rhythm steps (Shrine, and through it the Obelisk), so waiting for
+		// the Rhythm to complete first would wait on the very step the upgrade unblocks. Fired in list
+		// order the moment each is offered by its own queue; same single-shot latch as the Age upgrades,
+		// for the same reason (a paused queue item survives a temporary cash shortfall on its own).
+		void TryFireGatekeeperUpgrades(IBot bot)
+		{
+			for (var i = 0; i < Info.GatekeeperUpgradeTypes.Length && i < gatekeeperFired.Length; i++)
+			{
+				if (gatekeeperFired[i] || string.IsNullOrEmpty(Info.GatekeeperUpgradeTypes[i]))
+					continue;
+
+				var (name, queue) = FindAgeUpgradeQueue(Info.GatekeeperUpgradeTypes[i]);
+				if (name == null || queue == null)
+					continue;
+
+				bot.QueueOrder(Order.StartProduction(queue.Actor, name, 1));
+				gatekeeperFired[i] = true;
+				Log.Write("debug", $"[AotBuild][{player.PlayerName}] Gatekeeper upgrade ({name}) fired directly " +
+					"-- unblocks a later plan building");
 			}
 		}
 
