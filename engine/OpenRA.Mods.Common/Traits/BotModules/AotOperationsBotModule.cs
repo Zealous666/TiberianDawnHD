@@ -2776,6 +2776,11 @@ namespace OpenRA.Mods.Common.Traits
 			}
 		}
 
+		// Huts this bot is currently repairing -- read by ALLIED bots so they do not send a second
+		// engineer to the same bridge (only one repair per hut can run, and the engineer is consumed).
+		public IEnumerable<Actor> ActiveBridgeTargets =>
+			Missions.OfType<AotBridgeRepairMission>().Where(m => !m.Done).Select(m => m.Hut);
+
 		void StartBridgeRepairs()
 		{
 			if (Info.EngineerTypes.Length == 0)
@@ -2786,6 +2791,19 @@ namespace OpenRA.Mods.Common.Traits
 			if (freeSlots <= 0)
 				return;
 
+			// Coordinate with ALLIES (User 2026-08-04): three bots each sent an engineer to the very
+			// same hut, and since the engineer is consumed by the repair, two of the three were spent
+			// for nothing. Only one repair per hut can ever run, so a hut an ally is already handling
+			// is simply skipped. Deliberately limited to allies -- an enemy's plans are not ours to
+			// read, and the engine's own Repairing flag only goes up once someone actually enters,
+			// far too late to prevent the duplicate journey.
+			var allyTargets = World.Players
+				.Where(p => p != Player && Player.RelationshipWith(p) == PlayerRelationship.Ally)
+				.Select(p => p.PlayerActor.TraitOrDefault<AotOperationsBotModule>())
+				.Where(o => o != null)
+				.SelectMany(o => o.ActiveBridgeTargets)
+				.ToHashSet();
+
 			var baseCentre = BaseCentre();
 
 			// Reachability is checked against the hut cell itself: an engineer walks there on foot and
@@ -2794,7 +2812,7 @@ namespace OpenRA.Mods.Common.Traits
 			// intended behaviour -- there is no way to get anyone there until the span is back.
 			var candidates = World.Actors
 				.Where(a => AotBridgeRepairMission.NeedsRepair(a))
-				.Where(a => !active.Any(m => m.Hut == a))
+				.Where(a => !active.Any(m => m.Hut == a) && !allyTargets.Contains(a))
 				.Where(a => Intel.IsReachable(a.Location))
 				.OrderBy(a => (a.Location - baseCentre).LengthSquared)
 				.Take(freeSlots)
