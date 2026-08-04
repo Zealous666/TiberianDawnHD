@@ -832,6 +832,16 @@ namespace OpenRA.Mods.Common.Traits
 			"expansion, which is what the six deployed tick tanks in the user's layout were.")]
 		public readonly string[] ExpansionEscortTypes = [];
 
+		[ActorReference]
+		[Desc("Ore transporter types. Losing the last one before any refinery or harvester exists stops",
+			"the economy dead, so Ops stands down entirely until a replacement is built (User 2026-08-04).")]
+		public readonly string[] EconomyTransporterTypes = [];
+
+		[ActorReference]
+		[Desc("Harvester types. Their presence (like a refinery's) ends the bootstrap phase in which the",
+			"economy hangs off a single ore transporter.")]
+		public readonly string[] EconomyHarvesterTypes = [];
+
 		[Desc("Attack waves that must go out between two engineer raids (User 2026-08-04: '2x regular",
 			"waves 1x heliraid später 1x heli/subterrain raid'). Raids punctuate the pressure rather",
 			"than competing with it, and further operations can hook into the same counter instead of",
@@ -2173,7 +2183,7 @@ namespace OpenRA.Mods.Common.Traits
 			// Startup priority (User 2026-07-22): only the very FIRST wave waits on this -- every later
 			// wave/air-raid (waveIndex > 0) is unaffected. OreT boost + first Derrick scan + every Scout
 			// group (cashflow and reconnaissance) get a head start before the first real offensive.
-			if (Info.EnableWaves && !ExpansionHoldsPriority()
+			if (Info.EnableWaves && !ExpansionHoldsPriority() && !EconomyEmergency()
 				&& !Missions.OfType<AotRegularWaveMission>().Any() && !Missions.OfType<AotAirRaidMission>().Any()
 				&& (waveIndex > 0 || StartupPriorityMet()))
 			{
@@ -2325,6 +2335,9 @@ namespace OpenRA.Mods.Common.Traits
 		void TryStartExpansion()
 		{
 			if (AgeTier() < Info.ExpansionAgeTier || !HasRefinery() || Info.ExpansionMcvTypes.Length == 0)
+				return;
+
+			if (EconomyEmergency())
 				return;
 
 			if (Missions.OfType<AotExpansionMission>().Any() || (builder?.ExpansionPlanned ?? false))
@@ -2568,6 +2581,33 @@ namespace OpenRA.Mods.Common.Traits
 			return true;
 		}
 
+		// ECONOMY EMERGENCY (User 2026-08-04: "es sollte eine prio geben, wenn er 0 hat, dass zumindest
+		// einer gebaut wird"). Early on the whole economy hangs off ore transporters -- there is no
+		// refinery and no harvester yet -- so losing the last one is fatal: no income, no cash, and the
+		// replacement the ORET module duly requests loses every contest for the vehicle queue against
+		// attack waves. Multi1 sat at 0 cash and 500/min for over five minutes that way, unable to
+		// climb out.
+		//
+		// While that state holds, Ops stops asking for anything at all so the replacement can actually
+		// be paid for. Deliberately bounded to the bootstrap phase (user spec): once a refinery or a
+		// harvester exists the economy no longer stands on a single unit and the rule lapses.
+		bool EconomyEmergency()
+		{
+			if (Info.EconomyTransporterTypes.Length == 0)
+				return false;
+
+			var haveTransporter = World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld
+				&& Info.EconomyTransporterTypes.Contains(a.Info.Name));
+			if (haveTransporter)
+				return false;
+
+			var haveHarvester = Info.EconomyHarvesterTypes.Length > 0
+				&& World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld
+					&& Info.EconomyHarvesterTypes.Contains(a.Info.Name));
+
+			return !haveHarvester && !HasRefinery();
+		}
+
 		// True while an expansion convoy is being assembled or delivered. Attack waves and engineer
 		// raids stand down for that window so the whole income goes into the expansion -- and it is
 		// bounded by the mission's own ExpansionPriorityTimeout, so a failing expansion can never
@@ -2580,7 +2620,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (!HasRefinery() || Missions.OfType<AotEngineerRaidMission>().Any())
 				return;
 
-			if (ExpansionHoldsPriority())
+			if (ExpansionHoldsPriority() || EconomyEmergency())
 				return;
 
 			// Attack rhythm (User 2026-08-04): "2x regular waves 1x heliraid später 1x
@@ -2670,7 +2710,7 @@ namespace OpenRA.Mods.Common.Traits
 				$"[AotStatus] {seconds / 60:D2}:{seconds % 60:D2} {Player.InternalName} '{Player.PlayerName}' " +
 				$"[{ColorLabel()}] ({Player.Faction.InternalName}{(Player.IsBot ? ", bot" : "")}) " +
 				$"age={AgeTier()} cash={playerResources.GetCashAndResources()} " +
-				$"waves={waveState} " +
+				$"{(EconomyEmergency() ? "ECONOMY-EMERGENCY " : "")}waves={waveState} " +
 				$"{One<AotHeliRaidMission>("heli", $"none(next~{Math.Max(0, raidTicks) / 25}s)")} " +
 				$"{One<AotGroundRaidMission>("ground", groundRaidUnlocked ? "none" : "locked")} " +
 				$"{One<AotExpansionMission>("expansion", (builder?.ExpansionPlanned ?? false) ? "built" : "none")} " +
