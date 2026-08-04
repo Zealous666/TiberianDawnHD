@@ -1558,19 +1558,20 @@ namespace OpenRA.Mods.Common.Traits
 			currentAge = 1;
 
 			// AGE 1 — the builder naturally waits at the first entry whose variants are not buildable yet.
-			// AFLD is the first Age-1-only building (age-gated via Prerequisites); the strict rhythm
-			// already blocks there until the age upgrade finishes, so placing everything else right after
-			// it means it can never start before Age 1 has actually begun (not merely "later in the list"
-			// -- genuinely gated on the age, not just on tick-time ordering).
+			// Both PROC and AFLD are Age-1-only (age-gated via Prerequisites), so the strict rhythm blocks
+			// here until the age upgrade finishes -- everything after them is genuinely age-gated, not just
+			// ordered later in the list.
 			//
-			// Refinery gets top priority (user spec) -- but aot-proc-nod's OWN Buildable.Prerequisites
-			// requires afld to already exist ("PROC für NOD (braucht Airfield)", overrides.yaml), so it
-			// literally cannot go before AFLD: that would deadlock the strict rhythm forever (PROC waits on
-			// a prerequisite that AFLD -- stuck behind PROC in the list -- never gets a turn to satisfy).
-			// AFLD first is the earliest PROC can possibly follow; placing it immediately next is as close
-			// to "top priority" as the game's own rules allow.
-			AddBuilding(afld, 0, "AFLD");
+			// REFINERY FIRST, AIRFIELD SECOND (user spec 2026-08-04). This used to be the other way round
+			// and NOT by choice: aot-proc-nod's own Buildable.Prerequisites required afld, so a PROC-first
+			// list would have deadlocked the strict rhythm (PROC waiting on a prerequisite that AFLD, stuck
+			// behind it, never got a turn to satisfy). With the techtree rebuild of 2026-08-04 that
+			// dependency is gone -- both now hang off the NOD Tiberium Secrets gatekeeper instead, which
+			// the gatekeeper driver buys as the first thing in Age 1. The intended chain is therefore:
+			//   NOD Tiberium Secrets -> Refinery -> Airfield -> SAMs -> Temple -> expansion -> upgrades
+			// and the Refinery finally really is the top-priority Age-1 step the user asked for.
 			AddBuilding(proc, 0, "PROC");
+			AddBuilding(afld, 0, "AFLD");
 
 			// SAM Sites, Age 1 (user spec 2026-07-31): queued IMMEDIATELY after the Refinery, ahead of
 			// the Age-1 GUN turrets below and everything else in Age 1 -- 2x beside the tech pair, 1x

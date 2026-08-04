@@ -245,3 +245,19 @@ mods/cnc/rules/structures.yaml
 /debug-*.sh
 /recolor-*.py
 !engine/OpenRA.Mods.Common/Widgets/SupportPowerTimerWidget.cs
+
+# === Age-Super-Power-Umbau 2026-08-04 ===
+# Powers haengen jetzt am Spieler-Aktor statt am Bauhof, Tooltip zeigt Preis + Voraussetzungen,
+# eigenes Bot-Modul spart auf den Kauf an. Ohne diese Ausnahmen waeren die Patches beim
+# naechsten Engine-Neubezug verloren.
+!engine/OpenRA.Mods.Common/Traits/BotModules/AotAgePowerBotModule.cs
+!engine/OpenRA.Mods.Common/Traits/SupportPowers/SupportPowerManager.cs
+!engine/OpenRA.Mods.Common/Traits/SupportPowers/SupportPower.cs
+!engine/OpenRA.Mods.Common/Traits/Power/
+!engine/OpenRA.Mods.Common/Traits/Power/Player/
+!engine/OpenRA.Mods.Common/Traits/Power/Player/PowerManager.cs
+!engine/OpenRA.Mods.Common/Widgets/Logic/
+!engine/OpenRA.Mods.Common/Widgets/Logic/Ingame/
+!engine/OpenRA.Mods.Common/Widgets/Logic/Ingame/SupportPowerTooltipLogic.cs
+!engine/mods/cnc/chrome/
+!engine/mods/cnc/chrome/tooltips.yaml

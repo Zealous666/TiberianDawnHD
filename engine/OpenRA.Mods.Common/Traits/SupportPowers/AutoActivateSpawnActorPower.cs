@@ -37,8 +37,9 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Ticks to wait after activation before the actor spawns. 0 = instant.")]
 		public readonly int BuildDuration = 0;
 
-		[Desc("Credit cost to activate. 0 = free.")]
-		public readonly int Cost = 0;
+		// Cost ist 2026-08-04 nach SupportPowerInfo hochgewandert, damit der Tooltip ihn generisch
+		// anzeigen kann. Hier NICHT neu deklarieren -- das wuerde die Basisdefinition verdecken und
+		// FieldLoader wuerde je nach Bindung ein anderes Feld befuellen als der Tooltip liest.
 
 		public override object Create(ActorInitializer init) { return new AutoActivateSpawnActorPower(init.Self, this); }
 	}
@@ -94,6 +95,16 @@ namespace OpenRA.Mods.Common.Traits
 		public AutoActivateSpawnActorPower(Actor self, AutoActivateSpawnActorPowerInfo info)
 			: base(self, info) { }
 
+		// aotmod: der Host darf auch der SPIELER-Aktor sein (Age-Powers haengen dort, damit sie
+		// nicht vom Bauhof abhaengen). Der hat kein IOccupySpace -- self.Location wuerde in eine
+		// NullReferenceException laufen. Dann die Startposition des Spielers nehmen: der gespawnte
+		// Marker ist unsichtbar und dient nur als Prerequisite-Traeger, die Zelle ist egal, muss
+		// aber gueltig sein.
+		protected static CPos SpawnLocation(Actor self)
+		{
+			return self.OccupiesSpace != null ? self.Location : self.Owner.HomeLocation;
+		}
+
 		public override void SelectTarget(Actor self, string order, SupportPowerManager manager)
 		{
 			var info = Info as AutoActivateSpawnActorPowerInfo;
@@ -108,7 +119,7 @@ namespace OpenRA.Mods.Common.Traits
 				}
 			}
 
-			self.World.IssueOrder(new Order(order, manager.Self, Target.FromCell(self.World, self.Location), false));
+			self.World.IssueOrder(new Order(order, manager.Self, Target.FromCell(self.World, SpawnLocation(self)), false));
 		}
 
 		public override void Activate(Actor self, Order order, SupportPowerManager manager)
@@ -129,13 +140,14 @@ namespace OpenRA.Mods.Common.Traits
 
 		protected static void SpawnActor(Actor self, AutoActivateSpawnActorPowerInfo info)
 		{
+			var location = SpawnLocation(self);
 			if (info.BuildDuration <= 0)
 			{
 				self.World.AddFrameEndTask(w =>
 				{
 					var actor = w.CreateActor(info.Actor,
 					[
-						new LocationInit(self.Location),
+						new LocationInit(location),
 						new OwnerInit(self.Owner),
 					]);
 
@@ -149,7 +161,7 @@ namespace OpenRA.Mods.Common.Traits
 			else
 			{
 				self.World.Add(new AotDelayedSpawnEffect(
-					info.BuildDuration, info.Actor, self.Owner, self.Location, info.LifeTime));
+					info.BuildDuration, info.Actor, self.Owner, location, info.LifeTime));
 			}
 		}
 	}
@@ -187,7 +199,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (manager.Powers.TryGetValue(key, out var instance) && instance.Ready)
 			{
 				fired = true;
-				self.World.IssueOrder(new Order(key, manager.Self, Target.FromCell(self.World, self.Location), false));
+				self.World.IssueOrder(new Order(key, manager.Self, Target.FromCell(self.World, SpawnLocation(self)), false));
 			}
 		}
 	}

@@ -153,21 +153,22 @@ Player:
 		# really ship-navigable, not just terrain-adjacent to Water (User 2026-07-22: rock-enclosed
 		# inlets can pass the naive terrain check but trap a ship a few cells short forever).
 		NavalLocomotor: aot-lst
-		# Age-upgrade cash priority (User 2026-07-31): fired directly by this module once each tier's
-		# Rhythm is complete, bypassing BaseBuilderBotModule@aotupgrades' weighted-random pick for
-		# these 3 actors entirely -- see AgeUpgradeFallbackTimeoutTicks default (15000) for the
-		# permanently-stuck-core-building escape valve. Removed from that module's own
-		# BuildingFractions below so nothing can double-fire them.
-		AgeUpgradeTypes: aot-age1-upgrade-nod, aot-age2-upgrade-nod, aot-age3-upgrade-nod
+		# AgeUpgradeTypes ist ENTFALLEN (2026-08-04): der Age-Aufstieg ist seit dem Techtree-Umbau
+		# keine Produktionsqueue mehr, sondern eine Super Power auf dem Spieler-Aktor -- die
+		# aot-ageN-upgrade-*-Aktoren haben kein Buildable mehr, das Feld lief also ins Leere.
+		# Zustaendig ist jetzt AotAgePowerBotModule (weiter unten).
 		# Techtree-Gatekeeper (User 2026-08-02): KEINE optionalen Kampf-Upgrades, sondern harte
 		# Voraussetzungen fuer spaetere PLAN-Gebaeude. REIHENFOLGE = Abhaengigkeitsreihenfolge,
 		# es wird immer nur EINER gleichzeitig gekauft, und der Core-Rhythmus PAUSIERT solange:
-		#   aot-upgrade-nod-secrettech -> aot-nod-secrettech-upgrade -> Refinery (aot-proc-nod) baubar
+		#   aot-upgrade-nod-secrettech -> aot-nod-secrettech-upgrade -> Refinery UND Airfield baubar
 		#   aot-upgrade-nod-forbidden  -> aot-nod-forbidden-upgrade -> Shrine (aot-shrine) baubar
 		#   aot-upgrade-laser-fence    -> aot-laser-fence-upgrade   -> Obelisk (OBLI) baubar
-		# Daraus ergibt sich die vom User geforderte Age-1-Kette ganz von selbst, ohne Sonderfaelle:
-		# AFLD (core) -> NOD Tiberium Secrets (nur nach afld baubar) -> Refinery (core) -> SAMs
-		# (defence, wartet auf PROC) -> Base Expansion -> restliche Upgrades.
+		# Techtree-Umbau 2026-08-04: die Gatekeeper haengen nicht mehr an einem Gebaeude, sondern nur
+		# noch am erreichten Zeitalter -- dafuer haengen die Gebaeude jetzt an ihnen. Secrets ist damit
+		# der ALLERERSTE Schritt in Age 1 (vorher brauchte es erst das Airfield), und die vom User
+		# geforderte Kette ergibt sich ohne Sonderfaelle:
+		# NOD Tiberium Secrets -> Refinery (core) -> Airfield (core) -> SAMs (defence) -> Temple (core)
+		# -> Base Expansion -> restliche Upgrades.
 		# Als gewichteter Zufallskauf (Gewicht 20 bzw. 15) fuehrte das zum harten Deadlock: SHRN ist
 		# ein CORE-Schritt, und Core-Schritte laufen strikt first-open OHNE Timeout -- ein Bot, der
 		# aot-upgrade-nod-forbidden nie zog, blieb ab Age 2 dauerhaft auf "Waiting (age gate /
@@ -888,6 +889,24 @@ Player:
 	# Iron Dome) + reine Reveal (Satellite) = Phase B (Custom-Logik).
 	# OrderName-Default = {InfoClassName}Order (siehe AotNukePowerVariants.cs).
 	# =========================================================================
+	# === Age-Aufstieg (User-Wunsch 2026-08-04) ===
+	# Der Aufstieg ist seit 2026-08-04 keine Produktionsqueue mehr, sondern eine Super Power auf
+	# dem Spieler-Aktor: sie laedt von selbst, sobald die Voraussetzungen stehen, und muss dann
+	# per Klick ausgeloest werden (Kosten einmalig). Die KI klickt nicht und kauft sonst nur aus
+	# Queues -- ohne dieses Modul stiege sie nie auf.
+	#
+	# Das Modul spart waehrend der Ladezeit linear auf die Kosten an (echtes TakeCash auf ein
+	# modul-eigenes Konto, damit die anderen Bot-Module das Geld nicht vorher ausgeben) und loest
+	# aus, sobald die Power fertig ist. Silo-Obergrenzen sind davon nicht betroffen:
+	# ResourceCapacity deckelt nur das ungemuenzte Erz in PlayerResources, das Konto liegt
+	# ausserhalb davon.
+	#
+	# Faction-Split ist unnoetig: die Powers selbst sind faction-neutral, ihre Freischaltung
+	# haengt an ATEC bzw. STEC (siehe overrides.yaml, Player-Block).
+	AotAgePowerBotModule:
+		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
+		PowerOrderNames: AotAge1PowerInfoOrder, AotAge2PowerInfoOrder, AotAge3PowerInfoOrder
+
 	SupportPowerBotModule@aot:
 		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
 		Decisions:

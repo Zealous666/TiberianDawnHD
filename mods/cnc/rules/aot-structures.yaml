@@ -761,6 +761,12 @@ aot-age1-marker:
 	Selectable:
 		Priority: 0
 
+	# Chat-Ansage + "New build options" (2026-08-04 vom Upgrade-Aktor hierher verschoben):
+	# seit der Rueckkehr zur Super Power werden die aot-ageN-upgrade-*-Aktoren nicht mehr
+	# produziert, der Marker ist jetzt das Ding, das beim Aufstieg in die Welt kommt.
+	AotAgeActivationNotification:
+		AgeName: 1st Tiberium Age
+
 aot-age1:
 	Tooltip:
 		Name: 1st Tiberium Age
@@ -777,6 +783,9 @@ aot-age2-marker:
 	Selectable:
 		Priority: 0
 
+	AotAgeActivationNotification:
+		AgeName: 2nd Tiberium Age
+
 aot-age2:
 	Tooltip:
 		Name: 2nd Tiberium Age
@@ -792,6 +801,9 @@ aot-age3-marker:
 
 	Selectable:
 		Priority: 0
+
+	AotAgeActivationNotification:
+		AgeName: 3rd Tiberium Age
 
 aot-age3:
 	Tooltip:
@@ -1058,7 +1070,7 @@ aot-upgrade-gdi-advtech:
 
 	Buildable:
 		BuildPaletteOrder: 20
-		Prerequisites: ~aot-age1, weap
+		Prerequisites: ~aot-age1
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -1160,7 +1172,7 @@ aot-upgrade-nod-secrettech:
 		BuildPaletteOrder: 20
 		# ("nod-gate" Verwechslung rueckgaengig gemacht -- gemeint war das GEBAEUDE
 		# aot-gate-nod, nicht dieses Upgrade, siehe dort.)
-		Prerequisites: ~aot-age1, afld
+		Prerequisites: ~aot-age1
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -1259,7 +1271,13 @@ aot-upgrade-e4-toxic:
 
 	Buildable:
 		BuildPaletteOrder: 300
-		Prerequisites: ~aot-age3, tmpl, stec, aot-shrine, ~!aot-howitzer-upgrade
+		# ~!aot-howitzer-upgrade ENTFERNT (User-Fund 2026-08-04): das versteckte nach dem Kauf von
+		# Artillery Ballistics das komplette Toxic-Upgrade, obwohl der Ausschluss nur den RAKETEN-
+		# WERFER betreffen soll. Toxic Trooper, Toxin Tank, Toxic Tower und Avatar bleiben davon
+		# unberuehrt und muessen weiter kaufbar sein. Der Ausschluss beim Werfer greift ohnehin
+		# schon auf Einheiten-Ebene: die Toxic-V2-Variante traegt selbst ~!aot-howitzer-upgrade
+		# (aot-units.yaml), erscheint also nicht, wenn der Howitzer-Pfad gewaehlt wurde.
+		Prerequisites: ~aot-age3, tmpl, stec, aot-shrine
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -2756,7 +2774,7 @@ aot-tmpl-age1:
 	Buildable:
 		LockedGroup: aot-grp-tmpl
 		BuildPaletteOrder: 190
-		Prerequisites: anyhq, proc, ~techlevel.high, ~aot-age1, ~!aot-age2
+		Prerequisites: afld, aot-proc-nod, ~techlevel.high, ~aot-age1, ~!aot-age2
 		BuildLimit: 1
 		Queue: Building.Nod
 		Icon: icon
@@ -2774,7 +2792,7 @@ aot-tmpl-age2:
 	Buildable:
 		LockedGroup: aot-grp-tmpl
 		BuildPaletteOrder: 190
-		Prerequisites: anyhq, proc, ~techlevel.high, ~aot-age1, ~aot-age2, !aot-tmpl
+		Prerequisites: afld, aot-proc-nod, ~techlevel.high, ~aot-age1, ~aot-age2, !aot-tmpl
 		BuildLimit: 1
 		Queue: Building.Nod
 		Icon: icon
@@ -2791,34 +2809,28 @@ aot-tmpl-age2:
 		RequiresCondition: !build-incomplete
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - Age Upgrades (GDI/NOD Split) ===
-# GDI → Age.GDI, NOD → Age.Nod (Queue auf Player-Aktor, Faction-Split via Factions: gdi/nod).
-# Sichtbarkeit: Age-1 sofort (grau ohne ATEC/STEC), Age-2/3 per ~aot-ageN-Kette.
-# ATEC (GDI) / STEC (NOD) sind Pflicht-Voraussetzung für ALLE drei Ages.
-# BuildDuration: 37500 Ticks = 15 min Bauzeit (User-Wunsch 2026-07-30, vorher 50000/20min).
-# Nach Abschluss: AotAgeActivationNotification → globale Chat-Nachricht an alle Spieler.
-# ProvidesPrerequisite: aot-ageN DIREKT (kein -purchased-Zwischenschritt mehr).
+# === Age of Tiberium (aotmod) - Age Upgrades: NICHT MEHR BAUBAR (2026-08-04) ===
+# Der Tier-Aufstieg laeuft wieder ueber die Super Powers AotAge1/2/3Power auf dem FACT
+# (siehe FACT-Block weiter oben), nicht mehr ueber die Age.GDI/Age.Nod-Produktionsqueue.
+# Kosten, Ladezeit und Sichtbarkeit liegen damit an den Powers.
+#
+# Die sechs Aktoren bleiben bewusst STEHEN, nur ohne Buildable: mods/cnc/rules/aot-ai.yaml
+# referenziert sie noch (AgeUpgradeTypes + Upgrade-Gewichte), und ein geloeschter Aktorname
+# waere dort ein check-yaml-Fehler. Das KI-Verhalten fuer die neue Super-Power-Logik kommt
+# als eigener Schritt -- bis dahin steigt die KI nicht mehr im Age auf.
+#
+# AotAgeActivationNotification ist von hier auf die aot-ageN-marker gewandert: die Marker sind
+# jetzt das, was beim Aufstieg in die Welt kommt.
 aot-age1-upgrade-gdi:
 	Interactable:
 	Tooltip:
 		Name: 1st Tiberium Age
 	Valued:
 		Cost: 5000
-	Buildable:
-		BuildPaletteOrder: 5
-		Prerequisites: atec, ~!aot-age1
-		Queue: Age.GDI
-		BuildLimit: 1
-		BuildDuration: 37500
-		MoveIntoWorld: false
-		Description: Unlocks the Tiberium era with new units, buildings and the capability to harvest Tiberium.
 	ProvidesPrerequisite:
 		Prerequisite: aot-age1
 	RenderSprites:
 		Image: aot-age1-upgrade
-	AotAgeActivationNotification:
-		AgeName: 1st Tiberium Age
-	AotSuppressReadyNotification:
 
 aot-age1-upgrade-nod:
 	Interactable:
@@ -2826,109 +2838,54 @@ aot-age1-upgrade-nod:
 		Name: 1st Tiberium Age
 	Valued:
 		Cost: 5000
-	Buildable:
-		BuildPaletteOrder: 5
-		Prerequisites: stec, ~!aot-age1
-		Queue: Age.Nod
-		BuildLimit: 1
-		BuildDuration: 37500
-		MoveIntoWorld: false
-		Description: Unlocks the Tiberium era with new units, buildings and the capability to harvest Tiberium.
 	ProvidesPrerequisite:
 		Prerequisite: aot-age1
 	RenderSprites:
 		Image: aot-age1-upgrade
-	AotAgeActivationNotification:
-		AgeName: 1st Tiberium Age
-	AotSuppressReadyNotification:
 
 aot-age2-upgrade-gdi:
 	Interactable:
 	Tooltip:
 		Name: 2nd Tiberium Age
 	Valued:
-		Cost: 10000
-	Buildable:
-		BuildPaletteOrder: 6
-		Prerequisites: ~aot-age1, atec, aot-age1, aot-proc-gdi, ~!aot-age2
-		Queue: Age.GDI
-		BuildLimit: 1
-		BuildDuration: 37500
-		MoveIntoWorld: false
-		Description: Moves forward in the Tiberium technologies with new upgrades and additional equipment.
+		Cost: 7500
 	ProvidesPrerequisite:
 		Prerequisite: aot-age2
 	RenderSprites:
 		Image: aot-age2-upgrade
-	AotAgeActivationNotification:
-		AgeName: 2nd Tiberium Age
-	AotSuppressReadyNotification:
 
 aot-age2-upgrade-nod:
 	Interactable:
 	Tooltip:
 		Name: 2nd Tiberium Age
 	Valued:
-		Cost: 10000
-	Buildable:
-		BuildPaletteOrder: 6
-		Prerequisites: ~aot-age1, stec, aot-age1, aot-proc-nod, ~!aot-age2
-		Queue: Age.Nod
-		BuildLimit: 1
-		BuildDuration: 37500
-		MoveIntoWorld: false
-		Description: Moves forward in the Tiberium technologies with new upgrades and additional equipment.
+		Cost: 7500
 	ProvidesPrerequisite:
 		Prerequisite: aot-age2
 	RenderSprites:
 		Image: aot-age2-upgrade
-	AotAgeActivationNotification:
-		AgeName: 2nd Tiberium Age
-	AotSuppressReadyNotification:
 
 aot-age3-upgrade-gdi:
 	Interactable:
 	Tooltip:
 		Name: 3rd Tiberium Age
 	Valued:
-		Cost: 15000
-	Buildable:
-		BuildPaletteOrder: 7
-		Prerequisites: ~aot-age2, atec, aot-age2, aot-orbc, ~!aot-age3
-		Queue: Age.GDI
-		BuildLimit: 1
-		BuildDuration: 37500
-		MoveIntoWorld: false
-		Description: Upgrades to the most advanced Tiberium units, buildings and upgrades.
+		Cost: 10000
 	ProvidesPrerequisite:
 		Prerequisite: aot-age3
 	RenderSprites:
 		Image: aot-age3-upgrade
-	AotAgeActivationNotification:
-		AgeName: 3rd Tiberium Age
-	AotSuppressReadyNotification:
 
 aot-age3-upgrade-nod:
 	Interactable:
 	Tooltip:
 		Name: 3rd Tiberium Age
 	Valued:
-		Cost: 15000
-	Buildable:
-		BuildPaletteOrder: 7
-		Prerequisites: ~aot-age2, stec, aot-age2, aot-shrine, ~!aot-age3
-		Queue: Age.Nod
-		BuildLimit: 1
-		BuildDuration: 37500
-		MoveIntoWorld: false
-		Description: Upgrades to the most advanced Tiberium units, buildings and upgrades.
+		Cost: 10000
 	ProvidesPrerequisite:
 		Prerequisite: aot-age3
 	RenderSprites:
 		Image: aot-age3-upgrade
-	AotAgeActivationNotification:
-		AgeName: 3rd Tiberium Age
-	AotSuppressReadyNotification:
 # === Ende aotmod ===
 
 # Prerequisite display name shim — damit Tooltips "Radar" zeigen statt "gdi-hq".
@@ -2948,7 +2905,7 @@ aot-upgrade-mtnk-predator:
 
 	Buildable:
 		BuildPaletteOrder: 30
-		Prerequisites: ~aot-age2, aot-slab, ~!aot-mtnk-titan-upgrade
+		Prerequisites: ~aot-age2, ~!aot-mtnk-titan-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -2965,6 +2922,12 @@ aot-upgrade-mtnk-predator:
 
 	ProvidesPrerequisite@heavyord:
 		Prerequisite: aot-heavy-ordonance-upgrade
+
+	# Sammel-Voraussetzung fuer das Orbital Command (User 2026-08-04: "eins von beiden, ist
+	# egal welches"). Eine Prerequisites-Liste ist ein UND -- ein ODER laesst sich nur so
+	# bauen, dass beide sich gegenseitig ausschliessenden Upgrades DENSELBEN String liefern.
+	ProvidesPrerequisite@ordnance:
+		Prerequisite: aot-gdi-ordnance-upgrade
 
 	Interactable:
 
@@ -3005,7 +2968,7 @@ aot-upgrade-mtnk-titan:
 
 	Buildable:
 		BuildPaletteOrder: 40
-		Prerequisites: ~aot-age2, aot-slab, ~!aot-mtnk-predator-upgrade
+		Prerequisites: ~aot-age2, ~!aot-mtnk-predator-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -3019,6 +2982,12 @@ aot-upgrade-mtnk-titan:
 
 	ProvidesPrerequisite:
 		Prerequisite: aot-mtnk-titan-upgrade
+
+	# Sammel-Voraussetzung fuer das Orbital Command (User 2026-08-04: "eins von beiden, ist
+	# egal welches"). Eine Prerequisites-Liste ist ein UND -- ein ODER laesst sich nur so
+	# bauen, dass beide sich gegenseitig ausschliessenden Upgrades DENSELBEN String liefern.
+	ProvidesPrerequisite@ordnance:
+		Prerequisite: aot-gdi-ordnance-upgrade
 
 	Interactable:
 
@@ -5302,7 +5271,7 @@ ORBC:
 	Buildable:
 		Queue: Building.GDI
 		BuildPaletteOrder: 200
-		Prerequisites: ~aot-age2, atec, aot-slab
+		Prerequisites: ~aot-age2, aot-gdi-ordnance-upgrade
 		BuildLimit: 1
 		Icon: icon
 		Description: GDI uplink facility. Unlocks advanced support powers as your tech level increases.
@@ -5450,7 +5419,7 @@ aot-slab-age1:
 		LockedGroup: aot-grp-slab
 		Queue: Building.GDI
 		BuildPaletteOrder: 180
-		Prerequisites: ~aot-age1, atec, aot-proc-gdi, ~!aot-age2
+		Prerequisites: ~aot-age1, aot-weap, aot-proc-gdi, ~!aot-age2
 		BuildLimit: 1
 		Icon: icon
 		Description: GDI research facility. Provides a prerequisite for future GDI technologies.
@@ -5467,7 +5436,7 @@ aot-slab-age2:
 		LockedGroup: aot-grp-slab
 		Queue: Building.GDI
 		BuildPaletteOrder: 180
-		Prerequisites: ~aot-age1, atec, aot-proc-gdi, ~aot-age2, !aot-slab
+		Prerequisites: ~aot-age1, aot-weap, aot-proc-gdi, ~aot-age2, !aot-slab
 		BuildLimit: 1
 		Icon: aot-age2-icon
 		Description: GDI research facility. Provides a prerequisite for future GDI technologies.
@@ -5499,7 +5468,7 @@ aot-upgrade-nod-forbidden:
 
 	Buildable:
 		BuildPaletteOrder: 30
-		Prerequisites: ~aot-age2, tmpl
+		Prerequisites: ~aot-age2
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
@@ -5594,7 +5563,7 @@ aot-shrine:
 	Buildable:
 		Queue: Building.Nod
 		BuildPaletteOrder: 200
-		Prerequisites: ~aot-age2, stec, tmpl, aot-nod-forbidden-upgrade
+		Prerequisites: ~aot-age2, aot-nod-forbidden-upgrade
 		BuildLimit: 1
 		Icon: icon
 		Description: Ancient Nod relic. Unlocks NOD's most powerful combat systems and superweapons.

@@ -1228,12 +1228,19 @@ Container@PLAYER_WIDGETS:
 		# SupportPowerInfo.DisplayTimerRelationships pro Power (Default: None = unsichtbar).
 		# Gesetzt ist es bewusst NUR auf Ion Cannon Strike (ORBC) und Atom Bomb (MSLO) --
 		# siehe aot-structures.yaml.
-		# Order: Ascending -> die Zeilen wachsen nach OBEN weg, damit sie nicht in die
-		# Command Bar darunter laufen (deren Hintergrund ist 44px hoch + 5px Rand).
+		# Position (User-Wunsch 2026-08-04): oben RECHTS neben der Minimap, dort wo vorher die
+		# Age-Buttons sassen -- rechtsbuendig, nach unten wachsend. Die Sidebar beginnt bei
+		# WINDOW_WIDTH - 235, der Block endet also buendig 4px davor. Width ist bei
+		# Align: Right nicht kosmetisch, sondern die BEZUGSKANTE: das Widget rueckt jede
+		# Zeile um (Width - Textbreite) ein, ohne Width klebte alles bei X.
+		# Order: Descending -> Zeilen wachsen nach unten (frueher Ascending, weil sie unten
+		# links sonst in die Command Bar gelaufen waeren).
 		SupportPowerTimer@SUPPORT_POWER_TIMER:
-			X: 14
-			Y: WINDOW_HEIGHT - 75
-			Order: Ascending
+			X: WINDOW_WIDTH - 439
+			Y: 44
+			Width: 200
+			Order: Descending
+			Align: Right
 			ShowPlayerName: False
 		Image@COMMAND_BAR_BACKGROUND:
 			X: 5
@@ -1981,27 +1988,10 @@ Container@PLAYER_WIDGETS:
 					Visible: false
 					TextColor: FFD091
 					Text: purchase-panel-label-delivery
-		# === Age of Tiberium (aotmod) - Age-Upgrade-Widget links neben Minimap ===
-		# Standalone ProductionPalette für Age.GDI / Age.Nod Queue (auf Player-Aktor, immer aktiv).
-		# AotAgeProductionLogic verdrahtet die Faction-spezifische Queue ans Widget.
-		# Sidebar startet bei WINDOW_WIDTH - 235; Minimap-Top bei Y=44.
-		Container@AGE_PALETTE_CONTAINER:
-			Logic: AotAgeProductionLogic
-			X: WINDOW_WIDTH - 305
-			Y: 44
-			Width: 66
-			Height: 200
-			Children:
-				ProductionPalette@AGE_PALETTE:
-					Columns: 1
-					IconSize: 64, 48
-					TooltipContainer: TOOLTIP_CONTAINER
-					TooltipTemplate: PRODUCTION_TOOLTIP_FACTIONSUFFIX
-					ReadyText: productionpalette-player-widgets-production-palette.ready
-					HoldText: productionpalette-player-widgets-production-palette.hold
-					MinimumRows: 1
-					MaximumRows: 3
-		# === Ende aotmod ===
+		# === Age of Tiberium (aotmod) - Age-Upgrade-Widget ENTFALLEN (2026-08-04) ===
+		# Das Standalone-ProductionPalette links neben der Minimap ist weg: der Tier-Aufstieg
+		# laeuft wieder ueber die Super Powers links oben (AotAge1/2/3Power auf dem FACT).
+		# AotAgeProductionLogic.cs bleibt als Engine-Datei liegen, wird aber nicht mehr geladen.
 
 Background@FMVPLAYER:
 	Width: WINDOW_WIDTH

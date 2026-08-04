@@ -812,41 +812,129 @@ TMPL:
 	-WithSupportPowerActivationOverlay:
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - Age-Queue auf Player-Aktor ===
-# Age-Upgrades laufen jetzt als eigene Production-Queue (Age.GDI / Age.Nod) auf dem Player-Aktor.
-# Der Player-Aktor existiert ab Spielstart → Widget ist sofort sichtbar (kein Gebäude nötig).
-# Faction-Split via Factions: gdi / nod — nur die passende Queue ist Enabled.
-# Kosten + 30000-Tick-Bauzeit (20 min) direkt auf den Age-Upgrade-Aktoren in aot-structures.yaml.
-# Nach Abschluss: AotAgeActivationNotification sendet globale Chat-Nachricht an alle Spieler.
+# === Age of Tiberium (aotmod) - Age-Tier-Aufstieg als Super Power AM SPIELER (2026-08-04) ===
+# Vorgeschichte: Age-Queue (Age.GDI/Age.Nod) + Standalone-Widget -> ENTFALLEN. Der Aufstieg laeuft
+# wieder ueber das normale Super-Power-Menue links oben. Die Powers haengen am SPIELER-Aktor und
+# nicht am Bauhof, damit ein eingepackter MCV das Icon nicht mitnimmt (User-Wunsch).
+#
+# Dafuer noetige Engine-Patches (der Spieler-Aktor wird nie ueber World.Add() eingehaengt):
+#   - SupportPowerManager: INotifyCreated registriert die Powers des eigenen Spieler-Aktors
+#   - AutoActivateSpawnActorPower.SpawnLocation(): der Spieler-Aktor hat kein IOccupySpace,
+#     der Marker landet deshalb auf Player.HomeLocation statt auf self.Location
+#   - PowerManager.UpdatePowerRequiringActors(): benachrichtigt jetzt auch die Traits des
+#     Spieler-Aktors, sonst blieb GrantConditionOnPowerState dort auf seinem Startwert stehen
+#
+# Ablauf wie bei einer typischen Super Power:
+#   1. Icon sichtbar, Ladebalken PAUSIERT, solange Voraussetzungen fehlen ODER der Strom knapp ist
+#   2. Voraussetzungen erfuellt -> Ladezeit laeuft von selbst ab (22500 Ticks = 15 min, exakt die
+#      bisherige Bauzeit: 37500 x BuildDurationModifier 60% = 22500)
+#   3. fertig geladen -> der Spieler muss KLICKEN (AotAgeNPower = Click-to-fire-Variante, nicht
+#      die alte AotAgeNSuperPower, die von selbst ausloeste)
+#   4. beim Klick werden die Kosten EINMALIG abgebucht (Cost). Kein Abtickern ueber die Ladezeit
+#      wie in einer Produktionsqueue -- reicht das Geld nicht, bleibt die Power geladen stehen
+#      und meldet "Insufficient funds".
+# SupportPowerPaletteOrder 0/1/2 -> immer ganz oben, vor allen anderen Powers (die liegen bei 10
+# und hoeher). Sichtbarkeit wie in der Queue-Fassung: Age 1 sofort, Age 2/3 erst nach dem
+# Vorgaenger (RequiresCondition), nach Kauf weg (OneShot).
 Player:
-	Production@AGEGDI:
-		Produces: Age.GDI
-		MoveIntoWorld: false
-	ProductionQueue@AgeGDI:
-		Type: Age.GDI
-		Factions: gdi
-		Group: Age
-		ReadyAudio: ConstructionComplete
-		ReadyTextNotification: notification-construction-complete
-		BlockedAudio: NoBuild
-		BlockedTextNotification: notification-unable-to-build-more
-		QueuedAudio: Building
-		OnHoldAudio: OnHold
-		CancelledAudio: Cancelled
-	Production@AGENOD:
-		Produces: Age.Nod
-		MoveIntoWorld: false
-	ProductionQueue@AgeNod:
-		Type: Age.Nod
-		Factions: nod
-		Group: Age
-		ReadyAudio: ConstructionComplete
-		ReadyTextNotification: notification-construction-complete
-		BlockedAudio: NoBuild
-		BlockedTextNotification: notification-unable-to-build-more
-		QueuedAudio: Building
-		OnHoldAudio: OnHold
-		CancelledAudio: Cancelled
+	# Low Power pausiert den Ladebalken wie bei jeder anderen Super Power. Auf Gebaeuden kommt
+	# diese Condition aus ^DisabledOverlay (engine defaults.yaml); der Spieler-Aktor erbt davon
+	# nichts, deshalb hier eigenstaendig.
+	GrantConditionOnPowerState@LOWPOWER:
+		Condition: lowpower
+		ValidPowerStates: Low, Critical
+	# Freischalt-Bedingungen. Je zwei Traits pro Age, die DIESELBE Condition granten: eine
+	# GrantConditionOnPrerequisite-Liste ist ein UND, fuer das faction-abhaengige ODER braucht es
+	# deshalb einen GDI- und einen NOD-Zweig. SupportPowerInfo hat kein Factions-Feld, der Split
+	# ergibt sich ueber faction-exklusive Gebaeude: ATEC/STEC bei Age 1, Refinery bei Age 2,
+	# Orbital Command bzw. Shrine bei Age 3.
+	# ATEC/STEC stehen bewusst NUR bei Age 1 (User 2026-08-04): bei Age 2/3 waren sie redundant,
+	# weil die Age-Kette sie schon impliziert. Nebeneffekt der Streichung: ein begonnener Aufstieg
+	# laeuft jetzt weiter, auch wenn das Tech Centre zwischendurch faellt oder verkauft wird.
+	GrantConditionOnPrerequisite@age1gdi:
+		Condition: aot-age1-unlocked
+		Prerequisites: atec
+	GrantConditionOnPrerequisite@age1nod:
+		Condition: aot-age1-unlocked
+		Prerequisites: stec
+	GrantConditionOnPrerequisite@age2gdi:
+		Condition: aot-age2-unlocked
+		Prerequisites: aot-age1, aot-slab
+	GrantConditionOnPrerequisite@age2nod:
+		Condition: aot-age2-unlocked
+		Prerequisites: aot-age1, aot-tmpl
+	GrantConditionOnPrerequisite@age3gdi:
+		Condition: aot-age3-unlocked
+		Prerequisites: aot-age2, aot-orbc
+	GrantConditionOnPrerequisite@age3nod:
+		Condition: aot-age3-unlocked
+		Prerequisites: aot-age2, aot-shrine
+	# Sichtbarkeitsketten-Conditions (auf Gebaeuden liefert das der FACT-Block, hier eigenstaendig).
+	GrantConditionOnPrerequisite@ageactive1:
+		Condition: aot-age1-active
+		Prerequisites: aot-age1
+	GrantConditionOnPrerequisite@ageactive2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
+	AotAge1Power:
+		Actor: aot-age1-marker
+		# Countdown oben rechts fuer ALLE Spieler, wie bei Ion Cannon und Atom Bomb
+		# (User-Wunsch 2026-08-04). Es taucht immer nur die gerade relevante Age-Stufe auf:
+		# das Timer-Widget filtert auf !Disabled, und Age 2/3 sind bis zum Vorgaenger per
+		# RequiresCondition deaktiviert, eine gekaufte Stufe per OneShot.
+		DisplayTimerRelationships: Ally, Neutral, Enemy
+		LifeTime: -1
+		OneShot: true
+		Cost: 5000
+		ChargeInterval: 22500
+		PauseOnCondition: !aot-age1-unlocked || lowpower
+		IconImage: aot-age1-upgrade
+		Icon: icon
+		Name: 1st Tiberium Age
+		Description: Unlocks the Tiberium era with new units, buildings and the capability to harvest Tiberium.
+		# Preis und Voraussetzungen als EIGENE Tooltip-Felder (SupportPowerInfo.Cost /
+		# .TooltipRequirements, 2026-08-04). Als Fliesstext in der Description ging es nicht:
+		# Tooltips brechen keine Zeilen um.
+		TooltipRequirements: Requires: Tech Center
+		SupportPowerPaletteOrder: 0
+	AotAge2Power:
+		Actor: aot-age2-marker
+		# Countdown oben rechts fuer ALLE Spieler, wie bei Ion Cannon und Atom Bomb
+		# (User-Wunsch 2026-08-04). Es taucht immer nur die gerade relevante Age-Stufe auf:
+		# das Timer-Widget filtert auf !Disabled, und Age 2/3 sind bis zum Vorgaenger per
+		# RequiresCondition deaktiviert, eine gekaufte Stufe per OneShot.
+		DisplayTimerRelationships: Ally, Neutral, Enemy
+		LifeTime: -1
+		OneShot: true
+		Cost: 7500
+		ChargeInterval: 22500
+		RequiresCondition: aot-age1-active
+		PauseOnCondition: !aot-age2-unlocked || lowpower
+		IconImage: aot-age2-upgrade
+		Icon: icon
+		Name: 2nd Tiberium Age
+		Description: Moves forward in the Tiberium technologies with new upgrades and additional equipment.
+		TooltipRequirements: Requires: Science Lab (GDI) or Temple of Nod (Nod)
+		SupportPowerPaletteOrder: 1
+	AotAge3Power:
+		Actor: aot-age3-marker
+		# Countdown oben rechts fuer ALLE Spieler, wie bei Ion Cannon und Atom Bomb
+		# (User-Wunsch 2026-08-04). Es taucht immer nur die gerade relevante Age-Stufe auf:
+		# das Timer-Widget filtert auf !Disabled, und Age 2/3 sind bis zum Vorgaenger per
+		# RequiresCondition deaktiviert, eine gekaufte Stufe per OneShot.
+		DisplayTimerRelationships: Ally, Neutral, Enemy
+		LifeTime: -1
+		OneShot: true
+		Cost: 10000
+		ChargeInterval: 22500
+		RequiresCondition: aot-age2-active
+		PauseOnCondition: !aot-age3-unlocked || lowpower
+		IconImage: aot-age3-upgrade
+		Icon: icon
+		Name: 3rd Tiberium Age
+		Description: Upgrades to the most advanced Tiberium units, buildings and upgrades.
+		TooltipRequirements: Requires: Orbital Command (GDI) or Secret Shrine (Nod)
+		SupportPowerPaletteOrder: 2
 	# === Age of Tiberium (aotmod) - NOD Airstrip Starport (Dune 2000 / TS style bulk delivery) ===
 	# Instant-Kauf bis MaxCapacity, dann Purchase-Button -> Frachtflieger liefert alle auf einmal.
 	# Player-Level-Queue (Pflicht: BulkProductionQueue ist [TraitLocation(Player)]).
@@ -919,7 +1007,10 @@ HPAD:
 WEAP:
 	Buildable:
 		BuildPaletteOrder: 150
-		Prerequisites: ~aot-age1, aot-age1, lite
+		# Umkehrung 2026-08-04 (User): frueher schaltete WEAP den Gatekeeper frei, jetzt
+		# schaltet der Gatekeeper WEAP frei. Damit haengt die Age-Kette nicht mehr an einem
+		# einzelnen Gebaeude, sondern an einem gekauften Upgrade.
+		Prerequisites: ~aot-age1, aot-age1, lite, aot-gdi-advtech-upgrade
 		Queue: Building.GDI
 		BuildLimit: 1
 	ProvidesPrerequisite@aot:
@@ -937,7 +1028,8 @@ WEAP:
 AFLD:
 	Buildable:
 		BuildPaletteOrder: 150
-		Prerequisites: ~aot-age1, aot-age1, lite
+		# Umkehrung 2026-08-04 (User), siehe WEAP: Gatekeeper schaltet das Airfield frei.
+		Prerequisites: ~aot-age1, aot-age1, lite, aot-nod-secrettech-upgrade
 		Queue: Building.Nod
 		BuildLimit: 1
 	ProvidesPrerequisite@buildingname:
@@ -1021,7 +1113,8 @@ aot-proc-gdi:
 	Buildable:
 		BuildPaletteOrder: 160
 		LockedGroup: aot-grp-proc
-		Prerequisites: ~aot-age1, aot-age1, ~!aot-age2, aot-weap, silo, aot-gdi-advtech-upgrade
+		# aot-weap 2026-08-04 entfernt: die Refinery kommt jetzt VOR der Waffenfabrik.
+		Prerequisites: ~aot-age1, aot-age1, ~!aot-age2, silo, aot-gdi-advtech-upgrade
 		Queue: Building.GDI
 	WithSpriteBody@ts:
 		Sequence: aot-age2-nod-idle
@@ -1084,7 +1177,8 @@ aot-proc-nod:
 	Buildable:
 		BuildPaletteOrder: 160
 		LockedGroup: aot-grp-proc
-		Prerequisites: ~aot-age1, aot-age1, ~!aot-age2, afld, silo, aot-nod-secrettech-upgrade
+		# afld 2026-08-04 entfernt: die Refinery kommt jetzt VOR dem Airfield.
+		Prerequisites: ~aot-age1, aot-age1, ~!aot-age2, silo, aot-nod-secrettech-upgrade
 		Queue: Building.Nod
 	WithSpriteBody@ts:
 		Sequence: aot-age2-nod-idle
