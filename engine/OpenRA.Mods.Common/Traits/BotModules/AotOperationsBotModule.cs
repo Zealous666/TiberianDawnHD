@@ -2851,10 +2851,14 @@ namespace OpenRA.Mods.Common.Traits
 			// is simply skipped. Deliberately limited to allies -- an enemy's plans are not ours to
 			// read, and the engine's own Repairing flag only goes up once someone actually enters,
 			// far too late to prevent the duplicate journey.
+			// TraitsImplementing, NOT TraitOrDefault: the player actor carries ONE AotOperationsBotModule
+			// PER FACTION (@gdi and @nod are both declared on Player and only filtered at runtime), and
+			// TraitOrDefault throws outright on a second instance -- "Actor player has multiple traits of
+			// type AotOperationsBotModule", crash 2026-08-04. Every instance is asked; the inactive one
+			// simply has no missions.
 			var allyTargets = World.Players
 				.Where(p => p != Player && Player.RelationshipWith(p) == PlayerRelationship.Ally)
-				.Select(p => p.PlayerActor.TraitOrDefault<AotOperationsBotModule>())
-				.Where(o => o != null)
+				.SelectMany(p => p.PlayerActor.TraitsImplementing<AotOperationsBotModule>())
 				.SelectMany(o => o.ActiveBridgeTargets)
 				.ToHashSet();
 
