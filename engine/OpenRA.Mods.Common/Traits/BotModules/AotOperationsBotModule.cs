@@ -832,14 +832,23 @@ namespace OpenRA.Mods.Common.Traits
 			"expansion, which is what the six deployed tick tanks in the user's layout were.")]
 		public readonly string[] ExpansionEscortTypes = [];
 
-		[Desc("Escort size (user spec: 6 light tanks).")]
-		public readonly int ExpansionEscortCount = 6;
+		[Desc("Escort size. Four rather than the six of the original briefing (User 2026-08-04): at",
+			"1500 credits each, six tanks plus a 3000-credit MCV is 12000 for one convoy -- roughly",
+			"four minutes of an Age-1 bot's entire income, and in testing nothing ever finished. The",
+			"layout still has six guard posts; four tanks simply spread across them.")]
+		public readonly int ExpansionEscortCount = 4;
 
 		[Desc("Escorts the convoy refuses to leave without. Reaching ExpansionEscortCount is preferred,",
 			"but a lone MCV crossing the map is a donation to the enemy -- so below this it simply waits",
 			"(User 2026-08-03: the MCV kept departing with zero escorts because the light tanks are",
 			"Starport-routed and the Starport was producing nothing).")]
-		public readonly int ExpansionEscortMinimum = 3;
+		public readonly int ExpansionEscortMinimum = 2;
+
+		[Desc("How long an expansion convoy may hold back attack waves and engineer raids. THE SAFELOCK",
+			"(User 2026-08-04): the hold also drops the instant the yard is up, but this bounds the case",
+			"where the expansion simply never comes together -- no site, no escort, MCV lost -- so a",
+			"failing expansion can stall the army for a while but never permanently.")]
+		public readonly int ExpansionPriorityTimeout = 9000;
 
 		[Desc("Maximum construction yards the bot may own before it stops founding expansions. 1 = the",
 			"main base only plus the one expansion. Counted from the world, not from mission state.")]
@@ -2146,7 +2155,8 @@ namespace OpenRA.Mods.Common.Traits
 			// Startup priority (User 2026-07-22): only the very FIRST wave waits on this -- every later
 			// wave/air-raid (waveIndex > 0) is unaffected. OreT boost + first Derrick scan + every Scout
 			// group (cashflow and reconnaissance) get a head start before the first real offensive.
-			if (Info.EnableWaves && !Missions.OfType<AotRegularWaveMission>().Any() && !Missions.OfType<AotAirRaidMission>().Any()
+			if (Info.EnableWaves && !ExpansionHoldsPriority()
+				&& !Missions.OfType<AotRegularWaveMission>().Any() && !Missions.OfType<AotAirRaidMission>().Any()
 				&& (waveIndex > 0 || StartupPriorityMet()))
 			{
 				if (--waveCooldownTicks <= 0)
@@ -2514,9 +2524,19 @@ namespace OpenRA.Mods.Common.Traits
 			return true;
 		}
 
+		// True while an expansion convoy is being assembled or delivered. Attack waves and engineer
+		// raids stand down for that window so the whole income goes into the expansion -- and it is
+		// bounded by the mission's own ExpansionPriorityTimeout, so a failing expansion can never
+		// silence the army permanently (User 2026-08-04: "es braucht ein safelock").
+		bool ExpansionHoldsPriority() =>
+			Missions.OfType<AotExpansionMission>().Any(m => !m.Done && m.HoldsPriority);
+
 		void TryStartEngineerRaid()
 		{
 			if (!HasRefinery() || Missions.OfType<AotEngineerRaidMission>().Any())
+				return;
+
+			if (ExpansionHoldsPriority())
 				return;
 
 			var heliReady = Info.EnableHeliRaids

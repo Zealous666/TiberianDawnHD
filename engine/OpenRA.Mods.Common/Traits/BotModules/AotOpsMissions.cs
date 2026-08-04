@@ -2842,7 +2842,23 @@ namespace OpenRA.Mods.Common.Traits
 
 		public override string Status() =>
 			$"{phase.ToString().ToLowerInvariant()}(mcv{(Mcv() != null ? "+" : "-")}," +
-			$"esc{Escorts().Count}/{Ops.Info.ExpansionEscortCount},{Site})";
+			$"esc{Escorts().Count}/{Ops.Info.ExpansionEscortCount},{Site}" +
+			$"{(HoldsPriority ? ",PRIO" : "")})";
+
+		// While the convoy is being assembled and delivered, attack waves and engineer raids stand
+		// down so the whole income goes into getting the expansion up (User 2026-08-04: "wellen +
+		// heli raid pausieren"). At Age 1 the three compete for the same few thousand credits and in
+		// practice none of them finished -- two bots sat at 0 cash with esc0/6 for minutes.
+		//
+		// SAFELOCK (explicitly requested): the hold is bounded by ExpansionPriorityTimeout and drops
+		// the moment the yard is up. An expansion that cannot be finished -- no site, no escort, MCV
+		// lost on the way -- therefore stalls the army for a bounded time and never permanently.
+		int priorityTicks;
+
+		public bool HoldsPriority =>
+			yard == null
+			&& phase != Phase.Holding
+			&& priorityTicks < Ops.Info.ExpansionPriorityTimeout;
 
 		public readonly CPos Site;
 		Phase phase = Phase.Forming;
@@ -2889,6 +2905,8 @@ namespace OpenRA.Mods.Common.Traits
 
 		public override void Tick(IBot bot)
 		{
+			priorityTicks += Ops.Info.MissionInterval;
+
 			// The yard is the expansion. Losing it ends the mission so the next scan can start over
 			// somewhere else (user spec: "1 base expansion pro AI aber wenn zerstört, neu ansetzen").
 			if (yard != null && (yard.IsDead || !yard.IsInWorld || yard.Owner != Ops.Player))

@@ -866,8 +866,11 @@ Player:
 		# for expansion (escort)" plus 63 Claims. Der MCV fuhr NICHT ohne Eskorte los, er ist ihr
 		# davongefahren (Konvoi-Zusammenhalt, in AotExpansionMission.TickMoving behoben).
 		ExpansionEscortTypes: aot-ltnk-tick, aot-ltnk-laser, aot-ltnk-base
-		ExpansionEscortCount: 6
-		ExpansionEscortMinimum: 3
+		# 4 statt 6 (User 2026-08-04): 6 x 1500 + 3000 MCV = 12000 pro Konvoi, das sind rund vier
+		# Minuten Gesamteinnahmen eines Age-1-Bots -- im Test wurde nie einer fertig. Die sechs
+		# Wachposten im Layout bleiben, vier Panzer verteilen sich darauf.
+		ExpansionEscortCount: 4
+		ExpansionEscortMinimum: 2
 		# Derrick squad composition (User 2026-07-31, corrected same day -- Flame Trooper needs Radar,
 		# which would have deadlocked the sequential build): 1 rocketeer, 1 engineer, 1 mg, 1 mg.
 		# Escalation (User 2026-07-22): after 2 failed waves at the primary choke, the next wave
