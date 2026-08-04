@@ -753,6 +753,10 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Age tier at which heli raids unlock.")]
 		public readonly int HeliRaidAgeTier = 1;
 
+		[Desc("How often the ground-raid availability latch is re-checked. Much shorter than the raid",
+			"interval on purpose: it only has to catch one moment in which the transport is buildable.")]
+		public readonly int GroundRaidLatchInterval = 50;
+
 		[Desc("Ticks between engineer raid attempts. ONE raid runs at a time and its flavour (heli or",
 			"APC) is drawn at random from whichever are currently possible, so the two never compete",
 			"for the same infantry queue (User 2026-08-03).")]
@@ -995,6 +999,7 @@ namespace OpenRA.Mods.Common.Traits
 		int bridgeTicks;
 		IResourceLayer resourceLayer;
 		int raidTicks;
+		int groundLatchTicks;
 		int expansionTicks;
 		int expansionSiteLogTicks;
 		int raidGateLogTicks;
@@ -2238,6 +2243,25 @@ namespace OpenRA.Mods.Common.Traits
 			//
 			// Ground is only in the draw once its transport is ACTUALLY buildable, which is the
 			// honest test for "subterrain upgrade done" -- no separate prerequisite bookkeeping.
+			// Sampled far more often than raids are started. The latch below only needs to catch ONE
+			// moment in which the ground transport is buildable, but a BulkProductionQueue hides
+			// everything whenever its producer is disabled (a browned-out airfield, say), so checking
+			// once per 10-minute raid interval could easily miss every open window and the flavour
+			// would never unlock at all.
+			if (--groundLatchTicks <= 0)
+			{
+				groundLatchTicks = Info.GroundRaidLatchInterval;
+				if (!groundRaidUnlocked
+					&& Info.EnableGroundRaids
+					&& AgeTier() >= Info.GroundRaidAgeTier
+					&& Info.GroundRaidTransportTypes.Length > 0
+					&& FirstBuildable(Info.GroundRaidTransportTypes) != null)
+				{
+					groundRaidUnlocked = true;
+					Log("ground raids unlocked (transport became buildable)");
+				}
+			}
+
 			if (--raidTicks <= 0)
 			{
 				raidTicks = Info.EngineerRaidInterval;
@@ -2484,18 +2508,9 @@ namespace OpenRA.Mods.Common.Traits
 				&& Info.HeliRaidTransportTypes.Length > 0
 				&& FirstBuildable(Info.HeliRaidTransportTypes) != null;
 
-			// LATCHED, not sampled. FirstBuildable goes through BuildableItems(), and for the Starport
-			// -- a BulkProductionQueue -- that reports NOTHING while the cart is full or a delivery is
-			// running. Sampling it at one instant therefore says "no subterranean APC" for reasons that
-			// have nothing to do with the upgrade being bought, and the draw then picked the helicopter
-			// every single time (User 2026-08-03: 19 heli raids, 0 ground raids, 0 sub APCs ever built).
-			// Once the transport has been buildable ONCE the upgrade exists, so remember it.
-			if (Info.EnableGroundRaids
-				&& AgeTier() >= Info.GroundRaidAgeTier
-				&& Info.GroundRaidTransportTypes.Length > 0
-				&& FirstBuildable(Info.GroundRaidTransportTypes) != null)
-				groundRaidUnlocked = true;
-
+			// LATCHED, not sampled here -- the latch is maintained on its own frequent cadence in
+			// Schedule(), because a BulkProductionQueue hides everything while its producer is
+			// disabled and a single sample per raid interval would miss every open window.
 			var groundReady = groundRaidUnlocked;
 
 			if (--raidGateLogTicks <= 0)
@@ -2556,13 +2571,22 @@ namespace OpenRA.Mods.Common.Traits
 
 					foreach (var q in queues)
 					{
+						// AllItems vs BuildableItems is the decisive distinction: AllItems lists what
+						// the queue offers at all, BuildableItems only what currently passes its
+						// prerequisites AND (for a bulk queue) its cart/delivery state. An item present
+						// in AllItems but not in BuildableItems is a PREREQUISITE problem; an item
+						// missing from both while queueEnabled=False means the queue itself is dark --
+						// a BulkProductionQueue reports Enabled=false whenever no non-disabled producer
+						// exists, e.g. while the airfield is browned out, and then hides EVERYTHING.
+						var offered = q.AllItems().Any(b => b.Name == name);
 						var buildable = q.BuildableItems().Any(b => b.Name == name);
 						var extra = "";
 						if (q is BulkProductionQueue bulk)
 							extra = $" cart={bulk.GetActorsReadyForDelivery().Count} " +
 								$"delivering={bulk.HasDeliveryStarted()} queueBuildableTotal={bulk.BuildableItems().Count()}";
 
-						parts.Add($"{name}@{q.Info.Type}: buildable={buildable}{extra}");
+						parts.Add($"{name}@{q.Info.Type}: offered={offered} buildable={buildable} " +
+							$"queueEnabled={q.Enabled}{extra}");
 					}
 				}
 
