@@ -626,6 +626,9 @@ namespace OpenRA.Mods.Common.Traits
 
 		enum Phase { Forming, Ferrying, Executing, Retreating }
 
+		public override string Status() =>
+			$"{phase.ToString().ToLowerInvariant()}({Units.Count}u,{Ops.OpenRequests(this)}open)";
+
 		Phase phase = Phase.Forming;
 		readonly int index;
 		readonly bool useSecondaryRoute;
@@ -2057,6 +2060,8 @@ namespace OpenRA.Mods.Common.Traits
 	{
 		enum Phase { Forming, Moving, Repairing }
 
+		public override string Status() => $"{phase.ToString().ToLowerInvariant()}@{Hut.Location}";
+
 		public readonly Actor Hut;
 		Phase phase = Phase.Forming;
 		int formingTicks;
@@ -2232,6 +2237,10 @@ namespace OpenRA.Mods.Common.Traits
 	public abstract class AotEngineerRaidMission : AotMissionWithOrders
 	{
 		protected enum Phase { Forming, Loading, Delivering, Unloading, Raiding }
+
+		public override string Status() =>
+			$"{phase.ToString().ToLowerInvariant()}({Passengers().Count}p" +
+			$"{(Transport() != null ? "+T" : "-T")},{Ops.OpenRequests(this)}open)";
 
 		protected Phase phase = Phase.Forming;
 		protected int formingTicks;
@@ -2830,6 +2839,10 @@ namespace OpenRA.Mods.Common.Traits
 	public sealed class AotExpansionMission : AotMissionWithOrders
 	{
 		enum Phase { Forming, Moving, Ferrying, Deploying, Building, Holding }
+
+		public override string Status() =>
+			$"{phase.ToString().ToLowerInvariant()}(mcv{(Mcv() != null ? "+" : "-")}," +
+			$"esc{Escorts().Count}/{Ops.Info.ExpansionEscortCount},{Site})";
 
 		public readonly CPos Site;
 		Phase phase = Phase.Forming;

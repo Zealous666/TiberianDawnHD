@@ -96,6 +96,11 @@ namespace OpenRA.Mods.Common.Traits
 
 		public abstract void Tick(IBot bot);
 
+		// Short, human-readable state for the periodic [AotStatus] line (User-Wunsch 2026-08-04:
+		// "der muss simpel und kurz enthalten: status der heli engineer raids ... base expansion").
+		// Deliberately terse -- it is read at a glance while a test is running, not parsed.
+		public virtual string Status() => Done ? "done" : "active";
+
 		public virtual void OnUnitAssigned(Actor a) { Units.Add(a); }
 
 		// May this mission absorb spare units that have been sitting in the pool doing nothing?
@@ -753,6 +758,10 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Age tier at which heli raids unlock.")]
 		public readonly int HeliRaidAgeTier = 1;
 
+		[Desc("Ticks between [AotStatus] lines: one compact per-player summary of what every operation",
+			"is currently doing (User-Wunsch 2026-08-04, same shape as [AotCash]). 250 = every 10s.")]
+		public readonly int StatusLogInterval = 250;
+
 		[Desc("How often the ground-raid availability latch is re-checked. Much shorter than the raid",
 			"interval on purpose: it only has to catch one moment in which the transport is buildable.")]
 		public readonly int GroundRaidLatchInterval = 50;
@@ -1000,6 +1009,7 @@ namespace OpenRA.Mods.Common.Traits
 		IResourceLayer resourceLayer;
 		int raidTicks;
 		int groundLatchTicks;
+		int statusTicks;
 		int expansionTicks;
 		int expansionSiteLogTicks;
 		int raidGateLogTicks;
@@ -2248,6 +2258,12 @@ namespace OpenRA.Mods.Common.Traits
 			// everything whenever its producer is disabled (a browned-out airfield, say), so checking
 			// once per 10-minute raid interval could easily miss every open window and the flavour
 			// would never unlock at all.
+			if (--statusTicks <= 0)
+			{
+				statusTicks = Info.StatusLogInterval;
+				LogStatus();
+			}
+
 			if (--groundLatchTicks <= 0)
 			{
 				groundLatchTicks = Info.GroundRaidLatchInterval;
@@ -2534,6 +2550,62 @@ namespace OpenRA.Mods.Common.Traits
 		// whether that queue is even enabled, and -- for the Starport, which is a BulkProductionQueue
 		// and reports NOTHING buildable while its cart is full or a delivery is running -- the cart
 		// state as well, so a transient block can be told apart from a missing prerequisite.
+		// One compact line per player and interval (User-Wunsch 2026-08-04), same shape as [AotCash]
+		// so both can be grepped and lined up by timestamp. Colour label included because every bot
+		// logs under the same PlayerName -- the colour is what lets an observation on screen be tied
+		// to a specific bot.
+		string colorLabel;
+
+		string ColorLabel()
+		{
+			if (colorLabel != null)
+				return colorLabel;
+
+			var c = Player.Color;
+			var best = "?";
+			var bestDist = int.MaxValue;
+			foreach (var (_, label, candidate) in Render.RenderSpritesInfo.AotEditorColors)
+			{
+				var dr = c.R - candidate.R;
+				var dg = c.G - candidate.G;
+				var db = c.B - candidate.B;
+				var dist = (dr * dr) + (dg * dg) + (db * db);
+				if (dist < bestDist)
+				{
+					bestDist = dist;
+					best = label;
+				}
+			}
+
+			return colorLabel = $"{best}/{c.R:X2}{c.G:X2}{c.B:X2}";
+		}
+
+		void LogStatus()
+		{
+			string One<T>(string label, string idle) where T : AotMission
+			{
+				var m = Missions.OfType<T>().FirstOrDefault(x => !x.Done);
+				return $"{label}={(m == null ? idle : m.Status())}";
+			}
+
+			var waves = Missions.OfType<AotRegularWaveMission>().Where(m => !m.Done).ToList();
+			var waveState = waves.Count == 0
+				? $"none(next~{Math.Max(0, waveCooldownTicks) / 25}s)"
+				: string.Join(",", waves.Select(w => w.Status()));
+
+			var seconds = World.WorldTick * World.Timestep / 1000;
+			OpenRA.Log.Write("debug",
+				$"[AotStatus] {seconds / 60:D2}:{seconds % 60:D2} {Player.InternalName} '{Player.PlayerName}' " +
+				$"[{ColorLabel()}] ({Player.Faction.InternalName}{(Player.IsBot ? ", bot" : "")}) " +
+				$"age={AgeTier()} cash={playerResources.GetCashAndResources()} " +
+				$"waves={waveState} " +
+				$"{One<AotHeliRaidMission>("heli", $"none(next~{Math.Max(0, raidTicks) / 25}s)")} " +
+				$"{One<AotGroundRaidMission>("ground", groundRaidUnlocked ? "none" : "locked")} " +
+				$"{One<AotExpansionMission>("expansion", (builder?.ExpansionPlanned ?? false) ? "built" : "none")} " +
+				$"{One<AotBridgeRepairMission>("bridge", "none")} " +
+				$"pool={pool.Count}");
+		}
+
 		void LogRaidGate(bool heliReady, bool groundReady)
 		{
 			string Describe(string label, string[] chain)
