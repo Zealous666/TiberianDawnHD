@@ -544,8 +544,10 @@ Player:
 		# Luft/Marine ruhen bis Modul 9/13 des Ops-Frameworks.
 		UnitQueues: Vehicle.GDI, Starport, LightVehicle.GDI, LightVehicle.Nod
 		UnitLimits:
-			aot-mcv-age0: 1
-			aot-mcv-age1: 1
+			# aot-mcv-age0/-age1 ENTFERNT (User-Fund 2026-08-04): MCVs werden jetzt AUSSCHLIESSLICH auf
+			# Anforderung der AotExpansionMission gebaut. Als statisches Limit hier wurden sie proaktiv
+			# produziert und standen dann untaetig herum -- und ein untaetiger MCV war genau das, was
+			# McvManagerBotModule sofort mitten in der Basis ausgeklappt hat.
 			# aot-harv/aot-harv-nod and aot-oret-lite REMOVED (User 2026-07-22): both are now handled
 			# EXCLUSIVELY by their own dedicated, dynamic replacement modules (HarvesterBotModule@aot for
 			# HARV -- ties count to alive Refineries, already correct and was silently duplicated by this
@@ -565,7 +567,14 @@ Player:
 		# mcv = Start-MCV (BaseActor in aot-world.yaml StartingUnits, transformiert -> fact).
 		# aot-mcv-age0/1 = baubare Expansions-MCVs. ALLE drei müssen hier stehen,
 		# sonst wird der Start-MCV nie deployt -> kein Construction Yard -> KI tot.
-		McvTypes: mcv, aot-mcv-age0, aot-mcv-age1
+		# ⚠️ NUR der Start-MCV (User-Fund 2026-08-04)! McvManagerBotModule.DeployMcvs deployt JEDEN
+		# untaetigen MCV seiner Liste sofort -- ohne zu pruefen, ob eine andere Operation ihn gerade
+		# besitzt. Solange aot-mcv-age0/-age1 hier standen, wurde der Expansions-MCV in dem Moment
+		# ausgeklappt, in dem er fertig war: mitten in der Hauptbasis, bevor die Expansions-Mission
+		# ihn losschicken konnte. Folgen im Log: "expansion convoy never came together (mcv=False)",
+		# Bauhoefe an sinnlosen Stellen ohne Layout drumherum, mehrere Yards pro Bot.
+		# Die buildbaren MCVs gehoeren AUSSCHLIESSLICH der AotExpansionMission.
+		McvTypes: mcv
 		ConstructionYardTypes: fact, fact.gdi, fact.nod
 		McvFactoryTypes: aot-lite-gdi, aot-lite-nod
 		# Con-Yard NIE wieder einpacken/umziehen (verursachte Folgeprobleme). -1 = aus.

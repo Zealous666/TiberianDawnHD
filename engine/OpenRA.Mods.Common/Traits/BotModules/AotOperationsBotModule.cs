@@ -993,6 +993,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		int derrickTicks;
 		int bridgeTicks;
+		IResourceLayer resourceLayer;
 		int raidTicks;
 		int expansionTicks;
 		int expansionSiteLogTicks;
@@ -1042,6 +1043,9 @@ namespace OpenRA.Mods.Common.Traits
 			ChokeProvider = self.Owner.PlayerActor.TraitsImplementing<IBotChokepointProvider>().FirstOrDefault();
 			ApproachProvider = self.Owner.PlayerActor.TraitsImplementing<IBotBaseApproachProvider>().FirstOrDefault();
 			playerResources = self.Owner.PlayerActor.Trait<PlayerResources>();
+
+			// Live resource state (grows/gets harvested); Map.Resources is only the initial data.
+			resourceLayer = self.World.WorldActor.TraitOrDefault<IResourceLayer>();
 			techTree = self.Owner.PlayerActor.Trait<TechTree>();
 
 			// Match by faction so the right builder is picked once multiple faction instances exist
@@ -2454,7 +2458,12 @@ namespace OpenRA.Mods.Common.Traits
 					if (!World.Map.Contains(c) || !Intel.IsPassable(c))
 						return false;
 
-					if (World.Map.Resources[c].Type != 0)
+					// LIVE resource layer, not Map.Resources (User-Fund 2026-08-04: "hier wurde offenbar
+					// tiberium beim pinken spieler nicht berücksichtigt als bau-blocker"). Map.Resources
+					// is the map's INITIAL data -- tiberium grows and gets harvested, so a field that
+					// spread after map load was invisible to it and the yard was planted right in it.
+					// The base planner uses IResourceLayer for exactly this reason.
+					if (resourceLayer != null && resourceLayer.GetResource(c).Type != null)
 						return false;
 
 					if (World.ActorMap.GetActorsAt(c).Any(a => a.Info.HasTraitInfo<BuildingInfo>()))
