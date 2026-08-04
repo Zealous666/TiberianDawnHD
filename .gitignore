@@ -261,3 +261,6 @@ mods/cnc/rules/structures.yaml
 !engine/OpenRA.Mods.Common/Widgets/Logic/Ingame/SupportPowerTooltipLogic.cs
 !engine/mods/cnc/chrome/
 !engine/mods/cnc/chrome/tooltips.yaml
+
+# Cash-Logger fuer Balance-Beobachtung (2026-08-04)
+!engine/OpenRA.Mods.Common/Traits/AotCashLog.cs

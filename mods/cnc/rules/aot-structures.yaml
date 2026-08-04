@@ -1102,7 +1102,7 @@ aot-upgrade-apc2:
 		Description: Transforms all APCs into amphibious but unarmed APCs. Lockouts the Mine Layer.
 
 	Valued:
-		Cost: 550
+		Cost: 800
 
 	RenderSprites:
 		Image: aot-upgrade-apc2
@@ -1131,7 +1131,7 @@ aot-upgrade-minelayer:
 		Description: Transforms all APCs into unarmed Mine Layers with anti-tank mines. Lockouts the Amphibious APC.
 
 	Valued:
-		Cost: 550
+		Cost: 800
 
 	RenderSprites:
 		Image: aot-upgrade-minelayer
@@ -1209,7 +1209,7 @@ aot-upgrade-ltnk-tick:
 		Description: Replaces the Light Tank chassis with a Tick Tank hull. Enables dig-in mode.
 
 	Valued:
-		Cost: 550
+		Cost: 800
 
 	RenderSprites:
 		Image: aot-upgrade-ltnk-tick
@@ -1246,7 +1246,7 @@ aot-upgrade-ttnk-subterrain:
 		Description: Upgrades the Flame Tank and Toxin Tank to subterranean variants that can tunnel underground. Also unlocks the Subterranean Infantry Transport.
 
 	Valued:
-		Cost: 2850
+		Cost: 4300
 
 	RenderSprites:
 		Image: aot-upgrade-ttnk-subterrain
@@ -1284,7 +1284,7 @@ aot-upgrade-e4-toxic:
 		Description: Upgrades all Flamethrowers, Flame Tanks, Flame Towers, Napalm Rocket Launchers, and the Nod Avatar with toxic weaponry for improved damage vs. all ground targets. Toxic rockets leave a lingering tiberium gas field on impact.
 
 	Valued:
-		Cost: 1100
+		Cost: 2050
 
 	RenderSprites:
 		Image: aot-upgrade-e4-toxic
@@ -1345,7 +1345,7 @@ aot-upgrade-heavy-artillery:
 		Description: Upgrades the Mobile Howitzer with heavy siege artillery. Adds deploy capability and devastating firepower vs. structures.
 
 	Valued:
-		Cost: 2250
+		Cost: 4200
 
 	RenderSprites:
 		Image: aot-upgrade-heavy-artillery
@@ -1373,7 +1373,7 @@ aot-upgrade-ion-cannon:
 		Description: Upgrades Orbital Command with an Uplink to call Ion Cannon Strikes.
 
 	Valued:
-		Cost: 2850
+		Cost: 4300
 
 	RenderSprites:
 		Image: aot-upgrade-ion-cannon
@@ -1401,7 +1401,7 @@ aot-upgrade-infantry-railgun:
 		Description: Equips GDI infantry with experimental railgun technology. Required for Zone Trooper deployment.
 
 	Valued:
-		Cost: 2800
+		Cost: 5250
 
 	RenderSprites:
 		Image: aot-upgrade-infantry-railgun
@@ -1428,7 +1428,7 @@ aot-upgrade-zonetrooper-drop:
 		Description: Upgrades Orbital Command to deploy Zone Troopers via orbital drop pods.
 
 	Valued:
-		Cost: 5600
+		Cost: 10500
 
 	RenderSprites:
 		Image: aot-upgrade-zonetrooper-drop
@@ -1457,7 +1457,7 @@ aot-upgrade-carryall-harvest:
 		Description: Assign a carryall to a Refinery and it will transport the corresponding Harvesters between Tiberium Field and the Refinery.
 
 	Valued:
-		Cost: 2500
+		Cost: 4700
 
 	RenderSprites:
 		Image: harv
@@ -1504,7 +1504,7 @@ ATEC:
 		OnHoldAudio: OnHold
 		CancelledAudio: Cancelled
 	Valued:
-		Cost: 1500
+		Cost: 2500
 	Health:
 		HP: 60000
 	Building:
@@ -1686,7 +1686,7 @@ STEC:
 		OnHoldAudio: OnHold
 		CancelledAudio: Cancelled
 	Valued:
-		Cost: 1500
+		Cost: 2500
 	Health:
 		HP: 60000
 	Building:
@@ -2282,7 +2282,7 @@ aot-upgrade-tiberium-missile:
 	Tooltip:
 		Name: Tiberium Missile Upgrade
 	Valued:
-		Cost: 1000
+		Cost: 1500
 	Buildable:
 		Queue: Upgrade.Nod
 		BuildPaletteOrder: 230
@@ -2301,7 +2301,7 @@ aot-upgrade-atom-bomb:
 	Tooltip:
 		Name: Atom Bomb Upgrade
 	Valued:
-		Cost: 2000
+		Cost: 3750
 	Buildable:
 		Queue: Upgrade.Nod
 		BuildPaletteOrder: 330
@@ -2320,7 +2320,7 @@ aot-upgrade-mine-cluster-enhancement:
 	Tooltip:
 		Name: Mine Cluster Enhancement
 	Valued:
-		Cost: 1200
+		Cost: 1800
 	Buildable:
 		Queue: Upgrade.Nod
 		BuildPaletteOrder: 235
@@ -2717,6 +2717,9 @@ aot-nod-radar-age2:
 # ProvidesPrerequisite@buildingname: erhaelt den lowercase-Prerequisite-String "tmpl" (von aot-shrine +
 # NOD-Age-3-Gate referenziert), da -Buildable: die implizite Buildable-BuildLimit-Ableitung entfernt.
 TMPL:
+	# 2000 -> 5000 (User 2026-08-04, Balance).
+	Valued:
+		Cost: 5000
 	ProvidesPrerequisite@buildingname:
 		Prerequisite: tmpl
 	ProvidesPrerequisite@aottmpl:
@@ -2912,7 +2915,7 @@ aot-upgrade-mtnk-predator:
 		Description: Upgrades the Medium Tank with the Predator Turret, transforms the Rocket Launcher into a Hover Rocket Launcher and unlocks the Hover AA. Lockout of GDI Mech Armament.
 
 	Valued:
-		Cost: 2500
+		Cost: 5000
 
 	RenderSprites:
 		Image: aot-upgrade-mtnk-predator
@@ -2949,7 +2952,7 @@ aot-upgrade-mtnk-railgun:
 		Description: Equips the Predator Main Tank and Mammoth Tank with high-powered railguns. Requires the Predator Upgrade - incompatible with the Titan chassis path.
 
 	Valued:
-		Cost: 2800
+		Cost: 5250
 
 	RenderSprites:
 		Image: aot-upgrade-mtnk-railgun
@@ -2975,7 +2978,7 @@ aot-upgrade-mtnk-titan:
 		Description: Transforms the Medium Tank into a Titan battle mech, the HMVEE into a Wolverine anti-infantry mech and unlocks the Juggernaut artillery. Lockout of GDI Heavy Ordonance.
 
 	Valued:
-		Cost: 2500
+		Cost: 5000
 
 	RenderSprites:
 		Image: aot-upgrade-mtnk-titan
@@ -3007,7 +3010,7 @@ aot-upgrade-mtnk-titan-railgun:
 		Description: Upgrades the Titan Mech with Railgun for higher damage.
 
 	Valued:
-		Cost: 2800
+		Cost: 5250
 
 	RenderSprites:
 		Image: aot-upgrade-mtnk-titan-railgun
@@ -3188,7 +3191,7 @@ aot-upgrade-nod-parabombs:
 		Description: Unlocks the Parabombs support power: a heavy bomber flies over the target and drops five toxic parabombs, each leaving a lingering gas cloud. Requires the Spy Plane and Toxic upgrades.
 
 	Valued:
-		Cost: 2800
+		Cost: 5250
 
 	RenderSprites:
 		Image: aot-upgrade-nod-parabombs
@@ -3219,7 +3222,7 @@ aot-upgrade-nod-banshee:
 		Description: Unlocks the Banshee Airstrike, replacing the MiG Airstrike: three Banshee fighters make two passes firing plasma salvos that leave toxic gas clouds. Requires Age 3 and a Temple of Nod.
 
 	Valued:
-		Cost: 2800
+		Cost: 5250
 
 	RenderSprites:
 		Image: aot-upgrade-nod-banshee
@@ -3245,7 +3248,7 @@ aot-upgrade-harpy:
 		Description: Upgrades all HINDs to Harpy attack helicopters. Increases damage output and fire rate. Reloads ammunition automatically while airborne. Grants stealth capability when not engaged.
 
 	Valued:
-		Cost: 800
+		Cost: 1200
 
 	RenderSprites:
 		Image: aot-upgrade-harpy
@@ -3300,7 +3303,7 @@ aot-upgrade-tran-doorgunner:
 		Description: actor-aot-upgrade-tran-doorgunner.description
 
 	Valued:
-		Cost: 1200
+		Cost: 1800
 
 	RenderSprites:
 		Image: aot-upgrade-tran-doorgunner
@@ -3331,7 +3334,7 @@ aot-upgrade-tran-carryall:
 		Description: actor-aot-upgrade-tran-carryall.description
 
 	Valued:
-		Cost: 1200
+		Cost: 1800
 
 	RenderSprites:
 		Image: aot-upgrade-tran-carryall
@@ -3360,7 +3363,7 @@ aot-upgrade-tran-parachute:
 		Description: actor-aot-upgrade-tran-parachute.description
 
 	Valued:
-		Cost: 750
+		Cost: 1100
 
 	RenderSprites:
 		Image: aot-upgrade-tran-parachute
@@ -3388,7 +3391,7 @@ aot-upgrade-firehawk:
 		Description: Replaces all A-10 fighters with Firehawks. Swaps Vulcan cannons and napalm for triple-double rocket salvos, effective against ground and air targets.
 
 	Valued:
-		Cost: 5600
+		Cost: 10500
 
 	RenderSprites:
 		Image: aot-upgrade-firehawk
@@ -4272,7 +4275,7 @@ aot-upgrade-nuke-turbine:
 		Description: Upgrades all GDI Power Plants with Turbine Technology, doubling energy output.
 
 	Valued:
-		Cost: 1150
+		Cost: 1700
 
 	RenderSprites:
 		Image: aot-upgrade-nuke-turbine
@@ -4302,7 +4305,7 @@ aot-upgrade-cruiser-railgun:
 		Description: Replaces both Battle Cruiser turrets with 4 high-powered Railguns. Shorter range, no minimum distance, very precise.
 
 	Valued:
-		Cost: 5600
+		Cost: 10500
 
 	RenderSprites:
 		Image: aot-upgrade-cruiser-railgun
@@ -4328,7 +4331,7 @@ aot-upgrade-cruiser-carrier:
 		Description: Replaces both Battle Cruiser turrets with two Helibays. Deploy the carrier to allow nearby aircraft to land and resupply.
 
 	Valued:
-		Cost: 5600
+		Cost: 10500
 
 	RenderSprites:
 		Image: aot-upgrade-cruiser-carrier
@@ -4374,7 +4377,7 @@ aot-upgrade-gunboat-destroyer:
 		Description: Upgrades all Frigates into Destroyers with rockets, depth charges, and anti-air.
 
 	Valued:
-		Cost: 2850
+		Cost: 4300
 
 	RenderSprites:
 		Image: aot-upgrade-gunboat-destroyer
@@ -4760,7 +4763,7 @@ aot-upgrade-sub-cargo:
 		Description: actor-aot-upgrade-sub-cargo.description
 
 	Valued:
-		Cost: 750
+		Cost: 1100
 
 	RenderSprites:
 		Image: aot-upgrade-sub-cargo
@@ -4789,7 +4792,7 @@ aot-upgrade-stnk-cargo:
 		Description: actor-aot-upgrade-stnk-cargo.description
 
 	Valued:
-		Cost: 1100
+		Cost: 2050
 
 	RenderSprites:
 		Image: aot-upgrade-stnk-cargo
@@ -4845,7 +4848,7 @@ aot-upgrade-msub-mine:
 		Description: actor-aot-upgrade-msub-mine.description
 
 	Valued:
-		Cost: 1400
+		Cost: 2600
 
 	RenderSprites:
 		Image: aot-upgrade-msub-mine
@@ -4872,7 +4875,7 @@ aot-upgrade-msub-drone:
 		Description: actor-aot-upgrade-msub-drone.description
 
 	Valued:
-		Cost: 1950
+		Cost: 3650
 
 	RenderSprites:
 		Image: aot-upgrade-msub-drone
@@ -5133,7 +5136,7 @@ ORBC:
 	Tooltip:
 		Name: Orbital Command
 	Valued:
-		Cost: 1500
+		Cost: 5000
 	Health:
 		HP: 60000
 	Selectable:
@@ -5290,7 +5293,7 @@ SLAB:
 	Tooltip:
 		Name: Science Lab
 	Valued:
-		Cost: 1500
+		Cost: 5000
 	Health:
 		HP: 100000
 	Selectable:
@@ -5475,7 +5478,7 @@ aot-upgrade-nod-forbidden:
 		Description: Unlocks Chameleon Spy, Cyborgs and the Secret Shrine.
 
 	Valued:
-		Cost: 2500
+		Cost: 5000
 
 	RenderSprites:
 		Image: aot-shrine
@@ -5500,7 +5503,7 @@ aot-shrine:
 	Tooltip:
 		Name: Secret Shrine
 	Valued:
-		Cost: 3000
+		Cost: 5000
 	Health:
 		HP: 80000
 	Selectable:
@@ -5937,7 +5940,7 @@ aot-upgrade-sam-cloak:
 		Description: Grants SAM sites stealth technology. Cloaked while not firing, above 50% health, and not low on power.
 
 	Valued:
-		Cost: 950
+		Cost: 1400
 
 	RenderSprites:
 		Image: aot-upgrade-sam-cloak
@@ -5966,7 +5969,7 @@ aot-upgrade-avatar-laser:
 		Description: Replaces the Nod Avatar's cyborg chaingun with a devastating laser cannon.
 
 	Valued:
-		Cost: 2800
+		Cost: 5250
 
 	RenderSprites:
 		Image: aot-upgrade-avatar-laser
@@ -5997,7 +6000,7 @@ aot-upgrade-stealth-harvester:
 		Description: Cloaks all Harvesters. They decloak while harvesting and while unloading at the refinery.
 
 	Valued:
-		Cost: 2000
+		Cost: 3750
 
 	RenderSprites:
 		Image: harv
@@ -6409,7 +6412,7 @@ aot-fireposition:
 aot-wall-gdi:
 	Inherits: ^Wall
 	Valued:
-		Cost: 150
+		Cost: 200
 	CustomSellValue:
 		Value: 0
 	Tooltip:
@@ -6504,7 +6507,7 @@ aot-upgrade-firestorm-defense:
 		Description: Enables the Firestorm Generator in the Science lab and reinforces all GDI walls with Firestorm-powergrids
 
 	Valued:
-		Cost: 1500
+		Cost: 2250
 
 	RenderSprites:
 		Image: aot-upgrade-firestorm-defense
@@ -6524,7 +6527,7 @@ aot-upgrade-firestorm-defense:
 aot-wall-nod:
 	Inherits: ^Wall
 	Valued:
-		Cost: 50
+		Cost: 100
 	CustomSellValue:
 		Value: 0
 	Tooltip:
@@ -6741,7 +6744,7 @@ aot-upgrade-laser-fence:
 		Description: Upgrades fences with Laser-barriers, unlocks additional laser defense capabilities, and upgrades Light Tank with a Scorpio Laser turret aswell as Lasers for Harpy and Buggy.
 
 	Valued:
-		Cost: 1500
+		Cost: 2250
 
 	RenderSprites:
 		Image: aot-upgrade-laser-fence
@@ -6908,7 +6911,7 @@ aot-gate-nod:
 	Tooltip:
 		Name: NOD Gate
 	Valued:
-		Cost: 500
+		Cost: 750
 	Health:
 		HP: 60000
 	Armor:
