@@ -2901,17 +2901,27 @@ namespace OpenRA.Mods.Common.Traits
 				{
 					formingTicks += Ops.Info.MissionInterval;
 					var mcv = Mcv();
-					if (mcv != null && Ops.OpenRequests(this, "mcv") == 0
-						&& (Escorts().Count >= Ops.Info.ExpansionEscortCount
-							|| formingTicks >= Ops.Info.ExpansionEscortWaitTicks))
+					var escortCount = Escorts().Count;
+
+					// The convoy must NOT leave unescorted (User 2026-08-03: "gegner baut die MCVs, aber
+					// fährt ohne die light-tank escorten los"). The old rule departed once the escort
+					// wait expired regardless of how many had turned up, and with the light tanks
+					// routed through the Starport -- which was producing nothing at all -- that meant
+					// always zero. A lone MCV crossing the map is simply a donation to the enemy.
+					var haveEnough = escortCount >= Ops.Info.ExpansionEscortCount;
+					var settleForFewer = escortCount >= Ops.Info.ExpansionEscortMinimum
+						&& formingTicks >= Ops.Info.ExpansionEscortWaitTicks;
+
+					if (mcv != null && Ops.OpenRequests(this, "mcv") == 0 && (haveEnough || settleForFewer))
 					{
 						phase = Phase.Moving;
 						phaseTicks = 0;
-						Log($"convoy departing with {Escorts().Count} escort(s)");
+						Log($"convoy departing with {escortCount} escort(s)");
 					}
 					else if (formingTicks >= Ops.Info.ExpansionFormingTimeout)
 					{
-						Log("no MCV for the expansion in time -> mission over");
+						Log($"expansion convoy never came together (mcv={mcv != null}, escorts={escortCount}/" +
+							$"{Ops.Info.ExpansionEscortCount}, min={Ops.Info.ExpansionEscortMinimum}) -> mission over");
 						Finish();
 					}
 
@@ -2960,10 +2970,14 @@ namespace OpenRA.Mods.Common.Traits
 					}
 
 					// The deployed yard is a NEW actor, so watch for it appearing rather than trying
-					// to track the MCV through its own transformation.
+					// to track the MCV through its own transformation. Anchored on the MCV's OWN cell,
+					// not on the planned site: an MCV blocked a few cells short still deploys where it
+					// stands, and searching around the site missed it entirely -- the mission then timed
+					// out while a perfectly good yard stood there with nothing ever built around it
+					// (User 2026-08-03: "an keinem einzigen construction yard ... Gebäude daneben").
 					yard = Ops.World.Actors.FirstOrDefault(a => a.Owner == Ops.Player && !a.IsDead && a.IsInWorld
 						&& Ops.Info.ConstructionYardTypes.Contains(a.Info.Name)
-						&& (a.Location - Site).LengthSquared <= Ops.Info.ExpansionArriveRadius2);
+						&& (a.Location - mcv.Location).LengthSquared <= Ops.Info.ExpansionArriveRadius2);
 
 					if (yard != null)
 					{

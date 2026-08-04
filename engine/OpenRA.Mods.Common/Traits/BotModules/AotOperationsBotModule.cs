@@ -822,6 +822,21 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Escort size (user spec: 6 light tanks).")]
 		public readonly int ExpansionEscortCount = 6;
 
+		[Desc("Escorts the convoy refuses to leave without. Reaching ExpansionEscortCount is preferred,",
+			"but a lone MCV crossing the map is a donation to the enemy -- so below this it simply waits",
+			"(User 2026-08-03: the MCV kept departing with zero escorts because the light tanks are",
+			"Starport-routed and the Starport was producing nothing).")]
+		public readonly int ExpansionEscortMinimum = 3;
+
+		[Desc("Maximum construction yards the bot may own before it stops founding expansions. 1 = the",
+			"main base only plus the one expansion. Counted from the world, not from mission state.")]
+		public readonly int ExpansionMaxYards = 1;
+
+		[Desc("Score bonus per blossom tree on a candidate field. Weighted heavily on purpose: a",
+			"regrowing field keeps paying out long after a plain one is mined out, and plain fields",
+			"otherwise win on raw cell count alone (User 2026-08-03).")]
+		public readonly int ExpansionBlossomBonus = 40;
+
 		[Desc("How long the convoy waits for a full escort before departing with what it has. The MCV",
 			"itself is mandatory; the escort is not worth missing the site over.")]
 		public readonly int ExpansionEscortWaitTicks = 4500;
@@ -1906,7 +1921,12 @@ namespace OpenRA.Mods.Common.Traits
 			// is a short, deliberate delay, not a deadlock. `requests` keeps accumulating as normal;
 			// this only withholds the StartProduction orders that actually spend cash, so everything
 			// fires the instant the Refinery completes.
-			if (builder != null && builder.Info.Faction == Info.Faction && builder.Age1RefineryPending())
+			// Age 1 is the cashflow-optimisation phase (user spec 2026-08-02): the Refinery above, and
+			// the base expansion alongside it, are both what every later unit is paid for. Expanded from
+			// Age1RefineryPending() to EconomyPriorityPending(), which adds the expansion under its own
+			// hard tick budget -- the expansion half retires permanently once spent, so army production
+			// can never be starved by an expansion that drags on.
+			if (builder != null && builder.Info.Faction == Info.Faction && builder.EconomyPriorityPending())
 				return;
 
 			// The cash reserve keeps the AI from spending its last credits on ordinary units. It must
@@ -2229,6 +2249,21 @@ namespace OpenRA.Mods.Common.Traits
 			if (Missions.OfType<AotExpansionMission>().Any() || (builder?.ExpansionPlanned ?? false))
 				return;
 
+			// Hard ceiling on construction yards, checked against the WORLD rather than mission state
+			// (User 2026-08-03: "er baut pro AI teilweise mehrere"). A mission that died after its MCV
+			// deployed left a yard standing while both guards above went clear again, so the next scan
+			// happily founded another one. Counting actual yards cannot drift out of sync that way.
+			var yards = World.Actors.Count(a => a.Owner == Player && !a.IsDead && a.IsInWorld
+				&& Info.ConstructionYardTypes.Contains(a.Info.Name));
+			if (yards > Info.ExpansionMaxYards)
+				return;
+
+			// An MCV already rolling (ours, or one left over from a dead mission) is a pending
+			// expansion too -- ordering a second is how a bot ended up with several.
+			if (World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld
+					&& Info.ExpansionMcvTypes.Contains(a.Info.Name)))
+				return;
+
 			var site = FindExpansionSite();
 			if (site == null)
 				return;
@@ -2303,7 +2338,7 @@ namespace OpenRA.Mods.Common.Traits
 				// (User 2026-08-03). Purely a bonus -- a plain big field is a perfectly good site.
 				var score = indice.ResourceCellsCount
 					- distHome
-					+ (indice.ResourceCreatorLocs.Length * 10);
+					+ (indice.ResourceCreatorLocs.Length * Info.ExpansionBlossomBonus);
 
 				if (score > bestScore)
 				{
@@ -2327,15 +2362,44 @@ namespace OpenRA.Mods.Common.Traits
 
 			Log($"expansion site chosen near {best.Value} (score {bestScore}, {considered} candidate(s))");
 
-			// Settle a few cells OFF the tiberium itself: the layout needs buildable ground, and
-			// building on top of the field would bury the very resources it came for.
+			// Settle a few cells OFF the tiberium itself, on ground the WHOLE layout actually fits on
+			// (User 2026-08-03: "platziert MCV nicht so, dass er den expansion base-builder-plan
+			// umsetzen könnte"). Picking any single free cell was not enough -- the layout spans a
+			// block around the yard, so a cell with a cliff or the tiberium field one step away gives
+			// a yard that can never be built around. Checked against the real footprint the builder
+			// will use, so site selection and construction agree.
 			var site = best.Value;
-			for (var r = Info.ExpansionSiteOffset; r <= Info.ExpansionSiteOffset + 8; r++)
+			for (var r = Info.ExpansionSiteOffset; r <= Info.ExpansionSiteOffset + 10; r++)
 				foreach (var c in AotOpsUtils.Ring(site, r))
-					if (World.Map.Contains(c) && Intel.IsPassable(c) && World.Map.Resources[c].Type == 0)
+					if (LayoutFits(c))
 						return c;
 
-			return site;
+			Log($"expansion site near {site} rejected: the layout does not fit anywhere around it");
+			return null;
+		}
+
+		// The expansion layout occupies roughly x -4..+3 and y -1..+8 around the yard's top-left cell
+		// (see memory/ai-base-expansion-layout.md). Every cell of that block must be on the map, be
+		// passable, carry no resources and hold no existing actor.
+		bool LayoutFits(CPos yard)
+		{
+			for (var dx = -5; dx <= 4; dx++)
+			{
+				for (var dy = -2; dy <= 8; dy++)
+				{
+					var c = yard + new CVec(dx, dy);
+					if (!World.Map.Contains(c) || !Intel.IsPassable(c))
+						return false;
+
+					if (World.Map.Resources[c].Type != 0)
+						return false;
+
+					if (World.ActorMap.GetActorsAt(c).Any(a => a.Info.HasTraitInfo<BuildingInfo>()))
+						return false;
+				}
+			}
+
+			return true;
 		}
 
 		void TryStartEngineerRaid()

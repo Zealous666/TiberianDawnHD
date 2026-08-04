@@ -160,16 +160,21 @@ Player:
 		# BuildingFractions below so nothing can double-fire them.
 		AgeUpgradeTypes: aot-age1-upgrade-nod, aot-age2-upgrade-nod, aot-age3-upgrade-nod
 		# Techtree-Gatekeeper (User 2026-08-02): KEINE optionalen Kampf-Upgrades, sondern harte
-		# Voraussetzungen fuer spaetere PLAN-Gebaeude:
+		# Voraussetzungen fuer spaetere PLAN-Gebaeude. REIHENFOLGE = Abhaengigkeitsreihenfolge,
+		# es wird immer nur EINER gleichzeitig gekauft, und der Core-Rhythmus PAUSIERT solange:
+		#   aot-upgrade-nod-secrettech -> aot-nod-secrettech-upgrade -> Refinery (aot-proc-nod) baubar
 		#   aot-upgrade-nod-forbidden  -> aot-nod-forbidden-upgrade -> Shrine (aot-shrine) baubar
 		#   aot-upgrade-laser-fence    -> aot-laser-fence-upgrade   -> Obelisk (OBLI) baubar
+		# Daraus ergibt sich die vom User geforderte Age-1-Kette ganz von selbst, ohne Sonderfaelle:
+		# AFLD (core) -> NOD Tiberium Secrets (nur nach afld baubar) -> Refinery (core) -> SAMs
+		# (defence, wartet auf PROC) -> Base Expansion -> restliche Upgrades.
 		# Als gewichteter Zufallskauf (Gewicht 20 bzw. 15) fuehrte das zum harten Deadlock: SHRN ist
 		# ein CORE-Schritt, und Core-Schritte laufen strikt first-open OHNE Timeout -- ein Bot, der
 		# aot-upgrade-nod-forbidden nie zog, blieb ab Age 2 dauerhaft auf "Waiting (age gate /
 		# prerequisites): SHRN" stehen (618 Zeilen in einer Session). Ueber 5 Nod-Bots wurde in
 		# derselben Session KEIN einziger Obelisk gebaut. Reihenfolge = Abhaengigkeitsreihenfolge.
 		# Beide unten aus BuildingFractions entfernt, damit nichts doppelt feuert.
-		GatekeeperUpgradeTypes: aot-upgrade-nod-forbidden, aot-upgrade-laser-fence
+		GatekeeperUpgradeTypes: aot-upgrade-nod-secrettech, aot-upgrade-nod-forbidden, aot-upgrade-laser-fence
 
 	# CHOKEPOINT-FORTIFIER: für V1 DEAKTIVIERT (baute Streu-Zäune, konkurrierte um
 	# die Building-Queue). Kommt als V2 zurück, integriert mit AotBaseBuilder.
@@ -500,13 +505,12 @@ Player:
 			aot-upgrade-gunboat-frigate: 8
 			aot-upgrade-gunboat-destroyer: 8
 			# === Kampf-Upgrades NOD ===
-			# aot-upgrade-nod-secrettech (2026-08-01, User-Briefing): Age-1-Gatekeeper, hohe Prio
-			# analog zu aot-upgrade-turret -- soll direkt nach AFLD gekauft werden.
-			aot-upgrade-nod-secrettech: 45
-			# aot-upgrade-nod-forbidden und aot-upgrade-laser-fence stehen BEWUSST NICHT mehr hier:
-			# sie sind Techtree-Gatekeeper (Shrine bzw. Obelisk) und werden jetzt gezielt ueber
-			# AotBaseBuilderBotModule.GatekeeperUpgradeTypes gefeuert, sobald sie baubar sind.
-			# Ein zusaetzlicher Eintrag hier wuerde sie doppelt kaufen (siehe dort, 2026-08-02).
+			# aot-upgrade-nod-secrettech, aot-upgrade-nod-forbidden und aot-upgrade-laser-fence stehen
+			# BEWUSST NICHT mehr hier: alle drei sind Techtree-Gatekeeper (Refinery / Shrine / Obelisk)
+			# und werden jetzt gezielt ueber AotBaseBuilderBotModule.GatekeeperUpgradeTypes gefeuert,
+			# sobald sie baubar sind -- der Core-Rhythmus pausiert dabei, damit die Reihenfolge
+			# AFLD -> Secrets -> Refinery wirklich eingehalten wird (gewichteter Zufall konnte das nie
+			# garantieren). Ein zusaetzlicher Eintrag hier wuerde sie doppelt kaufen (2026-08-02).
 			aot-upgrade-ttnk-subterrain: 15
 			aot-upgrade-ltnk-tick: 18
 			aot-upgrade-sam-bunkered: 15
@@ -847,8 +851,13 @@ Player:
 		# Typen, die eine Mission AKTIV angefordert hat -- siehe Kommentar dort.
 		EnableExpansion: True
 		ExpansionMcvTypes: aot-mcv-age1, aot-mcv-age0
-		ExpansionEscortTypes: aot-ltnk-tick, aot-ltnk-laser, aot-ltnk-base
+		# ⚠️ Die LTNK-Varianten laufen ALLE ueber die Starport-Queue (BulkProductionQueue). Ist der
+		# Starport gerade blockiert oder liefert nichts, kommt NIE eine Eskorte zustande -- genau
+		# deshalb fuhr der MCV zuvor allein los. Deshalb Fallbacks aus der normalen Fahrzeug-Queue
+		# dahinter: erst der eigentliche Light Tank, dann was ohne Starport gebaut werden kann.
+		ExpansionEscortTypes: aot-ltnk-tick, aot-ltnk-laser, aot-ltnk-base, aot-ttnk-base, aot-bggy-laser, aot-bggy-base
 		ExpansionEscortCount: 6
+		ExpansionEscortMinimum: 3
 		# Derrick squad composition (User 2026-07-31, corrected same day -- Flame Trooper needs Radar,
 		# which would have deadlocked the sequential build): 1 rocketeer, 1 engineer, 1 mg, 1 mg.
 		# Escalation (User 2026-07-22): after 2 failed waves at the primary choke, the next wave
