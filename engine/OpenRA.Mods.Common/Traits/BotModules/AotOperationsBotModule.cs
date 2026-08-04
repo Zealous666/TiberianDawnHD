@@ -837,12 +837,14 @@ namespace OpenRA.Mods.Common.Traits
 			"otherwise win on raw cell count alone (User 2026-08-03).")]
 		public readonly int ExpansionBlossomBonus = 40;
 
-		[Desc("How long the convoy waits for a full escort before departing with what it has. The MCV",
-			"itself is mandatory; the escort is not worth missing the site over.")]
-		public readonly int ExpansionEscortWaitTicks = 4500;
+		[Desc("How long the convoy waits for the FULL escort before settling for ExpansionEscortMinimum.",
+			"Six light tanks take considerably longer than the old 4500 ticks while the same queue also",
+			"feeds attack waves -- confirmed from a log where escort production was still running",
+			"(5 of 6 outstanding) when the wait expired, so convoys left with 0 or 1 escorts.")]
+		public readonly int ExpansionEscortWaitTicks = 12000;
 
 		[Desc("Timeout for getting an MCV at all.")]
-		public readonly int ExpansionFormingTimeout = 12000;
+		public readonly int ExpansionFormingTimeout = 18000;
 
 		[Desc("Timeout for the drive (or crossing) to the site.")]
 		public readonly int ExpansionMoveTimeout = 12000;
@@ -2378,9 +2380,15 @@ namespace OpenRA.Mods.Common.Traits
 			return null;
 		}
 
-		// The expansion layout occupies roughly x -4..+3 and y -1..+8 around the yard's top-left cell
-		// (see memory/ai-base-expansion-layout.md). Every cell of that block must be on the map, be
-		// passable, carry no resources and hold no existing actor.
+		// The full expansion block must fit, INCLUDING the six dug-in tank posts around it (User
+		// 2026-08-03: "die fläche muss komplett bei der orts-wahl berücksichtigt werden inkl. der drum
+		// herum stehenden ltnks"). Relative to the yard's top-left cell the layout spans x -4..+3 and
+		// y -1..+8 (buildings, fence, gate); the guard posts sit at x -5 and +4, y -2, +3 and +8. The
+		// loop below therefore covers x -5..+4 and y -2..+8, which is exactly the union of both --
+		// see memory/ai-base-expansion-layout.md and AotExpansionMission.GuardPosts.
+		//
+		// Every cell must be on the map, passable, free of resources (building on the field would bury
+		// what the expansion came for) and free of existing structures.
 		bool LayoutFits(CPos yard)
 		{
 			for (var dx = -5; dx <= 4; dx++)

@@ -2969,15 +2969,13 @@ namespace OpenRA.Mods.Common.Traits
 						break;
 					}
 
-					// The deployed yard is a NEW actor, so watch for it appearing rather than trying
-					// to track the MCV through its own transformation. Anchored on the MCV's OWN cell,
-					// not on the planned site: an MCV blocked a few cells short still deploys where it
-					// stands, and searching around the site missed it entirely -- the mission then timed
-					// out while a perfectly good yard stood there with nothing ever built around it
-					// (User 2026-08-03: "an keinem einzigen construction yard ... Gebäude daneben").
+					// The deployed yard is a NEW actor, so watch for it appearing rather than trying to
+					// track the MCV through its own transformation. The MCV only reaches this phase
+					// standing ON Site, so the yard is expected exactly there -- a tolerance here would
+					// silently accept a shifted yard that the layout no longer fits around.
 					yard = Ops.World.Actors.FirstOrDefault(a => a.Owner == Ops.Player && !a.IsDead && a.IsInWorld
 						&& Ops.Info.ConstructionYardTypes.Contains(a.Info.Name)
-						&& (a.Location - mcv.Location).LengthSquared <= Ops.Info.ExpansionArriveRadius2);
+						&& a.Location == Site);
 
 					if (yard != null)
 					{
@@ -3022,7 +3020,12 @@ namespace OpenRA.Mods.Common.Traits
 				return;
 			}
 
-			if ((mcv.Location - Site).LengthSquared <= Ops.Info.ExpansionArriveRadius2)
+			// EXACT cell, not "close enough" (User 2026-08-03: "der deploy-platz des MCV muss exakt da
+			// sein, wo im expansion-bauplan der construction yard platziert ist"). The whole layout is
+			// expressed as offsets from the yard's top-left cell, so a yard one cell off shifts every
+			// building, the fence and the six guard posts with it -- and the site was validated for
+			// exactly this cell, not for its neighbours.
+			if (mcv.Location == Site)
 			{
 				phase = Phase.Deploying;
 				phaseTicks = 0;

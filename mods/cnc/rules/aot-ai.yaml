@@ -851,11 +851,11 @@ Player:
 		# Typen, die eine Mission AKTIV angefordert hat -- siehe Kommentar dort.
 		EnableExpansion: True
 		ExpansionMcvTypes: aot-mcv-age1, aot-mcv-age0
-		# ⚠️ Die LTNK-Varianten laufen ALLE ueber die Starport-Queue (BulkProductionQueue). Ist der
-		# Starport gerade blockiert oder liefert nichts, kommt NIE eine Eskorte zustande -- genau
-		# deshalb fuhr der MCV zuvor allein los. Deshalb Fallbacks aus der normalen Fahrzeug-Queue
-		# dahinter: erst der eigentliche Light Tank, dann was ohne Starport gebaut werden kann.
-		ExpansionEscortTypes: aot-ltnk-tick, aot-ltnk-laser, aot-ltnk-base, aot-ttnk-base, aot-bggy-laser, aot-bggy-base
+		# Reine Light-Tank-Eskorte (User-Vorgabe "6 light-tanks"). KEINE Fallbacks noetig: die
+		# Starport-Queue des Airfields liefert LTNKs zuverlaessig -- im Log 53x "produce aot-ltnk-base
+		# for expansion (escort)" plus 63 Claims. Der MCV fuhr NICHT ohne Eskorte los, er ist ihr
+		# davongefahren (Konvoi-Zusammenhalt, in AotExpansionMission.TickMoving behoben).
+		ExpansionEscortTypes: aot-ltnk-tick, aot-ltnk-laser, aot-ltnk-base
 		ExpansionEscortCount: 6
 		ExpansionEscortMinimum: 3
 		# Derrick squad composition (User 2026-07-31, corrected same day -- Flame Trooper needs Radar,
