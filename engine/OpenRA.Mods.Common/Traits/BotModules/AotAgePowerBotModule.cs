@@ -26,6 +26,7 @@
 // === Ende aotmod ===
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Collections.Frozen;
 using OpenRA.Traits;
 
@@ -52,6 +53,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		SupportPowerManager supportPowerManager;
 		PlayerResources playerResources;
+		AotOperationsBotModule[] ops = [];
 
 		public AotAgePowerBotModule(Actor self, AotAgePowerBotModuleInfo info)
 			: base(info)
@@ -63,12 +65,31 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			supportPowerManager = self.Owner.PlayerActor.Trait<SupportPowerManager>();
 			playerResources = self.Owner.PlayerActor.Trait<PlayerResources>();
+
+			// TraitsImplementing, not TraitOrDefault: the player actor carries one operations module
+			// per faction and TraitOrDefault throws on the second one.
+			ops = self.Owner.PlayerActor.TraitsImplementing<AotOperationsBotModule>().ToArray();
 		}
 
 		void IBotTick.BotTick(IBot bot)
 		{
+			// Saving for the next Age is the single highest-priority spend -- EXCEPT while the economy
+			// itself is gone (User-Fund 2026-08-04). A bot that has lost its last ore transporter, with
+			// no refinery and no harvester, has no income at all; hoarding 5000 credits for an Age
+			// upgrade while the replacement transporter cannot be paid for is exactly backwards. Save()
+			// takes the money off the account via TakeCash, so this module really does starve the
+			// replacement. Anything already put aside is released so it can be spent on the transporter.
+			var emergency = ops.Any(o => o.EconomyEmergency());
+
 			foreach (var key in Info.PowerOrderNames)
 			{
+				if (emergency)
+				{
+					savings.TryGetValue(key, out var held);
+					Refund(key, held);
+					continue;
+				}
+
 				savings.TryGetValue(key, out var saved);
 
 				if (!supportPowerManager.Powers.TryGetValue(key, out var power) || power.Disabled)

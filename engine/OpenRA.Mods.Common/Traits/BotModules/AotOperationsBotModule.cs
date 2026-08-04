@@ -2605,7 +2605,7 @@ namespace OpenRA.Mods.Common.Traits
 		// While that state holds, Ops stops asking for anything at all so the replacement can actually
 		// be paid for. Deliberately bounded to the bootstrap phase (user spec): once a refinery or a
 		// harvester exists the economy no longer stands on a single unit and the rule lapses.
-		bool EconomyEmergency()
+		public bool EconomyEmergency()
 		{
 			if (Info.EconomyTransporterTypes.Length == 0)
 				return false;
