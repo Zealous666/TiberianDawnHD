@@ -2489,20 +2489,45 @@ namespace OpenRA.Mods.Common.Traits
 				.Select(a => a.Location)
 				.ToList();
 
+			// Any ENEMY building, not just a construction yard (User-Fund 2026-08-04: "der goldene
+			// spieler hat seinen MCV zum spawn einer der feindlichen basen geschickt"). A yard-only
+			// test passed a spawn whose owner had deployed further along or whose base had simply
+			// sprawled past the clearance, so the marker looked free while sitting in enemy territory.
+			var enemyBuildings = World.Actors
+				.Where(a => !a.IsDead && a.IsInWorld
+					&& a.Owner != Player
+					&& Player.RelationshipWith(a.Owner) != PlayerRelationship.Ally
+					&& a.Info.HasTraitInfo<BuildingInfo>())
+				.Select(a => a.Location)
+				.ToList();
+
+			// Safety is judged on the CELL WE ACTUALLY RETURN, not on the spawn marker (User-Fund
+			// 2026-08-04: "der goldene spieler hat seinen MCV zum spawn einer der feindlichen basen
+			// geschickt"). The old code filtered the marker and then, when the layout did not fit
+			// there because an enemy base was standing on it, let an unfiltered ring search hand back
+			// a neighbouring cell -- chosen site 150,93 for spawn 151,94, one cell diagonally into
+			// the enemy base. Relying on Intel.EnemySpawns alone is not enough either: it only lists
+			// players this bot is actually at war with and came back short in testing.
+			bool Safe(CPos c) =>
+				!yards.Any(y => (y - c).Length < Info.ExpansionSpawnClearance)
+				&& !enemyBuildings.Any(b => (b - c).Length < Info.ExpansionEnemyClearance);
+
+			// A spawn either works as-is or is dropped entirely, and the next one is tried (User
+			// 2026-08-04: "wenn ein spawn nicht geeignet ist, soll er den ganz verwerfen und den
+			// nächsten spawn prüfen ... eine ringsuche bringt hier nicht viel"). The ring search that
+			// used to run here is exactly what put a site one cell diagonally into an enemy base:
+			// once the marker itself is unusable, anything near it is suspect too. If no spawn
+			// qualifies, the caller falls through to the tiberium-field tiers.
 			foreach (var spawn in Intel.AllSpawns
 				.Where(s => (s - home).Length >= Info.ExpansionMinDistance)
-				.Where(s => !yards.Any(y => (y - s).Length < Info.ExpansionSpawnClearance))
+				.Where(s => !Intel.EnemySpawns.Contains(s) && s != Intel.OwnSpawn)
+				.Where(Safe)
 				.OrderBy(s => (s - home).LengthSquared))
 			{
 				if (LayoutFits(spawn))
 					return spawn;
 
-				// Slightly off the spawn marker is fine -- the marker itself is a single cell and the
-				// mapper's tiberium usually starts right beside it.
-				for (var r = 1; r <= Info.ExpansionSiteOffset + 6; r++)
-					foreach (var c in AotOpsUtils.Ring(spawn, r))
-						if (LayoutFits(c))
-							return c;
+				Log($"spawn {spawn} skipped: layout does not fit there");
 			}
 
 			return null;
