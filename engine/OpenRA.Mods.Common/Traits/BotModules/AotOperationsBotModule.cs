@@ -832,6 +832,17 @@ namespace OpenRA.Mods.Common.Traits
 			"expansion, which is what the six deployed tick tanks in the user's layout were.")]
 		public readonly string[] ExpansionEscortTypes = [];
 
+		[Desc("Attack waves that must go out between two engineer raids (User 2026-08-04: '2x regular",
+			"waves 1x heliraid später 1x heli/subterrain raid'). Raids punctuate the pressure rather",
+			"than competing with it, and further operations can hook into the same counter instead of",
+			"inventing their own cadence.")]
+		public readonly int RaidAfterWaves = 2;
+
+		[Desc("Credits the bot saves up before assembling an engineer raid squad. Same reasoning as",
+			"ExpansionOrderCashThreshold: without it the raid nibbles at the balance from the moment",
+			"it is scheduled and competes with the attack waves for every credit.")]
+		public readonly int EngineerRaidCashThreshold = 3000;
+
 		[Desc("Credits the bot saves up before ordering the expansion convoy AT ONCE (User 2026-08-04).",
 			"Ordering piecemeal as credits trickled in meant each unit ate the balance the next one",
 			"needed and the convoy never completed. Everything else is paused while the expansion holds",
@@ -1025,6 +1036,7 @@ namespace OpenRA.Mods.Common.Traits
 		int raidTicks;
 		int groundLatchTicks;
 		int statusTicks;
+		int wavesSinceRaid;
 		int expansionTicks;
 		int expansionSiteLogTicks;
 		int raidGateLogTicks;
@@ -2195,6 +2207,7 @@ namespace OpenRA.Mods.Common.Traits
 						waveIndex++;
 						var wave = new AotRegularWaveMission(this, waveIndex, useSecondaryRoute);
 						Missions.Add(wave);
+						wavesSinceRaid++;
 						Log($"wave {waveIndex} scheduled (tier {AgeTier()}, secondaryRoute={useSecondaryRoute}, streak={waveFailureStreak}, random={randomEscalationPhase})");
 					}
 				}
@@ -2545,6 +2558,14 @@ namespace OpenRA.Mods.Common.Traits
 			if (ExpansionHoldsPriority())
 				return;
 
+			// Attack rhythm (User 2026-08-04): "2x regular waves 1x heliraid später 1x
+			// heli/subterrain raid". A raid only goes out once RaidAfterWaves attack waves have been
+			// launched since the last one, so raids punctuate the pressure instead of competing with
+			// it -- and the pattern still holds once further operations are added, because each of
+			// them can hook into the same counter rather than inventing its own cadence.
+			if (wavesSinceRaid < Info.RaidAfterWaves)
+				return;
+
 			var heliReady = Info.EnableHeliRaids
 				&& AgeTier() >= Info.HeliRaidAgeTier
 				&& Info.HeliRaidTransportTypes.Length > 0
@@ -2718,11 +2739,13 @@ namespace OpenRA.Mods.Common.Traits
 
 			if (ground)
 			{
+				wavesSinceRaid = 0;
 				Missions.Add(new AotGroundRaidMission(this, yard));
 				Log($"ground engineer raid -> {yard.Info.Name}@{yard.Location}");
 			}
 			else
 			{
+				wavesSinceRaid = 0;
 				Missions.Add(new AotHeliRaidMission(this, yard));
 				Log($"heli engineer raid -> {yard.Info.Name}@{yard.Location} (danger tier {HeliRaidDropTier})");
 			}

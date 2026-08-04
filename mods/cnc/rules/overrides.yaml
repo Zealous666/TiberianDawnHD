@@ -837,6 +837,14 @@ TMPL:
 # und hoeher). Sichtbarkeit wie in der Queue-Fassung: Age 1 sofort, Age 2/3 erst nach dem
 # Vorgaenger (RequiresCondition), nach Kauf weg (OneShot).
 Player:
+	# === Cash-Logger (User-Wunsch 2026-08-04) ===
+	# Schreibt alle 10 s eine Zeile pro Spieler ins debug.log, Praefix [AotCash]. Dient der
+	# Balance-Beobachtung waehrend eines Tests ("ab spaeterem Age 1 ist zu viel Cash im Umlauf") --
+	# die Ingame-Anzeige zeigt nur den eigenen Stand und nur den Moment, nicht den Verlauf und
+	# nicht die KI. Rein diagnostisch, greift nirgends ins Spiel ein.
+	AotCashLog:
+		Interval: 250
+
 	# Low Power pausiert den Ladebalken wie bei jeder anderen Super Power. Auf Gebaeuden kommt
 	# diese Condition aus ^DisabledOverlay (engine defaults.yaml); der Spieler-Aktor erbt davon
 	# nichts, deshalb hier eigenstaendig.
@@ -947,13 +955,12 @@ Player:
 		MaxCapacity: 5
 		QueueLimit: 5
 		PayUpFront: true
-		# Lowered 500 -> 200 (User 2026-08-01, option 2 of two proposed fixes for LTNK contention): the
-		# 5-slot cart fills up fast once TTNK-Flame is researched (both TTNK-Flame and LTNK route through
-		# this same queue), and a wave's one-shot Compose() sees a COMPLETELY empty BuildableItems() list
-		# while the cart is full or delivering -- confirmed via diagnostic log (cart=5, buildableNow=0)
-		# blocking the very next wave's composition. A shorter delivery cycle frees the shared queue up
-		# faster so back-to-back waves are less likely to collide.
-		DeliveryDelay: 200
+		# 500 -> 200 (2026-08-01, gegen LTNK-Queue-Kollisionen) -> 500 zurueck (User 2026-08-04):
+		# 200 Ticks sind nur ~8 Sekunden, der Airstrip lieferte damit praktisch im Dauerbetrieb.
+		# Die urspruengliche Begruendung ist ausserdem entfallen: TTNK-Flame und die V2-Varianten
+		# laufen inzwischen ueber LightVehicle.Nod statt ueber diese Queue, der 5-Slot-Karren
+		# fuellt sich also gar nicht mehr so schnell.
+		DeliveryDelay: 500
 		LowPowerModifier: 150
 		BlockedAudio: NoBuild
 		BlockedTextNotification: notification-unable-to-build-more

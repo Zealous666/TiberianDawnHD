@@ -2240,7 +2240,8 @@ namespace OpenRA.Mods.Common.Traits
 
 		public override string Status() =>
 			$"{phase.ToString().ToLowerInvariant()}({Passengers().Count}p" +
-			$"{(Transport() != null ? "+T" : "-T")},{Ops.OpenRequests(this)}open)";
+			$"{(Transport() != null ? "+T" : "-T")},{Ops.OpenRequests(this)}open" +
+			$"{(squadFunded ? "" : $",saving {Ops.AvailableCash()}/{Ops.Info.EngineerRaidCashThreshold}")})";
 
 		protected Phase phase = Phase.Forming;
 		protected int formingTicks;
@@ -2250,6 +2251,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		readonly (string Role, string[] Chain)[] squadOrder;
 		int squadStep;
+		bool squadFunded;
 
 		protected AotEngineerRaidMission(AotOperationsBotModule ops, string name)
 			: base(ops, name)
