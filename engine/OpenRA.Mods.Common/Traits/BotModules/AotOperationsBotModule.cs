@@ -2484,7 +2484,8 @@ namespace OpenRA.Mods.Common.Traits
 					if (LayoutFits(c))
 						return c;
 
-			Log($"expansion site near {site} rejected: the layout does not fit anywhere around it");
+			LayoutFits(site, out var siteWhy);
+			Log($"expansion site near {site} rejected: no fitting cell around it (at the centre: {siteWhy})");
 			return null;
 		}
 
@@ -2537,47 +2538,60 @@ namespace OpenRA.Mods.Common.Traits
 				.Where(Safe)
 				.OrderBy(s => (s - home).LengthSquared))
 			{
-				if (LayoutFits(spawn))
+				if (LayoutFits(spawn, out var why))
 					return spawn;
 
-				Log($"spawn {spawn} skipped: layout does not fit there");
+				Log($"spawn {spawn} skipped: {why}");
 			}
 
 			return null;
 		}
 
-		// The full expansion block must fit, INCLUDING the six dug-in tank posts around it (User
-		// 2026-08-03: "die fläche muss komplett bei der orts-wahl berücksichtigt werden inkl. der drum
-		// herum stehenden ltnks"). Relative to the yard's top-left cell the layout spans x -4..+3 and
-		// y -1..+8 (buildings, fence, gate); the guard posts sit at x -5 and +4, y -2, +3 and +8. The
-		// loop below therefore covers x -5..+4 and y -2..+8, which is exactly the union of both --
-		// see memory/ai-base-expansion-layout.md and AotExpansionMission.GuardPosts.
+		bool LayoutFits(CPos yard) => LayoutFits(yard, out _);
+
+		// The walled compound -- buildings AND fence -- must be on clear ground: x -4..+3, y -1..+8
+		// relative to the yard's top-left cell (see memory/ai-base-expansion-layout.md). Every cell of
+		// it has to be on the map, passable, free of existing structures and free of resources: the
+		// fence belongs BESIDE the tiberium, not in it (User 2026-08-04).
 		//
-		// Every cell must be on the map, passable, free of resources (building on the field would bury
-		// what the expansion came for) and free of existing structures.
-		bool LayoutFits(CPos yard)
+		// The six guard posts at x -5 and +4 are deliberately NOT part of the test. They are where the
+		// escort digs in, and a tank may perfectly well sit in tiberium -- gating the whole site on them
+		// is what rejected two entirely unused spawns and several usable fields in testing.
+		bool LayoutFits(CPos yard, out string reason)
 		{
-			for (var dx = -5; dx <= 4; dx++)
+			for (var dx = -4; dx <= 3; dx++)
 			{
-				for (var dy = -2; dy <= 8; dy++)
+				for (var dy = -1; dy <= 8; dy++)
 				{
 					var c = yard + new CVec(dx, dy);
-					if (!World.Map.Contains(c) || !Intel.IsPassable(c))
+					if (!World.Map.Contains(c))
+					{
+						reason = $"{c} off map";
 						return false;
+					}
 
-					// LIVE resource layer, not Map.Resources (User-Fund 2026-08-04: "hier wurde offenbar
-					// tiberium beim pinken spieler nicht berücksichtigt als bau-blocker"). Map.Resources
-					// is the map's INITIAL data -- tiberium grows and gets harvested, so a field that
-					// spread after map load was invisible to it and the yard was planted right in it.
-					// The base planner uses IResourceLayer for exactly this reason.
-					if (resourceLayer != null && resourceLayer.GetResource(c).Type != null)
+					if (!Intel.IsPassable(c))
+					{
+						reason = $"{c} impassable";
 						return false;
+					}
 
 					if (World.ActorMap.GetActorsAt(c).Any(a => a.Info.HasTraitInfo<BuildingInfo>()))
+					{
+						reason = $"{c} occupied by a building";
 						return false;
+					}
+
+					const bool building = true;
+					if (building && resourceLayer != null && resourceLayer.GetResource(c).Type != null)
+					{
+						reason = $"{c} would bury resources";
+						return false;
+					}
 				}
 			}
 
+			reason = null;
 			return true;
 		}
 
