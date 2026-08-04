@@ -2991,7 +2991,19 @@ namespace OpenRA.Mods.Common.Traits
 
 					if (phaseTicks >= Ops.Info.ExpansionDeployTimeout)
 					{
-						Log($"MCV would not deploy at {mcv.Location} -> mission over");
+						// Name every own building sitting on the site, so a deploy that produced an
+						// actor NOT in ConstructionYardTypes (or landed on the wrong cell) is visible
+						// rather than showing up as a yard standing around with nothing built next to
+						// it (User 2026-08-03: "er baut danach nichts daneben").
+						var here = Ops.World.ActorMap.GetActorsAt(Site)
+							.Concat(Ops.World.ActorMap.GetActorsAt(mcv.Location))
+							.Where(a => a.Owner == Ops.Player)
+							.Select(a => a.Info.Name)
+							.Distinct();
+
+						Log($"MCV would not deploy: mcv@{mcv.Location} site={Site} " +
+							$"ownActorsThere=[{string.Join(", ", here)}] " +
+							$"expectedYardTypes=[{string.Join(", ", Ops.Info.ConstructionYardTypes)}] -> mission over");
 						Finish();
 					}
 
@@ -3068,6 +3080,20 @@ namespace OpenRA.Mods.Common.Traits
 		void TickHolding(IBot bot)
 		{
 			var escorts = Escorts();
+
+			// Keep the guard at full strength for as long as the expansion stands (User 2026-08-03:
+			// "sie müssen immer expansion bereich bewachen und ersetzt werden, wenn sie zerstört
+			// werden"). The escort used to be requested exactly once, when the mission was created, so
+			// every tank lost to a raid was simply gone and the expansion slowly ended up undefended.
+			if (yard != null && escorts.Count < Ops.Info.ExpansionEscortCount
+				&& Ops.OpenRequests(this, "escort") == 0
+				&& Ops.Info.ExpansionEscortTypes.Length > 0)
+			{
+				var missing = Ops.Info.ExpansionEscortCount - escorts.Count;
+				Ops.QueueRequest(this, "escort", Ops.Info.ExpansionEscortTypes, missing);
+				Log($"guard below strength ({escorts.Count}/{Ops.Info.ExpansionEscortCount}) -> ordering {missing} replacement(s)");
+			}
+
 			if (escorts.Count == 0 || yard == null)
 				return;
 

@@ -832,10 +832,16 @@ namespace OpenRA.Mods.Common.Traits
 			"main base only plus the one expansion. Counted from the world, not from mission state.")]
 		public readonly int ExpansionMaxYards = 1;
 
-		[Desc("Score bonus per blossom tree on a candidate field. Weighted heavily on purpose: a",
-			"regrowing field keeps paying out long after a plain one is mined out, and plain fields",
-			"otherwise win on raw cell count alone (User 2026-08-03).")]
-		public readonly int ExpansionBlossomBonus = 40;
+		[Desc("Score offset for a field that has at least one blossom tree. Large enough to act as a",
+			"TIER rather than a weight (User 2026-08-03: blossom fields always rank above plain ones,",
+			"however big the plain one is -- a regrowing field keeps paying out after a bigger dead one",
+			"is mined out). Size and distance then decide within each class.")]
+		public readonly int ExpansionBlossomTierBonus = 1000;
+
+		[Desc("Cell distance from a start position within which any construction yard makes that spawn",
+			"count as taken. Unclaimed start positions are the first choice for an expansion: flat,",
+			"pre-cleared and placed next to tiberium by the mapper.")]
+		public readonly int ExpansionSpawnClearance = 20;
 
 		[Desc("How long the convoy waits for the FULL escort before settling for ExpansionEscortMinimum.",
 			"Six light tanks take considerably longer than the old 4500 ticks while the same queue also",
@@ -2284,6 +2290,17 @@ namespace OpenRA.Mods.Common.Traits
 				return null;
 
 			var home = BaseCentre();
+
+			// PRIORITY 1: an unclaimed start position (User 2026-08-03). On a map with more spawn
+			// points than players these are the best real estate on the board -- flat, pre-cleared,
+			// and placed next to tiberium by the mapper. "Unused" means no construction yard of ANY
+			// player anywhere near it, which also rules out a spawn somebody already expanded onto.
+			var freeSpawn = FindFreeSpawnSite(home);
+			if (freeSpawn != null)
+			{
+				Log($"expansion site: unused spawn point at {freeSpawn.Value}");
+				return freeSpawn;
+			}
 			var enemyBuildings = World.Actors
 				.Where(a => !a.IsDead && a.IsInWorld
 					&& a.Owner != Player
@@ -2338,9 +2355,14 @@ namespace OpenRA.Mods.Common.Traits
 				// is for BLOSSOM TREES (ResourceCreatorTypes = split2/split3/splitblue), not ore mines:
 				// a regrowing field keeps paying out, and ore mines mostly sit at enemy spawns anyway
 				// (User 2026-08-03). Purely a bonus -- a plain big field is a perfectly good site.
+				// PRIORITY 2 and 3 (User 2026-08-03): fields WITH a blossom tree always outrank fields
+				// without one, regardless of size -- a regrowing field is worth more than a bigger dead
+				// one. Only within the same class does size (and then proximity) decide. Implemented as
+				// a tier offset rather than a weight so a very large plain field can never overtake a
+				// blossom field, which a plain bonus allowed.
 				var score = indice.ResourceCellsCount
 					- distHome
-					+ (indice.ResourceCreatorLocs.Length * Info.ExpansionBlossomBonus);
+					+ (indice.ResourceCreatorLocs.Length > 0 ? Info.ExpansionBlossomTierBonus : 0);
 
 				if (score > bestScore)
 				{
@@ -2377,6 +2399,39 @@ namespace OpenRA.Mods.Common.Traits
 						return c;
 
 			Log($"expansion site near {site} rejected: the layout does not fit anywhere around it");
+			return null;
+		}
+
+		// An unclaimed start position, if there is one: no construction yard of ANY player within
+		// ExpansionSpawnClearance, and far enough from our own base to count as an expansion. The
+		// layout has to fit there too -- a spawn is flat by construction, but it may sit right on the
+		// tiberium the mapper put next to it, so the same footprint test decides.
+		CPos? FindFreeSpawnSite(CPos home)
+		{
+			if (Intel == null || !Intel.Ready)
+				return null;
+
+			var yards = World.Actors
+				.Where(a => !a.IsDead && a.IsInWorld && Info.ConstructionYardTypes.Contains(a.Info.Name))
+				.Select(a => a.Location)
+				.ToList();
+
+			foreach (var spawn in Intel.AllSpawns
+				.Where(s => (s - home).Length >= Info.ExpansionMinDistance)
+				.Where(s => !yards.Any(y => (y - s).Length < Info.ExpansionSpawnClearance))
+				.OrderBy(s => (s - home).LengthSquared))
+			{
+				if (LayoutFits(spawn))
+					return spawn;
+
+				// Slightly off the spawn marker is fine -- the marker itself is a single cell and the
+				// mapper's tiberium usually starts right beside it.
+				for (var r = 1; r <= Info.ExpansionSiteOffset + 6; r++)
+					foreach (var c in AotOpsUtils.Ring(spawn, r))
+						if (LayoutFits(c))
+							return c;
+			}
+
 			return null;
 		}
 
