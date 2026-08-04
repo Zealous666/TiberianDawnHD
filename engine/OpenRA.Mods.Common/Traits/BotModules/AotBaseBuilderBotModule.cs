@@ -1492,6 +1492,20 @@ namespace OpenRA.Mods.Common.Traits
 			return open[0];
 		}
 
+		// Is a refinery something this player could actually start right now? Mirrors BuildableVariant's
+		// own test, but for the PROC role specifically and without needing a step object.
+		bool RefineryBuildable()
+		{
+			if (planner == null)
+				return false;
+
+			foreach (var v in planner.Info.ProcTypes)
+				if (world.Map.Rules.Actors.TryGetValue(v, out var ai) && QueueFor(v)?.BuildableItems().Any(b => b.Name == ai.Name) == true)
+					return true;
+
+			return false;
+		}
+
 		void StartStep(IBot bot, AotPlanStep step)
 		{
 			// ECONOMY EMERGENCY (User 2026-08-04: "alle prio in oreT bis mind. eine refinery inkl.
@@ -1502,8 +1516,16 @@ namespace OpenRA.Mods.Common.Traits
 			// The REFINERY is the deliberate exception: it is the second way out of exactly this hole,
 			// and in testing a bot rescued itself precisely that way, funding one from a derrick's
 			// trickle. Blocking it would have removed the escape route this rule exists to protect.
+			// ...and only once the refinery is genuinely BUILDABLE. It needs prerequisites of its own
+			// (for Nod: airstrip, silo, the Secret Tech upgrade), so blocking every other step while
+			// those are still missing would deadlock the very escape route above -- the refinery could
+			// then never be reached (User 2026-08-04: "und für die voraussetzungen, die er für die
+			// refinery braucht"). While it is not yet buildable the Rhythm runs normally and works
+			// towards exactly those prerequisites; the hold bites the moment the refinery itself is
+			// the thing that could be bought.
 			if (ops != null && ops.Info.Faction == Info.Faction && ops.EconomyEmergency()
-				&& step.Role != "PROC" && !step.Role.StartsWith("EXP_", StringComparison.Ordinal))
+				&& step.Role != "PROC" && !step.Role.StartsWith("EXP_", StringComparison.Ordinal)
+				&& RefineryBuildable())
 			{
 				if (++economyPauseLog % 16 == 0)
 					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Economy emergency: holding {step.Role} until the economy is back");
