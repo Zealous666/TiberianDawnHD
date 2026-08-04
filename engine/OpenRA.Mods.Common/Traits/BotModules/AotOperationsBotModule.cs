@@ -832,6 +832,12 @@ namespace OpenRA.Mods.Common.Traits
 			"expansion, which is what the six deployed tick tanks in the user's layout were.")]
 		public readonly string[] ExpansionEscortTypes = [];
 
+		[Desc("Credits the bot saves up before ordering the expansion convoy AT ONCE (User 2026-08-04).",
+			"Ordering piecemeal as credits trickled in meant each unit ate the balance the next one",
+			"needed and the convoy never completed. Everything else is paused while the expansion holds",
+			"priority, so the balance genuinely accumulates.")]
+		public readonly int ExpansionOrderCashThreshold = 6000;
+
 		[Desc("Escort size. Four rather than the six of the original briefing (User 2026-08-04): at",
 			"1500 credits each, six tanks plus a 3000-credit MCV is 12000 for one convoy -- roughly",
 			"four minutes of an Age-1 bot's entire income, and in testing nothing ever finished. The",

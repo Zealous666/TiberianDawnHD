@@ -2843,6 +2843,7 @@ namespace OpenRA.Mods.Common.Traits
 		public override string Status() =>
 			$"{phase.ToString().ToLowerInvariant()}(mcv{(Mcv() != null ? "+" : "-")}," +
 			$"esc{Escorts().Count}/{Ops.Info.ExpansionEscortCount},{Site}" +
+			$"{(ordered ? "" : $",saving {Ops.AvailableCash()}/{Ops.Info.ExpansionOrderCashThreshold}")}" +
 			$"{(HoldsPriority ? ",PRIO" : "")})";
 
 		// While the convoy is being assembled and delivered, attack waves and engineer raids stand
@@ -2854,6 +2855,7 @@ namespace OpenRA.Mods.Common.Traits
 		// the moment the yard is up. An expansion that cannot be finished -- no site, no escort, MCV
 		// lost on the way -- therefore stalls the army for a bounded time and never permanently.
 		int priorityTicks;
+		bool ordered;
 
 		public bool HoldsPriority =>
 			yard == null
@@ -2872,14 +2874,6 @@ namespace OpenRA.Mods.Common.Traits
 			: base(ops, "expansion")
 		{
 			Site = site;
-
-			// MCV first: it IS the mission. Escorts are requested alongside because they come from a
-			// different queue (vehicles vs. the MCV's own), so they cost the MCV no waiting time.
-			if (ops.Info.ExpansionMcvTypes.Length > 0)
-				ops.QueueRequest(this, "mcv", ops.Info.ExpansionMcvTypes, 1);
-
-			if (ops.Info.ExpansionEscortTypes.Length > 0 && ops.Info.ExpansionEscortCount > 0)
-				ops.QueueRequest(this, "escort", ops.Info.ExpansionEscortTypes, ops.Info.ExpansionEscortCount);
 
 			Log($"expansion planned at {site}");
 		}
@@ -2931,6 +2925,29 @@ namespace OpenRA.Mods.Common.Traits
 				case Phase.Forming:
 				{
 					formingTicks += Ops.Info.MissionInterval;
+
+					// SAVE UP, THEN ORDER THE WHOLE CONVOY AT ONCE (User 2026-08-04: "der spieler
+					// spart bis er 6000 hat und dann: 4 ltnks auf einmal bestellt und den mcv in
+					// auftrag gibt"). Ordering piecemeal as credits trickled in meant each unit ate
+					// the balance the next one needed, and with waves running alongside the convoy
+					// never completed at all -- two bots sat at zero cash with no escort for minutes.
+					// Everything else is already paused while this mission holds priority, so the
+					// balance genuinely accumulates instead of being spent elsewhere.
+					if (!ordered)
+					{
+						if (Ops.AvailableCash() < Ops.Info.ExpansionOrderCashThreshold)
+							break;
+
+						if (Ops.Info.ExpansionMcvTypes.Length > 0)
+							Ops.QueueRequest(this, "mcv", Ops.Info.ExpansionMcvTypes, 1);
+
+						if (Ops.Info.ExpansionEscortTypes.Length > 0 && Ops.Info.ExpansionEscortCount > 0)
+							Ops.QueueRequest(this, "escort", Ops.Info.ExpansionEscortTypes, Ops.Info.ExpansionEscortCount);
+
+						ordered = true;
+						Log($"saved up {Ops.AvailableCash()} -> ordering MCV + {Ops.Info.ExpansionEscortCount} escort(s) at once");
+					}
+
 					var mcv = Mcv();
 					var escortCount = Escorts().Count;
 

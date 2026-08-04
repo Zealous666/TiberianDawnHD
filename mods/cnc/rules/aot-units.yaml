@@ -80,7 +80,7 @@ aot-spy-nod:
 		Bounds: 512, 725, -42, -170
 		DecorationBounds: 512, 725, -42, -170
 	Valued:
-		Cost: 700
+		Cost: 1050
 	Tooltip:
 		Name: Chameleon Spy
 	UpdatesPlayerStatistics:
@@ -1991,6 +1991,24 @@ TRUCK:
 # Proxy-Aktor-Pattern wie MCV/JEEP/MTNK: -Buildable: im Basis-Aktor, Buildable im Proxy.
 HARV:
 	-Buildable:
+	# === Ertrag pro Fuhre gesenkt (User-Wunsch 2026-08-04) ===
+	# 20 -> 14 Ballen. Bei unveraendertem ResourceValues (Tiberium 35, BlueTiberium 60, siehe
+	# engine/mods/cnc/rules/player.yaml) sind das 490 statt 700 Credits pro Fuhre gruen bzw.
+	# 840 statt 1200 blau -- rund 30% weniger.
+	#
+	# Bewusst NUR hier und NICHT ueber ResourceValues: der Wert pro Einheit gilt fuer jede
+	# Tiberium-Zelle der Karte. Ihn anzuheben haette den Gesamtwert des Feldes mit veraendert
+	# (und die Felder laenger halten lassen) -- gewollt war aber nur der Ertrag je Fuhre.
+	#
+	# Achtung Nebeneffekt: BaleLoadDelay (12) gilt PRO BALLEN. Der Harvester ist damit nach
+	# 168 statt 240 Ticks voll, faehrt also etwas haeufiger -- der Einkommensrueckgang pro
+	# Minute faellt dadurch kleiner aus als die 30% pro Fuhre.
+	StoresResources:
+		Capacity: 14
+	# Anzeige: 5 Kaestchen statt 7, damit ein Kaestchen rund 100 Credits entspricht (490/5 = 98).
+	# Rein kosmetisch, PipCount war noch nie an die Kapazitaet gekoppelt.
+	WithStoresResourcesPipsDecoration:
+		PipCount: 5
 	# === Carryall Harvester Transport (User-Wunsch 2026-08-01) ===
 	# Harvester-Seite der Dune-2000-Faehrlogik. Beides liegt fertig in Mods.Common:
 	#   CarryableHarvester meldet Transportbedarf an -- in BEIDE Richtungen, also beim Losfahren
@@ -2130,7 +2148,7 @@ aot-tran-gdi-cary:
 	# Preis 1000 (User-Wunsch 2026-08-01). TRANs Basispreis (750) galt bisher auch fuer den
 	# Carryall; sobald zusaetzlich die Faehr-Routine gekauft ist, uebernimmt der Proxy darunter.
 	Valued:
-		Cost: 1000
+		Cost: 1500
 	Buildable:
 		Queue: Aircraft.GDI
 		BuildPaletteOrder: 10
@@ -2148,7 +2166,7 @@ aot-tran-gdi-cary-ferry:
 	RenderSprites:
 		Image: aot-tran-cary
 	Valued:
-		Cost: 1500
+		Cost: 2250
 	Buildable:
 		Queue: Aircraft.GDI
 		BuildPaletteOrder: 10
@@ -2224,7 +2242,7 @@ aot-hind-base:
 	# NOD Basis-Heli: Preis 2000 (User-Wunsch 2026-08-01). Vorher erbten alle Heli-Proxies
 	# stumm die 1200 ihres Basis-Aktors.
 	Valued:
-		Cost: 2000
+		Cost: 3000
 	AmmoPool:
 		Ammo: 6
 	ReloadAmmoPool:
@@ -2283,7 +2301,7 @@ aot-harpy-upgraded:
 	# NOD nach Harpy-Upgrade: Preis 2500 (User-Wunsch 2026-08-01). Vorher erbten alle Heli-Proxies
 	# stumm die 1200 ihres Basis-Aktors.
 	Valued:
-		Cost: 2500
+		Cost: 3750
 	AmmoPool:
 		Ammo: 6
 	ReloadAmmoPool:
@@ -2304,7 +2322,7 @@ aot-harpy-upgraded-laser:
 	# NOD Harpy + Laser: Preis 3000 (User-Wunsch 2026-08-01). Vorher erbten alle Heli-Proxies
 	# stumm die 1200 ihres Basis-Aktors.
 	Valued:
-		Cost: 3000
+		Cost: 4500
 	AmmoPool:
 		Ammo: 6
 	ReloadAmmoPool:
@@ -2334,7 +2352,7 @@ AJET:
 		Condition: aot-firehawk
 		Prerequisites: aot-firehawk-upgrade
 	Valued:
-		Cost: 2500
+		Cost: 3750
 	Tooltip:
 		Name: GDI Fighter
 		RequiresCondition: !aot-firehawk
@@ -2503,7 +2521,7 @@ aot-ajet-firehawk:
 	RenderSprites:
 		Image: aot-ajet
 	Valued:
-		Cost: 3000
+		Cost: 4500
 	Buildable:
 		LockedGroup: aot-grp-ajet
 		BuildPaletteOrder: 10
@@ -3097,7 +3115,7 @@ aot-subapc:
 	Inherits: ^Vehicle
 	Inherits@EXPERIENCE: ^GainsExperience
 	Valued:
-		Cost: 800
+		Cost: 1200
 	-Tooltip:
 	Tooltip:
 		Name: actor-aot-subapc.name
@@ -3289,7 +3307,7 @@ aot-v2-napalm:
 	Inherits: aot-v2-base
 	# Napalm Rocket Launcher: Preis 1250 (User-Freigabe 2026-08-01, Staffelung Basis/+25%/+50%).
 	Valued:
-		Cost: 1250
+		Cost: 1900
 	Buildable:
 		LockedGroup: aot-grp-v2
 		BuildPaletteOrder: 40
@@ -3325,7 +3343,7 @@ aot-v2-toxic:
 	Inherits: aot-v2-napalm
 	# Toxic Rocket Launcher: Preis 1500 (User-Freigabe 2026-08-01, Staffelung Basis/+25%/+50%).
 	Valued:
-		Cost: 1500
+		Cost: 2250
 	Buildable:
 		LockedGroup: aot-grp-v2
 		BuildPaletteOrder: 40
@@ -3351,7 +3369,7 @@ aot-arty-howitzer:
 	Inherits: ARTY
 	# Howitzer: Preis 1000 (User-Freigabe 2026-08-01, Staffelung Basis/+25%/+50%).
 	Valued:
-		Cost: 1000
+		Cost: 1500
 	RenderSprites:
 		Image: arty
 	Buildable:
@@ -3455,7 +3473,7 @@ aot-arty-heavy:
 	Inherits@EXPERIENCE: ^GainsExperience
 	Inherits@AUTOTARGET: ^AutoTargetGround
 	Valued:
-		Cost: 1500
+		Cost: 2250
 	UpdatesPlayerStatistics:
 		AddToArmyValue: true
 	Buildable:
@@ -3676,7 +3694,7 @@ aot-cyborg:
 	Mobile:
 		Speed: 56
 	Valued:
-		Cost: 300
+		Cost: 450
 	Armament:
 		Weapon: aot-CyborgChainGun
 	Buildable:
@@ -3719,7 +3737,7 @@ aot-cyc2:
 	Mobile:
 		Speed: 48
 	Valued:
-		Cost: 2000
+		Cost: 3000
 	Armament:
 		Weapon: aot-CyCannon
 	Buildable:
@@ -3763,7 +3781,7 @@ aot-avatar:
 	Mobile:
 		Speed: 42
 	Valued:
-		Cost: 2500
+		Cost: 3750
 	GrantConditionOnPrerequisite@LASER:
 		Condition: aot-avatar-laser
 		Prerequisites: aot-avatar-laser-upgrade
@@ -4211,7 +4229,7 @@ aot-stnk-base:
 	# Basis-Stealth-Tank: Preis 1000 (User-Wunsch 2026-08-01). Beide Proxies erbten bisher stumm
 	# die 900 von STNK.
 	Valued:
-		Cost: 1000
+		Cost: 1500
 	RenderSprites:
 		Image: stnk
 	Buildable:
@@ -4230,7 +4248,7 @@ aot-stnk-cargo:
 	# nach Cargo-Upgrade: Preis 1500 (User-Wunsch 2026-08-01). Beide Proxies erbten bisher stumm
 	# die 900 von STNK.
 	Valued:
-		Cost: 1500
+		Cost: 2250
 	RenderSprites:
 		Image: stnk
 	Buildable:
@@ -4639,7 +4657,7 @@ aot-cruiser:
 	RenderSprites:
 		Image: aot-cruiser
 	Valued:
-		Cost: 2400
+		Cost: 3600
 	UpdatesPlayerStatistics:
 		AddToArmyValue: true
 	Buildable:
