@@ -54,21 +54,54 @@ namespace OpenRA.Mods.Common.Traits
 			"core step must NEVER be silently abandoned, since a later Age upgrade may depend on it.")]
 		public readonly int DefenseStepTimeoutTicks = 6000;
 
-		[ActorReference]
-		[Desc("Age-upgrade actors, age-ordered (index 0 unlocks Age 1, index 1 Age 2, index 2 Age 3).",
-			"Fired directly by THIS module the moment the corresponding Age tier's entire planned",
-			"Rhythm (core + defence) is done, or AgeUpgradeFallbackTimeoutTicks elapses -- bypassing",
-			"the generic BaseBuilderBotModule@aotupgrades weighted-random pick entirely for these",
-			"actors (user spec 2026-07-31: the age-jump used to compete for cash against a base that",
-			"was still mid-build, e.g. an Airfield going up in Age 1 while the Refinery never got its",
-			"turn). Leave empty to disable -- the generic upgrades module keeps handling it as before.")]
-		public readonly string[] AgeUpgradeTypes = [];
+		[Desc("CORE roles that outrank everything else of their own Age: while one of these is still",
+			"outstanding, the DEFENCE chooser stands down completely, and the generic upgrades module",
+			"(BaseBuilderBotModule@aotupgrades) is not allowed to spend either. User spec 2026-08-02:",
+			"'es sollte eine klare prio geben: airfield -> refinery -> sams -> upgrades, sonst dauert",
+			"alles ewig weil der cashflow das nicht her gibt' -- reaching Age 1 previously started the",
+			"Airfield, a scattering of SAM sites and a random assortment of upgrades all at once, three",
+			"independent spenders competing for the same early-Age-1 income.")]
+		public readonly string[] PriorityCoreRoles = ["AFLD", "PROC"];
 
-		[Desc("Ticks an Age-upgrade may wait for its tier's Rhythm to fully complete before firing",
-			"anyway. Mirrors the reasoning for DefenseStepTimeoutTicks one level up: a single",
-			"permanently-stuck CORE building (which, unlike a defence step, is never skipped) must",
-			"not be able to freeze Age progression forever.")]
-		public readonly int AgeUpgradeFallbackTimeoutTicks = 15000;
+		[Desc("Ticks either priority gate (defence-behind-core, upgrades-behind-both) may hold before",
+			"it releases anyway. A core step is never skipped, so without a timeout one permanently",
+			"unbuildable Airfield would",
+			"freeze all defence and all upgrades for the rest of the match.")]
+		public readonly int PriorityGateTimeoutTicks = 15000;
+
+		[Desc("Cash (credits + ore) at which the UPGRADE gate releases regardless of what the rhythm",
+			"is still doing. The gate only exists because early income cannot fund base, defence and",
+			"upgrades at once -- once the AI is sitting on this much, that reason is gone. Note this is",
+			"the WEAKEST of the three backups in practice: Operations keeps producing waves and helis,",
+			"so a healthy AI rarely sits on a large balance (user observation 2026-08-02). The two",
+			"tick-based backups below are the ones that actually guarantee upgrades happen.")]
+		public readonly int PriorityGateCashOverride = 2500;
+
+		[Desc("TOTAL ticks the UPGRADE gate may ever hold, summed over the whole match and never reset.",
+			"PriorityGateTimeoutTicks alone only bounds ONE continuous stall: a gate that keeps briefly",
+			"clearing and re-engaging (defence of the next Age tier opening right as the previous one",
+			"finishes) would reset that counter forever and starve upgrades for the entire match without",
+			"ever technically deadlocking. Once this budget is spent the upgrade gate stays open for",
+			"good. Backup plan #2.")]
+		public readonly int PriorityGateTotalBudgetTicks = 36000;
+
+		[Desc("Ticks the BASE EXPANSION may withhold Operations' army production while still in Age 1.",
+			"User spec 2026-08-02: 'insbesondere zu age-1 muss es vorallem um cashflow-optimierung",
+			"mittels refinery und base expansion gehen' -- the Age-1 Refinery already pauses army",
+			"production (see Age1RefineryPending), and the expansion is the other half of that same",
+			"economy push. Tightly bounded and one-shot: army production is what keeps the AI alive, so",
+			"once this budget is spent the expansion never pauses production again.")]
+		public readonly int ExpansionPausesArmyBudgetTicks = 6000;
+
+		[Desc("Ticks the Age-1 Refinery may withhold Operations' army production. Originally this pause",
+			"needed no bound at all: it covered exactly one building, entered only once the Airfield",
+			"ahead of it was already standing. The build-order swap of 2026-08-04 (Refinery first, then",
+			"Airfield) made the Refinery the FIRST Age-1 step, so the pause now also spans the NOD",
+			"Tiberium Secrets purchase that gates it -- and while that gatekeeper holds the core rhythm,",
+			"an AI that cannot yet afford it would build nothing AND produce nothing, with no defence",
+			"going up either. One-shot like the expansion pause: once spent, the Refinery never withholds",
+			"unit production again.")]
+		public readonly int RefineryPausesArmyBudgetTicks = 9000;
 
 		[ActorReference]
 		[Desc("Techtree GATEKEEPER upgrades: upgrades that are not optional combat perks but hard",
@@ -168,6 +201,7 @@ namespace OpenRA.Mods.Common.Traits
 		// automatic rebuild the next time HasNavalProduction() is checked.
 		bool navalPlanAttempted;
 		bool navalRequested;
+		int economyPauseLog;
 		AotPlanStep navalStep;
 		int navalWaitLog;
 
@@ -196,19 +230,32 @@ namespace OpenRA.Mods.Common.Traits
 		const int FenceNodeMaxWaits = 12;
 		int fenceNodeWaits;
 
-		// Age-upgrade cash priority (user spec 2026-07-31): index i tracks Info.AgeUpgradeTypes[i], i.e.
-		// the jump INTO Age (i+1). ageUpgradeFired[i] latches once the direct StartProduction order is
-		// sent, mirroring TryOreBoost's "retry every tick until buildable, then never again" shape --
-		// the production queue keeps the item queued-but-paused on its own if cash is short at that
-		// exact tick, so firing once is enough. ageUpgradeWaitTicks[i] only accumulates while the
-		// upgrade is otherwise buildable (its own stec/proc/shrine-style prerequisites already met) but
-		// its tier's Rhythm is not yet complete -- this is what AgeUpgradeFallbackTimeoutTicks measures.
-		readonly bool[] ageUpgradeFired = new bool[3];
-		readonly int[] ageUpgradeWaitTicks = new int[3];
-
-		// Same latch, for Info.GatekeeperUpgradeTypes -- sized at Created time since that list is
-		// mod-configured rather than fixed at 3 like the Age tiers.
+		// Single-shot latch for Info.GatekeeperUpgradeTypes -- sized at Created time since that list is
+		// mod-configured. Latching mirrors TryOreBoost's "retry every tick until buildable, then never
+		// again" shape: the production queue keeps the item queued-but-paused on its own if cash is
+		// short at the exact firing tick, so one StartProduction order is enough.
 		bool[] gatekeeperFired;
+
+		// Priority gates (user spec 2026-08-02, "airfield -> refinery -> sams -> upgrades"). Two
+		// separate counters on purpose: the DEFENCE gate only waits on the core economy roles, while
+		// the UPGRADE gate additionally waits out the defence steps behind them. Sharing one counter
+		// would let the long defence stretch time out the (much shorter) core gate as a side effect.
+		int coreGateTicks;
+		int gatekeeperGateTicks;
+		int upgradeGateTicks;
+
+		// Never reset -- see PriorityGateTotalBudgetTicks. upgradeGateReleased latches the "this gate is
+		// done holding, permanently" decision so the reason is logged exactly once.
+		int upgradeGateSpentTicks;
+		bool upgradeGateReleased;
+
+		// Age-1 expansion-vs-army-production pause (see ExpansionPausesArmyBudgetTicks). One-shot.
+		int expansionArmyPauseTicks;
+		bool expansionArmyPauseRetired;
+
+		// Same, for the Age-1 Refinery (see RefineryPausesArmyBudgetTicks). One-shot.
+		int refineryArmyPauseTicks;
+		bool refineryArmyPauseRetired;
 
 		public AotBaseBuilderBotModule(Actor self, AotBaseBuilderBotModuleInfo info)
 			: base(info)
@@ -902,9 +949,50 @@ namespace OpenRA.Mods.Common.Traits
 				PruneStrayFenceSegments(bot);
 			}
 
+			// Priority-gate bookkeeping (see PriorityCoreRoles). Each counter only accumulates while
+			// its OWN gate is actually holding something back, and resets the moment it clears, so the
+			// timeout measures one continuous stall rather than total elapsed match time.
+			coreGateTicks = CorePriorityPending() ? coreGateTicks + Info.Interval : 0;
+			gatekeeperGateTicks = GatekeeperPriorityPending() ? gatekeeperGateTicks + Info.Interval : 0;
+
+			// upgradeGateTicks measures ONE continuous stall (resets whenever the chain clears);
+			// upgradeGateSpentTicks is the never-reset lifetime budget. Both advance only while the gate
+			// is genuinely holding upgrades back: a hold that the cash override is already waving through
+			// costs no budget, so the "rich right now" case can never exhaust the backups meant for the
+			// "actually stuck" case.
+			if (!upgradeGateReleased && UpgradeHoldRequested()
+				&& (playerResources == null || playerResources.GetCashAndResources() < Info.PriorityGateCashOverride))
+			{
+				upgradeGateTicks += Info.Interval;
+				upgradeGateSpentTicks += Info.Interval;
+			}
+			else
+				upgradeGateTicks = 0;
+
+			if (ExpansionPausesArmy())
+			{
+				expansionArmyPauseTicks += Info.Interval;
+				if (expansionArmyPauseTicks >= Info.ExpansionPausesArmyBudgetTicks)
+				{
+					expansionArmyPauseRetired = true;
+					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Expansion no longer pauses army production " +
+						$"-- budget spent ({expansionArmyPauseTicks} ticks); units take priority again");
+				}
+			}
+
+			if (RefineryPausesArmy())
+			{
+				refineryArmyPauseTicks += Info.Interval;
+				if (refineryArmyPauseTicks >= Info.RefineryPausesArmyBudgetTicks)
+				{
+					refineryArmyPauseRetired = true;
+					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Age-1 Refinery no longer pauses army production " +
+						$"-- budget spent ({refineryArmyPauseTicks} ticks); units take priority again");
+				}
+			}
+
 			// Independent of `pending`/the Rhythm chooser entirely -- this fires its own StartProduction
-			// order directly (see TryFireAgeUpgrades) and never touches the single build-in-flight slot.
-			TryFireAgeUpgrades(bot);
+			// order directly and never touches the single build-in-flight slot.
 			TryFireGatekeeperUpgrades(bot);
 
 			// Plan the site ONCE, eagerly, the moment map intel is ready -- regardless of whether anything
@@ -945,7 +1033,12 @@ namespace OpenRA.Mods.Common.Traits
 			// that would lift the production pause never gets built. Observed in-game 2026-07-31: base
 			// construction stopped dead the moment the barracks finished and never resumed. The
 			// Refinery always wins that tie -- it is itself the economy step both sides depend on.
-			if (ops != null && ops.Info.Faction == Info.Faction && !Age1RefineryPending() && ops.FirstDerrickSquadPending())
+			// Widened from Age1RefineryPending() to EconomyPriorityPending() (2026-08-02) so the tie-break
+			// covers the expansion pause too: that pause ALSO stops Ops from producing, so without this
+			// the squad could never be built, FirstDerrickSquadPending() would stay true forever, and base
+			// construction would sit withheld waiting on a squad that production is not allowed to make --
+			// the exact deadlock shape the Refinery guard was added for. Economy pause always wins.
+			if (ops != null && ops.Info.Faction == Info.Faction && !EconomyPriorityPending() && ops.FirstDerrickSquadPending())
 				return;
 
 			// On-demand naval production takes priority over the Rhythm: an Operations mission is blocked
@@ -1115,9 +1208,122 @@ namespace OpenRA.Mods.Common.Traits
 		// True once EVERY planned Rhythm step (core AND defence) for the given Age tier is Done. A
 		// timed-out defence step already counts as Done (Skipped is set alongside it), so this can
 		// never hang on an unplaceable SAM -- only a permanently-stuck CORE step (which never times
-		// out, by design) can keep it false forever, which is exactly what
-		// AgeUpgradeFallbackTimeoutTicks exists to route around in TryFireAgeUpgrades.
+		// out, by design) can keep it false forever. Kept public though nothing consumes it since the
+		// age jump moved to AotAgePowerBotModule: it is the natural gate should that module ever want
+		// "do not jump age while this tier is still half-built" too.
 		public bool AgeRhythmComplete(int age) => planner.Rhythm.Where(s => s.Age == age).All(s => s.Done);
+
+		// --- priority gates: airfield -> refinery -> sams -> upgrades (user spec 2026-08-02) ---
+
+		// A core economy step (Info.PriorityCoreRoles) of the CURRENT age tier is still outstanding.
+		// Age-gated so the Age-2 Refinery cannot retroactively re-block Age-1's defence once it is
+		// planned but not yet reachable.
+		bool CorePriorityPending()
+		{
+			if (Info.PriorityCoreRoles.Length == 0)
+				return false;
+
+			var tier = AgeTier();
+			return planner.Rhythm.Any(s => !s.Done && !s.Defense && s.Age <= tier
+				&& s.Kind == AotStepKind.Building && Info.PriorityCoreRoles.Contains(s.Role));
+		}
+
+		// Any defence step of the current age tier still outstanding. Skipped steps count as resolved
+		// (they already gave up permanently), so a genuinely unplaceable SAM cannot hold this open.
+		bool DefencePriorityPending()
+		{
+			var tier = AgeTier();
+			return planner.Rhythm.Any(s => !s.Done && !s.Skipped && s.Defense && s.Age <= tier);
+		}
+
+		// A gatekeeper upgrade is offered by its queue right now, i.e. its own prerequisites are met but
+		// we do not own it yet (BuildLimit 1 takes it out of the queue for good once bought). This is
+		// what slots the gatekeepers INTO the priority chain rather than beside it (user spec
+		// 2026-08-02: "airfield -> NOD TIBERIUM SECRETS -> refinery -> sams"): NOD Tiberium Secrets
+		// only becomes offered once the Airfield stands, and the Refinery behind it is a core step, so
+		// pausing core while this is true produces exactly that order without hardcoding any of it.
+		bool GatekeeperPriorityPending() => NextGatekeeperIndex() >= 0;
+
+		// Index of the first gatekeeper that is offered-but-unowned, or -1. Deliberately the FIRST
+		// only: the list is in dependency order, so firing them strictly one at a time keeps a later
+		// gatekeeper from competing for cash with the one currently blocking the rhythm.
+		int NextGatekeeperIndex()
+		{
+			for (var i = 0; i < Info.GatekeeperUpgradeTypes.Length; i++)
+			{
+				if (string.IsNullOrEmpty(Info.GatekeeperUpgradeTypes[i]))
+					continue;
+
+				if (FindAgeUpgradeQueue(Info.GatekeeperUpgradeTypes[i]).Queue != null)
+					return i;
+			}
+
+			return -1;
+		}
+
+		// The base expansion outranks the remaining upgrades but nothing else (user spec 2026-08-02:
+		// "BASE EXPANSION (wenn möglich, darf kein showstopper sein) -> dann restliche upgrades").
+		// Nothing waits ON the expansion except upgrade spending, and even that is bounded twice: each
+		// expansion step has its own ExpansionStepTimeoutTicks, and the upgrade gate has its own.
+		bool ExpansionPriorityPending() => ChooseExpansionStep() != null;
+
+		// Asked by BaseBuilderBotModule@aotupgrades before it spends anything: upgrades are the LAST
+		// tier of the priority chain, behind both the core economy roles and the defence steps of the
+		// current age. Returns false for a player this module is not actually driving (disabled,
+		// wrong faction, no plan yet) so the generic module keeps its unmodified behaviour there.
+		public bool RhythmPriorityActive()
+		{
+			if (IsTraitDisabled || planner == null || !planner.Planned)
+				return false;
+
+			if (Info.Faction != null && player.Faction.InternalName != Info.Faction)
+				return false;
+
+			// Retired for good (backup plans #1/#2 below latch here) -- never engages again.
+			if (upgradeGateReleased)
+				return false;
+
+			if (!UpgradeHoldRequested())
+				return false;
+
+			// Backup #1 -- ONE continuous stall ran too long: something in the chain is genuinely stuck
+			// (an unbuildable Airfield, an expansion that never gets going, a defence step that neither
+			// completes nor skips). Latches rather than merely returning false: without the latch the
+			// counter would reset the very next tick and the gate would re-engage immediately, leaking
+			// only a single tick of upgrade time per timeout period.
+			if (upgradeGateTicks >= Info.PriorityGateTimeoutTicks)
+			{
+				upgradeGateReleased = true;
+				Log.Write("debug", $"[AotBuild][{player.PlayerName}] Upgrade gate retired -- one continuous hold " +
+					$"exceeded {Info.PriorityGateTimeoutTicks} ticks (rhythm appears stuck); upgrades now run unrestricted");
+				return false;
+			}
+
+			// Backup #2 -- lifetime budget spent. Catches the flicker case the per-stall timeout above
+			// cannot see: a gate that keeps clearing and re-engaging never accumulates one long stall,
+			// but can still starve upgrades for the entire match.
+			if (upgradeGateSpentTicks >= Info.PriorityGateTotalBudgetTicks)
+			{
+				upgradeGateReleased = true;
+				Log.Write("debug", $"[AotBuild][{player.PlayerName}] Upgrade gate retired -- total budget spent " +
+					$"({upgradeGateSpentTicks} ticks held across the match); upgrades now run unrestricted");
+				return false;
+			}
+
+			// Backup #3 -- plenty of cash, so the cashflow argument for holding upgrades back does not
+			// apply right now. Deliberately NOT latched: if the AI spends back down, prioritising again
+			// is the correct behaviour, and this costs no budget either (see the counters in BotTick).
+			if (playerResources != null && playerResources.GetCashAndResources() >= Info.PriorityGateCashOverride)
+				return false;
+
+			return true;
+		}
+
+		// The raw question, without any of the backup releases: is something ahead of upgrades in the
+		// priority chain still outstanding?
+		bool UpgradeHoldRequested() =>
+			CorePriorityPending() || GatekeeperPriorityPending()
+			|| DefencePriorityPending() || ExpansionPriorityPending();
 
 		// See AotBasePlannerBotModule.IsInsideGateCluster for why this needs to exist at all.
 		public bool IsInsideGateCluster(CPos c) => planner != null && planner.IsInsideGateCluster(c);
@@ -1146,6 +1352,30 @@ namespace OpenRA.Mods.Common.Traits
 			return planner.Rhythm.FirstOrDefault(s => !s.Done) == step;
 		}
 
+		// What Operations asks before spending on army units. Age 1 is the cashflow-optimisation phase
+		// (user spec 2026-08-02): the Refinery AND the base expansion both outrank new units there,
+		// because both of them are what pays for every unit after them. Everything else -- SAMs,
+		// upgrades, later ages -- never touches army production; those are handled by the build-side
+		// gates only, exactly because starving unit production is far more dangerous than delaying a
+		// turret.
+		public bool EconomyPriorityPending()
+		{
+			if (IsTraitDisabled || planner == null || !planner.Planned)
+				return false;
+
+			if (Info.Faction != null && player.Faction.InternalName != Info.Faction)
+				return false;
+
+			return RefineryPausesArmy() || ExpansionPausesArmy();
+		}
+
+		// Age-1 Refinery pause, budget-bounded and one-shot -- see RefineryPausesArmyBudgetTicks.
+		bool RefineryPausesArmy() => !refineryArmyPauseRetired && Age1RefineryPending();
+
+		// Age-1 expansion pause, budget-bounded and one-shot -- see ExpansionPausesArmyBudgetTicks.
+		bool ExpansionPausesArmy() =>
+			!expansionArmyPauseRetired && AgeTier() <= 1 && ExpansionPriorityPending();
+
 		// Mirrors AotOperationsBotModule.FirstBuildable: is this SPECIFIC actor currently offered by any
 		// of its own declared queue categories, right now (Prerequisites/BuildLimit/etc. all already
 		// factored in by BuildableItems()). Deliberately NOT QueueFor()/Info.BuildingQueues -- the
@@ -1168,47 +1398,10 @@ namespace OpenRA.Mods.Common.Traits
 			return (null, null);
 		}
 
-		// Age-upgrade cash priority (user spec 2026-07-31): fires each configured age-upgrade the
-		// moment its OWN prerequisites are met (stec/proc/shrine etc., untouched) AND its tier's entire
-		// Rhythm is done -- bypassing BaseBuilderBotModule@aotupgrades' weighted-random pick, which
-		// could previously buy the age-jump via sheer chance while the base was still mid-build,
-		// starving both the Rhythm builder AND unit production of cash at the same time (observed:
-		// Airfield up in Age 1, Refinery never built). Same "retry until buildable, then never again"
-		// shape as TryOreBoost -- the production queue keeps a paused item queued on its own if cash is
-		// short at the exact firing tick, so a single StartProduction order is enough.
-		void TryFireAgeUpgrades(IBot bot)
-		{
-			for (var i = 0; i < Info.AgeUpgradeTypes.Length && i < ageUpgradeFired.Length; i++)
-			{
-				if (ageUpgradeFired[i] || string.IsNullOrEmpty(Info.AgeUpgradeTypes[i]))
-					continue;
-
-				var (name, queue) = FindAgeUpgradeQueue(Info.AgeUpgradeTypes[i]);
-				if (name == null || queue == null)
-				{
-					// Not even otherwise-buildable yet (its own prerequisites, e.g. stec, still missing)
-					// -- nothing to time out against.
-					ageUpgradeWaitTicks[i] = 0;
-					continue;
-				}
-
-				var rhythmComplete = AgeRhythmComplete(i);
-				if (!rhythmComplete)
-				{
-					ageUpgradeWaitTicks[i] += Info.Interval;
-					if (ageUpgradeWaitTicks[i] < Info.AgeUpgradeFallbackTimeoutTicks)
-						continue;
-
-					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Age-{i + 1} upgrade fallback timeout reached " +
-						$"({ageUpgradeWaitTicks[i]} ticks, Rhythm still incomplete) -> firing anyway");
-				}
-
-				bot.QueueOrder(Order.StartProduction(queue.Actor, name, 1));
-				ageUpgradeFired[i] = true;
-				Log.Write("debug", $"[AotBuild][{player.PlayerName}] Age-{i + 1} upgrade ({name}) fired directly -- " +
-					(rhythmComplete ? "Age Rhythm complete" : "fallback timeout"));
-			}
-		}
+		// The Age upgrades used to be fired from here too (an age-ordered AgeUpgradeTypes list gated on
+		// AgeRhythmComplete). The techtree rebuild of 2026-08-04 turned the age jump into a Super Power on
+		// the player actor -- the aot-ageN-upgrade-* actors lost their Buildable, so this path could never
+		// find a queue again and had become silently dead code. AotAgePowerBotModule owns the age jump now.
 
 		// Techtree gatekeepers (user spec 2026-08-02). Unlike the Age upgrades these get NO Rhythm gate:
 		// the buildings they unlock ARE Rhythm steps (Shrine, and through it the Obelisk), so waiting for
@@ -1217,20 +1410,21 @@ namespace OpenRA.Mods.Common.Traits
 		// for the same reason (a paused queue item survives a temporary cash shortfall on its own).
 		void TryFireGatekeeperUpgrades(IBot bot)
 		{
-			for (var i = 0; i < Info.GatekeeperUpgradeTypes.Length && i < gatekeeperFired.Length; i++)
-			{
-				if (gatekeeperFired[i] || string.IsNullOrEmpty(Info.GatekeeperUpgradeTypes[i]))
-					continue;
+			// Strictly one at a time, in dependency order (see NextGatekeeperIndex): the rhythm is
+			// paused on exactly this upgrade, so letting a later one queue up beside it would split the
+			// cash the pause was meant to concentrate.
+			var i = NextGatekeeperIndex();
+			if (i < 0 || i >= gatekeeperFired.Length || gatekeeperFired[i])
+				return;
 
-				var (name, queue) = FindAgeUpgradeQueue(Info.GatekeeperUpgradeTypes[i]);
-				if (name == null || queue == null)
-					continue;
+			var (name, queue) = FindAgeUpgradeQueue(Info.GatekeeperUpgradeTypes[i]);
+			if (name == null || queue == null)
+				return;
 
-				bot.QueueOrder(Order.StartProduction(queue.Actor, name, 1));
-				gatekeeperFired[i] = true;
-				Log.Write("debug", $"[AotBuild][{player.PlayerName}] Gatekeeper upgrade ({name}) fired directly " +
-					"-- unblocks a later plan building");
-			}
+			bot.QueueOrder(Order.StartProduction(queue.Actor, name, 1));
+			gatekeeperFired[i] = true;
+			Log.Write("debug", $"[AotBuild][{player.PlayerName}] Gatekeeper upgrade ({name}) fired directly " +
+				"-- rhythm holds until it is bought");
 		}
 
 		// Two fully independent strict-first-open queues over the SAME Rhythm list, split by
@@ -1252,6 +1446,34 @@ namespace OpenRA.Mods.Common.Traits
 		// replacing it, until now.
 		AotPlanStep ChooseStep(bool defense)
 		{
+			// Defence stands down entirely while the age's core economy roles (Airfield, Refinery) are
+			// still outstanding -- user spec 2026-08-02, "airfield -> refinery -> sams". Before this,
+			// reaching Age 1 fired the Airfield, five SAM sites and the upgrades module simultaneously
+			// and the income covered none of them properly. Bounded by PriorityGateTimeoutTicks so a
+			// permanently unbuildable core step cannot leave the base undefended for good.
+			if (defense && CorePriorityPending() && coreGateTicks < Info.PriorityGateTimeoutTicks)
+			{
+				if (++waitLog % 32 == 0)
+					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Defence on hold -- core economy first " +
+						$"({string.Join("/", Info.PriorityCoreRoles)} still open, {coreGateTicks} ticks)");
+
+				return null;
+			}
+
+			// CORE itself stands down while a gatekeeper upgrade is offered but unbought. That is what
+			// puts NOD Tiberium Secrets BETWEEN the Airfield and the Refinery instead of alongside
+			// them: the upgrade only becomes offered once the Airfield stands, and the Refinery is the
+			// next core step behind it. Defence is already held by the pending Refinery above, so the
+			// whole chain falls out of these two gates without any per-role wiring.
+			if (!defense && GatekeeperPriorityPending() && gatekeeperGateTicks < Info.PriorityGateTimeoutTicks)
+			{
+				if (++waitLog % 32 == 0)
+					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Core on hold -- gatekeeper upgrade first " +
+						$"({Info.GatekeeperUpgradeTypes[NextGatekeeperIndex()]}, {gatekeeperGateTicks} ticks)");
+
+				return null;
+			}
+
 			var ageTier = defense ? AgeTier() : 0;
 			var open = planner.Rhythm.Where(s => !s.Done && s.Defense == defense && (!defense || s.Age <= ageTier)).ToList();
 			if (open.Count == 0)
@@ -1272,6 +1494,23 @@ namespace OpenRA.Mods.Common.Traits
 
 		void StartStep(IBot bot, AotPlanStep step)
 		{
+			// ECONOMY EMERGENCY (User 2026-08-04: "alle prio in oreT bis mind. eine refinery inkl.
+			// harvester steht"). With no ore transporter and no working refinery the bot has no income
+			// worth the name, and every credit spent on anything else delays the one purchase that
+			// restores it. Construction therefore stands down too -- Ops and the age fund already do.
+			//
+			// The REFINERY is the deliberate exception: it is the second way out of exactly this hole,
+			// and in testing a bot rescued itself precisely that way, funding one from a derrick's
+			// trickle. Blocking it would have removed the escape route this rule exists to protect.
+			if (ops != null && ops.Info.Faction == Info.Faction && ops.EconomyEmergency()
+				&& step.Role != "PROC" && !step.Role.StartsWith("EXP_", StringComparison.Ordinal))
+			{
+				if (++economyPauseLog % 16 == 0)
+					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Economy emergency: holding {step.Role} until the economy is back");
+
+				return;
+			}
+
 			var (type, queue) = BuildableVariant(step);
 			if (type == null)
 			{

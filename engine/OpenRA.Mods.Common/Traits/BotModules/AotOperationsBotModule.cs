@@ -2615,11 +2615,15 @@ namespace OpenRA.Mods.Common.Traits
 			if (haveTransporter)
 				return false;
 
+			// End condition per user spec 2026-08-04: "alle prio in oreT bis mind. eine refinery inkl.
+			// harvester steht". A refinery ALONE is not an economy -- it needs something delivering to
+			// it -- so both must exist before the emergency lifts. Rebuilding the transporter ends it
+			// just as well, whichever comes first.
 			var haveHarvester = Info.EconomyHarvesterTypes.Length > 0
 				&& World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld
 					&& Info.EconomyHarvesterTypes.Contains(a.Info.Name));
 
-			return !haveHarvester && !HasRefinery();
+			return !(haveHarvester && HasRefinery());
 		}
 
 		// True while an expansion convoy is being assembled or delivered. Attack waves and engineer
