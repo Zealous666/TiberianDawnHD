@@ -2331,6 +2331,20 @@ namespace OpenRA.Mods.Common.Traits
 			// -- observed across all three bots: helicopters hovering, engineers standing around, and
 			// nothing ever departing. The saving gate above guarantees the credits are already there,
 			// so there is nothing left to stagger.
+			// SAVE UP FIRST (User 2026-08-04). Without this the squad is ordered the instant the mission
+			// starts, and with an empty account nothing is ever produced: observed as "funded (31)" in
+			// the log, followed by helicopters hovering, three engineers standing around and the raid
+			// timing out. The gate was lost when this method was rewritten for batch ordering -- the
+			// squadFunded flag survived only in the status line, which is why the status still claimed
+			// to be saving while the code no longer was.
+			if (!squadFunded)
+			{
+				if (Ops.AvailableCash() < Ops.Info.EngineerRaidCashThreshold)
+					return;
+
+				squadFunded = true;
+			}
+
 			if (squadOrdered)
 				return;
 

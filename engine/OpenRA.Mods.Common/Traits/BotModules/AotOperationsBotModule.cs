@@ -2111,6 +2111,15 @@ namespace OpenRA.Mods.Common.Traits
 			// for the next raid instead.
 			var stale = pool.Where(a => !unitCannotBeOrdered(a)
 				&& !IsRaidTransport(a)
+
+				// AIRCRAFT never join a ground attack wave (User 2026-08-04: "er setzt plötzlich auch
+				// einen HIND mit boden einheiten in einer wave ein. wieso das denn?!"). A Hind is in no
+				// wave slot at all -- it can only get there as an air-raid survivor that was pooled and
+				// then swept up as reinforcement, whereupon it attack-moves at tank pace alongside the
+				// column. Same failure as the Chinook trailing an attack wave, which was only fixed for
+				// raid transports. Pooled helicopters are picked up again by the next air raid instead,
+				// since production requests now satisfy themselves from the pool first.
+				&& !a.Info.HasTraitInfo<AircraftInfo>()
 				&& pooledSince.TryGetValue(a, out var since)
 				&& World.WorldTick - since >= Info.PoolIdleReinforceTicks).ToList();
 			if (stale.Count == 0)
