@@ -138,9 +138,11 @@ def parse_sequences(files):
                     continue
                 s = im.setdefault(seq, {})
                 s["__val__"] = snode["__val__"]
+                s.setdefault("__own__", set())
                 for fk, fn in snode["__children__"].items():
                     s[fk] = fn["__val__"]
-    # apply per-image Defaults
+                    s["__own__"].add(fk)   # explicitly set ON THIS SEQUENCE
+    # apply per-image Defaults (only where the sequence itself says nothing)
     for img, seqs in images.items():
         defaults = seqs.get("Defaults", {})
         if not defaults:
@@ -149,32 +151,83 @@ def parse_sequences(files):
             if seq == "Defaults":
                 continue
             for dk, dv in defaults.items():
+                if dk.startswith("__"):
+                    continue
                 fields.setdefault(dk, dv)
     return images
 
 
+# TS-Originalnamen, an denen ein PNG/ZIP-Repack als Tiberian-Sun-Import erkennbar ist.
+TS_STEMS = (
+    "gtpowr", "ntpowr", "ntapwr", "gtcnst", "gtpile", "nthand", "gadept", "gtdept",
+    "namisl", "nttech", "natech", "gtradr", "ntradr", "natmpl", "ntpyra", "gtdept",
+    "weap2", "weap2n", "silomake-ts", "slab-ts", "tmpl-ts", "atec-ts", "stec-ts",
+    "orbc", "shrine", "oremine", "apc2", "nod-radar-age2", "hq-age2", "nod-silo-ts",
+)
+
+
 def classify(filename, remastered):
-    if filename and "gemini" in filename.lower():
+    """Woher stammt das Sprite? filename/remastered sind bereits aufgeloest."""
+    src = (remastered or filename or "").strip()
+    if not src:
+        return "NONE"
+    low = src.lower()
+    if "gemini" in low:
         return "GEMINI"
-    if remastered and remastered.strip():
-        return "REMASTER-ZIP"
-    if filename:
-        if filename.lower().endswith(".shp"):
-            return "SHP-vanilla"
-        if filename.lower().endswith(".png"):
-            return "PNG-repack"
+    if "red_alert" in low:
+        return "RA-Remaster"
+    if "tiberian_dawn" in low or "\\common\\" in low:
+        return "TD-Remaster"
+    if low.endswith(".shp"):
+        return "SHP-vanilla"
+    if any(stem in low for stem in TS_STEMS):
+        return "TS-Import"
+    if low.endswith(".zip"):
+        return "ZIP-custom"
+    if low.endswith(".png"):
         return "PNG-repack"
-    return "NONE"
+    return "PNG-repack"
+
+
+# Was faellt in das beauftragte Arbeitspaket (Gemini-/TS-Sprites)?
+IN_SCOPE = {"GEMINI", "TS-Import"}
+
+
+def age_tier(cond):
+    """In welchem Age-Tier ist dieser Body sichtbar? Aus der RequiresCondition."""
+    c = (cond or "").replace(" ", "")
+    if not c:
+        return "alle"
+    for tier, tok in (("Age3", "aot-age3"), ("Age2", "aot-age2"), ("Age1", "aot-age1")):
+        if tok in c and f"!{tok}" not in c.replace(f"&&!{tok}", "&&"):
+            # positive Nennung des Tokens -> Body gehoert zu diesem Tier
+            idx = c.find(tok)
+            if idx == 0 or c[idx - 1] != "!":
+                return tier
+    if "!aot-age1" in c:
+        return "Age0"
+    return "alle"
 
 
 def seq_source(images, image, seqname):
-    """Return (kind, filename) for image/seqname."""
+    """Return (kind, filename) for image/seqname.
+    Bevorzugt explizit AUF DER SEQUENZ gesetzte Keys vor geerbten Defaults --
+    sonst schlaegt ein vanilla `Defaults: Filename:` durch und verfaelscht die
+    Quellen-Zuordnung (Bug: SAM ra-idle wurde als `sam.shp` statt als
+    `aot-sam-make.zip` ausgewiesen)."""
     if not image or image not in images:
         return ("NONE", None)
     seqs = images[image]
     if seqname not in seqs:
         return ("NONE", None)
     f = seqs[seqname]
+    own = f.get("__own__", set())
+    if "RemasteredFilename" in own and f.get("RemasteredFilename", "").strip():
+        rem = f["RemasteredFilename"]
+        return (classify(None, rem), rem)
+    if "Filename" in own and f.get("Filename", "").strip():
+        fn = f["Filename"]
+        return (classify(fn, None), fn)
     fn = f.get("Filename") or f.get("__val__") or None
     rem = f.get("RemasteredFilename")
     return (classify(fn, rem), fn or (rem if rem else None))
@@ -265,21 +318,35 @@ def main():
                     "idle": f"{ikind}:{ifile}", "make": f"{mkind}:{mfile}" if mseq else "-",
                     "mseq": mseq or "-", "problem": problem,
                     "cond": cond, "sources": actors_raw[name]["sources"],
+                    "age": age_tier(cond), "ikind": ikind,
+                    "scope": "Gemini/TS" if ikind in IN_SCOPE else f"AUSSERHALB ({ikind})",
                 })
 
     # group by (image, body, idle, make) to collapse proxy actors
+    # Nach Sprite/Body gruppieren. Age NICHT in den Schluessel nehmen: Editor-/
+    # Proxy-Aktoren tragen Tautologie-Conditions ("aot-age2-active ||
+    # !aot-age2-active"), die sonst dieselbe Zeile kuenstlich aufspalten.
     groups = OrderedDict()
+    ages = {}
     for f in findings:
-        key = (f["image"], f["body"], f["idle"], f["make"], f["problem"])
+        key = (f["image"], f["body"], f["idle"], f["make"], f["problem"], f["scope"])
         groups.setdefault(key, []).append(f["actor"])
+        ages.setdefault(key, set()).add(f["age"])
 
-    print(f"{'IMAGE':<18} {'BODY':<22} {'PROBLEM':<42} {'IDLE':<46} {'MAKE'}")
-    print("=" * 190)
-    for (image, body, idle, make, problem), acts in sorted(groups.items()):
-        print(f"{image:<18} {body:<22} {problem:<42} {idle:<46} {make}")
+    print(f"{'IMAGE':<18} {'BODY':<20} {'AGE':<7} {'SCOPE':<24} {'PROBLEM':<40} {'IDLE':<44} {'MAKE'}")
+    print("=" * 210)
+    for key, acts in sorted(
+            groups.items(), key=lambda kv: (kv[0][5].startswith("AUSSERHALB"), kv[0][0], kv[0][1])):
+        image, body, idle, make, problem, scope = key
+        tiers = ages[key] - {"alle"} or {"alle"}
+        age = "/".join(sorted(tiers))
+        print(f"{image:<18} {body:<20} {age:<7} {scope:<24} {problem:<40} {idle:<44} {make}")
         print(f"{'':<18} └─ Aktoren ({len(acts)}): {', '.join(sorted(acts))}")
     print()
-    print(f"Gesamt: {len(groups)} eindeutige Sprite/Body-Kombinationen, {len(findings)} Aktor-Instanzen")
+    n_scope = sum(1 for k in groups if k[5] == "Gemini/TS")
+    print(f"Gesamt: {len(groups)} eindeutige Sprite/Body-Kombinationen "
+          f"({n_scope} im Gemini/TS-Scope, {len(groups) - n_scope} ausserhalb), "
+          f"{len(findings)} Aktor-Instanzen")
 
 
 if __name__ == "__main__":

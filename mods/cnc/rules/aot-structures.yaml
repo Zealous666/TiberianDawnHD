@@ -3920,6 +3920,16 @@ NUKE:
 		BodyNames: body-turbine
 		Condition: build-incomplete
 		Sequence: aot-turbine-make
+	# Age-2-GDI MIT Turbinen-Upgrade: body-tsturbine hatte bisher als einziger
+	# Body ueberhaupt keine Make-Animation -> wurde nach dem Upgrade jedes neu
+	# gebaute Kraftwerk ohne Aufbau eingeblendet. Bedingung spiegelt
+	# WithSpriteBody@tsturbine (aot-age2-gdi && aot-turbine-active), sonst wuerde
+	# sie mit @ts kollidieren, das den turbinenlosen Fall abdeckt.
+	WithMakeAnimation@tsturbine:
+		BodyNames: body-tsturbine
+		Condition: build-incomplete
+		Sequence: aot-age2-turbine-make
+		RequiresCondition: aot-age2-gdi && aot-turbine-active
 	-Power:
 	# Faction-abhaengige Power (User 2026-07-19): NOD Nuke 150, GDI Nuke 200, GDI Turbine-Upgrade 300.
 	# Der geteilte age0/age1-Nuke wird von BEIDEN Fraktionen gebaut -> per Faction-Condition getrennt.
@@ -5739,7 +5749,7 @@ OBLI:
 # === Age of Tiberium (aotmod) - NOD SAM Site (RA-Import, 2026-07-05) ===
 # User-Wunsch: Verschoben von Support.Nod in die normale Baumenue-Queue.
 # RA-Remastered-Sprite (rotierender Turm, "ra-idle"/"ra-turret"/
-# "ra-damaged-turret" im geteilten "sam"-Image, siehe structures-overrides.
+# "damaged-ra-turret" im geteilten "sam"-Image, siehe structures-overrides.
 # yaml) ist jetzt der STANDARD-Look, ersetzt die bisherige TD-Pop-up-Silo-
 # Optik als Default. Die TD-Frames/-Mechanik (WithEmbeddedTurretSpriteBody +
 # AttackPopupTurreted, native in structures.yaml) bleiben komplett erhalten,
@@ -5822,6 +5832,18 @@ SAM:
 		Sequence: ra-turret
 		RequiresCondition: !build-incomplete && !aot-sam-bunkered
 		Recoils: false
+
+	# Bau-Animation fuer den RA-Pfad. Die von ^BaseBuilding geerbte
+	# WithMakeAnimation zeigt per Default nur auf BodyNames:"body" - das ist hier
+	# ausschliesslich die WithEmbeddedTurretSpriteBody (Bunkered). Im RA-Zustand
+	# (Name:"body-ra") fand sie also keinen aktiven Body und returnte sofort ->
+	# SAM erschien ohne jede Aufbau-Animation. Zweite Instanz analog zum
+	# Pillbox-Muster (dort body/body-guard/body-camo).
+	WithMakeAnimation@ra:
+		BodyNames: body-ra
+		Condition: build-incomplete
+		Sequence: ra-make
+		RequiresCondition: !aot-sam-bunkered
 
 	# TD-Render-Pfad (Bunkered SAM-Upgrade): bereits nativ vorhandene
 	# WithEmbeddedTurretSpriteBody bleibt inhaltlich unveraendert - nur
@@ -6125,7 +6147,12 @@ aot-pillbox:
 	WithSpriteBody@guardremap:
 		Sequence: guard-remap
 		Name: body-guard-remap
-		RequiresCondition: aot-guard-tower-active
+		# "!build-incomplete" PFLICHT: der Player-Color-Layer hat keine eigene
+		# Make-Animation. Ohne die Bedingung steht er waehrend des gesamten Baus
+		# in voller Groesse da, waehrend body-guard darunter erst hochwaechst
+		# (dieselbe Fehlerklasse wie der LITE-Roof-Pop-in). SLAB/MSLO/TMPL
+		# handhaben ihre Remap-Layer bereits genauso.
+		RequiresCondition: aot-guard-tower-active && !build-incomplete
 	# RA HBOX.ZIP (Camo Pillbox), 1:1 importiert wie die Basis-Pillbox (kein
 	# Zwei-Layer-Remap noetig, HBOX ist ein Ein-Layer-RA-Sprite wie PBOX).
 	WithSpriteBody@camo:
@@ -6250,7 +6277,9 @@ aot-pillbox-guard:
 	WithSpriteBody@guard:
 		RequiresCondition: aot-guard-tower-active || !aot-guard-tower-active
 	WithSpriteBody@guardremap:
-		RequiresCondition: aot-guard-tower-active || !aot-guard-tower-active
+		# Tautologie (immer an) UND "!build-incomplete" - siehe Kommentar am
+		# Basis-Aktor: Remap-Layer waehrend des Baus ausblenden.
+		RequiresCondition: (aot-guard-tower-active || !aot-guard-tower-active) && !build-incomplete
 
 # Camo-Pillbox-Upgrade (2026-07-27), Ausschluss-Alternative zum Guard Tower -
 # 1:1 dasselbe Proxy-Muster wie aot-pillbox-guard oben. Icon bleibt bewusst

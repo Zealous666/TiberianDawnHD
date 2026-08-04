@@ -485,11 +485,22 @@ sam:
 	ra-idle:
 		RemasteredFilename: aot-sam-make.zip
 		Length: 1
+	# Bau-Animation des RA-Render-Pfads (18 Frames: Plattform -> fertige SAM).
+	# Lag zuvor faelschlich im Image-Block "aot-upgrade-sam-cloak" (nur ein
+	# Upgrade-Icon-Aktor) und wurde daher von "sam" nie gefunden -> RA-SAM
+	# poppte ohne Aufbau ins Bild. Gehoert in DIESEN Block.
+	ra-make:
+		RemasteredFilename: aot-sam-make.zip
+		Length: *
 	ra-turret:
 		RemasteredFilename: aot-sam.zip
 		Facings: 32
 		UseClassicFacings: True
-	ra-damaged-turret:
+	# NAME IST KRITISCH: RenderSprites.NormalizeSequence stellt "damaged-" VORAN und sucht
+	# damit "damaged-ra-turret". Der frueher hier stehende Name "ra-damaged-turret" (damaged
+	# in der Mitte) wurde deshalb nie gefunden -- das SAM zeigte in Age 0 nie ein Schadensbild,
+	# obwohl die Frames korrekt in aot-sam.zip ab Index 34 liegen.
+	damaged-ra-turret:
 		RemasteredFilename: aot-sam.zip
 		Start: 34
 		Facings: 32
@@ -506,9 +517,6 @@ aot-upgrade-sam-cloak:
 	icon:
 		RemasteredFilename: aot-sam-icon.png
 		Length: 1
-	ra-make:
-		RemasteredFilename: aot-sam-make.zip
-		Length: *
 
 gtwr:
 	Defaults:

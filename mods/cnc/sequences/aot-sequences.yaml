@@ -380,7 +380,9 @@ hq:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\EYE.ZIP
 		Length: 16
 		Tick: 100
-	aot-eye-damaged-idle:
+	# NAME KORRIGIERT: NormalizeSequence stellt "damaged-" VORAN. Der alte Name mit
+	# "damaged" in der Mitte wurde nie abgefragt -- Schadensbild blieb unsichtbar.
+	damaged-aot-eye-idle:
 		Filename: eye.shp
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\EYE.ZIP
 		Start: 16
@@ -450,10 +452,16 @@ aot-nod-radar:
 		Length: 1
 		Scale: 0.37
 		Offset: 0,-20
+	# Schadensbild aus der urspruenglichen DOME-Extraktion (aot-nod-radar-damaged-idle-000X,
+	# 8 Frames, 255x198). Die lagen seit dem Sprite-Wechsel ungenutzt herum. Skaliert mit
+	# 71/186 = 0.38172 -- hergeleitet ueber die Breite des gruenen Basisrings, der in beiden
+	# Quellen identisch 186 px misst. Y-Anker ist die RING-UNTERKANTE (nicht die Oberkante:
+	# die zerstoerte Kuppel gibt mehr Ringflaeche frei und verfaelscht die Oberkante).
 	damaged-idle:
-		Filename: aot-nod-radar-age0-idle.png
+		Filename: aot-nod-radar-age0-damaged-idle.png
 		RemasteredFilename:
-		Length: 1
+		Length: 8
+		Tick: 120
 		Scale: 0.37
 		Offset: 0,-20
 	aot-age1-idle:
@@ -756,11 +764,17 @@ fact:
 		Offset: 0, 228
 		Tick: 100
 	aot-age2-make:
-		Filename: aot-gtcnst-make.png
+		# Bau-Animation aus dem Gemini-Idle interpoliert (Bottom-up-Reveal-Wipe,
+		# 14 Frames, Tick 40). Ersetzt die fruehere TS-/Vanilla-Make-Animation, die
+		# nicht zum Gemini-Sprite passte -- das Gebaeude sprang beim Fertigstellen
+		# sichtbar in den neuen Look. Scale/Offset sind fuer das vor dem Backen
+		# downgescalte Quellbild kompensiert (siehe make-animation-interpolation.md).
+		Filename: aot-gtcnst-gemini-make.png
 		RemasteredFilename:
-		Length: 24
-		Scale: 0.55
-		Offset: 0, 0
+		Length: 14
+		Tick: 40
+		Scale: 0.1667
+		Offset: 0, 72
 	aot-age2-make-remap:
 		Filename: aot-gtcnst-make-remap.png
 		RemasteredFilename:
@@ -934,8 +948,10 @@ lite-gdi:
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.17
+	# lite-damaged-idle.png lag fertig und passgenau (384x256, gleiche Canvas wie lite-body)
+	# in bits/, war aber nie verdrahtet -- damaged-idle zeigte das unbeschaedigte Sprite.
 	damaged-idle:
-		Filename: lite-body.png
+		Filename: lite-damaged-idle.png
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.17
@@ -1023,18 +1039,27 @@ lite-gdi:
 		Offset: 24, 96
 		ZOffset: 2048
 	aot-age2-make:
-		Filename: weapmake.shp
+		# Bau-Animation aus dem Gemini-Idle interpoliert (Bottom-up-Reveal-Wipe,
+		# 14 Frames, Tick 40). Ersetzt die fruehere TS-/Vanilla-Make-Animation, die
+		# nicht zum Gemini-Sprite passte -- das Gebaeude sprang beim Fertigstellen
+		# sichtbar in den neuen Look. Scale/Offset sind fuer das vor dem Backen
+		# downgescalte Quellbild kompensiert (siehe make-animation-interpolation.md).
+		Filename: weap2-gemini-make.png
 		RemasteredFilename:
-		Tick: 80
-
+		Length: 14
+		Tick: 40
+		Scale: 0.1667
+		Offset: 7, 27
 lite-nod:
 	idle:
 		Filename: lite-body.png
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.17
+	# lite-damaged-idle.png lag fertig und passgenau (384x256, gleiche Canvas wie lite-body)
+	# in bits/, war aber nie verdrahtet -- damaged-idle zeigte das unbeschaedigte Sprite.
 	damaged-idle:
-		Filename: lite-body.png
+		Filename: lite-damaged-idle.png
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.17
@@ -1122,9 +1147,17 @@ lite-nod:
 		Offset: 4, 65
 		ZOffset: 2048
 	aot-age2-make:
-		Filename: weapmake.shp
+		# Bau-Animation aus dem Gemini-Idle interpoliert (Bottom-up-Reveal-Wipe,
+		# 14 Frames, Tick 40). Ersetzt die fruehere TS-/Vanilla-Make-Animation, die
+		# nicht zum Gemini-Sprite passte -- das Gebaeude sprang beim Fertigstellen
+		# sichtbar in den neuen Look. Scale/Offset sind fuer das vor dem Backen
+		# downgescalte Quellbild kompensiert (siehe make-animation-interpolation.md).
+		Filename: weap2n-gemini-make.png
 		RemasteredFilename:
-		Tick: 80
+		Length: 14
+		Tick: 40
+		Scale: 0.1667
+		Offset: 1, 21
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Shipyard (aot-shipyard): RA SYRD Remaster (umgepackt flach) ===
@@ -1340,7 +1373,9 @@ atec:
 		RemasteredStart: 0
 		RemasteredLength: 1
 		Scale: 0.85
-	aot-td-damaged-idle:
+	# NAME KORRIGIERT: NormalizeSequence stellt "damaged-" VORAN. Der alte Name mit
+	# "damaged" in der Mitte wurde nie abgefragt -- Schadensbild blieb unsichtbar.
+	damaged-aot-td-idle:
 		Filename: atec-td-damaged-idle.png
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\MISS.ZIP
 		RemasteredStart: 1
@@ -1358,13 +1393,13 @@ atec:
 		Length: 1
 		Scale: 0.08
 		Offset: -28, 177
-	atec-ts-damaged-idle:
+	damaged-atec-ts-idle:
 		Filename: atec-gemini-idle.png
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.08
 		Offset: -28, 177
-	atec-ts-damaged-idle-remap:
+	damaged-atec-ts-idle-remap:
 		Filename: atec-gemini-idle-remap.png
 		RemasteredFilename:
 		Length: 1
@@ -1394,12 +1429,17 @@ atec:
 		# damit Make-Animation und Idle gleich groß erscheinen (siehe make-animation-interpolation.md)
 		Scale: 0.159375
 	atec-ts-make:
-		Filename: atec-ts-make.png
+		# Bau-Animation aus dem Gemini-Idle interpoliert (Bottom-up-Reveal-Wipe,
+		# 14 Frames, Tick 40). Ersetzt die fruehere TS-/Vanilla-Make-Animation, die
+		# nicht zum Gemini-Sprite passte -- das Gebaeude sprang beim Fertigstellen
+		# sichtbar in den neuen Look. Scale/Offset sind fuer das vor dem Backen
+		# downgescalte Quellbild kompensiert (siehe make-animation-interpolation.md).
+		Filename: atec-gemini-make.png
 		RemasteredFilename:
-		Length: 20
-		Tick: 80
-		Scale: 0.55
-		Offset: -20, 0
+		Length: 14
+		Tick: 40
+		Scale: 0.1667
+		Offset: -13, 85
 	place:
 		Filename: atec-idle.png
 		RemasteredFilename:
@@ -1465,7 +1505,9 @@ stec:
 		RemasteredStart: 0
 		RemasteredLength: 1
 		Scale: 0.85
-	aot-td-damaged-idle:
+	# NAME KORRIGIERT: NormalizeSequence stellt "damaged-" VORAN. Der alte Name mit
+	# "damaged" in der Mitte wurde nie abgefragt -- Schadensbild blieb unsichtbar.
+	damaged-aot-td-idle:
 		Filename: stec-td-damaged-idle.png
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\BIO.ZIP
 		RemasteredStart: 1
@@ -1477,7 +1519,7 @@ stec:
 		Length: 1
 		Scale: 0.0546
 		Offset: -54, 167
-	stec-ts-damaged-idle:
+	damaged-stec-ts-idle:
 		Filename: stec-gemini-idle.png
 		RemasteredFilename:
 		Length: 1
@@ -1510,12 +1552,17 @@ stec:
 		# Scale kompensiert, siehe atec-Block oben / make-animation-interpolation.md
 		Scale: 0.159375
 	stec-ts-make:
-		Filename: stec-ts-make.png
+		# Bau-Animation aus dem Gemini-Idle interpoliert (Bottom-up-Reveal-Wipe,
+		# 14 Frames, Tick 40). Ersetzt die fruehere TS-/Vanilla-Make-Animation, die
+		# nicht zum Gemini-Sprite passte -- das Gebaeude sprang beim Fertigstellen
+		# sichtbar in den neuen Look. Scale/Offset sind fuer das vor dem Backen
+		# downgescalte Quellbild kompensiert (siehe make-animation-interpolation.md).
+		Filename: stec-gemini-make.png
 		RemasteredFilename:
-		Length: 18
-		Tick: 80
-		Scale: 0.6
-		Offset: -5, 0
+		Length: 14
+		Tick: 40
+		Scale: 0.1667
+		Offset: -18, 55
 	place:
 		Filename: stec-idle.png
 		RemasteredFilename:
@@ -1716,10 +1763,17 @@ mslo:
 		Scale: 0.5
 		Offset: -4,9
 	aot-ts-make:
-		Filename: aot-namisl-make.png
-		Length: 20
-		Scale: 0.5
-		Offset: -4,9
+		# Bau-Animation aus dem Gemini-Idle interpoliert (Bottom-up-Reveal-Wipe,
+		# 14 Frames, Tick 40). Ersetzt die fruehere TS-/Vanilla-Make-Animation, die
+		# nicht zum Gemini-Sprite passte -- das Gebaeude sprang beim Fertigstellen
+		# sichtbar in den neuen Look. Scale/Offset sind fuer das vor dem Backen
+		# downgescalte Quellbild kompensiert (siehe make-animation-interpolation.md).
+		Filename: namisl-gemini-make.png
+		RemasteredFilename:
+		Length: 14
+		Tick: 40
+		Scale: 0.1667
+		Offset: 0, 93
 	aot-ts-make-remap:
 		Filename: aot-namisl-make-remap.png
 		Length: 20
@@ -1788,10 +1842,17 @@ orbc:
 		Scale: 0.0628
 		Offset: 25,64
 	make:
-		Filename: aot-orbc-make.png
-		Length: 17
-		Scale: 0.55
-		Offset: 20,0
+		# Bau-Animation aus dem Gemini-Idle interpoliert (Bottom-up-Reveal-Wipe,
+		# 14 Frames, Tick 40). Ersetzt die fruehere TS-/Vanilla-Make-Animation, die
+		# nicht zum Gemini-Sprite passte -- das Gebaeude sprang beim Fertigstellen
+		# sichtbar in den neuen Look. Scale/Offset sind fuer das vor dem Backen
+		# downgescalte Quellbild kompensiert (siehe make-animation-interpolation.md).
+		Filename: aot-orbc-gemini-make.png
+		RemasteredFilename:
+		Length: 14
+		Tick: 40
+		Scale: 0.1667
+		Offset: 9, 24
 	make-remap:
 		Filename: aot-orbc-make-remap.png
 		Length: 17
@@ -1900,10 +1961,17 @@ slab:
 		Scale: 0.0681
 		Offset: -11,101
 	aot-ts-make:
-		Filename: aot-slab-ts-make.png
-		Length: 15
-		Scale: 0.55
-		Offset: -12,-8
+		# Bau-Animation aus dem Gemini-Idle interpoliert (Bottom-up-Reveal-Wipe,
+		# 14 Frames, Tick 40). Ersetzt die fruehere TS-/Vanilla-Make-Animation, die
+		# nicht zum Gemini-Sprite passte -- das Gebaeude sprang beim Fertigstellen
+		# sichtbar in den neuen Look. Scale/Offset sind fuer das vor dem Backen
+		# downgescalte Quellbild kompensiert (siehe make-animation-interpolation.md).
+		Filename: aot-slab-gemini-make.png
+		RemasteredFilename:
+		Length: 14
+		Tick: 40
+		Scale: 0.1667
+		Offset: -4, 41
 	aot-ts-make-remap:
 		Filename: aot-slab-ts-make-remap.png
 		Length: 15
@@ -2459,10 +2527,17 @@ hand:
 		Scale: 0.068
 		Offset: 88, 161
 	aot-age2-make:
-		Filename: aot-nthand-make.png
+		# Bau-Animation aus dem Gemini-Idle interpoliert (Bottom-up-Reveal-Wipe,
+		# 14 Frames, Tick 40). Ersetzt die fruehere TS-/Vanilla-Make-Animation, die
+		# nicht zum Gemini-Sprite passte -- das Gebaeude sprang beim Fertigstellen
+		# sichtbar in den neuen Look. Scale/Offset sind fuer das vor dem Backen
+		# downgescalte Quellbild kompensiert (siehe make-animation-interpolation.md).
+		Filename: hand-gemini-make.png
 		RemasteredFilename:
-		Length: 15
-		Scale: 0.55
+		Length: 14
+		Tick: 40
+		Scale: 0.1667
+		Offset: 36, 66
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - FIX: RA Repair Facility Sprites für Age 0 ===
@@ -2527,10 +2602,16 @@ fix:
 		Offset: 0, 0
 		ZOffset: -1c511
 	aot-age2-nod-make:
-		Filename: aot-gtdept-make.png
+		# Bau-Animation aus dem Gemini-Idle interpoliert (Bottom-up-Reveal-Wipe,
+		# 14 Frames, Tick 40). Ersetzt die fruehere TS-/Vanilla-Make-Animation, die
+		# nicht zum Gemini-Sprite passte -- das Gebaeude sprang beim Fertigstellen
+		# sichtbar in den neuen Look. Scale/Offset sind fuer das vor dem Backen
+		# downgescalte Quellbild kompensiert (siehe make-animation-interpolation.md).
+		Filename: aot-gadept-gemini-make.png
 		RemasteredFilename:
-		Length: 10
-		Scale: 0.55
+		Length: 14
+		Tick: 40
+		Scale: 0.1667
 		Offset: 0, 0
 # === Ende aotmod ===
 
@@ -2607,10 +2688,17 @@ pyle:
 		Scale: 0.0516
 		Offset: -2, 163
 	aot-age2-make:
-		Filename: aot-gtpile-make.png
+		# Bau-Animation aus dem Gemini-Idle interpoliert (Bottom-up-Reveal-Wipe,
+		# 14 Frames, Tick 40). Ersetzt die fruehere TS-/Vanilla-Make-Animation, die
+		# nicht zum Gemini-Sprite passte -- das Gebaeude sprang beim Fertigstellen
+		# sichtbar in den neuen Look. Scale/Offset sind fuer das vor dem Backen
+		# downgescalte Quellbild kompensiert (siehe make-animation-interpolation.md).
+		Filename: pyle-gemini-make.png
 		RemasteredFilename:
-		Length: 20
-		Scale: 0.55
+		Length: 14
+		Tick: 40
+		Scale: 0.1667
+		Offset: -1, 50
 	aot-age2-make-remap:
 		Filename: aot-gtpile-make-remap.png
 		RemasteredFilename:
@@ -2644,10 +2732,16 @@ nuke:
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.17
+	# Schadensbild aus POWR.ZIP Frame-Gruppe 0001 (8 Frames, flackerndes Feuer) gebacken.
+	# Canvas 263x254 statt 229x254: bewusst so gewaehlt, dass die Bild-MITTE exakt auf der
+	# Mitte von aot-ra-idle liegt (idle-crop 17,2,246,256 vs damaged-crop 0,19,253,256 im
+	# 256er-Quellcanvas) -- OpenRA zentriert PNG-Frames auf ihrer eigenen Groesse, ohne diese
+	# Korrektur wuerde das Gebaeude beim Schadenswechsel springen.
 	damaged-aot-ra-idle:
-		Filename: nuke-ra-idle.png
+		Filename: nuke-ra-damaged-idle.png
 		RemasteredFilename:
-		Length: 1
+		Length: 8
+		Tick: 120
 		Scale: 0.17
 	# GDI Turbinen-Kraftwerk (TS gtpowr.shp, silbergrau + Turbinen-Kuppeln) — Sprite ab Turbine-Upgrade.
 	# Scale 0.5 (= 0.4 +25%); Offset 0,24 schiebt das Gebäude ~halbe Zelle nach unten.
@@ -2716,11 +2810,17 @@ nuke:
 		Scale: 0.0516
 		Offset: 0, 102
 	aot-age2-make:
-		Filename: aot-gtpowr-make.png
+		# Bau-Animation aus dem Gemini-Idle interpoliert (Bottom-up-Reveal-Wipe,
+		# 14 Frames, Tick 40). Ersetzt die fruehere TS-/Vanilla-Make-Animation, die
+		# nicht zum Gemini-Sprite passte -- das Gebaeude sprang beim Fertigstellen
+		# sichtbar in den neuen Look. Scale/Offset sind fuer das vor dem Backen
+		# downgescalte Quellbild kompensiert (siehe make-animation-interpolation.md).
+		Filename: aot-gtpowr-gemini-make.png
 		RemasteredFilename:
-		Length: 20
-		Scale: 0.55
-		Offset: 0, 10
+		Length: 14
+		Tick: 40
+		Scale: 0.1667
+		Offset: 0, 32
 	# Age-2 GDI TS GTPOWR + Turbinen — Gemini-Render (2026-07-08), gleiche Scale/Offset wie
 	# aot-age2-idle (identisches Gebaeude-Footprint, nur Kuppel-Optik anders). Zusätzlich
 	# aot-age2-turbine-lights: 3 unabhängig langsam auf-/abdimmende gelbrötliche Lichtscheine
@@ -2729,6 +2829,19 @@ nuke:
 		Filename: aot-gtpowr-gemini-turbine-idle.png
 		RemasteredFilename:
 		Length: 1
+		Scale: 0.1875
+		Offset: 0, 28
+	aot-age2-turbine-make:
+		# Bau-Animation aus dem Gemini-Idle interpoliert (Bottom-up-Reveal-Wipe,
+		# 14 Frames, Tick 40). Ersetzt die fruehere TS-/Vanilla-Make-Animation, die
+		# nicht zum Gemini-Sprite passte -- das Gebaeude sprang beim Fertigstellen
+		# sichtbar in den neuen Look. Scale/Offset sind fuer das vor dem Backen
+		# downgescalte Quellbild kompensiert (siehe make-animation-interpolation.md).
+		# Dieser Body hatte zuvor GAR KEINE Make-Animation.
+		Filename: aot-gtpowr-gemini-turbine-make.png
+		RemasteredFilename:
+		Length: 14
+		Tick: 40
 		Scale: 0.1875
 		Offset: 0, 28
 	damaged-aot-age2-turbine-idle:
@@ -2792,10 +2905,17 @@ nuke:
 		Offset: 0, -21
 		Tick: 180
 	aot-age2-nod-make:
-		Filename: aot-ntpowr-make.png
+		# Bau-Animation aus dem Gemini-Idle interpoliert (Bottom-up-Reveal-Wipe,
+		# 14 Frames, Tick 40). Ersetzt die fruehere TS-/Vanilla-Make-Animation, die
+		# nicht zum Gemini-Sprite passte -- das Gebaeude sprang beim Fertigstellen
+		# sichtbar in den neuen Look. Scale/Offset sind fuer das vor dem Backen
+		# downgescalte Quellbild kompensiert (siehe make-animation-interpolation.md).
+		Filename: aot-ntpowr-gemini-make.png
 		RemasteredFilename:
-		Length: 19
-		Scale: 0.55
+		Length: 14
+		Tick: 40
+		Scale: 0.1667
+		Offset: 0, -7
 	aot-age2-icon:
 		Filename: nuke_turbine.png
 		RemasteredFilename:
@@ -2827,10 +2947,13 @@ nuk2:
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.17
+	# Schadensbild aus APWR.ZIP Frame-Gruppe 0001 (8 Frames). Canvas 384x362 zentriert auf
+	# die Mitte von aot-ra-idle (siehe Kommentar bei nuke).
 	damaged-aot-ra-idle:
-		Filename: nuk2-ra-idle.png
+		Filename: nuk2-ra-damaged-idle.png
 		RemasteredFilename:
-		Length: 1
+		Length: 8
+		Tick: 120
 		Scale: 0.17
 	aot-ra-make:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\APWRMAKE.ZIP
@@ -2877,10 +3000,17 @@ nuk2:
 		Offset: 0, -45
 		Tick: 180
 	aot-age2-make:
-		Filename: aot-ntapwr-make.png
+		# Bau-Animation aus dem Gemini-Idle interpoliert (Bottom-up-Reveal-Wipe,
+		# 14 Frames, Tick 40). Ersetzt die fruehere TS-/Vanilla-Make-Animation, die
+		# nicht zum Gemini-Sprite passte -- das Gebaeude sprang beim Fertigstellen
+		# sichtbar in den neuen Look. Scale/Offset sind fuer das vor dem Backen
+		# downgescalte Quellbild kompensiert (siehe make-animation-interpolation.md).
+		Filename: aot-ntapwr-gemini-make.png
 		RemasteredFilename:
-		Length: 19
-		Scale: 0.55
+		Length: 14
+		Tick: 40
+		Scale: 0.1667
+		Offset: 0, -19
 	aot-age2-icon:
 		Filename: nuk2_age2.png
 		RemasteredFilename:
@@ -3948,9 +4078,17 @@ aot-shrine:
 		Scale: 0.5
 		Offset: 0,10
 	make:
-		Filename: weapmake.shp
+		# Bau-Animation aus dem Gemini-Idle interpoliert (Bottom-up-Reveal-Wipe,
+		# 14 Frames, Tick 40). Ersetzt die fruehere TS-/Vanilla-Make-Animation, die
+		# nicht zum Gemini-Sprite passte -- das Gebaeude sprang beim Fertigstellen
+		# sichtbar in den neuen Look. Scale/Offset sind fuer das vor dem Backen
+		# downgescalte Quellbild kompensiert (siehe make-animation-interpolation.md).
+		Filename: aot-shrine-gemini-make.png
 		RemasteredFilename:
-		Tick: 80
+		Length: 14
+		Tick: 40
+		Scale: 0.1667
+		Offset: 1, 109
 	place:
 		Filename: aot-shrine-gemini-idle.png
 		RemasteredFilename:
@@ -4097,12 +4235,17 @@ tmpl:
 		Scale: 0.0627
 		Offset: 0,51
 	aot-age2-make:
-		Filename: aot-tmpl-ts-make.png
+		# Bau-Animation aus dem Gemini-Idle interpoliert (Bottom-up-Reveal-Wipe,
+		# 14 Frames, Tick 40). Ersetzt die fruehere TS-/Vanilla-Make-Animation, die
+		# nicht zum Gemini-Sprite passte -- das Gebaeude sprang beim Fertigstellen
+		# sichtbar in den neuen Look. Scale/Offset sind fuer das vor dem Backen
+		# downgescalte Quellbild kompensiert (siehe make-animation-interpolation.md).
+		Filename: aot-tmpl-gemini-make.png
 		RemasteredFilename:
-		Length: 17
-		Tick: 80
-		Scale: 0.5
-		Offset: -8,-6
+		Length: 14
+		Tick: 40
+		Scale: 0.1667
+		Offset: 0, 19
 	# TS ActiveAnim (NATMPL_A) — winziger dunkler Blink-Punkt an der Turmspitze (24px, kein
 	# House-Color). Scale/Offset UNVERAENDERT auf dem alten 192x168-Canvas belassen: der neue
 	# Gemini-Body wurde per Bottom+Center-Anchor exakt auf denselben Bildschirm-Ankerpunkt wie
