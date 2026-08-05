@@ -554,6 +554,7 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Radius in cells to search for a coastal embark/landing cell around the reference point.")]
 		public readonly int FerrySearchRadius = 24;
 
+
 		[Desc("Radius searched for the EMBARK shore. Much wider than FerrySearchRadius on purpose: troops",
 			"walk to the coast, so the boarding beach need not be next door -- it only has to be on the",
 			"ships' water and reachable over land. With the old shared radius of 24 the search saw only",

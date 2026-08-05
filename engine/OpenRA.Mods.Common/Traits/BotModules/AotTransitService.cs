@@ -221,6 +221,28 @@ namespace OpenRA.Mods.Common.Traits
 					continue;
 				}
 
+				// A CROSSING MUST OPEN A ROUTE THAT WALKING CANNOT. Not "get closer" -- closer is
+				// worthless if the army could simply march there (User 2026-08-05: "einfach nur um auf
+				// dem seeweg naeher ran zu kommen reicht nicht"). The one thing a ferry is for is
+				// ground the group cannot otherwise reach: the far side of a river whose bridges are
+				// down, another landmass.
+				//
+				// With every bridge destroyed the shore search fell back to the nearest coast of
+				// whatever water the base happens to sit on, and the log shows what that produced:
+				// "home stop 33,1" against "far stop for spawn 149,34: 33,1" -- the same cell. The bot
+				// booked a ferry ride that unloaded the group where it embarked, and because a ticket
+				// existed, a sub pen and three transports were built for it in good faith.
+				//
+				// A landing this bot can already walk to is therefore rejected. No far stop means no
+				// ticket, and no ticket means no transports and no pen requested for transit. Subs are
+				// a separate matter and unaffected.
+				if (intel.IsReachable(shore.Value))
+				{
+					LogChanged($"far{spawn}", $"far stop for spawn {spawn}: {shore.Value} rejected, " +
+						"already reachable on foot -- a crossing there opens no route");
+					continue;
+				}
+
 				// Two spawns behind the same beachhead legitimately share one quay -- don't build it twice.
 				var stop = FarStops.FirstOrDefault(s => s.Shore == shore.Value);
 				if (stop == null)

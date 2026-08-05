@@ -25,6 +25,7 @@
 // und verringert die Verschwendung bei vollen Silos eher, als dass es sie erhoeht.
 // === Ende aotmod ===
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections.Frozen;
@@ -41,12 +42,14 @@ namespace OpenRA.Mods.Common.Traits
 			"SupportPowerInfo builds this as <InfoTypeName>Order.")]
 		public readonly FrozenSet<string> PowerOrderNames = FrozenSet<string>.Empty;
 
-		[Desc("Credits the Age fund never touches, so the base can keep building while it saves.",
-			"Under the research model the upgrade is buyable the moment its prerequisites are met,",
-			"so without a floor the bot would hoard every credit from that point on and stall its",
-			"own production for the whole saving period. The user's spec is that it saves MOST of",
-			"its income for the age, not literally all of it.")]
-		public readonly int SavingReserve = 1000;
+		[Desc("Percentage of INCOME the Age fund skims while it saves. This is deliberately a share",
+			"of what comes in, not a grab from the balance: the module used to take everything on the",
+			"account the moment the prerequisites were met, which brought the bot's whole operation to",
+			"a halt for as long as it took to reach the price (User 2026-08-05: \"damit wuerde sie de",
+			"facto fuer lange zeit ihren betrieb einstellen\"). Skimming income keeps production",
+			"running throughout and makes the saving time predictable: at 55% and 1500 credits a",
+			"minute, 5000 takes about six minutes.")]
+		public readonly int IncomeShare = 55;
 
 		public override object Create(ActorInitializer init) { return new AotAgePowerBotModule(init.Self, this); }
 	}
@@ -94,6 +97,17 @@ namespace OpenRA.Mods.Common.Traits
 			// stand-down cannot last forever even if the expansion never gets off the ground.
 			var emergency = ops.Any(o => o.EconomyEmergency() || o.ExpansionHoldsPriority());
 
+			// One research at a time; while it runs, the fund may work ahead on the next tier.
+			var anyResearching = Info.PowerOrderNames.Any(k =>
+				supportPowerManager.Powers.TryGetValue(k, out var p)
+				&& p is AotAgeResearchInstance r && r.Researching);
+
+			// Income since the last bot tick. Earned only ever grows, so the delta is what actually
+			// came in -- spending does not distort it the way a balance comparison would.
+			var income = Math.Max(0, playerResources.Earned - lastEarned);
+			lastEarned = playerResources.Earned;
+			skim = income * Info.IncomeShare / 100;
+
 			foreach (var key in Info.PowerOrderNames)
 			{
 				if (emergency)
@@ -105,16 +119,30 @@ namespace OpenRA.Mods.Common.Traits
 
 				savings.TryGetValue(key, out var saved);
 
-				if (!supportPowerManager.Powers.TryGetValue(key, out var power) || power.Disabled)
+				if (!supportPowerManager.Powers.TryGetValue(key, out var power))
 				{
-					// Power weg (noch nicht freigeschaltet, schon gekauft, Spieler verloren):
-					// Zurueckgelegtes sofort freigeben, sonst waere es fuer immer verloren.
 					Refund(key, saved);
 					continue;
 				}
 
 				if (power.Info is not AutoActivateSpawnActorPowerInfo info || info.Cost <= 0)
 					continue;
+
+				// Disabled covers three very different things, and they must not share a branch:
+				// already bought, player lost, or simply not unlocked yet. Only the last one is worth
+				// keeping money for -- and only while an earlier age is researching, which is exactly
+				// the pre-funding window. Anything else releases the savings, or they would sit there
+				// for the rest of the match.
+				if (power.Disabled)
+				{
+					var bought = power is AotAgeResearchInstance done && done.Purchased;
+					if (!bought && anyResearching)
+						SaveFromIncome(key, saved, info.Cost);
+					else
+						Refund(key, saved);
+
+					continue;
+				}
 
 				// RESEARCH MODEL: once the upgrade is bought and the research is running, it is paid
 				// for -- there is nothing left to save towards. Without this the module would fall
@@ -128,52 +156,62 @@ namespace OpenRA.Mods.Common.Traits
 
 				if (power.Ready)
 				{
-					// Kauf-Modus mit HOECHSTER Prioritaet (User-Wunsch 2026-08-04): solange der
-					// volle Betrag nicht zusammen ist, greift das Modul in JEDEM Bot-Tick alles ab,
-					// was da ist -- vor allen anderen Modulen. Normalerweise liegt das Geld nach
-					// der Ladezeit ohnehin komplett hier; der Fall greift, wenn zwischen Rueckgabe
-					// und Wirksamwerden der Order ein anderes Modul zugeschlagen hat.
-					if (saved < info.Cost)
+					// Enough put by -- hand it back and buy. Refund first, because the power bills the
+					// account itself when the order resolves. If the order fails the money is simply
+					// loose again and gets skimmed back next tick, so the loop settles by itself.
+					if (saved >= info.Cost)
 					{
-						saved = Save(key, saved, info.Cost - saved);
-						if (saved < info.Cost)
-							continue;
+						Refund(key, saved);
+						world.IssueOrder(new Order(key, supportPowerManager.Self, false));
+						continue;
 					}
 
-					// Erst zurueckgeben, dann ausloesen: die Power bucht beim Aktivieren selbst ab
-					// (AutoActivateSpawnActorPower.Activate). Schlaegt die Order fehl, faellt der
-					// Betrag als loses Geld an und wird im naechsten Tick oben wieder eingesammelt
-					// -- die Schleife laeuft also von selbst weiter, bis der Kauf sitzt.
-					Refund(key, saved);
-					world.IssueOrder(new Order(key, supportPowerManager.Self, false));
+					// Still saving: take a SHARE OF INCOME, never a bite out of the balance. This is
+					// the whole point of the rework -- the bot stays in business while it saves.
+					SaveFromIncome(key, saved, info.Cost);
 					continue;
 				}
 
 				if (!power.Active || power.TotalTicks <= 0)
-					continue;
+				{
+					// Prerequisites not up yet. Pre-funding the NEXT age is worth doing only while an
+					// earlier one is actually being researched: that window is dead time for this fund
+					// anyway, so the money is already waiting when the next tier unlocks (the user's
+					// second idea, kept as the complement to the income share). Outside that window the
+					// savings are released -- money sitting idle for an age whose Temple or Shrine is
+					// not even planned yet is just another way of standing still.
+					if (anyResearching)
+						SaveFromIncome(key, saved, info.Cost);
+					else
+						Refund(key, saved);
 
-				// Gleichmaessig ansparen: Kosten geteilt durch Gesamtdauer, also bei halb geladener
-				// Power die Haelfte der Kosten. Ueber den Ziel-Ist-Vergleich statt eines festen
-				// Betrags pro Tick, damit sich verpasste Raten (kein Geld da) spaeter von selbst
-				// nachholen. Bewusst OHNE Deckel auf einen Anteil des Vermoegens: dem Cashflow soll
-				// nur die laufende Rate entzogen werden, so als wuerde die KI etwas bauen.
-				var elapsed = power.TotalTicks - power.RemainingTicks;
-				var target = info.Cost * elapsed / power.TotalTicks;
-				if (target > saved)
-					Save(key, saved, target - saved);
+					continue;
+				}
+
+				// Active but not Ready means the research is running (handled above) -- nothing to do.
 			}
 		}
 
 		// Legt bis zu "wanted" zur Seite und gibt den neuen Kontostand zurueck. Ist weniger da,
 		// wird genommen was da ist -- die Rate wird dann beim naechsten Mal nachgeholt, weil sich
 		// das Sparziel aus dem Ladefortschritt ergibt und nicht aus einer Summe von Einzelraten.
+		int lastEarned;
+		int skim;
+
+		// Skims this tick's share of income towards `cost`, never touching what is already banked for
+		// other purposes.
+		void SaveFromIncome(string key, int saved, int cost)
+		{
+			var wanted = Math.Min(skim, cost - saved);
+			if (wanted > 0)
+				Save(key, saved, wanted);
+		}
+
 		int Save(string key, int saved, int wanted)
 		{
-			// Leave the reserve liquid -- see SavingReserve.
-			var available = playerResources.GetCashAndResources() - Info.SavingReserve;
-			if (available <= 0)
-				return saved;
-
+			// Never more than is actually on the account -- the share is computed by the caller from
+			// income, this is only the hard limit.
+			var available = playerResources.GetCashAndResources();
 			var take = wanted < available ? wanted : available;
 			if (take <= 0 || !playerResources.TakeCash(take))
 				return saved;

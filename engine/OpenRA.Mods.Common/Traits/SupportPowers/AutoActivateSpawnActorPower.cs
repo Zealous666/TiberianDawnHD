@@ -85,6 +85,11 @@ namespace OpenRA.Mods.Common.Traits
 
 		public bool Researching => researching;
 
+		// Bought already -- either being researched right now, or finished and spent. The AI fund uses
+		// this to tell "not unlocked yet" (worth pre-funding) from "done with" (release the savings),
+		// which Disabled alone cannot distinguish.
+		public bool Purchased => researching || oneShotFired;
+
 		public override void Tick()
 		{
 			if (!researching)
