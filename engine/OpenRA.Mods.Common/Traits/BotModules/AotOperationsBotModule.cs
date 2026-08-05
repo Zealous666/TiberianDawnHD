@@ -2300,7 +2300,11 @@ namespace OpenRA.Mods.Common.Traits
 			// Startup priority (User 2026-07-22): only the very FIRST wave waits on this -- every later
 			// wave/air-raid (waveIndex > 0) is unaffected. OreT boost + first Derrick scan + every Scout
 			// group (cashflow and reconnaissance) get a head start before the first real offensive.
-			if (Info.EnableWaves && !ExpansionHoldsPriority() && !EconomyEmergency()
+			// AGE SPRINT (User 2026-08-05): once the bot is buying its next Age in earnest, offensive
+			// waves stand down and every credit goes to the upgrade -- the same call a human makes,
+			// "put the buildings up, build one wave's worth, then stop and save the rest". Base
+			// defence is untouched and still answers attacks; this only stops NEW offensives.
+			if (Info.EnableWaves && !ExpansionHoldsPriority() && !EconomyEmergency() && !AgeSprintActive()
 				&& !Missions.OfType<AotRegularWaveMission>().Any() && !Missions.OfType<AotAirRaidMission>().Any()
 				&& (waveIndex > 0 || StartupPriorityMet()))
 			{
@@ -2881,6 +2885,12 @@ namespace OpenRA.Mods.Common.Traits
 		// raids stand down for that window so the whole income goes into the expansion -- and it is
 		// bounded by the mission's own ExpansionPriorityTimeout, so a failing expansion can never
 		// silence the army permanently (User 2026-08-04: "es braucht ein safelock").
+		// True while the Age fund has committed to its final sprint. Asked of every Age module on the
+		// player actor -- TraitsImplementing, not TraitOrDefault, since the player carries one per
+		// faction and TraitOrDefault throws on the second (crash 2026-08-04).
+		public bool AgeSprintActive() =>
+			Player.PlayerActor.TraitsImplementing<AotAgePowerBotModule>().Any(m => !m.IsTraitDisabled && m.HardSaving);
+
 		public bool ExpansionHoldsPriority() =>
 			Missions.OfType<AotExpansionMission>().Any(m => !m.Done && m.HoldsPriority);
 

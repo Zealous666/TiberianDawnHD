@@ -964,26 +964,31 @@ namespace OpenRA.Mods.Common.Traits
 			// the wave grows while it stands at the choke -- visible pressure on the frontier instead
 			// of a lull at home.
 			var mass = Ops.Info.WaveMinimumMass + Ops.AgeTier() * Ops.Info.WaveMinimumMassPerTier;
-			if (open == 0 && Units.Count > 0 && Units.Count < mass
+
+			// Count what is ON THE WAY as well. Gating the top-up on "no open orders" meant it never
+			// fired even once: a forming wave practically always has something in production, so the
+			// condition was never true and the floor did nothing but make waves wait longer (log:
+			// "below critical mass" zero times across a whole run).
+			//
+			// Nothing is ordered during the Age sprint either -- that is the point of the sprint.
+			var missing = mass - Units.Count - open;
+			if (missing > 0 && !Ops.AgeSprintActive()
 				&& formingTicks < Ops.Info.WaveFormingTimeout)
 			{
 				var chain = AdaptiveChain();
 				if (chain.Length > 0)
 				{
-					var short_ = mass - Units.Count;
-					var fromPool = Ops.TakeFromPool(chain, short_);
+					var fromPool = Ops.TakeFromPool(chain, missing);
 					Ops.AssignFromPool(this, fromPool);
-					if (short_ - fromPool.Count > 0)
-						Ops.QueueRequest(this, "adaptive", chain, short_ - fromPool.Count);
+					if (missing - fromPool.Count > 0)
+						Ops.QueueRequest(this, "adaptive", chain, missing - fromPool.Count);
 
-					Log($"below critical mass ({Units.Count}/{mass}) -> ordering {short_} more");
+					Log($"below critical mass ({Units.Count}+{open} of {mass}) -> ordering {missing} more");
 					open = Ops.OpenRequests(this);
 				}
 			}
 
-			var launch = open == 0 && Units.Count >= Math.Min(mass, 1);
-			if (launch && Units.Count < mass && formingTicks < Ops.Info.WaveFormingTimeout)
-				launch = false;
+			var launch = open == 0 && Units.Count >= mass;
 
 			if (!launch && formingTicks >= Ops.Info.WaveFormingTimeout)
 				launch = Units.Count >= open; // at least half assembled

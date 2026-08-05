@@ -51,6 +51,13 @@ namespace OpenRA.Mods.Common.Traits
 			"minute, 5000 takes about six minutes.")]
 		public readonly int IncomeShare = 55;
 
+		[Desc("Cash at which the fund switches from skimming income to saving in earnest, provided",
+			"the upgrade is already buyable (its building stands). This is how a human plays it:",
+			"put up the structures, build a wave's worth of units, and once roughly this much is",
+			"left, stop spending and take the rest straight to the Age price (User 2026-08-05).",
+			"Once tripped it latches until the upgrade is bought.")]
+		public readonly int HardSavingTrigger = 3000;
+
 		public override object Create(ActorInitializer init) { return new AotAgePowerBotModule(init.Self, this); }
 	}
 
@@ -112,6 +119,7 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				if (emergency)
 				{
+					hardSaving.Remove(key);
 					savings.TryGetValue(key, out var held);
 					Refund(key, held);
 					continue;
@@ -161,14 +169,23 @@ namespace OpenRA.Mods.Common.Traits
 					// loose again and gets skimmed back next tick, so the loop settles by itself.
 					if (saved >= info.Cost)
 					{
+						hardSaving.Remove(key);
 						Refund(key, saved);
 						world.IssueOrder(new Order(key, supportPowerManager.Self, false));
 						continue;
 					}
 
-					// Still saving: take a SHARE OF INCOME, never a bite out of the balance. This is
-					// the whole point of the rework -- the bot stays in business while it saves.
-					SaveFromIncome(key, saved, info.Cost);
+					// The sprint starts once there is a real pile to build on -- everything already put
+					// by, plus what is on the account. Below that the bot keeps operating normally on
+					// the income share; above it, every credit goes to the Age.
+					if (saved + playerResources.GetCashAndResources() >= Info.HardSavingTrigger)
+						hardSaving.Add(key);
+
+					if (hardSaving.Contains(key))
+						Save(key, saved, info.Cost - saved);
+					else
+						SaveFromIncome(key, saved, info.Cost);
+
 					continue;
 				}
 
@@ -197,6 +214,15 @@ namespace OpenRA.Mods.Common.Traits
 		// das Sparziel aus dem Ladefortschritt ergibt und nicht aus einer Summe von Einzelraten.
 		int lastEarned;
 		int skim;
+
+		// Latched per power: once the bot commits to the sprint it does not drift back out of it
+		// because a unit finished and the balance dipped under the trigger again.
+		readonly HashSet<string> hardSaving = [];
+
+		// Read by AotOperationsBotModule: attack waves stand down while this is on, exactly as a human
+		// stops producing to reach the next Age. Base defence is deliberately NOT affected -- being
+		// overrun while saving would be the one way this backfires.
+		public bool HardSaving => hardSaving.Count > 0;
 
 		// Skims this tick's share of income towards `cost`, never touching what is already banked for
 		// other purposes.
