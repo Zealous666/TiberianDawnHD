@@ -1533,19 +1533,21 @@ namespace OpenRA.Mods.Common.Traits
 			//          3-building fenced cluster at every other classified approach.
 			AddBuilding(gateCluster, 1, "FTUR", defense: true);
 
-			// SAM Sites, Age 0 (user spec 2026-07-31): 2x directly beside the construction yard, outside
-			// its YardFence -- see the anchored placement in Plan() for why (air cover for the one
-			// building that can never be rebuilt if lost).
-			AddBuilding(samYard1, 0, "SAM", defense: true);
-			AddBuilding(samYard2, 0, "SAM", defense: true);
-
-			// STEC comes before both the Repair Facility and the Helipad (user spec 2026-08-05): the
-			// Tech Centre is what unlocks the next Age, and every credit spent ahead of it delays the
-			// upgrade the whole build-up is aimed at.
+			// STEC comes before the Repair Facility, the Helipad and the SAMs (user spec 2026-08-05):
+			// the Tech Centre is what unlocks the next Age, and every credit spent ahead of it delays
+			// the upgrade the whole build-up is aimed at. Everything below is built during the Age
+			// research window instead -- see the sprint hold in AotBaseBuilderBotModule.
 			AddBuilding(tech, 1, "STEC");
 
 			AddBuilding(fix, 0, "FIX");
 			AddBuilding(hpad, 0, "HPAD");
+
+			// SAM Sites, Age 0 (user spec 2026-07-31): 2x directly beside the construction yard,
+			// outside its YardFence -- see the anchored placement in Plan() for why (air cover for the
+			// one building that can never be rebuilt if lost). Behind the Helipad, which is their
+			// prerequisite anyway, and low priority besides: nothing is flying this early.
+			AddBuilding(samYard1, 0, "SAM", defense: true);
+			AddBuilding(samYard2, 0, "SAM", defense: true);
 
 			// Second SILO (user spec 2026-08-01): the LAST Age-0 core step, 2-3 cells behind the Age-3
 			// Obelisk's own eventual spot (see the anchor computed in Plan(), right after pGateCluster).

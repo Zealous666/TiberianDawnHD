@@ -1581,6 +1581,7 @@ namespace OpenRA.Mods.Common.Traits
 		}
 
 		int expansionPauseLog;
+		int ageSprintPauseLog;
 
 		void StartStep(IBot bot, AotPlanStep step)
 		{
@@ -1605,6 +1606,23 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				if (++economyPauseLog % 16 == 0)
 					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Economy emergency: holding {step.Role} until the economy is back");
+
+				return;
+			}
+
+			// AGE SPRINT (User 2026-08-05: "wenn das age-0 upgrade angestossen wurde"). Once the Tech
+			// Centre stands and the bot has committed to buying its next Age, construction stops too --
+			// not just the attack waves. Everything positioned after STEC (Repair Facility, Helipad,
+			// the SAMs, the second Silo) is therefore built during the RESEARCH window instead, which
+			// is dead time for the Age fund anyway. That is the human pattern being copied: put the
+			// buildings up, build a wave's worth of units, then stop and take the rest to the price.
+			//
+			// PROC stays exempt: cutting income is never the way to reach a price faster.
+			if (ops != null && ops.Info.Faction == Info.Faction && ops.AgeSprintActive()
+				&& step.Role != "PROC")
+			{
+				if (++ageSprintPauseLog % 16 == 0)
+					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Age sprint: holding {step.Role} until the upgrade is bought");
 
 				return;
 			}
