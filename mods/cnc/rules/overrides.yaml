@@ -885,6 +885,7 @@ Player:
 		Condition: aot-age2-active
 		Prerequisites: aot-age2
 	AotAge1Power:
+		InsufficientFundsTextNotification: notification-insufficient-funds
 		Actor: aot-age1-marker
 		# Countdown oben rechts fuer ALLE Spieler, wie bei Ion Cannon und Atom Bomb
 		# (User-Wunsch 2026-08-04). Es taucht immer nur die gerade relevante Age-Stufe auf:
@@ -906,6 +907,7 @@ Player:
 		TooltipRequirements: Requires: Tech Center
 		SupportPowerPaletteOrder: 0
 	AotAge2Power:
+		InsufficientFundsTextNotification: notification-insufficient-funds
 		Actor: aot-age2-marker
 		# Countdown oben rechts fuer ALLE Spieler, wie bei Ion Cannon und Atom Bomb
 		# (User-Wunsch 2026-08-04). Es taucht immer nur die gerade relevante Age-Stufe auf:
@@ -925,6 +927,7 @@ Player:
 		TooltipRequirements: Requires: Science Lab (GDI) or Temple of Nod (Nod)
 		SupportPowerPaletteOrder: 1
 	AotAge3Power:
+		InsufficientFundsTextNotification: notification-insufficient-funds
 		Actor: aot-age3-marker
 		# Countdown oben rechts fuer ALLE Spieler, wie bei Ion Cannon und Atom Bomb
 		# (User-Wunsch 2026-08-04). Es taucht immer nur die gerade relevante Age-Stufe auf:

@@ -41,6 +41,13 @@ namespace OpenRA.Mods.Common.Traits
 		// anzeigen kann. Hier NICHT neu deklarieren -- das wuerde die Basisdefinition verdecken und
 		// FieldLoader wuerde je nach Bindung ein anderes Feld befuellen als der Tooltip liest.
 
+		[FluentReference(optional: true)]
+		[Desc("Text notification shown when the player clicks the power without the cash for it.",
+			"Tiberian Dawn has no EVA line for insufficient funds, so the speech notification this",
+			"also plays stays silent -- without this line the click gives no feedback whatsoever",
+			"(User 2026-08-05: \"es muss eine Not enough money meldung kommen\").")]
+		public readonly string InsufficientFundsTextNotification = null;
+
 		public override object Create(ActorInitializer init) { return new AutoActivateSpawnActorPower(init.Self, this); }
 	}
 
@@ -115,6 +122,7 @@ namespace OpenRA.Mods.Common.Traits
 				if (resources == null || resources.GetCashAndResources() < info.Cost)
 				{
 					Game.Sound.PlayNotification(self.World.Map.Rules, self.Owner, "Speech", "InsufficientFunds", self.Owner.Faction.InternalName);
+					TextNotificationsManager.AddTransientLine(self.Owner, info.InsufficientFundsTextNotification);
 					return;
 				}
 			}
