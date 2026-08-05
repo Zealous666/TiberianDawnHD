@@ -3131,9 +3131,22 @@ namespace OpenRA.Mods.Common.Traits
 			if (mcv.IsIdle)
 				MoveUnit(bot, mcv, Site, false);
 
+			// Escorts head for their PERIMETER POSTS, never for Site itself. Sending them to the same
+			// cell as the MCV is self-defeating: the MCV has to occupy that exact cell to deploy, and
+			// four tanks converging on it park right where it needs to stand. The convoy then sits
+			// there in a heap doing nothing until the move timeout kills the mission -- which is
+			// exactly what happened on the first convoy that ever got this far (User 2026-08-05:
+			// "aber dann stehen sie nur rum ... blocken sie sich gegenseitig?").
+			//
+			// The posts are the positions they take up once the yard is built anyway, so they screen
+			// the site on approach and are already in place when it deploys.
 			var escorts = Escorts();
-			if (escorts.Count > 0)
-				AttackMoveGroup(bot, escorts, Site);
+			for (var i = 0; i < escorts.Count; i++)
+			{
+				var escort = escorts[i];
+				if (escort.IsIdle)
+					AttackMoveGroup(bot, [escort], Site + GuardPosts[i % GuardPosts.Length]);
+			}
 		}
 
 		// Escort duty at the finished expansion. From Age 2 the tanks dig in at the six perimeter

@@ -2625,28 +2625,65 @@ namespace OpenRA.Mods.Common.Traits
 			// players this bot is actually at war with and came back short in testing.
 			var allySites = AllyExpansionSites();
 
-			bool Safe(CPos c) =>
-				!yards.Any(y => (y - c).Length < Info.ExpansionSpawnClearance)
-				&& !enemyBuildings.Any(b => (b - c).Length < Info.ExpansionEnemyClearance)
-				&& !allySites.Any(a => (a - c).Length < Info.ExpansionAllyClearance);
-
 			// A spawn either works as-is or is dropped entirely, and the next one is tried (User
 			// 2026-08-04: "wenn ein spawn nicht geeignet ist, soll er den ganz verwerfen und den
 			// nächsten spawn prüfen ... eine ringsuche bringt hier nicht viel"). The ring search that
 			// used to run here is exactly what put a site one cell diagonally into an enemy base:
 			// once the marker itself is unusable, anything near it is suspect too. If no spawn
 			// qualifies, the caller falls through to the tiberium-field tiers.
-			foreach (var spawn in Intel.AllSpawns
-				.Where(s => (s - home).Length >= Info.ExpansionMinDistance)
-				.Where(s => !Intel.EnemySpawns.Contains(s) && s != Intel.OwnSpawn)
-				.Where(Safe)
-				.OrderBy(s => (s - home).LengthSquared))
+			// Rejection counters, exactly like the tiberium-field tier already has. Without them this
+			// tier failed SILENTLY: not one "spawn skipped" line was written all run, because every
+			// candidate was dropped by a pre-filter before the layout test could log anything -- so a
+			// map with two genuinely unused spawns looked identical to a map with none (User
+			// 2026-08-05: "wenige meter daneben wäre ein freier spawn-base gewesen ... stelle ich das
+			// weiterhin in frage"). An unexplained rejection is how the last three site arguments
+			// started.
+			int spawnTooClose = 0, spawnTaken = 0, spawnYardNear = 0, spawnEnemyNear = 0, spawnNoFit = 0;
+
+			foreach (var spawn in Intel.AllSpawns.OrderBy(s => (s - home).LengthSquared))
 			{
+				if ((spawn - home).Length < Info.ExpansionMinDistance)
+				{
+					spawnTooClose++;
+					continue;
+				}
+
+				if (Intel.EnemySpawns.Contains(spawn) || spawn == Intel.OwnSpawn)
+				{
+					spawnTaken++;
+					continue;
+				}
+
+				if (yards.Any(y => (y - spawn).Length < Info.ExpansionSpawnClearance))
+				{
+					spawnYardNear++;
+					continue;
+				}
+
+				if (enemyBuildings.Any(b => (b - spawn).Length < Info.ExpansionEnemyClearance))
+				{
+					spawnEnemyNear++;
+					continue;
+				}
+
+				if (allySites.Any(a => (a - spawn).Length < Info.ExpansionAllyClearance))
+				{
+					spawnTaken++;
+					continue;
+				}
+
 				if (LayoutFits(spawn, out var why))
 					return spawn;
 
+				spawnNoFit++;
 				Log($"spawn {spawn} skipped: {why}");
 			}
+
+			Log($"no free spawn: {Intel.AllSpawns.Count} spawn(s) checked -- {spawnTooClose} too close " +
+				$"(<{Info.ExpansionMinDistance}), {spawnTaken} taken or claimed, " +
+				$"{spawnYardNear} within {Info.ExpansionSpawnClearance} of a construction yard, " +
+				$"{spawnEnemyNear} within {Info.ExpansionEnemyClearance} of an enemy building, " +
+				$"{spawnNoFit} where the layout does not fit");
 
 			return null;
 		}
