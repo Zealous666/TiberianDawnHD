@@ -291,6 +291,17 @@ namespace OpenRA.Mods.Common.Traits
 			return null;
 		}
 
+		// Draw attention to this icon right now. Default off, so nothing changes for any existing
+		// power; the Age upgrades use it to pulse once they are genuinely purchasable.
+		public virtual bool FlashIcon => false;
+
+		// True for every ordinary power: its timer is meaningful from the start, because it charges
+		// on its own. The Age upgrades are the exception -- theirs only starts when it is bought.
+		public virtual bool CountsDownBeforePurchase => true;
+
+		// Is a countdown actually running right now?
+		public virtual bool Counting => Active && RemainingTicks > 0;
+
 		public virtual string TooltipTimeTextOverride()
 		{
 			return null;

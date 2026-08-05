@@ -86,6 +86,9 @@ namespace OpenRA.Mods.Common.Traits
 
 		public bool Researching => researching;
 
+		public override bool CountsDownBeforePurchase => false;
+		public override bool Counting => researching;
+
 		// Bought already -- either being researched right now, or finished and spent. The AI fund uses
 		// this to tell "not unlocked yet" (worth pre-funding) from "done with" (release the savings),
 		// which Disabled alone cannot distinguish.
@@ -134,6 +137,24 @@ namespace OpenRA.Mods.Common.Traits
 		public override string IconOverlayTextOverride()
 		{
 			return researching ? null : "";
+		}
+
+		// Pulse only when the upgrade could actually be bought this instant -- prerequisites met AND
+		// the money on the account (User 2026-08-05). Flashing on prerequisites alone would nag for
+		// minutes while the player saves, which is the opposite of a useful signal.
+		public override bool FlashIcon
+		{
+			get
+			{
+				if (researching || !Ready)
+					return false;
+
+				if (info.Cost <= 0)
+					return true;
+
+				var resources = Manager.Self.Owner.PlayerActor.TraitOrDefault<PlayerResources>();
+				return resources != null && resources.GetCashAndResources() >= info.Cost;
+			}
 		}
 
 		public override void Activate(Order order)

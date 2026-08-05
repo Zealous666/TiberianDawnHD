@@ -63,6 +63,13 @@ namespace OpenRA.Mods.Common.Widgets
 		{
 			var displayedPowers = powers.Where(p =>
 			{
+				// A power that counts down only AFTER it is bought has nothing to show before that:
+				// RemainingTicks is zero, and the row read "1st Tiberium Age: 0:00" for every player
+				// from the first second of the match (User 2026-08-05). It belongs here exactly while
+				// the research runs, which is also the only time it tells other players anything.
+				if (!p.CountsDownBeforePurchase && !p.Counting)
+					return false;
+
 				var owner = p.Instances[0].Self.Owner;
 				var viewer = owner.World.RenderPlayer ?? owner.World.LocalPlayer;
 				return viewer == null || p.Info.DisplayTimerRelationships.HasRelationship(owner.RelationshipWith(viewer));
