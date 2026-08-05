@@ -322,10 +322,36 @@ namespace OpenRA.Mods.Common.Traits
 
 		// ---- Fleet acquisition -----------------------------------------------------------------
 
+		bool noDemandLogged;
+
 		void AcquireVessels()
 		{
 			if (mission == null || !ops.HasNavalProduction())
 				return;
+
+			// DEMAND-DRIVEN (User 2026-08-05). The fleet used to be a standing force: the moment a
+			// shipyard existed, FerryCount transports were ordered whether or not anything had ever
+			// asked for a crossing. On a map where all bridges had been destroyed the bots duly built
+			// shipyards -- correctly, that IS a real transit request -- but some of them sat on a
+			// closed lake with no far shore to serve, so the transports were built, idled and did
+			// nothing at all ("1 vessel(s) [Idle#-1], 0 ticket(s)" in the log, for the whole run).
+			//
+			// Transports are now ordered only while a booking is actually open. Ships already owned
+			// are kept: they cost nothing to keep, and the next crossing gets a head start. Escorts
+			// are inside the same gate, so an idle lake fleet no longer grows a navy around itself.
+			var demand = tickets.Count(t => !t.Finished);
+			if (demand == 0)
+			{
+				if (!noDemandLogged && vessels.Count == 0)
+				{
+					noDemandLogged = true;
+					Log("no crossing booked -> not ordering transports");
+				}
+
+				return;
+			}
+
+			noDemandLogged = false;
 
 			var want = Math.Max(1, ops.Info.FerryCount);
 			if (vessels.Count < want)
@@ -344,7 +370,7 @@ namespace OpenRA.Mods.Common.Traits
 			// Escorts are strictly optional and must never hold up a crossing: they join over time out
 			// of spare money (user spec 2026-07-27). Own role, so they neither block the transports'
 			// request slot nor inherit their cash-reserve exemption.
-			var transportsSecured = vessels.Count >= want;
+			var transportsSecured = vessels.Count > 0 && vessels.Count >= want;
 			var escortOrdersOpen = ops.OpenRequests(mission, AotOperationsBotModule.FerryEscortRole) > 0;
 			var wantEscorts = vessels.Count * ops.Info.FerryEscortPerVessel;
 
