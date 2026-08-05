@@ -1005,6 +1005,18 @@ namespace OpenRA.Mods.Common.Traits
 			"planned overlapping and the second MCV would arrive with nowhere to deploy.")]
 		public readonly int ExpansionAllyClearance = 16;
 
+		[Desc("Percentage of the expansion's perimeter fence that may be unbuildable before the site",
+			"is rejected. The fence is cosmetic-ish protection, not a foundation: refusing a site with",
+			"plenty of room for every building because one wall cell sits on a rock is how the search",
+			"ended up returning nothing on maps full of usable ground.")]
+		public readonly int ExpansionFenceTolerance = 35;
+
+		[Desc("How far the compound may be slid away from a candidate anchor (spawn marker or field",
+			"centre) to find a spot the layout actually fits. Every shifted cell is re-checked against",
+			"the same safety filters as the anchor, so this cannot walk a site into an enemy base the",
+			"way the old unchecked ring search did.")]
+		public readonly int ExpansionFitRadius = 6;
+
 		[Desc("How far off the tiberium field itself the yard is planted. Building on top of the field",
 			"would bury the very resources the expansion came for.")]
 		public readonly int ExpansionSiteOffset = 6;
@@ -2672,11 +2684,27 @@ namespace OpenRA.Mods.Common.Traits
 					continue;
 				}
 
-				if (LayoutFits(spawn, out var why))
-					return spawn;
+				// Slide the compound around the marker rather than demanding it land exactly on it. The
+				// safety predicate travels with it, so a shifted site is filtered as hard as the
+				// marker was.
+				bool SafeNear(CPos c) =>
+					World.Map.Contains(c)
+					&& (c - home).Length >= Info.ExpansionMinDistance
+					&& !yards.Any(y => (y - c).Length < Info.ExpansionSpawnClearance)
+					&& !enemyBuildings.Any(b => (b - c).Length < Info.ExpansionEnemyClearance)
+					&& !allySites.Any(a => (a - c).Length < Info.ExpansionAllyClearance);
+
+				var fit = FitNear(spawn, Info.ExpansionFitRadius, SafeNear, out var why);
+				if (fit != null)
+				{
+					if (fit.Value != spawn)
+						Log($"spawn {spawn}: layout shifted to {fit.Value} ({why} at the marker)");
+
+					return fit;
+				}
 
 				spawnNoFit++;
-				Log($"spawn {spawn} skipped: {why}");
+				Log($"spawn {spawn} skipped: {why} (no fit within {Info.ExpansionFitRadius} cells)");
 			}
 
 			Log($"no free spawn: {Intel.AllSpawns.Count} spawn(s) checked -- {spawnTooClose} too close " +
@@ -2698,38 +2726,97 @@ namespace OpenRA.Mods.Common.Traits
 		// The six guard posts at x -5 and +4 are deliberately NOT part of the test. They are where the
 		// escort digs in, and a tank may perfectly well sit in tiberium -- gating the whole site on them
 		// is what rejected two entirely unused spawns and several usable fields in testing.
-		bool LayoutFits(CPos yard, out string reason)
+		// Validates the site against the layout that will ACTUALLY be built -- the cells come from
+		// AotBaseBuilderBotModule.ExpansionLayout, the same source the construction reads, so the two
+		// can no longer disagree. The previous version tested a hand-maintained 8x10 rectangle and
+		// required every one of its 80 cells to be clear, including a courtyard nothing is ever built
+		// on and cells the compound does not touch at all. On real maps that vetoed sites with ample
+		// room (User 2026-08-05).
+		//
+		// Foundations are strict: off-map, impassable, already built on, or standing on resources all
+		// disqualify. The FENCE is not -- a perimeter with a few gaps still works, and one awkward
+		// wall cell must never cost the whole expansion. ExpansionFenceTolerance caps how much of the
+		// rim may be missing before the site is genuinely too cramped.
+		// Slides the compound around an anchor until it fits, instead of vetoing the anchor outright.
+		// A single rock never blocks an area a human would build on without a second thought -- you
+		// just put the rectangle down a few cells over (User 2026-08-05: "ist er nicht in der lage,
+		// wenn ein stein im weg ist, das rechteck um offset daneben zu schieben?").
+		//
+		// The ring search that used to exist was removed for a good reason: it handed back a cell one
+		// step diagonally inside an enemy base, because it re-tested only the LAYOUT at the shifted
+		// cell and never the SAFETY that had qualified the anchor. Every offset is therefore put
+		// through the same safety predicate as the anchor itself -- shifting is safe, shifting blind
+		// is not.
+		CPos? FitNear(CPos anchor, int radius, Func<CPos, bool> safe, out string reason)
 		{
-			for (var dx = -4; dx <= 3; dx++)
+			if (safe(anchor) && LayoutFits(anchor, out reason))
+				return anchor;
+
+			LayoutFits(anchor, out reason);
+
+			for (var r = 1; r <= radius; r++)
 			{
-				for (var dy = -1; dy <= 8; dy++)
+				for (var dx = -r; dx <= r; dx++)
 				{
-					var c = yard + new CVec(dx, dy);
-					if (!World.Map.Contains(c))
+					for (var dy = -r; dy <= r; dy++)
 					{
-						reason = $"{c} off map";
-						return false;
-					}
+						// Ring only: the interior was covered by the smaller radii.
+						if (Math.Max(Math.Abs(dx), Math.Abs(dy)) != r)
+							continue;
 
-					if (!Intel.IsPassable(c))
-					{
-						reason = $"{c} impassable";
-						return false;
-					}
-
-					if (World.ActorMap.GetActorsAt(c).Any(a => a.Info.HasTraitInfo<BuildingInfo>()))
-					{
-						reason = $"{c} occupied by a building";
-						return false;
-					}
-
-					const bool building = true;
-					if (building && resourceLayer != null && resourceLayer.GetResource(c).Type != null)
-					{
-						reason = $"{c} would bury resources";
-						return false;
+						var c = anchor + new CVec(dx, dy);
+						if (safe(c) && LayoutFits(c, out _))
+							return c;
 					}
 				}
+			}
+
+			return null;
+		}
+
+		bool LayoutFits(CPos yard, out string reason)
+		{
+			if (builder == null)
+			{
+				reason = "no base builder to read the layout from";
+				return false;
+			}
+
+			var fenceBlocked = 0;
+			var fenceTotal = 0;
+
+			foreach (var (c, role, critical) in builder.ExpansionLayout(yard, Info.ConstructionYardTypes))
+			{
+				if (!critical)
+					fenceTotal++;
+
+				string why = null;
+				if (!World.Map.Contains(c))
+					why = "off map";
+				else if (!Intel.IsPassable(c))
+					why = "impassable";
+				else if (World.ActorMap.GetActorsAt(c).Any(a => a.Info.HasTraitInfo<BuildingInfo>()))
+					why = "occupied by a building";
+				else if (resourceLayer != null && resourceLayer.GetResource(c).Type != null)
+					why = "would bury resources";
+
+				if (why == null)
+					continue;
+
+				if (!critical)
+				{
+					fenceBlocked++;
+					continue;
+				}
+
+				reason = $"{role} at {c} {why}";
+				return false;
+			}
+
+			if (fenceTotal > 0 && fenceBlocked * 100 > fenceTotal * Info.ExpansionFenceTolerance)
+			{
+				reason = $"{fenceBlocked}/{fenceTotal} fence cells blocked";
+				return false;
 			}
 
 			reason = null;

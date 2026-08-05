@@ -344,6 +344,82 @@ namespace OpenRA.Mods.Common.Traits
 
 		public bool ExpansionPlanned => expansionYard != null;
 
+		// ------------------------------------------------------------------------------------------
+		// THE canonical description of the expansion compound. Both the construction below and the
+		// SITE TEST in AotOperationsBotModule read it, so they cannot drift apart.
+		//
+		// They had drifted badly: the site test hard-coded a solid 8x10 rectangle and demanded that
+		// all 80 cells be passable, resource-free and empty. The compound does not fill that
+		// rectangle -- five buildings, a fence around the rim, and a courtyard that is never built on
+		// at all. One rock in that empty courtyard, or a patch of tiberium nowhere near a foundation,
+		// vetoed the whole site. That is why maps with plenty of usable ground came back with nothing
+		// (User 2026-08-05: "ich kann dir im editor spielend belegen, an wievielen orten der feind
+		// dieses template haette aufbauen koennen").
+		// ------------------------------------------------------------------------------------------
+		public readonly record struct ExpansionCell(CPos Cell, string Role, bool Critical);
+
+		// Building anchors, in build order. The yard itself is first: the MCV has to deploy there.
+		IEnumerable<(string Role, string[] Variants, CVec Offset)> ExpansionBuildings()
+		{
+			yield return ("NUKE", Info.ExpansionPowerTypes, new CVec(-3, 0));
+			yield return ("PROC", Info.ExpansionRefineryTypes, new CVec(0, 3));
+			yield return ("SILO", Info.ExpansionSiloTypes, new CVec(-3, 5));
+			yield return ("SAM", Info.ExpansionSamTypes, new CVec(-1, 3));
+
+			// Fence + gate are Age-2 items (user spec). The gate occupies TWO cells (-1,+7) and (0,+7),
+			// which is why the bottom fence row has a gap there rather than a missing segment.
+			yield return ("GATE", Info.ExpansionGateTypes, new CVec(-1, 7));
+		}
+
+		static IEnumerable<CPos> FencePerimeter(CPos yard)
+		{
+			for (var x = -4; x <= 3; x++)
+			{
+				yield return yard + new CVec(x, -1);
+				if (x != -1 && x != 0)
+					yield return yard + new CVec(x, 7);
+			}
+
+			for (var y = -1; y <= 7; y++)
+			{
+				yield return yard + new CVec(-4, y);
+				yield return yard + new CVec(3, y);
+			}
+
+			yield return yard + new CVec(-2, 8);
+			yield return yard + new CVec(1, 8);
+		}
+
+		// Every cell the compound will actually occupy, building footprints expanded. Critical cells
+		// carry a foundation and must be clear; the fence is not critical -- a perimeter with a gap
+		// is a perfectly good expansion, and refusing the whole site over one unbuildable wall cell is
+		// how the search ended up rejecting everything.
+		// yardTypes comes from the Operations module, which owns the MCV/yard actor names.
+		public IEnumerable<ExpansionCell> ExpansionLayout(CPos yard, IEnumerable<string> yardTypes)
+		{
+			foreach (var c in Footprint(yardTypes, yard))
+				yield return new ExpansionCell(c, "YARD", true);
+
+			foreach (var (role, variants, offset) in ExpansionBuildings())
+				foreach (var c in Footprint(variants, yard + offset))
+					yield return new ExpansionCell(c, role, true);
+
+			foreach (var c in FencePerimeter(yard).Distinct())
+				yield return new ExpansionCell(c, "FENCE", false);
+		}
+
+		// Real footprint from the rules, not a guess. An unknown or unset variant falls back to the
+		// anchor cell alone rather than silently claiming nothing.
+		IEnumerable<CPos> Footprint(IEnumerable<string> variants, CPos topLeft)
+		{
+			var type = variants.FirstOrDefault(t => world.Map.Rules.Actors.ContainsKey(t));
+			if (type == null)
+				return [topLeft];
+
+			var bi = world.Map.Rules.Actors[type].TraitInfoOrDefault<BuildingInfo>();
+			return bi == null ? [topLeft] : bi.Tiles(topLeft);
+		}
+
 		public void RequestExpansionLayout(CPos yard)
 		{
 			if (expansionYard == yard)
@@ -352,7 +428,7 @@ namespace OpenRA.Mods.Common.Traits
 			expansionSteps.Clear();
 			expansionYard = yard;
 
-			void Add(string role, string[] variants, int dx, int dy)
+			void Add(string role, string[] variants, CVec offset)
 			{
 				if (variants.Length > 0)
 					expansionSteps.Add(new AotPlanStep
@@ -360,19 +436,13 @@ namespace OpenRA.Mods.Common.Traits
 						Kind = AotStepKind.Building,
 						Role = "EXP_" + role,
 						Variants = variants,
-						TopLeft = yard + new CVec(dx, dy),
+						TopLeft = yard + offset,
 						Defense = true
 					});
 			}
 
-			Add("NUKE", Info.ExpansionPowerTypes, -3, 0);
-			Add("PROC", Info.ExpansionRefineryTypes, 0, 3);
-			Add("SILO", Info.ExpansionSiloTypes, -3, 5);
-			Add("SAM", Info.ExpansionSamTypes, -1, 3);
-
-			// Fence + gate are Age-2 items (user spec). The gate occupies TWO cells (-1,+7) and (0,+7),
-			// which is why the bottom fence row has a gap there rather than a missing segment.
-			Add("GATE", Info.ExpansionGateTypes, -1, 7);
+			foreach (var (role, variants, offset) in ExpansionBuildings())
+				Add(role, variants, offset);
 
 			// Fence as one step PER CELL rather than a single Fence-kind step: the expansion runs on its
 			// own simple driver (see TickExpansion) which knows nothing about node/perimeter bookkeeping,
@@ -380,24 +450,7 @@ namespace OpenRA.Mods.Common.Traits
 			// the engine connects the run itself. Gap at (-1,+7)/(0,+7) is the gate.
 			if (Info.WallType != null)
 			{
-				var perimeter = new List<CPos>();
-				for (var x = -4; x <= 3; x++)
-				{
-					perimeter.Add(yard + new CVec(x, -1));
-					if (x != -1 && x != 0)
-						perimeter.Add(yard + new CVec(x, 7));
-				}
-
-				for (var y = -1; y <= 7; y++)
-				{
-					perimeter.Add(yard + new CVec(-4, y));
-					perimeter.Add(yard + new CVec(3, y));
-				}
-
-				perimeter.Add(yard + new CVec(-2, 8));
-				perimeter.Add(yard + new CVec(1, 8));
-
-				foreach (var c in perimeter.Distinct())
+				foreach (var c in FencePerimeter(yard).Distinct())
 					expansionSteps.Add(new AotPlanStep
 					{
 						Kind = AotStepKind.Building,
@@ -1265,7 +1318,16 @@ namespace OpenRA.Mods.Common.Traits
 		// "BASE EXPANSION (wenn möglich, darf kein showstopper sein) -> dann restliche upgrades").
 		// Nothing waits ON the expansion except upgrade spending, and even that is bounded twice: each
 		// expansion step has its own ExpansionStepTimeoutTicks, and the upgrade gate has its own.
-		bool ExpansionPriorityPending() => ChooseExpansionStep() != null;
+		// The expansion counts as pending from the moment the MISSION exists, not from the moment its
+		// yard is standing. ChooseExpansionStep only knows about steps, and the steps are registered
+		// by RequestExpansionLayout -- which runs when the MCV has already deployed. So through the
+		// entire saving-and-driving phase, the phase that actually needs the money, this returned
+		// false and the upgrade gate let purchases through: the bots bought the 900-credit transport
+		// gun upgrade while their expansion was still short of its 6000 (User 2026-08-05, and against
+		// the standing rule that upgrades come last in Age 1).
+		bool ExpansionPriorityPending() =>
+			(ops != null && ops.Info.Faction == Info.Faction && ops.ExpansionHoldsPriority())
+			|| ChooseExpansionStep() != null;
 
 		// Asked by BaseBuilderBotModule@aotupgrades before it spends anything: upgrades are the LAST
 		// tier of the priority chain, behind both the core economy roles and the defence steps of the
