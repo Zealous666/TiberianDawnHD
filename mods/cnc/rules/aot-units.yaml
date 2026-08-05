@@ -1845,6 +1845,16 @@ aot-ltnk-deployed:
 	# Befehle), macht aber JEDE map-platzierte Instanz mit KI-losem Owner (z.B. "Creeps" auf
 	# Hammerfest) komplett passiv.
 	Inherits@AUTOTARGET: ^AutoTargetGround
+	# Vom MOBILEN Stealth-Generator mittarnen (User 2026-08-04). Beide Deploy-Formen erben
+	# ^Building, und dessen Cloak@AOTSTEALTH hoert nur auf aot-stealth-field (das Feld des
+	# stationaeren Generators). Das mobile Feld grantet aot-stealth-field-mobile, das ^Building
+	# bewusst NICHT konsumiert -- eingegrabene Einheiten sind aber Einheiten, keine Basis.
+	# Juggernaut und Heavy Artillery brauchen das nicht: die nutzen GrantConditionOnDeploy,
+	# bleiben also derselbe ^Vehicle-Aktor und sind ueber ^Vehicle schon abgedeckt.
+	ExternalCondition@AOTSTEALTHMOBILE:
+		Condition: aot-stealth-field-mobile
+	Cloak@AOTSTEALTH:
+		RequiresCondition: aot-stealth-field || aot-stealth-field-mobile
 
 	Building:
 		Footprint: x
@@ -3759,7 +3769,27 @@ aot-cyc2:
 # "die"-Sprite im Original (nur Partikel-Explosion, Explosion=DEFD_EXP) -> WithDeathAnimation
 # entfernt.
 aot-avatar:
+	# Genau EIN Avatar pro Spieler (User 2026-08-04). Zwei Bausteine, beide noetig:
+	#   BuildLimit: 1     -- verhindert das Einreihen eines zweiten in derselben Queue
+	#   !aot-avatar-built -- wirkt ueber die VARIANTEN HINWEG. BuildLimit zaehlt je Aktortyp;
+	#                        nach dem Laser-Upgrade ist aot-avatar-laser ein ANDERER Typ mit
+	#                        eigenem Zaehlerstand 0, ein zweiter waere also baubar gewesen.
+	#                        Beide Varianten stellen dieselbe Bedingung bereit und schliessen
+	#                        sich darueber gegenseitig aus. Faellt der Avatar, ist wieder einer
+	#                        baubar -- das Limit gilt fuer LEBENDE Exemplare, wie BuildLimit auch.
+	ProvidesPrerequisite@limit:
+		Prerequisite: aot-avatar-built
 	Inherits: E1
+	# Kein Einsteigen in Transporter (User 2026-08-04). Inhaltlich passt ein mehrere Meter hoher
+	# Cyborg-Mech ohnehin in keinen APC -- vor allem aber schliesst es eine Luecke im Ein-Avatar-
+	# Limit: RideTransport nimmt den Passagier per w.Remove(self) aus der Welt, und
+	# TechTree.GatherOwnedPrerequisites zaehlt nur Aktoren mit IsInWorld. Ein eingestiegener Avatar
+	# haette also weder aot-avatar-built bereitgestellt noch bei BuildLimit gezaehlt -- ein zweiter
+	# waere baubar gewesen, und nach dem Ausladen haette man zwei.
+	# MUSS hinter 'Inherits' stehen: MiniYaml loest Vererbung in Reihenfolge auf, davor gaebe es
+	# das zu entfernende Trait noch gar nicht ('There are no elements with key Passenger to remove').
+	# aot-avatar-laser erbt von aot-avatar und bekommt die Entfernung damit automatisch mit.
+	-Passenger:
 	WithShadow:
 		Offset: 0, 48, 0
 		ZOffset: -129
@@ -3814,7 +3844,8 @@ aot-avatar:
 		LockedGroup: aot-grp-avatar
 		Queue: Infantry.NodElite
 		BuildPaletteOrder: 30
-		Prerequisites: ~aot-age3, afld, aot-shrine, ~!aot-avatar-laser-upgrade
+		Prerequisites: ~aot-age3, afld, aot-shrine, ~!aot-avatar-laser-upgrade, !aot-avatar-built
+		BuildLimit: 1
 		Icon: icon
 		Description: Massive NOD cyborg walker armed with a chaingun and flamethrower. CABAL's ultimate war machine.
 
@@ -3822,12 +3853,23 @@ aot-avatar:
 # gekauft wurde (Waffen-Umschaltung passiert bereits automatisch auf aot-avatar
 # selbst, analog BGGY).
 aot-avatar-laser:
+	# Genau EIN Avatar pro Spieler (User 2026-08-04). Zwei Bausteine, beide noetig:
+	#   BuildLimit: 1     -- verhindert das Einreihen eines zweiten in derselben Queue
+	#   !aot-avatar-built -- wirkt ueber die VARIANTEN HINWEG. BuildLimit zaehlt je Aktortyp;
+	#                        nach dem Laser-Upgrade ist aot-avatar-laser ein ANDERER Typ mit
+	#                        eigenem Zaehlerstand 0, ein zweiter waere also baubar gewesen.
+	#                        Beide Varianten stellen dieselbe Bedingung bereit und schliessen
+	#                        sich darueber gegenseitig aus. Faellt der Avatar, ist wieder einer
+	#                        baubar -- das Limit gilt fuer LEBENDE Exemplare, wie BuildLimit auch.
+	ProvidesPrerequisite@limit:
+		Prerequisite: aot-avatar-built
 	Inherits: aot-avatar
 	Buildable:
 		LockedGroup: aot-grp-avatar
 		Queue: Infantry.NodElite
 		BuildPaletteOrder: 30
-		Prerequisites: ~aot-age3, afld, aot-shrine, ~aot-avatar-laser-upgrade
+		Prerequisites: ~aot-age3, afld, aot-shrine, ~aot-avatar-laser-upgrade, !aot-avatar-built
+		BuildLimit: 1
 		Icon: icon-laser
 		Description: Massive NOD cyborg walker armed with a laser cannon and flamethrower. CABAL's ultimate war machine.
 # === Ende aotmod ===
@@ -5572,7 +5614,7 @@ aot-mstealth:
 	# (^Vehicle/^Infantry/^Ship/^Plane/^Helicopter), NICHT ^Building -> tarnt nur Einheiten.
 	ProximityExternalCondition@STEALTH:
 		Condition: aot-stealth-field-mobile
-		Range: 8c341
+		Range: 7c0
 		ValidRelationships: Ally
 		AffectsParent: true
 		RequiresCondition: aot-mstealth-deployed
@@ -5581,7 +5623,7 @@ aot-mstealth:
 	# Tarn-Radius einzeichnen (bei Selektion), Range MUSS mit ProximityExternalCondition uebereinstimmen.
 	WithRangeCircle:
 		Type: cloakgenerator
-		Range: 8c341
+		Range: 7c0
 		Color: 8844FFB4
 		BorderColor: 20102080
 	Buildable:
@@ -5641,6 +5683,16 @@ aot-aray:
 # Statisches gadpsa.shp Frame 0, Player-Color via PlayerPalette: player.
 aot-gadpsa:
 	Inherits: ^Building
+	# Vom MOBILEN Stealth-Generator mittarnen (User 2026-08-04). Beide Deploy-Formen erben
+	# ^Building, und dessen Cloak@AOTSTEALTH hoert nur auf aot-stealth-field (das Feld des
+	# stationaeren Generators). Das mobile Feld grantet aot-stealth-field-mobile, das ^Building
+	# bewusst NICHT konsumiert -- eingegrabene Einheiten sind aber Einheiten, keine Basis.
+	# Juggernaut und Heavy Artillery brauchen das nicht: die nutzen GrantConditionOnDeploy,
+	# bleiben also derselbe ^Vehicle-Aktor und sind ueber ^Vehicle schon abgedeckt.
+	ExternalCondition@AOTSTEALTHMOBILE:
+		Condition: aot-stealth-field-mobile
+	Cloak@AOTSTEALTH:
+		RequiresCondition: aot-stealth-field || aot-stealth-field-mobile
 
 	Building:
 		Footprint: x
@@ -5704,6 +5756,12 @@ aot-gadpsa:
 
 	DetectCloaked:
 		Range: 17c0
+		# DetectionTypes (User-Fund 2026-08-04): ohne "Mine" deckt der Sensor Seeminen und
+		# Minenfelder NICHT auf -- Cloak.IsVisible verlangt eine Ueberschneidung der Typen, und
+		# Minen tragen ausschliesslich "Mine". Sie wurden dadurch zwar auf der Minimap gemeldet
+		# (AotSensorArrayDetection prueft nur, OB ein Cloak aktiv ist), blieben auf dem Feld aber
+		# unsichtbar. U-Boote nutzen den Default-Typ und waren nie betroffen.
+		DetectionTypes: Cloak, Mine
 
 	AotSensorArrayDetection:
 		Notification: CloakedUnitDetected
@@ -5875,6 +5933,12 @@ aot-outpost-gdi:
 
 	DetectCloaked:
 		Range: 5c0
+		# DetectionTypes (User-Fund 2026-08-04): ohne "Mine" deckt der Sensor Seeminen und
+		# Minenfelder NICHT auf -- Cloak.IsVisible verlangt eine Ueberschneidung der Typen, und
+		# Minen tragen ausschliesslich "Mine". Sie wurden dadurch zwar auf der Minimap gemeldet
+		# (AotSensorArrayDetection prueft nur, OB ein Cloak aktiv ist), blieben auf dem Feld aber
+		# unsichtbar. U-Boote nutzen den Default-Typ und waren nie betroffen.
+		DetectionTypes: Cloak, Mine
 
 	# Bauzone: normale 2-Zellen-Kette (building) + 6-Zellen-Radius (outpost, OR-Logik via engine-Patch)
 	GivesBuildableArea:
@@ -5988,6 +6052,12 @@ aot-outpost-nod:
 
 	DetectCloaked:
 		Range: 5c0
+		# DetectionTypes (User-Fund 2026-08-04): ohne "Mine" deckt der Sensor Seeminen und
+		# Minenfelder NICHT auf -- Cloak.IsVisible verlangt eine Ueberschneidung der Typen, und
+		# Minen tragen ausschliesslich "Mine". Sie wurden dadurch zwar auf der Minimap gemeldet
+		# (AotSensorArrayDetection prueft nur, OB ein Cloak aktiv ist), blieben auf dem Feld aber
+		# unsichtbar. U-Boote nutzen den Default-Typ und waren nie betroffen.
+		DetectionTypes: Cloak, Mine
 
 	# Bauzone: normale 2-Zellen-Kette + 6-Zellen-Radius (outpost-Typ)
 	GivesBuildableArea:
