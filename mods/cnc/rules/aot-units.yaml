@@ -1623,7 +1623,10 @@ ORET:
 		Resources: Tiberium
 	DockClientManager:
 	OreTransporter:
-		OreLoadAmount: 400
+		# User 2026-08-05: 400 -> 200. Nach dem Age-Kauf floss zu viel Geld nach, gemessen an der
+		# Forschungszeit. Halbiert die Einnahmen PRO ZEIT; der Gesamtertrag der Mine haengt an ihrer
+		# Fuhrenzahl (aot-structures.yaml, StoresResources.Capacity 40 -> 50) und liegt nun bei 10000.
+		OreLoadAmount: 200
 		OreLoadDelay: 25
 	WithStoresResourcesPipsDecoration:
 		Position: BottomLeft
