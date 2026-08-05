@@ -823,6 +823,13 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Ticks between expansion attempts (only while none is standing or under way).")]
 		public readonly int ExpansionInterval = 6000;
 
+		[Desc("Retry delay after an expansion attempt that never got off the ground (no refinery yet,",
+			"Age tier not reached, no site). Deliberately short: the full ExpansionInterval is a",
+			"cooldown BETWEEN expansions, and using it for failed attempts meant a bot that was merely",
+			"a few seconds short of its refinery had to wait four more minutes before it even looked",
+			"again -- which is why expansions kept starting far too late, if at all.")]
+		public readonly int ExpansionRetryInterval = 250;
+
 		[ActorReference]
 		[Desc("MCV chain for the expansion (age-ordered, first buildable wins).")]
 		public readonly string[] ExpansionMcvTypes = [];
@@ -2333,24 +2340,24 @@ namespace OpenRA.Mods.Common.Traits
 			}
 
 			if (Info.EnableExpansion && --expansionTicks <= 0)
-			{
-				expansionTicks = Info.ExpansionInterval;
-				TryStartExpansion();
-			}
+				expansionTicks = TryStartExpansion() ? Info.ExpansionInterval : Info.ExpansionRetryInterval;
 		}
 
 		// One expansion per bot. The mission ends when its yard dies, and the builder's layout is
 		// cleared with it, so the next scan simply founds a new one somewhere else (user spec).
-		void TryStartExpansion()
+		// Returns true when an expansion is running or was just founded, i.e. when the long
+		// ExpansionInterval cooldown is the right wait. Every "not yet" answer returns false and is
+		// retried within seconds instead.
+		bool TryStartExpansion()
 		{
 			if (AgeTier() < Info.ExpansionAgeTier || !HasRefinery() || Info.ExpansionMcvTypes.Length == 0)
-				return;
+				return false;
 
 			if (EconomyEmergency())
-				return;
+				return false;
 
 			if (Missions.OfType<AotExpansionMission>().Any() || (builder?.ExpansionPlanned ?? false))
-				return;
+				return true;
 
 			// Hard ceiling on construction yards, checked against the WORLD rather than mission state
 			// (User 2026-08-03: "er baut pro AI teilweise mehrere"). A mission that died after its MCV
@@ -2359,20 +2366,31 @@ namespace OpenRA.Mods.Common.Traits
 			var yards = World.Actors.Count(a => a.Owner == Player && !a.IsDead && a.IsInWorld
 				&& Info.ConstructionYardTypes.Contains(a.Info.Name));
 			if (yards > Info.ExpansionMaxYards)
-				return;
+				return true;
 
 			// An MCV already rolling (ours, or one left over from a dead mission) is a pending
 			// expansion too -- ordering a second is how a bot ended up with several.
 			if (World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld
 					&& Info.ExpansionMcvTypes.Contains(a.Info.Name)))
-				return;
+				return true;
 
+			// No site anywhere on this map: report it and keep retrying quietly. Crucially NO mission
+			// is created, so nothing holds priority -- an expansion that cannot be placed must never
+			// become a gatekeeper that stalls waves, raids and the Age fund (User 2026-08-05).
 			var site = FindExpansionSite();
 			if (site == null)
-				return;
+			{
+				if (++noSiteLog % 24 == 0)
+					Log($"[expansion] no usable site found -- expansion is not holding priority");
+
+				return false;
+			}
 
 			Missions.Add(new AotExpansionMission(this, site.Value));
+			return true;
 		}
+
+		int noSiteLog;
 
 		// Scores tiberium fields from the resource map: plenty of resources, far enough from home to
 		// actually be an expansion, and no enemy base sitting on it. A field with no land route is NOT
@@ -2639,7 +2657,7 @@ namespace OpenRA.Mods.Common.Traits
 		// raids stand down for that window so the whole income goes into the expansion -- and it is
 		// bounded by the mission's own ExpansionPriorityTimeout, so a failing expansion can never
 		// silence the army permanently (User 2026-08-04: "es braucht ein safelock").
-		bool ExpansionHoldsPriority() =>
+		public bool ExpansionHoldsPriority() =>
 			Missions.OfType<AotExpansionMission>().Any(m => !m.Done && m.HoldsPriority);
 
 		void TryStartEngineerRaid()

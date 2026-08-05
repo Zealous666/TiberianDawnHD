@@ -2252,7 +2252,11 @@ namespace OpenRA.Mods.Common.Traits
 		readonly (string Role, string[] Chain)[] squadOrder;
 		int squadStep;
 		bool squadFunded;
-		bool squadOrdered;
+
+		// Readable by the two concrete raids: their tick-1 self-termination check must not fire while
+		// the squad has deliberately not been ordered yet. No units plus no open requests is the
+		// SAVING state, not a wipe-out -- the same trap that silently killed every base expansion.
+		protected bool squadOrdered;
 
 		protected AotEngineerRaidMission(AotOperationsBotModule ops, string name)
 			: base(ops, name)
@@ -2689,7 +2693,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		public override void Tick(IBot bot)
 		{
-			if (Units.Count == 0 && Ops.OpenRequests(this) == 0)
+			if (squadOrdered && Units.Count == 0 && Ops.OpenRequests(this) == 0)
 			{
 				Finish();
 				return;
@@ -2785,7 +2789,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		public override void Tick(IBot bot)
 		{
-			if (Units.Count == 0 && Ops.OpenRequests(this) == 0)
+			if (squadOrdered && Units.Count == 0 && Ops.OpenRequests(this) == 0)
 			{
 				Finish();
 				return;
@@ -2923,7 +2927,13 @@ namespace OpenRA.Mods.Common.Traits
 				return;
 			}
 
-			if (Units.Count == 0 && Ops.OpenRequests(this) == 0 && yard == null)
+			// NOT while still saving up (`ordered` false). A mission that has not placed its order yet
+			// has no units and no open requests BY DESIGN, which is exactly what this check treats as
+			// "everything was lost" -- so it killed itself on tick one, every time, and the expansion
+			// never got past planning: 831 status lines reading expansion=none and not a single
+			// "saved up" ever logged. Same trap the derrick squad hit in FIX 2026-07-31k, which is why
+            // that one requests in its constructor. The forming timeout still bounds the wait.
+			if (ordered && Units.Count == 0 && Ops.OpenRequests(this) == 0 && yard == null)
 			{
 				Ops.Transit.Cancel(ticket);
 				ticket = null;

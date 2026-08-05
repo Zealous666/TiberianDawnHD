@@ -79,7 +79,13 @@ namespace OpenRA.Mods.Common.Traits
 			// upgrade while the replacement transporter cannot be paid for is exactly backwards. Save()
 			// takes the money off the account via TakeCash, so this module really does starve the
 			// replacement. Anything already put aside is released so it can be spent on the transporter.
-			var emergency = ops.Any(o => o.EconomyEmergency());
+			//
+			// A base expansion that holds priority is the second exception (User-Fund 2026-08-04). It
+			// saves for its MCV and escort out of the same account, so an Age fund quietly draining the
+			// balance meant the expansion could never reach its own threshold -- it just planned, waited
+			// and expired, over and over. Priority is bounded by ExpansionPriorityTimeout, so this
+			// stand-down cannot last forever even if the expansion never gets off the ground.
+			var emergency = ops.Any(o => o.EconomyEmergency() || o.ExpansionHoldsPriority());
 
 			foreach (var key in Info.PowerOrderNames)
 			{

@@ -1506,6 +1506,8 @@ namespace OpenRA.Mods.Common.Traits
 			return false;
 		}
 
+		int expansionPauseLog;
+
 		void StartStep(IBot bot, AotPlanStep step)
 		{
 			// ECONOMY EMERGENCY (User 2026-08-04: "alle prio in oreT bis mind. eine refinery inkl.
@@ -1529,6 +1531,25 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				if (++economyPauseLog % 16 == 0)
 					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Economy emergency: holding {step.Role} until the economy is back");
+
+				return;
+			}
+
+			// EXPANSION PRIORITY (User 2026-08-05: "expansion nach refinery absolute bevorzugung").
+			// Once the refinery stands, founding the second base outranks everything else the bot could
+			// build. Attack waves, engineer raids and the Age fund already stand down for it; the base
+			// builder was the last hole in that bucket, and the biggest -- it kept spending the very
+			// credits the convoy was saving for, so the expansion never reached its threshold.
+			//
+			// PROC and the expansion's own EXP_* steps stay exempt: a second refinery is income, and
+			// blocking the expansion layout would deadlock the thing being prioritised. The hold ends
+			// by itself when the yard deploys, and ExpansionHoldsPriority is bounded by
+			// ExpansionPriorityTimeout, so an expansion that never works out cannot freeze the base.
+			if (ops != null && ops.Info.Faction == Info.Faction && ops.ExpansionHoldsPriority()
+				&& step.Role != "PROC" && !step.Role.StartsWith("EXP_", StringComparison.Ordinal))
+			{
+				if (++expansionPauseLog % 16 == 0)
+					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Expansion has priority: holding {step.Role}");
 
 				return;
 			}
