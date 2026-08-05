@@ -1536,8 +1536,20 @@ namespace OpenRA.Mods.Common.Traits
 				return null;
 			}
 
-			var ageTier = defense ? AgeTier() : 0;
-			var open = planner.Rhythm.Where(s => !s.Done && s.Defense == defense && (!defense || s.Age <= ageTier)).ToList();
+			// CORE is age-filtered too, not just Defence (User-Fund 2026-08-05: "ich habe GESEHEN, dass
+			// ein spieler in age 1 eine zweite refinery hatte"). The assumption above -- that core steps
+			// gate themselves through their own Buildable.Prerequisites -- holds only where a step's
+			// variants differ per age. The OPTIONAL second Refinery is the counter-example: both PROC
+			// steps resolve through RoleVariants("PROC") to the very same actor list, so the Age-2 step
+			// was perfectly buildable in Age 1 and the strict chooser walked straight into it as soon as
+			// Age 1's own steps were done. The Age tag was decorative for core steps; now it binds.
+			//
+			// Safe against stalling the rhythm because the ages are contiguous blocks in Rhythm order:
+			// filtering removes a whole trailing block, never a hole that lets a later step jump the
+			// queue. The buildings that UNLOCK the next age sit in the age below by construction (STEC
+			// at the end of Age 0 opens Age 1), so the chain cannot gate itself out.
+			var ageTier = AgeTier();
+			var open = planner.Rhythm.Where(s => !s.Done && s.Defense == defense && s.Age <= ageTier).ToList();
 			if (open.Count == 0)
 				return null;
 
