@@ -1519,7 +1519,6 @@ namespace OpenRA.Mods.Common.Traits
 			AddBuildingByRole(nuke, "NUK2", 1);
 			AddBuildingByRole(nuke, "NUKE", 1);
 			AddFenceFor(nuke, "PowerFence");
-			AddBuilding(fix, 0, "FIX");
 
 			// Gate defence master plan (user spec, conceptualised fully now even though most of it only
 			// becomes buildable many ages later -- same as every other age-gated step in this Rhythm):
@@ -1540,11 +1539,13 @@ namespace OpenRA.Mods.Common.Traits
 			AddBuilding(samYard1, 0, "SAM", defense: true);
 			AddBuilding(samYard2, 0, "SAM", defense: true);
 
-			// Helipad closes out Age 0 -- deliberately last, after the gate turret (user spec).
-			AddBuilding(hpad, 0, "HPAD");
-
-			// STEC moved to the very end of Age 0 (user spec).
+			// STEC comes before both the Repair Facility and the Helipad (user spec 2026-08-05): the
+			// Tech Centre is what unlocks the next Age, and every credit spent ahead of it delays the
+			// upgrade the whole build-up is aimed at.
 			AddBuilding(tech, 1, "STEC");
+
+			AddBuilding(fix, 0, "FIX");
+			AddBuilding(hpad, 0, "HPAD");
 
 			// Second SILO (user spec 2026-08-01): the LAST Age-0 core step, 2-3 cells behind the Age-3
 			// Obelisk's own eventual spot (see the anchor computed in Plan(), right after pGateCluster).

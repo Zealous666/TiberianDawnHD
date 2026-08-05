@@ -3498,6 +3498,11 @@ AFLT:
 # Doppel-Aktor-Pattern analog PYLE. FIX muss das Prerequisite "fix" explizit bereitstellen.
 FIX:
 	-Buildable:
+	# User-Wunsch 2026-08-05: 500 -> 1500. Hier am Basis-Aktor, nicht an den Varianten: alle fuenf
+	# (aot-fix-age0/1/2 GDI und aot-fix-age1/2-nod) erben von FIX, ein Eintrag deckt also beide
+	# Fraktionen ab.
+	Valued:
+		Cost: 1500
 	# User-Wunsch 2026-08-01: repariertes Fahrzeug bleibt nach Abschluss noch ~2 Sekunden stehen
 	# (50 Ticks bei Standard-Timestep 40ms), statt im selben Tick loszufahren. Gibt u.a. das
 	# Zeitfenster, es dort noch zu verkaufen. RepairsUnits selbst wird von der Engine geerbt,
