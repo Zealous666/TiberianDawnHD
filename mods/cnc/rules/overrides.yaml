@@ -886,6 +886,12 @@ Player:
 		Prerequisites: aot-age2
 	AotAge1Power:
 		InsufficientFundsTextNotification: notification-insufficient-funds
+		# Age-of-Empires-Modell (User 2026-08-05): sobald die Voraussetzungen stehen, ist der
+		# Knopf klickbar. Der Klick bucht den vollen Betrag EINMALIG ab, danach laeuft
+		# ChargeInterval als FORSCHUNGSZEIT, und nach Ablauf steigt das Age von selbst auf --
+		# kein zweiter Klick. Gilt ausschliesslich fuer die Age-Stufen; Ion Cannon, Atombombe
+		# usw. laden weiterhin zuerst und feuern auf Klick.
+		ResearchModel: True
 		Actor: aot-age1-marker
 		# Countdown oben rechts fuer ALLE Spieler, wie bei Ion Cannon und Atom Bomb
 		# (User-Wunsch 2026-08-04). Es taucht immer nur die gerade relevante Age-Stufe auf:
@@ -908,6 +914,12 @@ Player:
 		SupportPowerPaletteOrder: 0
 	AotAge2Power:
 		InsufficientFundsTextNotification: notification-insufficient-funds
+		# Age-of-Empires-Modell (User 2026-08-05): sobald die Voraussetzungen stehen, ist der
+		# Knopf klickbar. Der Klick bucht den vollen Betrag EINMALIG ab, danach laeuft
+		# ChargeInterval als FORSCHUNGSZEIT, und nach Ablauf steigt das Age von selbst auf --
+		# kein zweiter Klick. Gilt ausschliesslich fuer die Age-Stufen; Ion Cannon, Atombombe
+		# usw. laden weiterhin zuerst und feuern auf Klick.
+		ResearchModel: True
 		Actor: aot-age2-marker
 		# Countdown oben rechts fuer ALLE Spieler, wie bei Ion Cannon und Atom Bomb
 		# (User-Wunsch 2026-08-04). Es taucht immer nur die gerade relevante Age-Stufe auf:
@@ -928,6 +940,12 @@ Player:
 		SupportPowerPaletteOrder: 1
 	AotAge3Power:
 		InsufficientFundsTextNotification: notification-insufficient-funds
+		# Age-of-Empires-Modell (User 2026-08-05): sobald die Voraussetzungen stehen, ist der
+		# Knopf klickbar. Der Klick bucht den vollen Betrag EINMALIG ab, danach laeuft
+		# ChargeInterval als FORSCHUNGSZEIT, und nach Ablauf steigt das Age von selbst auf --
+		# kein zweiter Klick. Gilt ausschliesslich fuer die Age-Stufen; Ion Cannon, Atombombe
+		# usw. laden weiterhin zuerst und feuern auf Klick.
+		ResearchModel: True
 		Actor: aot-age3-marker
 		# Countdown oben rechts fuer ALLE Spieler, wie bei Ion Cannon und Atom Bomb
 		# (User-Wunsch 2026-08-04). Es taucht immer nur die gerade relevante Age-Stufe auf:

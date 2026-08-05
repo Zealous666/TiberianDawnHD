@@ -172,11 +172,15 @@ namespace OpenRA.Mods.Common.Traits
 		public SupportPowerInfo Info { get { return Instances.Select(i => i.Info).FirstOrDefault(); } }
 		public readonly string Name;
 		public readonly string Description;
-		public bool Ready => Active && RemainingTicks == 0;
+		// virtual fuer die Age-Aufstiege (aotmod 2026-08-05): die laufen nach Age-of-Empires-Muster
+		// -- erst KAUFEN, dann forschen -- und muessen daher klickbar sein, BEVOR der Zaehler
+		// gelaufen ist, und unklickbar, WAEHREND er laeuft. Genau umgekehrt zu Ion Cannon & Co.,
+		// deren Verhalten hier unveraendert bleibt.
+		public virtual bool Ready => Active && RemainingTicks == 0;
 
 		bool instancesEnabled;
 		bool prereqsAvailable = true;
-		bool oneShotFired;
+		protected bool oneShotFired;
 		protected bool notifiedCharging;
 		bool notifiedReady;
 

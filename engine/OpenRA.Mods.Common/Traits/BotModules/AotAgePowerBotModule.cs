@@ -41,6 +41,13 @@ namespace OpenRA.Mods.Common.Traits
 			"SupportPowerInfo builds this as <InfoTypeName>Order.")]
 		public readonly FrozenSet<string> PowerOrderNames = FrozenSet<string>.Empty;
 
+		[Desc("Credits the Age fund never touches, so the base can keep building while it saves.",
+			"Under the research model the upgrade is buyable the moment its prerequisites are met,",
+			"so without a floor the bot would hoard every credit from that point on and stall its",
+			"own production for the whole saving period. The user's spec is that it saves MOST of",
+			"its income for the age, not literally all of it.")]
+		public readonly int SavingReserve = 1000;
+
 		public override object Create(ActorInitializer init) { return new AotAgePowerBotModule(init.Self, this); }
 	}
 
@@ -109,6 +116,16 @@ namespace OpenRA.Mods.Common.Traits
 				if (power.Info is not AutoActivateSpawnActorPowerInfo info || info.Cost <= 0)
 					continue;
 
+				// RESEARCH MODEL: once the upgrade is bought and the research is running, it is paid
+				// for -- there is nothing left to save towards. Without this the module would fall
+				// through to the pro-rata branch below, whose target grows with elapsed charge time,
+				// and would quietly hoard the full price a SECOND time for an upgrade already owned.
+				if (power is AotAgeResearchInstance research && research.Researching)
+				{
+					Refund(key, saved);
+					continue;
+				}
+
 				if (power.Ready)
 				{
 					// Kauf-Modus mit HOECHSTER Prioritaet (User-Wunsch 2026-08-04): solange der
@@ -152,7 +169,11 @@ namespace OpenRA.Mods.Common.Traits
 		// das Sparziel aus dem Ladefortschritt ergibt und nicht aus einer Summe von Einzelraten.
 		int Save(string key, int saved, int wanted)
 		{
-			var available = playerResources.GetCashAndResources();
+			// Leave the reserve liquid -- see SavingReserve.
+			var available = playerResources.GetCashAndResources() - Info.SavingReserve;
+			if (available <= 0)
+				return saved;
+
 			var take = wanted < available ? wanted : available;
 			if (take <= 0 || !playerResources.TakeCash(take))
 				return saved;

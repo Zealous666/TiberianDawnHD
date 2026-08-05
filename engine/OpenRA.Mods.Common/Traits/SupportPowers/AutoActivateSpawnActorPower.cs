@@ -48,7 +48,91 @@ namespace OpenRA.Mods.Common.Traits
 			"(User 2026-08-05: \"es muss eine Not enough money meldung kommen\").")]
 		public readonly string InsufficientFundsTextNotification = null;
 
+		[Desc("Age-of-Empires research model (aotmod 2026-08-05): the icon is clickable as soon as the",
+			"prerequisites are met, the FULL cost is taken once on that click, and only then does the",
+			"timer run -- when it expires the age advances by itself, without a second click.",
+			"ChargeInterval is therefore the RESEARCH time, not a wait before you may buy.",
+			"Off by default so Ion Cannon, Atom Bomb and every other power keep charging first and",
+			"firing on click, exactly as before.")]
+		public readonly bool ResearchModel = false;
+
 		public override object Create(ActorInitializer init) { return new AutoActivateSpawnActorPower(init.Self, this); }
+	}
+
+	// Buy first, research, then advance on its own -- the Age of Empires order, which is the reverse
+	// of a normal support power (charge first, then click to fire).
+	//
+	// Lives in an instance rather than in the trait because charge state and the Ready flag are
+	// instance-side: the icon has to report "clickable" while the counter is still full, and
+	// "not clickable" while it runs down. Nothing here touches the base behaviour of any other power.
+	public class AotAgeResearchInstance : SupportPowerInstance
+	{
+		readonly AutoActivateSpawnActorPowerInfo info;
+		bool researching;
+
+		public AotAgeResearchInstance(string key, AutoActivateSpawnActorPowerInfo info, SupportPowerManager manager)
+			: base(key, info, manager)
+		{
+			this.info = info;
+
+			// Offered immediately: the player pays to START the research, so there is nothing to wait
+			// for beforehand.
+			remainingSubTicks = 0;
+		}
+
+		// Buyable while idle, never while the research is already running.
+		public override bool Ready => Active && !researching;
+
+		public bool Researching => researching;
+
+		public override void Tick()
+		{
+			if (!researching)
+			{
+				// Deliberately NOT calling base.Tick(): it would count the timer down before anything
+				// was bought, which is the very behaviour this model replaces. Active still has to be
+				// maintained, so the icon greys out while the prerequisites are missing.
+				base.Tick();
+				remainingSubTicks = 0;
+				return;
+			}
+
+			base.Tick();
+
+			if (RemainingTicks > 0)
+				return;
+
+			// Research finished -- advance the age without asking again.
+			researching = false;
+			oneShotFired = info.OneShot;
+
+			var power = Instances.FirstOrDefault(i => !i.IsTraitDisabled);
+			power?.Activate(power.Self, new Order(Key, Manager.Self, false), Manager);
+		}
+
+		public override void Activate(Order order)
+		{
+			if (researching || !Ready)
+				return;
+
+			var power = Instances.FirstOrDefault(i => !i.IsTraitPaused && !i.IsTraitDisabled);
+			if (power == null)
+				return;
+
+			// The cash goes now, in full, once. SelectTarget has already refused the click if the
+			// player cannot cover it.
+			if (info.Cost > 0)
+			{
+				var resources = Manager.Self.Owner.PlayerActor.TraitOrDefault<PlayerResources>();
+				if (resources == null || !resources.TakeCash(info.Cost))
+					return;
+			}
+
+			researching = true;
+			remainingSubTicks = TotalTicks * 100;
+			notifiedCharging = false;
+			power.Charging(power.Self, Key);
+		}
 	}
 
 	// IEffect-based delayed spawn — ticks independently of the SupportPower trait lifecycle.
@@ -112,6 +196,15 @@ namespace OpenRA.Mods.Common.Traits
 			return self.OccupiesSpace != null ? self.Location : self.Owner.HomeLocation;
 		}
 
+		public override SupportPowerInstance CreateInstance(string key, SupportPowerManager manager)
+		{
+			var info = Info as AutoActivateSpawnActorPowerInfo;
+			if (info.ResearchModel)
+				return new AotAgeResearchInstance(key, info, manager);
+
+			return base.CreateInstance(key, manager);
+		}
+
 		public override void SelectTarget(Actor self, string order, SupportPowerManager manager)
 		{
 			var info = Info as AutoActivateSpawnActorPowerInfo;
@@ -134,7 +227,10 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			var info = Info as AutoActivateSpawnActorPowerInfo;
 
-			if (info.Cost > 0)
+			// In the research model the instance already took the money when the research was STARTED.
+			// Charging here as well would bill the player twice for one upgrade -- once on the click,
+			// once when it completes.
+			if (info.Cost > 0 && !info.ResearchModel)
 			{
 				var resources = self.Owner.PlayerActor.TraitOrDefault<PlayerResources>();
 				resources?.TakeCash(info.Cost);
