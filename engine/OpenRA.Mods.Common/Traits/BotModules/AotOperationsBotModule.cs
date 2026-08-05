@@ -1000,6 +1000,11 @@ namespace OpenRA.Mods.Common.Traits
 			"per-index EnemyBaseCount check above already keeps the expansion out of an enemy's own base.")]
 		public readonly int ExpansionEnemyClearance = 12;
 
+		[Desc("Keep this many cells clear of a site an ALLY has already claimed. Must comfortably",
+			"exceed the expansion layout itself (x -4..+3, y -1..+8), or two allied compounds would be",
+			"planned overlapping and the second MCV would arrive with nowhere to deploy.")]
+		public readonly int ExpansionAllyClearance = 16;
+
 		[Desc("How far off the tiberium field itself the yard is planted. Building on top of the field",
 			"would bury the very resources the expansion came for.")]
 		public readonly int ExpansionSiteOffset = 6;
@@ -2489,7 +2494,8 @@ namespace OpenRA.Mods.Common.Traits
 			// Rejection counters: with no site found the whole mission is silently skipped, and there
 			// was no way to tell an empty map from an over-strict filter (User 2026-08-03: "nicht
 			// einmal wurde irgend etwas richtung base expansion gebaut ... gibt es andere gründe?").
-			int tooSmall = 0, tooClose = 0, enemyBase = 0, enemyNear = 0, considered = 0;
+			int tooSmall = 0, tooClose = 0, enemyBase = 0, enemyNear = 0, allyClaimed = 0, considered = 0;
+			var fieldAllySites = AllyExpansionSites();
 
 			for (var i = 0; i < resourceMap.GetIndicesLength(); i++)
 			{
@@ -2523,6 +2529,12 @@ namespace OpenRA.Mods.Common.Traits
 					continue;
 				}
 
+				if (fieldAllySites.Any(a => (a - centre).Length < Info.ExpansionAllyClearance))
+				{
+					allyClaimed++;
+					continue;
+				}
+
 				considered++;
 
 				// More tiberium is better, closer to home is better (shorter, safer convoy). The bonus
@@ -2552,7 +2564,8 @@ namespace OpenRA.Mods.Common.Traits
 					expansionSiteLogTicks = 8;
 					Log($"no expansion site: rejected {tooSmall} too small (<{Info.ExpansionMinResourceCells} cells), " +
 						$"{tooClose} too close to home (<{Info.ExpansionMinDistance}), {enemyBase} with an enemy base, " +
-						$"{enemyNear} within {Info.ExpansionEnemyClearance} of an enemy building");
+						$"{enemyNear} within {Info.ExpansionEnemyClearance} of an enemy building, " +
+						$"{allyClaimed} claimed by an ally");
 				}
 
 				return null;
@@ -2610,9 +2623,12 @@ namespace OpenRA.Mods.Common.Traits
 			// a neighbouring cell -- chosen site 150,93 for spawn 151,94, one cell diagonally into
 			// the enemy base. Relying on Intel.EnemySpawns alone is not enough either: it only lists
 			// players this bot is actually at war with and came back short in testing.
+			var allySites = AllyExpansionSites();
+
 			bool Safe(CPos c) =>
 				!yards.Any(y => (y - c).Length < Info.ExpansionSpawnClearance)
-				&& !enemyBuildings.Any(b => (b - c).Length < Info.ExpansionEnemyClearance);
+				&& !enemyBuildings.Any(b => (b - c).Length < Info.ExpansionEnemyClearance)
+				&& !allySites.Any(a => (a - c).Length < Info.ExpansionAllyClearance);
 
 			// A spawn either works as-is or is dropped entirely, and the next one is tried (User
 			// 2026-08-04: "wenn ein spawn nicht geeignet ist, soll er den ganz verwerfen und den
@@ -2924,6 +2940,24 @@ namespace OpenRA.Mods.Common.Traits
 
 		// Huts this bot is currently repairing -- read by ALLIED bots so they do not send a second
 		// engineer to the same bridge (only one repair per hut can run, and the engineer is consumed).
+		// What this bot has laid claim to, readable by allies. First come, first served: a site is
+		// claimed the moment the mission is founded and released when it ends, exactly like a bridge
+		// hut. Deliberately NOT visible to enemies -- an opponent's plans are not ours to read.
+		public IEnumerable<CPos> ActiveExpansionSites =>
+			Missions.OfType<AotExpansionMission>().Where(m => !m.Done).Select(m => m.Site);
+
+		// Sites allies have already spoken for. Two bots picking the same spot is not a crash, but it
+		// wastes the more expensive convoy of the two: both save 6000, both march an MCV across the
+		// map, and only one can deploy (User 2026-08-05: "innerhalb von allieds sollte es da
+		// absprachen geben").
+		// TraitsImplementing, NOT TraitOrDefault -- the player actor carries one module PER FACTION
+		// and TraitOrDefault throws on the second (crash 2026-08-04).
+		HashSet<CPos> AllyExpansionSites() => World.Players
+			.Where(p => p != Player && Player.RelationshipWith(p) == PlayerRelationship.Ally)
+			.SelectMany(p => p.PlayerActor.TraitsImplementing<AotOperationsBotModule>())
+			.SelectMany(o => o.ActiveExpansionSites)
+			.ToHashSet();
+
 		public IEnumerable<Actor> ActiveBridgeTargets =>
 			Missions.OfType<AotBridgeRepairMission>().Where(m => !m.Done).Select(m => m.Hut);
 
