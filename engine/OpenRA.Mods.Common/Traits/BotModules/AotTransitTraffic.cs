@@ -1193,7 +1193,7 @@ namespace OpenRA.Mods.Common.Traits
 			base.OnUnitAssigned(a);
 		}
 
-		public override void Tick(IBot bot)
+		protected override void TickMission(IBot bot)
 		{
 			service.RunTraffic(bot);
 		}

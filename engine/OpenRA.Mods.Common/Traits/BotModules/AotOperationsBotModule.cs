@@ -94,7 +94,60 @@ namespace OpenRA.Mods.Common.Traits
 			Name = name;
 		}
 
-		public abstract void Tick(IBot bot);
+		// ---------------------------------------------------------------------------------------
+		// "NOTHING LEFT" -- defined ONCE, here, on purpose.
+		//
+		// Every mission used to spell out "no units and no open requests -> we were wiped out" in its
+		// own Tick. That reading is wrong for any mission that orders lazily: one still saving up for
+		// its squad has no units and no open requests BY DESIGN, so it killed itself on its very first
+		// tick. It cost the base expansion 15 silent false starts and hit the derrick squad and both
+		// engineer raids as well -- the trap was even documented in a comment, and was still walked
+		// into twice after that. A comment cannot enforce anything; this structure can.
+		//
+		// Missions no longer write the check at all. They override the two questions only they can
+		// answer, and cannot forget a guard they never author.
+		// ---------------------------------------------------------------------------------------
+
+		// Opt-in: only missions that are genuinely OVER once their squad is gone. Waves, base defense
+		// and starting units legitimately sit empty and must keep running -- switching this on globally
+		// would have traded one bug for five.
+		protected virtual bool EndsWhenEmpty => false;
+
+		// False while the mission has deliberately not placed its orders yet (saving up for a batch).
+		protected virtual bool OrdersPlaced => true;
+
+		// True while the mission still owns something that is not a unit -- an expansion's construction
+		// yard, for instance -- and must therefore stay alive with an empty squad.
+		protected virtual bool HasAssets => false;
+
+		// What to do when the mission really is empty. Default: end it.
+		protected virtual void OnNothingLeft(IBot bot) { Finish(); }
+
+		public int TicksAlive { get; private set; }
+
+		bool everActive;
+
+		public void Tick(IBot bot)
+		{
+			if (Done)
+				return;
+
+			TicksAlive++;
+
+			if (Units.Count > 0 || Ops.OpenRequests(this) > 0)
+				everActive = true;
+
+			if (EndsWhenEmpty && OrdersPlaced && !HasAssets && Units.Count == 0 && Ops.OpenRequests(this) == 0)
+			{
+				OnNothingLeft(bot);
+				if (Done)
+					return;
+			}
+
+			TickMission(bot);
+		}
+
+		protected abstract void TickMission(IBot bot);
 
 		// Short, human-readable state for the periodic [AotStatus] line (User-Wunsch 2026-08-04:
 		// "der muss simpel und kurz enthalten: status der heli engineer raids ... base expansion").
@@ -158,6 +211,14 @@ namespace OpenRA.Mods.Common.Traits
 		protected void Finish()
 		{
 			Done = true;
+
+			// STILLBORN WATCHDOG. A mission that ends without ever having held a unit or an open order
+			// did not fail -- it never started, and that is always a bug in its gating. This class of
+			// defect used to hide behind a perfectly plausible message ("convoy lost before reaching
+			// the site"), which is why it survived so many test runs. It is now impossible to miss.
+			if (!everActive)
+				OpenRA.Log.Write("debug", $"[AotOps][{Ops.Player.PlayerName}][{Name}] STILLBORN: ended after {TicksAlive} tick(s) without ever holding a unit or an order -- check this mission's ordering gate");
+
 			Ops.ReleaseToPool(this, Units.ToList());
 			Units.Clear();
 		}

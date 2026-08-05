@@ -182,7 +182,7 @@ namespace OpenRA.Mods.Common.Traits
 			base.OnUnitAssigned(a);
 		}
 
-		public override void Tick(IBot bot)
+		protected override void TickMission(IBot bot)
 		{
 			startedEmpty ??= Units.Count == 0;
 
@@ -685,7 +685,7 @@ namespace OpenRA.Mods.Common.Traits
 			Finish();
 		}
 
-		public override void Tick(IBot bot)
+		protected override void TickMission(IBot bot)
 		{
 			if (!composed)
 			{
@@ -1339,16 +1339,17 @@ namespace OpenRA.Mods.Common.Traits
 			base.OnUnitAssigned(a);
 		}
 
-		public override void Tick(IBot bot)
-		{
-			if (Units.Count == 0 && Ops.OpenRequests(this) == 0)
-			{
-				Ops.Transit.Cancel(ticket);
-				ticket = null;
-				Done = true;
-				return;
-			}
+		// Squad gone: drop any booked crossing with it (base class decides WHEN we are empty).
+		protected override bool EndsWhenEmpty => true;
 
+		protected override void OnNothingLeft(IBot bot)
+		{
+			Ops.Transit.Cancel(ticket);
+			ticket = null;
+			Done = true;
+		}
+		protected override void TickMission(IBot bot)
+		{
 			// A vessel is genuinely on its way for the spawn we couldn't reach by land -- release the
 			// hold so the service can walk the squad to the staging ground, and stop touring.
 			if (ferryArmed && phase != Phase.Ferrying && ticket != null && ticket.VesselAssigned)
@@ -1708,7 +1709,16 @@ namespace OpenRA.Mods.Common.Traits
 			base.OnUnitAssigned(a);
 		}
 
-		public override void Tick(IBot bot)
+		// Squad gone: drop any booked crossing with it (base class decides WHEN we are empty).
+		protected override bool EndsWhenEmpty => true;
+
+		protected override void OnNothingLeft(IBot bot)
+		{
+			Ops.Transit.Cancel(ticket);
+			ticket = null;
+			Done = true;
+		}
+		protected override void TickMission(IBot bot)
 		{
 			if (Derrick.IsDead || !Derrick.IsInWorld)
 			{
@@ -1716,14 +1726,6 @@ namespace OpenRA.Mods.Common.Traits
 				Ops.Transit.Cancel(ticket);
 				ticket = null;
 				Finish();
-				return;
-			}
-
-			if (Units.Count == 0 && Ops.OpenRequests(this) == 0)
-			{
-				Ops.Transit.Cancel(ticket);
-				ticket = null;
-				Done = true;
 				return;
 			}
 
@@ -1941,7 +1943,7 @@ namespace OpenRA.Mods.Common.Traits
 				ops.QueueRequest(this, "airraid", ops.Info.AirRaidHelicopterTypes, count - fromPool.Count);
 		}
 
-		public override void Tick(IBot bot)
+		protected override void TickMission(IBot bot)
 		{
 			if (Done)
 				return;
@@ -2105,7 +2107,20 @@ namespace OpenRA.Mods.Common.Traits
 			return modern != null && modern.BridgeDamageState == DamageState.Dead && !modern.Repairing;
 		}
 
-		public override void Tick(IBot bot)
+		protected override bool EndsWhenEmpty => true;
+
+		protected override void OnNothingLeft(IBot bot)
+		{
+			// The engineer is consumed on a successful repair, so an empty squad in the Repairing
+			// phase is the SUCCESS case, not a failure.
+			// Outcome bleibt Unknown -- Wellen-Eskalation nicht verfaelschen.
+			Log(phase == Phase.Repairing
+				? "engineer consumed -> bridge repair underway"
+				: "engineer lost before reaching the bridge -> mission over");
+
+			Finish();
+		}
+		protected override void TickMission(IBot bot)
 		{
 			if (Hut.IsDead || !Hut.IsInWorld)
 			{
@@ -2125,25 +2140,6 @@ namespace OpenRA.Mods.Common.Traits
 				// aus, ob der Angriff am Chokepoint funktioniert.
 				Log("bridge no longer needs repair -> releasing engineer");
 				Finish();
-				return;
-			}
-
-			if (Units.Count == 0 && Ops.OpenRequests(this) == 0)
-			{
-				// The engineer is consumed on a successful repair, so an empty squad in the Repairing
-				// phase is the SUCCESS case, not a failure.
-				if (phase == Phase.Repairing)
-				{
-					// Outcome bleibt Unknown -- siehe oben (Wellen-Eskalation nicht verfaelschen).
-					Log("engineer consumed -> bridge repair underway");
-					Finish();
-				}
-				else
-				{
-					Log("engineer lost before reaching the bridge -> mission over");
-					Finish();
-				}
-
 				return;
 			}
 
@@ -2275,6 +2271,10 @@ namespace OpenRA.Mods.Common.Traits
 
 		protected abstract string[] TransportChain { get; }
 		protected abstract int FormingTimeout { get; }
+
+		// Saving up for the batch order is a legitimate empty state, not a wipe-out.
+		protected override bool EndsWhenEmpty => true;
+		protected override bool OrdersPlaced => squadOrdered;
 
 		// ⚠️ NEVER gate a transport order on IsIdle alone. Aircraft rest in a perpetual FlyIdle
 		// activity rather than a null CurrentActivity, so IsIdle is structurally always false for
@@ -2691,14 +2691,8 @@ namespace OpenRA.Mods.Common.Traits
 		protected override string[] TransportChain => Ops.Info.HeliRaidTransportTypes;
 		protected override int FormingTimeout => Ops.Info.HeliRaidFormingTimeout;
 
-		public override void Tick(IBot bot)
+		protected override void TickMission(IBot bot)
 		{
-			if (squadOrdered && Units.Count == 0 && Ops.OpenRequests(this) == 0)
-			{
-				Finish();
-				return;
-			}
-
 			switch (phase)
 			{
 				case Phase.Forming: TickForming(bot); break;
@@ -2787,14 +2781,8 @@ namespace OpenRA.Mods.Common.Traits
 		protected override string[] TransportChain => Ops.Info.GroundRaidTransportTypes;
 		protected override int FormingTimeout => Ops.Info.GroundRaidFormingTimeout;
 
-		public override void Tick(IBot bot)
+		protected override void TickMission(IBot bot)
 		{
-			if (squadOrdered && Units.Count == 0 && Ops.OpenRequests(this) == 0)
-			{
-				Finish();
-				return;
-			}
-
 			switch (phase)
 			{
 				case Phase.Forming: TickForming(bot); break;
@@ -2913,7 +2901,21 @@ namespace OpenRA.Mods.Common.Traits
 			base.OnUnitAssigned(a);
 		}
 
-		public override void Tick(IBot bot)
+		// Saving up for the batch order is a legitimate empty state, and a deployed yard keeps the
+		// mission alive on its own.
+		protected override bool OrdersPlaced => ordered;
+		protected override bool HasAssets => yard != null;
+
+		protected override bool EndsWhenEmpty => true;
+
+		protected override void OnNothingLeft(IBot bot)
+		{
+			Ops.Transit.Cancel(ticket);
+			ticket = null;
+			Log("convoy lost before reaching the site -> mission over");
+			Finish();
+		}
+		protected override void TickMission(IBot bot)
 		{
 			priorityTicks += Ops.Info.MissionInterval;
 
@@ -2933,15 +2935,6 @@ namespace OpenRA.Mods.Common.Traits
 			// never got past planning: 831 status lines reading expansion=none and not a single
 			// "saved up" ever logged. Same trap the derrick squad hit in FIX 2026-07-31k, which is why
             // that one requests in its constructor. The forming timeout still bounds the wait.
-			if (ordered && Units.Count == 0 && Ops.OpenRequests(this) == 0 && yard == null)
-			{
-				Ops.Transit.Cancel(ticket);
-				ticket = null;
-				Log("convoy lost before reaching the site -> mission over");
-				Finish();
-				return;
-			}
-
 			switch (phase)
 			{
 				case Phase.Forming:
@@ -3212,7 +3205,7 @@ namespace OpenRA.Mods.Common.Traits
 			return perAge.Length > 0 ? perAge[Math.Min(Ops.AgeTier(), perAge.Length - 1)] : Ops.Info.ProtectionMinProduced;
 		}
 
-		public override void Tick(IBot bot)
+		protected override void TickMission(IBot bot)
 		{
 			responding.RemoveWhere(Ops.CannotOrder);
 
