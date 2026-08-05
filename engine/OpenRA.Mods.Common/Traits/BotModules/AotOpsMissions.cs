@@ -939,7 +939,8 @@ namespace OpenRA.Mods.Common.Traits
 			return info.WaveTankTypes;
 		}
 
-		CPos RallyPoint() => Ops.GarrisonMusterPoint();
+		// At the choke, not halfway home -- see AotOperationsBotModule.WaveStagingPoint.
+		CPos RallyPoint() => Ops.WaveStagingPoint();
 
 		void TickForming(IBot bot)
 		{
@@ -951,7 +952,39 @@ namespace OpenRA.Mods.Common.Traits
 					bot.QueueOrder(new Order("AttackMove", a, Target.FromCell(Ops.World, rally), false));
 
 			var open = Ops.OpenRequests(this);
-			var launch = open == 0 && Units.Count > 0;
+
+			// CRITICAL MASS. A wave used to leave the moment its order was complete, and that order is
+			// small -- four units at tier 0. Four units die at the first defensive line without doing
+			// anything; twelve break through. The cost is identical, only the timing differs, which is
+			// why this needs no extra income (User 2026-08-05).
+			//
+			// Short of the floor the wave ORDERS MORE rather than merely waiting: waiting alone would
+			// never reach a floor above the composition size, it would just sit until the timeout and
+			// then attack with four anyway. Topping up spends the income that arrives meanwhile, so
+			// the wave grows while it stands at the choke -- visible pressure on the frontier instead
+			// of a lull at home.
+			var mass = Ops.Info.WaveMinimumMass + Ops.AgeTier() * Ops.Info.WaveMinimumMassPerTier;
+			if (open == 0 && Units.Count > 0 && Units.Count < mass
+				&& formingTicks < Ops.Info.WaveFormingTimeout)
+			{
+				var chain = AdaptiveChain();
+				if (chain.Length > 0)
+				{
+					var short_ = mass - Units.Count;
+					var fromPool = Ops.TakeFromPool(chain, short_);
+					Ops.AssignFromPool(this, fromPool);
+					if (short_ - fromPool.Count > 0)
+						Ops.QueueRequest(this, "adaptive", chain, short_ - fromPool.Count);
+
+					Log($"below critical mass ({Units.Count}/{mass}) -> ordering {short_} more");
+					open = Ops.OpenRequests(this);
+				}
+			}
+
+			var launch = open == 0 && Units.Count >= Math.Min(mass, 1);
+			if (launch && Units.Count < mass && formingTicks < Ops.Info.WaveFormingTimeout)
+				launch = false;
+
 			if (!launch && formingTicks >= Ops.Info.WaveFormingTimeout)
 				launch = Units.Count >= open; // at least half assembled
 

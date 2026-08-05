@@ -451,6 +451,17 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Delay before the first wave is formed.")]
 		public readonly int WaveInitialDelay = 3000;
 
+		[Desc("Fewest units a wave sets out with. Below this it keeps ORDERING (not merely waiting),",
+			"so the mass is built up rather than hoped for. Critical mass costs nothing extra: four",
+			"units every minute and twelve every three minutes are the same outlay, and only one of",
+			"them survives contact. Bounded by WaveFormingTimeout, so a bot that cannot afford the",
+			"floor still attacks instead of saving itself to death.")]
+		public readonly int WaveMinimumMass = 8;
+
+		[Desc("Added to WaveMinimumMass per Age tier -- six units is a lot in Age 0 and very little",
+			"by Age 2.")]
+		public readonly int WaveMinimumMassPerTier = 3;
+
 		[Desc("Forming timeout; the wave launches with what it has (if at least half).")]
 		public readonly int WaveFormingTimeout = 4500;
 
@@ -1275,6 +1286,17 @@ namespace OpenRA.Mods.Common.Traits
 
 		// Halfway between base and primary choke: out of the builders' way, on the way out. Shared
 		// (User 2026-07-22) by both regular wave staging and the base defense garrison muster point.
+		// WHERE AN ATTACK WAVE GATHERS. Deliberately NOT GarrisonMusterPoint: that sits halfway
+		// between base and choke, i.e. inside our own territory where the enemy never sees it. A wave
+		// forming there reads as a lull -- the bot looks like it stopped attacking while it is in fact
+		// building up (User 2026-08-05: "es fuehlt sich manchmal zu sehr so an, als wuerde er
+		// luftholen"). Gathering AT the choke keeps a visible force on the frontier the whole time,
+		// which is pressure in itself, without feeding units into defences piecemeal.
+		//
+		// The choke is the fortified point the bot already holds, so this is also the safest place on
+		// the way out to stand and wait.
+		public CPos WaveStagingPoint() => ChokeProvider?.Chokepoint ?? GarrisonMusterPoint();
+
 		public CPos GarrisonMusterPoint()
 		{
 			var baseCentre = BaseCentre();
