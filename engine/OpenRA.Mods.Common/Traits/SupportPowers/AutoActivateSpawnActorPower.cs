@@ -19,6 +19,7 @@ using OpenRA;
 using OpenRA.Effects;
 using OpenRA.Graphics;
 using OpenRA.Mods.Common.Activities;
+using OpenRA.Mods.Common.Widgets;
 using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Traits
@@ -113,6 +114,26 @@ namespace OpenRA.Mods.Common.Traits
 
 			var power = Instances.FirstOrDefault(i => !i.IsTraitDisabled);
 			power?.Activate(power.Self, new Order(Key, Manager.Self, false), Manager);
+		}
+
+		// The tooltip must state how long the research WILL take while the icon is still just an offer
+		// -- the default shows RemainingTicks, which is zero before purchase and read as "00:00", i.e.
+		// no time at all. Once the research runs, the default remaining-time is exactly right again.
+		public override string TooltipTimeTextOverride()
+		{
+			if (researching)
+				return null;
+
+			return WidgetUtils.FormatTime(TotalTicks, Manager.Self.World.Timestep);
+		}
+
+		// No "READY" or "ON HOLD" stamped across an Age icon (User 2026-08-05). Those labels describe a
+		// charge cycle this power does not have: here the icon is simply buyable or it is not, which
+		// the greyed-out state already says. An empty override still suppresses the default; during
+		// the research null hands back to the normal countdown.
+		public override string IconOverlayTextOverride()
+		{
+			return researching ? null : "";
 		}
 
 		public override void Activate(Order order)
