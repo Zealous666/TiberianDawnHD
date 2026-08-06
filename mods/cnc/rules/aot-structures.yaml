@@ -3056,7 +3056,7 @@ aot-hpad-gdi:
 	# Preis verdoppelt 1000 -> 2000 (User-Wunsch 2026-08-01). Beide Helipad-Proxies erbten
 	# bisher HPADs 1000 und hatten kein eigenes Valued.
 	Valued:
-		Cost: 2000
+		Cost: 2500
 	RenderSprites:
 		Image: aot-hpad4
 	Building:
@@ -3103,7 +3103,7 @@ aot-hpad-nod:
 	# weil NOD es nur zum BAU braucht: NOD-Flugeinheiten laden on-the-fly nach, GDI muss zum
 	# Helipad zurueck. Der Aufschlag steckt zusaetzlich in den NOD-Heli-Preisen selbst.
 	Valued:
-		Cost: 3000
+		Cost: 2000
 	RenderSprites:
 		Image: hpad
 	Buildable:
@@ -3502,7 +3502,7 @@ FIX:
 	# (aot-fix-age0/1/2 GDI und aot-fix-age1/2-nod) erben von FIX, ein Eintrag deckt also beide
 	# Fraktionen ab.
 	Valued:
-		Cost: 1250
+		Cost: 1500
 	# User-Wunsch 2026-08-01: repariertes Fahrzeug bleibt nach Abschluss noch ~2 Sekunden stehen
 	# (50 Ticks bei Standard-Timestep 40ms), statt im selben Tick loszufahren. Gibt u.a. das
 	# Zeitfenster, es dort noch zu verkaufen. RepairsUnits selbst wird von der Engine geerbt,
