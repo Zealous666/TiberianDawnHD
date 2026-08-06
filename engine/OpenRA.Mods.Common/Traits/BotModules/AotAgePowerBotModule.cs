@@ -189,8 +189,15 @@ namespace OpenRA.Mods.Common.Traits
 								Save(key, saved, target - saved);
 						}
 					}
-					else
-						Refund(key, saved);
+
+					// NOT refunded when no research is running: the whole point of banking it during
+					// the window is that it is ready the moment the tier unlocks (User 2026-08-05:
+					// "wenn sie ein neues age erreicht hat, hat sie das geld schon beiseite gelegt und
+					// kann zu dem zeitpunkt abgerufen werden"). Releasing it the instant the research
+					// ended -- which is exactly when the Science Lab or Temple is still going up --
+					// would throw away everything the pacing just achieved. It simply stops GROWING
+					// while the tier is locked and no window is running; an economy emergency still
+					// releases it.
 
 					continue;
 				}
