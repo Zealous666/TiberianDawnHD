@@ -104,10 +104,14 @@ namespace OpenRA.Mods.Common.Traits
 			// stand-down cannot last forever even if the expansion never gets off the ground.
 			var emergency = ops.Any(o => o.EconomyEmergency() || o.ExpansionHoldsPriority());
 
-			// One research at a time; while it runs, the fund may work ahead on the next tier.
-			var anyResearching = Info.PowerOrderNames.Any(k =>
-				supportPowerManager.Powers.TryGetValue(k, out var p)
-				&& p is AotAgeResearchInstance r && r.Researching);
+			// One research at a time; while it runs, the fund works ahead on the next tier.
+			AotAgeResearchInstance running = null;
+			foreach (var k in Info.PowerOrderNames)
+				if (supportPowerManager.Powers.TryGetValue(k, out var p)
+					&& p is AotAgeResearchInstance r && r.Researching)
+					running = r;
+
+			var anyResearching = running != null;
 
 			// Income since the last bot tick. Earned only ever grows, so the delta is what actually
 			// came in -- spending does not distort it the way a balance comparison would.
@@ -145,7 +149,23 @@ namespace OpenRA.Mods.Common.Traits
 				{
 					var bought = power is AotAgeResearchInstance done && done.Purchased;
 					if (!bought && anyResearching)
-						SaveFromIncome(key, saved, info.Cost);
+					{
+						// PACED TO THE RESEARCH WINDOW (User 2026-08-05: "genau in den 15 minuten soll
+						// er doch schon den GESAMTEN betrag fuer age-2 zuruecklegen"). The target is
+						// tied to how far the running research has got, so the next tier's full price
+						// is banked exactly as this one completes -- and the rest of the income stays
+						// free for the buildings that were held back during the sprint.
+						//
+						// An absolute target rather than a rate per tick: a moment with no money to
+						// spare is made up automatically later instead of being lost for good.
+						if (running.TotalTicks > 0)
+						{
+							var elapsed = running.TotalTicks - running.RemainingTicks;
+							var target = info.Cost * elapsed / running.TotalTicks;
+							if (target > saved)
+								Save(key, saved, target - saved);
+						}
+					}
 					else
 						Refund(key, saved);
 
@@ -172,6 +192,21 @@ namespace OpenRA.Mods.Common.Traits
 						hardSaving.Remove(key);
 						Refund(key, saved);
 						world.IssueOrder(new Order(key, supportPowerManager.Self, false));
+						continue;
+					}
+
+					// While a research is running, PACE instead of sprinting -- even if this tier is
+					// already unlocked. The sprint exists to close the last gap before a purchase; if
+					// it engaged during the research window it would freeze the base all over again,
+					// in exactly the window the buildings held back by the previous sprint are meant
+					// to go up. Pacing banks the full price by the time the window ends anyway.
+					if (anyResearching && running.TotalTicks > 0)
+					{
+						var elapsed = running.TotalTicks - running.RemainingTicks;
+						var target = info.Cost * elapsed / running.TotalTicks;
+						if (target > saved)
+							Save(key, saved, target - saved);
+
 						continue;
 					}
 
