@@ -1669,9 +1669,11 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				var waitingFor = step.Role switch
 				{
-					"FTUR" => ops.WavesScheduled < 1 ? "the first wave" : null,
-					"FIX" => ops.WavesScheduled < 1 ? "the first wave"
-						: RolePending("FTUR") ? "the Flame Turret" : null,
+					// FTUR is deliberately NOT in here: it sits ahead of the Tech Centre in the plan
+					// (user spec 2026-08-06, "sonst ist er anfangs schnell nackt am eingang"), so
+					// making it wait for a wave that waits for the upgrade would mean it never got
+					// built early at all, which is the whole point of its position.
+					"FIX" => ops.WavesScheduled < 1 ? "the first wave" : null,
 					"HPAD" => ops.WavesScheduled < 2 ? "the second wave" : null,
 					"SAM" => ops.WavesScheduled < 2 ? "the second wave"
 						: RolePending("HPAD") ? "the Helipad" : null,

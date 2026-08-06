@@ -129,6 +129,7 @@ namespace OpenRA.Mods.Common.Traits
 		Actor crateCollector;
 		int crateWaitTicks;
 		int threatLog;
+		CPos? threatCentre;
 		int stallTicks;
 		Actor finalTarget;
 
@@ -218,32 +219,34 @@ namespace OpenRA.Mods.Common.Traits
 				return;
 			}
 
-			// BASE UNDER ATTACK OUTRANKS EVERY PHASE (User 2026-08-06). The opening group splits
-			// between the primary and secondary chokes and then holds position -- and held position
-			// literally, watching the base being shot up a few cells away, because nothing in this
-			// mission ever looked for threats. Module 5's garrison did the looking, but it does not own
-			// these units and could not send them.
+			// BASE UNDER ATTACK OUTRANKS HOLDING (User 2026-08-06). Nothing in this mission ever looked
+			// for threats: the group split between the two chokes and then held position literally,
+			// watching the base being shot up a few cells away. Module 5's garrison does the looking,
+			// but it does not own these units and cannot send them.
 			//
-			// The WHOLE group answers, both reserves together, and the phase resumes by itself on the
-			// next tick once the attackers are gone. Deliberately not a phase of its own: an opening
-			// group that has already left for the oil pump should not be recalled across the map, and
-			// it no longer counts as holding by then.
-			if (phase is Phase.ChokeHold)
+			// Who answers depends on the phase, and gating the whole thing on ChokeHold -- as the first
+			// attempt did -- was the bug: the moment the raid group leaves, the phase changes and the
+			// secondary guard, which is still sitting at home, fell out of the check entirely.
+			//   ChokeHold: everyone, and the phase waits.
+			//   Later:     the home guard only, while the raid carries on.
+			threatCentre = null;
+			var threats = Ops.BaseThreats();
+			if (threats.Count > 0)
 			{
-				var threats = Ops.BaseThreats();
-				if (threats.Count > 0)
+				var defenders = (phase == Phase.ChokeHold ? Units : (IEnumerable<Actor>)secondaryReserve)
+					.Where(a => !Ops.CannotOrder(a))
+					.ToList();
+
+				if (defenders.Count > 0)
 				{
-					var defenders = Units.Where(a => !Ops.CannotOrder(a)).ToList();
-					if (defenders.Count > 0)
-					{
-						var centre = Centroid(threats.ToList());
-						AttackMoveGroup(bot, defenders, centre);
+					threatCentre = Centroid(threats.ToList());
+					AttackMoveGroup(bot, defenders, threatCentre.Value);
 
-						if (++threatLog % 8 == 1)
-							Log($"base under attack ({threats.Count} enemy unit(s)) -> whole opening group responding to {centre}");
+					if (++threatLog % 8 == 1)
+						Log($"base under attack ({threats.Count} enemy unit(s)) -> {defenders.Count} unit(s) responding to {threatCentre.Value}");
 
+					if (phase == Phase.ChokeHold)
 						return;
-					}
 				}
 			}
 
@@ -260,7 +263,10 @@ namespace OpenRA.Mods.Common.Traits
 			// The secondary/beach guard holds its post through every phase EXCEPT the crossing and
 			// everything after it: its post is a chokepoint at HOME, so ordering the landed force back
 			// to it would send half of them walking into the sea.
-			if (phase != Phase.ChokeHold && phase != Phase.Ferrying && !ashore && secondaryReserve.Count > 0)
+			// ... unless it is currently answering an attack, or the hold order would pull it straight
+			// back off the defenders it was just sent to.
+			if (threatCentre == null
+				&& phase != Phase.ChokeHold && phase != Phase.Ferrying && !ashore && secondaryReserve.Count > 0)
 			{
 				secondaryReserve.RemoveWhere(a => Ops.CannotOrder(a));
 				var secTarget = SecondaryTarget();
