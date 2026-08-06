@@ -3241,8 +3241,17 @@ namespace OpenRA.Mods.Common.Traits
 
 			int Near(CPos c) => (c - Intel.OwnSpawn).LengthSquared;
 
+			// An ALLY's spawn is neither our own nor an enemy's, so it fell through into "unused" and
+			// got a scouting visit of its own (User 2026-08-06). There is nothing to learn there and
+			// nothing to fight, only a detour on the way to somewhere that matters.
+			var allied = World.Players
+				.Where(p => p != Player && !p.NonCombatant
+					&& Player.RelationshipWith(p) == PlayerRelationship.Ally)
+				.Select(p => p.HomeLocation)
+				.ToHashSet();
+
 			var unused = Intel.AllSpawns
-				.Where(s => s != Intel.OwnSpawn && !Intel.EnemySpawns.Contains(s))
+				.Where(s => s != Intel.OwnSpawn && !Intel.EnemySpawns.Contains(s) && !allied.Contains(s))
 				.OrderBy(Near)
 				.ToList();
 
