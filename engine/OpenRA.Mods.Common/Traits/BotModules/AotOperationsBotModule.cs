@@ -336,7 +336,9 @@ namespace OpenRA.Mods.Common.Traits
 		public readonly HashSet<string> ChokeClearExcludeTypes = [];
 
 		[Desc("Maximum ARCO raid targets after the choke is cleared.")]
-		public readonly int ArcoMaxTargets = 2;
+		// User 2026-08-05: 2 -> 1. The opening group cleared two oil pumps, each with its own crate
+		// wait, before finally heading for the enemy -- far too long a detour. One pump, then go.
+		public readonly int ArcoMaxTargets = 1;
 
 		// ---- Module 2: Regular Attack Waves ----
 		[ActorReference]
@@ -461,6 +463,12 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Added to WaveMinimumMass per Age tier -- six units is a lot in Age 0 and very little",
 			"by Age 2.")]
 		public readonly int WaveMinimumMassPerTier = 3;
+
+		[Desc("Cash that must be on hand before a wave tops itself up towards the mass floor. Ordering",
+			"the full shortfall regardless of funds is how three bots ended up at zero credits with",
+			"five to seven units queued and nothing else moving at all -- production drains the",
+			"account continuously, so an order placed without cover starves everything behind it.")]
+		public readonly int WaveTopUpMinimumCash = 400;
 
 		[Desc("Forming timeout; the wave launches with what it has (if at least half).")]
 		public readonly int WaveFormingTimeout = 4500;
@@ -2306,7 +2314,7 @@ namespace OpenRA.Mods.Common.Traits
 			// defence is untouched and still answers attacks; this only stops NEW offensives.
 			if (Info.EnableWaves && !ExpansionHoldsPriority() && !EconomyEmergency() && !AgeSprintActive()
 				&& !Missions.OfType<AotRegularWaveMission>().Any() && !Missions.OfType<AotAirRaidMission>().Any()
-				&& (waveIndex > 0 || StartupPriorityMet()))
+				&& (waveIndex > 0 || (StartupPriorityMet() && AgeUpgradeStarted())))
 			{
 				if (--waveCooldownTicks <= 0)
 				{
@@ -2888,6 +2896,22 @@ namespace OpenRA.Mods.Common.Traits
 		// True while the Age fund has committed to its final sprint. Asked of every Age module on the
 		// player actor -- TraitsImplementing, not TraitOrDefault, since the player carries one per
 		// faction and TraitOrDefault throws on the second (crash 2026-08-04).
+		// The FIRST wave waits for the Age upgrade to be under way (User 2026-08-05). Age 0 then pays
+		// for scouts, the derrick squad and the buildings up to the Tech Centre, and nothing else --
+		// which is what lets the bot reach the 3000 the sprint needs in the first place. Later waves
+		// are not affected.
+		//
+		// Returns TRUE when there is no Age module at all, so a faction or ruleset without Age powers
+		// can never be locked out of attacking entirely.
+		public bool AgeUpgradeStarted()
+		{
+			var modules = Player.PlayerActor.TraitsImplementing<AotAgePowerBotModule>()
+				.Where(m => !m.IsTraitDisabled)
+				.ToList();
+
+			return modules.Count == 0 || modules.Any(m => m.AnyAgeStarted);
+		}
+
 		public bool AgeSprintActive() =>
 			Player.PlayerActor.TraitsImplementing<AotAgePowerBotModule>().Any(m => !m.IsTraitDisabled && m.HardSaving);
 

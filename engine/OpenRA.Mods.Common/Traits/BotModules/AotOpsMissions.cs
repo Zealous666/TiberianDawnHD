@@ -973,6 +973,7 @@ namespace OpenRA.Mods.Common.Traits
 			// Nothing is ordered during the Age sprint either -- that is the point of the sprint.
 			var missing = mass - Units.Count - open;
 			if (missing > 0 && !Ops.AgeSprintActive()
+				&& Ops.AvailableCash() >= Ops.Info.WaveTopUpMinimumCash
 				&& formingTicks < Ops.Info.WaveFormingTimeout)
 			{
 				var chain = AdaptiveChain();

@@ -1688,7 +1688,7 @@ STEC:
 		OnHoldAudio: OnHold
 		CancelledAudio: Cancelled
 	Valued:
-		Cost: 2500
+		Cost: 2000
 	Health:
 		HP: 60000
 	Building:
@@ -3502,7 +3502,7 @@ FIX:
 	# (aot-fix-age0/1/2 GDI und aot-fix-age1/2-nod) erben von FIX, ein Eintrag deckt also beide
 	# Fraktionen ab.
 	Valued:
-		Cost: 1500
+		Cost: 1250
 	# User-Wunsch 2026-08-01: repariertes Fahrzeug bleibt nach Abschluss noch ~2 Sekunden stehen
 	# (50 Ticks bei Standard-Timestep 40ms), statt im selben Tick loszufahren. Gibt u.a. das
 	# Zeitfenster, es dort noch zu verkaufen. RepairsUnits selbst wird von der Engine geerbt,

@@ -289,6 +289,12 @@ namespace OpenRA.Mods.Common.Traits
 		// overrun while saving would be the one way this backfires.
 		public bool HardSaving => hardSaving.Count > 0;
 
+		// Has this bot committed to its first Age yet? Read by AotOperationsBotModule to hold the very
+		// first attack wave until then.
+		public bool AnyAgeStarted =>
+			Info.PowerOrderNames.Any(k => supportPowerManager.Powers.TryGetValue(k, out var p)
+				&& p is AotAgeResearchInstance r && r.Purchased);
+
 		// Skims this tick's share of income towards `cost`, never touching what is already banked for
 		// other purposes.
 		void SaveFromIncome(string key, int saved, int cost)
