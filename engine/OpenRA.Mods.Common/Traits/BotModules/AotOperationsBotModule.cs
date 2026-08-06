@@ -2365,17 +2365,22 @@ namespace OpenRA.Mods.Common.Traits
 				{
 					waveCooldownTicks = Info.WaveCooldown;
 
-					// Air raids need a REFINERY behind them (user spec 2026-08-06). Helicopters are the
-					// expensive half of the ground/air alternation, and before the refinery there is
-					// simply no income to sustain it -- the bot would trade its whole balance for one
-					// raid and then stand still.
-					var canAirRaid = Info.AirRaidHelicopterTypes.Length > 0 && HasHelipad() && HasRefinery();
+					var canAirRaid = Info.AirRaidHelicopterTypes.Length > 0 && HasHelipad();
 					bool doAirRaid;
 					bool useSecondaryRoute;
 
 					if (randomEscalationPhase)
 					{
-						doAirRaid = canAirRaid && World.LocalRandom.Next(100) < Info.RandomAirRaidChancePercent;
+						// The ONGOING 1:3 air-to-ground alternation needs a REFINERY behind it (user spec
+						// 2026-08-06). Helicopters are the expensive half of that rhythm, and before the
+						// refinery there is no income to sustain it -- the bot would trade its balance
+						// for a raid and then stand still.
+						//
+						// The one-off escalation raid below is deliberately NOT covered: that is the
+						// 2-helicopter mini-wave (AirRaidCountPerAge[0]), small enough to afford and
+						// the whole point of having a helipad that early.
+						doAirRaid = canAirRaid && HasRefinery()
+							&& World.LocalRandom.Next(100) < Info.RandomAirRaidChancePercent;
 						useSecondaryRoute = !doAirRaid && World.LocalRandom.Next(2) == 0;
 					}
 					else
