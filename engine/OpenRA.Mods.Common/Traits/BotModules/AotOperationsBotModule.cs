@@ -3223,13 +3223,46 @@ namespace OpenRA.Mods.Common.Traits
 			}
 		}
 
+		// EVERY spawn marker gets visited, unused ones FIRST (User 2026-08-06). Two reasons, and the
+		// second is the one that matters: an unused spawn is prime expansion ground, so seeing it early
+		// is worth something in itself -- and by the time a group has worked through those it arrives
+		// at the occupied ones, where it will run into something. Scouts tour on AttackMove, so contact
+		// means a fight rather than a drive-by.
+		//
+		// The number of GROUPS is deliberately unchanged: each group simply tours longer. More groups
+		// would mean more units, and Age 0 is exactly where the money has to go to the Tech Centre
+		// instead.
+		//
+		// Spawn markers are static map data the bot already holds -- nothing is being revealed here
+		// that a player could not read off the lobby.
 		void BuildScoutAssignments()
 		{
 			var groups = Math.Max(1, Intel.AllSpawns.Count / 2);
-			var targets = Intel.EnemySpawns.OrderBy(s => (s - Intel.OwnSpawn).LengthSquared).ToList();
-			var index = 0;
-			for (var i = 0; i < targets.Count && index < groups; i += 2, index++)
-				scoutAssignments[index] = targets.Skip(i).Take(2).ToList();
+
+			int Near(CPos c) => (c - Intel.OwnSpawn).LengthSquared;
+
+			var unused = Intel.AllSpawns
+				.Where(s => s != Intel.OwnSpawn && !Intel.EnemySpawns.Contains(s))
+				.OrderBy(Near)
+				.ToList();
+
+			var occupied = Intel.EnemySpawns.OrderBy(Near).ToList();
+
+			// Dealt round-robin so every group gets a share of each kind, then ordered unused-first
+			// WITHIN the group. Chunking the combined list instead would hand one group nothing but
+			// empty spawns and another nothing but enemies, which is not what was asked for.
+			for (var i = 0; i < groups; i++)
+				scoutAssignments[i] = [];
+
+			for (var i = 0; i < unused.Count; i++)
+				scoutAssignments[i % groups].Add(unused[i]);
+
+			for (var i = 0; i < occupied.Count; i++)
+				scoutAssignments[i % groups].Add(occupied[i]);
+
+			foreach (var i in scoutAssignments.Keys.ToList())
+				if (scoutAssignments[i].Count == 0)
+					scoutAssignments.Remove(i);
 		}
 
 		void Log(string message)
