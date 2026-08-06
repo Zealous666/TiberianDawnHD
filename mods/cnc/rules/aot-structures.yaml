@@ -1506,7 +1506,7 @@ ATEC:
 		OnHoldAudio: OnHold
 		CancelledAudio: Cancelled
 	Valued:
-		Cost: 2500
+		Cost: 2000
 	Health:
 		HP: 60000
 	Building:
