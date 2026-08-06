@@ -113,6 +113,21 @@ namespace OpenRA.Mods.Common.Traits
 
 			var anyResearching = running != null;
 
+			// ONLY THE NEXT TIER IS FUNDED. All three Ages sit in PowerOrderNames, and while Age 1 is
+			// being researched both Age 2 AND Age 3 are "unpurchased and still locked" -- so without
+			// this the fund would pace towards 7500 and 10000 at the same time and starve the base for
+			// a tier two steps away. The next tier is simply the first one not yet bought.
+			string nextKey = null;
+			foreach (var k in Info.PowerOrderNames)
+			{
+				if (supportPowerManager.Powers.TryGetValue(k, out var p2)
+					&& p2 is AotAgeResearchInstance r2 && r2.Purchased)
+					continue;
+
+				nextKey = k;
+				break;
+			}
+
 			// Income since the last bot tick. Earned only ever grows, so the delta is what actually
 			// came in -- spending does not distort it the way a balance comparison would.
 			var income = Math.Max(0, playerResources.Earned - lastEarned);
@@ -133,6 +148,14 @@ namespace OpenRA.Mods.Common.Traits
 
 				if (!supportPowerManager.Powers.TryGetValue(key, out var power))
 				{
+					Refund(key, saved);
+					continue;
+				}
+
+				// Anything beyond the next tier releases whatever it holds -- see nextKey above.
+				if (key != nextKey)
+				{
+					hardSaving.Remove(key);
 					Refund(key, saved);
 					continue;
 				}
