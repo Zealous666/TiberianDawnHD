@@ -128,6 +128,7 @@ namespace OpenRA.Mods.Common.Traits
 		CPos currentArcoCell;
 		Actor crateCollector;
 		int crateWaitTicks;
+		int threatLog;
 		int stallTicks;
 		Actor finalTarget;
 
@@ -215,6 +216,35 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				Done = true;
 				return;
+			}
+
+			// BASE UNDER ATTACK OUTRANKS EVERY PHASE (User 2026-08-06). The opening group splits
+			// between the primary and secondary chokes and then holds position -- and held position
+			// literally, watching the base being shot up a few cells away, because nothing in this
+			// mission ever looked for threats. Module 5's garrison did the looking, but it does not own
+			// these units and could not send them.
+			//
+			// The WHOLE group answers, both reserves together, and the phase resumes by itself on the
+			// next tick once the attackers are gone. Deliberately not a phase of its own: an opening
+			// group that has already left for the oil pump should not be recalled across the map, and
+			// it no longer counts as holding by then.
+			if (phase is Phase.ChokeHold)
+			{
+				var threats = Ops.BaseThreats();
+				if (threats.Count > 0)
+				{
+					var defenders = Units.Where(a => !Ops.CannotOrder(a)).ToList();
+					if (defenders.Count > 0)
+					{
+						var centre = Centroid(threats.ToList());
+						AttackMoveGroup(bot, defenders, centre);
+
+						if (++threatLog % 8 == 1)
+							Log($"base under attack ({threats.Count} enemy unit(s)) -> whole opening group responding to {centre}");
+
+						return;
+					}
+				}
 			}
 
 			switch (phase)
@@ -341,16 +371,6 @@ namespace OpenRA.Mods.Common.Traits
 			if (readyUnits.Count == 0)
 				return;
 
-			// Never let the garrison hold position ON TOP of the gate-defence cluster's own reserved
-			// footprint (buildings + fence). Both are independently biased toward the SAME choke cell
-			// (the garrison holds AT the choke; the cluster is placed as close to the choke as
-			// possible), so a unit "correctly" holding its post can end up parked on a planned
-			// building or fence node forever, permanently blocking it -- it LOOKS right (it is exactly
-			// at the choke) while structurally colliding with what gets built there (user-fund
-			// 2026-08-01). Push it toward the base (same "behind" direction the Obelisk/second Silo
-			// use) a few cells at a time; re-issued every check while still inside, same as the
-			// out-of-position push below, so it keeps making progress without needing an IsIdle gate.
-			var insideCluster = readyUnits.Where(a => Ops.IsInsideGateCluster(a.Location)).ToList();
 
 			// CLEARING COMES FIRST, and everyone at the choke takes part -- including whoever is
 			// standing on the planned gate cluster. Excluding them meant the clearing was often left
@@ -371,28 +391,23 @@ namespace OpenRA.Mods.Common.Traits
 
 			var obstacles = ClearNearbyObstacles(bot, choke.Value, atChoke);
 
-			// Only once the ground is clear is it worth freeing the cluster's own footprint: a unit
-			// parked there would block the buildings that go up on it (user-fund 2026-08-01).
-			if (obstacles.Count == 0 && insideCluster.Count > 0)
-			{
-				var baseCentre = Ops.BaseCentre();
-				foreach (var a in insideCluster)
-				{
-					var behind = AotBasePlannerBotModule.Cardinal(new CVec(baseCentre.X - a.Location.X, baseCentre.Y - a.Location.Y));
-					bot.QueueOrder(new Order("AttackMove", a, Target.FromCell(Ops.World, a.Location + (behind * 3)), false));
-				}
-			}
-
 			if (obstacles.Count > 0)
 			{
 				clearChecks = 0;
 				return;
 			}
 
-			// Clearing done. Wait until the whole reserve is actually in position for a
-			// few consecutive checks, then hand the group its follow-up mission. Units still being
-			// pushed out of the cluster's own footprint do not count as "settled" either.
-			if (awayFromChoke.Count == 0 && insideCluster.Count == 0 && ++clearChecks >= 3)
+			// Clearing done. Wait until the whole reserve is actually in position for a few consecutive
+			// checks, then hand the group its follow-up mission.
+			//
+			// The cluster footprint is deliberately NOT part of this any more. Pushing units off it and
+			// then requiring the footprint to be empty is unsatisfiable when the cluster sits on the
+			// very choke the group is told to hold: pushed a few cells toward base, counted as out of
+			// position, pulled straight back. The group ended up shuttling instead of leaving for the
+			// oil pump (User 2026-08-06). It leaves the choke entirely a moment later in any case --
+			// "the choke stays EMPTY after the group leaves" -- and the buildings that go on the
+			// footprint are not queued until after the Age upgrade, long after that.
+			if (awayFromChoke.Count == 0 && ++clearChecks >= 3)
 			{
 				BuildArcoTargets();
 				phase = arcoTargets.Count > 0 ? Phase.ArcoRaid : Phase.FinalAttack;

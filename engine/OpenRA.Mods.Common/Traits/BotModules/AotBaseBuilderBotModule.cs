@@ -1264,6 +1264,19 @@ namespace OpenRA.Mods.Common.Traits
 		// out, by design) can keep it false forever. Kept public though nothing consumes it since the
 		// age jump moved to AotAgePowerBotModule: it is the natural gate should that module ever want
 		// "do not jump age while this tier is still half-built" too.
+		// A Silo still owed at the current tier. The Age fund asks before it starts hoarding: the Silo
+		// is exempt from the sprint's build hold, but exemption is worthless if the fund has already
+		// taken every credit that could pay for it -- which is why the Silo was going up AFTER the
+		// upgrade instead of before it (User 2026-08-06).
+		public bool SiloPending()
+		{
+			if (planner == null || !planner.Planned)
+				return false;
+
+			var tier = AgeTier();
+			return planner.Rhythm.Any(s => !s.Done && !s.Skipped && s.Role == "SILO" && s.Age <= tier);
+		}
+
 		public bool AgeRhythmComplete(int age) => planner.Rhythm.Where(s => s.Age == age).All(s => s.Done);
 
 		// --- priority gates: airfield -> refinery -> sams -> upgrades (user spec 2026-08-02) ---
@@ -1583,6 +1596,7 @@ namespace OpenRA.Mods.Common.Traits
 		int expansionPauseLog;
 		int ageSprintPauseLog;
 		int helipadWaitLog;
+		int fturWaitLog;
 
 		void StartStep(IBot bot, AotPlanStep step)
 		{
@@ -1627,6 +1641,19 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				if (++ageSprintPauseLog % 16 == 0)
 					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Age sprint: holding {step.Role} until the upgrade is bought");
+
+				return;
+			}
+
+			// FLAME TURRET WAITS FOR THE FIRST WAVE, HELIPAD FOR THE SECOND (user spec 2026-08-06).
+			// Without this both simply started as soon as the upgrade did, in parallel with wave 1 --
+			// and a building finishes sooner than a squad assembles, so the Repair Facility was
+			// standing before the first wave had even formed.
+			if (ops != null && ops.Info.Faction == Info.Faction
+				&& step.Role == "FTUR" && ops.WavesScheduled < 1)
+			{
+				if (++fturWaitLog % 16 == 0)
+					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Flame Turret held until the first wave is on its way");
 
 				return;
 			}

@@ -234,6 +234,18 @@ namespace OpenRA.Mods.Common.Traits
 						continue;
 					}
 
+					// ...but not while a build step the sprint itself allows is still unpaid. The Silo is
+					// exempt from the build hold precisely so it goes up first, and that exemption is
+					// worthless if the fund has already taken every credit that could pay for it --
+					// which is exactly why the Silo was appearing AFTER the upgrade instead of before
+					// it (User 2026-08-06). The income share keeps running meanwhile, so this delays
+					// the sprint by one building, not by a phase.
+					if (ops.Any(o => o.ExemptBuildPending()))
+					{
+						SaveFromIncome(key, saved, info.Cost);
+						continue;
+					}
+
 					// THE SPRINT STARTS THE MOMENT THE UPGRADE IS BUYABLE, i.e. as soon as the Tech
 					// Centre stands. It used to wait for a cash threshold, and that never arrived:
 					// production drains the account as fast as it fills, so all three bots sat at zero

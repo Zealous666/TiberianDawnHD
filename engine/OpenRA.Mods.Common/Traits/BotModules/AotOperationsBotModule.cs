@@ -1325,6 +1325,24 @@ namespace OpenRA.Mods.Common.Traits
 		// buildable -- see AotBaseDefenseMission.
 		public bool FirstWaveScheduled() => waveIndex >= 1;
 
+		// Enemies inside our own base perimeter. Shared so that any mission holding units at home can
+		// answer an attack, not just Module 5's garrison (User 2026-08-06: the starting group's
+		// secondary reserve sat at its choke and watched the base being shot up).
+		public List<Actor> BaseThreats()
+		{
+			var threats = new HashSet<Actor>();
+			foreach (var b in World.Actors.Where(a => a.Owner == Player && !a.IsDead && a.IsInWorld
+				&& a.Info.HasTraitInfo<BuildingInfo>()
+				&& (Info.ProtectionTypes.Count == 0 || Info.ProtectionTypes.Contains(a.Info.Name))))
+			{
+				foreach (var a in World.FindActorsInCircle(b.CenterPosition, WDist.FromCells(Info.ProtectionScanRadius)))
+					if (AotOpsUtils.IsPreferredEnemyUnit(Player, a, includeAir: true) && a.CanBeViewedByPlayer(Player))
+						threats.Add(a);
+			}
+
+			return threats.ToList();
+		}
+
 		// How many attack waves have been put on the board so far. The base builder uses it to slot
 		// buildings between waves (user spec 2026-08-06).
 		public int WavesScheduled => waveIndex;
@@ -2965,6 +2983,10 @@ namespace OpenRA.Mods.Common.Traits
 
 			return modules.Count == 0 || modules.Any(m => m.AnyAgeStarted);
 		}
+
+		// Asked by the Age fund: is a build step that the sprint deliberately allows still waiting to
+		// be paid for?
+		public bool ExemptBuildPending() => builder != null && builder.SiloPending();
 
 		public bool AgeSprintActive() =>
 			Player.PlayerActor.TraitsImplementing<AotAgePowerBotModule>().Any(m => !m.IsTraitDisabled && m.HardSaving);

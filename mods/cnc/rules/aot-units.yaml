@@ -2255,7 +2255,7 @@ aot-hind-base:
 	# NOD Basis-Heli: Preis 2000 (User-Wunsch 2026-08-01). Vorher erbten alle Heli-Proxies
 	# stumm die 1200 ihres Basis-Aktors.
 	Valued:
-		Cost: 3000
+		Cost: 2500
 	AmmoPool:
 		Ammo: 6
 	ReloadAmmoPool:
@@ -2314,7 +2314,7 @@ aot-harpy-upgraded:
 	# NOD nach Harpy-Upgrade: Preis 2500 (User-Wunsch 2026-08-01). Vorher erbten alle Heli-Proxies
 	# stumm die 1200 ihres Basis-Aktors.
 	Valued:
-		Cost: 3750
+		Cost: 3000
 	AmmoPool:
 		Ammo: 6
 	ReloadAmmoPool:
@@ -2335,7 +2335,7 @@ aot-harpy-upgraded-laser:
 	# NOD Harpy + Laser: Preis 3000 (User-Wunsch 2026-08-01). Vorher erbten alle Heli-Proxies
 	# stumm die 1200 ihres Basis-Aktors.
 	Valued:
-		Cost: 4500
+		Cost: 3500
 	AmmoPool:
 		Ammo: 6
 	ReloadAmmoPool:
