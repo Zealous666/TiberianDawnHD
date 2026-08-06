@@ -351,7 +351,29 @@ namespace OpenRA.Mods.Common.Traits
 			// use) a few cells at a time; re-issued every check while still inside, same as the
 			// out-of-position push below, so it keeps making progress without needing an IsIdle gate.
 			var insideCluster = readyUnits.Where(a => Ops.IsInsideGateCluster(a.Location)).ToList();
-			if (insideCluster.Count > 0)
+
+			// CLEARING COMES FIRST, and everyone at the choke takes part -- including whoever is
+			// standing on the planned gate cluster. Excluding them meant the clearing was often left
+			// to the single unit that happened to be outside the footprint, while the rest oscillated:
+			// pushed a few cells toward base by the block below, pulled straight back by the
+			// out-of-position order, over and over, because the cluster sits on the choke the garrison
+			// is told to hold (User 2026-08-06: "es rodet nur eine einheit waehrend die anderen
+			// daneben die ganze zeit hin und her fahren"). Trees fall far quicker with four guns than
+			// with one, and the cluster cannot be built until the trees are gone anyway.
+			var atChoke = readyUnits.Where(a => (a.Location - choke.Value).LengthSquared <= holdR2).ToList();
+			var awayFromChoke = readyUnits.Where(a => (a.Location - choke.Value).LengthSquared > holdR2).ToList();
+
+			if (awayFromChoke.Count > 0)
+				bot.QueueOrder(new Order("AttackMove", null, Target.FromCell(Ops.World, choke.Value), false, groupedActors: awayFromChoke.ToArray()));
+
+			if (atChoke.Count == 0)
+				return;
+
+			var obstacles = ClearNearbyObstacles(bot, choke.Value, atChoke);
+
+			// Only once the ground is clear is it worth freeing the cluster's own footprint: a unit
+			// parked there would block the buildings that go up on it (user-fund 2026-08-01).
+			if (obstacles.Count == 0 && insideCluster.Count > 0)
 			{
 				var baseCentre = Ops.BaseCentre();
 				foreach (var a in insideCluster)
@@ -361,17 +383,6 @@ namespace OpenRA.Mods.Common.Traits
 				}
 			}
 
-			var outside = readyUnits.Where(a => !insideCluster.Contains(a)).ToList();
-			var inPosition = outside.Where(a => (a.Location - choke.Value).LengthSquared <= holdR2).ToList();
-			var outOfPosition = outside.Where(a => (a.Location - choke.Value).LengthSquared > holdR2).ToList();
-
-			if (outOfPosition.Count > 0)
-				bot.QueueOrder(new Order("AttackMove", null, Target.FromCell(Ops.World, choke.Value), false, groupedActors: outOfPosition.ToArray()));
-
-			if (inPosition.Count == 0)
-				return;
-
-			var obstacles = ClearNearbyObstacles(bot, choke.Value, inPosition);
 			if (obstacles.Count > 0)
 			{
 				clearChecks = 0;
@@ -381,7 +392,7 @@ namespace OpenRA.Mods.Common.Traits
 			// Clearing done. Wait until the whole reserve is actually in position for a
 			// few consecutive checks, then hand the group its follow-up mission. Units still being
 			// pushed out of the cluster's own footprint do not count as "settled" either.
-			if (outOfPosition.Count == 0 && insideCluster.Count == 0 && ++clearChecks >= 3)
+			if (awayFromChoke.Count == 0 && insideCluster.Count == 0 && ++clearChecks >= 3)
 			{
 				BuildArcoTargets();
 				phase = arcoTargets.Count > 0 ? Phase.ArcoRaid : Phase.FinalAttack;
