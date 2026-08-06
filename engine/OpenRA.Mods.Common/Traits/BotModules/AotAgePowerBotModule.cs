@@ -51,12 +51,6 @@ namespace OpenRA.Mods.Common.Traits
 			"minute, 5000 takes about six minutes.")]
 		public readonly int IncomeShare = 55;
 
-		[Desc("Cash at which the fund switches from skimming income to saving in earnest, provided",
-			"the upgrade is already buyable (its building stands). This is how a human plays it:",
-			"put up the structures, build a wave's worth of units, and once roughly this much is",
-			"left, stop spending and take the rest straight to the Age price (User 2026-08-05).",
-			"Once tripped it latches until the upgrade is bought.")]
-		public readonly int HardSavingTrigger = 3000;
 
 		public override object Create(ActorInitializer init) { return new AotAgePowerBotModule(init.Self, this); }
 	}
@@ -240,11 +234,14 @@ namespace OpenRA.Mods.Common.Traits
 						continue;
 					}
 
-					// The sprint starts once there is a real pile to build on -- everything already put
-					// by, plus what is on the account. Below that the bot keeps operating normally on
-					// the income share; above it, every credit goes to the Age.
-					if (saved + playerResources.GetCashAndResources() >= Info.HardSavingTrigger)
-						hardSaving.Add(key);
+					// THE SPRINT STARTS THE MOMENT THE UPGRADE IS BUYABLE, i.e. as soon as the Tech
+					// Centre stands. It used to wait for a cash threshold, and that never arrived:
+					// production drains the account as fast as it fills, so all three bots sat at zero
+					// credits with the sprint never once engaging -- and went on to build a Repair
+					// Facility while the Age upgrade they were supposedly saving for had not even been
+					// started (User 2026-08-06: "das darf nicht sein"). A balance test cannot gate the
+					// very mechanism whose job is to stop the spending that keeps the balance at zero.
+					hardSaving.Add(key);
 
 					if (hardSaving.Contains(key))
 						Save(key, saved, info.Cost - saved);

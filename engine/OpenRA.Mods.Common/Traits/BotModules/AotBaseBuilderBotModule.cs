@@ -1618,8 +1618,11 @@ namespace OpenRA.Mods.Common.Traits
 			// buildings up, build a wave's worth of units, then stop and take the rest to the price.
 			//
 			// PROC stays exempt: cutting income is never the way to reach a price faster.
+			// SILO is exempt alongside PROC (user spec 2026-08-06): it sits directly behind the Tech
+			// Centre in the plan and is the last thing built before the stop, because the credits being
+			// saved need somewhere to sit.
 			if (ops != null && ops.Info.Faction == Info.Faction && ops.AgeSprintActive()
-				&& step.Role != "PROC")
+				&& step.Role != "PROC" && step.Role != "SILO")
 			{
 				if (++ageSprintPauseLog % 16 == 0)
 					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Age sprint: holding {step.Role} until the upgrade is bought");

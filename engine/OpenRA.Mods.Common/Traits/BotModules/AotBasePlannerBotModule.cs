@@ -1539,6 +1539,18 @@ namespace OpenRA.Mods.Common.Traits
 			// research window instead -- see the sprint hold in AotBaseBuilderBotModule.
 			AddBuilding(tech, 1, "STEC");
 
+			// Second SILO immediately behind the Tech Centre (user spec 2026-08-06), and then a hard stop:
+			// everything below waits for the Age upgrade to be started. Storage is the one thing still
+			// worth buying first -- without it the credits being saved have nowhere to sit.
+			// Second SILO (user spec 2026-08-01): the LAST Age-0 core step, 2-3 cells behind the Age-3
+			// Obelisk's own eventual spot (see the anchor computed in Plan(), right after pGateCluster).
+			// Being last in Age 0's core list means two things fall out for free from the strict
+			// first-open ordering every other step here already relies on: it isn't attempted until
+			// Tech Centre (STEC) stands, and -- since AgeRhythmComplete(0) waits for ALL of Age 0's
+			// Rhythm, not just STEC -- the Age-1 upgrade purchase doesn't fire until this Silo is done
+			// either, so it genuinely finishes right as Age 1 begins rather than merely "around" then.
+			AddBuilding(silo2, 0, "SILO");
+
 			AddBuilding(fix, 0, "FIX");
 			AddBuilding(hpad, 0, "HPAD");
 
@@ -1548,15 +1560,6 @@ namespace OpenRA.Mods.Common.Traits
 			// prerequisite anyway, and low priority besides: nothing is flying this early.
 			AddBuilding(samYard1, 0, "SAM", defense: true);
 			AddBuilding(samYard2, 0, "SAM", defense: true);
-
-			// Second SILO (user spec 2026-08-01): the LAST Age-0 core step, 2-3 cells behind the Age-3
-			// Obelisk's own eventual spot (see the anchor computed in Plan(), right after pGateCluster).
-			// Being last in Age 0's core list means two things fall out for free from the strict
-			// first-open ordering every other step here already relies on: it isn't attempted until
-			// Tech Centre (STEC) stands, and -- since AgeRhythmComplete(0) waits for ALL of Age 0's
-			// Rhythm, not just STEC -- the Age-1 upgrade purchase doesn't fire until this Silo is done
-			// either, so it genuinely finishes right as Age 1 begins rather than merely "around" then.
-			AddBuilding(silo2, 0, "SILO");
 
 			currentAge = 1;
 
