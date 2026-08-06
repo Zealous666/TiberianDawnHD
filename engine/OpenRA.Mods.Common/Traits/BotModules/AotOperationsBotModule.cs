@@ -573,6 +573,10 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Radius in cells to search for a coastal embark/landing cell around the reference point.")]
 		public readonly int FerrySearchRadius = 24;
 
+		[Desc("Keep a scout observation post this far from any ALLIED building. Only relevant for the",
+			"last-resort bridge fallback -- the post is normally an enemy base outright.")]
+		public readonly int ScoutPostAllyClearance = 12;
+
 
 		[Desc("Radius searched for the EMBARK shore. Much wider than FerrySearchRadius on purpose: troops",
 			"walk to the coast, so the boarding beach need not be next door -- it only has to be on the",

@@ -1609,13 +1609,42 @@ namespace OpenRA.Mods.Common.Traits
 			return waypoints;
 		}
 
+		// The post has to be an ENEMY base (User 2026-08-06). It used to be the nearest bridge hut,
+		// which is a fine vantage point in the abstract but says nothing about who is standing next to
+		// it -- squads were observed finishing their tour parked inside an ALLIED base, watching
+		// nothing at all. An enemy yard is the only endpoint that keeps eyes where something happens.
+		//
+		// Reachability is asked for first and then relaxed: a squad that ferried across is outside its
+		// own reachable set by definition, and insisting would conclude there is no enemy anywhere.
 		CPos FindPost()
 		{
-			// Bridges and crossings make the best posts; fall back to the map centre.
 			var centre = Centroid(Units);
+
+			var yard = Ops.Intel.NearestEnemyYard(centre, requireReachable: true)
+				?? Ops.Intel.NearestEnemyYard(centre, requireReachable: false);
+
+			if (yard != null)
+				return yard.Location;
+
+			var spawn = Ops.Intel.NearestEnemySpawn(centre, requireReachable: true)
+				?? Ops.Intel.NearestEnemySpawn(centre, requireReachable: false);
+
+			if (spawn.HasValue)
+				return spawn.Value;
+
+			// No enemy left to watch at all. Fall back to a bridge, but never one an ally is sitting
+			// on -- that is the case this whole change exists to rule out.
+			var allied = Ops.World.Actors
+				.Where(a => !a.IsDead && a.IsInWorld && a.Owner != Ops.Player
+					&& Ops.Player.RelationshipWith(a.Owner) == PlayerRelationship.Ally
+					&& a.Info.HasTraitInfo<BuildingInfo>())
+				.Select(a => a.Location)
+				.ToList();
+
 			var bridgeHut = Ops.World.Actors
 				.Where(a => !a.IsDead && a.IsInWorld
 					&& (a.Info.HasTraitInfo<LegacyBridgeHutInfo>() || a.Info.HasTraitInfo<BridgeHutInfo>()))
+				.Where(a => !allied.Any(b => (b - a.Location).Length < Ops.Info.ScoutPostAllyClearance))
 				.MinByOrDefault(a => (a.Location - centre).LengthSquared);
 
 			return bridgeHut?.Location ?? Ops.Intel.MapCentreFallback;
