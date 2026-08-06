@@ -1268,6 +1268,18 @@ namespace OpenRA.Mods.Common.Traits
 		// is exempt from the sprint's build hold, but exemption is worthless if the fund has already
 		// taken every credit that could pay for it -- which is why the Silo was going up AFTER the
 		// upgrade instead of before it (User 2026-08-06).
+		// Is a step with this role at the current tier still outstanding? Needed because the opening
+		// sequence alternates between the CORE and DEFENCE queues, which run in parallel -- list order
+		// alone enforces nothing across them.
+		public bool RolePending(string role)
+		{
+			if (planner == null || !planner.Planned)
+				return false;
+
+			var tier = AgeTier();
+			return planner.Rhythm.Any(s => !s.Done && !s.Skipped && s.Role == role && s.Age <= tier);
+		}
+
 		public bool SiloPending()
 		{
 			if (planner == null || !planner.Planned)
@@ -1595,8 +1607,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		int expansionPauseLog;
 		int ageSprintPauseLog;
-		int helipadWaitLog;
-		int fturWaitLog;
+		int sequenceWaitLog;
 
 		void StartStep(IBot bot, AotPlanStep step)
 		{
@@ -1645,33 +1656,35 @@ namespace OpenRA.Mods.Common.Traits
 				return;
 			}
 
-			// FLAME TURRET WAITS FOR THE FIRST WAVE, HELIPAD FOR THE SECOND (user spec 2026-08-06).
-			// Without this both simply started as soon as the upgrade did, in parallel with wave 1 --
-			// and a building finishes sooner than a squad assembles, so the Repair Facility was
-			// standing before the first wave had even formed.
-			if (ops != null && ops.Info.Faction == Info.Faction
-				&& step.Role == "FTUR" && ops.WavesScheduled < 1)
-			{
-				if (++fturWaitLog % 16 == 0)
-					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Flame Turret held until the first wave is on its way");
-
-				return;
-			}
-
-			// HELIPAD WAITS FOR THE SECOND WAVE (user spec 2026-08-06). The opening sequence
-			// interleaves army and buildings:
+			// THE OPENING SEQUENCE (user spec 2026-08-06):
+			//
 			//   Age upgrade -> wave 1 -> Flame Turret -> Repair Facility -> wave 2 -> Helipad
 			//   -> SAMs -> wave 3
-			// so the bot always has something on the board while the base grows behind it. The strict
-			// chooser stalls here, which also holds the SAMs queued behind the Helipad -- air defence
-			// before there is any air is wasted money on both sides.
-			if (ops != null && ops.Info.Faction == Info.Faction
-				&& step.Role == "HPAD" && ops.WavesScheduled < 2)
+			//
+			// Every link is spelled out here because LIST ORDER ALONE ENFORCES NOTHING across this
+			// sequence: the Flame Turret and the SAMs are DEFENCE steps and the Repair Facility and
+			// Helipad are CORE ones, and the two queues run in parallel. Left to the list, the Repair
+			// Facility was finished before the first wave had even formed.
+			if (ops != null && ops.Info.Faction == Info.Faction && step.Age == 0)
 			{
-				if (++helipadWaitLog % 16 == 0)
-					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Helipad held until the second wave is on its way");
+				var waitingFor = step.Role switch
+				{
+					"FTUR" => ops.WavesScheduled < 1 ? "the first wave" : null,
+					"FIX" => ops.WavesScheduled < 1 ? "the first wave"
+						: RolePending("FTUR") ? "the Flame Turret" : null,
+					"HPAD" => ops.WavesScheduled < 2 ? "the second wave" : null,
+					"SAM" => ops.WavesScheduled < 2 ? "the second wave"
+						: RolePending("HPAD") ? "the Helipad" : null,
+					_ => null,
+				};
 
-				return;
+				if (waitingFor != null)
+				{
+					if (++sequenceWaitLog % 16 == 0)
+						Log.Write("debug", $"[AotBuild][{player.PlayerName}] {step.Role} held until {waitingFor} is done");
+
+					return;
+				}
 			}
 
 			// EXPANSION PRIORITY (User 2026-08-05: "expansion nach refinery absolute bevorzugung").
