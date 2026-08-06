@@ -1582,6 +1582,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		int expansionPauseLog;
 		int ageSprintPauseLog;
+		int helipadWaitLog;
 
 		void StartStep(IBot bot, AotPlanStep step)
 		{
@@ -1626,6 +1627,22 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				if (++ageSprintPauseLog % 16 == 0)
 					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Age sprint: holding {step.Role} until the upgrade is bought");
+
+				return;
+			}
+
+			// HELIPAD WAITS FOR THE SECOND WAVE (user spec 2026-08-06). The opening sequence
+			// interleaves army and buildings:
+			//   Age upgrade -> wave 1 -> Flame Turret -> Repair Facility -> wave 2 -> Helipad
+			//   -> SAMs -> wave 3
+			// so the bot always has something on the board while the base grows behind it. The strict
+			// chooser stalls here, which also holds the SAMs queued behind the Helipad -- air defence
+			// before there is any air is wasted money on both sides.
+			if (ops != null && ops.Info.Faction == Info.Faction
+				&& step.Role == "HPAD" && ops.WavesScheduled < 2)
+			{
+				if (++helipadWaitLog % 16 == 0)
+					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Helipad held until the second wave is on its way");
 
 				return;
 			}

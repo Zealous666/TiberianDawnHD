@@ -1325,6 +1325,47 @@ namespace OpenRA.Mods.Common.Traits
 		// buildable -- see AotBaseDefenseMission.
 		public bool FirstWaveScheduled() => waveIndex >= 1;
 
+		// How many attack waves have been put on the board so far. The base builder uses it to slot
+		// buildings between waves (user spec 2026-08-06).
+		public int WavesScheduled => waveIndex;
+
+		// Own Repair Facility standing? The first wave waits for it (user spec 2026-08-06: after the
+		// Age upgrade comes the Repair Facility, THEN wave 1, then the Helipad). Repairing a damaged
+		// tank costs a fraction of replacing it, so having the building before the first units are
+		// committed is worth the short delay.
+		public bool HasRepairFacility() =>
+			World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld
+				&& Info.RepairTypes.Contains(a.Info.Name));
+
+		bool HasAntiAir() =>
+			Info.AntiAirTypes.Length == 0
+			|| World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld
+				&& Info.AntiAirTypes.Contains(a.Info.Name));
+
+		// The opening sequence, interleaving army and buildings (user spec 2026-08-06):
+		//   Age upgrade -> wave 1 -> Flame Turret -> Repair Facility -> wave 2 -> Helipad -> SAMs
+		//   -> wave 3
+		// Each wave waits for the building ahead of it, which is what stops the bot from spending its
+		// whole income on units and never finishing the base -- or the reverse.
+		//
+		// Every gate is bounded by AgeTier() > 0: once the Age has actually advanced, a building that
+		// never got finished (no room, destroyed, unaffordable) must not silence the army for good.
+		bool WaveUnlocked()
+		{
+			if (!StartupPriorityMet() || !AgeUpgradeStarted())
+				return false;
+
+			if (AgeTier() > 0)
+				return true;
+
+			return waveIndex switch
+			{
+				0 => true,
+				1 => HasRepairFacility(),
+				_ => HasHelipad() && HasAntiAir(),
+			};
+		}
+
 		// ROOT CAUSE FOUND (debug.log evidence): stock BaseBuilderBotModule (still active on @aot for
 		// its PauseUnitProduction economy service) has its OWN rally-point assignment
 		// (AssignRallyPointsInterval) that re-validates every RallyPoint-trait actor the player owns
@@ -2318,13 +2359,17 @@ namespace OpenRA.Mods.Common.Traits
 			// defence is untouched and still answers attacks; this only stops NEW offensives.
 			if (Info.EnableWaves && !ExpansionHoldsPriority() && !EconomyEmergency() && !AgeSprintActive()
 				&& !Missions.OfType<AotRegularWaveMission>().Any() && !Missions.OfType<AotAirRaidMission>().Any()
-				&& (waveIndex > 0 || (StartupPriorityMet() && AgeUpgradeStarted())))
+				&& WaveUnlocked())
 			{
 				if (--waveCooldownTicks <= 0)
 				{
 					waveCooldownTicks = Info.WaveCooldown;
 
-					var canAirRaid = Info.AirRaidHelicopterTypes.Length > 0 && HasHelipad();
+					// Air raids need a REFINERY behind them (user spec 2026-08-06). Helicopters are the
+					// expensive half of the ground/air alternation, and before the refinery there is
+					// simply no income to sustain it -- the bot would trade its whole balance for one
+					// raid and then stand still.
+					var canAirRaid = Info.AirRaidHelicopterTypes.Length > 0 && HasHelipad() && HasRefinery();
 					bool doAirRaid;
 					bool useSecondaryRoute;
 

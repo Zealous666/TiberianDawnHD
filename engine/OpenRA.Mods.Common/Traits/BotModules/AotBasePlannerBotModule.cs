@@ -1520,18 +1520,6 @@ namespace OpenRA.Mods.Common.Traits
 			AddBuildingByRole(nuke, "NUKE", 1);
 			AddFenceFor(nuke, "PowerFence");
 
-			// Gate defence master plan (user spec, conceptualised fully now even though most of it only
-			// becomes buildable many ages later -- same as every other age-gated step in this Rhythm):
-			//   Age 0: the cluster's Flame Turret (middle of the row/column). The cluster itself --
-			//          Turret-FlameTurret-Turret in one row or column, fenced as a single ring, exactly
-			//          like the power cluster -- is already fully planned NOW (gateCluster, computed in
-			//          Plan()), only the middle building is queued this age.
-			//   Age 1: the 2 Turrets flanking the already-standing Flame Turret, THEN the fence ring
-			//          around all 3.
-			//   Age 3: 1x Obelisk of Light directly behind the cluster (toward the yard, away from the
-			//          chokepoint -- an Obelisk facing the wrong way is a wasted superweapon) + the same
-			//          3-building fenced cluster at every other classified approach.
-			AddBuilding(gateCluster, 1, "FTUR", defense: true);
 
 			// STEC comes before the Repair Facility, the Helipad and the SAMs (user spec 2026-08-05):
 			// the Tech Centre is what unlocks the next Age, and every credit spent ahead of it delays
@@ -1550,6 +1538,21 @@ namespace OpenRA.Mods.Common.Traits
 			// Rhythm, not just STEC -- the Age-1 upgrade purchase doesn't fire until this Silo is done
 			// either, so it genuinely finishes right as Age 1 begins rather than merely "around" then.
 			AddBuilding(silo2, 0, "SILO");
+
+			// Flame Turret first among the post-upgrade steps (user spec 2026-08-06): the order after the
+			// Age upgrade is wave 1 -> FTUR -> Repair Facility -> wave 2 -> Helipad -> SAMs -> wave 3.
+			// Gate defence master plan (user spec, conceptualised fully now even though most of it only
+			// becomes buildable many ages later -- same as every other age-gated step in this Rhythm):
+			//   Age 0: the cluster's Flame Turret (middle of the row/column). The cluster itself --
+			//          Turret-FlameTurret-Turret in one row or column, fenced as a single ring, exactly
+			//          like the power cluster -- is already fully planned NOW (gateCluster, computed in
+			//          Plan()), only the middle building is queued this age.
+			//   Age 1: the 2 Turrets flanking the already-standing Flame Turret, THEN the fence ring
+			//          around all 3.
+			//   Age 3: 1x Obelisk of Light directly behind the cluster (toward the yard, away from the
+			//          chokepoint -- an Obelisk facing the wrong way is a wasted superweapon) + the same
+			//          3-building fenced cluster at every other classified approach.
+			AddBuilding(gateCluster, 1, "FTUR", defense: true);
 
 			AddBuilding(fix, 0, "FIX");
 			AddBuilding(hpad, 0, "HPAD");
