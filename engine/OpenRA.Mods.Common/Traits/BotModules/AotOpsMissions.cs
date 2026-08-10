@@ -239,11 +239,19 @@ namespace OpenRA.Mods.Common.Traits
 
 				if (defenders.Count > 0)
 				{
-					threatCentre = Centroid(threats.ToList());
+					// The NEAREST attacker, not the average of all of them. A centroid is a point where
+					// nobody necessarily is: with a real attack at the main choke and a stray unit
+					// somewhere else, the average lands between the two -- which in a base means
+					// roughly the construction yard. The guard was seen running there to defend an
+					// empty spot while the fighting went on at the choke (User 2026-08-10).
+					var home = Centroid(defenders);
+					var target = threats.MinBy(t => (t.Location - home).LengthSquared);
+					threatCentre = target.Location;
 					AttackMoveGroup(bot, defenders, threatCentre.Value);
 
 					if (++threatLog % 8 == 1)
-						Log($"base under attack ({threats.Count} enemy unit(s)) -> {defenders.Count} unit(s) responding to {threatCentre.Value}");
+						Log($"base under attack ({threats.Count} enemy unit(s)) -> {defenders.Count} unit(s) responding to " +
+							$"{target.Info.Name}@{threatCentre.Value}");
 
 					if (phase == Phase.ChokeHold)
 						return;
@@ -3343,7 +3351,15 @@ namespace OpenRA.Mods.Common.Traits
 				// ALSO holds at the raw choke cell, which is exactly where the gate-defence cluster is
 				// independently biased to build -- a unit standing inside the cluster's own footprint
 				// must be pushed clear before HoldAt is allowed to treat it as "in position".
-				var insideCluster = holding.Where(a => Ops.IsInsideGateCluster(a.Location)).ToList();
+				// Never while anyone is dispatched against an attack: the push aims at the base centre,
+				// i.e. the
+				// construction yard, so a defender caught on the cluster walks AWAY from the fighting.
+				// Freeing the footprint can wait until the shooting stops -- the same lesson as the
+				// starting group's choke shuttle.
+				var insideCluster = responding.Count > 0
+					? []
+					: holding.Where(a => Ops.IsInsideGateCluster(a.Location)).ToList();
+
 				if (insideCluster.Count > 0)
 				{
 					var baseCentre = Ops.BaseCentre();
@@ -3461,8 +3477,19 @@ namespace OpenRA.Mods.Common.Traits
 			// Clamp(value, 2, 1) crashed the match -- reported 2026-07-27 right after the player killed
 			// most of the AI's units. Availability is the hard ceiling; the minimum only applies as far
 			// as there are units to send.
-			var want = Math.Min(available.Count,
-				Math.Max(Ops.Info.ProtectionMinResponse, threats.Count * Ops.Info.ProtectionResponseRatio));
+			// THE WHOLE GARRISON ANSWERS (User 2026-08-06/08-10: "sie sollten sofort auf jegliche
+			// bedrohung in der base geschlossen reagieren"). It used to send a ratio-sized subset and
+			// leave the rest "holding" -- and holding, for anyone standing on the gate cluster, means
+			// being walked toward the construction yard by the push below. The result looked exactly
+			// like guarding the yard while the fighting happened at the choke.
+			//
+			// These units exist to defend the base; there is nothing else for them to be doing while
+			// it is under attack. ProtectionMinResponse/ResponseRatio still bound the FLOOR, so a lone
+			// scout does not have to pull the entire garrison out of position for nothing.
+			var want = threats.Count >= Ops.Info.ProtectionMinResponse
+				? available.Count
+				: Math.Min(available.Count,
+					Math.Max(Ops.Info.ProtectionMinResponse, threats.Count * Ops.Info.ProtectionResponseRatio));
 			var threatCentre = ThreatCentroid(threats);
 			var responders = available.OrderBy(a => (a.Location - threatCentre).LengthSquared).Take(want).ToList();
 
