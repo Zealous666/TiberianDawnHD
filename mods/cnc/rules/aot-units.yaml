@@ -1623,10 +1623,15 @@ ORET:
 		Resources: Tiberium
 	DockClientManager:
 	OreTransporter:
-		# User 2026-08-05: 400 -> 200. Nach dem Age-Kauf floss zu viel Geld nach, gemessen an der
-		# Forschungszeit. Halbiert die Einnahmen PRO ZEIT; der Gesamtertrag der Mine haengt an ihrer
-		# Fuhrenzahl (aot-structures.yaml, StoresResources.Capacity 40 -> 50) und liegt nun bei 10000.
-		OreLoadAmount: 200
+		# User 2026-08-10: 200 -> 500, wie beim Harvester. 200 war zu scharf: alle drei Bots standen
+		# im Test bei 0 Credits, Wellen hingen unbezahlt in der Aufstellung.
+		#
+		# Die Mine ist ausdruecklich eine BRUECKE: sie haelt den Cashflow, bis Tiberium-Refinery und
+		# Base Expansion eine dauerhafte Quelle ergeben, und ist gegen Ende Age 1 weitgehend
+		# abgeerntet. Weil StoresResources.Capacity FUHREN zaehlt und nicht Erz, aendert dieser Wert
+		# nur den Durchsatz, NICHT die Lebensdauer -- 50 Fuhren bleiben 50 Fuhren.
+		# Gesamtertrag pro Mine damit 50 x 500 = 25000.
+		OreLoadAmount: 500
 		OreLoadDelay: 25
 	WithStoresResourcesPipsDecoration:
 		Position: BottomLeft
