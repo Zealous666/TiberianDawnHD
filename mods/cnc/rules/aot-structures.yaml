@@ -291,9 +291,10 @@ aot-ore-mine:
 		# User-Wunsch 2026-08-03: Einkommen pro Zeit runter UND Mine frueher erschoepft. Beides
 		# zusammen: OreLoadAmount 500 -> 400 (Rate -20%, aot-units.yaml) und Fuhren 50 -> 40
 		# (Laufzeit -20%). Multipliziert sich zu 40 x 400 = 16000 statt bisher 25000.
-		# User 2026-08-05: 40 -> 50 Fuhren. Zusammen mit OreLoadAmount 400 -> 200 ergibt das
-		# 50 x 200 = 10000 pro Mine (vorher 40 x 400 = 16000): Rate halbiert, Laufzeit +25 %.
-		Capacity: 50
+		# User 2026-08-10: 50 -> 35 Fuhren. Die Rate von 500/Fuhre passt, aber die Mine trug damit zu
+		# lange -- sie ist als BRUECKE bis Refinery/Expansion gedacht, nicht als Dauerquelle.
+		# 35 x 500 = 17500 pro Mine (vorher 50 x 500 = 25000), Laufzeit -30 % bei gleicher Rate.
+		Capacity: 35
 		Resources: Tiberium
 	OreMineDurability:
 		ResourceType: Tiberium
