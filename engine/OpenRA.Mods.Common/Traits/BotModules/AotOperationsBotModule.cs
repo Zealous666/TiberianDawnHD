@@ -1370,17 +1370,39 @@ namespace OpenRA.Mods.Common.Traits
 		// never got finished (no room, destroyed, unaffordable) must not silence the army for good.
 		bool WaveUnlocked()
 		{
-			if (!StartupPriorityMet() || !AgeUpgradeStarted())
-				return false;
-
-			if (AgeTier() > 0)
+			var reason = WaveHeldBy();
+			if (reason == null)
 				return true;
+
+			// Named in the log rather than left to be inferred: a wave that never comes is otherwise
+			// indistinguishable from a wave that is merely between cooldowns, and working out which
+			// gate was holding it meant reading source (User 2026-08-10: "ich sehe noch nicht, dass
+			// wave-1 gebaut wird obwohl bereits ein FIX gebaut wurde").
+			if (++waveHoldLog % 32 == 1)
+				Log($"wave {waveIndex + 1} held: waiting for {reason}");
+
+			return false;
+		}
+
+		int waveHoldLog;
+
+		string WaveHeldBy()
+		{
+			if (!StartupPriorityMet())
+				return "startup priority (ore transporter boost, first derrick scan, scout groups)";
+
+			if (!AgeUpgradeStarted())
+				return "the Age upgrade to be started";
+
+			// Past the first Age everything below has long since been answered.
+			if (AgeTier() > 0)
+				return null;
 
 			return waveIndex switch
 			{
-				0 => true,
-				1 => HasRepairFacility(),
-				_ => HasHelipad() && HasAntiAir(),
+				0 => null,
+				1 => HasRepairFacility() ? null : "the Repair Facility",
+				_ => !HasHelipad() ? "the Helipad" : !HasAntiAir() ? "a SAM site" : null,
 			};
 		}
 

@@ -202,6 +202,12 @@ namespace OpenRA.Mods.Common.Traits
 				// and would quietly hoard the full price a SECOND time for an upgrade already owned.
 				if (power is AotAgeResearchInstance research && research.Researching)
 				{
+					// Clear the latch here as well, not only on the tick the order goes out. If that
+					// order ever needs a second attempt -- the refund and the purchase land on
+					// different ticks -- the sprint is re-armed in between, and nothing downstream
+					// would ever switch it off again. A stuck sprint silences the attack waves for the
+					// rest of the match.
+					hardSaving.Remove(key);
 					Refund(key, saved);
 					continue;
 				}
