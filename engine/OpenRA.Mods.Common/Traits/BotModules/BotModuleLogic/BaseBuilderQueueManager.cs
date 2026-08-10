@@ -165,7 +165,11 @@ namespace OpenRA.Mods.Common.Traits
 				var haveCount = playerBuildings.Count(a => a.Info.Name == item.Name)
 					+ (baseBuilder.BuildingsBeingProduced.TryGetValue(item.Name, out var bpc) ? bpc : 0);
 				var limitStr = baseBuilder.Info.BuildingLimits.TryGetValue(item.Name, out var lim) ? lim.ToString() : "none";
-				Log.Write("debug", $"[AotBuild] {queue.Info.Type} -> {item.Name} (have {haveCount}, limit {limitStr})");
+				// Player named, and by INTERNAL name rather than the display name: every bot in a skirmish
+				// carries the same "bot-cabal.name", so a line without it cannot be attributed at all --
+				// which is how three bots' log lines got read as one bot's sequence (2026-08-10).
+				Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] {queue.Info.Type} -> {item.Name} " +
+					$"(have {haveCount}, limit {limitStr})");
 
 				bot.QueueOrder(Order.StartProduction(queue.Actor, item.Name, 1));
 				itemQueuedThisTick = true;

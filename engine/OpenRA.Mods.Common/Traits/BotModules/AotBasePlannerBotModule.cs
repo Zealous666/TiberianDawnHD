@@ -607,7 +607,7 @@ namespace OpenRA.Mods.Common.Traits
 				// e.g. the SAM roleDims.ContainsKey guard in Plan()).
 				if (!world.Map.Rules.Actors.TryGetValue(variants[0], out var ai))
 				{
-					Log.Write("debug", $"[AotPlan][{player.PlayerName}] WARNING: role {role} references unknown actor '{variants[0]}' — skipped");
+					Log.Write("debug", $"[AotPlan][{player.InternalName}/{player.PlayerName}] WARNING: role {role} references unknown actor '{variants[0]}' — skipped");
 					continue;
 				}
 
@@ -624,7 +624,7 @@ namespace OpenRA.Mods.Common.Traits
 				{
 					var vbi = world.Map.Rules.Actors[v].TraitInfoOrDefault<BuildingInfo>();
 					if (vbi != null && (vbi.Dimensions.X != bi.Dimensions.X || vbi.Dimensions.Y != bi.Dimensions.Y))
-						Log.Write("debug", $"[AotPlan][{player.PlayerName}] WARNING: {v} dims differ from {variants[0]} — plan uses {variants[0]}'s footprint");
+						Log.Write("debug", $"[AotPlan][{player.InternalName}/{player.PlayerName}] WARNING: {v} dims differ from {variants[0]} — plan uses {variants[0]}'s footprint");
 				}
 			}
 
@@ -954,7 +954,7 @@ namespace OpenRA.Mods.Common.Traits
 						return Commit(name, best.Value, v);
 				}
 
-				Log.Write("debug", $"[AotPlan][{player.PlayerName}] FAILED to place {name} — no valid position in pocket");
+				Log.Write("debug", $"[AotPlan][{player.InternalName}/{player.PlayerName}] FAILED to place {name} — no valid position in pocket");
 				return null;
 			}
 
@@ -1029,7 +1029,7 @@ namespace OpenRA.Mods.Common.Traits
 						return Commit(name, best.Value, v);
 				}
 
-				Log.Write("debug", $"[AotPlan][{player.PlayerName}] FAILED to place {name} — no valid position in local area");
+				Log.Write("debug", $"[AotPlan][{player.InternalName}/{player.PlayerName}] FAILED to place {name} — no valid position in local area");
 				return null;
 			}
 
@@ -1129,13 +1129,13 @@ namespace OpenRA.Mods.Common.Traits
 					{
 						var pl = Commit(name, bestAny.Value, v);
 						pl.SkipFence = true;
-						Log.Write("debug", $"[AotPlan][{player.PlayerName}] {name}: no position near {anchor} keeps the " +
+						Log.Write("debug", $"[AotPlan][{player.InternalName}/{player.PlayerName}] {name}: no position near {anchor} keeps the " +
 							"corridor passable with a fence -- built WITHOUT one (worst case, user spec 2026-08-01)");
 						return pl;
 					}
 				}
 
-				Log.Write("debug", $"[AotPlan][{player.PlayerName}] FAILED to place {name} — no valid position in local area");
+				Log.Write("debug", $"[AotPlan][{player.InternalName}/{player.PlayerName}] FAILED to place {name} — no valid position in local area");
 				return null;
 			}
 
@@ -1370,7 +1370,7 @@ namespace OpenRA.Mods.Common.Traits
 				pSamYard1, pSamYard2, pSamTech1, pSamTech2, pSamProd1, pSamPower1a, pSamPower1b,
 				pSamDefence1, pSamDefence2, pSamTemple, pSamShrine, pGateCluster, secondaryClusters);
 
-			Log.Write("debug", $"[AotPlan][{player.PlayerName}] yard={yard} pocket={Pocket.Count} gates=[{string.Join(" ", gates)}] main={MainGate} " +
+			Log.Write("debug", $"[AotPlan][{player.InternalName}/{player.PlayerName}] yard={yard} pocket={Pocket.Count} gates=[{string.Join(" ", gates)}] main={MainGate} " +
 				$"placed={placements.Count}/15 rhythm={Rhythm.Count} steps");
 		}
 
@@ -1484,7 +1484,7 @@ namespace OpenRA.Mods.Common.Traits
 				// fence gets built without one -- an open passage matters more than a closed ring.
 				if (p.SkipFence)
 				{
-					Log.Write("debug", $"[AotBuild][{player.PlayerName}] {label}: skipped (cluster has no fence, corridor stayed the priority)");
+					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] {label}: skipped (cluster has no fence, corridor stayed the priority)");
 					return;
 				}
 
@@ -1855,14 +1855,14 @@ namespace OpenRA.Mods.Common.Traits
 
 			if (choke.HasValue)
 			{
-				Log.Write("debug", $"[AotPlan][{player.PlayerName}] Choke(defence)=two-sided {choke.Value} width={bestWidth} axis={defenceChokeAxis} " +
+				Log.Write("debug", $"[AotPlan][{player.InternalName}/{player.PlayerName}] Choke(defence)=two-sided {choke.Value} width={bestWidth} axis={defenceChokeAxis} " +
 					$"plusDist={defenceChokeAxisPlusDist} minusDist={defenceChokeAxisMinusDist}");
 				return choke.Value;
 			}
 
 			var front1 = path.FirstOrDefault(c => (c - yard).Length >= Info.BaseFrontExtent);
 			var frontLine = front1 != default ? front1 : FallbackFrontLine(enemies);
-			Log.Write("debug", $"[AotPlan][{player.PlayerName}] Choke(defence)=frontline {frontLine} (open terrain, no two-sided neck)");
+			Log.Write("debug", $"[AotPlan][{player.InternalName}/{player.PlayerName}] Choke(defence)=frontline {frontLine} (open terrain, no two-sided neck)");
 			return frontLine;
 		}
 
@@ -2043,7 +2043,7 @@ namespace OpenRA.Mods.Common.Traits
 
 			approaches.Clear();
 			approaches.AddRange(kept);
-			Log.Write("debug", "[AotPlan][{player.PlayerName}] Approaches(defence): " + string.Join(", ", approaches.Select(a => $"{a.Type}@{a.Gate}")));
+			Log.Write("debug", "[AotPlan][{player.InternalName}/{player.PlayerName}] Approaches(defence): " + string.Join(", ", approaches.Select(a => $"{a.Type}@{a.Gate}")));
 		}
 	}
 }

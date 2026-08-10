@@ -386,7 +386,14 @@ namespace OpenRA.Mods.Common.Traits
 
 			// AOT: BuildingQueues/DefenseQueues may deliberately be empty (building construction is owned
 			// by AotBaseBuilderBotModule; this module only provides its economy services then).
-			if (builders.Length > 0)
+			//
+			// AOT priority chain (user spec 2026-08-02): upgrades are the LAST spender, behind the base
+			// rhythm's core economy buildings and behind its defence steps -- "airfield -> refinery ->
+			// sams -> upgrades, sonst dauert alles ewig weil der cashflow das nicht her gibt". Asking
+			// the Aot builder each tick (rather than latching) keeps this self-correcting: it answers
+			// false for any player it does not drive, and has its own timeout so a stuck rhythm cannot
+			// block upgrades permanently.
+			if (builders.Length > 0 && !AotRhythmPriorityActive())
 				builders[currentBuilderIndex].Tick(bot, queuesByCategory);
 
 			if (Info.SellRefineryInterval >= 0 && --sellRefineryTick <= 0)
@@ -394,6 +401,22 @@ namespace OpenRA.Mods.Common.Traits
 				SellUselessRefinery(bot);
 				sellRefineryTick = Info.SellRefineryInterval;
 			}
+		}
+
+		// AOT: resolved lazily (Created order between bot modules is not guaranteed) and cached, since
+		// this runs every BotTick. An empty array means "no Aot builder on this player" -- the check
+		// then costs one length test and this module behaves exactly as it did before.
+		AotBaseBuilderBotModule[] aotBuilders;
+
+		bool AotRhythmPriorityActive()
+		{
+			aotBuilders ??= player.PlayerActor.TraitsImplementing<AotBaseBuilderBotModule>().ToArray();
+
+			foreach (var b in aotBuilders)
+				if (b.RhythmPriorityActive())
+					return true;
+
+			return false;
 		}
 
 		void IBotRespondToAttack.RespondToAttack(IBot bot, Actor self, AttackInfo e)

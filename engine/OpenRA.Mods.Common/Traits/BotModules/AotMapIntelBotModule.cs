@@ -151,7 +151,7 @@ namespace OpenRA.Mods.Common.Traits
 
 			EnemySpawns.Clear();
 			EnemySpawns.AddRange(next);
-			Log.Write("debug", $"[AotIntel][{Player.PlayerName}] enemy spawns -> {EnemySpawns.Count} " +
+			Log.Write("debug", $"[AotIntel][{Player.InternalName}/{Player.PlayerName}] enemy spawns -> {EnemySpawns.Count} " +
 				$"({(live.Count > 0 ? "live players" : "map markers, no player resolved")}): " +
 				$"{string.Join(" ", EnemySpawns)}");
 		}

@@ -205,7 +205,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		protected void Log(string message)
 		{
-			OpenRA.Log.Write("debug", $"[AotOps][{Ops.Player.PlayerName}][{Name}] {message}");
+			OpenRA.Log.Write("debug", $"[AotOps][{Ops.Player.InternalName}/{Ops.Player.PlayerName}][{Name}] {message}");
 		}
 
 		protected void Finish()
@@ -217,7 +217,7 @@ namespace OpenRA.Mods.Common.Traits
 			// defect used to hide behind a perfectly plausible message ("convoy lost before reaching
 			// the site"), which is why it survived so many test runs. It is now impossible to miss.
 			if (!everActive)
-				OpenRA.Log.Write("debug", $"[AotOps][{Ops.Player.PlayerName}][{Name}] STILLBORN: ended after {TicksAlive} tick(s) without ever holding a unit or an order -- check this mission's ordering gate");
+				OpenRA.Log.Write("debug", $"[AotOps][{Ops.Player.InternalName}/{Ops.Player.PlayerName}][{Name}] STILLBORN: ended after {TicksAlive} tick(s) without ever holding a unit or an order -- check this mission's ordering gate");
 
 			Ops.ReleaseToPool(this, Units.ToList());
 			Units.Clear();
@@ -3192,7 +3192,7 @@ namespace OpenRA.Mods.Common.Traits
 
 			var seconds = World.WorldTick * World.Timestep / 1000;
 			OpenRA.Log.Write("debug",
-				$"[AotStatus] {seconds / 60:D2}:{seconds % 60:D2} {Player.InternalName} '{Player.PlayerName}' " +
+				$"[AotStatus] {seconds / 60:D2}:{seconds % 60:D2} {Player.InternalName} '{Player.InternalName}/{Player.PlayerName}' " +
 				$"[{ColorLabel()}] ({Player.Faction.InternalName}{(Player.IsBot ? ", bot" : "")}) " +
 				$"age={AgeTier()} cash={playerResources.GetCashAndResources()} " +
 				$"{(EconomyEmergency() ? "ECONOMY-EMERGENCY " : "")}waves={waveState} " +
@@ -3458,7 +3458,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		void Log(string message)
 		{
-			OpenRA.Log.Write("debug", $"[AotOps][{Player.PlayerName}] {message}");
+			OpenRA.Log.Write("debug", $"[AotOps][{Player.InternalName}/{Player.PlayerName}] {message}");
 		}
 
 		void INotifyActorDisposing.Disposing(Actor self)

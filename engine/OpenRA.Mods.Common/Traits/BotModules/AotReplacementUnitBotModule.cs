@@ -137,14 +137,14 @@ namespace OpenRA.Mods.Common.Traits
 				if (host != null)
 				{
 					bot.QueueOrder(Order.StartProduction(host.Actor, type, 1));
-					Log.Write("debug", $"[AotReplace][{player.PlayerName}] {type} ordered ({unitCount}/{target} alive)");
+					Log.Write("debug", $"[AotReplace][{player.InternalName}/{player.PlayerName}] {type} ordered ({unitCount}/{target} alive)");
 				}
 
 				return;
 			}
 
 			if (++noBuildLog % 8 == 1)
-				Log.Write("debug", $"[AotReplace][{player.PlayerName}] cannot replace {string.Join("/", Info.UnitTypes)} " +
+				Log.Write("debug", $"[AotReplace][{player.InternalName}/{player.PlayerName}] cannot replace {string.Join("/", Info.UnitTypes)} " +
 					$"({unitCount}/{target} alive): " +
 					(buildable ? "already queued" : "no production queue can build it yet -- its factory is not up (or was lost)"));
 		}

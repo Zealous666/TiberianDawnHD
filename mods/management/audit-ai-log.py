@@ -26,6 +26,9 @@ from collections import Counter, defaultdict
 DEFAULT_LOG = os.path.expanduser(
     "~/Library/Application Support/OpenRA/Logs/debug.log")
 
+# Player tag is "InternalName/PlayerName" since 2026-08-10: every bot in a skirmish shares the
+# display name "bot-cabal.name", so grouping on it merged all of them into one entry and made
+# three bots' lines read as one bot's sequence.
 OPS = re.compile(r"^\[AotOps\]\[([^\]]+)\](?:\[([^\]]+)\])? (.*)$")
 STATUS = re.compile(
     r"^\[AotStatus\] (\S+) (\S+) '([^']+)' \[([^/\]]+)/\S*\] \(([^)]*)\) (.*)$")

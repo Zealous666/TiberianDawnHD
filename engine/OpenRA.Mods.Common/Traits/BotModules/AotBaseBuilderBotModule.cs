@@ -467,7 +467,7 @@ namespace OpenRA.Mods.Common.Traits
 					});
 			}
 
-			Log.Write("debug", $"[AotBuild][{player.PlayerName}] Expansion layout requested at {yard} " +
+			Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Expansion layout requested at {yard} " +
 				$"({expansionSteps.Count} steps)");
 		}
 
@@ -561,7 +561,7 @@ namespace OpenRA.Mods.Common.Traits
 						SuppressVisualFeedback = true
 					});
 
-					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Expansion placed {expansionPendingType} at {expansionPendingCell}");
+					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Expansion placed {expansionPendingType} at {expansionPendingCell}");
 					expansionPendingType = null;
 					return;
 				}
@@ -569,7 +569,7 @@ namespace OpenRA.Mods.Common.Traits
 				// Give up on a single item rather than blocking the whole expansion behind it.
 				if (expansionPendingTicks >= Info.ExpansionStepTimeoutTicks)
 				{
-					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Expansion step {expansionPendingType} timed out -> skipped");
+					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Expansion step {expansionPendingType} timed out -> skipped");
 					var stuck = expansionSteps.FirstOrDefault(s => !s.Done && s.Variants.Contains(expansionPendingType) && s.TopLeft == expansionPendingCell);
 					if (stuck != null)
 						stuck.Skipped = true;
@@ -594,7 +594,7 @@ namespace OpenRA.Mods.Common.Traits
 				expansionPendingType = v;
 				expansionPendingCell = step.TopLeft;
 				expansionPendingTicks = 0;
-				Log.Write("debug", $"[AotBuild][{player.PlayerName}] Expansion building {v} for {step.Role} at {step.TopLeft}");
+				Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Expansion building {v} for {step.Role} at {step.TopLeft}");
 				return;
 			}
 		}
@@ -608,16 +608,16 @@ namespace OpenRA.Mods.Common.Traits
 			if (site == null)
 			{
 				if (logImmediately)
-					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Naval site planning: NO coastal site found near the base -- naval production will never be available if requested");
+					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Naval site planning: NO coastal site found near the base -- naval production will never be available if requested");
 				else if (++navalWaitLog % 8 == 0)
-					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Naval production requested but no coastal site found near the base yet");
+					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Naval production requested but no coastal site found near the base yet");
 
 				return null;
 			}
 
 			Log.Write("debug", logImmediately
-				? $"[AotBuild][{player.PlayerName}] Naval site planned -> {site.Value} (proactive, not yet requested)"
-				: $"[AotBuild][{player.PlayerName}] Naval production requested -> site {site.Value}");
+				? $"[AotBuild][{player.InternalName}/{player.PlayerName}] Naval site planned -> {site.Value} (proactive, not yet requested)"
+				: $"[AotBuild][{player.InternalName}/{player.PlayerName}] Naval production requested -> site {site.Value}");
 			return new AotPlanStep
 			{
 				Kind = AotStepKind.Building, Role = "NAVAL", Variants = Info.NavalPenTypes,
@@ -835,7 +835,7 @@ namespace OpenRA.Mods.Common.Traits
 			var reach = WallReach();
 			if (reach == null || reach.Count == 0)
 			{
-				Log.Write("debug", $"[AotBuild][{player.PlayerName}] Naval site: no wall-reachable land at all (no own buildings?)");
+				Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Naval site: no wall-reachable land at all (no own buildings?)");
 				return (null, null);
 			}
 
@@ -945,14 +945,14 @@ namespace OpenRA.Mods.Common.Traits
 					foreach (var r in reach.Keys)
 						nearestMiss = Math.Min(nearestMiss, Math.Max(Math.Abs(r.X - c.X), Math.Abs(r.Y - c.Y)));
 
-				Log.Write("debug", $"[AotBuild][{player.PlayerName}] Naval site: none usable -- {placeable} placeable footprint(s) within {radius} of {centre}, " +
+				Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Naval site: none usable -- {placeable} placeable footprint(s) within {radius} of {centre}, " +
 					$"wall chain reaches {reach.Count} land cell(s) (max {Info.MaxBridgeLength} segments), building reach {adjacent}, " +
 					$"closest site is {(nearestMiss == int.MaxValue ? "n/a" : nearestMiss.ToString())} cell(s) from reachable land " +
 					$"(needs <= {adjacent})");
 				return (null, null);
 			}
 
-			Log.Write("debug", $"[AotBuild][{player.PlayerName}] Naval site {best.Value}: anchor={bestAnchor}, {bestKey.Offshore} cell(s) offshore (max {adjacent}), " +
+			Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Naval site {best.Value}: anchor={bestAnchor}, {bestKey.Offshore} cell(s) offshore (max {adjacent}), " +
 				$"{bestKey.Steps} wall segment(s) from base, water body {bestKey.Body switch { 2 => "sea", 1 => "medium", _ => "small" }}, " +
 				$"reachesEnemy={bestKey.Reaches == 1}, troopsCanBoard={bestKey.Loadable == 1}, " +
 				$"{placeable} candidate(s) considered");
@@ -1034,7 +1034,7 @@ namespace OpenRA.Mods.Common.Traits
 				if (expansionArmyPauseTicks >= Info.ExpansionPausesArmyBudgetTicks)
 				{
 					expansionArmyPauseRetired = true;
-					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Expansion no longer pauses army production " +
+					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Expansion no longer pauses army production " +
 						$"-- budget spent ({expansionArmyPauseTicks} ticks); units take priority again");
 				}
 			}
@@ -1045,7 +1045,7 @@ namespace OpenRA.Mods.Common.Traits
 				if (refineryArmyPauseTicks >= Info.RefineryPausesArmyBudgetTicks)
 				{
 					refineryArmyPauseRetired = true;
-					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Age-1 Refinery no longer pauses army production " +
+					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Age-1 Refinery no longer pauses army production " +
 						$"-- budget spent ({refineryArmyPauseTicks} ticks); units take priority again");
 				}
 			}
@@ -1164,7 +1164,7 @@ namespace OpenRA.Mods.Common.Traits
 			var liveGun = world.Actors.Count(a => a.Owner == player && !a.IsDead && a.IsInWorld && planner.Info.GunTypes.Contains(a.Info.Name));
 			var liveFtur = world.Actors.Count(a => a.Owner == player && !a.IsDead && a.IsInWorld && planner.Info.FturTypes.Contains(a.Info.Name));
 			if (liveGun > plannedGun || liveFtur > plannedFtur)
-				Log.Write("debug", $"[AotBuild][{player.PlayerName}] WARNING: extra gate-defence turret(s) outside the Rhythm -- " +
+				Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] WARNING: extra gate-defence turret(s) outside the Rhythm -- " +
 					$"GUN {liveGun}/{plannedGun} planned, FTUR {liveFtur}/{plannedFtur} planned");
 
 			foreach (var step in planner.Rhythm)
@@ -1198,7 +1198,7 @@ namespace OpenRA.Mods.Common.Traits
 				{
 					step.Role = "GUN";
 					step.Variants = planner.Info.GunTypes;
-					Log.Write("debug", $"[AotBuild][{player.PlayerName}] FTUR at {step.TopLeft} was upgraded in place " +
+					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] FTUR at {step.TopLeft} was upgraded in place " +
 						"to a Gun Turret -> slot now tracked as GUN (no rebuild needed)");
 				}
 
@@ -1220,13 +1220,13 @@ namespace OpenRA.Mods.Common.Traits
 					{
 						step.Role = "GUN";
 						step.Variants = planner.Info.GunTypes;
-						Log.Write("debug", $"[AotBuild][{player.PlayerName}] Destroyed FTUR at {step.TopLeft} " +
+						Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Destroyed FTUR at {step.TopLeft} " +
 							"can no longer be rebuilt (Turret upgrade taken) -> converting slot to GUN");
 					}
 
 					step.Done = false;
 					step.StuckTicks = 0;
-					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Plan building {step.Role} at {step.TopLeft} lost -> rebuild");
+					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Plan building {step.Role} at {step.TopLeft} lost -> rebuild");
 				}
 			}
 		}
@@ -1259,7 +1259,7 @@ namespace OpenRA.Mods.Common.Traits
 
 			foreach (var a in stray)
 			{
-				Log.Write("debug", $"[AotBuild][{player.PlayerName}] Selling stray fence segment at {a.Location} (outside every ring's perimeter)");
+				Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Selling stray fence segment at {a.Location} (outside every ring's perimeter)");
 				bot.QueueOrder(new Order("Sell", a, Target.FromActor(a), false));
 			}
 		}
@@ -1387,7 +1387,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (open != null)
 			{
 				if (++gateOpenLog % 32 == 1)
-					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Upgrade gate OPEN -- {open}");
+					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Upgrade gate OPEN -- {open}");
 
 				return false;
 			}
@@ -1400,7 +1400,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (upgradeGateTicks >= Info.PriorityGateTimeoutTicks)
 			{
 				upgradeGateReleased = true;
-				Log.Write("debug", $"[AotBuild][{player.PlayerName}] Upgrade gate retired -- one continuous hold " +
+				Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Upgrade gate retired -- one continuous hold " +
 					$"exceeded {Info.PriorityGateTimeoutTicks} ticks (rhythm appears stuck); upgrades now run unrestricted");
 				return false;
 			}
@@ -1411,7 +1411,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (upgradeGateSpentTicks >= Info.PriorityGateTotalBudgetTicks)
 			{
 				upgradeGateReleased = true;
-				Log.Write("debug", $"[AotBuild][{player.PlayerName}] Upgrade gate retired -- total budget spent " +
+				Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Upgrade gate retired -- total budget spent " +
 					$"({upgradeGateSpentTicks} ticks held across the match); upgrades now run unrestricted");
 				return false;
 			}
@@ -1565,7 +1565,7 @@ namespace OpenRA.Mods.Common.Traits
 
 			bot.QueueOrder(Order.StartProduction(queue.Actor, name, 1));
 			gatekeeperFired[i] = true;
-			Log.Write("debug", $"[AotBuild][{player.PlayerName}] Gatekeeper upgrade ({name}) fired directly " +
+			Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Gatekeeper upgrade ({name}) fired directly " +
 				"-- rhythm holds until it is bought");
 		}
 
@@ -1596,7 +1596,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (defense && CorePriorityPending() && coreGateTicks < Info.PriorityGateTimeoutTicks)
 			{
 				if (++waitLog % 32 == 0)
-					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Defence on hold -- core economy first " +
+					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Defence on hold -- core economy first " +
 						$"({string.Join("/", Info.PriorityCoreRoles)} still open, {coreGateTicks} ticks)");
 
 				return null;
@@ -1610,7 +1610,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (!defense && GatekeeperPriorityPending() && gatekeeperGateTicks < Info.PriorityGateTimeoutTicks)
 			{
 				if (++waitLog % 32 == 0)
-					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Core on hold -- gatekeeper upgrade first " +
+					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Core on hold -- gatekeeper upgrade first " +
 						$"({Info.GatekeeperUpgradeTypes[NextGatekeeperIndex()]}, {gatekeeperGateTicks} ticks)");
 
 				return null;
@@ -1687,7 +1687,7 @@ namespace OpenRA.Mods.Common.Traits
 				&& RefineryBuildable())
 			{
 				if (++economyPauseLog % 16 == 0)
-					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Economy emergency: holding {step.Role} until the economy is back");
+					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Economy emergency: holding {step.Role} until the economy is back");
 
 				return;
 			}
@@ -1707,7 +1707,7 @@ namespace OpenRA.Mods.Common.Traits
 				&& step.Role != "PROC" && step.Role != "SILO")
 			{
 				if (++ageSprintPauseLog % 16 == 0)
-					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Age sprint: holding {step.Role} until the upgrade is bought");
+					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Age sprint: holding {step.Role} until the upgrade is bought");
 
 				return;
 			}
@@ -1739,7 +1739,7 @@ namespace OpenRA.Mods.Common.Traits
 				if (waitingFor != null)
 				{
 					if (++sequenceWaitLog % 16 == 0)
-						Log.Write("debug", $"[AotBuild][{player.PlayerName}] {step.Role} held until {waitingFor} is done");
+						Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] {step.Role} held until {waitingFor} is done");
 
 					return;
 				}
@@ -1759,7 +1759,7 @@ namespace OpenRA.Mods.Common.Traits
 				&& step.Role != "PROC" && !step.Role.StartsWith("EXP_", StringComparison.Ordinal))
 			{
 				if (++expansionPauseLog % 16 == 0)
-					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Expansion has priority: holding {step.Role}");
+					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Expansion has priority: holding {step.Role}");
 
 				return;
 			}
@@ -1768,7 +1768,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (type == null)
 			{
 				if (++waitLog % 8 == 0)
-					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Waiting (age gate / prerequisites): {step.Role}");
+					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Waiting (age gate / prerequisites): {step.Role}");
 
 				return;
 			}
@@ -1816,7 +1816,7 @@ namespace OpenRA.Mods.Common.Traits
 					{
 						step.Done = true;
 						step.Skipped = true;
-						Log.Write("debug", $"[AotBuild][{player.PlayerName}] Defence step {step.Role} at {step.TopLeft} unplaceable " +
+						Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Defence step {step.Role} at {step.TopLeft} unplaceable " +
 							$"after {step.StuckTicks} ticks (re-site and bridge both failed) -> skipped permanently");
 						return;
 					}
@@ -1824,7 +1824,7 @@ namespace OpenRA.Mods.Common.Traits
 
 				if (++waitLog % 8 == 0)
 				{
-					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Waiting (target blocked): {step.Role} at {step.TopLeft}");
+					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Waiting (target blocked): {step.Role} at {step.TopLeft}");
 					DiagnoseBlock(step, type);
 				}
 
@@ -1838,7 +1838,7 @@ namespace OpenRA.Mods.Common.Traits
 			pendingIsBridgeWall = false;
 			pendingWaitLog = 0;
 			bot.QueueOrder(Order.StartProduction(queue.Actor, type, 1));
-			Log.Write("debug", $"[AotBuild][{player.PlayerName}] Start {step.Role} ({type}) -> {pendingCell}");
+			Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Start {step.Role} ({type}) -> {pendingCell}");
 		}
 
 		CPos? ResolveCell(AotPlanStep step, string type)
@@ -1915,7 +1915,7 @@ namespace OpenRA.Mods.Common.Traits
 				return;
 
 			notifier.NotifyBlocker(blockers);
-			Log.Write("debug", $"[AotBuild][{player.PlayerName}] Nudging {blockers.Count} own unit(s) off {type} site at {cell}");
+			Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Nudging {blockers.Count} own unit(s) off {type} site at {cell}");
 		}
 
 		// Prints every fact needed to conclusively identify why a step's target is stuck, instead of
@@ -1931,21 +1931,21 @@ namespace OpenRA.Mods.Common.Traits
 			var target = step.TopLeft;
 			var canPlace = world.CanPlaceBuilding(target, ai, bi, null);
 			var closeEnough = bi.IsCloseEnoughToBase(world, player, ai, target);
-			Log.Write("debug", $"[AotBuild][{player.PlayerName}] Diag {step.Role}@{target}: CanPlaceBuilding={canPlace} IsCloseEnoughToBase={closeEnough} inPocket={planner.Pocket.Contains(target)}");
+			Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Diag {step.Role}@{target}: CanPlaceBuilding={canPlace} IsCloseEnoughToBase={closeEnough} inPocket={planner.Pocket.Contains(target)}");
 
 			foreach (var t in bi.Tiles(target))
 			{
 				var terrain = world.Map.GetTerrainInfo(t).Type;
 				var res = world.WorldActor.TraitOrDefault<IResourceLayer>()?.GetResource(t).Type;
 				var actors = world.ActorMap.GetActorsAt(t).Select(a => $"{a.Info.Name}(owner={a.Owner.ResolvedPlayerName},mobile={a.Info.HasTraitInfo<MobileInfo>()})").ToList();
-				Log.Write("debug", $"[AotBuild][{player.PlayerName}] Diag tile {t}: terrain={terrain} resource={res ?? "none"} inPocket={planner.Pocket.Contains(t)} actors=[{string.Join(",", actors)}]");
+				Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Diag tile {t}: terrain={terrain} resource={res ?? "none"} inPocket={planner.Pocket.Contains(t)} actors=[{string.Join(",", actors)}]");
 			}
 
 			diagBridge = true;
 			var frontier = BridgeFrontier(target);
 			diagBridge = false;
 			var ownCount = world.ActorsHavingTrait<Building>().Count(a => a.Owner == player && !a.IsDead);
-			Log.Write("debug", $"[AotBuild][{player.PlayerName}] Diag bridge: ownBuildings={ownCount} frontier={(frontier.HasValue ? frontier.Value.ToString() : "NULL")}");
+			Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Diag bridge: ownBuildings={ownCount} frontier={(frontier.HasValue ? frontier.Value.ToString() : "NULL")}");
 		}
 
 		// PERMANENT block: something on the footprint that NudgeBlockers cannot clear — either a resource
@@ -2054,12 +2054,12 @@ namespace OpenRA.Mods.Common.Traits
 						if (!world.CanPlaceBuilding(c, ai, bi, null))
 							continue;
 
-						Log.Write("debug", $"[AotBuild][{player.PlayerName}] Re-sited {step.Role}: {step.TopLeft} -> {c} (resources grew onto plan)");
+						Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Re-sited {step.Role}: {step.TopLeft} -> {c} (resources grew onto plan)");
 						step.TopLeft = c;
 						return true;
 					}
 
-			Log.Write("debug", $"[AotBuild][{player.PlayerName}] Re-site FAILED for {step.Role} at {step.TopLeft}");
+			Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Re-site FAILED for {step.Role} at {step.TopLeft}");
 			return false;
 		}
 
@@ -2117,7 +2117,7 @@ namespace OpenRA.Mods.Common.Traits
 			pendingIsBridgeWall = true;
 			pendingWaitLog = 0;
 			bot.QueueOrder(Order.StartProduction(wallQueue.Actor, Info.WallType, 1));
-			Log.Write("debug", $"[AotBuild][{player.PlayerName}] Bridge wall #{bridgeWallCells.Count + 1} -> {pendingCell} (toward {target} for {step.Role})");
+			Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Bridge wall #{bridgeWallCells.Count + 1} -> {pendingCell} (toward {target} for {step.Role})");
 			return true;
 		}
 
@@ -2271,12 +2271,12 @@ namespace OpenRA.Mods.Common.Traits
 				if (diagBridge)
 				{
 					var actors = world.ActorMap.GetActorsAt(c).Select(a => $"{a.Info.Name}(owner={a.Owner.ResolvedPlayerName},mobile={a.Info.HasTraitInfo<MobileInfo>()})");
-					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Diag frontier blocked cell {c}: actors=[{string.Join(",", actors)}]");
+					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Diag frontier blocked cell {c}: actors=[{string.Join(",", actors)}]");
 				}
 			}
 
 			if (best == null && diagBridge)
-				Log.Write("debug", $"[AotBuild][{player.PlayerName}] Diag frontier: target={target} pathLen={path.Count} (nudged blockers along path, see above)");
+				Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Diag frontier: target={target} pathLen={path.Count} (nudged blockers along path, see above)");
 
 			return best;
 		}
@@ -2294,7 +2294,7 @@ namespace OpenRA.Mods.Common.Traits
 					sold++;
 				}
 
-			Log.Write("debug", $"[AotBuild][{player.PlayerName}] Sold wall bridge ({sold} segments)");
+			Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Sold wall bridge ({sold} segments)");
 			bridgeWallCells.Clear();
 			bridgeOwner = null;
 		}
@@ -2350,7 +2350,7 @@ namespace OpenRA.Mods.Common.Traits
 
 				if (++fenceNodeWaits >= FenceNodeMaxWaits)
 				{
-					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Fence node {c} still blocked after {fenceNodeWaits} tries -> skipping (ring keeps a gap)");
+					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Fence node {c} still blocked after {fenceNodeWaits} tries -> skipping (ring keeps a gap)");
 					fenceQueue.Dequeue();
 					fenceNodeWaits = 0;
 					continue;
@@ -2361,7 +2361,7 @@ namespace OpenRA.Mods.Common.Traits
 
 			// All nodes handled -> fence complete.
 			step.Done = true;
-			Log.Write("debug", $"[AotBuild][{player.PlayerName}] Fence complete: {step.Role}");
+			Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Fence complete: {step.Role}");
 			return null;
 		}
 
@@ -2380,7 +2380,7 @@ namespace OpenRA.Mods.Common.Traits
 			var queued = queue.AllQueued().Where(i => i.Item == pendingType).ToList();
 			if (queued.Count == 0)
 			{
-				Log.Write("debug", $"[AotBuild][{player.PlayerName}] Lost production of {pendingType}, retrying");
+				Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Lost production of {pendingType}, retrying");
 				bot.QueueOrder(Order.StartProduction(queue.Actor, pendingType, 1));
 				return;
 			}
@@ -2411,7 +2411,7 @@ namespace OpenRA.Mods.Common.Traits
 					// !Done && !Paused && power is Normal is the cash branch: costThisFrame computed but
 					// pr.TakeCash(costThisFrame, true) fails, i.e. GetCashAndResources() < costThisFrame.
 					// excessPower alone never proves "nothing is blocking" -- log actual spendable cash too.
-					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Still building {pending.Role} ({pendingType}): " +
+					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Still building {pending.Role} ({pendingType}): " +
 						$"started={item?.Started} paused={item?.Paused} remainingTime={item?.RemainingTime}/{item?.TotalTime} " +
 						$"remainingCost={item?.RemainingCost} excessPower={playerPower?.ExcessPower} " +
 						$"cash={playerResources?.Cash} ore={playerResources?.Resources} " +
@@ -2422,7 +2422,7 @@ namespace OpenRA.Mods.Common.Traits
 				{
 					for (var i = 0; i < ourIndex; i++)
 					{
-						Log.Write("debug", $"[AotBuild][{player.PlayerName}] Cancelling stuck queue blocker ahead of {pendingType}: {allItems[i].Item}");
+						Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Cancelling stuck queue blocker ahead of {pendingType}: {allItems[i].Item}");
 						bot.QueueOrder(Order.CancelProduction(queue.Actor, allItems[i].Item, 1));
 					}
 
@@ -2462,7 +2462,7 @@ namespace OpenRA.Mods.Common.Traits
 
 			if (pendingIsBridgeWall)
 			{
-				Log.Write("debug", $"[AotBuild][{player.PlayerName}] Placed bridge wall at {pendingCell} ({bridgeWallCells.Count + 1} segments)");
+				Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Placed bridge wall at {pendingCell} ({bridgeWallCells.Count + 1} segments)");
 				bridgeWallCells.Add(pendingCell);
 				bridgeOwner = pending;
 				pendingIsBridgeWall = false;
@@ -2470,7 +2470,7 @@ namespace OpenRA.Mods.Common.Traits
 				return;
 			}
 
-			Log.Write("debug", $"[AotBuild][{player.PlayerName}] Place {pending.Role} ({pendingType}) at {pendingCell}");
+			Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Place {pending.Role} ({pendingType}) at {pendingCell}");
 
 			// Soll/Ist tally for gate-defence turrets (user-fund 2026-08-01, "4th turret" screenshot):
 			// PLANNED is however many GUN/FTUR Rhythm steps exist in total (main cluster + however many
@@ -2485,7 +2485,7 @@ namespace OpenRA.Mods.Common.Traits
 				var plannedFtur = planner.Rhythm.Count(s => s.Role == "FTUR");
 				var liveGun = world.Actors.Count(a => a.Owner == player && !a.IsDead && a.IsInWorld && planner.Info.GunTypes.Contains(a.Info.Name));
 				var liveFtur = world.Actors.Count(a => a.Owner == player && !a.IsDead && a.IsInWorld && planner.Info.FturTypes.Contains(a.Info.Name));
-				Log.Write("debug", $"[AotBuild][{player.PlayerName}] Gate-defence tally: GUN {liveGun}/{plannedGun} planned, FTUR {liveFtur}/{plannedFtur} planned");
+				Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Gate-defence tally: GUN {liveGun}/{plannedGun} planned, FTUR {liveFtur}/{plannedFtur} planned");
 			}
 
 			// Only tear down the chain that was built FOR this step.
