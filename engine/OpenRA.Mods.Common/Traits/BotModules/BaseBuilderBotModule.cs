@@ -410,7 +410,14 @@ namespace OpenRA.Mods.Common.Traits
 
 		bool AotRhythmPriorityActive()
 		{
-			aotBuilders ??= player.PlayerActor.TraitsImplementing<AotBaseBuilderBotModule>().ToArray();
+			// NEVER cache an EMPTY result. There are two instances of this module -- one for economy
+			// services, one for upgrades -- and each caches its own array. Whichever resolved before
+			// the Aot builder was available stored an empty array with "??=" and never asked again,
+			// so its spending was ungated for the rest of the match while the other instance produced
+			// perfectly healthy "Upgrade gate HOLDING" lines. That is precisely the contradiction in
+			// the log: the gate holding throughout, and upgrades bought anyway (2026-08-10).
+			if (aotBuilders == null || aotBuilders.Length == 0)
+				aotBuilders = player.PlayerActor.TraitsImplementing<AotBaseBuilderBotModule>().ToArray();
 
 			foreach (var b in aotBuilders)
 				if (b.RhythmPriorityActive())
