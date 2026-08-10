@@ -2668,7 +2668,8 @@ namespace OpenRA.Mods.Common.Traits
 			var fieldHazards = Info.ExpansionHazardTypes.Count == 0
 				? []
 				: World.Actors
-					.Where(a => !a.IsDead && a.IsInWorld && Info.ExpansionHazardTypes.Contains(a.Info.Name))
+					.Where(a => !a.IsDead && a.IsInWorld && a.OccupiesSpace != null
+						&& Info.ExpansionHazardTypes.Contains(a.Info.Name))
 					.Select(a => a.Location)
 					.ToList();
 			var fieldAllySites = AllyExpansionSites();
@@ -2782,7 +2783,8 @@ namespace OpenRA.Mods.Common.Traits
 				return null;
 
 			var yards = World.Actors
-				.Where(a => !a.IsDead && a.IsInWorld && Info.ConstructionYardTypes.Contains(a.Info.Name))
+				.Where(a => !a.IsDead && a.IsInWorld && a.OccupiesSpace != null
+					&& Info.ConstructionYardTypes.Contains(a.Info.Name))
 				.Select(a => a.Location)
 				.ToList();
 
@@ -2809,7 +2811,8 @@ namespace OpenRA.Mods.Common.Traits
 			var hazards = Info.ExpansionHazardTypes.Count == 0
 				? []
 				: World.Actors
-					.Where(a => !a.IsDead && a.IsInWorld && Info.ExpansionHazardTypes.Contains(a.Info.Name))
+					.Where(a => !a.IsDead && a.IsInWorld && a.OccupiesSpace != null
+						&& Info.ExpansionHazardTypes.Contains(a.Info.Name))
 					.Select(a => a.Location)
 					.ToList();
 
@@ -3094,6 +3097,26 @@ namespace OpenRA.Mods.Common.Traits
 		// be paid for?
 		public bool ExemptBuildPending() => builder != null && builder.SiloPending();
 
+		// "+saving 3200/5000" or "+SPRINT 3200/5000" appended to cash, so the status line distinguishes
+		// a bot hoarding for its next Age from one that is simply broke -- both read cash=0, because
+		// the fund takes its savings off the account.
+		string AgeSavingLabel()
+		{
+			foreach (var m in Player.PlayerActor.TraitsImplementing<AotAgePowerBotModule>())
+			{
+				if (m.IsTraitDisabled)
+					continue;
+
+				var (saved, cost, sprinting) = m.AgeSavingProgress();
+				if (cost <= 0 || saved <= 0)
+					continue;
+
+				return $" +{(sprinting ? "SPRINT" : "saving")} {saved}/{cost}";
+			}
+
+			return string.Empty;
+		}
+
 		public bool AgeSprintActive() =>
 			Player.PlayerActor.TraitsImplementing<AotAgePowerBotModule>().Any(m => !m.IsTraitDisabled && m.HardSaving);
 
@@ -3194,7 +3217,7 @@ namespace OpenRA.Mods.Common.Traits
 			OpenRA.Log.Write("debug",
 				$"[AotStatus] {seconds / 60:D2}:{seconds % 60:D2} {Player.InternalName} '{Player.InternalName}/{Player.PlayerName}' " +
 				$"[{ColorLabel()}] ({Player.Faction.InternalName}{(Player.IsBot ? ", bot" : "")}) " +
-				$"age={AgeTier()} cash={playerResources.GetCashAndResources()} " +
+				$"age={AgeTier()} cash={playerResources.GetCashAndResources()}{AgeSavingLabel()} " +
 				$"{(EconomyEmergency() ? "ECONOMY-EMERGENCY " : "")}waves={waveState} " +
 				$"{One<AotHeliRaidMission>("heli", $"none(next~{Math.Max(0, raidTicks) / 25}s)")} " +
 				$"{One<AotGroundRaidMission>("ground", groundRaidUnlocked ? "none" : "locked")} " +

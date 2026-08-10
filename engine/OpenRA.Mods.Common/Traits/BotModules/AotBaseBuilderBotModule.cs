@@ -531,9 +531,13 @@ namespace OpenRA.Mods.Common.Traits
 			if (expansionYard == null || expansionSteps.Count == 0)
 				return;
 
+			// OccupiesSpace FIRST: Actor.Location reads OccupiesSpace.TopLeft and throws outright on an
+			// actor that has no position. world.Actors contains such actors -- invisible spawners and
+			// the like -- so touching Location before that check crashed the match (2026-08-10).
 			var yardActor = world.Actors.FirstOrDefault(a => a.Owner == player && !a.IsDead && a.IsInWorld
-				&& a.Location == expansionYard.Value
-				&& planner != null && planner.Info.ConstructionYardTypes.Contains(a.Info.Name));
+				&& a.OccupiesSpace != null
+				&& planner != null && planner.Info.ConstructionYardTypes.Contains(a.Info.Name)
+				&& a.Location == expansionYard.Value);
 
 			// Yard gone: the mission notices too and finishes, this just stops us building into a hole.
 			if (yardActor == null)

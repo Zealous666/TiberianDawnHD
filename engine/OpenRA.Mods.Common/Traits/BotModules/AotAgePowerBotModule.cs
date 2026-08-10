@@ -304,6 +304,29 @@ namespace OpenRA.Mods.Common.Traits
 		// overrun while saving would be the one way this backfires.
 		public bool HardSaving => hardSaving.Count > 0;
 
+		// What is put by for the next tier, and what it costs. Savings are taken OFF the account by
+		// TakeCash, so a bot saving hard reads cash=0 and is indistinguishable from a bankrupt one --
+		// which is exactly why "are they saving or stuck?" could not be answered from a status line.
+		public (int Saved, int Cost, bool Sprinting) AgeSavingProgress()
+		{
+			foreach (var key in Info.PowerOrderNames)
+			{
+				if (!supportPowerManager.Powers.TryGetValue(key, out var power))
+					continue;
+
+				if (power is AotAgeResearchInstance r && r.Purchased)
+					continue;
+
+				if (power.Info is not AutoActivateSpawnActorPowerInfo info || info.Cost <= 0)
+					continue;
+
+				savings.TryGetValue(key, out var saved);
+				return (saved, info.Cost, hardSaving.Contains(key));
+			}
+
+			return (0, 0, false);
+		}
+
 		// Has this bot committed to its first Age yet? Read by AotOperationsBotModule to hold the very
 		// first attack wave until then.
 		public bool AnyAgeStarted =>
