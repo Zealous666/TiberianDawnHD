@@ -639,6 +639,12 @@ Player:
 		Faction: gdi
 		ConstructionYardTypes: fact, fact.gdi, fact.nod
 		ExcludeFromOpsTypes: aot-harv, aot-harv-nod, aot-mcv-age0, aot-mcv-age1, aot-surveyor-gdi, aot-surveyor-nod, oret, aot-oret-lite, aot-minelayer, aot-aray, aot-mgap, aot-mstealth, truck, mcv
+
+		# Gefahrenzonen fuer die Base Expansion (User-Fund 2026-08-10): Ameisen & Co. sind EINHEITEN,
+		# kein Gebaeude -- kein anderer Standortfilter sieht sie, und ein Konvoi wurde neben eine
+		# Ameisenkolonie geschickt. aot-critter-spawner ist der unsichtbare Erzeuger, die uebrigen
+		# sind die Kritter selbst.
+		ExpansionHazardTypes: aot-critter-spawner, aot-ant, aot-fireant, aot-scoutant, aot-visceroid, aot-steg, aot-trex, aot-tric, aot-rapt
 		ChokepointReserveSize: 4
 		ChokepointHoldRadius: 4
 		ChokeClearRadius: 5

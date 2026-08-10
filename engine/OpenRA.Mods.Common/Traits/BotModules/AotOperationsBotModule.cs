@@ -1030,6 +1030,21 @@ namespace OpenRA.Mods.Common.Traits
 			"per-index EnemyBaseCount check above already keeps the expansion out of an enemy's own base.")]
 		public readonly int ExpansionEnemyClearance = 12;
 
+		[Desc("How many enemy buildings inside ExpansionEnemyClearance make a site count as somebody",
+			"else's BASE rather than a stray structure. A construction yard blocks on its own",
+			"regardless. Blanket-rejecting on a single building discarded both unused start positions",
+			"on the map and sent the convoy somewhere far worse.")]
+		public readonly int ExpansionEnemyClusterSize = 3;
+
+		[ActorReference]
+		[Desc("Actors that make ground unsafe to settle on even though nobody owns them -- ant and",
+			"visceroid nests and the like. They are UNITS, not buildings, so no other filter here sees",
+			"them, and a convoy was sent to build next to an ant colony (User 2026-08-10).")]
+		public readonly HashSet<string> ExpansionHazardTypes = [];
+
+		[Desc("Cells to keep clear of ExpansionHazardTypes.")]
+		public readonly int ExpansionHazardClearance = 12;
+
 		[Desc("Keep this many cells clear of a site an ALLY has already claimed. Must comfortably",
 			"exceed the expansion layout itself (x -4..+3, y -1..+8), or two allied compounds would be",
 			"planned overlapping and the second MCV would arrive with nowhere to deploy.")]
@@ -2630,7 +2645,15 @@ namespace OpenRA.Mods.Common.Traits
 			var enemyBuildings = World.Actors
 				.Where(a => !a.IsDead && a.IsInWorld
 					&& a.Owner != Player
-					&& Player.RelationshipWith(a.Owner) != PlayerRelationship.Ally
+
+					// REAL enemies only. "not allied" also matches NEUTRAL, and an ore mine is a
+					// neutral actor carrying BuildingInfo -- so every start position next to a mine
+					// counted as standing in an enemy base and was thrown out, which is precisely the
+					// ground worth expanding onto (User 2026-08-10: "dort sind aber keine feindlichen
+					// gebaeude ... ggf. oremine oder blossom trees"). Civilian buildings, tech
+					// structures and blossom trees fell into the same trap.
+					&& Player.RelationshipWith(a.Owner) == PlayerRelationship.Enemy
+					&& !a.Owner.NonCombatant
 					&& a.Info.HasTraitInfo<BuildingInfo>())
 				.Select(a => a.Location)
 				.ToList();
@@ -2641,7 +2664,13 @@ namespace OpenRA.Mods.Common.Traits
 			// Rejection counters: with no site found the whole mission is silently skipped, and there
 			// was no way to tell an empty map from an over-strict filter (User 2026-08-03: "nicht
 			// einmal wurde irgend etwas richtung base expansion gebaut ... gibt es andere gründe?").
-			int tooSmall = 0, tooClose = 0, enemyBase = 0, enemyNear = 0, allyClaimed = 0, considered = 0;
+			int tooSmall = 0, tooClose = 0, enemyBase = 0, enemyNear = 0, allyClaimed = 0, hazardNear = 0, considered = 0;
+			var fieldHazards = Info.ExpansionHazardTypes.Count == 0
+				? []
+				: World.Actors
+					.Where(a => !a.IsDead && a.IsInWorld && Info.ExpansionHazardTypes.Contains(a.Info.Name))
+					.Select(a => a.Location)
+					.ToList();
 			var fieldAllySites = AllyExpansionSites();
 
 			for (var i = 0; i < resourceMap.GetIndicesLength(); i++)
@@ -2682,6 +2711,12 @@ namespace OpenRA.Mods.Common.Traits
 					continue;
 				}
 
+				if (fieldHazards.Any(h => (h - centre).Length < Info.ExpansionHazardClearance))
+				{
+					hazardNear++;
+					continue;
+				}
+
 				considered++;
 
 				// More tiberium is better, closer to home is better (shorter, safer convoy). The bonus
@@ -2712,7 +2747,7 @@ namespace OpenRA.Mods.Common.Traits
 					Log($"no expansion site: rejected {tooSmall} too small (<{Info.ExpansionMinResourceCells} cells), " +
 						$"{tooClose} too close to home (<{Info.ExpansionMinDistance}), {enemyBase} with an enemy base, " +
 						$"{enemyNear} within {Info.ExpansionEnemyClearance} of an enemy building, " +
-						$"{allyClaimed} claimed by an ally");
+						$"{allyClaimed} claimed by an ally, {hazardNear} beside a hazard");
 				}
 
 				return null;
@@ -2758,8 +2793,31 @@ namespace OpenRA.Mods.Common.Traits
 			var enemyBuildings = World.Actors
 				.Where(a => !a.IsDead && a.IsInWorld
 					&& a.Owner != Player
-					&& Player.RelationshipWith(a.Owner) != PlayerRelationship.Ally
+
+					// REAL enemies only. "not allied" also matches NEUTRAL, and an ore mine is a
+					// neutral actor carrying BuildingInfo -- so every start position next to a mine
+					// counted as standing in an enemy base and was thrown out, which is precisely the
+					// ground worth expanding onto (User 2026-08-10: "dort sind aber keine feindlichen
+					// gebaeude ... ggf. oremine oder blossom trees"). Civilian buildings, tech
+					// structures and blossom trees fell into the same trap.
+					&& Player.RelationshipWith(a.Owner) == PlayerRelationship.Enemy
+					&& !a.Owner.NonCombatant
 					&& a.Info.HasTraitInfo<BuildingInfo>())
+				.Select(a => a.Location)
+				.ToList();
+
+			var hazards = Info.ExpansionHazardTypes.Count == 0
+				? []
+				: World.Actors
+					.Where(a => !a.IsDead && a.IsInWorld && Info.ExpansionHazardTypes.Contains(a.Info.Name))
+					.Select(a => a.Location)
+					.ToList();
+
+			var enemyYards = World.Actors
+				.Where(a => !a.IsDead && a.IsInWorld
+					&& a.Owner != Player
+					&& Player.RelationshipWith(a.Owner) == PlayerRelationship.Enemy
+					&& Info.ConstructionYardTypes.Contains(a.Info.Name))
 				.Select(a => a.Location)
 				.ToList();
 
@@ -2785,7 +2843,7 @@ namespace OpenRA.Mods.Common.Traits
 			// 2026-08-05: "wenige meter daneben wäre ein freier spawn-base gewesen ... stelle ich das
 			// weiterhin in frage"). An unexplained rejection is how the last three site arguments
 			// started.
-			int spawnTooClose = 0, spawnTaken = 0, spawnYardNear = 0, spawnEnemyNear = 0, spawnNoFit = 0;
+			int spawnTooClose = 0, spawnTaken = 0, spawnYardNear = 0, spawnEnemyNear = 0, spawnHazard = 0, spawnNoFit = 0;
 
 			foreach (var spawn in Intel.AllSpawns.OrderBy(s => (s - home).LengthSquared))
 			{
@@ -2801,15 +2859,34 @@ namespace OpenRA.Mods.Common.Traits
 					continue;
 				}
 
-				if (yards.Any(y => (y - spawn).Length < Info.ExpansionSpawnClearance))
+				// Only somebody ELSE'S yard blocks a spawn. Ours does not: an unused start position a
+				// short walk from home is a perfectly good expansion, and counting our own yard here
+				// rejected one outright (log: "1 within 20 of a construction yard").
+				if (yards.Any(y => y != BaseCentre() && (y - spawn).Length < Info.ExpansionSpawnClearance))
 				{
 					spawnYardNear++;
 					continue;
 				}
 
-				if (enemyBuildings.Any(b => (b - spawn).Length < Info.ExpansionEnemyClearance))
+				// A BASE nearby disqualifies a spawn -- a single stray building does not. The blanket
+				// test threw away both genuinely unused start positions on the map because one enemy
+				// structure stood within twelve cells (User 2026-08-10: "eine komplett ungenutzte
+				// spawn-base ganz in der Nähe"), and the search then settled for far worse ground.
+				//
+				// The property that matters is unchanged: an MCV must never be walked into an enemy
+				// base. A construction yard at any range inside the clearance still blocks, and so
+				// does a cluster of buildings; one wall or turret no longer does.
+				var enemyNearby = enemyBuildings.Count(b => (b - spawn).Length < Info.ExpansionEnemyClearance);
+				var enemyYardNearby = enemyYards.Any(y => (y - spawn).Length < Info.ExpansionEnemyClearance);
+				if (enemyYardNearby || enemyNearby >= Info.ExpansionEnemyClusterSize)
 				{
 					spawnEnemyNear++;
+					continue;
+				}
+
+				if (hazards.Any(h => (h - spawn).Length < Info.ExpansionHazardClearance))
+				{
+					spawnHazard++;
 					continue;
 				}
 
@@ -2825,8 +2902,9 @@ namespace OpenRA.Mods.Common.Traits
 				bool SafeNear(CPos c) =>
 					World.Map.Contains(c)
 					&& (c - home).Length >= Info.ExpansionMinDistance
-					&& !yards.Any(y => (y - c).Length < Info.ExpansionSpawnClearance)
-					&& !enemyBuildings.Any(b => (b - c).Length < Info.ExpansionEnemyClearance)
+					&& !yards.Any(y => y != BaseCentre() && (y - c).Length < Info.ExpansionSpawnClearance)
+					&& !enemyYards.Any(y => (y - c).Length < Info.ExpansionEnemyClearance)
+					&& enemyBuildings.Count(b => (b - c).Length < Info.ExpansionEnemyClearance) < Info.ExpansionEnemyClusterSize
 					&& !allySites.Any(a => (a - c).Length < Info.ExpansionAllyClearance);
 
 				var fit = FitNear(spawn, Info.ExpansionFitRadius, SafeNear, out var why);
@@ -2845,7 +2923,7 @@ namespace OpenRA.Mods.Common.Traits
 			Log($"no free spawn: {Intel.AllSpawns.Count} spawn(s) checked -- {spawnTooClose} too close " +
 				$"(<{Info.ExpansionMinDistance}), {spawnTaken} taken or claimed, " +
 				$"{spawnYardNear} within {Info.ExpansionSpawnClearance} of a construction yard, " +
-				$"{spawnEnemyNear} within {Info.ExpansionEnemyClearance} of an enemy building, " +
+				$"{spawnEnemyNear} beside an enemy base, {spawnHazard} beside a hazard, " +
 				$"{spawnNoFit} where the layout does not fit");
 
 			return null;
