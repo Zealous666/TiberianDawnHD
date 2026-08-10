@@ -125,10 +125,19 @@ namespace OpenRA.Mods.Common.Traits
 				if (queue.Any(q => q.AllQueued().Any(i => i.Item == type)))
 					return;
 
-				if (unitBuilder.RequestedProductionCount(bot, type) == 0)
+				// ORDERED DIRECTLY, not through IBotRequestUnitProduction. The generic pipeline never
+				// delivered here: a bot that had lost both ore transporters kept its Light Factory and
+				// its queue, was flagged ECONOMY-EMERGENCY, and still no transporter was ever built or
+				// even queued (User 2026-08-10). The one-time ore boost in AotOperationsBotModule
+				// takes this direct route and fires reliably in the very same log, so this follows it.
+				//
+				// StartProduction appends, so a replacement slots in behind whatever the factory is
+				// already building rather than being dropped for it.
+				var host = queue.FirstOrDefault(q => q.CanBuild(ai));
+				if (host != null)
 				{
-					unitBuilder.RequestUnitProduction(bot, type);
-					Log.Write("debug", $"[AotReplace][{player.PlayerName}] {type} requested ({unitCount}/{target} alive)");
+					bot.QueueOrder(Order.StartProduction(host.Actor, type, 1));
+					Log.Write("debug", $"[AotReplace][{player.PlayerName}] {type} ordered ({unitCount}/{target} alive)");
 				}
 
 				return;
