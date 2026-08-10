@@ -3005,6 +3005,8 @@ namespace OpenRA.Mods.Common.Traits
 			Units.Where(a => !Ops.Info.ExpansionMcvTypes.Contains(a.Info.Name) && !Ops.CannotOrder(a)).ToList();
 
 		// The six dug-in positions from the pre-built layout, relative to the yard's top-left cell.
+		readonly Dictionary<Actor, CVec> postOf = [];
+
 		static readonly CVec[] GuardPosts =
 		[
 			new(4, -2), new(-5, -2), new(4, 3), new(-5, 3), new(4, 8), new(-5, 8)
@@ -3300,11 +3302,31 @@ namespace OpenRA.Mods.Common.Traits
 			if (escorts.Count == 0 || yard == null)
 				return;
 
-			var digIn = Ops.AgeTier() >= Ops.Info.ExpansionDigInAgeTier;
-			for (var i = 0; i < escorts.Count; i++)
+			// A tank keeps ITS post for as long as it lives. The post used to follow the escort's index
+			// in the current list, so every casualty or replacement renumbered everyone and each tank
+			// was sent to a different corner than the one it had been holding -- they drifted around
+			// the compound instead of returning to where they started (User 2026-08-10: "sollten aber
+			// in idle immer an ihren ursprungs zielort zurückkehren").
+			foreach (var gone in postOf.Keys.Where(Ops.CannotOrder).ToList())
+				postOf.Remove(gone);
+
+			foreach (var a in escorts)
 			{
-				var post = yard.Location + GuardPosts[i % GuardPosts.Length];
-				var a = escorts[i];
+				if (postOf.ContainsKey(a))
+					continue;
+
+				// First post nobody else holds; falls back to spreading over the ring if the guard has
+				// grown past the number of posts.
+				var free = GuardPosts.FirstOrDefault(p => !postOf.ContainsValue(p));
+				postOf[a] = free != default || !postOf.ContainsValue(GuardPosts[0])
+					? free
+					: GuardPosts[postOf.Count % GuardPosts.Length];
+			}
+
+			var digIn = Ops.AgeTier() >= Ops.Info.ExpansionDigInAgeTier;
+			foreach (var a in escorts)
+			{
+				var post = yard.Location + postOf[a];
 				if ((a.Location - post).LengthSquared > Ops.Info.ExpansionPostRadius2)
 				{
 					if (a.IsIdle)

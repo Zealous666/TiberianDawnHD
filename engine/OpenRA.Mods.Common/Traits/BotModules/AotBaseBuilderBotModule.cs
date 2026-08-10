@@ -545,8 +545,19 @@ namespace OpenRA.Mods.Common.Traits
 
 			// Anything already standing on its planned cell counts as done -- same idea as the main
 			// Rhythm's rebuild scan, and it makes the driver idempotent across save/reload.
+			// Matched on the building's OWN TopLeft, not on what occupies that cell. Many footprints
+			// leave their top-left corner free -- a refinery's dock apron, for one -- so GetActorsAt
+			// found nothing there and the step was never marked done. The driver then sat on the
+			// refinery forever, re-issuing it 123 times in one run while the building stood finished
+			// beside it, and the Silo, SAM and gate behind it never got a turn (User 2026-08-10:
+			// "beide bases haben refinery und nuke gebaut, komischerweise aber bisher nicht das
+			// silo").
+			var ownBuildings = world.ActorsHavingTrait<Building>()
+				.Where(a => a.Owner == player && !a.IsDead && a.IsInWorld && a.OccupiesSpace != null)
+				.ToList();
+
 			foreach (var s in expansionSteps)
-				if (!s.Done && world.ActorMap.GetActorsAt(s.TopLeft).Any(a => a.Owner == player && s.Variants.Contains(a.Info.Name)))
+				if (!s.Done && ownBuildings.Any(a => a.Location == s.TopLeft && s.Variants.Contains(a.Info.Name)))
 					s.Done = true;
 
 			if (expansionPendingType != null)
