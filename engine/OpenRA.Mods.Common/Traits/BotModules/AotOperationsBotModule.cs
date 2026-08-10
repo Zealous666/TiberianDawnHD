@@ -470,6 +470,12 @@ namespace OpenRA.Mods.Common.Traits
 			"account continuously, so an order placed without cover starves everything behind it.")]
 		public readonly int WaveTopUpMinimumCash = 400;
 
+		[Desc("Most units a wave adds per top-up. Ordering the whole shortfall at once buys a queue",
+			"nothing can pay for: one bot sat at zero credits with ELEVEN units outstanding, none of",
+			"them finishing, and with them went its defence, its next wave and its expansion savings.",
+			"Adding a couple at a time lets the wave grow as income actually arrives.")]
+		public readonly int WaveTopUpBatch = 2;
+
 		[Desc("Forming timeout; the wave launches with what it has (if at least half).")]
 		public readonly int WaveFormingTimeout = 4500;
 

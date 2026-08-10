@@ -1019,6 +1019,9 @@ namespace OpenRA.Mods.Common.Traits
 				&& Ops.AvailableCash() >= Ops.Info.WaveTopUpMinimumCash
 				&& formingTicks < Ops.Info.WaveFormingTimeout)
 			{
+				// A couple at a time, not the whole shortfall: see WaveTopUpBatch.
+				missing = Math.Min(missing, Ops.Info.WaveTopUpBatch);
+
 				var chain = AdaptiveChain();
 				if (chain.Length > 0)
 				{
