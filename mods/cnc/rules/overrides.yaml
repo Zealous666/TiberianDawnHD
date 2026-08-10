@@ -845,6 +845,13 @@ Player:
 	AotCashLog:
 		Interval: 250
 
+	# Fraktions-Conditions fuer die fraktionsspezifischen Age-Power-Varianten (User 2026-08-05).
+	GrantConditionOnFaction@AOTGDI:
+		Condition: aot-faction-gdi
+		Factions: gdi
+	GrantConditionOnFaction@AOTNOD:
+		Condition: aot-faction-nod
+		Factions: nod
 	# Low Power pausiert den Ladebalken wie bei jeder anderen Super Power. Auf Gebaeuden kommt
 	# diese Condition aus ^DisabledOverlay (engine defaults.yaml); der Spieler-Aktor erbt davon
 	# nichts, deshalb hier eigenstaendig.
@@ -884,7 +891,12 @@ Player:
 	GrantConditionOnPrerequisite@ageactive2:
 		Condition: aot-age2-active
 		Prerequisites: aot-age2
-	AotAge1Power:
+	AotAge1Power@gdi:
+		# Fraktionsspezifische Variante (User 2026-08-05). Beide Traits teilen sich denselben
+		# OrderName und landen daher in EINER SupportPowerInstance -- die Leiste zeigt weiter
+		# genau ein Icon. Welche Konfiguration gilt, entscheidet SupportPowerInstance.Info:
+		# das nimmt seit 2026-08-05 die erste NICHT deaktivierte Instanz, hier also die der
+		# eigenen Fraktion. Icons sind vorerst fuer beide dieselben (kommen spaeter neu).
 		InsufficientFundsTextNotification: notification-insufficient-funds
 		# Age-of-Empires-Modell (User 2026-08-05): sobald die Voraussetzungen stehen, ist der
 		# Knopf klickbar. Der Klick bucht den vollen Betrag EINMALIG ab, danach laeuft
@@ -902,6 +914,7 @@ Player:
 		OneShot: true
 		Cost: 5000
 		ChargeInterval: 22500
+		RequiresCondition: aot-faction-gdi
 		PauseOnCondition: !aot-age1-unlocked || lowpower
 		IconImage: aot-age1-upgrade
 		Icon: icon
@@ -910,9 +923,54 @@ Player:
 		# Preis und Voraussetzungen als EIGENE Tooltip-Felder (SupportPowerInfo.Cost /
 		# .TooltipRequirements, 2026-08-04). Als Fliesstext in der Description ging es nicht:
 		# Tooltips brechen keine Zeilen um.
-		TooltipRequirements: Requires: Tech Center
+		TooltipRequirements: Tech Center
+		# Nur fuer die Einfaerbung: fehlt die Voraussetzung, faerbt der Tooltip die
+		# Zeile rot. Gatet die Power NICHT -- das macht PauseOnCondition.
+		TooltipRequirementsPrerequisites: atec
 		SupportPowerPaletteOrder: 0
-	AotAge2Power:
+	AotAge1Power@nod:
+		# Fraktionsspezifische Variante (User 2026-08-05). Beide Traits teilen sich denselben
+		# OrderName und landen daher in EINER SupportPowerInstance -- die Leiste zeigt weiter
+		# genau ein Icon. Welche Konfiguration gilt, entscheidet SupportPowerInstance.Info:
+		# das nimmt seit 2026-08-05 die erste NICHT deaktivierte Instanz, hier also die der
+		# eigenen Fraktion. Icons sind vorerst fuer beide dieselben (kommen spaeter neu).
+		InsufficientFundsTextNotification: notification-insufficient-funds
+		# Age-of-Empires-Modell (User 2026-08-05): sobald die Voraussetzungen stehen, ist der
+		# Knopf klickbar. Der Klick bucht den vollen Betrag EINMALIG ab, danach laeuft
+		# ChargeInterval als FORSCHUNGSZEIT, und nach Ablauf steigt das Age von selbst auf --
+		# kein zweiter Klick. Gilt ausschliesslich fuer die Age-Stufen; Ion Cannon, Atombombe
+		# usw. laden weiterhin zuerst und feuern auf Klick.
+		ResearchModel: True
+		Actor: aot-age1-marker
+		# Countdown oben rechts fuer ALLE Spieler, wie bei Ion Cannon und Atom Bomb
+		# (User-Wunsch 2026-08-04). Es taucht immer nur die gerade relevante Age-Stufe auf:
+		# das Timer-Widget filtert auf !Disabled, und Age 2/3 sind bis zum Vorgaenger per
+		# RequiresCondition deaktiviert, eine gekaufte Stufe per OneShot.
+		DisplayTimerRelationships: Ally, Neutral, Enemy
+		LifeTime: -1
+		OneShot: true
+		Cost: 5000
+		ChargeInterval: 22500
+		RequiresCondition: aot-faction-nod
+		PauseOnCondition: !aot-age1-unlocked || lowpower
+		IconImage: aot-age1-upgrade
+		Icon: icon
+		Name: 1st Tiberium Age
+		Description: Unlocks the Tiberium era with new units, buildings and the capability to harvest Tiberium.
+		# Preis und Voraussetzungen als EIGENE Tooltip-Felder (SupportPowerInfo.Cost /
+		# .TooltipRequirements, 2026-08-04). Als Fliesstext in der Description ging es nicht:
+		# Tooltips brechen keine Zeilen um.
+		TooltipRequirements: Tech Center
+		# Nur fuer die Einfaerbung: fehlt die Voraussetzung, faerbt der Tooltip die
+		# Zeile rot. Gatet die Power NICHT -- das macht PauseOnCondition.
+		TooltipRequirementsPrerequisites: stec
+		SupportPowerPaletteOrder: 0
+	AotAge2Power@gdi:
+		# Fraktionsspezifische Variante (User 2026-08-05). Beide Traits teilen sich denselben
+		# OrderName und landen daher in EINER SupportPowerInstance -- die Leiste zeigt weiter
+		# genau ein Icon. Welche Konfiguration gilt, entscheidet SupportPowerInstance.Info:
+		# das nimmt seit 2026-08-05 die erste NICHT deaktivierte Instanz, hier also die der
+		# eigenen Fraktion. Icons sind vorerst fuer beide dieselben (kommen spaeter neu).
 		InsufficientFundsTextNotification: notification-insufficient-funds
 		# Age-of-Empires-Modell (User 2026-08-05): sobald die Voraussetzungen stehen, ist der
 		# Knopf klickbar. Der Klick bucht den vollen Betrag EINMALIG ab, danach laeuft
@@ -930,15 +988,57 @@ Player:
 		OneShot: true
 		Cost: 7500
 		ChargeInterval: 22500
-		RequiresCondition: aot-age1-active
+		RequiresCondition: aot-age1-active && aot-faction-gdi
 		PauseOnCondition: !aot-age2-unlocked || lowpower
 		IconImage: aot-age2-upgrade
 		Icon: icon
 		Name: 2nd Tiberium Age
 		Description: Moves forward in the Tiberium technologies with new upgrades and additional equipment.
-		TooltipRequirements: Requires: Science Lab (GDI) or Temple of Nod (Nod)
+		TooltipRequirements: Science Lab
+		# Nur fuer die Einfaerbung: fehlt die Voraussetzung, faerbt der Tooltip die
+		# Zeile rot. Gatet die Power NICHT -- das macht PauseOnCondition.
+		TooltipRequirementsPrerequisites: aot-slab
 		SupportPowerPaletteOrder: 1
-	AotAge3Power:
+	AotAge2Power@nod:
+		# Fraktionsspezifische Variante (User 2026-08-05). Beide Traits teilen sich denselben
+		# OrderName und landen daher in EINER SupportPowerInstance -- die Leiste zeigt weiter
+		# genau ein Icon. Welche Konfiguration gilt, entscheidet SupportPowerInstance.Info:
+		# das nimmt seit 2026-08-05 die erste NICHT deaktivierte Instanz, hier also die der
+		# eigenen Fraktion. Icons sind vorerst fuer beide dieselben (kommen spaeter neu).
+		InsufficientFundsTextNotification: notification-insufficient-funds
+		# Age-of-Empires-Modell (User 2026-08-05): sobald die Voraussetzungen stehen, ist der
+		# Knopf klickbar. Der Klick bucht den vollen Betrag EINMALIG ab, danach laeuft
+		# ChargeInterval als FORSCHUNGSZEIT, und nach Ablauf steigt das Age von selbst auf --
+		# kein zweiter Klick. Gilt ausschliesslich fuer die Age-Stufen; Ion Cannon, Atombombe
+		# usw. laden weiterhin zuerst und feuern auf Klick.
+		ResearchModel: True
+		Actor: aot-age2-marker
+		# Countdown oben rechts fuer ALLE Spieler, wie bei Ion Cannon und Atom Bomb
+		# (User-Wunsch 2026-08-04). Es taucht immer nur die gerade relevante Age-Stufe auf:
+		# das Timer-Widget filtert auf !Disabled, und Age 2/3 sind bis zum Vorgaenger per
+		# RequiresCondition deaktiviert, eine gekaufte Stufe per OneShot.
+		DisplayTimerRelationships: Ally, Neutral, Enemy
+		LifeTime: -1
+		OneShot: true
+		Cost: 7500
+		ChargeInterval: 22500
+		RequiresCondition: aot-age1-active && aot-faction-nod
+		PauseOnCondition: !aot-age2-unlocked || lowpower
+		IconImage: aot-age2-upgrade
+		Icon: icon
+		Name: 2nd Tiberium Age
+		Description: Moves forward in the Tiberium technologies with new upgrades and additional equipment.
+		TooltipRequirements: Temple of Nod
+		# Nur fuer die Einfaerbung: fehlt die Voraussetzung, faerbt der Tooltip die
+		# Zeile rot. Gatet die Power NICHT -- das macht PauseOnCondition.
+		TooltipRequirementsPrerequisites: aot-tmpl
+		SupportPowerPaletteOrder: 1
+	AotAge3Power@gdi:
+		# Fraktionsspezifische Variante (User 2026-08-05). Beide Traits teilen sich denselben
+		# OrderName und landen daher in EINER SupportPowerInstance -- die Leiste zeigt weiter
+		# genau ein Icon. Welche Konfiguration gilt, entscheidet SupportPowerInstance.Info:
+		# das nimmt seit 2026-08-05 die erste NICHT deaktivierte Instanz, hier also die der
+		# eigenen Fraktion. Icons sind vorerst fuer beide dieselben (kommen spaeter neu).
 		InsufficientFundsTextNotification: notification-insufficient-funds
 		# Age-of-Empires-Modell (User 2026-08-05): sobald die Voraussetzungen stehen, ist der
 		# Knopf klickbar. Der Klick bucht den vollen Betrag EINMALIG ab, danach laeuft
@@ -956,13 +1056,50 @@ Player:
 		OneShot: true
 		Cost: 10000
 		ChargeInterval: 22500
-		RequiresCondition: aot-age2-active
+		RequiresCondition: aot-age2-active && aot-faction-gdi
 		PauseOnCondition: !aot-age3-unlocked || lowpower
 		IconImage: aot-age3-upgrade
 		Icon: icon
 		Name: 3rd Tiberium Age
 		Description: Upgrades to the most advanced Tiberium units, buildings and upgrades.
-		TooltipRequirements: Requires: Orbital Command (GDI) or Secret Shrine (Nod)
+		TooltipRequirements: Orbital Command
+		# Nur fuer die Einfaerbung: fehlt die Voraussetzung, faerbt der Tooltip die
+		# Zeile rot. Gatet die Power NICHT -- das macht PauseOnCondition.
+		TooltipRequirementsPrerequisites: aot-orbc
+		SupportPowerPaletteOrder: 2
+	AotAge3Power@nod:
+		# Fraktionsspezifische Variante (User 2026-08-05). Beide Traits teilen sich denselben
+		# OrderName und landen daher in EINER SupportPowerInstance -- die Leiste zeigt weiter
+		# genau ein Icon. Welche Konfiguration gilt, entscheidet SupportPowerInstance.Info:
+		# das nimmt seit 2026-08-05 die erste NICHT deaktivierte Instanz, hier also die der
+		# eigenen Fraktion. Icons sind vorerst fuer beide dieselben (kommen spaeter neu).
+		InsufficientFundsTextNotification: notification-insufficient-funds
+		# Age-of-Empires-Modell (User 2026-08-05): sobald die Voraussetzungen stehen, ist der
+		# Knopf klickbar. Der Klick bucht den vollen Betrag EINMALIG ab, danach laeuft
+		# ChargeInterval als FORSCHUNGSZEIT, und nach Ablauf steigt das Age von selbst auf --
+		# kein zweiter Klick. Gilt ausschliesslich fuer die Age-Stufen; Ion Cannon, Atombombe
+		# usw. laden weiterhin zuerst und feuern auf Klick.
+		ResearchModel: True
+		Actor: aot-age3-marker
+		# Countdown oben rechts fuer ALLE Spieler, wie bei Ion Cannon und Atom Bomb
+		# (User-Wunsch 2026-08-04). Es taucht immer nur die gerade relevante Age-Stufe auf:
+		# das Timer-Widget filtert auf !Disabled, und Age 2/3 sind bis zum Vorgaenger per
+		# RequiresCondition deaktiviert, eine gekaufte Stufe per OneShot.
+		DisplayTimerRelationships: Ally, Neutral, Enemy
+		LifeTime: -1
+		OneShot: true
+		Cost: 10000
+		ChargeInterval: 22500
+		RequiresCondition: aot-age2-active && aot-faction-nod
+		PauseOnCondition: !aot-age3-unlocked || lowpower
+		IconImage: aot-age3-upgrade
+		Icon: icon
+		Name: 3rd Tiberium Age
+		Description: Upgrades to the most advanced Tiberium units, buildings and upgrades.
+		TooltipRequirements: Secret Shrine
+		# Nur fuer die Einfaerbung: fehlt die Voraussetzung, faerbt der Tooltip die
+		# Zeile rot. Gatet die Power NICHT -- das macht PauseOnCondition.
+		TooltipRequirementsPrerequisites: aot-shrine
 		SupportPowerPaletteOrder: 2
 	# === Age of Tiberium (aotmod) - NOD Airstrip Starport (Dune 2000 / TS style bulk delivery) ===
 	# Instant-Kauf bis MaxCapacity, dann Purchase-Button -> Frachtflieger liefert alle auf einmal.

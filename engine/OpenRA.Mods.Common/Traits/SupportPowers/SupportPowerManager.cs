@@ -169,9 +169,37 @@ namespace OpenRA.Mods.Common.Traits
 			!instancesEnabled ||
 			oneShotFired;
 
-		public SupportPowerInfo Info { get { return Instances.Select(i => i.Info).FirstOrDefault(); } }
-		public readonly string Name;
-		public readonly string Description;
+		// aotmod 2026-08-05: die erste NICHT DEAKTIVIERTE Instanz bevorzugen. Mehrere Traits mit
+		// demselben OrderName landen in dieser einen Instanz -- das ist die Grundlage fuer
+		// fraktionsspezifische Varianten EINER Power (Age-Aufstiege: je ein GDI- und ein NOD-Trait,
+		// per RequiresCondition auf die eigene Fraktion beschraenkt). Vorher lieferte Info stur die
+		// zuerst deklarierte Instanz, also haette ein NOD-Spieler Icon, Name, Beschreibung und Preis
+		// der GDI-Variante gesehen. Der Fallback deckt den Moment ab, in dem noch gar nichts aktiv
+		// ist (Conditions werden erst nach der Trait-Konstruktion ausgewertet).
+		public SupportPowerInfo Info =>
+			Instances.FirstOrDefault(i => !i.IsTraitDisabled)?.Info ?? Instances.Select(i => i.Info).FirstOrDefault();
+		// aotmod 2026-08-05: Name und Description folgen der AKTIVEN Instanz. Vorher waren es
+		// readonly-Felder, im Konstruktor aus der zuerst deklarierten Info eingefroren -- bei
+		// fraktionsspezifischen Varianten haette ein NOD-Spieler dauerhaft den GDI-Text gelesen.
+		// Gecacht, weil FluentProvider.GetMessage pro Frame zu teuer waere; der Cache haengt an
+		// der Info-Referenz und erneuert sich damit genau bei einem Wechsel.
+		SupportPowerInfo textInfo;
+		string cachedName = string.Empty;
+		string cachedDescription = string.Empty;
+
+		public string Name { get { RefreshText(); return cachedName; } }
+		public string Description { get { RefreshText(); return cachedDescription; } }
+
+		void RefreshText()
+		{
+			var info = Info;
+			if (ReferenceEquals(info, textInfo))
+				return;
+
+			textInfo = info;
+			cachedName = info?.Name == null ? string.Empty : FluentProvider.GetMessage(info.Name);
+			cachedDescription = info?.Description == null ? string.Empty : FluentProvider.GetMessage(info.Description);
+		}
 		// virtual fuer die Age-Aufstiege (aotmod 2026-08-05): die laufen nach Age-of-Empires-Muster
 		// -- erst KAUFEN, dann forschen -- und muessen daher klickbar sein, BEVOR der Zaehler
 		// gelaufen ist, und unklickbar, WAEHREND er laeuft. Genau umgekehrt zu Ion Cannon & Co.,
@@ -194,8 +222,6 @@ namespace OpenRA.Mods.Common.Traits
 			Key = key;
 			TotalTicks = info.ChargeInterval;
 			remainingSubTicks = info.StartFullyCharged ? 0 : TotalTicks * 100;
-			Name = info.Name == null ? string.Empty : FluentProvider.GetMessage(info.Name);
-			Description = info.Description == null ? string.Empty : FluentProvider.GetMessage(info.Description);
 
 			Manager = manager;
 		}
@@ -218,7 +244,10 @@ namespace OpenRA.Mods.Common.Traits
 			if (!Active)
 				return;
 
-			var power = Instances[0];
+			// aotmod 2026-08-05: die aktive Instanz, nicht stur die erste -- sonst kaemen die
+			// Lade-Ansagen (Charging/Charged) bei fraktionsspezifischen Varianten aus der
+			// Konfiguration der jeweils anderen Fraktion.
+			var power = Instances.FirstOrDefault(i => !i.IsTraitDisabled) ?? Instances[0];
 			if (Manager.DevMode.FastCharge && remainingSubTicks > 2500)
 				remainingSubTicks = 2500;
 

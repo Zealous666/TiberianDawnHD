@@ -264,3 +264,6 @@ mods/cnc/rules/structures.yaml
 
 # Cash-Logger fuer Balance-Beobachtung (2026-08-04)
 !engine/OpenRA.Mods.Common/Traits/AotCashLog.cs
+
+# Tooltip-Rotfaerbung fehlender Voraussetzungen (2026-08-05)
+!engine/OpenRA.Mods.Common/Widgets/Logic/Ingame/ProductionTooltipLogic.cs

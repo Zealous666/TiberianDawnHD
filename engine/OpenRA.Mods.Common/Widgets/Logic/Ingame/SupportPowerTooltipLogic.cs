@@ -29,6 +29,9 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 {
 	public class SupportPowerTooltipLogic : ChromeLogic
 	{
+		// Dieselbe Fluent-Zeile wie ProductionTooltipLogic: "Requires { $prerequisites }."
+		const string Requires = "label-requires";
+
 		[ObjectCreator.UseCtor]
 		public SupportPowerTooltipLogic(Widget widget, TooltipContainerWidget tooltipContainer,
 			Func<SupportPowersWidget.SupportPowerIcon> getTooltipIcon, World world)
@@ -56,6 +59,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			// gerade nicht leisten kann (User 2026-08-04, wie im Bau-Menue). Beobachter und Replays
 			// haben keinen LocalPlayer, deshalb TraitOrDefault und Null-Pruefung im Delegaten.
 			var playerResources = world.LocalPlayer?.PlayerActor.TraitOrDefault<PlayerResources>();
+			var techTree = world.LocalPlayer?.PlayerActor.TraitOrDefault<TechTree>();
 
 			// Ausgangsgeometrie merken: die Zeilen der rechten Spalte wandern je nachdem, ob es
 			// ueberhaupt einen Preis gibt -- es darf also nicht auf die laufend ueberschriebenen
@@ -106,10 +110,25 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				var requiresSize = int2.Zero;
 				if (requiresLabel != null)
 				{
-					var requiresText = sp.Info.TooltipRequirements;
-					requiresLabel.Visible = !string.IsNullOrEmpty(requiresText);
+					var requirement = sp.Info.TooltipRequirements;
+					requiresLabel.Visible = !string.IsNullOrEmpty(requirement);
 					if (requiresLabel.Visible)
 					{
+						// aotmod 2026-08-05: noch nicht erfuellte Voraussetzung rot (User-Wunsch),
+						// gleiche Mechanik wie im Bau-Menue-Tooltip -- LabelWithHighlightWidget faerbt
+						// den Text zwischen '<' und '>'.
+						//
+						// Eingeklammert wird NUR der Name, nie die ganze Zeile: das Widget prueft
+						// "highlightStart > 0" (LabelWithHighlightWidget.cs), ein '<' an Position 0
+						// wird also gar nicht als Markierung erkannt und landet roh im Tooltip.
+						// Das "Requires ..."-Geruest kommt deshalb aus derselben Fluent-Zeile wie im
+						// Bau-Menue -- gleiche Formulierung, gleiche Uebersetzung, und der Name steht
+						// garantiert nicht am Zeilenanfang.
+						var prereqs = sp.Info.TooltipRequirementsPrerequisites;
+						if (prereqs.Length > 0 && techTree != null && !techTree.HasPrerequisites(prereqs))
+							requirement = $"<{requirement}>";
+
+						var requiresText = FluentProvider.GetMessage(Requires, "prerequisites", requirement);
 						requiresLabel.GetText = () => requiresText;
 						requiresSize = requiresFont.Measure(requiresText);
 						descLabel.Bounds.Y = descLabelY + requiresLabel.Bounds.Height;

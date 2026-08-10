@@ -168,6 +168,11 @@ namespace OpenRA.Mods.Common.Traits
 			"TechTree Prerequisites above, and conditions have no display names to derive this from.")]
 		public readonly string TooltipRequirements = null;
 
+		[Desc("Prerequisites the tooltip checks to decide whether TooltipRequirements is still",
+			"unmet. Purely cosmetic -- it does NOT gate the power (Age of Tiberium gates via",
+			"PauseOnCondition). Left empty the line is never coloured.")]
+		public readonly string[] TooltipRequirementsPrerequisites = [];
+
 		protected SupportPowerInfo() { OrderName = GetType().Name + "Order"; }
 	}
 

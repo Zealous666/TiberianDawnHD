@@ -195,11 +195,15 @@ Background@PRODUCTION_TOOLTIP:
 			Height: 23
 			TextColor: FFFF00
 			Font: Bold
-		Label@REQUIRES:
+		# aotmod 2026-08-05: LabelWithHighlight statt Label -- noch nicht erfuellte Voraussetzungen
+		# werden von der Tooltip-Logik in <> gesetzt und dadurch in HighlightColor gezeichnet.
+		# Ein normales Label kann keine Teile einer Zeile einfaerben.
+		LabelWithHighlight@REQUIRES:
 			X: 5
 			Y: 20
 			Height: 15
 			Font: TinyBold
+			HighlightColor: FF4040
 		Label@DESC:
 			X: 5
 			Y: 20
@@ -256,11 +260,15 @@ Background@PRODUCTION_TOOLTIP_FACTIONSUFFIX:
 			Height: 23
 			TextColor: FFFF00
 			Font: Bold
-		Label@REQUIRES:
+		# aotmod 2026-08-05: LabelWithHighlight statt Label -- noch nicht erfuellte Voraussetzungen
+		# werden von der Tooltip-Logik in <> gesetzt und dadurch in HighlightColor gezeichnet.
+		# Ein normales Label kann keine Teile einer Zeile einfaerben.
+		LabelWithHighlight@REQUIRES:
 			X: 5
 			Y: 20
 			Height: 15
 			Font: TinyBold
+			HighlightColor: FF4040
 		Label@DESC:
 			X: 5
 			Y: 20
@@ -319,11 +327,15 @@ Background@SUPPORT_POWER_TOOLTIP:
 			Height: 23
 			TextColor: FFFF00
 			Font: Bold
-		Label@REQUIRES:
+		# aotmod 2026-08-05: LabelWithHighlight statt Label -- noch nicht erfuellte Voraussetzungen
+		# werden von der Tooltip-Logik in <> gesetzt und dadurch in HighlightColor gezeichnet.
+		# Ein normales Label kann keine Teile einer Zeile einfaerben.
+		LabelWithHighlight@REQUIRES:
 			X: 5
 			Y: 20
 			Height: 15
 			Font: TinyBold
+			HighlightColor: FF4040
 		Label@DESC:
 			X: 5
 			Y: 20
@@ -372,11 +384,15 @@ Background@SUPPORT_POWER_TOOLTIP_FACTIONSUFFIX:
 			Height: 23
 			TextColor: FFFF00
 			Font: Bold
-		Label@REQUIRES:
+		# aotmod 2026-08-05: LabelWithHighlight statt Label -- noch nicht erfuellte Voraussetzungen
+		# werden von der Tooltip-Logik in <> gesetzt und dadurch in HighlightColor gezeichnet.
+		# Ein normales Label kann keine Teile einer Zeile einfaerben.
+		LabelWithHighlight@REQUIRES:
 			X: 5
 			Y: 20
 			Height: 15
 			Font: TinyBold
+			HighlightColor: FF4040
 		Label@DESC:
 			X: 5
 			Y: 20
