@@ -146,7 +146,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (++noBuildLog % 8 == 1)
 				Log.Write("debug", $"[AotReplace][{player.PlayerName}] cannot replace {string.Join("/", Info.UnitTypes)} " +
 					$"({unitCount}/{target} alive): " +
-					(buildable ? "already queued" : "no production queue can build it -- prerequisite building lost?"));
+					(buildable ? "already queued" : "no production queue can build it yet -- its factory is not up (or was lost)"));
 		}
 
 		int noBuildLog;

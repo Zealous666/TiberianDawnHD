@@ -63,6 +63,12 @@ namespace OpenRA.Mods.Common.Traits
 			"independent spenders competing for the same early-Age-1 income.")]
 		public readonly string[] PriorityCoreRoles = ["AFLD", "PROC"];
 
+		[Desc("Age tier whose building programme must be COMPLETE before any upgrade may be bought.",
+			"User spec 2026-08-10: no upgrade at all before every building of Age 1 stands. The only",
+			"upgrade available in Age 0 is the Foundation, and buying it while the Tech Centre is",
+			"still going up is exactly the spending order this chain exists to prevent.")]
+		public readonly int UpgradesAfterAge = 1;
+
 		[Desc("Ticks either priority gate (defence-behind-core, upgrades-behind-both) may hold before",
 			"it releases anyway. A core step is never skipped, so without a timeout one permanently",
 			"unbuildable Airfield would",
@@ -1360,18 +1366,31 @@ namespace OpenRA.Mods.Common.Traits
 		// wrong faction, no plan yet) so the generic module keeps its unmodified behaviour there.
 		public bool RhythmPriorityActive()
 		{
-			if (IsTraitDisabled || planner == null || !planner.Planned)
-				return false;
+			// EVERY "no" is logged from here on. Twice now this gate was reported as fixed and twice it
+			// went on letting upgrades through -- with a Tech Centre still under construction, which
+			// UpgradeHoldRequested plainly covers. Guessing at the reason from the outside has cost two
+			// test runs, so the gate states it itself (User 2026-08-10).
+			string open = null;
 
-			if (Info.Faction != null && player.Faction.InternalName != Info.Faction)
-				return false;
+			if (IsTraitDisabled)
+				open = "trait disabled";
+			else if (planner == null || !planner.Planned)
+				open = "no plan yet";
+			else if (Info.Faction != null && player.Faction.InternalName != Info.Faction)
+				open = $"wrong faction ({player.Faction.InternalName} vs {Info.Faction})";
+			else if (upgradeGateReleased)
+				open = "gate retired earlier";
+			else if (!UpgradeHoldRequested())
+				open = "nothing pending: no core role, no gatekeeper, no defence, no expansion, "
+					+ $"no age saving, age {AgeTier()} rhythm complete";
 
-			// Retired for good (backup plans #1/#2 below latch here) -- never engages again.
-			if (upgradeGateReleased)
-				return false;
+			if (open != null)
+			{
+				if (++gateOpenLog % 32 == 1)
+					Log.Write("debug", $"[AotBuild][{player.PlayerName}] Upgrade gate OPEN -- {open}");
 
-			if (!UpgradeHoldRequested())
 				return false;
+			}
 
 			// Backup #1 -- ONE continuous stall ran too long: something in the chain is genuinely stuck
 			// (an unbuildable Airfield, an expansion that never gets going, a defence step that neither
@@ -1411,7 +1430,19 @@ namespace OpenRA.Mods.Common.Traits
 		bool UpgradeHoldRequested() =>
 			CorePriorityPending() || GatekeeperPriorityPending()
 			|| DefencePriorityPending() || ExpansionPriorityPending()
-			|| AgeSavingPending() || CurrentAgeIncomplete();
+			|| AgeSavingPending() || CurrentAgeIncomplete() || AgeProgrammeIncomplete();
+
+		// Nothing at all until the building programme up to UpgradesAfterAge is finished. Age 0's own
+		// rhythm going quiet is not enough: an upgrade bought there competes directly with the Age
+		// upgrade the bot is saving for.
+		bool AgeProgrammeIncomplete()
+		{
+			if (AgeTier() < Info.UpgradesAfterAge)
+				return true;
+
+			return planner.Rhythm.Any(s => !s.Done && !s.Skipped
+				&& s.Age <= Info.UpgradesAfterAge && s.Kind == AotStepKind.Building);
+		}
 
 		// Saving for the next Age outranks any upgrade. Nothing else covered this: the sprint holds
 		// the Aot builder, but the generic upgrades module is a separate spender and only consults
@@ -1630,6 +1661,7 @@ namespace OpenRA.Mods.Common.Traits
 		}
 
 		int expansionPauseLog;
+		int gateOpenLog;
 		int ageSprintPauseLog;
 		int sequenceWaitLog;
 
