@@ -92,6 +92,13 @@ namespace OpenRA.Mods.Common.Traits
 			if (unitCount >= target)
 				return;
 
+			// Below target and about to try: from here on every exit is a REASON, and a silent one was
+			// exactly the problem. A bot that had lost both ore transporters showed ECONOMY-EMERGENCY
+			// in its status and still never queued a replacement, with nothing in the log to say why
+			// (User 2026-08-10). Logged sparsely -- this runs on a scan interval, and a genuinely
+			// unbuildable transporter would otherwise fill the file.
+			var buildable = false;
+
 			// First currently-buildable type (matches the age-variant pattern used elsewhere in this mod --
 			// RoleVariants/BuildableVariant -- without needing access to that machinery here).
 			var queue = AIUtils.FindQueuesByCategory(player).SelectMany(g => g).ToList();
@@ -113,14 +120,26 @@ namespace OpenRA.Mods.Common.Traits
 				if (!queue.Any(q => q.CanBuild(ai)))
 					continue;
 
+				buildable = true;
+
 				if (queue.Any(q => q.AllQueued().Any(i => i.Item == type)))
-					continue;
+					return;
 
 				if (unitBuilder.RequestedProductionCount(bot, type) == 0)
+				{
 					unitBuilder.RequestUnitProduction(bot, type);
+					Log.Write("debug", $"[AotReplace][{player.PlayerName}] {type} requested ({unitCount}/{target} alive)");
+				}
 
 				return;
 			}
+
+			if (++noBuildLog % 8 == 1)
+				Log.Write("debug", $"[AotReplace][{player.PlayerName}] cannot replace {string.Join("/", Info.UnitTypes)} " +
+					$"({unitCount}/{target} alive): " +
+					(buildable ? "already queued" : "no production queue can build it -- prerequisite building lost?"));
 		}
+
+		int noBuildLog;
 	}
 }

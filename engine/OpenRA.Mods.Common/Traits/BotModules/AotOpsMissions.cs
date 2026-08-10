@@ -1011,8 +1011,11 @@ namespace OpenRA.Mods.Common.Traits
 			// "below critical mass" zero times across a whole run).
 			//
 			// Nothing is ordered during the Age sprint either -- that is the point of the sprint.
+			// Nothing is topped up during an economy emergency either: with the last ore transporter
+			// gone, every credit belongs to its replacement, and a wave that keeps ordering reinforce-
+			// ments is competing with the one purchase that restores the income (User 2026-08-10).
 			var missing = mass - Units.Count - open;
-			if (missing > 0 && !Ops.AgeSprintActive()
+			if (missing > 0 && !Ops.AgeSprintActive() && !Ops.EconomyEmergency()
 				&& Ops.AvailableCash() >= Ops.Info.WaveTopUpMinimumCash
 				&& formingTicks < Ops.Info.WaveFormingTimeout)
 			{
