@@ -3141,24 +3141,34 @@ namespace OpenRA.Mods.Common.Traits
 				case Phase.Deploying:
 				{
 					phaseTicks += Ops.Info.MissionInterval;
+
+					// LOOK FOR THE YARD FIRST. Deploying CONSUMES the MCV -- it transforms into the
+					// yard -- so Mcv() goes null on exactly the tick the expansion succeeds. Checking
+					// that first meant a completed deployment was read as a lost MCV: the mission
+					// finished, released its escort to the pool where the next wave collected it, and
+					// never called RequestExpansionLayout, so nothing was ever built beside the new
+					// yard (User 2026-08-10, both symptoms at once).
+					//
+					// A small tolerance rather than the exact cell: the layout is anchored on the
+					// yard's REAL location below, so a yard a cell off simply shifts the compound with
+					// it. Demanding the exact cell only turned a working expansion into a lost one.
+					yard = Ops.World.Actors.FirstOrDefault(a => a.Owner == Ops.Player && !a.IsDead && a.IsInWorld
+						&& Ops.Info.ConstructionYardTypes.Contains(a.Info.Name)
+						&& (a.Location - Site).LengthSquared <= 4);
+
 					var mcv = Mcv();
-					if (mcv == null)
+					if (yard == null && mcv == null)
 					{
 						Log("MCV lost before deploying -> mission over");
 						Finish();
 						break;
 					}
 
-					// The deployed yard is a NEW actor, so watch for it appearing rather than trying to
-					// track the MCV through its own transformation. The MCV only reaches this phase
-					// standing ON Site, so the yard is expected exactly there -- a tolerance here would
-					// silently accept a shifted yard that the layout no longer fits around.
-					yard = Ops.World.Actors.FirstOrDefault(a => a.Owner == Ops.Player && !a.IsDead && a.IsInWorld
-						&& Ops.Info.ConstructionYardTypes.Contains(a.Info.Name)
-						&& a.Location == Site);
-
 					if (yard != null)
 					{
+						if (yard.Location != Site)
+							Log($"yard deployed at {yard.Location}, {(yard.Location - Site).Length} cell(s) off the planned {Site} -> layout follows the yard");
+
 						Ops.Builder?.RequestExpansionLayout(yard.Location);
 						phase = Phase.Building;
 						phaseTicks = 0;
@@ -3166,7 +3176,7 @@ namespace OpenRA.Mods.Common.Traits
 						break;
 					}
 
-					if (mcv.IsIdle)
+					if (mcv != null && mcv.IsIdle)
 						bot.QueueOrder(new Order("DeployTransform", mcv, false));
 
 					if (phaseTicks >= Ops.Info.ExpansionDeployTimeout)

@@ -1410,7 +1410,31 @@ namespace OpenRA.Mods.Common.Traits
 		// priority chain still outstanding?
 		bool UpgradeHoldRequested() =>
 			CorePriorityPending() || GatekeeperPriorityPending()
-			|| DefencePriorityPending() || ExpansionPriorityPending();
+			|| DefencePriorityPending() || ExpansionPriorityPending()
+			|| AgeSavingPending() || CurrentAgeIncomplete();
+
+		// Saving for the next Age outranks any upgrade. Nothing else covered this: the sprint holds
+		// the Aot builder, but the generic upgrades module is a separate spender and only consults
+		// this gate.
+		bool AgeSavingPending() =>
+			ops != null && ops.Info.Faction == Info.Faction && ops.AgeSprintActive();
+
+		// "Upgrades come LAST" in full, not just behind two named roles. PriorityCoreRoles is
+		// ["AFLD", "PROC"] and both are AGE-1 steps, while CorePriorityPending filters on
+		// `s.Age <= tier` -- so through the whole of Age 0 neither can ever be pending, the gate
+		// opened as soon as Age 0's own rhythm was done, and upgrades were bought while the bot was
+		// supposed to be saving for its Age upgrade. That is exactly the report: upgrades running
+		// with no Airfield standing, because the Airfield could not count yet (User 2026-08-10).
+		//
+		// Any outstanding step of the CURRENT age holds instead. Skipped steps count as resolved, and
+		// the gate's existing stall timeout and lifetime budget still retire it if the rhythm wedges,
+		// so this cannot starve upgrades for good.
+		bool CurrentAgeIncomplete()
+		{
+			var tier = AgeTier();
+			return planner.Rhythm.Any(s => !s.Done && !s.Skipped && s.Age <= tier
+				&& s.Kind == AotStepKind.Building);
+		}
 
 		// See AotBasePlannerBotModule.IsInsideGateCluster for why this needs to exist at all.
 		public bool IsInsideGateCluster(CPos c) => planner != null && planner.IsInsideGateCluster(c);
