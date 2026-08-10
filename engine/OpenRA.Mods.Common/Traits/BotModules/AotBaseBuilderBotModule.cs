@@ -1384,13 +1384,19 @@ namespace OpenRA.Mods.Common.Traits
 				open = "nothing pending: no core role, no gatekeeper, no defence, no expansion, "
 					+ $"no age saving, age {AgeTier()} rhythm complete";
 
-			if (open != null)
+			// Logged on CHANGE, not every n-th call. A "% 32" throttle drops exactly the rare moments
+			// that matter: the gate opened for a handful of ticks as each Tech Centre completed, an
+			// upgrade slipped through, and the counter was already past its logging point -- so the
+			// one event worth seeing left no trace at all (2026-08-10).
+			if (open != gateState)
 			{
-				if (++gateOpenLog % 32 == 1)
-					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Upgrade gate OPEN -- {open}");
-
-				return false;
+				gateState = open;
+				Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Upgrade gate " +
+					(open == null ? "HOLDING" : $"OPEN -- {open}"));
 			}
+
+			if (open != null)
+				return false;
 
 			// Backup #1 -- ONE continuous stall ran too long: something in the chain is genuinely stuck
 			// (an unbuildable Airfield, an expansion that never gets going, a defence step that neither
@@ -1661,7 +1667,7 @@ namespace OpenRA.Mods.Common.Traits
 		}
 
 		int expansionPauseLog;
-		int gateOpenLog;
+		string gateState = "(unset)";
 		int ageSprintPauseLog;
 		int sequenceWaitLog;
 
