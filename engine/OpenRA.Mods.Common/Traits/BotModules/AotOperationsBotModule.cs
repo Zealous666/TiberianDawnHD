@@ -523,6 +523,12 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Air raid forming timeout; launches short-handed if hit.")]
 		public readonly int AirRaidFormingTimeout = 9000;
 
+		[Desc("Fewest helicopters an air raid will set out with. Below this it is cancelled instead,",
+			"and the helicopters go back to the pool for the next attempt -- a single one dies to the",
+			"first SAM without achieving anything. Capped by how many were actually ordered, so a raid",
+			"that only ever wanted one is not blocked by it.")]
+		public readonly int AirRaidMinimumCount = 2;
+
 		[Desc("Air raid executing-phase stall safety net; same purpose as WaveExecutingTimeout.")]
 		public readonly int AirRaidExecutingTimeout = 9000;
 

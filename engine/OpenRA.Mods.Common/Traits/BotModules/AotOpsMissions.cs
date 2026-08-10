@@ -2071,21 +2071,27 @@ namespace OpenRA.Mods.Common.Traits
 			formingTicks += Ops.Info.MissionInterval;
 
 			var open = Ops.OpenRequests(this);
-			var launch = open == 0 && Units.Count > 0;
+
+			// A LONE HELICOPTER IS NOT A RAID. The half-assembled rule reads "Units.Count >= open",
+			// and with two ordered and one built that is 1 >= 1 -- so a single Hind flew out on its
+			// own, at 2500 credits, and achieved nothing (User 2026-08-10). The configured raid size
+			// is two for a reason.
+			//
+			// Below the floor the raid is cancelled rather than sent: Finish() returns the helicopters
+			// to the pool, aircraft are never swept into ground waves, and the next raid picks them up
+			// from there -- so nothing is wasted and the following attempt starts closer to strength.
+			var minimum = Math.Min(Ops.Info.AirRaidMinimumCount, Units.Count + open);
+
+			var launch = open == 0 && Units.Count >= minimum;
 			if (!launch && formingTicks >= Ops.Info.AirRaidFormingTimeout)
-				launch = Units.Count >= open;
+				launch = Units.Count >= minimum;
 
 			if (!launch && formingTicks >= Ops.Info.AirRaidFormingTimeout * 2)
 			{
-				if (Units.Count > 0)
-					launch = true;
-				else
-				{
-					Log("air-raid forming dead end -> raid cancelled");
-					Outcome = AotMissionOutcome.Failure;
-					Finish();
-					return;
-				}
+				Log($"air-raid forming dead end ({Units.Count}/{minimum} helicopter(s)) -> raid cancelled");
+				Outcome = AotMissionOutcome.Failure;
+				Finish();
+				return;
 			}
 
 			if (!launch)
