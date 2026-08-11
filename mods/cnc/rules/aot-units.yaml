@@ -4161,7 +4161,10 @@ aot-seamine:
 	Immobile:
 		OccupiesSpace: true
 	Targetable:
-		TargetTypes: Water, Mine
+		# Siehe aot-minv: "Ground" ergaenzt und RequiresForceFire an DIESES Trait, damit die
+		# Seemine per Force-Fire zerstoerbar ist, ohne zum Auto-Angriffsziel zu werden.
+		TargetTypes: Water, Mine, Ground
+		RequiresForceFire: true
 
 # === Age of Tiberium (aotmod) - NOD Submarine (aot-sub) ===
 # Auto-Tauch-Mechanik analog STNK: Cloak mit CloakedCondition → TargetType-Switch.

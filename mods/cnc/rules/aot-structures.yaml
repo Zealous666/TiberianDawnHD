@@ -1075,6 +1075,13 @@ aot-upgrade-gdi-advtech:
 		BuildPaletteOrder: 20
 		Prerequisites: ~aot-age1
 		Queue: Upgrade.GDI
+		# Feste 2:00 fuer ALLE Gatekeeper (User 2026-08-05), unabhaengig vom Preis. Ohne
+		# BuildDuration leitet ProductionQueue.GetBuildTime die Zeit aus den Kosten ab -- die
+		# Age-1-Gatekeeper lagen dadurch bei 24s, die Age-2-Gatekeeper nur deshalb bei 2:00,
+		# weil sie auf 5000 angehoben wurden. Jede kuenftige Preisaenderung haette die Dauer
+		# wieder mitverschoben. 5000 x BuildDurationModifier 60% = 3000 Ticks = 120s.
+		# Laser Technologies bleibt bewusst aussen vor (User: separat anschauen).
+		BuildDuration: 5000
 		BuildLimit: 1
 		MoveIntoWorld: false
 		Description: Upgrades the Recon Jeep to HUMVEE armor, equips the Mammoth Tank with rockets, unlocks the Rocket Launcher in the Advanced War Factory, and unlocks the Tiberium Refinery.
@@ -1177,6 +1184,13 @@ aot-upgrade-nod-secrettech:
 		# aot-gate-nod, nicht dieses Upgrade, siehe dort.)
 		Prerequisites: ~aot-age1
 		Queue: Upgrade.Nod
+		# Feste 2:00 fuer ALLE Gatekeeper (User 2026-08-05), unabhaengig vom Preis. Ohne
+		# BuildDuration leitet ProductionQueue.GetBuildTime die Zeit aus den Kosten ab -- die
+		# Age-1-Gatekeeper lagen dadurch bei 24s, die Age-2-Gatekeeper nur deshalb bei 2:00,
+		# weil sie auf 5000 angehoben wurden. Jede kuenftige Preisaenderung haette die Dauer
+		# wieder mitverschoben. 5000 x BuildDurationModifier 60% = 3000 Ticks = 120s.
+		# Laser Technologies bleibt bewusst aussen vor (User: separat anschauen).
+		BuildDuration: 5000
 		BuildLimit: 1
 		MoveIntoWorld: false
 		Description: Upgrades the Heavy Tank with flamethrowers, replaces the V2 Rocket Launcher's warhead with napalm, unlocks the Stealth Tank, and unlocks the Tiberium Refinery.
@@ -2391,7 +2405,15 @@ aot-minv:
 	Tooltip:
 		Name: Vehicle Mine
 	Targetable:
-		TargetTypes: GroundActor, Mine
+		# "Ground" ergaenzt + RequiresForceFire (User 2026-08-05: Minen sollen per Force-Fire
+		# zerstoerbar sein). Ohne "Ground" trifft sie gar keine normale Waffe -- die Waffen des
+		# Mods pruefen gegen "Ground", die Mine trug nur "GroundActor"/"Mine".
+		# RequiresForceFire MUSS an DIESES Trait: Target.RequiresForceFire ist laut Kommentar im
+		# Engine-Code "all or nothing" und liefert false, sobald IRGENDEIN aktives Targetable es
+		# nicht setzt -- ein zusaetzliches Trait haette die Sperre also aufgehoben statt gesetzt
+		# und die Minen zum Auto-Angriffsziel gemacht.
+		TargetTypes: GroundActor, Mine, Ground
+		RequiresForceFire: true
 	Immobile:
 		OccupiesSpace: true
 	RenderSprites:
@@ -2931,6 +2953,13 @@ aot-upgrade-mtnk-predator:
 		BuildPaletteOrder: 30
 		Prerequisites: ~aot-age2, ~!aot-mtnk-titan-upgrade
 		Queue: Upgrade.GDI
+		# Feste 2:00 fuer ALLE Gatekeeper (User 2026-08-05), unabhaengig vom Preis. Ohne
+		# BuildDuration leitet ProductionQueue.GetBuildTime die Zeit aus den Kosten ab -- die
+		# Age-1-Gatekeeper lagen dadurch bei 24s, die Age-2-Gatekeeper nur deshalb bei 2:00,
+		# weil sie auf 5000 angehoben wurden. Jede kuenftige Preisaenderung haette die Dauer
+		# wieder mitverschoben. 5000 x BuildDurationModifier 60% = 3000 Ticks = 120s.
+		# Laser Technologies bleibt bewusst aussen vor (User: separat anschauen).
+		BuildDuration: 5000
 		BuildLimit: 1
 		MoveIntoWorld: false
 		Description: Upgrades the Medium Tank with the Predator Turret, transforms the Rocket Launcher into a Hover Rocket Launcher and unlocks the Hover AA. Lockout of GDI Mech Armament.
@@ -2994,6 +3023,13 @@ aot-upgrade-mtnk-titan:
 		BuildPaletteOrder: 40
 		Prerequisites: ~aot-age2, ~!aot-mtnk-predator-upgrade
 		Queue: Upgrade.GDI
+		# Feste 2:00 fuer ALLE Gatekeeper (User 2026-08-05), unabhaengig vom Preis. Ohne
+		# BuildDuration leitet ProductionQueue.GetBuildTime die Zeit aus den Kosten ab -- die
+		# Age-1-Gatekeeper lagen dadurch bei 24s, die Age-2-Gatekeeper nur deshalb bei 2:00,
+		# weil sie auf 5000 angehoben wurden. Jede kuenftige Preisaenderung haette die Dauer
+		# wieder mitverschoben. 5000 x BuildDurationModifier 60% = 3000 Ticks = 120s.
+		# Laser Technologies bleibt bewusst aussen vor (User: separat anschauen).
+		BuildDuration: 5000
 		BuildLimit: 1
 		MoveIntoWorld: false
 		Description: Transforms the Medium Tank into a Titan battle mech, the HMVEE into a Wolverine anti-infantry mech and unlocks the Juggernaut artillery. Lockout of GDI Heavy Ordonance.
@@ -5499,6 +5535,13 @@ aot-upgrade-nod-forbidden:
 		BuildPaletteOrder: 30
 		Prerequisites: ~aot-age2
 		Queue: Upgrade.Nod
+		# Feste 2:00 fuer ALLE Gatekeeper (User 2026-08-05), unabhaengig vom Preis. Ohne
+		# BuildDuration leitet ProductionQueue.GetBuildTime die Zeit aus den Kosten ab -- die
+		# Age-1-Gatekeeper lagen dadurch bei 24s, die Age-2-Gatekeeper nur deshalb bei 2:00,
+		# weil sie auf 5000 angehoben wurden. Jede kuenftige Preisaenderung haette die Dauer
+		# wieder mitverschoben. 5000 x BuildDurationModifier 60% = 3000 Ticks = 120s.
+		# Laser Technologies bleibt bewusst aussen vor (User: separat anschauen).
+		BuildDuration: 5000
 		BuildLimit: 1
 		MoveIntoWorld: false
 		Description: Unlocks Chameleon Spy, Cyborgs and the Secret Shrine.
@@ -5873,6 +5916,11 @@ SAM:
 	Cloak:
 		RequiresCondition: aot-sam-cloak-active
 		CloakStyle: Alpha
+		# 0.3 statt des Defaults 0.55 (User 2026-08-05: "kaum von nicht-cloaked zu
+		# unterscheiden"). Betrifft nur die Darstellung fuer Verbuendete und Detektoren --
+		# fuer alle anderen ist das SAM ohnehin komplett unsichtbar. Gleicher Wert wie
+		# bei den Seeminen, U-Boote liegen mit 0.35 knapp darueber.
+		CloakedAlpha: 0.3
 		InitialDelay: 25
 		# CloakDelay erhoeht (User-Wunsch 2026-07-05): vorher 25 Ticks (~1s ab dem
 		# Angriffs-Trigger) - das SAM begann bereits zu tarnen, waehrend der Turm
@@ -6594,6 +6642,22 @@ aot-wall-nod:
 		PulseCount: 4
 		PulseInterval: 4
 		RequiresCondition: aot-laser-fence
+	# Laserzaun im Tarnfeld mittarnen (User 2026-08-05). ^Wall erbt NICHT von ^Building und
+	# bekommt dessen Cloak@AOTSTEALTH daher nicht -- hier eigenstaendig. Nur der LASER-Zustand:
+	# der Stacheldraht ohne Upgrade bleibt sichtbar. aot-stealth-field ist das GEBAEUDE-Feld
+	# (stationaerer Generator + Outpost); das rein einheitenbezogene aot-stealth-field-mobile
+	# bleibt bewusst aussen vor, wie bei jedem anderen Bauwerk.
+	ExternalCondition@AOTSTEALTH:
+		Condition: aot-stealth-field
+	Cloak@AOTSTEALTH:
+		RequiresCondition: aot-laser-fence && aot-stealth-field
+		CloakType: aot-stealth-field
+		InitialDelay: 0
+		CloakDelay: 50
+		CloakStyle: Alpha
+		CloakedAlpha: 0.35
+		UncloakOn: Attack
+
 
 # Icon-Wechsel nach Laser-Upgrade (Doppel-Aktor-Pattern wie aot-wall-gdi-fs)
 aot-wall-nod-laser:
