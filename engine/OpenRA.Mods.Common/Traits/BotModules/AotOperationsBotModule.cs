@@ -1017,6 +1017,11 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Squared cell distance within which an escort counts as being on its guard post.")]
 		public readonly int ExpansionPostRadius2 = 4;
 
+		[Desc("How many times an escort re-issues the walk to its guard post before giving up and",
+			"digging in where it stands. Without a bound, a post blocked by wreckage would leave that",
+			"tank un-entrenched for the rest of the match.")]
+		public readonly int ExpansionPostAttempts = 8;
+
 		[Desc("Age tier from which the escort digs in at its post (user spec: Age 2, after the tick",
 			"tank upgrade). A tank without the upgrade simply ignores the deploy order.")]
 		public readonly int ExpansionDigInAgeTier = 2;

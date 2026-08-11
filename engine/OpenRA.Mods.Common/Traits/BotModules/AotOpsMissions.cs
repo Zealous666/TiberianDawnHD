@@ -3009,6 +3009,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		// The six dug-in positions from the pre-built layout, relative to the yard's top-left cell.
 		readonly Dictionary<Actor, CVec> postOf = [];
+		readonly Dictionary<Actor, int> postTries = [];
 
 		static readonly CVec[] GuardPosts =
 		[
@@ -3330,12 +3331,30 @@ namespace OpenRA.Mods.Common.Traits
 			foreach (var a in escorts)
 			{
 				var post = yard.Location + postOf[a];
-				if ((a.Location - post).LengthSquared > Ops.Info.ExpansionPostRadius2)
+
+				// ON the post before digging in, not merely near it. Digging in is irreversible for
+				// positioning purposes, so a tank that deploys "close enough" is wrong for good --
+				// which is what the compound looked like: tanks entrenched wherever they happened to
+				// stand (User 2026-08-10: "sie sollten vorher wieder ihren korrekten ort anfahren").
+				if (a.Location != post)
 				{
 					if (a.IsIdle)
+					{
 						MoveUnit(bot, a, post, false);
+						postTries.TryGetValue(a, out var tries);
+						postTries[a] = tries + 1;
+					}
+
+					// Bounded: a post that cannot be reached at all -- blocked by wreckage, or a cell
+					// the layout put somewhere awkward -- must not leave the guard permanently
+					// un-entrenched. After this many attempts it digs in where it stands.
+					if (postTries.TryGetValue(a, out var t) && t < Ops.Info.ExpansionPostAttempts)
+						continue;
 				}
-				else if (digIn && a.IsIdle)
+				else
+					postTries.Remove(a);
+
+				if (digIn && a.IsIdle)
 					bot.QueueOrder(new Order("DeployTransform", a, false));
 			}
 		}
