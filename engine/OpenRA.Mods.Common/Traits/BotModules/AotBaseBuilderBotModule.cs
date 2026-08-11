@@ -1403,15 +1403,8 @@ namespace OpenRA.Mods.Common.Traits
 			// that matter: the gate opened for a handful of ticks as each Tech Centre completed, an
 			// upgrade slipped through, and the counter was already past its logging point -- so the
 			// one event worth seeing left no trace at all (2026-08-10).
-			if (open != gateState)
-			{
-				gateState = open;
-				Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Upgrade gate " +
-					(open == null ? "HOLDING" : $"OPEN -- {open}"));
-			}
-
 			if (open != null)
-				return false;
+				return GateState(open);
 
 			// Backup #1 -- ONE continuous stall ran too long: something in the chain is genuinely stuck
 			// (an unbuildable Airfield, an expansion that never gets going, a defence step that neither
@@ -1421,9 +1414,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (upgradeGateTicks >= Info.PriorityGateTimeoutTicks)
 			{
 				upgradeGateReleased = true;
-				Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Upgrade gate retired -- one continuous hold " +
-					$"exceeded {Info.PriorityGateTimeoutTicks} ticks (rhythm appears stuck); upgrades now run unrestricted");
-				return false;
+				return GateState($"retired -- one continuous hold exceeded {Info.PriorityGateTimeoutTicks} ticks (rhythm appears stuck)");
 			}
 
 			// Backup #2 -- lifetime budget spent. Catches the flicker case the per-stall timeout above
@@ -1432,18 +1423,37 @@ namespace OpenRA.Mods.Common.Traits
 			if (upgradeGateSpentTicks >= Info.PriorityGateTotalBudgetTicks)
 			{
 				upgradeGateReleased = true;
-				Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Upgrade gate retired -- total budget spent " +
-					$"({upgradeGateSpentTicks} ticks held across the match); upgrades now run unrestricted");
-				return false;
+				return GateState($"retired -- total budget spent ({upgradeGateSpentTicks} ticks held across the match)");
 			}
 
 			// Backup #3 -- plenty of cash, so the cashflow argument for holding upgrades back does not
 			// apply right now. Deliberately NOT latched: if the AI spends back down, prioritising again
 			// is the correct behaviour, and this costs no budget either (see the counters in BotTick).
-			if (playerResources != null && playerResources.GetCashAndResources() >= Info.PriorityGateCashOverride)
-				return false;
+			//
+			// EXCEPT while saving for an Age or with the age's buildings unfinished. A balance sitting
+			// there is then not spare money, it is the money being saved -- so this override fired
+			// continuously at 2500 and bought upgrades with exactly the funds put aside for the next
+			// Age. It is also why the gate reported HOLDING while purchases went through: this exit
+			// returned false without ever saying so (User 2026-08-11).
+			if (playerResources != null && playerResources.GetCashAndResources() >= Info.PriorityGateCashOverride
+				&& !AgeSavingPending() && !AgeProgrammeIncomplete())
+				return GateState($"plenty of cash ({playerResources.GetCashAndResources()} >= {Info.PriorityGateCashOverride})");
 
-			return true;
+			return GateState(null);
+		}
+
+		// One line per CHANGE, covering every exit. The previous version logged before the three
+		// backups below it, so it announced HOLDING and then let the caller through anyway.
+		bool GateState(string open)
+		{
+			if (open != gateState)
+			{
+				gateState = open;
+				Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Upgrade gate " +
+					(open == null ? "HOLDING" : $"OPEN -- {open}"));
+			}
+
+			return open == null;
 		}
 
 		// The raw question, without any of the backup releases: is something ahead of upgrades in the
