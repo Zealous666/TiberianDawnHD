@@ -170,8 +170,14 @@ namespace OpenRA.Mods.Common.Traits
 			"leaves a two-cell gap at the gate position.")]
 		public readonly string[] ExpansionGateTypes = [];
 
-		[Desc("Age tier from which the expansion's fence and gate are built (user spec: Age 2).")]
-		public readonly int ExpansionFenceAgeTier = 2;
+		[Desc("Age tier from which the expansion's FENCE is built (user spec 2026-08-11: Age 1 --",
+			"the perimeter is worth having as soon as the compound stands). The gate has its own tier.")]
+		public readonly int ExpansionFenceAgeTier = 1;
+
+		[Desc("Age tier from which the expansion's GATE is built. Separate from the fence: the gate",
+			"is an Age-2 structure, while the perimeter itself is worth having the moment the",
+			"compound stands.")]
+		public readonly int ExpansionGateAgeTier = 2;
 
 		[Desc("Builder ticks a single expansion building may sit unfinished before it is skipped.",
 			"Bounded on purpose: an expansion must never turn into a retry loop the way a stuck",
@@ -490,8 +496,13 @@ namespace OpenRA.Mods.Common.Traits
 				if (s.Done || s.Skipped)
 					continue;
 
-				var lateStep = s.Role == "EXP_FENCE" || s.Role == "EXP_GATE";
-				if (lateStep && tier < Info.ExpansionFenceAgeTier)
+				// Fence and gate are gated SEPARATELY (user spec 2026-08-11): the perimeter goes up as
+				// soon as the compound exists, the gate waits for the age that can actually build one.
+				// Sharing one tier held the whole rim back for the sake of the gate.
+				if (s.Role == "EXP_FENCE" && tier < Info.ExpansionFenceAgeTier)
+					continue;
+
+				if (s.Role == "EXP_GATE" && tier < Info.ExpansionGateAgeTier)
 					continue;
 
 				return s;
