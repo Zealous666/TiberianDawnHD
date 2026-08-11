@@ -46,7 +46,7 @@ namespace OpenRA.Mods.Common.Traits
 		public override object Create(ActorInitializer init) { return new OreTransporter(init.Self, this); }
 	}
 
-	public class OreTransporter : DockClientBase<OreTransporterInfo>, ITick
+	public class OreTransporter : DockClientBase<OreTransporterInfo>, ITick, IResolveOrder
 	{
 		static readonly BitSet<DockType> OreLoadType = new("OreLoad");
 		static readonly BitSet<DockType> UnloadType = new("OreDeliver");
@@ -60,6 +60,8 @@ namespace OpenRA.Mods.Common.Traits
 		readonly Actor self;
 
 		// Stall recovery, see StallRecoveryTicks.
+		Actor lastDeliveryTarget;
+		bool manualHold;
 		CPos lastPos;
 		int stallTicks;
 		bool stallTracking;
@@ -109,6 +111,20 @@ namespace OpenRA.Mods.Common.Traits
 			return best;
 		}
 
+		// See manualHold in Tick: a hand-issued Move or Stop parks the transporter, and pointing it at
+		// a mine or a silo puts it back to work. Bot owners are ignored entirely -- their own modules
+		// issue Move orders for reasons that have nothing to do with parking.
+		void IResolveOrder.ResolveOrder(Actor self, Order order)
+		{
+			if (self.Owner.IsBot)
+				return;
+
+			if (order.OrderString is "Move" or "Stop" or "Scatter")
+				manualHold = true;
+			else if (order.OrderString is "Dock" or "Deliver" or "Harvest" or "Enter")
+				manualHold = false;
+		}
+
 		public override bool CanDockAt(Actor hostActor, IDockHost host, bool forceEnter = false, bool ignoreOccupancy = false)
 		{
 			if (host.GetDockType.Overlaps(UnloadType) && hostActor.Owner != self.Owner)
@@ -134,6 +150,18 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			if (IsTraitDisabled)
 				return;
+
+			// TARGET GONE -> RE-TARGET AT ONCE (User 2026-08-11: "wenn oremine kaputt geht, er
+			// automatisch zum naechst besseren faehrt"). A mine is removed the moment it empties, so
+			// this happens constantly. Without it the transporter keeps walking to where the mine used
+			// to be and only recovers when the stall watchdog eventually fires -- a long detour for
+			// something that can be noticed immediately.
+			if (!manualHold && self.CurrentActivity != null && DockClientManager?.ReservedHostActor != null
+				&& (DockClientManager.ReservedHostActor.IsDead || !DockClientManager.ReservedHostActor.IsInWorld))
+			{
+				self.CancelActivity();
+				return;
+			}
 
 			// Stall recovery -- see StallRecoveryTicks. Only while Empty: Loading and waiting-for-silo-
 			// space are legitimate reasons for CurrentActivity to sit non-null without the actor moving,
@@ -190,12 +218,35 @@ namespace OpenRA.Mods.Common.Traits
 			if (self.CurrentActivity != null)
 				return;
 
+			// SENT SOMEWHERE BY HAND -> STAY THERE (User 2026-08-11). Without this the cycle simply
+			// resumes the moment the move finishes and the transporter drives off to the nearest mine
+			// again, so a player cannot park one anywhere. Cleared by ordering it back to a mine or a
+			// silo, which is how you put it back to work.
+			//
+			// Only for human owners: a bot's own modules issue Move orders too -- nudging units off a
+			// building site, for one -- and honouring those would silently retire the AI's economy.
+			if (manualHold)
+				return;
+
 			if (state == TransportState.Full)
 			{
 				// Deliver: head to the nearest owned silo anywhere on the map.
 				var silo = FindNearestDock(UnloadType);
 				if (silo.HasValue)
 				{
+					// Logged whenever the chosen silo CHANGES. A transporter reported driving past a
+					// newly built expansion silo all the way back to the main base, and there was no
+					// way to tell whether it never considered the near one, could not path to it, or
+					// could not dock there -- the stall diagnostics only ever cover the mine leg
+					// (User 2026-08-11).
+					if (silo.Value.Actor != lastDeliveryTarget)
+					{
+						lastDeliveryTarget = silo.Value.Actor;
+						OpenRA.Log.Write("debug", $"[OreTransporter] {self.Owner.InternalName} #{self.ActorID} at {self.Location}: " +
+							$"delivering to {silo.Value.Actor.Info.Name}@{silo.Value.Actor.Location} " +
+							$"({(silo.Value.Actor.CenterPosition - self.CenterPosition).HorizontalLength / 1024} cells away)");
+					}
+
 					self.QueueActivity(new MoveToDock(self, silo.Value.Actor, silo.Value.Trait));
 					return;
 				}
