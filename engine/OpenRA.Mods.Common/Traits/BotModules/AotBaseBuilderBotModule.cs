@@ -1315,11 +1315,24 @@ namespace OpenRA.Mods.Common.Traits
 					foreach (var c in step.FencePerimeter)
 						allowed.Add(c);
 
+			// The EXPANSION's perimeter belongs here too. It lives in expansionSteps, not in
+			// planner.Rhythm, so every segment the expansion built counted as "outside every ring" and
+			// was sold again within moments -- a build-and-demolish loop that burned the compound's
+			// money and never produced a fence (User 2026-08-11).
+			foreach (var s in expansionSteps)
+				if (s.Role is "EXP_FENCE" or "EXP_GATE")
+					allowed.Add(s.TopLeft);
+
 			if (allowed.Count == 0)
 				return;
 
+			// Matched against the whole wall CHAIN, not just WallType: after the laser upgrade the
+			// expansion builds aot-wall-nod-laser, which this filter would not have recognised as a
+			// fence segment at all.
+			var wallTypes = new HashSet<string>(Info.ExpansionWallTypes) { Info.WallType };
+
 			var stray = world.ActorsHavingTrait<Building>()
-				.Where(a => a.Owner == player && !a.IsDead && a.Info.Name == Info.WallType
+				.Where(a => a.Owner == player && !a.IsDead && wallTypes.Contains(a.Info.Name)
 					&& !bridgeWallCells.Contains(a.Location) && !allowed.Contains(a.Location))
 				.ToList();
 
