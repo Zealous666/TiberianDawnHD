@@ -987,7 +987,10 @@ Player:
 		LifeTime: -1
 		OneShot: true
 		Cost: 7500
-		ChargeInterval: 22500
+		# Forschungszeit sinkt mit jeder Stufe (User 2026-08-05): 15:00 / 12:00 / 10:00.
+		# Roher Tickwert bei 25 Ticks/s -- Super Powers kennen keinen BuildDurationModifier,
+		# Preis und Dauer sind hier also ohnehin entkoppelt.
+		ChargeInterval: 18000
 		RequiresCondition: aot-age1-active && aot-faction-gdi
 		PauseOnCondition: !aot-age2-unlocked || lowpower
 		IconImage: aot-age2-upgrade
@@ -1021,7 +1024,10 @@ Player:
 		LifeTime: -1
 		OneShot: true
 		Cost: 7500
-		ChargeInterval: 22500
+		# Forschungszeit sinkt mit jeder Stufe (User 2026-08-05): 15:00 / 12:00 / 10:00.
+		# Roher Tickwert bei 25 Ticks/s -- Super Powers kennen keinen BuildDurationModifier,
+		# Preis und Dauer sind hier also ohnehin entkoppelt.
+		ChargeInterval: 18000
 		RequiresCondition: aot-age1-active && aot-faction-nod
 		PauseOnCondition: !aot-age2-unlocked || lowpower
 		IconImage: aot-age2-upgrade
@@ -1055,7 +1061,10 @@ Player:
 		LifeTime: -1
 		OneShot: true
 		Cost: 10000
-		ChargeInterval: 22500
+		# Forschungszeit sinkt mit jeder Stufe (User 2026-08-05): 15:00 / 12:00 / 10:00.
+		# Roher Tickwert bei 25 Ticks/s -- Super Powers kennen keinen BuildDurationModifier,
+		# Preis und Dauer sind hier also ohnehin entkoppelt.
+		ChargeInterval: 15000
 		RequiresCondition: aot-age2-active && aot-faction-gdi
 		PauseOnCondition: !aot-age3-unlocked || lowpower
 		IconImage: aot-age3-upgrade
@@ -1089,7 +1098,10 @@ Player:
 		LifeTime: -1
 		OneShot: true
 		Cost: 10000
-		ChargeInterval: 22500
+		# Forschungszeit sinkt mit jeder Stufe (User 2026-08-05): 15:00 / 12:00 / 10:00.
+		# Roher Tickwert bei 25 Ticks/s -- Super Powers kennen keinen BuildDurationModifier,
+		# Preis und Dauer sind hier also ohnehin entkoppelt.
+		ChargeInterval: 15000
 		RequiresCondition: aot-age2-active && aot-faction-nod
 		PauseOnCondition: !aot-age3-unlocked || lowpower
 		IconImage: aot-age3-upgrade
