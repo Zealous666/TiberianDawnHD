@@ -466,9 +466,10 @@ namespace OpenRA.Mods.Common.Traits
 				Add(role, variants, offset);
 
 			// Fence as one step PER CELL rather than a single Fence-kind step: the expansion runs on its
-			// own simple driver (see TickExpansion) which knows nothing about node/perimeter bookkeeping,
-			// and a wall carries LineBuildInfo anyway, so each cell is placed with a LineBuild order and
-			// the engine connects the run itself. Gap at (-1,+7)/(0,+7) is the gate.
+			// own simple driver (see TickExpansion) which knows nothing about node/perimeter bookkeeping.
+			// Because every cell is listed here, each one is placed as a SINGLE segment (PlaceBuilding, see
+			// TickPending) -- LineBuild would splice walls straight through the gate gap.
+			// Gap at (-1,+7)/(0,+7) is the gate.
 			var wallChain = Info.ExpansionWallTypes.Length > 0
 				? Info.ExpansionWallTypes
 				: Info.WallType != null ? [Info.WallType] : System.Array.Empty<string>();
@@ -2545,9 +2546,20 @@ namespace OpenRA.Mods.Common.Traits
 			}
 
 			// Bridge walls are SINGLE segments (PlaceBuilding): LineBuild would auto-connect intermediate
-			// segments we could not sell later. Fences use LineBuild so the ring closes between nodes.
+			// segments we could not sell later. Main-base fences DO use LineBuild -- they are placed as
+			// corner NODES only (FenceNodes) and rely on the engine to fill the runs between them.
+			//
+			// The EXPANSION fence must not (User 2026-08-11: "unten beim ausgang wird eine mauer zuviel
+			// gebaut, da wird später kein tor reinpassen"). It enumerates every perimeter cell itself, so
+			// LineBuild has nothing left to contribute -- but it does actively harm: placing the segment at
+			// (+1,+7) while (-2,+7) already stands is a straight run of 3 cells, well inside LineBuild's
+			// Range of 5, so the engine splices walls into (-1,+7) and (0,+7) -- exactly the two cells the
+			// Age-2 gate needs. PruneStrayFenceSegments then sold them again (log: stray at 100,157), which
+			// is why the gap kept flickering shut instead of staying open. Same splice closed the bib row
+			// between the two stubs at (-2,+8)/(+1,+8).
 			var isLineBuildable = ai.HasTraitInfo<LineBuildInfo>();
-			var orderName = !pendingIsBridgeWall && isLineBuildable ? "LineBuild" : "PlaceBuilding";
+			var isExpansionFence = pending.Role == "EXP_FENCE";
+			var orderName = !pendingIsBridgeWall && !isExpansionFence && isLineBuildable ? "LineBuild" : "PlaceBuilding";
 			bot.QueueOrder(new Order(orderName, player.PlayerActor, Target.FromCell(world, pendingCell), false)
 			{
 				TargetString = pendingType,
