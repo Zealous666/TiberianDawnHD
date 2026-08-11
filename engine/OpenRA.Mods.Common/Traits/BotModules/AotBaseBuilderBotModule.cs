@@ -35,6 +35,15 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Wall used for bridges and fences.")]
 		public readonly string WallType = null;
 
+		[ActorReference]
+		[Desc("Wall chain for the EXPANSION fence, best first. A chain rather than WallType's single",
+			"actor because the wall changes with the tech: aot-wall-nod carries",
+			"\"~!aot-laser-fence-upgrade\", so the moment the laser fence is researched the barbwire",
+			"stops being buildable -- and a single-actor fence then silently never gets built at all",
+			"(User 2026-08-11: gate up in Age 2, no fence anywhere). Falls back to WallType when",
+			"empty, so a mod that never upgrades its walls needs no extra configuration.")]
+		public readonly string[] ExpansionWallTypes = [];
+
 		[Desc("Abort a wall bridge after this many segments.")]
 		public readonly int MaxBridgeLength = 24;
 
@@ -460,14 +469,18 @@ namespace OpenRA.Mods.Common.Traits
 			// own simple driver (see TickExpansion) which knows nothing about node/perimeter bookkeeping,
 			// and a wall carries LineBuildInfo anyway, so each cell is placed with a LineBuild order and
 			// the engine connects the run itself. Gap at (-1,+7)/(0,+7) is the gate.
-			if (Info.WallType != null)
+			var wallChain = Info.ExpansionWallTypes.Length > 0
+				? Info.ExpansionWallTypes
+				: Info.WallType != null ? [Info.WallType] : System.Array.Empty<string>();
+
+			if (wallChain.Length > 0)
 			{
 				foreach (var c in FencePerimeter(yard).Distinct())
 					expansionSteps.Add(new AotPlanStep
 					{
 						Kind = AotStepKind.Building,
 						Role = "EXP_FENCE",
-						Variants = [Info.WallType],
+						Variants = wallChain,
 						TopLeft = c,
 						Defense = true
 					});
@@ -610,11 +623,14 @@ namespace OpenRA.Mods.Common.Traits
 			if (step == null)
 				return;
 
+			var triedNone = true;
 			foreach (var v in step.Variants)
 			{
 				var q = ExpansionQueueFor(v, yardActor);
 				if (q == null)
 					continue;
+
+				triedNone = false;
 
 				bot.QueueOrder(Order.StartProduction(q.Actor, v, 1));
 				expansionPendingType = v;
@@ -623,7 +639,16 @@ namespace OpenRA.Mods.Common.Traits
 				Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Expansion building {v} for {step.Role} at {step.TopLeft}");
 				return;
 			}
+
+			// Nothing in the chain is buildable at the expansion's own yard. Reported rather than
+			// skipped in silence: the fence failed exactly this way for a whole match and left no
+			// trace at all, because the loop simply fell through.
+			if (triedNone && ++expansionNoQueueLog % 32 == 1)
+				Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Expansion {step.Role} at {step.TopLeft}: " +
+					$"none of [{string.Join(", ", step.Variants)}] can be built at the expansion yard");
 		}
+
+		int expansionNoQueueLog;
 
 		AotPlanStep BuildNavalStep(bool logImmediately)
 		{

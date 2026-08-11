@@ -132,6 +132,10 @@ Player:
 		Faction: nod
 		BuildingQueues: Building.Nod
 		WallType: aot-wall-nod
+		# Kette fuer den EXPANSIONS-Zaun, bestes zuerst (User-Fund 2026-08-11: Tor in Age 2 gebaut,
+		# aber kein Zaun). aot-wall-nod traegt "~!aot-laser-fence-upgrade" -- sobald der Laserzaun
+		# erforscht ist, ist der Stacheldraht unbaubar, und ein Einzel-Aktor faellt dann still aus.
+		ExpansionWallTypes: aot-wall-nod-laser, aot-wall-nod
 		# Base-Expansion-Layout (User-Briefing 2026-08-03). Die GEOMETRIE ist fest im Code verdrahtet
 		# (RequestExpansionLayout), weil sie vom User exakt im Editor vorgebaut wurde -- siehe
 		# memory/ai-base-expansion-layout.md. Hier stehen nur die Aktor-Ketten.
