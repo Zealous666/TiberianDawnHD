@@ -67,7 +67,7 @@ aot-MtnkPredator:
 	Report: tnkfire4.aud
 
 # === Age of Tiberium (aotmod) - MTNK Railgun: Hochschaden-Laser ===
-# Tier 3: LaserZap-Projektil, ~50% mehr Schaden (6000 statt 4000), kein Spread.
+# Tier 3: LaserZap-Projektil, kein Spread. Balancing 2026-08-11: Damage 6000→4000.
 aot-MtnkRailgun:
 	ReloadDelay: 50
 	Range: 6c0
@@ -79,7 +79,7 @@ aot-MtnkRailgun:
 		ZOffset: 2047
 	Warhead@1Dam: SpreadDamage
 		Spread: 42
-		Damage: 6000
+		Damage: 4000
 		Versus:
 			None: 25
 			Wood: 100
@@ -91,6 +91,7 @@ aot-MtnkRailgun:
 		InvalidTargets: Vehicle, Structure, Wall, Husk, Trees, Creep
 
 # === Age of Tiberium (aotmod) - HTNK Laser: weißer LaserZap wie MTNK Railgun ===
+# Balancing 2026-08-11: Damage 8000→5000.
 aot-HtnkLaser:
 	ReloadDelay: 50
 	Burst: 2
@@ -104,7 +105,7 @@ aot-HtnkLaser:
 		ZOffset: 2047
 	Warhead@1Dam: SpreadDamage
 		Spread: 42
-		Damage: 8000
+		Damage: 5000
 		Versus:
 			None: 25
 			Wood: 100
@@ -115,19 +116,19 @@ aot-HtnkLaser:
 		SmudgeType: Scorch
 		InvalidTargets: Vehicle, Structure, Wall, Husk, Trees, Creep
 
+# Balancing 2026-08-11: Burst 3→1 (langsame Kadenz wie vorher), ReloadDelay 60→45,
+# Damage 4000→3000. HarpyLaser entkoppelt (eigene Stats für schnelles Feuer).
 aot-LtnkLaser:
-	ReloadDelay: 60
+	ReloadDelay: 45
 	Range: 6c0
 	Report: obelray1.aud
-	Burst: 3
-	BurstDelay: 8
 	Projectile: LaserZap
 		Width: 40
 		HitAnim: laserfire
 		ZOffset: 2047
 	Warhead@1Dam: SpreadDamage
 		Spread: 42
-		Damage: 4000
+		Damage: 3000
 		Versus:
 			Wood: 50
 		DamageTypes: Prone50Percent, TriggerProne, FireDeath
@@ -314,8 +315,27 @@ aot-HarpyAGGun:
 	Warhead@1Dam: SpreadDamage
 		Damage: 2000
 
+# Balancing 2026-08-11: entkoppelt von aot-LtnkLaser. Schnelles Burst-Feuer (Burst 3)
+# für Harpy + Buggy, aber Damage 1800 (vorher 4000).
 aot-HarpyLaser:
-	Inherits: aot-LtnkLaser
+	ReloadDelay: 60
+	Range: 6c0
+	Report: obelray1.aud
+	Burst: 3
+	BurstDelay: 8
+	Projectile: LaserZap
+		Width: 40
+		HitAnim: laserfire
+		ZOffset: 2047
+	Warhead@1Dam: SpreadDamage
+		Spread: 42
+		Damage: 1800
+		Versus:
+			Wood: 50
+		DamageTypes: Prone50Percent, TriggerProne, FireDeath
+	Warhead@2Smu: LeaveSmudge
+		SmudgeType: Scorch
+		InvalidTargets: Vehicle, Structure, Wall, Husk, Trees, Creep
 
 # === Age of Tiberium (aotmod) - BIKE Laser (Laser Technologies Upgrade) ===
 # Dual-Laser für NOD Recon Bike: je ein Schuss aus linker und rechter Kanone.
