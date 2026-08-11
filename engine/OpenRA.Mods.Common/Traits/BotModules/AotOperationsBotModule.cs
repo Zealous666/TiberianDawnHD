@@ -2401,6 +2401,14 @@ namespace OpenRA.Mods.Common.Traits
 			return taken;
 		}
 
+		// An own unit of one of these types that no mission has claimed. Used to pick up an MCV left
+		// behind by a failed expansion instead of paying for another one.
+		public Actor FindUnclaimed(IEnumerable<string> types) =>
+			World.Actors.FirstOrDefault(a => a.Owner == Player && !a.IsDead && a.IsInWorld
+				&& a.OccupiesSpace != null
+				&& types.Contains(a.Info.Name)
+				&& !owned.ContainsKey(a));
+
 		public void AssignFromPool(AotMission mission, List<Actor> units)
 		{
 			foreach (var a in units)
@@ -2607,10 +2615,15 @@ namespace OpenRA.Mods.Common.Traits
 			if (yards > Info.ExpansionMaxYards)
 				return true;
 
-			// An MCV already rolling (ours, or one left over from a dead mission) is a pending
-			// expansion too -- ordering a second is how a bot ended up with several.
+			// An MCV that a live mission is driving counts as a pending expansion -- ordering a second
+			// is how a bot ended up with several. An UNCLAIMED one does not: it is the leftover of a
+			// failed attempt, and treating it as "an expansion is already under way" is what left it
+			// parked forever while no new mission was ever started to use it (User 2026-08-11:
+			// "untaetige MCVs sollten abgestellt werden und fuer eine neue base expansion zur
+			// verfuegung stehen"). The new mission picks it up below.
 			if (World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld
-					&& Info.ExpansionMcvTypes.Contains(a.Info.Name)))
+					&& Info.ExpansionMcvTypes.Contains(a.Info.Name)
+					&& owned.ContainsKey(a)))
 				return true;
 
 			// No site anywhere on this map: report it and keep retrying quietly. Crucially NO mission

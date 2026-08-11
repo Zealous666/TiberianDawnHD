@@ -3077,7 +3077,19 @@ namespace OpenRA.Mods.Common.Traits
 							break;
 
 						if (Ops.Info.ExpansionMcvTypes.Length > 0)
-							Ops.QueueRequest(this, "mcv", Ops.Info.ExpansionMcvTypes, 1);
+						{
+							// Reuse before buying: an MCV orphaned by a failed convoy is worth more than
+							// the 2000-odd credits a replacement costs, and it was previously invisible
+							// -- MCVs are excluded from the unit pool, so nothing ever picked one up.
+							var spare = Ops.FindUnclaimed(Ops.Info.ExpansionMcvTypes);
+							if (spare != null)
+							{
+								Ops.AssignFromPool(this, [spare]);
+								Log($"reusing idle {spare.Info.Name}@{spare.Location} instead of ordering one");
+							}
+							else
+								Ops.QueueRequest(this, "mcv", Ops.Info.ExpansionMcvTypes, 1);
+						}
 
 						if (Ops.Info.ExpansionEscortTypes.Length > 0 && Ops.Info.ExpansionEscortCount > 0)
 							Ops.QueueRequest(this, "escort", Ops.Info.ExpansionEscortTypes, Ops.Info.ExpansionEscortCount);
