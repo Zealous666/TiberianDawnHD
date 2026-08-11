@@ -192,6 +192,14 @@ Player:
 	# jetzt exklusiv. Diese Instanz bleibt nur für ihre Ökonomie-Dienste (z.B. Pause der
 	# Einheitenproduktion bis Raffinerie existiert); Fractions/Delays unten sind damit inert.
 	BaseBuilderBotModule@aot:
+		# ABGESCHALTET (User-Fund 2026-08-11: "in beiden base expansions scheint die refinery nicht
+		# mehr da zu sein, sieht aus wie verkauft"). Die Vanilla-Automatik verkauft eine Refinery,
+		# wenn im Umkreis von SellRefineryNoResourceDistance (12) kein TIBERIUM und kein Blossom Tree
+		# liegt -- und genau das ist bei einer Expansion der Normalfall: sie steht an einer ORE MINE,
+		# die weder ein Ressourcen-Tile noch ein ResourceCreator ist. Die Expansions-Refinery wurde
+		# damit zuverlaessig kurz nach dem Bau wieder abgerissen.
+		# Zweites Kriterium waere ebenso falsch: PROC2 steht plangemaess nahe der ersten Refinery.
+		SellRefineryInterval: -1
 		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
 		BuildingQueues:
 		DefenseQueues:
