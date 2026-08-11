@@ -580,9 +580,24 @@ namespace OpenRA.Mods.Common.Traits
 				.Where(a => a.Owner == player && !a.IsDead && a.IsInWorld && a.OccupiesSpace != null)
 				.ToList();
 
+			// Re-evaluated BOTH ways every pass, not just set once. A step that was marked done stayed
+			// done forever, so a destroyed expansion building was never replaced -- an expansion that
+			// lost its power plant simply sat there without one (User 2026-08-11). Anything standing on
+			// its planned cell counts as done; anything gone goes back on the list.
 			foreach (var s in expansionSteps)
-				if (!s.Done && ownBuildings.Any(a => a.Location == s.TopLeft && s.Variants.Contains(a.Info.Name)))
+			{
+				var standing = ownBuildings.Any(a => a.Location == s.TopLeft && s.Variants.Contains(a.Info.Name));
+				if (standing)
+				{
 					s.Done = true;
+					s.Skipped = false;
+				}
+				else if (s.Done && expansionPendingCell != s.TopLeft)
+				{
+					s.Done = false;
+					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Expansion {s.Role} at {s.TopLeft} is gone -> rebuilding");
+				}
+			}
 
 			if (expansionPendingType != null)
 			{
