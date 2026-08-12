@@ -54,6 +54,15 @@ namespace OpenRA.Mods.Common.Traits
 		// site that was already given up on would just restart the same stuck cycle forever.
 		public bool Skipped;
 
+		// Set by RebuildScan when a step that had ALREADY been built loses its building, and cleared the
+		// moment it is rebuilt. A rebuild of a lost CORE structure is base RECOVERY, not fresh expansion,
+		// and must outrank the saving holds (Age sprint, expansion priority, economy emergency): a bot
+		// whose base was gutted has to rebuild it before hoarding for the next Age, not sit on rubble with
+		// a full bank (User 2026-08-12: purple lost yard + many main-base buildings, had everything it
+		// needed to rebuild around the survivors, but the Age sprint held every step). Defence-step
+		// rebuilds do NOT get this: a lost turret is not survival-critical and can wait for the sprint.
+		public bool Rebuilding;
+
 		// Which Age tier (0-3) this step belongs to, set from BuildRhythm's own section boundaries.
 		// Consumed by AotBaseBuilderBotModule.AgeRhythmComplete(tier) to gate the age-UPGRADE purchase
 		// on "this tier's entire planned Rhythm is done" (user spec 2026-07-31), so it stops competing

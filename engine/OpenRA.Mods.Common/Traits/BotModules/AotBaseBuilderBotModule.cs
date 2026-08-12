@@ -1305,7 +1305,13 @@ namespace OpenRA.Mods.Common.Traits
 
 					step.Done = false;
 					step.StuckTicks = 0;
-					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Plan building {step.Role} at {step.TopLeft} lost -> rebuild");
+
+					// This step stood and then fell: its rebuild is base recovery. A CORE structure so
+					// marked is exempt from the saving holds until it stands again (see the hold checks
+					// in StartStep). Defence turrets are deliberately not -- they can wait for the sprint.
+					step.Rebuilding = !step.Defense;
+
+					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Plan building {step.Role} at {step.TopLeft} lost -> rebuild{(step.Rebuilding ? " (recovery: outranks saving holds)" : "")}");
 				}
 			}
 		}
@@ -1807,8 +1813,15 @@ namespace OpenRA.Mods.Common.Traits
 			// refinery braucht"). While it is not yet buildable the Rhythm runs normally and works
 			// towards exactly those prerequisites; the hold bites the moment the refinery itself is
 			// the thing that could be bought.
+			// step.Rebuilding is the recovery exemption throughout: a CORE structure that stood and fell
+			// (RebuildScan set the flag) must be rebuilt regardless of any SAVING hold. A bot whose base
+			// was gutted rebuilds first, then saves -- otherwise it hoards on rubble, and if the lost
+			// building was the Tech Centre it can never even reach the Age it is saving for (User
+			// 2026-08-12: "er hat auch kein tmpl mehr, er kann also garnicht das nächste zeitalter-upgrade
+			// starten ohne wiederaufzubauen").
 			if (ops != null && ops.Info.Faction == Info.Faction && ops.EconomyEmergency()
 				&& step.Role != "PROC" && !step.Role.StartsWith("EXP_", StringComparison.Ordinal)
+				&& !step.Rebuilding
 				&& RefineryBuildable())
 			{
 				if (++economyPauseLog % 16 == 0)
@@ -1829,7 +1842,8 @@ namespace OpenRA.Mods.Common.Traits
 			// Centre in the plan and is the last thing built before the stop, because the credits being
 			// saved need somewhere to sit.
 			if (ops != null && ops.Info.Faction == Info.Faction && ops.AgeSprintActive()
-				&& step.Role != "PROC" && step.Role != "SILO")
+				&& step.Role != "PROC" && step.Role != "SILO"
+				&& !step.Rebuilding)
 			{
 				if (++ageSprintPauseLog % 16 == 0)
 					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Age sprint: holding {step.Role} until the upgrade is bought");
@@ -1881,7 +1895,8 @@ namespace OpenRA.Mods.Common.Traits
 			// by itself when the yard deploys, and ExpansionHoldsPriority is bounded by
 			// ExpansionPriorityTimeout, so an expansion that never works out cannot freeze the base.
 			if (ops != null && ops.Info.Faction == Info.Faction && ops.ExpansionHoldsPriority()
-				&& step.Role != "PROC" && !step.Role.StartsWith("EXP_", StringComparison.Ordinal))
+				&& step.Role != "PROC" && !step.Role.StartsWith("EXP_", StringComparison.Ordinal)
+				&& !step.Rebuilding)
 			{
 				if (++expansionPauseLog % 16 == 0)
 					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Expansion has priority: holding {step.Role}");
@@ -2622,7 +2637,10 @@ namespace OpenRA.Mods.Common.Traits
 
 			// Fence steps stay open until every node is placed (NextFenceCell marks them Done).
 			if (pending.Kind != AotStepKind.Fence)
+			{
 				pending.Done = true;
+				pending.Rebuilding = false;   // recovered -> saving holds apply to it again
+			}
 
 			pending = null;
 		}
