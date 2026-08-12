@@ -442,6 +442,13 @@ Player:
 	# Platzierung (siehe ProductionQueue.cs:552-565).
 	# =========================================================================
 	BaseBuilderBotModule@aotupgrades:
+		# ABGESCHALTET wie bei @aot (User 2026-08-11: "fein verkauft in expansions weiterhin
+		# sporadisch seine refinery"). Der Schalter stand nur auf der @aot-Instanz -- diese hier hat
+		# ein eigenes SellRefineryInterval (Default 5000) UND ein eigenes RefineryTypes, lief also
+		# unveraendert weiter und verkaufte allein. Klassische Zwei-Instanzen-Falle: von
+		# BaseBuilderBotModule existieren ZWEI Auspraegungen, jede mit eigenem Zustand.
+		# Deshalb sporadisch statt zuverlaessig -- es feuerte nur noch jeder zweite Zaehler.
+		SellRefineryInterval: -1
 		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
 		BuildingQueues: Age.GDI, Age.Nod, Upgrade.GDI, Upgrade.Nod
 		ConstructionYardTypes: fact, fact.gdi, fact.nod

@@ -65,6 +65,10 @@ namespace OpenRA.Mods.Common.Traits
 		public CPos BaseCentre { get; private set; }
 
 		readonly HashSet<CPos> reachable = [];
+
+		// Same flood fill, but a cell held by a static blocker (tree, husk, rock, civ building) is
+		// not a step. Used for expansion sites, where "we could shoot our way there" is not a route.
+		readonly HashSet<CPos> clearReachable = [];
 		int refreshTicks;
 
 		// Own quarter: the map quadrant (relative to the bounds centre) containing the own spawn.
@@ -90,6 +94,26 @@ namespace OpenRA.Mods.Common.Traits
 			&& loco.MovementCostForCell(c) != PathGraph.MovementCostForUnreachableCell;
 
 		public bool IsReachable(CPos c) => reachable.Contains(c);
+
+		// Terrain passable AND not occupied by a static blocker. Trees, tree husks and civilian
+		// buildings all carry Building, which is what makes their cell impassable to a vehicle;
+		// Mobile actors are ignored on purpose -- a tank parked in a gap moves out of the way.
+		public bool IsClearPassable(CPos c)
+		{
+			if (!IsPassable(c))
+				return false;
+
+			foreach (var a in World.ActorMap.GetActorsAt(c))
+				if (a.TraitOrDefault<Building>() != null)
+					return false;
+
+			return true;
+		}
+
+		// Reachable WITHOUT shooting anything out of the way -- the criterion for an expansion site.
+		public bool IsClearReachable(CPos c) => clearReachable.Contains(c);
+
+		public int ClearReachableCount => clearReachable.Count;
 
 		public bool IsInOwnQuarter(CPos c)
 		{
@@ -195,6 +219,7 @@ namespace OpenRA.Mods.Common.Traits
 		void RefreshReachability()
 		{
 			reachable.Clear();
+			clearReachable.Clear();
 			if (loco == null)
 				return;
 
@@ -223,6 +248,57 @@ namespace OpenRA.Mods.Common.Traits
 					if (!reachable.Contains(n) && IsPassable(n))
 					{
 						reachable.Add(n);
+						queue.Enqueue(n);
+					}
+				}
+			}
+
+			RefreshClearReachability(start.Value);
+		}
+
+		// Second flood fill, same seed, stricter predicate: a cell blocked by a STATIC actor (tree,
+		// tree husk, rock, civilian building, wall) does not count as a step.
+		//
+		// IsPassable is purely terrain-based -- MovementCostForCell knows nothing about actors. A
+		// tree line across the only isthmus therefore reads as open ground, and `reachable` happily
+		// spans it. For an attack wave that is roughly true: it shoots its way through. For an
+		// expansion convoy it is not (User 2026-08-11: "es gibt kein landweg hin, bei dem nicht
+		// bäume zerstört werden müssten. das muss bei der location-wahl für expansion mit
+		// berücksichtigt werden"). The MCV has no weapon, so a site behind a tree line is simply
+		// unreachable, and the convoy grinds against it until the move timeout kills the mission.
+		void RefreshClearReachability(CPos start)
+		{
+			if (!IsClearPassable(start))
+			{
+				// Seed itself blocked (own base furniture): fall back to the nearest clear ring cell,
+				// otherwise the whole strict set would come out empty and reject every site.
+				CPos? seed = null;
+				for (var r = 1; r <= 6 && seed == null; r++)
+					foreach (var c in AotOpsUtils.Ring(BaseCentre, r))
+						if (IsClearPassable(c))
+						{
+							seed = c;
+							break;
+						}
+
+				if (seed == null)
+					return;
+
+				start = seed.Value;
+			}
+
+			var queue = new Queue<CPos>();
+			queue.Enqueue(start);
+			clearReachable.Add(start);
+			while (queue.Count > 0)
+			{
+				var c = queue.Dequeue();
+				foreach (var d in CVec.Directions)
+				{
+					var n = c + d;
+					if (!clearReachable.Contains(n) && IsClearPassable(n))
+					{
+						clearReachable.Add(n);
 						queue.Enqueue(n);
 					}
 				}

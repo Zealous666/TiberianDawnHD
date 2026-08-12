@@ -1011,6 +1011,17 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Timeout for the MCV to actually turn into a construction yard.")]
 		public readonly int ExpansionDeployTimeout = 1500;
 
+		[Desc("Cell distance the escort may trail behind the MCV before the MCV waits for it.",
+			"The convoy had no cohesion at all: the MCV drove off on its own path and the escort was",
+			"only ever re-ordered while IDLE, so a tank that stopped to shoot at something was never",
+			"caught up again (User 2026-08-11: \"jetzt faehrt mcv weiter. aber ohne eskorte\"). An MCV",
+			"that reaches the site alone deploys an undefended compound, which is the one thing the",
+			"escort exists to prevent.")]
+		public readonly int ExpansionConvoyCohesion = 8;
+
+		[Desc("Mission ticks between two convoy diagnostics while the expansion is under way.")]
+		public readonly int ExpansionConvoyDiagInterval = 8;
+
 		[Desc("Squared cell distance at which the convoy counts as arrived at the site.")]
 		public readonly int ExpansionArriveRadius2 = 36;
 
@@ -3019,6 +3030,21 @@ namespace OpenRA.Mods.Common.Traits
 			if (builder == null)
 			{
 				reason = "no base builder to read the layout from";
+				return false;
+			}
+
+			// A route the convoy would have to SHOOT open is not a route (User 2026-08-11: "es gibt
+			// kein landweg hin, bei dem nicht bäume zerstört werden müssten ... nur erreichbare
+			// orte"). Intel.IsReachable is terrain-only -- MovementCostForCell knows nothing about
+			// actors -- so a site behind a tree line reads as perfectly reachable, and the MCV, which
+			// has no weapon at all, grinds against the trees until the move timeout ends the mission.
+			//
+			// Sites on ANOTHER LANDMASS are exempt: not being reachable by land at all is the ferry's
+			// job, and the mission books a crossing for exactly that case. What is rejected here is
+			// the in-between -- same landmass on paper, blocked by scenery in practice.
+			if (Intel.ClearReachableCount > 0 && Intel.IsReachable(yard) && !Intel.IsClearReachable(yard))
+			{
+				reason = "no land route that does not go through trees or other scenery";
 				return false;
 			}
 

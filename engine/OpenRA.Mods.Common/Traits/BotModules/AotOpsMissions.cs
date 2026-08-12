@@ -2990,6 +2990,7 @@ namespace OpenRA.Mods.Common.Traits
 		Phase phase = Phase.Forming;
 		int formingTicks;
 		int phaseTicks;
+		int diagTicks;
 		Actor yard;
 		AotTransitTicket ticket;
 		bool ashore;
@@ -3273,8 +3274,7 @@ namespace OpenRA.Mods.Common.Traits
 				return;
 			}
 
-			if (mcv.IsIdle)
-				MoveUnit(bot, mcv, Site, false);
+			var escorts = Escorts();
 
 			// Escorts head for their PERIMETER POSTS, never for Site itself. Sending them to the same
 			// cell as the MCV is self-defeating: the MCV has to occupy that exact cell to deploy, and
@@ -3285,7 +3285,40 @@ namespace OpenRA.Mods.Common.Traits
 			//
 			// The posts are the positions they take up once the yard is built anyway, so they screen
 			// the site on approach and are already in place when it deploys.
-			var escorts = Escorts();
+			//
+			// But that is the ARRIVAL formation, not the march. Ordering it from the moment of
+			// departure gave the convoy no cohesion whatsoever: MCV and each tank picked their own
+			// path to their own cell, and because an escort was only ever re-ordered while IsIdle, a
+			// tank that stopped to engage something en route was never gathered up again. The MCV
+			// then arrived alone (User 2026-08-11: "jetzt faehrt mcv weiter. aber ohne eskorte") and
+			// deployed an undefended compound.
+			//
+			// So: while any escort trails further than ExpansionConvoyCohesion behind, the MCV holds
+			// and the stragglers are ordered onto it -- unconditionally, not just when idle, because
+			// "busy shooting at something back home" is precisely the state that has to be broken.
+			var trailing = escorts
+				.Where(e => (e.Location - mcv.Location).LengthSquared > Ops.Info.ExpansionConvoyCohesion * Ops.Info.ExpansionConvoyCohesion)
+				.ToList();
+
+			if (++diagTicks % Ops.Info.ExpansionConvoyDiagInterval == 0)
+				Log($"convoy diag: mcv@{mcv.Location} idle={mcv.IsIdle} dist²={(mcv.Location - Site).LengthSquared} " +
+					$"escorts=[{string.Join(", ", escorts.Select(e => $"{e.Location}{(e.IsIdle ? " idle" : "")}/{(e.CurrentActivity?.GetType().Name ?? "none")}"))}] " +
+					$"trailing={trailing.Count}");
+
+			if (trailing.Count > 0)
+			{
+				// Hold the MCV where it stands. Re-issuing Stop every tick would cancel the escort's
+				// own approach, so only the MCV is stopped, and only while it still has orders.
+				if (!mcv.IsIdle)
+					bot.QueueOrder(new Order("Stop", mcv, false));
+
+				AttackMoveGroup(bot, trailing, mcv.Location);
+				return;
+			}
+
+			if (mcv.IsIdle)
+				MoveUnit(bot, mcv, Site, false);
+
 			for (var i = 0; i < escorts.Count; i++)
 			{
 				var escort = escorts[i];
