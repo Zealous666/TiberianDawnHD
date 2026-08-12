@@ -1554,7 +1554,9 @@ HELI:
 		Prerequisites: aot-harpy-upgrade
 	GrantConditionOnPrerequisite@harpylaser:
 		Condition: aot-harpy-laser
-		Prerequisites: aot-harpy-upgrade, aot-laser-fence-upgrade
+		# Laser-Waffe jetzt eigenes Age-3-Upgrade (User 2026-08-05). aot-harpy-laser-upgrade
+		# = aot-upgrade-harpy-laser; Harpy-Upgrade bleibt zusaetzlich Voraussetzung.
+		Prerequisites: aot-harpy-upgrade, aot-harpy-laser-upgrade
 	-WithFacingSpriteBody:
 	WithFacingSpriteBody@hind:
 		Sequence: aot-hind-idle
@@ -1629,7 +1631,9 @@ BGGY:
 	-Buildable:
 	GrantConditionOnPrerequisite@laserupgrade:
 		Condition: aot-bggy-laser
-		Prerequisites: aot-laser-fence-upgrade
+		# Laser-Waffe jetzt eigenes Age-3-Upgrade (User 2026-08-05). aot-buggy-laser-upgrade
+		# = aot-upgrade-buggy-laser.
+		Prerequisites: aot-buggy-laser-upgrade
 	-Armament:
 	Armament:
 		Weapon: MachineGun

@@ -536,6 +536,10 @@ Player:
 			aot-upgrade-sam-bunkered: 15
 			aot-upgrade-sam-cloak: 12
 			aot-upgrade-harpy: 15
+			# Laser-Waffen-Upgrades (Age 3, 2026-08-05) -- setzen Laser Technologies voraus.
+			aot-upgrade-ltnk-laser: 15
+			aot-upgrade-buggy-laser: 12
+			aot-upgrade-harpy-laser: 15
 			aot-upgrade-avatar-laser: 15
 			aot-upgrade-e4-toxic: 15
 			aot-upgrade-stnk-cargo: 10

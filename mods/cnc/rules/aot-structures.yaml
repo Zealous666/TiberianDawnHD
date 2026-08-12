@@ -5742,8 +5742,10 @@ aot-sgen:
 		SkipMakeAnimation: true
 	ProximityExternalCondition@STEALTH:
 		Condition: aot-stealth-field
-		# Radius um 2/3 vergroessert (5c0 -> 8c341 = 8,33 Zellen).
-		Range: 10c0
+		# Radius-Historie: 5c0 -> 8c341 -> 10c0 (Staffelung Generator/Outpost/mobil, 2026-08-04)
+		# -> 11c0 (+10%, User 2026-08-05). Groesstes der drei Tarnfelder; Outpost liegt bei
+		# 8c341, der mobile Generator bei 7c0.
+		Range: 11c0
 		ValidRelationships: Ally
 		AffectsParent: true
 		RequiresCondition: aot-sgen-powered && aot-sgen-healthy && !aot-sgen-powerdown
@@ -5755,7 +5757,7 @@ aot-sgen:
 	# cloakgenerator) + Shroud Generator (aot-gap).
 	WithRangeCircle:
 		Type: cloakgenerator
-		Range: 10c0
+		Range: 11c0
 		Color: 8844FFB4
 		BorderColor: 20102080
 	ProvidesPrerequisite:
@@ -6832,7 +6834,7 @@ aot-upgrade-laser-fence:
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		MoveIntoWorld: false
-		Description: Upgrades fences with Laser-barriers, unlocks additional laser defense capabilities, and upgrades Light Tank with a Scorpio Laser turret aswell as Lasers for Harpy and Buggy.
+		Description: Replaces fences and gates with laser barriers and unlocks the Laser Defense turret. Prerequisite for the Obelisk of Light and for the separate Light Tank, Buggy and Harpy laser upgrades in the 3rd Tiberium Age.
 
 	Valued:
 		Cost: 2250
@@ -6843,6 +6845,70 @@ aot-upgrade-laser-fence:
 	ProvidesPrerequisite:
 		Prerequisite: aot-laser-fence-upgrade
 
+	Interactable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Laser-WAFFEN-Upgrades (Age 3, User 2026-08-05) ===
+# Aufgeteilt von "Laser Technologies" (Age 2): jenes schaltet weiterhin Zaeune, Tore, die
+# Laser-Defense-Turret und (als Gatekeeper) den Obelisken frei. Die WAFFEN-Umruestung von
+# Light Tank, Buggy und Harpy sind jetzt drei einzelne Age-3-Upgrades, die Laser Technologies
+# voraussetzen. Icons: die bestehenden Einheiten-Laser-Icons (bggy/ltnk/hind).
+aot-upgrade-ltnk-laser:
+	Tooltip:
+		Name: Scorpio Laser
+	Buildable:
+		BuildPaletteOrder: 305
+		Prerequisites: ~aot-age3, aot-laser-fence-upgrade
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Icon: ltnk-laser-icon
+		Description: Upgrades the Light Tank with a Scorpio laser turret. Requires Laser Technologies.
+	Valued:
+		Cost: 2000
+	RenderSprites:
+		Image: ltnk
+	ProvidesPrerequisite:
+		Prerequisite: aot-ltnk-laser-upgrade
+	Interactable:
+
+aot-upgrade-buggy-laser:
+	Tooltip:
+		Name: Buggy Laser
+	Buildable:
+		BuildPaletteOrder: 306
+		Prerequisites: ~aot-age3, aot-laser-fence-upgrade
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Icon: aot-bggy-laser-icon
+		Description: Upgrades the Attack Buggy with a laser cannon. Requires Laser Technologies.
+	Valued:
+		Cost: 2000
+	RenderSprites:
+		Image: bggy
+	ProvidesPrerequisite:
+		Prerequisite: aot-buggy-laser-upgrade
+	Interactable:
+
+aot-upgrade-harpy-laser:
+	Tooltip:
+		Name: Harpy Laser
+	Buildable:
+		BuildPaletteOrder: 307
+		# Harpy-Upgrade zusaetzlich, damit man die Laser-Harpy nicht ohne die Harpy kaufen kann.
+		Prerequisites: ~aot-age3, aot-laser-fence-upgrade, aot-harpy-upgrade
+		Queue: Upgrade.Nod
+		BuildLimit: 1
+		MoveIntoWorld: false
+		Icon: aot-harpy-laser-icon
+		Description: Arms the Harpy with laser cannons. Requires Laser Technologies.
+	Valued:
+		Cost: 2000
+	RenderSprites:
+		Image: aot-hind
+	ProvidesPrerequisite:
+		Prerequisite: aot-harpy-laser-upgrade
 	Interactable:
 # === Ende aotmod ===
 

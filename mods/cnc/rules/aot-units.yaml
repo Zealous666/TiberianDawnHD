@@ -1667,7 +1667,7 @@ aot-ltnk-base:
 		Queue: Starport
 		BuildDuration: 0
 		BuildPaletteOrder: 20
-		Prerequisites: ~aot-age1, aot-age1, afld, ~!aot-ltnk-upgrade, ~!aot-laser-fence-upgrade
+		Prerequisites: ~aot-age1, aot-age1, afld, ~!aot-ltnk-upgrade, ~!aot-ltnk-laser-upgrade
 		Description: Fast and agile NOD light tank. Available from Age 1.
 	Tooltip:
 		Name: Light Tank
@@ -1691,7 +1691,7 @@ aot-ltnk-tick:
 		Queue: Starport
 		BuildDuration: 0
 		BuildPaletteOrder: 20
-		Prerequisites: ~aot-age1, aot-age1, afld, ~aot-ltnk-upgrade, ~!aot-laser-fence-upgrade
+		Prerequisites: ~aot-age1, aot-age1, afld, ~aot-ltnk-upgrade, ~!aot-ltnk-laser-upgrade
 		Icon: ltnk-tick-icon
 		Description: Light Tank upgraded with Tick Tank chassis. Enables dig-in siege mode. Requires FIX facility.
 	Tooltip:
@@ -1731,7 +1731,7 @@ aot-ltnk-laser:
 		Queue: Starport
 		BuildDuration: 0
 		BuildPaletteOrder: 20
-		Prerequisites: ~aot-age1, aot-age1, afld, ~aot-laser-fence-upgrade
+		Prerequisites: ~aot-age1, aot-age1, afld, ~aot-ltnk-laser-upgrade
 		Icon: ltnk-laser-icon
 		Description: Light Tank (Tick Chassis) with experimental laser turret. Remains deployed after upgrade.
 	Tooltip:
@@ -1777,7 +1777,9 @@ LTNK:
 
 	GrantConditionOnPrerequisite@upgrade2:
 		Condition: aot-ltnk-upgraded2
-		Prerequisites: aot-laser-fence-upgrade
+		# Laser-Turret jetzt eigenes Age-3-Upgrade (User 2026-08-05), nicht mehr die
+		# Age-2-Laser-Tech direkt. aot-ltnk-laser-upgrade = aot-upgrade-ltnk-laser.
+		Prerequisites: aot-ltnk-laser-upgrade
 
 	-WithFacingSpriteBody:
 
@@ -2329,7 +2331,7 @@ aot-harpy-upgraded:
 		LockedGroup: aot-grp-hind
 		Queue: Aircraft.Nod
 		BuildPaletteOrder: 10
-		Prerequisites: anyhq, ~aot-harpy-upgrade, ~!aot-laser-fence-upgrade
+		Prerequisites: anyhq, ~aot-harpy-upgrade, ~!aot-harpy-laser-upgrade
 		Icon: aot-harpy-icon
 		Description: Upgraded attack helicopter. Deals increased damage with a higher fire rate. Reloads ammunition automatically while airborne. Cloaks when not engaged.
 	Tooltip:
@@ -2350,7 +2352,7 @@ aot-harpy-upgraded-laser:
 		LockedGroup: aot-grp-hind
 		Queue: Aircraft.Nod
 		BuildPaletteOrder: 10
-		Prerequisites: anyhq, ~aot-harpy-upgrade, ~aot-laser-fence-upgrade
+		Prerequisites: anyhq, ~aot-harpy-upgrade, ~aot-harpy-laser-upgrade
 		Icon: aot-harpy-laser-icon
 		Description: Upgraded attack helicopter with laser cannon. High single-target damage at medium range. Reloads ammunition automatically while airborne. Cloaks when not engaged.
 	Tooltip:
@@ -2942,6 +2944,16 @@ aot-ttnk-flame:
 		Image: ttnk
 	Buildable:
 		LockedGroup: aot-grp-ttnk
+		# ShowWhenLocked: False (User-Fund 2026-08-05: Geister-Icon in der NOD-LITE-Queue).
+		# Der Palettenplatz dieser Linie wird IMMER vom Basis-Aktor gehalten (aot-v2-base bzw.
+		# aot-ttnk-base) -- die Upgrade-Varianten muessen daher nie einen Platzhalter stellen.
+		# Ohne das Flag zeigte ProductionQueue.AllItems() einen: pro LockedGroup gibt es einen
+		# Platz, und ist kein Mitglied sichtbar, springt ein NIE sichtbar gewesenes Mitglied als
+		# Platzhalter ein. Die Toxic-Variante ist genau das, solange das Toxic-Upgrade fehlt.
+		# Verschaerft dadurch, dass die Gruppe ueber ZWEI Queues laeuft: die Nachfolger
+		# (Howitzer / Devil's Tongue) liegen im Starport, Producible ist aber pro Queue -- in
+		# LITE bleibt nach dem Umstieg also eine Gruppe ohne jedes erreichbare Mitglied zurueck.
+		ShowWhenLocked: False
 		BuildPaletteOrder: 30
 		Prerequisites: lite, ~aot-ttnk-flame-upgrade, ~!aot-toxic-upgrade, ~!aot-subterrain-upgrade
 		Queue: LightVehicle.Nod
@@ -2978,6 +2990,16 @@ aot-ttnk-toxin:
 		Image: ttnk
 	Buildable:
 		LockedGroup: aot-grp-ttnk
+		# ShowWhenLocked: False (User-Fund 2026-08-05: Geister-Icon in der NOD-LITE-Queue).
+		# Der Palettenplatz dieser Linie wird IMMER vom Basis-Aktor gehalten (aot-v2-base bzw.
+		# aot-ttnk-base) -- die Upgrade-Varianten muessen daher nie einen Platzhalter stellen.
+		# Ohne das Flag zeigte ProductionQueue.AllItems() einen: pro LockedGroup gibt es einen
+		# Platz, und ist kein Mitglied sichtbar, springt ein NIE sichtbar gewesenes Mitglied als
+		# Platzhalter ein. Die Toxic-Variante ist genau das, solange das Toxic-Upgrade fehlt.
+		# Verschaerft dadurch, dass die Gruppe ueber ZWEI Queues laeuft: die Nachfolger
+		# (Howitzer / Devil's Tongue) liegen im Starport, Producible ist aber pro Queue -- in
+		# LITE bleibt nach dem Umstieg also eine Gruppe ohne jedes erreichbare Mitglied zurueck.
+		ShowWhenLocked: False
 		BuildPaletteOrder: 30
 		Prerequisites: lite, ~aot-ttnk-flame-upgrade, ~aot-toxic-upgrade, ~!aot-subterrain-upgrade
 		Queue: LightVehicle.Nod
@@ -3328,6 +3350,16 @@ aot-v2-napalm:
 		Cost: 1900
 	Buildable:
 		LockedGroup: aot-grp-v2
+		# ShowWhenLocked: False (User-Fund 2026-08-05: Geister-Icon in der NOD-LITE-Queue).
+		# Der Palettenplatz dieser Linie wird IMMER vom Basis-Aktor gehalten (aot-v2-base bzw.
+		# aot-ttnk-base) -- die Upgrade-Varianten muessen daher nie einen Platzhalter stellen.
+		# Ohne das Flag zeigte ProductionQueue.AllItems() einen: pro LockedGroup gibt es einen
+		# Platz, und ist kein Mitglied sichtbar, springt ein NIE sichtbar gewesenes Mitglied als
+		# Platzhalter ein. Die Toxic-Variante ist genau das, solange das Toxic-Upgrade fehlt.
+		# Verschaerft dadurch, dass die Gruppe ueber ZWEI Queues laeuft: die Nachfolger
+		# (Howitzer / Devil's Tongue) liegen im Starport, Producible ist aber pro Queue -- in
+		# LITE bleibt nach dem Umstieg also eine Gruppe ohne jedes erreichbare Mitglied zurueck.
+		ShowWhenLocked: False
 		BuildPaletteOrder: 40
 		Prerequisites: lite, anyhq, ~aot-napalm-upgrade, ~!aot-toxic-upgrade, ~!aot-howitzer-upgrade
 		Queue: LightVehicle.Nod
@@ -3364,6 +3396,16 @@ aot-v2-toxic:
 		Cost: 2250
 	Buildable:
 		LockedGroup: aot-grp-v2
+		# ShowWhenLocked: False (User-Fund 2026-08-05: Geister-Icon in der NOD-LITE-Queue).
+		# Der Palettenplatz dieser Linie wird IMMER vom Basis-Aktor gehalten (aot-v2-base bzw.
+		# aot-ttnk-base) -- die Upgrade-Varianten muessen daher nie einen Platzhalter stellen.
+		# Ohne das Flag zeigte ProductionQueue.AllItems() einen: pro LockedGroup gibt es einen
+		# Platz, und ist kein Mitglied sichtbar, springt ein NIE sichtbar gewesenes Mitglied als
+		# Platzhalter ein. Die Toxic-Variante ist genau das, solange das Toxic-Upgrade fehlt.
+		# Verschaerft dadurch, dass die Gruppe ueber ZWEI Queues laeuft: die Nachfolger
+		# (Howitzer / Devil's Tongue) liegen im Starport, Producible ist aber pro Queue -- in
+		# LITE bleibt nach dem Umstieg also eine Gruppe ohne jedes erreichbare Mitglied zurueck.
+		ShowWhenLocked: False
 		BuildPaletteOrder: 40
 		Prerequisites: lite, anyhq, ~aot-napalm-upgrade, ~aot-toxic-upgrade, ~!aot-howitzer-upgrade
 		Queue: LightVehicle.Nod
@@ -3638,7 +3680,7 @@ aot-bggy-base:
 		LockedGroup: aot-grp-bggy
 		Queue: LightVehicle.Nod
 		BuildPaletteOrder: 7
-		Prerequisites: ~aot-age1, lite, hand, ~!aot-laser-fence-upgrade
+		Prerequisites: ~aot-age1, lite, hand, ~!aot-buggy-laser-upgrade
 		Icon: aot-bggy-icon
 		Description: Fast NOD scout buggy armed with a machine gun.
 	Tooltip:
@@ -3652,7 +3694,7 @@ aot-bggy-laser:
 		LockedGroup: aot-grp-bggy
 		Queue: LightVehicle.Nod
 		BuildPaletteOrder: 7
-		Prerequisites: ~aot-age1, lite, hand, ~aot-laser-fence-upgrade
+		Prerequisites: ~aot-age1, lite, hand, ~aot-buggy-laser-upgrade
 		Icon: aot-bggy-laser-icon
 		Description: NOD scout buggy upgraded with a laser cannon.
 	Tooltip:
