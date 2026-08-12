@@ -1891,7 +1891,8 @@ aot-ltnk-deployed:
 
 	GrantConditionOnPrerequisite@laser:
 		Condition: aot-ltnk-upgraded2
-		Prerequisites: aot-laser-fence-upgrade
+		# Laser-Turret jetzt eigenes Age-3-Upgrade (User 2026-08-05) -- wie am LTNK-Basisaktor.
+		Prerequisites: aot-ltnk-laser-upgrade
 
 	RenderSprites:
 		Image: aot-gatick
