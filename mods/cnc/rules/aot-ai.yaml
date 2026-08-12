@@ -543,7 +543,6 @@ Player:
 			aot-upgrade-avatar-laser: 15
 			aot-upgrade-e4-toxic: 15
 			aot-upgrade-stnk-cargo: 10
-			aot-upgrade-sub-cargo: 8
 			aot-upgrade-msub-mine: 12
 			aot-upgrade-msub-drone: 12
 			aot-upgrade-transport-gun: 8
@@ -833,7 +832,7 @@ Player:
 		FerryMaxTotal: 3
 		# Eskorte: pro Vessel 1 U-Boot. Es begleitet NICHT, sondern sichert den Landepunkt und
 		# verweilt dort. Ab Age 1 (STEC) kommt zusaetzlich ein Missile Sub dazu.
-		FerryEscortTypes: aot-sub-cargo-proxy, aot-sub-base
+		FerryEscortTypes: aot-sub-base
 		FerryEscortPerVessel: 1
 		FerryEscortSecondaryTypes: aot-msub-drone-proxy, aot-msub-mine-proxy, aot-msub-base
 		FerryEscortSecondaryCount: 1

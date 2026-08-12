@@ -4811,29 +4811,6 @@ aot-subpen:
 # === Age of Tiberium (aotmod) - Sub Passenger Upgrade ===
 # Normale U-Boot erhält 5 Infanterie-Passagier-Slots.
 # Voraussetzung: Sub Pen + Hand of NOD. Sichtbar ab Age 1.
-aot-upgrade-sub-cargo:
-	Tooltip:
-		Name: actor-aot-upgrade-sub-cargo.name
-
-	Buildable:
-		BuildPaletteOrder: 210
-		Prerequisites: ~aot-age2, aot-subpen, hand
-		Queue: Upgrade.Nod
-		BuildLimit: 1
-		MoveIntoWorld: false
-		Icon: icon
-		Description: actor-aot-upgrade-sub-cargo.description
-
-	Valued:
-		Cost: 1100
-
-	RenderSprites:
-		Image: aot-upgrade-sub-cargo
-
-	ProvidesPrerequisite:
-		Prerequisite: aot-sub-cargo-upgrade
-
-	Interactable:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Stealth Tank Cargo Upgrade ===
@@ -5743,9 +5720,9 @@ aot-sgen:
 	ProximityExternalCondition@STEALTH:
 		Condition: aot-stealth-field
 		# Radius-Historie: 5c0 -> 8c341 -> 10c0 (Staffelung Generator/Outpost/mobil, 2026-08-04)
-		# -> 11c0 (+10%, User 2026-08-05). Groesstes der drei Tarnfelder; Outpost liegt bei
+		# -> 11c0 (+10%) -> 12c665 (+15%, User 2026-08-05). Groesstes der drei Tarnfelder; Outpost liegt bei
 		# 8c341, der mobile Generator bei 7c0.
-		Range: 11c0
+		Range: 12c665
 		ValidRelationships: Ally
 		AffectsParent: true
 		RequiresCondition: aot-sgen-powered && aot-sgen-healthy && !aot-sgen-powerdown
@@ -5757,7 +5734,7 @@ aot-sgen:
 	# cloakgenerator) + Shroud Generator (aot-gap).
 	WithRangeCircle:
 		Type: cloakgenerator
-		Range: 11c0
+		Range: 12c665
 		Color: 8844FFB4
 		BorderColor: 20102080
 	ProvidesPrerequisite:

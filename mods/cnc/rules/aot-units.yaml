@@ -4227,20 +4227,6 @@ aot-sub:
 		AddToArmyValue: true
 	Tooltip:
 		Name: actor-aot-sub.name
-	GrantConditionOnPrerequisite@cargo:
-		Condition: aot-sub-cargo-upgrade
-		Prerequisites: aot-sub-cargo-upgrade
-	Cargo:
-		Types: Infantry
-		MaxWeight: 5
-		UnloadVoice: Unload
-		LoadingCondition: aot-sub-loading
-		RequiresCondition: aot-sub-cargo-upgrade
-	WithCargoPipsDecoration@cargo:
-		Position: BottomLeft
-		Margin: 4, 3
-		RequiresSelection: true
-		RequiresCondition: aot-sub-cargo-upgrade
 	Health:
 		HP: 20000
 	Armor:
@@ -4264,9 +4250,9 @@ aot-sub:
 		CloakedAlpha: 0.35
 		CloakSound: subshow1.wav
 		UncloakSound: subshow1.wav
-		UncloakOn: Damage, Attack, Unload, Load
+		UncloakOn: Damage, Attack
 		CloakedCondition: aot-sub-cloaked
-		PauseOnCondition: aot-sub-critical || aot-sub-loading
+		PauseOnCondition: aot-sub-critical
 	# Bei kritischen HP (≈20% verbleibend): Cloak pausiert → Sub bleibt sichtbar.
 	GrantConditionOnDamageState@critical:
 		Condition: aot-sub-critical
@@ -4295,26 +4281,11 @@ aot-sub-base:
 		LockedGroup: aot-grp-sub
 		Queue: Naval.Nod
 		BuildPaletteOrder: 10
-		Prerequisites: aot-subpen, ~!aot-sub-cargo-upgrade
+		Prerequisites: aot-subpen
 		Icon: icon
 		Description: actor-aot-sub.description
 	Tooltip:
 		Name: actor-aot-sub.name
-
-# Proxy: Passenger Sub — sichtbar ab Age 1 wenn Upgrade aktiv
-aot-sub-cargo-proxy:
-	Inherits: aot-sub
-	RenderSprites:
-		Image: aot-sub
-	Buildable:
-		LockedGroup: aot-grp-sub
-		Queue: Naval.Nod
-		BuildPaletteOrder: 10
-		Prerequisites: aot-subpen, ~aot-age2, ~aot-sub-cargo-upgrade
-		Icon: cargo-icon
-		Description: actor-aot-sub.description
-	Tooltip:
-		Name: actor-aot-sub-cargo.name
 
 # === Age of Tiberium (aotmod) - NOD Stealth Tank Proxies ===
 # Sichtbar/baubar ab Age 1 + TMPL (ersetzt techlevel.high). Cargo-Upgrade (5 Infanterie-Slots)
