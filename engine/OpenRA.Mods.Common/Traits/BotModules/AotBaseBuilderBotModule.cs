@@ -608,7 +608,19 @@ namespace OpenRA.Mods.Common.Traits
 				if (item != null)
 				{
 					var ai = world.Map.Rules.Actors[expansionPendingType];
-					var orderName = ai.HasTraitInfo<LineBuildInfo>() ? "LineBuild" : "PlaceBuilding";
+
+					// NEVER LineBuild an expansion fence. The expansion enumerates every perimeter cell
+					// itself (FencePerimeter, gate gap already omitted), so LineBuild has nothing to add
+					// -- but it actively harms: placing (+1,+7) while (-2,+7) stands is a 3-cell straight
+					// run inside LineBuild's Range of 5, so the engine splices walls into the gate cells
+					// (-1,+7)/(0,+7). The earlier fix for this went into TickPending, but the expansion
+					// does NOT run through TickPending -- it has this separate driver, which still used
+					// LineBuild (User 2026-08-12: "bei der expansion ist wieder zuviel zaun gebaut
+					// worden"). Only genuine LineBuild items that are NOT the expansion fence (there are
+					// none today, but stay honest) keep the auto-connect.
+					var isExpFence = expansionSteps.Any(s => s.Role == "EXP_FENCE"
+						&& s.TopLeft == expansionPendingCell && s.Variants.Contains(expansionPendingType));
+					var orderName = !isExpFence && ai.HasTraitInfo<LineBuildInfo>() ? "LineBuild" : "PlaceBuilding";
 					bot.QueueOrder(new Order(orderName, player.PlayerActor, Target.FromCell(world, expansionPendingCell), false)
 					{
 						TargetString = expansionPendingType,
@@ -1324,7 +1336,22 @@ namespace OpenRA.Mods.Common.Traits
 				if (s.Role is "EXP_FENCE" or "EXP_GATE")
 					allowed.Add(s.TopLeft);
 
-			if (allowed.Count == 0)
+			// The TWO gate cells must ALWAYS stay clear of walls, even though they are "allowed" (the
+			// gate itself belongs there). This is the belt-and-suspenders half of the fix the user
+			// insisted on (2026-08-12: "er muss in jeden fall nach allen zauns prüfen dass die
+			// doppellücke existiert oder verkaufen"): no matter HOW a wall reaches a gate cell -- a
+			// LineBuild splice, a stray, a relocated ring -- it is force-sold, so the Age-2 gate can
+			// always be placed into a genuine two-cell opening. Without this the gate cell counted as
+			// allowed and a squatting wall was spared, blocking the gate for the rest of the match.
+			// Offsets mirror FencePerimeter's gap exactly: (-1,+7) and (0,+7) from the yard.
+			var gateGap = new HashSet<CPos>();
+			if (expansionYard != null)
+			{
+				gateGap.Add(expansionYard.Value + new CVec(-1, 7));
+				gateGap.Add(expansionYard.Value + new CVec(0, 7));
+			}
+
+			if (allowed.Count == 0 && gateGap.Count == 0)
 				return;
 
 			// Matched against the whole wall CHAIN, not just WallType: after the laser upgrade the
@@ -1334,12 +1361,14 @@ namespace OpenRA.Mods.Common.Traits
 
 			var stray = world.ActorsHavingTrait<Building>()
 				.Where(a => a.Owner == player && !a.IsDead && wallTypes.Contains(a.Info.Name)
-					&& !bridgeWallCells.Contains(a.Location) && !allowed.Contains(a.Location))
+					&& !bridgeWallCells.Contains(a.Location)
+					&& (!allowed.Contains(a.Location) || gateGap.Contains(a.Location)))
 				.ToList();
 
 			foreach (var a in stray)
 			{
-				Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Selling stray fence segment at {a.Location} (outside every ring's perimeter)");
+				var reason = gateGap.Contains(a.Location) ? "blocking the gate opening" : "outside every ring's perimeter";
+				Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Selling stray fence segment at {a.Location} ({reason})");
 				bot.QueueOrder(new Order("Sell", a, Target.FromActor(a), false));
 			}
 		}
@@ -2548,18 +2577,10 @@ namespace OpenRA.Mods.Common.Traits
 			// Bridge walls are SINGLE segments (PlaceBuilding): LineBuild would auto-connect intermediate
 			// segments we could not sell later. Main-base fences DO use LineBuild -- they are placed as
 			// corner NODES only (FenceNodes) and rely on the engine to fill the runs between them.
-			//
-			// The EXPANSION fence must not (User 2026-08-11: "unten beim ausgang wird eine mauer zuviel
-			// gebaut, da wird später kein tor reinpassen"). It enumerates every perimeter cell itself, so
-			// LineBuild has nothing left to contribute -- but it does actively harm: placing the segment at
-			// (+1,+7) while (-2,+7) already stands is a straight run of 3 cells, well inside LineBuild's
-			// Range of 5, so the engine splices walls into (-1,+7) and (0,+7) -- exactly the two cells the
-			// Age-2 gate needs. PruneStrayFenceSegments then sold them again (log: stray at 100,157), which
-			// is why the gap kept flickering shut instead of staying open. Same splice closed the bib row
-			// between the two stubs at (-2,+8)/(+1,+8).
+			// (The EXPANSION fence is placed by TickExpansion, a separate driver, NOT this method --
+			// its gate-gap protection lives there and in PruneStrayFenceSegments.)
 			var isLineBuildable = ai.HasTraitInfo<LineBuildInfo>();
-			var isExpansionFence = pending.Role == "EXP_FENCE";
-			var orderName = !pendingIsBridgeWall && !isExpansionFence && isLineBuildable ? "LineBuild" : "PlaceBuilding";
+			var orderName = !pendingIsBridgeWall && isLineBuildable ? "LineBuild" : "PlaceBuilding";
 			bot.QueueOrder(new Order(orderName, player.PlayerActor, Target.FromCell(world, pendingCell), false)
 			{
 				TargetString = pendingType,
