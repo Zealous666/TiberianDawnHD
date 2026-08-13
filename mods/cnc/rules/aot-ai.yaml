@@ -179,7 +179,17 @@ Player:
 		# prerequisites): SHRN" stehen (618 Zeilen in einer Session). Ueber 5 Nod-Bots wurde in
 		# derselben Session KEIN einziger Obelisk gebaut. Reihenfolge = Abhaengigkeitsreihenfolge.
 		# Beide unten aus BuildingFractions entfernt, damit nichts doppelt feuert.
-		GatekeeperUpgradeTypes: aot-upgrade-nod-secrettech, aot-upgrade-nod-forbidden, aot-upgrade-laser-fence
+		# aot-upgrade-turret HIERHER verschoben (User-Fund 2026-08-12: "keine AI hat ihre defense mit
+		# den 4 umzäunten GUNs ausgebaut ... vielleicht generell upgrades nicht gemacht?"). Es GATET
+		# den GUN-Cluster (aot-gun-base: Prereq aot-turret-upgrade) — dieselbe "Upgrade schaltet
+		# PLAN-Gebäude frei"-Klasse wie die drei Techtree-Gatekeeper. Als hohe-Prio-Eintrag im
+		# @aotupgrades-Topf (vorher) wurde es NIE gekauft: GUN ist ein offener Kern/Defence-Schritt,
+		# hält damit RhythmPriorityActive dauerhaft an, und @aotupgrades feuert nur, wenn NICHTS mehr
+		# priorisiert ist -> harter Kreis-Deadlock (Gold mit 24k Cash baute trotzdem keine GUN). Als
+		# Gatekeeper wird es direkt gefeuert, sobald angeboten (Age1 + lite, 750 Cr), und der Cluster
+		# kann stehen. Position 2: nach secrettech (Refinery/Airfield), vor den Age-2-Gatekeepern; die
+		# Prereq-Prüfung (kein lite -> nicht angeboten) verschiebt das Feuern von selbst korrekt.
+		GatekeeperUpgradeTypes: aot-upgrade-nod-secrettech, aot-upgrade-turret, aot-upgrade-nod-forbidden, aot-upgrade-laser-fence
 
 	# CHOKEPOINT-FORTIFIER: für V1 DEAKTIVIERT (baute Streu-Zäune, konkurrierte um
 	# die Building-Queue). Kommt als V2 zurück, integriert mit AotBaseBuilder.
@@ -480,17 +490,15 @@ Player:
 			aot-age1-upgrade-gdi: 3
 			aot-age2-upgrade-gdi: 3
 			aot-age3-upgrade-gdi: 3
-			# === Verteidigungs-Enabler NOD (hohe Prio, User 2026-07-31): aot-upgrade-turret schaltet
-			# das GUN erst frei UND ist Voraussetzung fuer das Laser Turret. Der Base-Planner platziert
-			# im Age-1-Rhythm direkt danach zwei GUN-Türme am Gate-Cluster (siehe AotBasePlannerBotModule
-			# .GateClusterVariants) — bleibt das Upgrade ungekauft, blockiert dieser Rhythm-Schritt den
-			# GESAMTEN Rest von Age 1 dahinter ("builder wartet an erster nicht baubarer Stelle").
-			# aot-upgrade-ftur-napalm ist ABSICHTLICH NICHT gelistet: BaseBuilderQueueManager waehlt nur
+			# aot-upgrade-turret ist als GATEKEEPER verschoben (siehe GatekeeperUpgradeTypes oben,
+			# 2026-08-12) und HIER bewusst NICHT mehr gelistet — sonst feuert es doppelt. Es gatet den
+			# GUN-Cluster und muss direkt gefeuert werden, nicht aus diesem deferred Topf (der bei
+			# offenem GUN-Schritt nie an die Reihe kommt -> Kreis-Deadlock, Gold baute mit 24k keine GUN).
+			# aot-upgrade-ftur-napalm bleibt ABSICHTLICH ungelistet: BaseBuilderQueueManager waehlt nur
 			# aus Namen, die hier als Key stehen — ein fehlender Eintrag heisst "die KI kauft das nie".
 			# Das ist der einzige Hebel, um die KI zwingend auf den Turret-Zweig festzulegen (die beiden
 			# Upgrades schliessen sich in den Rules gegenseitig aus, ~!aot-nitro-napalm-upgrade /
 			# ~!aot-turret-upgrade).
-			aot-upgrade-turret: 45
 			# === Superwaffen-Enabler (hohe Prio — sonst existiert die Power nie) ===
 			aot-upgrade-ion-cannon: 40
 			aot-upgrade-zonetrooper-drop: 30
