@@ -574,7 +574,11 @@ aot-e4-nod-flame:
 	Buildable:
 		LockedGroup: aot-grp-e4
 		BuildPaletteOrder: 40
-		Prerequisites: anyhq, ~techlevel.medium, ~!aot-age3
+		# Umschalten am TOXIC-UPGRADE statt am Zeitalter (User-Fund 2026-08-05: Toxic Trooper
+		# war schon durch Erreichen von Age 3 baubar, ohne das Toxic-Upgrade -- die Waffe
+		# (aot-e4-toxic) haengt aber am Upgrade, also gab es einen "Toxic Trooper", der Flammen
+		# warf). aot-toxic-upgrade ist Age-3-gegated, die Alterssperre bleibt also implizit.
+		Prerequisites: anyhq, ~techlevel.medium, ~!aot-toxic-upgrade
 		Queue: Infantry.Nod
 		Icon: icon-flame
 		Description: actor-e4.description
@@ -588,7 +592,7 @@ aot-e4-nod-toxic:
 	Buildable:
 		LockedGroup: aot-grp-e4
 		BuildPaletteOrder: 40
-		Prerequisites: anyhq, ~techlevel.medium, ~aot-age3
+		Prerequisites: anyhq, ~techlevel.medium, ~aot-toxic-upgrade
 		Queue: Infantry.Nod
 		Icon: icon-toxic
 		Description: actor-e5.description
@@ -3481,11 +3485,14 @@ aot-arty-howitzer:
 		IsPlayerPalette: true
 		RequiresCondition: aot-heavy-upgraded
 	# Turret + Barrel (koaxial undeployed, rotierend deployed)
+	# Offset X = vorwärts. Das Barrel-Sprite ist um 40° ballistisch angestellt und dreht um seine
+	# Schildzapfen (Anker = Sprite-Mitte, siehe PIVOT_Z in bake-vxl-test.sh). Bei -46 hing das
+	# Rohrende hinten über die Wanne hinaus; +90 setzt es bündig auf.
 	Turreted:
 		Turret: turret
 		TurnSpeed: 32
 		RealignDelay: -1
-		Offset: -46, 0, 0
+		Offset: 90, 0, 0
 	WithSpriteTurret@turret-undeployed:
 		Turret: turret
 		Sequence: aot-arty-barrel
@@ -3523,7 +3530,9 @@ aot-arty-howitzer:
 	Armament@primary:
 		Weapon: aot-ArtilleryShell-Heavy
 		RequiresCondition: aot-howitzer-deployed && aot-heavy-upgraded
-		LocalOffset: 624,0,208
+		# Mündungspunkt folgt dem 40°-Rohr: der kalibrierte Vektor Trunnion->Mündung (670 WDist,
+		# waagerecht) um 40° gekippt, plus den nach vorn gerückten Turret-Anker (-46 -> 90).
+		LocalOffset: 603,0,639
 		MuzzleSequence: muzzle
 
 # === Age of Tiberium (aotmod) - ARTY Heavy Artillery (freigeschalten durch Heavy Artillery Upgrade, Age 3) ===
@@ -3598,11 +3607,12 @@ aot-arty-heavy:
 		IsPlayerPalette: true
 		RequiresCondition: arty-deployed
 	# Deployed turret (32 Facings, Zwei-Layer Player-Color)
+	# Offset X wie beim Howitzer: +90 statt -46, siehe Kommentar dort (40°-Barrel, Schildzapfen-Anker).
 	Turreted:
 		Turret: turret
 		TurnSpeed: 32
 		RealignDelay: -1
-		Offset: -46, 0, 0
+		Offset: 90, 0, 0
 	WithSpriteTurret@turret-undeployed:
 		Turret: turret
 		Sequence: aot-arty-barrel
@@ -3633,7 +3643,8 @@ aot-arty-heavy:
 	Armament@primary:
 		Weapon: aot-ArtilleryShell-Heavy
 		RequiresCondition: arty-deployed
-		LocalOffset: 624,0,208
+		# Mündungspunkt wie beim Howitzer ans 40°-Rohr angepasst, siehe Kommentar dort.
+		LocalOffset: 603,0,639
 		MuzzleSequence: muzzle
 	# Deploy-Mechanik: Immobil wenn deployed, kein Auto-Undeploy
 	GrantConditionOnDeploy:
