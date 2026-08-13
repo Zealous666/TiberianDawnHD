@@ -651,6 +651,27 @@ namespace OpenRA.Mods.Common.Traits
 			if (step == null)
 				return;
 
+			// A FENCE cell that is permanently unplaceable -- blocked by terrain, tiberium, a husk, or
+			// an overlapping footprint -- must be SKIPPED, not retried forever. The fence tolerates gaps
+			// by design (LayoutFits treats it as non-critical), but the driver had no placeability check
+			// after placing: it produced and placed the same wall at a blocked cell hundreds of times,
+			// the wall never registered as standing, the step never completed, and the whole expansion
+			// fence stalled on that one cell (User 2026-08-13: purple placed aot-wall-nod at 96,149 393x
+			// while gold's fence -- with placeable cells -- finished cleanly). Critical buildings are NOT
+			// skipped here: their cells were validated by LayoutFits, so an unplaceable one is a real
+			// problem that the production-wait timeout should surface rather than silently gap over.
+			if (step.Role == "EXP_FENCE")
+			{
+				var fai = step.Variants.FirstOrDefault(world.Map.Rules.Actors.ContainsKey) is string fn ? world.Map.Rules.Actors[fn] : null;
+				var fbi = fai?.TraitInfoOrDefault<BuildingInfo>();
+				if (fbi != null && !world.CanPlaceBuilding(step.TopLeft, fai, fbi, null))
+				{
+					step.Skipped = true;
+					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Expansion fence cell {step.TopLeft} unplaceable -> skipped (gap tolerated)");
+					return;
+				}
+			}
+
 			var triedNone = true;
 			foreach (var v in step.Variants)
 			{
