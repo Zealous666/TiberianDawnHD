@@ -2364,6 +2364,11 @@ namespace OpenRA.Mods.Common.Traits
 				// raid transports. Pooled helicopters are picked up again by the next air raid instead,
 				// since production requests now satisfy themselves from the pool first.
 				&& !a.Info.HasTraitInfo<AircraftInfo>()
+
+				// Belt-and-suspenders with the ReleaseToPool guard: an excluded-from-ops type (MCV,
+				// harvester, ore transporter, surveyor ...) must never be swept into an attack wave,
+				// however it reached the pool. Same class as the raid-transport and aircraft exclusions.
+				&& !Info.ExcludeFromOpsTypes.Contains(a.Info.Name)
 				&& pooledSince.TryGetValue(a, out var since)
 				&& World.WorldTick - since >= Info.PoolIdleReinforceTicks).ToList();
 			if (stale.Count == 0)
@@ -2388,7 +2393,18 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				if (unitCannotBeOrdered(a))
 					continue;
+
 				owned.Remove(a);
+
+				// An excluded-from-ops type (MCV, harvester, ore transporter, surveyor ...) must NEVER
+				// enter the shared pool: the pool feeds attack waves and the base garrison, and an MCV a
+				// failed expansion released this way was swept straight into a frontal assault on an enemy
+				// main base (User 2026-08-13: "grün hat einen MCV gerade mit einer normalen wave in den
+				// frontalangriff ... verheizt"). Dropping it UNCLAIMED instead leaves it for FindUnclaimed,
+				// so the next expansion reuses it rather than paying for another one.
+				if (Info.ExcludeFromOpsTypes.Contains(a.Info.Name))
+					continue;
+
 				PoolAdd(a);
 			}
 		}
