@@ -3472,50 +3472,68 @@ aot-arty-howitzer:
 	WithFacingSpriteBody@base:
 		Name: body-base
 		RequiresCondition: !aot-heavy-upgraded
+	# Heavy-Upgrade: art2-Voxel, Rohr verstaut. Undeployed KEIN separates Geschuetz (TS-Verhalten).
 	WithFacingSpriteBody@heavy:
 		Name: body-heavy
 		Sequence: aot-arty-howitzer-heavy-idle
 		Palette: aot-vxl-player
 		IsPlayerPalette: true
-		RequiresCondition: aot-heavy-upgraded
+		RequiresCondition: aot-heavy-upgraded && aot-howitzer-undeployed
 	WithFacingSpriteBody@heavy-remap:
 		Name: body-heavy-remap
 		Sequence: aot-arty-howitzer-heavy-idle-remap
 		Palette: aot-vxl-player
 		IsPlayerPalette: true
-		RequiresCondition: aot-heavy-upgraded
-	# Turret + Barrel (koaxial undeployed, rotierend deployed)
-	# Offset X = vorwärts. Das Barrel-Sprite ist um 40° ballistisch angestellt und dreht um seine
-	# Schildzapfen (Anker = Sprite-Mitte, siehe PIVOT_Z in bake-vxl-test.sh). Bei -46 hing das
-	# Rohrende hinten über die Wanne hinaus; +90 setzt es bündig auf.
+		RequiresCondition: aot-heavy-upgraded && aot-howitzer-undeployed
+	# Deployed: Standbein-Plattform. !aot-howitzer-undeployed statt aot-howitzer-deployed, damit der
+	# Body waehrend der Deploy-Animation aktiv ist (sonst haengt der Deploy) — siehe aot-arty-heavy.
+	WithSpriteBody@legs:
+		Sequence: aot-arty-deployed
+		Name: body
+		RequiresCondition: aot-heavy-upgraded && !aot-howitzer-undeployed
+	WithSpriteBody@legs-remap:
+		Sequence: aot-arty-deployed-remap
+		Name: body-legs-remap
+		Palette: aot-vxl-player
+		IsPlayerPalette: true
+		RequiresCondition: aot-heavy-upgraded && !aot-howitzer-undeployed
+	WithMakeAnimation@legs:
+		Sequence: aot-arty-deploy-make
+		BodyNames: body
+	WithMakeAnimation@legs-remap:
+		Sequence: aot-arty-deploy-make-remap
+		BodyNames: body-legs-remap
+	# Turret + 45deg-Rohr nur deployed, Offset 0,0,256 wie TS.
 	Turreted:
 		Turret: turret
 		TurnSpeed: 32
 		RealignDelay: -1
-		Offset: 90, 0, 0
-	WithSpriteTurret@turret-undeployed:
+		InitialFacing: 384
+		Offset: 0,0,256
+	WithSpriteTurret@turret:
+		Turret: turret
+		Sequence: aot-arty-turret
+		RequiresCondition: aot-heavy-upgraded && !aot-howitzer-undeployed
+	WithSpriteTurret@turret-remap:
+		Turret: turret
+		Sequence: aot-arty-turret-remap
+		Palette: aot-vxl-player
+		IsPlayerPalette: true
+		RequiresCondition: aot-heavy-upgraded && !aot-howitzer-undeployed
+	WithSpriteTurret@barrel:
 		Turret: turret
 		Sequence: aot-arty-barrel
-		RequiresCondition: aot-heavy-upgraded && !aot-howitzer-deployed
-	WithSpriteTurret@turret-undeployed-remap:
+		RequiresCondition: aot-heavy-upgraded && !aot-howitzer-undeployed
+	WithSpriteTurret@barrel-remap:
 		Turret: turret
 		Sequence: aot-arty-barrel-remap
 		Palette: aot-vxl-player
 		IsPlayerPalette: true
-		RequiresCondition: aot-heavy-upgraded && !aot-howitzer-deployed
-	WithSpriteTurret@turret-deployed:
-		Turret: turret
-		Sequence: aot-arty-barrel
-		RequiresCondition: aot-heavy-upgraded && aot-howitzer-deployed
-	WithSpriteTurret@turret-deployed-remap:
-		Turret: turret
-		Sequence: aot-arty-barrel-remap
-		Palette: aot-vxl-player
-		IsPlayerPalette: true
-		RequiresCondition: aot-heavy-upgraded && aot-howitzer-deployed
+		RequiresCondition: aot-heavy-upgraded && !aot-howitzer-undeployed
 	# Deploy-Mechanik (nur bei Heavy Upgrade aktiv)
 	GrantConditionOnDeploy:
 		DeployedCondition: aot-howitzer-deployed
+		UndeployedCondition: aot-howitzer-undeployed
 		RequiresCondition: aot-heavy-upgraded
 		Facing: 384
 		DeploySounds: place2.aud
@@ -3529,10 +3547,11 @@ aot-arty-howitzer:
 		TargetFrozenActors: true
 	Armament@primary:
 		Weapon: aot-ArtilleryShell-Heavy
+		# Turret setzen, sonst waere LocalOffset body-relativ und folgte der Turmdrehung nicht.
+		Turret: turret
 		RequiresCondition: aot-howitzer-deployed && aot-heavy-upgraded
-		# Mündungspunkt folgt dem 40°-Rohr: der kalibrierte Vektor Trunnion->Mündung (670 WDist,
-		# waagerecht) um 40° gekippt, plus den nach vorn gerückten Turret-Anker (-46 -> 90).
-		LocalOffset: 603,0,639
+		# Lagerung -> Muendung 3.6 Welteinheiten (1381 WDist), um 45deg gekippt = je 977 WDist.
+		LocalOffset: 977,0,977
 		MuzzleSequence: muzzle
 
 # === Age of Tiberium (aotmod) - ARTY Heavy Artillery (freigeschalten durch Heavy Artillery Upgrade, Age 3) ===
@@ -3577,62 +3596,78 @@ aot-arty-heavy:
 		Range: 10c0
 	RenderSprites:
 		Image: arty
-	# Undeployed body (Voxel walk, 32 Facings, Zwei-Layer Player-Color)
+	# PFLICHT: ^Vehicle bringt einen eigenen WithFacingSpriteBody (Name "body", Sequence idle) mit.
+	# Ohne dieses Removal rendert das alte TD-ARTY-Sprite UNTER dem TS-Voxel mit — das war der
+	# "Chassis auf Chassis"-Look.
+	-WithFacingSpriteBody:
+	# Fahrend: art2-Voxel. Das Rohr ist im Modell verstaut — TS zeigt undeployed bewusst KEIN
+	# separates Geschuetz und richtet es erst beim Deploy auf.
 	WithFacingSpriteBody@body:
 		Sequence: aot-arty-howitzer-heavy-idle
 		Name: arty-body
 		Palette: aot-vxl-player
 		IsPlayerPalette: true
-		RequiresCondition: !arty-deployed
+		RequiresCondition: arty-undeployed
 	WithFacingSpriteBody@body-remap:
 		Sequence: aot-arty-howitzer-heavy-idle-remap
 		Name: arty-body-remap
 		Palette: aot-vxl-player
 		IsPlayerPalette: true
-		RequiresCondition: !arty-deployed
+		RequiresCondition: arty-undeployed
 	WithShadow:
 		Offset: 0, 48, 0
 		ZOffset: -129
-	# Deployed body (nutzt gleiche Sequenzen wie undeployed, kein visueller Unterschied)
-	WithFacingSpriteBody@deployed:
-		Sequence: aot-arty-howitzer-heavy-idle
-		Name: arty-deployed
+	# Deployed: Standbein-Plattform (gtarty.shp).
+	# Bedingung ist !arty-undeployed, NICHT arty-deployed: waehrend der Deploy-Animation ist keine
+	# der beiden Conditions gesetzt, und WithMakeAnimation ueberspringt deaktivierte Bodies. Mit
+	# `arty-deployed` wuerde die Animation nie starten und FinishedDeploy nie feuern -> Deploy haengt.
+	WithSpriteBody@legs:
+		Sequence: aot-arty-deployed
+		Name: body
+		RequiresCondition: !arty-undeployed
+	WithSpriteBody@legs-remap:
+		Sequence: aot-arty-deployed-remap
+		Name: body-legs-remap
 		Palette: aot-vxl-player
 		IsPlayerPalette: true
-		RequiresCondition: arty-deployed
-	WithFacingSpriteBody@deployed-remap:
-		Sequence: aot-arty-howitzer-heavy-idle-remap
-		Name: arty-deployed-remap
-		Palette: aot-vxl-player
-		IsPlayerPalette: true
-		RequiresCondition: arty-deployed
-	# Deployed turret (32 Facings, Zwei-Layer Player-Color)
-	# Offset X wie beim Howitzer: +90 statt -46, siehe Kommentar dort (40°-Barrel, Schildzapfen-Anker).
+		RequiresCondition: !arty-undeployed
+	# Standbeine aus-/einfahren: WithMakeAnimation spielt beim Deploy vorwaerts, beim Undeploy
+	# rueckwaerts. Zwei Instanzen, weil Body- und Remap-Layer verschiedene Sequenzen brauchen;
+	# das doppelte FinishedDeploy ist unkritisch (OnDeployCompleted ist idempotent).
+	WithMakeAnimation@legs:
+		Sequence: aot-arty-deploy-make
+		BodyNames: body
+	WithMakeAnimation@legs-remap:
+		Sequence: aot-arty-deploy-make-remap
+		BodyNames: body-legs-remap
+	# Turret (art2tur) + 45deg-Rohr (art2barl) nur im Deploy-Zustand, wie TS.
+	# Offset 0,0,256 = TS-Wert: Geschuetz sitzt auf der Plattform.
 	Turreted:
 		Turret: turret
 		TurnSpeed: 32
 		RealignDelay: -1
-		Offset: 90, 0, 0
-	WithSpriteTurret@turret-undeployed:
-		Turret: turret
-		Sequence: aot-arty-barrel
-		RequiresCondition: !arty-deployed
-	WithSpriteTurret@turret-undeployed-remap:
-		Turret: turret
-		Sequence: aot-arty-barrel-remap
-		Palette: aot-vxl-player
-		IsPlayerPalette: true
-		RequiresCondition: !arty-deployed
+		InitialFacing: 384
+		Offset: 0,0,256
 	WithSpriteTurret@turret:
 		Turret: turret
-		Sequence: aot-arty-barrel
-		RequiresCondition: arty-deployed
+		Sequence: aot-arty-turret
+		RequiresCondition: !arty-undeployed
 	WithSpriteTurret@turret-remap:
+		Turret: turret
+		Sequence: aot-arty-turret-remap
+		Palette: aot-vxl-player
+		IsPlayerPalette: true
+		RequiresCondition: !arty-undeployed
+	WithSpriteTurret@barrel:
+		Turret: turret
+		Sequence: aot-arty-barrel
+		RequiresCondition: !arty-undeployed
+	WithSpriteTurret@barrel-remap:
 		Turret: turret
 		Sequence: aot-arty-barrel-remap
 		Palette: aot-vxl-player
 		IsPlayerPalette: true
-		RequiresCondition: arty-deployed
+		RequiresCondition: !arty-undeployed
 	# Angriff: nur wenn deployed
 	AttackTurreted:
 		Armaments: primary
@@ -3642,9 +3677,13 @@ aot-arty-heavy:
 		TargetFrozenActors: true
 	Armament@primary:
 		Weapon: aot-ArtilleryShell-Heavy
+		# Turret setzen, sonst ist LocalOffset body-relativ (Default-Turretname ist "primary")
+		# und der Schuss folgt der Turmdrehung nicht.
+		Turret: turret
 		RequiresCondition: arty-deployed
-		# Mündungspunkt wie beim Howitzer ans 40°-Rohr angepasst, siehe Kommentar dort.
-		LocalOffset: 603,0,639
+		# Lagerung -> Muendung sind 3.6 Welteinheiten (=1381 WDist); um 45deg gekippt ergibt das
+		# je 977 WDist nach vorn und nach oben.
+		LocalOffset: 977,0,977
 		MuzzleSequence: muzzle
 	# Deploy-Mechanik: Immobil wenn deployed, kein Auto-Undeploy
 	GrantConditionOnDeploy:
@@ -5075,40 +5114,53 @@ aot-jugg:
 	Tooltip@deployed:
 		Name: Juggernaut (Deployed)
 		RequiresCondition: jugg-deployed
-	# Walk body (aktiv wenn NICHT deployed) — Zwei-Layer Player-Color
+	# Walk body — nur im vollstaendig eingefahrenen Zustand. Waehrend der Deploy-Animation ist
+	# jugg-undeployed bereits widerrufen, damit hier nichts doppelt zum Deploy-Body rendert.
 	-WithFacingSpriteBody:
 	WithFacingSpriteBody@body:
 		Sequence: aot-jugg-stand
 		Name: jugg-body
-		RequiresCondition: !jugg-deployed
+		RequiresCondition: jugg-undeployed
 	WithFacingSpriteBody@body-remap:
 		Sequence: aot-jugg-stand-remap
 		Name: jugg-body-remap
 		Palette: aot-vxl-player
 		IsPlayerPalette: true
-		RequiresCondition: !jugg-deployed
+		RequiresCondition: jugg-undeployed
 	WithMoveAnimation@body:
 		MoveSequence: aot-jugg-run
 		Body: jugg-body
-		RequiresCondition: !jugg-deployed
+		RequiresCondition: jugg-undeployed
 	WithMoveAnimation@body-remap:
 		MoveSequence: aot-jugg-run-remap
 		Body: jugg-body-remap
-		RequiresCondition: !jugg-deployed
+		RequiresCondition: jugg-undeployed
 	WithShadow:
 		Offset: 0, 48, 0
 		ZOffset: -129
-	# Deployed body (aktiv wenn deployed) — Zwei-Layer Player-Color
+	# Deployed body — Zwei-Layer Player-Color.
+	# !jugg-undeployed statt jugg-deployed: waehrend der Deploy-Animation ist keine der beiden
+	# Conditions gesetzt, und WithMakeAnimation ueberspringt deaktivierte Bodies. Mit jugg-deployed
+	# wuerde die Animation nie starten und der Deploy haengen. Beim Bau ist jugg-undeployed gesetzt,
+	# der Body also aus — deshalb spielt die Standbein-Animation dort korrekt NICHT.
 	WithSpriteBody@deployed:
 		Sequence: aot-jugg-deployed
 		Name: jugg-deployed-body
-		RequiresCondition: jugg-deployed
+		RequiresCondition: !jugg-undeployed
 	WithSpriteBody@deployed-remap:
 		Sequence: aot-jugg-deployed-remap
 		Name: jugg-deployed-remap
 		Palette: aot-vxl-player
 		IsPlayerPalette: true
-		RequiresCondition: jugg-deployed
+		RequiresCondition: !jugg-undeployed
+	# Standbeine ausfahren (djuggmk.shp, 18 Frames): beim Deploy vorwaerts, beim Undeploy rueckwaerts.
+	# Zwei Instanzen, weil Body- und Remap-Layer verschiedene Sequenzen brauchen.
+	WithMakeAnimation@deploy:
+		Sequence: aot-jugg-make
+		BodyNames: jugg-deployed-body
+	WithMakeAnimation@deploy-remap:
+		Sequence: aot-jugg-make-remap
+		BodyNames: jugg-deployed-remap
 	# Deployed Turret (32 Facings, Zwei-Layer Player-Color)
 	Turreted:
 		Turret: turret
@@ -5133,8 +5185,14 @@ aot-jugg:
 		TargetFrozenActors: true
 	Armament@primary:
 		Weapon: aot-JuggCannon
+		# Turret setzen, sonst waere LocalOffset body-relativ (Default-Turretname ist "primary")
+		# und die drei Muendungen folgten der Turmdrehung nicht.
+		Turret: turret
 		RequiresCondition: jugg-deployed
-		LocalOffset: 820,203,600, 820,0,600, 820,-203,600
+		# Rohre sind auf 45 Grad gebacken (TS: WithVoxelBarrel LocalOrientation 0,128,0).
+		# Der flache Vektor Lagerung->Muendung (820 vorwaerts, Lagerung auf Hoehe 600) um 45 Grad
+		# gekippt ergibt 580 vorwaerts und 600+580 hoch. Seitlicher Versatz der drei Rohre bleibt.
+		LocalOffset: 580,203,1180, 580,0,1180, 580,-203,1180
 		MuzzleSequence: muzzle
 	# Deploy-Mechanik: Facing 384 = SW, immobil wenn deployed, kein Auto-Undeploy bei Move
 	GrantConditionOnDeploy:

@@ -649,6 +649,7 @@ arty:
 		UseClassicFacings: True
 	aot-arty-howitzer-heavy-idle-remap:
 		RemasteredFilename: aot-arty-heavy-test-remap.png
+		RemasteredPremultiplied: False
 		Facings: 32
 		UseClassicFacings: True
 	# Barrel-Sequenzen für deployed + undeployed Rendering (beide Moden)
@@ -658,6 +659,34 @@ arty:
 		UseClassicFacings: True
 	aot-arty-barrel-remap:
 		RemasteredFilename: aot-arty-barrel-test-remap.png
+		RemasteredPremultiplied: False
+		Facings: 32
+		UseClassicFacings: True
+	# TS-Deploy-Zustand: Standbein-Plattform (gtarty.shp) + Ausfahr-Animation (gtartymk.shp,
+	# 16 Frames). 4x hochskaliert auf unsere Voxel-Groesse, Canvas 191px = gleicher Anker wie
+	# der Fahr-Body, damit kein Sequence-Offset noetig ist.
+	aot-arty-deployed:
+		RemasteredFilename: aot-arty-deployed.png
+		Length: 1
+	aot-arty-deployed-remap:
+		RemasteredFilename: aot-arty-deployed-remap.png
+		RemasteredPremultiplied: False
+		Length: 1
+	aot-arty-deploy-make:
+		RemasteredFilename: aot-arty-deploy-anim.png
+		Length: 16
+	aot-arty-deploy-make-remap:
+		RemasteredFilename: aot-arty-deploy-anim-remap.png
+		RemasteredPremultiplied: False
+		Length: 16
+	# Turret (art2tur) — nur im Deploy-Zustand sichtbar
+	aot-arty-turret:
+		RemasteredFilename: aot-arty-turret-test.zip
+		Facings: 32
+		UseClassicFacings: True
+	aot-arty-turret-remap:
+		RemasteredFilename: aot-arty-turret-test-remap.png
+		RemasteredPremultiplied: False
 		Facings: 32
 		UseClassicFacings: True
 
@@ -668,6 +697,7 @@ aot-arty-heavy:
 		UseClassicFacings: True
 	idle-remap:
 		RemasteredFilename: aot-arty-heavy-test-remap.png
+		RemasteredPremultiplied: False
 		Facings: 32
 		UseClassicFacings: True
 	aot-arty-heavy-deployed:
@@ -686,6 +716,34 @@ aot-arty-heavy:
 		UseClassicFacings: True
 	aot-arty-barrel-remap:
 		RemasteredFilename: aot-arty-barrel-test-remap.png
+		RemasteredPremultiplied: False
+		Facings: 32
+		UseClassicFacings: True
+	# TS-Deploy-Zustand: Standbein-Plattform (gtarty.shp) + Ausfahr-Animation (gtartymk.shp,
+	# 16 Frames). 4x hochskaliert auf unsere Voxel-Groesse, Canvas 191px = gleicher Anker wie
+	# der Fahr-Body, damit kein Sequence-Offset noetig ist.
+	aot-arty-deployed:
+		RemasteredFilename: aot-arty-deployed.png
+		Length: 1
+	aot-arty-deployed-remap:
+		RemasteredFilename: aot-arty-deployed-remap.png
+		RemasteredPremultiplied: False
+		Length: 1
+	aot-arty-deploy-make:
+		RemasteredFilename: aot-arty-deploy-anim.png
+		Length: 16
+	aot-arty-deploy-make-remap:
+		RemasteredFilename: aot-arty-deploy-anim-remap.png
+		RemasteredPremultiplied: False
+		Length: 16
+	# Turret (art2tur) — nur im Deploy-Zustand sichtbar
+	aot-arty-turret:
+		RemasteredFilename: aot-arty-turret-test.zip
+		Facings: 32
+		UseClassicFacings: True
+	aot-arty-turret-remap:
+		RemasteredFilename: aot-arty-turret-test-remap.png
+		RemasteredPremultiplied: False
 		Facings: 32
 		UseClassicFacings: True
 	aot-arty-heavy-adv-icon:

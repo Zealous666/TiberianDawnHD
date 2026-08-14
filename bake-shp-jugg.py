@@ -308,6 +308,15 @@ def scale_frame_about_center(arr, factor, is_index=False):
     out[oy:oy+nh, ox:ox+nw] = np.array(resized)
     return out
 
+# Facings, bei denen das Geschuetzrohr zur Kamera zeigt und deshalb VOR dem Turmgehaeuse
+# gezeichnet werden muss. Herleitung: Kamera-Yaw 225, Rohr zeigt zur Kamera wenn
+# cos(yaw - theta_i) > 0; theta_i folgt aus dem Facing-Mapping des Renderers
+# (classic facings, --facing-flip, --facing-offset 45), kalibriert an Frame 8.
+# Empirisch bestaetigt am flachen Render: bei f9..f23 liegt die Muendung tiefer auf dem
+# Schirm als das Heck (= naeher an der Kamera). f16 ist dort PCA-degeneriert (Rohre fast
+# frontal), gehoert aber ebenfalls in die Menge.
+BARREL_IN_FRONT = set(range(9, 25))
+
 def bake_turret(stem, frame_range_list, C0, C1, out_stem, tga_prefix,
                 barrel_stem=None, barrel_remap_name=None, barrel_scale=1.0):
     """Turret-Bake: explizite Index-Erkennung (wie Titan-Turret).
@@ -352,12 +361,19 @@ def bake_turret(stem, frame_range_list, C0, C1, out_stem, tga_prefix,
                 b_body = scale_frame_about_center(b_body, barrel_scale, is_index=False)
                 b_remap = scale_frame_about_center(b_remap, barrel_scale, is_index=True)
 
-            # Composite: barrel under turret housing
-            combined = alpha_over(b_body, big_rgba)
-            # Remap: barrel remap, then turret remap overrides
-            combined_remap = np.where(b_remap >= 176, b_remap, 0).astype(np.uint8)
-            turr_remap = np.where(big_remap >= 176, big_remap, 0).astype(np.uint8)
-            combined_remap = np.where(turr_remap > 0, turr_remap, combined_remap)
+            # Zeichenreihenfolge haengt vom Facing ab: zeigt das Rohr zur Kamera, gehoert es VOR
+            # das Gehaeuse, sonst dahinter. Bei flachen Rohren fiel das nicht auf (kein Ueberlapp);
+            # mit der 45deg-Elevation verschwaende das Rohr sonst in der Suedhaelfte hinter dem Turm.
+            if out_i in BARREL_IN_FRONT:
+                combined = alpha_over(big_rgba, b_body)
+                combined_remap = np.where(big_remap >= 176, big_remap, 0).astype(np.uint8)
+                barr_remap = np.where(b_remap >= 176, b_remap, 0).astype(np.uint8)
+                combined_remap = np.where(barr_remap > 0, barr_remap, combined_remap)
+            else:
+                combined = alpha_over(b_body, big_rgba)
+                combined_remap = np.where(b_remap >= 176, b_remap, 0).astype(np.uint8)
+                turr_remap = np.where(big_remap >= 176, big_remap, 0).astype(np.uint8)
+                combined_remap = np.where(turr_remap > 0, turr_remap, combined_remap)
 
             bodies.append(combined)
             remaps.append(combined_remap)

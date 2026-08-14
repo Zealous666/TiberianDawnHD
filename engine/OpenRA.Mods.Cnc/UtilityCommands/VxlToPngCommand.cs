@@ -47,7 +47,13 @@ namespace OpenRA.Mods.Cnc.UtilityCommands
 			"                      results (e.g. 0.55 when --ambient 0.6). Transferable: same",
 			"                      formula applies to any future TS-Voxel import.",
 			"  --saturation F      Body saturation 0..1 (default: 1.0 = full color). 0.1 = 90%",
-			"                      desaturated (almost silver-gray). Never affects player-color region.")]
+			"                      desaturated (almost silver-gray). Never affects player-color region.",
+			"  --elevation F       Ballistic elevation: tilt the model up F degrees around its",
+			"                      transverse horizontal axis (auto-detected length axis). Same tilt",
+			"                      for every facing — use for gun barrels that should point at the sky.",
+			"  --elevation-flip    Invert the elevation direction (if muzzle tilts down instead of up).",
+			"  --elevation-pivot F Move the rotation centre/anchor F world units along the length",
+			"                      axis toward the breech, so a barrel pivots at its mount.")]
 		void IUtilityCommand.Run(Utility utility, string[] args)
 		{
 			var vxlPath = args[1];
@@ -93,6 +99,19 @@ namespace OpenRA.Mods.Cnc.UtilityCommands
 			var pivotOffsetX = GetArgFloat(args, "--pivot-offset-x", 0f);
 			var pivotOffsetY = GetArgFloat(args, "--pivot-offset-y", 0f);
 			var pivotOffsetZ = GetArgFloat(args, "--pivot-offset-z", 0f);
+			// Ballistic elevation: tilt the whole model up around its transverse horizontal axis
+			// (perpendicular to the model's dominant horizontal/length axis), applied in the base
+			// frame BEFORE the per-facing Z rotation, so every facing keeps the SAME elevation.
+			// Use for barrel/turret voxels (e.g. djuggbar) so the gun points ballistically at the
+			// sky instead of flat at the target. Positive = muzzle up. --elevation-flip inverts the
+			// tilt direction if the model's length axis is detected pointing the other way.
+			var elevation = GetArgFloat(args, "--elevation", 0f) * MathF.PI / 180f;
+			var elevationFlip = GetArgBool(args, "--elevation-flip", false);
+			// Shifts the rotation centre (and therefore the sprite anchor) along the detected
+			// length axis, in world units, positive = toward the breech. A turret barrel must be
+			// anchored at its mount, otherwise the facing rotation swings the whole barrel around
+			// the middle of the tube instead of around the turret axis.
+			var elevationPivot = GetArgFloat(args, "--elevation-pivot", 0f);
 
 			var palette = ReadPalette(palPath);
 			// In two-layer mode the player color comes from the indexed overlay, not a baked palette.
@@ -232,6 +251,71 @@ namespace OpenRA.Mods.Cnc.UtilityCommands
 			{
 				var (wx, wy, wz, nx, ny, nz, c, sh) = voxels[i];
 				voxels[i] = (wx - worldCx + pivotOffsetX, wy - worldCy + pivotOffsetY, wz - worldCz + pivotOffsetZ, nx, ny, nz, c, sh);
+			}
+
+			// Ballistic elevation: tilt the centred model up around its transverse horizontal axis.
+			// The tilt axis is perpendicular to the model's dominant horizontal (length) axis, which
+			// we recover from the XY covariance of the voxel cloud — robust for any barrel voxel.
+			// Applied in the base frame (before the per-facing Z rotation), so all facings share the
+			// exact same elevation. The rotation pivots about the model centre; re-pin the muzzle/breech
+			// afterwards via the sequence turret offset + sprite meta if needed.
+			if (MathF.Abs(elevation) > 1e-6f)
+			{
+				// Dominant horizontal axis via 2×2 XY covariance eigenvector.
+				double sxx = 0, sxy = 0, syy = 0;
+				foreach (var (wx, wy, _, _, _, _, _, _) in voxels)
+				{
+					sxx += wx * wx; sxy += wx * wy; syy += wy * wy;
+				}
+
+				var lenAngle = 0.5f * MathF.Atan2(2f * (float)sxy, (float)(sxx - syy));
+				var dx = MathF.Cos(lenAngle);
+				var dy = MathF.Sin(lenAngle);
+				// Transverse horizontal axis a = Z × D = (-dy, dx, 0). Rotating the length axis about a
+				// by +elevation sends it toward +Z (muzzle up). --elevation-flip inverts if the detected
+				// length axis points toward the breech instead of the muzzle.
+				var ax = -dy;
+				var ay = dx;
+				var e = elevationFlip ? -elevation : elevation;
+
+				// Move the chosen pivot to the origin before rotating. With the flip applied the
+				// muzzle points along -D, so +D is the breech: a positive --elevation-pivot walks
+				// the anchor back toward the mount.
+				if (MathF.Abs(elevationPivot) > 1e-6f)
+				{
+					var px = dx * elevationPivot;
+					var py = dy * elevationPivot;
+					for (var i = 0; i < voxels.Count; i++)
+					{
+						var (wx, wy, wz, nx, ny, nz, c, sh) = voxels[i];
+						voxels[i] = (wx - px, wy - py, wz, nx, ny, nz, c, sh);
+					}
+				}
+
+				var cosE = MathF.Cos(e);
+				var sinE = MathF.Sin(e);
+
+				// Rodrigues rotation about unit axis a=(ax,ay,0) by angle e.
+				(float, float, float) Rotate(float vx, float vy, float vz)
+				{
+					var dot = ax * vx + ay * vy; // a·v (az=0)
+					// a × v
+					var cxp = ay * vz - 0f * vy;
+					var cyp = 0f * vx - ax * vz;
+					var czp = ax * vy - ay * vx;
+					var rx = vx * cosE + cxp * sinE + ax * dot * (1f - cosE);
+					var ry = vy * cosE + cyp * sinE + ay * dot * (1f - cosE);
+					var rz = vz * cosE + czp * sinE;
+					return (rx, ry, rz);
+				}
+
+				for (var i = 0; i < voxels.Count; i++)
+				{
+					var (wx, wy, wz, nx, ny, nz, c, sh) = voxels[i];
+					var (px, py, pz) = Rotate(wx, wy, wz);
+					var (rnx, rny, rnz) = Rotate(nx, ny, nz);
+					voxels[i] = (px, py, pz, rnx, rny, rnz, c, sh);
+				}
 			}
 
 			// Determine canvas size from max screen bounding box across all facings,

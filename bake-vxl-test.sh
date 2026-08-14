@@ -29,6 +29,22 @@ BRIGHTNESS="${BRIGHTNESS:-1.0}"
 # Body-Sättigung (nur Nicht-Player-Color). 1.0 = volle Farbe, 0.1 = 90% desaturiert (fast silbergrau). Via Env:
 #   SATURATION=0.1 ./bake-vxl-test.sh ...
 SATURATION="${SATURATION:-1.0}"
+# Ballistische Elevation für Geschützrohre (Grad, 0 = aus). Kippt das Modell um seine Querachse,
+# gleich für alle Facings, damit das Rohr auch im Idle schräg zum Himmel zeigt.
+#   ELEVATION=40 ELEVATION_FLIP=1 PIVOT_Z=0.7337 ./bake-vxl-test.sh artybarl 48 arty-barrel …
+# ELEVATION_FLIP dreht die Kipprichtung (Mündung statt Heck anheben).
+# PIVOT_Z verschiebt den Drehpunkt auf die Schildzapfen; er ist zugleich der Sprite-Anker,
+# um den auch die Facing-Rotation läuft — so bleibt der Anker über alle Winkel stabil.
+# ⚠️ ELEVATION exakt gleich dem Kamera-Pitch (30) lässt das Rohr in der Südansicht auf einen
+#    Punkt kollabieren. Abstand halten (z.B. 40).
+ELEVATION="${ELEVATION:-0}"
+PIVOT_Z="${PIVOT_Z:-0}"
+# ELEVATION_PIVOT verschiebt Drehpunkt+Anker entlang der Rohrachse zur Lagerung hin (Welteinheiten).
+# Pflicht bei Turret-Rohren: sonst rotiert das Rohr beim Zielen um die Rohrmitte statt um die Lagerung.
+# Vorzeichen ist modellabhaengig -> empirisch pruefen (Heck-Ende muss nahe Sprite-Zentrum liegen).
+ELEVATION_PIVOT="${ELEVATION_PIVOT:-0}"
+ELEV_ARGS=(--elevation "${ELEVATION}" --pivot-offset-z "${PIVOT_Z}" --elevation-pivot "${ELEVATION_PIVOT}")
+[ -n "${ELEVATION_FLIP:-}" ] && ELEV_ARGS+=(--elevation-flip)
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ENGINE_DIR="${SCRIPT_DIR}/engine"
@@ -57,6 +73,7 @@ MOD_SEARCH_PATHS="${SCRIPT_DIR}/mods" ENGINE_DIR=".." \
     --facings 32 --scale "${SCALE}" --pitch 30 --yaw 225 \
     --light-yaw 240 --light-pitch 50 --ambient 0.6 --diffuse 0.4 \
     --supersample 8 --facing-offset 45 --facing-flip --brightness "${BRIGHTNESS}" --saturation "${SATURATION}" \
+    "${ELEV_ARGS[@]}" \
     --remap-sheet "${TMP_DIR}/aot-${OUT}-test-remap.png" --remap-floor "${REMAP_FLOOR}" \
     --output-dir "${RENDER_DIR}" 2>&1 | grep -E "Voxels|Saved|overlay"
 
@@ -107,6 +124,7 @@ if [ -n "${ARCHIVE_DIR}" ]; then
         --facings 32 --scale "${SCALE}" --pitch 30 --yaw 225 \
         --light-yaw 240 --light-pitch 50 --ambient 0.6 --diffuse 0.4 \
         --supersample 8 --facing-offset 45 --facing-flip --brightness "${BRIGHTNESS}" --saturation "${SATURATION}" \
+        "${ELEV_ARGS[@]}" \
         --player-color "${COLOR}" \
         --output-dir "${ABS_ARCHIVE}" 2>&1 | grep -E "Saved"
     # Frames auf OUT-Namen umbenennen (Renderer nutzt VXL-Basisnamen)
