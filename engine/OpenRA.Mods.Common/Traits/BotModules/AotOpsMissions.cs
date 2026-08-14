@@ -2163,6 +2163,137 @@ namespace OpenRA.Mods.Common.Traits
 	}
 
 	// ======================================================================
+	// Subterranean Flame Raid (User-Briefing 2026-08-03 #5, spec 2026-08-13): from Age 2 with the
+	// Subterranean upgrade, a pack of Devil's Tongues strikes ALONE -- no infantry, no tanks. It is a
+	// RANDOM alternative to a regular ground wave or a Hind air raid, launched from the scheduler, not
+	// an escalation step. Devils tunnel, so they simply drive at the enemy base and surface inside it,
+	// bypassing the front line -- no route/ferry logic is needed (unlike a ground wave).
+	//
+	// Kept OUT of the normal wave composition on purpose (user: "aus normalen waves entfernen"): the
+	// wave lists never named a devil, and post-upgrade the flame TTNK they DID build is no longer
+	// buildable (~!aot-subterrain-upgrade), so new waves fall back to the base tank. This mission is the
+	// only thing that deliberately builds devils, so the two never compete for them.
+	//
+	// Reports NO Outcome (leaves it Unknown): only wave/air-raid missions drive the escalation streak,
+	// and a devil raid must not reset it (same trap as every other non-wave mission -- see Bridge Repair).
+	public sealed class AotDevilRaidMission : AotMissionWithOrders
+	{
+		enum Phase { Forming, Executing }
+
+		Phase phase = Phase.Forming;
+		int formingTicks;
+		int executingTicks;
+		Actor targetActor;
+		CPos? targetCell;
+
+		public AotDevilRaidMission(AotOperationsBotModule ops)
+			: base(ops, "devil-raid")
+		{
+			// Reuse before buying: a devil left over from an earlier raid is worth more than the ~1600
+			// credits a replacement costs. Same pool-first pattern as the air raid.
+			var fromPool = ops.TakeFromPool(ops.Info.DevilRaidTypes, ops.Info.DevilRaidCount);
+			ops.AssignFromPool(this, fromPool);
+
+			var missing = ops.Info.DevilRaidCount - fromPool.Count;
+			if (missing > 0)
+				ops.QueueRequest(this, "devil", ops.Info.DevilRaidTypes, missing);
+		}
+
+		protected override void TickMission(IBot bot)
+		{
+			if (Done)
+				return;
+
+			switch (phase)
+			{
+				case Phase.Forming: TickForming(bot); break;
+				case Phase.Executing: TickExecuting(bot); break;
+			}
+		}
+
+		void TickForming(IBot bot)
+		{
+			formingTicks += Ops.Info.MissionInterval;
+
+			var open = Ops.OpenRequests(this);
+
+			// A lone Devil is not a raid (same reasoning as the air raid's single-Hind guard): wait for
+			// the configured minimum before committing, but never demand more than can still arrive.
+			var minimum = Math.Min(Ops.Info.DevilRaidMinimumCount, Units.Count + open);
+
+			var launch = open == 0 && Units.Count >= minimum;
+			if (!launch && formingTicks >= Ops.Info.DevilRaidFormingTimeout)
+				launch = Units.Count >= minimum;
+
+			if (!launch && formingTicks >= Ops.Info.DevilRaidFormingTimeout * 2)
+			{
+				Log($"devil-raid forming dead end ({Units.Count}/{minimum} devil(s)) -> raid cancelled");
+				Finish();   // no Outcome: leave the wave-escalation streak alone
+				return;
+			}
+
+			if (!launch)
+				return;
+
+			ChooseTarget();
+			phase = Phase.Executing;
+			Log($"devil raid launch: {Units.Count} devil(s), target={DescribeTarget()}");
+		}
+
+		string DescribeTarget() =>
+			targetActor != null ? $"{targetActor.Info.Name}@{targetActor.Location}" : targetCell?.ToString() ?? "none";
+
+		// Devils tunnel, so reachability by the surface ground locomotor is irrelevant -- aim at the
+		// enemy construction yard (its base) exactly like the air raid does, requireReachable:false.
+		void ChooseTarget()
+		{
+			var centre = Centroid(Units);
+			targetActor = Ops.Intel.NearestEnemyYard(centre, requireReachable: false);
+			if (targetActor == null)
+				targetCell = Ops.Intel.NearestEnemySpawn(centre, requireReachable: false);
+		}
+
+		void TickExecuting(IBot bot)
+		{
+			if (Units.Count == 0)
+			{
+				Log("devil raid wiped out");
+				Finish();
+				return;
+			}
+
+			executingTicks += Ops.Info.MissionInterval;
+			if (executingTicks >= Ops.Info.DevilRaidExecutingTimeout)
+			{
+				Log($"devil raid executing timed out ({Units.Count} unit(s) stuck) -> raid abandoned");
+				Finish();
+				return;
+			}
+
+			if (targetActor != null && (targetActor.IsDead || !targetActor.IsInWorld))
+				targetActor = null;
+
+			if (targetActor == null && targetCell == null)
+			{
+				ChooseTarget();
+				if (targetActor == null && targetCell == null)
+				{
+					Log("devil raid: no target left -> raid done");
+					Finish();
+					return;
+				}
+			}
+
+			// Ground units: idle == CurrentActivity null (no FlyIdle special-case). One grouped
+			// AttackMove keeps the pack together and re-issues for any devil that has gone idle.
+			var goal = targetActor?.Location ?? targetCell.Value;
+			var idle = Units.Where(a => !Ops.CannotOrder(a) && a.IsIdle).ToList();
+			if (idle.Count > 0)
+				AttackMoveGroup(bot, idle, goal);
+		}
+	}
+
+	// ======================================================================
 	// Bridge Repair (User-Briefing 2026-08-03, Age 0): "scannt map alle 5min, ob eine Bruecke kaputt
 	// ist. Schickt dann ein engineer los, sie zu reparieren."
 	//

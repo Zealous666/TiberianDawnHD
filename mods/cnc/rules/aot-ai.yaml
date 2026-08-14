@@ -929,6 +929,12 @@ Player:
 		# to ground waves regardless of the raid's outcome.
 		HelipadTypes: aot-hpad-nod
 		AirRaidHelicopterTypes: aot-hind-base, aot-harpy-upgraded, aot-harpy-upgraded-laser
+		# Subterranean Flame Raid (User-Briefing #5, Spec 2026-08-13): ab Age 2 / Subterrain-Upgrade
+		# schickt der Bot als ZUFALLS-Alternative zu einer regulaeren Welle oder einem Hind-Angriff
+		# 5 Devil's Tongue ALLEIN los. Kette: aot-ttnk-devil (Starport) zuerst, aot-ttnk-devil-base
+		# als Fallback. Nur baubar mit Subterrain-Upgrade -> das gatet den Raid selbst, keine extra
+		# Prerequisite-Buchhaltung. Devils tunneln an der Front vorbei -> kein Routen-/Faehren-Code.
+		DevilRaidTypes: aot-ttnk-devil, aot-ttnk-devil-base
 		# Retreating survivors that are damaged head to the repair bay before rejoining the pool
 		# (User 2026-07-22).
 		RepairTypes: aot-fix-age0, aot-fix-age1-nod, aot-fix-age2-nod

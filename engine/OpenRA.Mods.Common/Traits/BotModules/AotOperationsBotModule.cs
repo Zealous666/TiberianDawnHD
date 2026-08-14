@@ -538,6 +538,38 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Air raid executing-phase stall safety net; same purpose as WaveExecutingTimeout.")]
 		public readonly int AirRaidExecutingTimeout = 9000;
 
+		[Desc("Enable the Subterranean Flame Raid (Devil's Tongue pack). Off leaves the AI's old",
+			"behaviour untouched.")]
+		public readonly bool EnableDevilRaids = true;
+
+		[ActorReference]
+		[Desc("Devil's Tongue variant chain (best first, first buildable wins). Only buildable once the",
+			"Subterranean upgrade is taken, which is exactly what gates the raid -- no separate",
+			"prerequisite bookkeeping (same honesty test as the ground engineer raid's transporter).")]
+		public readonly string[] DevilRaidTypes = [];
+
+		[Desc("Devils sent in one Subterranean Flame Raid (user spec 2026-08-13: five, alone).")]
+		public readonly int DevilRaidCount = 5;
+
+		[Desc("Fewest devils the raid will set out with; below this it is cancelled and they return to",
+			"the pool for the next attempt. Capped by how many were actually ordered.")]
+		public readonly int DevilRaidMinimumCount = 4;
+
+		[Desc("Devil raid forming timeout; launches short-handed if hit, cancels at twice this.")]
+		public readonly int DevilRaidFormingTimeout = 12000;
+
+		[Desc("Devil raid executing-phase stall safety net.")]
+		public readonly int DevilRaidExecutingTimeout = 9000;
+
+		[Desc("Age tier from which the Subterranean Flame Raid may be rolled (the Subterranean upgrade",
+			"is an Age-2 upgrade, so 2).")]
+		public readonly int DevilRaidAgeTier = 2;
+
+		[Desc("Per-scheduler-roll chance the offensive this cycle is a Devil's Tongue raid instead of a",
+			"ground wave or Hind air raid -- only considered once devils are actually buildable",
+			"(Age 2 + Subterranean upgrade) and a refinery stands to pay for them.")]
+		public readonly int DevilRaidChancePercent = 30;
+
 		[ActorReference]
 		[Desc("Shipyard/Sub Pen actor types. A wave only switches to naval ferrying once one of",
 			"these is owned and alive.")]
@@ -2466,49 +2498,69 @@ namespace OpenRA.Mods.Common.Traits
 			// defence is untouched and still answers attacks; this only stops NEW offensives.
 			if (Info.EnableWaves && !ExpansionHoldsPriority() && !EconomyEmergency() && !AgeSprintActive()
 				&& !Missions.OfType<AotRegularWaveMission>().Any() && !Missions.OfType<AotAirRaidMission>().Any()
+				&& !Missions.OfType<AotDevilRaidMission>().Any()
 				&& WaveUnlocked())
 			{
 				if (--waveCooldownTicks <= 0)
 				{
 					waveCooldownTicks = Info.WaveCooldown;
 
-					var canAirRaid = Info.AirRaidHelicopterTypes.Length > 0 && HasHelipad();
-					bool doAirRaid;
-					bool useSecondaryRoute;
+					// SUBTERRANEAN FLAME RAID (user spec 2026-08-13): from Age 2 with the Subterranean
+					// upgrade, this cycle's offensive is SOMETIMES a pack of five Devil's Tongues alone
+					// instead of a ground wave or a Hind air raid. Rolled first, as a random alternative to
+					// the whole wave/air-raid decision below. Gated on the devils actually being buildable
+					// (Age 2 + upgrade -- the honest test, no separate prerequisite bookkeeping) and on a
+					// refinery to pay for them. It reports no Outcome, so it never disturbs the
+					// wave/air-raid escalation ladder it sits beside.
+					var canDevilRaid = Info.EnableDevilRaids && AgeTier() >= Info.DevilRaidAgeTier
+						&& Info.DevilRaidTypes.Length > 0 && FirstBuildable(Info.DevilRaidTypes) != null;
 
-					if (randomEscalationPhase)
+					if (canDevilRaid && HasRefinery()
+						&& World.LocalRandom.Next(100) < Info.DevilRaidChancePercent)
 					{
-						// The ONGOING 1:3 air-to-ground alternation needs a REFINERY behind it (user spec
-						// 2026-08-06). Helicopters are the expensive half of that rhythm, and before the
-						// refinery there is no income to sustain it -- the bot would trade its balance
-						// for a raid and then stand still.
-						//
-						// The one-off escalation raid below is deliberately NOT covered: that is the
-						// 2-helicopter mini-wave (AirRaidCountPerAge[0]), small enough to afford and
-						// the whole point of having a helipad that early.
-						doAirRaid = canAirRaid && HasRefinery()
-							&& World.LocalRandom.Next(100) < Info.RandomAirRaidChancePercent;
-						useSecondaryRoute = !doAirRaid && World.LocalRandom.Next(2) == 0;
+						Missions.Add(new AotDevilRaidMission(this));
+						Log($"devil raid scheduled (tier {AgeTier()}, {Info.DevilRaidCount} devils alone)");
 					}
 					else
 					{
-						doAirRaid = waveFailureStreak >= Info.WaveAirRaidAfterFailures && canAirRaid;
-						useSecondaryRoute = !doAirRaid && waveFailureStreak >= Info.WaveSecondaryRouteAfterFailures;
-					}
+						var canAirRaid = Info.AirRaidHelicopterTypes.Length > 0 && HasHelipad();
+						bool doAirRaid;
+						bool useSecondaryRoute;
 
-					if (doAirRaid)
-					{
-						Missions.Add(new AotAirRaidMission(this));
-						randomEscalationPhase = true;
-						Log($"air raid scheduled (streak={waveFailureStreak}, random={randomEscalationPhase})");
-					}
-					else
-					{
-						waveIndex++;
-						var wave = new AotRegularWaveMission(this, waveIndex, useSecondaryRoute);
-						Missions.Add(wave);
-						wavesSinceRaid++;
-						Log($"wave {waveIndex} scheduled (tier {AgeTier()}, secondaryRoute={useSecondaryRoute}, streak={waveFailureStreak}, random={randomEscalationPhase})");
+						if (randomEscalationPhase)
+						{
+							// The ONGOING 1:3 air-to-ground alternation needs a REFINERY behind it (user spec
+							// 2026-08-06). Helicopters are the expensive half of that rhythm, and before the
+							// refinery there is no income to sustain it -- the bot would trade its balance
+							// for a raid and then stand still.
+							//
+							// The one-off escalation raid below is deliberately NOT covered: that is the
+							// 2-helicopter mini-wave (AirRaidCountPerAge[0]), small enough to afford and
+							// the whole point of having a helipad that early.
+							doAirRaid = canAirRaid && HasRefinery()
+								&& World.LocalRandom.Next(100) < Info.RandomAirRaidChancePercent;
+							useSecondaryRoute = !doAirRaid && World.LocalRandom.Next(2) == 0;
+						}
+						else
+						{
+							doAirRaid = waveFailureStreak >= Info.WaveAirRaidAfterFailures && canAirRaid;
+							useSecondaryRoute = !doAirRaid && waveFailureStreak >= Info.WaveSecondaryRouteAfterFailures;
+						}
+
+						if (doAirRaid)
+						{
+							Missions.Add(new AotAirRaidMission(this));
+							randomEscalationPhase = true;
+							Log($"air raid scheduled (streak={waveFailureStreak}, random={randomEscalationPhase})");
+						}
+						else
+						{
+							waveIndex++;
+							var wave = new AotRegularWaveMission(this, waveIndex, useSecondaryRoute);
+							Missions.Add(wave);
+							wavesSinceRaid++;
+							Log($"wave {waveIndex} scheduled (tier {AgeTier()}, secondaryRoute={useSecondaryRoute}, streak={waveFailureStreak}, random={randomEscalationPhase})");
+						}
 					}
 				}
 			}
