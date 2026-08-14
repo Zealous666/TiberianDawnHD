@@ -2401,6 +2401,15 @@ namespace OpenRA.Mods.Common.Traits
 				// harvester, ore transporter, surveyor ...) must never be swept into an attack wave,
 				// however it reached the pool. Same class as the raid-transport and aircraft exclusions.
 				&& !Info.ExcludeFromOpsTypes.Contains(a.Info.Name)
+
+				// Devils are reserved for the Subterranean Flame Raid. The common way one reaches the
+				// pool is a transform: a flame TTNK the bot built BEFORE taking the Subterranean upgrade
+				// turns into a Devil's Tongue in place (a NEW actor, so ClaimNewUnits pools it), and the
+				// sweep would then fold it into a normal ground wave -- exactly what the raid exists to
+				// avoid (User 2026-08-13: "manchmal haben sie mehrere flame tanks gebaut und machen dann
+				// subterrain upgrade ... versuchen sie dennoch mit normalen waves in einsatz zu bringen").
+				// Left in the pool, the next devil raid's TakeFromPool claims it instead.
+				&& !Info.DevilRaidTypes.Contains(a.Info.Name)
 				&& pooledSince.TryGetValue(a, out var since)
 				&& World.WorldTick - since >= Info.PoolIdleReinforceTicks).ToList();
 			if (stale.Count == 0)
