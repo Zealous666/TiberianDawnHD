@@ -539,7 +539,17 @@ Player:
 			# sobald sie baubar sind -- der Core-Rhythmus pausiert dabei, damit die Reihenfolge
 			# AFLD -> Secrets -> Refinery wirklich eingehalten wird (gewichteter Zufall konnte das nie
 			# garantieren). Ein zusaetzlicher Eintrag hier wuerde sie doppelt kaufen (2026-08-02).
-			aot-upgrade-ttnk-subterrain: 15
+			# OPERATIONS-ENABLER: dieses Upgrade schaltet den Subterranean APC (Boden-Engineer-Raid)
+			# UND die Devil's Tongue (Subterranean Flame Raid) frei -- es gatet also zwei ganze
+			# Operationen, keine blosse Kampfwert-Steigerung. Prio HOCH ueber die Superwaffen-Enabler
+			# (Ion Cannon/Atom Bomb 30-40) gehoben (User 2026-08-14: "noch nicht ein einziges mal ein
+			# engineer raid per subterrain apc"): der @aotupgrades-Topf kommt nur in den seltenen
+			# Nicht-Spar-Fenstern zum Zug und kaufte dort zuerst die teuren Superwaffen -- das billige,
+			# tief priorisierte Subterrain (4300) wurde praktisch nie erreicht, obwohl der User es fuer
+			# genau diese Raids will. Als Gatekeeper taugt es NICHT (gatet Einheiten, kein Plan-Gebaeude
+			# -> ein rhythmus-haltender Gatekeeper wuerde den Basisbau blockieren); die hohe Prio hier
+			# ist der richtige Hebel.
+			aot-upgrade-ttnk-subterrain: 50
 			aot-upgrade-ltnk-tick: 18
 			aot-upgrade-sam-bunkered: 15
 			aot-upgrade-sam-cloak: 12
