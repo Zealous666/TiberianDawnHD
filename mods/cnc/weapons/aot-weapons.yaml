@@ -1473,8 +1473,16 @@ aot-FireAntBite:
 	BurstDelays: 20
 	Range: 4c0
 	Report: aot-antbite.wav
-	TargetActorCenter: true
-	Projectile: InstantHit
+	# Echter Feuerball statt InstantHit (User-Fund 2026-08-05: Fire Ant schoss keine
+	# Feuerbaelle). Vorbild ist RA's AntFireball (Projectile Bullet, Speed 200); die
+	# Feuerball-Sprites aot-ftur-fb1/-fb2 nutzt bereits der Flame Tower. Vorher flog gar
+	# kein Projektil -- der Schaden traf unsichtbar aus 4 Zellen. Blockable: false wie beim
+	# Flame Tower, damit die Ameise ueber Zaeune/Mauern feuern kann.
+	Projectile: Bullet
+		Speed: 200
+		Image: aot-ftur-fb1
+		TrailImage: aot-ftur-fb2
+		Blockable: false
 	Warhead@DAMAGE: SpreadDamage
 		Spread: 213
 		Damage: 4000
