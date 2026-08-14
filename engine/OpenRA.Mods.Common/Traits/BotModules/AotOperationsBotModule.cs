@@ -930,6 +930,12 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Age tier at which ground engineer raids unlock.")]
 		public readonly int GroundRaidAgeTier = 2;
 
+		[Desc("When BOTH a heli and a ground engineer raid are ready, the ground raid is chosen this",
+			"many times out of every (this+1) rolls -- i.e. a heli:ground ratio of 1:this. Default 4",
+			"(user 2026-08-14): by the time the ground raid unlocks (Age 2 + Subterranean upgrade) plenty",
+			"of heli raids have already been tried, so the ground flavour should dominate from then on.")]
+		public readonly int GroundRaidPreferenceRatio = 4;
+
 
 		[Desc("Cells behind the enemy construction yard the APC unloads at.")]
 		public readonly int GroundRaidDropDistance = 5;
@@ -3285,7 +3291,10 @@ namespace OpenRA.Mods.Common.Traits
 			if (!heliReady && !groundReady)
 				return;
 
-			var ground = groundReady && (!heliReady || World.LocalRandom.Next(2) == 0);
+			// 1:GroundRaidPreferenceRatio in favour of the ground raid when both are ready (user
+			// 2026-08-14). Next(ratio+1) == 0 is the 1-in-(ratio+1) heli case; everything else is ground.
+			var ground = groundReady
+				&& (!heliReady || World.LocalRandom.Next(Info.GroundRaidPreferenceRatio + 1) != 0);
 			StartEngineerRaid(ground);
 		}
 
