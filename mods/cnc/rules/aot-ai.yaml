@@ -179,17 +179,16 @@ Player:
 		# prerequisites): SHRN" stehen (618 Zeilen in einer Session). Ueber 5 Nod-Bots wurde in
 		# derselben Session KEIN einziger Obelisk gebaut. Reihenfolge = Abhaengigkeitsreihenfolge.
 		# Beide unten aus BuildingFractions entfernt, damit nichts doppelt feuert.
-		# aot-upgrade-turret HIERHER verschoben (User-Fund 2026-08-12: "keine AI hat ihre defense mit
-		# den 4 umzäunten GUNs ausgebaut ... vielleicht generell upgrades nicht gemacht?"). Es GATET
-		# den GUN-Cluster (aot-gun-base: Prereq aot-turret-upgrade) — dieselbe "Upgrade schaltet
-		# PLAN-Gebäude frei"-Klasse wie die drei Techtree-Gatekeeper. Als hohe-Prio-Eintrag im
-		# @aotupgrades-Topf (vorher) wurde es NIE gekauft: GUN ist ein offener Kern/Defence-Schritt,
-		# hält damit RhythmPriorityActive dauerhaft an, und @aotupgrades feuert nur, wenn NICHTS mehr
-		# priorisiert ist -> harter Kreis-Deadlock (Gold mit 24k Cash baute trotzdem keine GUN). Als
-		# Gatekeeper wird es direkt gefeuert, sobald angeboten (Age1 + lite, 750 Cr), und der Cluster
-		# kann stehen. Position 2: nach secrettech (Refinery/Airfield), vor den Age-2-Gatekeepern; die
-		# Prereq-Prüfung (kein lite -> nicht angeboten) verschiebt das Feuern von selbst korrekt.
-		GatekeeperUpgradeTypes: aot-upgrade-nod-secrettech, aot-upgrade-turret, aot-upgrade-nod-forbidden, aot-upgrade-laser-fence
+		GatekeeperUpgradeTypes: aot-upgrade-nod-secrettech, aot-upgrade-nod-forbidden, aot-upgrade-laser-fence
+		# aot-upgrade-turret ist ein ENABLER, kein Gatekeeper (Korrektur 2026-08-15). Es gatet den
+		# GUN-Cluster (aot-gun-base: Prereq aot-turret-upgrade) und MUSS direkt gekauft werden -- der
+		# @aotupgrades-Topf tat das nie (GUN offen -> RhythmPriorityActive dauerhaft an -> Topf nie dran,
+		# Gold mit 24k baute keine GUN). ABER: als voller Gatekeeper (vorher) hielt es den KERN-RHYTHMUS
+		# ~2 Min an, waehrend ein pleiter Bot die 750 zusammenkratzte -- Basisentwicklung eingefroren,
+		# Wellen/Verteidigung liefen weiter -> Age-1-Defizit (User 2026-08-15: "das lief doch bisher
+		# besser"). Der Hold ist ueberfluessig: die Prereq-Pruefung erzwingt "Turret vor GUN" schon
+		# selbst. Enabler feuert das Upgrade sofort bei Verfuegbarkeit (Age1 + lite), OHNE Rhythmus-Hold.
+		EnablerUpgradeTypes: aot-upgrade-turret
 
 	# CHOKEPOINT-FORTIFIER: für V1 DEAKTIVIERT (baute Streu-Zäune, konkurrierte um
 	# die Building-Queue). Kommt als V2 zurück, integriert mit AotBaseBuilder.
@@ -901,8 +900,10 @@ Player:
 		# Geht der Transporter vor dem Ausladen verloren, steigt die Gefahrenstufe und der naechste
 		# Raid setzt HeliRaidDropDistanceStep Zellen weiter draussen ab -- wirkt, als haette die KI
 		# gelernt, wo die Flugabwehr steht. aot-tran-nod = derselbe Chinook wie GDI.
+		# aot-tran-nod-para: nach dem Parachute-Bay-Upgrade ist nur noch dieser Proxy baubar
+		# (aot-tran-nod wird per ~!aot-tran-parachute-upgrade ausgeblendet) -- beide gleichwertig.
 		EnableHeliRaids: True
-		HeliRaidTransportTypes: aot-tran-nod
+		HeliRaidTransportTypes: aot-tran-nod, aot-tran-nod-para
 		# Boden-Raid ab Age 2: NOD hat KEINEN normalen APC -- der Subterranean APC ist der Transport
 		# (Starport-Queue, braucht aot-subterrain-upgrade). Er tunnelt ohnehin an der Front vorbei.
 		EnableGroundRaids: True

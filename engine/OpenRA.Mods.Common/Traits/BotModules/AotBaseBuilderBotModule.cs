@@ -131,6 +131,18 @@ namespace OpenRA.Mods.Common.Traits
 			"Must be removed from that module's BuildingFractions so nothing double-fires.")]
 		public readonly string[] GatekeeperUpgradeTypes = [];
 
+		[ActorReference]
+		[Desc("ENABLER upgrades: bought directly the moment they are buildable, exactly like a",
+			"gatekeeper -- but WITHOUT holding the core rhythm. For an upgrade that gates a UNIT or a",
+			"defence building (the GUN cluster needs aot-upgrade-turret), the prerequisite system already",
+			"enforces the order -- the GUN step simply is not buildable until the upgrade is bought -- so",
+			"a rhythm hold adds nothing but a ~2-minute Age-1 economy stall while a broke bot scrapes the",
+			"cash together (User 2026-08-15 regression: turret as a full gatekeeper froze base development",
+			"and tipped the economy into deficit). Fired independently, each on its own single-shot latch;",
+			"never counted in GatekeeperPriorityPending, so the rhythm keeps running. Must be removed from",
+			"the @aotupgrades BuildingFractions so nothing double-fires.")]
+		public readonly string[] EnablerUpgradeTypes = [];
+
 		[Desc("Prerequisites marking Age tiers 1-3, age-ordered. Same convention as",
 			"AotOperationsBotModuleInfo.AgePrerequisites -- kept as an independent copy here rather",
 			"than shared, since this module must be able to compute the current Age tier even when no",
@@ -256,6 +268,7 @@ namespace OpenRA.Mods.Common.Traits
 		// again" shape: the production queue keeps the item queued-but-paused on its own if cash is
 		// short at the exact firing tick, so one StartProduction order is enough.
 		bool[] gatekeeperFired;
+		bool[] enablerFired;
 
 		// Priority gates (user spec 2026-08-02, "airfield -> refinery -> sams -> upgrades"). Two
 		// separate counters on purpose: the DEFENCE gate only waits on the core economy roles, while
@@ -305,6 +318,7 @@ namespace OpenRA.Mods.Common.Traits
 			ops = opsModules.FirstOrDefault(o => o.Info.Faction == Info.Faction) ?? opsModules.FirstOrDefault();
 
 			gatekeeperFired = new bool[Info.GatekeeperUpgradeTypes.Length];
+			enablerFired = new bool[Info.EnablerUpgradeTypes.Length];
 		}
 
 		// Mirrors AotOperationsBotModule.AgeTier() exactly (same AgePrerequisites convention).
@@ -1153,6 +1167,7 @@ namespace OpenRA.Mods.Common.Traits
 			// Independent of `pending`/the Rhythm chooser entirely -- this fires its own StartProduction
 			// order directly and never touches the single build-in-flight slot.
 			TryFireGatekeeperUpgrades(bot);
+			TryFireEnablerUpgrades(bot);
 
 			// Plan the site ONCE, eagerly, the moment map intel is ready -- regardless of whether anything
 			// has actually asked for naval production yet, and regardless of whatever else is currently
@@ -1719,6 +1734,28 @@ namespace OpenRA.Mods.Common.Traits
 			gatekeeperFired[i] = true;
 			Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Gatekeeper upgrade ({name}) fired directly " +
 				"-- rhythm holds until it is bought");
+		}
+
+		// ENABLER upgrades: same direct-fire as a gatekeeper, but the rhythm does NOT wait on them
+		// (see EnablerUpgradeTypes). Each is independent -- no dependency order between them -- so every
+		// buildable-but-unowned one is fired, each on its own single-shot latch. The prerequisite that
+		// consumes the upgrade (e.g. GUN needs aot-upgrade-turret) enforces the ordering by itself.
+		void TryFireEnablerUpgrades(IBot bot)
+		{
+			for (var i = 0; i < Info.EnablerUpgradeTypes.Length; i++)
+			{
+				if (enablerFired[i] || string.IsNullOrEmpty(Info.EnablerUpgradeTypes[i]))
+					continue;
+
+				var (name, queue) = FindAgeUpgradeQueue(Info.EnablerUpgradeTypes[i]);
+				if (name == null || queue == null)
+					continue;
+
+				bot.QueueOrder(Order.StartProduction(queue.Actor, name, 1));
+				enablerFired[i] = true;
+				Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Enabler upgrade ({name}) fired directly " +
+					"-- rhythm keeps running (no hold)");
+			}
 		}
 
 		// Two fully independent strict-first-open queues over the SAME Rhythm list, split by
