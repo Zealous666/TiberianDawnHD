@@ -2980,6 +2980,20 @@ namespace OpenRA.Mods.Common.Traits
 			// started.
 			int spawnTooClose = 0, spawnTaken = 0, spawnYardNear = 0, spawnEnemyNear = 0, spawnHazard = 0, spawnNoFit = 0;
 
+			// Every OTHER player's starting position, proximity-matched. EnemySpawns is built from each
+			// hostile player's HomeLocation and was compared to the spawn marker with an EXACT cell match
+			// -- but HomeLocation and the mpspawn marker are not guaranteed to be the same cell (map- and
+			// lobby-dependent), so on some maps an enemy's own start read as a free spawn and the bot
+			// expanded straight onto it (User 2026-08-15: "auf wasser-maps hat der AI als base-expansion
+			// spawn manchmal basen gewählt, bei denen gegner waren"). Matching any non-self player's home
+			// within ExpansionSpawnClearance closes that gap for enemies AND allies, regardless of the
+			// exact-cell mismatch, and does not depend on the enemy having built anything visible yet.
+			var otherHomes = World.Players
+				.Where(p => p != Player && !p.NonCombatant && !p.Spectating
+					&& World.Map.Contains(p.HomeLocation))
+				.Select(p => p.HomeLocation)
+				.ToList();
+
 			foreach (var spawn in Intel.AllSpawns.OrderBy(s => (s - home).LengthSquared))
 			{
 				if ((spawn - home).Length < Info.ExpansionMinDistance)
@@ -2988,7 +3002,9 @@ namespace OpenRA.Mods.Common.Traits
 					continue;
 				}
 
-				if (Intel.EnemySpawns.Contains(spawn) || spawn == Intel.OwnSpawn)
+				if (spawn == Intel.OwnSpawn
+					|| Intel.EnemySpawns.Contains(spawn)
+					|| otherHomes.Any(h => (h - spawn).Length < Info.ExpansionSpawnClearance))
 				{
 					spawnTaken++;
 					continue;
