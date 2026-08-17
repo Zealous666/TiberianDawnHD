@@ -1075,6 +1075,20 @@ namespace OpenRA.Mods.Common.Traits
 			"tank upgrade). A tank without the upgrade simply ignores the deploy order.")]
 		public readonly int ExpansionDigInAgeTier = 2;
 
+		[ActorReference]
+		[Desc("The dug-in form(s) an escort becomes when it entrenches. Digging in is a DeployTransform:",
+			"the mobile escort is destroyed and a new immobile actor (aot-ltnk-deployed) is created,",
+			"which is NOT one of ExpansionEscortTypes and no longer belongs to the mission -- so the",
+			"guard-strength check counted it as lost and ordered an endless stream of replacements while",
+			"the entrenched tanks sat right there (User 2026-08-15: 'baut auch neue ltnks bei der",
+			"expansion, selbst wenn alte noch nicht verloren'). These are counted toward the guard,",
+			"within ExpansionGuardRadius of the yard.")]
+		public readonly HashSet<string> ExpansionDeployedTypes = [];
+
+		[Desc("How far from the expansion yard a dug-in escort still counts toward guard strength. The",
+			"guard posts sit a handful of cells out, so this only needs to cover the perimeter.")]
+		public readonly int ExpansionGuardRadius = 12;
+
 		[Desc("Minimum resource cells an index must hold to be considered as an expansion site. The",
 			"resource map splits the world into fixed-stride indices, so one visible field can be cut",
 			"across several of them -- this is NOT the size of the field a player would see.")]

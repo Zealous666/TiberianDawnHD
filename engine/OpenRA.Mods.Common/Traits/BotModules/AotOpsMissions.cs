@@ -3466,17 +3466,31 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			var escorts = Escorts();
 
+			// Dug-in escorts no longer live in Units: DeployTransform destroys the mobile tank and
+			// creates an immobile aot-ltnk-deployed, which the mission does not own. Count those near the
+			// yard as part of the guard, or the strength check below reads the entrenched tanks as
+			// casualties and orders replacement after replacement -- each of which drives out, digs in,
+			// vanishes from the count, and triggers the next order (User 2026-08-15: "baut auch neue
+			// ltnks bei der expansion, selbst wenn alte noch nicht verloren").
+			var dugIn = 0;
+			if (yard != null && Ops.Info.ExpansionDeployedTypes.Count > 0)
+				dugIn = Ops.World.Actors.Count(a => a.Owner == Ops.Player && !a.IsDead && a.IsInWorld
+					&& Ops.Info.ExpansionDeployedTypes.Contains(a.Info.Name)
+					&& (a.Location - yard.Location).LengthSquared <= Ops.Info.ExpansionGuardRadius * Ops.Info.ExpansionGuardRadius);
+
+			var guard = escorts.Count + dugIn;
+
 			// Keep the guard at full strength for as long as the expansion stands (User 2026-08-03:
 			// "sie müssen immer expansion bereich bewachen und ersetzt werden, wenn sie zerstört
 			// werden"). The escort used to be requested exactly once, when the mission was created, so
 			// every tank lost to a raid was simply gone and the expansion slowly ended up undefended.
-			if (yard != null && escorts.Count < Ops.Info.ExpansionEscortCount
+			if (yard != null && guard < Ops.Info.ExpansionEscortCount
 				&& Ops.OpenRequests(this, "escort") == 0
 				&& Ops.Info.ExpansionEscortTypes.Length > 0)
 			{
-				var missing = Ops.Info.ExpansionEscortCount - escorts.Count;
+				var missing = Ops.Info.ExpansionEscortCount - guard;
 				Ops.QueueRequest(this, "escort", Ops.Info.ExpansionEscortTypes, missing);
-				Log($"guard below strength ({escorts.Count}/{Ops.Info.ExpansionEscortCount}) -> ordering {missing} replacement(s)");
+				Log($"guard below strength ({escorts.Count} mobile + {dugIn} dug-in / {Ops.Info.ExpansionEscortCount}) -> ordering {missing} replacement(s)");
 			}
 
 			if (escorts.Count == 0 || yard == null)

@@ -927,6 +927,11 @@ Player:
 		# for expansion (escort)" plus 63 Claims. Der MCV fuhr NICHT ohne Eskorte los, er ist ihr
 		# davongefahren (Konvoi-Zusammenhalt, in AotExpansionMission.TickMoving behoben).
 		ExpansionEscortTypes: aot-ltnk-tick, aot-ltnk-laser, aot-ltnk-base
+		# Eingegrabene Form der Eskorte (ab Age 2). DeployTransform erzeugt aus dem mobilen Panzer den
+		# stationaeren aot-ltnk-deployed -- ein neuer Aktor, der NICHT in ExpansionEscortTypes steht und
+		# der Mission nicht mehr gehoert. Ohne diese Zeile zaehlte die Wachstaerke-Pruefung ihn als
+		# verloren und orderte endlos Ersatz (User 2026-08-15).
+		ExpansionDeployedTypes: aot-ltnk-deployed
 		# 4 statt 6 (User 2026-08-04): 6 x 1500 + 3000 MCV = 12000 pro Konvoi, das sind rund vier
 		# Minuten Gesamteinnahmen eines Age-1-Bots -- im Test wurde nie einer fertig. Die sechs
 		# Wachposten im Layout bleiben, vier Panzer verteilen sich darauf.
