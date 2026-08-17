@@ -2257,10 +2257,25 @@ aot-tran-cary:
 		Filename: cary_all.png
 		Length: 1
 		RemasteredFilename:
+	# NOD-exklusives Basis-Icon (aot-tran-nod, ohne Parachute-Upgrade)
+	icon-nod:
+		Filename: cary_nod.png
+		Length: 1
+		RemasteredFilename:
+	# NOD nach Parachute-Upgrade (aot-tran-nod-para)
+	icon-para:
+		Filename: cary_para.png
+		Length: 1
+		RemasteredFilename:
+	# GDI nach Doorgunner-Upgrade (aot-tran-gdi-gunship)
+	icon-door:
+		Filename: cary_door.png
+		Length: 1
+		RemasteredFilename:
 
 aot-upgrade-tran-doorgunner:
 	icon:
-		Filename: cary_base.png
+		Filename: cary_door.png
 		Length: 1
 		RemasteredFilename:
 
@@ -2272,7 +2287,7 @@ aot-upgrade-tran-carryall:
 
 aot-upgrade-tran-parachute:
 	icon:
-		Filename: cary_base.png
+		Filename: cary_para.png
 		Length: 1
 		RemasteredFilename:
 

@@ -2121,6 +2121,7 @@ aot-harv-nod:
 # NOD: 1 Proxy ohne Upgrade-Abhängigkeit
 # Proxies erben von TRAN, das in overrides.yaml die Buildable-Logik + Carryall/Doorgunner trägt.
 
+# NOD Basis-Chinook (ohne Parachute-Upgrade) — NOD-exklusives Icon.
 aot-tran-nod:
 	Inherits: TRAN
 	RenderSprites:
@@ -2128,8 +2129,24 @@ aot-tran-nod:
 	Buildable:
 		Queue: Aircraft.Nod
 		BuildPaletteOrder: 10
-		Prerequisites: anyhq
-		Icon: icon
+		Prerequisites: anyhq, ~!aot-tran-parachute-upgrade
+		Icon: icon-nod
+		Description: actor-tran.description
+	Tooltip:
+		Name: actor-tran.name
+
+# NOD Chinook nach Parachute-Bay-Upgrade — eigenes Baumenue-Icon (Fallschirm).
+# Baut denselben TRAN; die Fallschirm-Faehigkeit kommt in-world ueber die
+# aot-tran-parachute-upgrade-Condition (GrantConditionOnPrerequisite in overrides.yaml).
+aot-tran-nod-para:
+	Inherits: TRAN
+	RenderSprites:
+		Image: aot-tran-cary
+	Buildable:
+		Queue: Aircraft.Nod
+		BuildPaletteOrder: 10
+		Prerequisites: anyhq, ~aot-tran-parachute-upgrade
+		Icon: icon-para
 		Description: actor-tran.description
 	Tooltip:
 		Name: actor-tran.name
@@ -2160,7 +2177,7 @@ aot-tran-gdi-gunship:
 		Queue: Aircraft.GDI
 		BuildPaletteOrder: 10
 		Prerequisites: anyhq, ~!aot-tran-carryall-upgrade, ~aot-tran-doorgunner-upgrade
-		Icon: icon
+		Icon: icon-door
 		Description: actor-tran.description
 	-Tooltip:
 	Tooltip:
