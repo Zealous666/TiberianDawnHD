@@ -1940,6 +1940,17 @@ aot-ltnk-deployed:
 	Targetable:
 		TargetTypes: Ground, Vehicle
 
+	# Vom Mobile Repair Drone (aot-repv) reparierbar. aot-ltnk-deployed erbt ^Building und
+	# hat daher NICHT das Targetable@AOTREPAIR von ^Vehicle -- ohne das kann der Repair-Beam
+	# (ValidTargets: Repair) den eingegrabenen Tick Tank nicht anvisieren (Heavy Artillery
+	# bleibt beim Deploy ein ^Vehicle und war deshalb schon abgedeckt).
+	GrantConditionOnDamageState@AOTREPAIR:
+		Condition: aot-vehicle-damaged
+		ValidDamageStates: Light, Medium, Heavy, Critical
+	Targetable@AOTREPAIR:
+		RequiresCondition: aot-vehicle-damaged
+		TargetTypes: Repair
+
 	Health:
 		HP: 48000
 
@@ -3257,6 +3268,74 @@ aot-subapc:
 		Actor: LTNK.Husk
 		OwnerType: InternalName
 		EffectiveOwnerFromOwner: true
+	Selectable:
+		DecorationBounds: 1024, 1024
+
+# === Age of Tiberium (aotmod) - Mobile Repair Drone (NOD) ===
+# TS REPAIR.VXL importiert, unbewaffnetes Support-Fahrzeug: repariert verbuendete
+# Fahrzeuge im 2-Zellen-Radius. Baubar am Airstrip-Starport ab Age 2 mit fix-Prereq.
+# Repair-Waffe (aot-RepairBeam): -2000 HP/Schuss, TS-Sound repair11.aud, piff-Funken.
+aot-repv:
+	Inherits: ^Vehicle
+	Inherits@EXPERIENCE: ^GainsExperience
+	Valued:
+		Cost: 1200
+	-Tooltip:
+	Tooltip:
+		Name: actor-aot-repv.name
+		GenericName: meta-vehicle-generic-name
+	UpdatesPlayerStatistics:
+		AddToArmyValue: true
+	Buildable:
+		BuildPaletteOrder: 80
+		Prerequisites: ~afld, ~aot-age2, fix
+		Queue: Starport
+		BuildDuration: 0
+		Icon: icon
+		Description: Mobile repair unit. Repairs friendly vehicles in range.
+	Mobile:
+		TurnSpeed: 20
+		Speed: 71
+	Health:
+		HP: 15000
+	Armor:
+		Type: Light
+	RenderSprites:
+		Image: aot-repv
+	-WithFacingSpriteBody:
+	WithFacingSpriteBody@body:
+		Sequence: idle
+		Name: body
+	WithFacingSpriteBody@bodyremap:
+		Sequence: idle-remap
+		Name: body-remap
+		Palette: aot-vxl-player
+		IsPlayerPalette: True
+	WithShadow:
+		Offset: 0, 48, 0
+		ZOffset: -129
+	RevealsShroud:
+		Range: 5c0
+	Armament:
+		Weapon: aot-RepairBeam
+		Cursor: repair
+		OutsideRangeCursor: repair
+		TargetRelationships: Ally
+		ForceTargetRelationships: None
+	AttackFrontal:
+		FacingTolerance: 0
+	# Selbststaendiges Reparieren im Guard-Umkreis (User 2026-08-19): InitialStance AttackAnything
+	# = repariert proaktiv beschaedigte Verbuendete. ScanRadius 7 = groesserer Guard-Umkreis (der
+	# vorherige radius=3/AllowMovement:False war zu klein). AllowMovement: True -> die Drohne faehrt
+	# innerhalb des Umkreises zum Ziel. Das Folgen ist natuerlich begrenzt: sobald das Ziel voll
+	# repariert ist, faellt aot-vehicle-damaged weg und es ist kein Repair-Ziel mehr -> Drohne stoppt.
+	AutoTarget:
+		InitialStance: AttackAnything
+		InitialStanceAI: AttackAnything
+		ScanRadius: 7
+	AutoTargetPriority@DEFAULT:
+		ValidTargets: Repair
+		ValidRelationships: Ally
 	Selectable:
 		DecorationBounds: 1024, 1024
 

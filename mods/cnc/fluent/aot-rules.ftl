@@ -57,6 +57,9 @@ actor-aot-ttnk-devil-toxin =
 actor-aot-subapc =
     .name = Subterranean APC
 
+actor-aot-repv =
+    .name = Mobile Repair Drone
+
 actor-aot-sub =
     .name = Attack Submarine
     .description = Stealthy torpedo submarine. Auto-submerges after surfacing. Surfaces when damaged critically.

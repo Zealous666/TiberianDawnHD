@@ -1605,3 +1605,31 @@ IonStormBolt:
 	Warhead@3Flash: FlashEffect
 		FlashType: aot-ionstorm
 		Duration: 12
+
+# === Mobile Repair Drone (aot-repv) — Repair-Beam ===
+# Reine Reparatur-Waffe: negativer Schaden auf Targetable@AOTREPAIR (Ziel muss beschaedigt sein).
+# Sichtbare Funken via piffs (piffpiff.shp) auf dem Ziel; haeufiges Feuern (ReloadDelay 15)
+# laesst die Funken kontinuierlich spruehen. TS-Repair-Sound (repair11.aud) beim Feuern.
+aot-RepairBeam:
+	ReloadDelay: 15
+	Range: 3c0
+	Report: repair11.aud
+	ValidTargets: Repair
+	Projectile: InstantHit
+	Warhead@1Eff: FlashTargetsInRadius
+		Radius: 1065
+		ValidRelationships: Ally
+		ValidTargets: Repair
+	Warhead@2Dam: SpreadDamage
+		Spread: 213
+		Damage: -700
+		ValidRelationships: Ally
+		ValidTargets: Repair
+	# Funken direkt auf dem reparierten Ziel — piffs (piffpiff.shp) ist der TS/TD-Funkensprueh
+	# (spruehende helle Funken-Specks), KEIN Explosions-/Truemmereffekt. ValidTargets: Repair,
+	# damit die Funken nur am echten Repair-Ziel erscheinen.
+	Warhead@3Spark: CreateEffect
+		Explosions: piffs
+		ExplosionPalette: effect
+		ValidTargets: Repair
+		ValidRelationships: Ally

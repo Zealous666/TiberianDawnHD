@@ -4978,6 +4978,25 @@ aot-subapc:
 		RemasteredFilename:
 		Length: 1
 
+# === Mobile Repair Drone (aot-repv) — TS REPAIR.VXL, 32 Facings ===
+aot-repv:
+	Defaults:
+		RemasteredFilename: aot-repv.zip
+	idle:
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 0.80
+	idle-remap:
+		RemasteredFilename: aot-repv-remap.png
+		Facings: 32
+		UseClassicFacings: True
+		RemasteredPremultiplied: False
+		Scale: 0.80
+	icon:
+		Filename: repv_icon.png
+		RemasteredFilename:
+		Length: 1
+
 # === Dig-Animation (aot-dig) — TS DIG.SHP, Erdaufwirbel beim Ein-/Ausgraben ===
 aot-dig:
 	idle:
