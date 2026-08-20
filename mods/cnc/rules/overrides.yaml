@@ -395,6 +395,11 @@ HQ:
 		PlayerExperience: 10
 		InfiltratedNotification: BuildingInfiltrated
 		InfiltratedTextNotification: notification-building-infiltrated
+	# HITSHAPE-FIX (2026-08-03): Engine-Footprint "X_ xx ==" hatte die obere Antennen-Eckzelle als
+	# X (untargetbar) -> nahm reduzierten Schaden. x_ macht sie treffbar. Gilt fuer alle
+	# aot-hq-* (base/ion/age2), die von HQ erben.
+	Building:
+		Footprint: x_ xx ==
 
 EYE:
 	AotInfiltrateForScan:

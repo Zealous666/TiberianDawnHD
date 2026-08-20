@@ -66,7 +66,7 @@ actor-aot-sub =
 
 actor-aot-msub =
     .name = Missile Sub
-    .description = Wolf-class missile submarine. Launches ballistic missiles at ground and naval targets. Surfaces to fire.
+    .description = Wolf-class missile submarine. Fires guided missiles at ground, naval and air targets. Surfaces to fire.
 
 actor-aot-msub-mine =
     .name = Mine Layer Sub

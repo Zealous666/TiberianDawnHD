@@ -51,8 +51,9 @@
 
 aot-ts-ct0001:
 	Inherits: ^CivBuilding
+	Inherits@shape: ^3x3Shape
 	Building:
-		Footprint: xxX xxX XXX
+		Footprint: xxx xxx xxx
 		Dimensions: 3,3
 	Selectable:
 		Bounds: 3072, 3072
@@ -71,8 +72,9 @@ aot-ts-ct0001:
 
 aot-ts-ca0001:
 	Inherits: ^CivBuilding
+	Inherits@shape: ^3x3Shape
 	Building:
-		Footprint: xxX xxX XXX
+		Footprint: xxx xxx xxx
 		Dimensions: 3,3
 	Selectable:
 		Bounds: 3072, 3072
@@ -91,8 +93,9 @@ aot-ts-ca0001:
 
 aot-ts-ct0002:
 	Inherits: ^CivBuilding
+	Inherits@shape: ^3x3Shape
 	Building:
-		Footprint: xxX xxx Xxx
+		Footprint: xxx xxx xxx
 		Dimensions: 3,3
 	Selectable:
 		Bounds: 3072, 3072
@@ -111,8 +114,9 @@ aot-ts-ct0002:
 
 aot-ts-ca0002:
 	Inherits: ^CivBuilding
+	Inherits@shape: ^3x3Shape
 	Building:
-		Footprint: xxX xxx Xxx
+		Footprint: xxx xxx xxx
 		Dimensions: 3,3
 	Selectable:
 		Bounds: 3072, 3072
@@ -331,8 +335,9 @@ aot-ts-ca0007:
 
 aot-ts-ct0008:
 	Inherits: ^CivBuilding
+	Inherits@shape: ^2x3Shape
 	Building:
-		Footprint: xX xX xx
+		Footprint: xx xx xx
 		Dimensions: 2,3
 	Selectable:
 		Bounds: 2048, 3072
@@ -351,8 +356,9 @@ aot-ts-ct0008:
 
 aot-ts-ca0008:
 	Inherits: ^CivBuilding
+	Inherits@shape: ^2x3Shape
 	Building:
-		Footprint: xX xX xx
+		Footprint: xx xx xx
 		Dimensions: 2,3
 	Selectable:
 		Bounds: 2048, 3072
@@ -371,8 +377,9 @@ aot-ts-ca0008:
 
 aot-ts-ct0009:
 	Inherits: ^CivBuilding
+	Inherits@shape: ^2x3Shape
 	Building:
-		Footprint: xX xx xX
+		Footprint: xx xx xx
 		Dimensions: 2,3
 	Selectable:
 		Bounds: 2048, 3072
@@ -391,8 +398,9 @@ aot-ts-ct0009:
 
 aot-ts-ca0009:
 	Inherits: ^CivBuilding
+	Inherits@shape: ^2x3Shape
 	Building:
-		Footprint: xX xx xX
+		Footprint: xx xx xx
 		Dimensions: 2,3
 	Selectable:
 		Bounds: 2048, 3072
@@ -894,8 +902,9 @@ aot-ts-ca0021:
 
 aot-ts-city01:
 	Inherits: ^CivBuilding
+	Inherits@shape: ^4x2Shape
 	Building:
-		Footprint: xxxX XxxX
+		Footprint: xxxx xxxx
 		Dimensions: 4,2
 	Selectable:
 		Bounds: 4096, 2048
@@ -913,6 +922,7 @@ aot-ts-city01:
 
 aot-ts-city02:
 	Inherits: ^CivBuilding
+	Inherits@shape: ^2x3Shape
 	Building:
 		Footprint: xx xx xx
 		Dimensions: 2,3
@@ -932,6 +942,7 @@ aot-ts-city02:
 
 aot-ts-city03:
 	Inherits: ^CivBuilding
+	Inherits@shape: ^3x2Shape
 	Building:
 		Footprint: xxx xxx
 		Dimensions: 3,2
@@ -951,6 +962,7 @@ aot-ts-city03:
 
 aot-ts-city04:
 	Inherits: ^CivBuilding
+	Inherits@shape: ^3x2Shape
 	Building:
 		Footprint: xxx xxx
 		Dimensions: 3,2
@@ -970,6 +982,7 @@ aot-ts-city04:
 
 aot-ts-city05:
 	Inherits: ^CivBuilding
+	Inherits@shape: ^3x2Shape
 	Building:
 		Footprint: xxx xxx
 		Dimensions: 3,2
@@ -989,8 +1002,9 @@ aot-ts-city05:
 
 aot-ts-city06:
 	Inherits: ^CivBuilding
+	Inherits@shape: ^4x2Shape
 	Building:
-		Footprint: xxxx XxxX
+		Footprint: xxxx xxxx
 		Dimensions: 4,2
 	Selectable:
 		Bounds: 4096, 2048
@@ -1008,6 +1022,7 @@ aot-ts-city06:
 
 aot-ts-city07:
 	Inherits: ^CivBuilding
+	Inherits@shape: ^4x2Shape
 	Building:
 		Footprint: xxxx xxxx
 		Dimensions: 4,2
@@ -1160,8 +1175,9 @@ aot-ts-city14:
 
 aot-ts-city15:
 	Inherits: ^CivBuilding
+	Inherits@shape: ^4x2Shape
 	Building:
-		Footprint: xxxX xxxX
+		Footprint: xxxx xxxx
 		Dimensions: 4,2
 	Selectable:
 		Bounds: 4096, 2048
@@ -1179,6 +1195,7 @@ aot-ts-city15:
 
 aot-ts-city16:
 	Inherits: ^CivBuilding
+	Inherits@shape: ^4x2Shape
 	Building:
 		Footprint: xxxx xxxx
 		Dimensions: 4,2
@@ -1198,8 +1215,9 @@ aot-ts-city16:
 
 aot-ts-city17:
 	Inherits: ^CivBuilding
+	Inherits@shape: ^4x3Shape
 	Building:
-		Footprint: XxxX xxxx xxxX
+		Footprint: xxxx xxxx xxxx
 		Dimensions: 4,3
 	Selectable:
 		Bounds: 4096, 3072
@@ -1217,8 +1235,9 @@ aot-ts-city17:
 
 aot-ts-city18:
 	Inherits: ^CivBuilding
+	Inherits@shape: ^3x5Shape
 	Building:
-		Footprint: xxx xxx xxx xxx xxX
+		Footprint: xxx xxx xxx xxx xxx
 		Dimensions: 3,5
 	Selectable:
 		Bounds: 3072, 5120
@@ -1314,8 +1333,9 @@ aot-ts-city22:
 
 aot-ts-aban01:
 	Inherits: ^CivBuilding
+	Inherits@shape: ^2x6Shape
 	Building:
-		Footprint: xx xx xx xx xx XX
+		Footprint: xx xx xx xx xx xx
 		Dimensions: 2,6
 	Selectable:
 		Bounds: 2048, 6144
@@ -1333,8 +1353,9 @@ aot-ts-aban01:
 
 aot-ts-aban02:
 	Inherits: ^CivBuilding
+	Inherits@shape: ^5x3Shape
 	Building:
-		Footprint: xxxxx xxxxx XXXxX
+		Footprint: xxxxx xxxxx xxxxx
 		Dimensions: 5,3
 	Selectable:
 		Bounds: 5120, 3072
@@ -1352,8 +1373,9 @@ aot-ts-aban02:
 
 aot-ts-aban03:
 	Inherits: ^CivBuilding
+	Inherits@shape: ^2x5Shape
 	Building:
-		Footprint: xx xx xx xx XX
+		Footprint: xx xx xx xx xx
 		Dimensions: 2,5
 	Selectable:
 		Bounds: 2048, 5120
@@ -1371,8 +1393,9 @@ aot-ts-aban03:
 
 aot-ts-aban04:
 	Inherits: ^CivBuilding
+	Inherits@shape: ^4x2Shape
 	Building:
-		Footprint: xxxX xxxX
+		Footprint: xxxx xxxx
 		Dimensions: 4,2
 	Selectable:
 		Bounds: 4096, 2048
@@ -1390,8 +1413,9 @@ aot-ts-aban04:
 
 aot-ts-aban05:
 	Inherits: ^CivBuilding
+	Inherits@shape: ^3x2Shape
 	Building:
-		Footprint: xxX xxX
+		Footprint: xxx xxx
 		Dimensions: 3,2
 	Selectable:
 		Bounds: 3072, 2048
@@ -1732,6 +1756,7 @@ aot-ts-ctpyr01:
 
 aot-ts-ctpyr02:
 	Inherits: ^CivBuilding
+	Inherits@shape: ^4x4Shape
 	Building:
 		Footprint: xxxx xxxx xxxx xxxx
 		Dimensions: 4,4
@@ -1751,6 +1776,7 @@ aot-ts-ctpyr02:
 
 aot-ts-ctpyr03:
 	Inherits: ^CivBuilding
+	Inherits@shape: ^4x4Shape
 	Building:
 		Footprint: xxxx xxxx xxxx xxxx
 		Dimensions: 4,4
@@ -1821,6 +1847,7 @@ aot-ts-purplamp:
 
 aot-ts-ctvega:
 	Inherits: ^CivBuilding
+	Inherits@shape: ^4x4Shape
 	Building:
 		Footprint: xxxx xxxx xxxx xxxx
 		Dimensions: 4,4
@@ -1840,6 +1867,7 @@ aot-ts-ctvega:
 
 aot-ts-ctdam:
 	Inherits: ^CivBuilding
+	Inherits@shape: ^2x5Shape
 	Building:
 		Footprint: xx xx xx xx xx
 		Dimensions: 2,5

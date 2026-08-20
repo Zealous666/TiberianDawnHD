@@ -11,6 +11,66 @@
 # damit alle bestehenden "-SpawnActorsOnSell:"-Entfernungen (SILO, OBLI, Shipyard, Sub Pen,
 # beide Gates) weiterhin greifen. Wer das Verkaufs-Spawnen unterdrueckt, muss ZUSAETZLICH
 # "-SpawnActorsOnSell@nod:" setzen -- sonst spuckt das Gebaeude bei NOD-Besitz doch Infanterie aus.
+# === Age of Tiberium (aotmod) - fehlende HitShape-Shape-Templates (2026-08-03) ===
+# Die Engine (engine/mods/cnc/rules/defaults.yaml) liefert nur ^1x1/2x1/2x2/3x2Shape. Groessere
+# Gebaeude ohne passendes Template blieben auf ^1x1Shape haengen -> Schadens-HitShape war nur
+# eine Zelle (DistanceFromEdge nutzt NUR dieses eine Rechteck, nicht die targetbaren Zellen).
+# Bounds = +-(Zellen*512), analog zu den Engine-Templates.
+^2x3Shape:
+	HitShape:
+		UseTargetableCellsOffsets: true
+		Type: Rectangle
+			TopLeft: -1024, -1536
+			BottomRight: 1024, 1536
+^3x3Shape:
+	HitShape:
+		UseTargetableCellsOffsets: true
+		Type: Rectangle
+			TopLeft: -1536, -1536
+			BottomRight: 1536, 1536
+^4x2Shape:
+	HitShape:
+		UseTargetableCellsOffsets: true
+		Type: Rectangle
+			TopLeft: -2048, -1024
+			BottomRight: 2048, 1024
+^4x3Shape:
+	HitShape:
+		UseTargetableCellsOffsets: true
+		Type: Rectangle
+			TopLeft: -2048, -1536
+			BottomRight: 2048, 1536
+^4x4Shape:
+	HitShape:
+		UseTargetableCellsOffsets: true
+		Type: Rectangle
+			TopLeft: -2048, -2048
+			BottomRight: 2048, 2048
+^5x3Shape:
+	HitShape:
+		UseTargetableCellsOffsets: true
+		Type: Rectangle
+			TopLeft: -2560, -1536
+			BottomRight: 2560, 1536
+^2x5Shape:
+	HitShape:
+		UseTargetableCellsOffsets: true
+		Type: Rectangle
+			TopLeft: -1024, -2560
+			BottomRight: 1024, 2560
+^2x6Shape:
+	HitShape:
+		UseTargetableCellsOffsets: true
+		Type: Rectangle
+			TopLeft: -1024, -3072
+			BottomRight: 1024, 3072
+^3x5Shape:
+	HitShape:
+		UseTargetableCellsOffsets: true
+		Type: Rectangle
+			TopLeft: -1536, -2560
+			BottomRight: 1536, 2560
+
 ^BaseBuilding:
 	SpawnActorsOnSell:
 		ActorTypes: aot-e6-gdi, aot-e1-gdi, aot-e1-gdi, aot-e1-gdi
@@ -1490,6 +1550,8 @@ aot-upgrade-carryall-harvest:
 # Stellt aot-atec bereit → schaltet HTNK Dual-Railgun Upgrade sichtbar; stellt atec (Tech-Gate) für ORBC/Ion Cannon Strike bereit.
 ATEC:
 	Inherits: ^BaseBuilding
+	# HITSHAPE-FIX (2026-08-03): wie STEC -- nur ^1x1Shape geerbt bei 3x2-Rumpf. ^3x2Shape deckt ihn.
+	Inherits@shape: ^3x2Shape
 	Inherits@IDISABLE: ^DisabledOverlay
 	# Custom TS/RA-Sprite ohne "dead"-Rubble-Frame -> WithDeathAnimation (von ^BaseBuilding
 	# geerbt) würde beim Zerstören crashen ("Image `atec` does not have a sequence named `dead`").
@@ -1675,6 +1737,11 @@ aot-atec-age2:
 # Schaltet NOD-Tier-2-Upgrades frei (aot-stec Prerequisite).
 STEC:
 	Inherits: ^BaseBuilding
+	# HITSHAPE-FIX (2026-08-03): erbte ueber ^Building nur ^1x1Shape (Schadens-HitShape =
+	# eine Zelle), obwohl der Rumpf 3x2 ist (xxx xxx). DistanceFromEdge nutzt NUR dieses eine
+	# Rechteck -- Treffer ausserhalb der Mittelzelle machten fast keinen Schaden (User: STEC/ATEC
+	# nehmen kaum Schaden, v.a. ab Age-2 mit dem grossen Gemini-Sprite). ^3x2Shape deckt den Rumpf.
+	Inherits@shape: ^3x2Shape
 	Inherits@IDISABLE: ^DisabledOverlay
 	# Custom TS/RA-Sprite ohne "dead"-Rubble-Frame -> WithDeathAnimation (von ^BaseBuilding
 	# geerbt) würde beim Zerstören crashen ("Image `stec` does not have a sequence named `dead`").
@@ -2513,6 +2580,7 @@ aot-gascloud-parabomb:
 # aot-hq-ion:  sichtbar sobald Ion Cannon Uplink aktiv ist.
 aot-hq-base:
 	Inherits: HQ
+	Inherits@shape: ^2x2Shape
 	RenderSprites:
 		Image: hq
 	Buildable:
@@ -2524,6 +2592,7 @@ aot-hq-base:
 
 aot-hq-ion:
 	Inherits: HQ
+	Inherits@shape: ^2x2Shape
 	RenderSprites:
 		Image: hq
 	Buildable:
@@ -2538,6 +2607,7 @@ aot-hq-ion:
 
 aot-hq-base-age2:
 	Inherits: HQ
+	Inherits@shape: ^2x2Shape
 	RenderSprites:
 		Image: hq
 	Buildable:
@@ -2557,6 +2627,7 @@ aot-hq-base-age2:
 
 aot-hq-ion-age2:
 	Inherits: HQ
+	Inherits@shape: ^2x2Shape
 	RenderSprites:
 		Image: hq
 	Buildable:
@@ -2585,7 +2656,10 @@ aot-nod-radar:
 	# geerbt) würde beim Zerstören crashen.
 	-WithDeathAnimation:
 	HitShape:
-		UseTargetableCellsOffsets: false
+		# HITSHAPE-FIX (2026-08-03): war false -> eine Struktur-Zelle blieb ungedeckt (Schaden dort
+		# reduziert). true ergaenzt die Zellmitten als Trefferpunkte -> voller 2x2-Rumpf gedeckt.
+		# Die getunten TargetableOffsets (Dish/Ecken) bleiben zusaetzlich erhalten.
+		UseTargetableCellsOffsets: true
 		TargetableOffsets: 0,0,0, 630,-384,0, 630,384,0, -700,-512,0, -700,512,0
 	Valued:
 		Cost: 1000
@@ -4641,6 +4715,16 @@ aot-shipyard:
 		Description: Naval production facility.
 	Targetable:
 		TargetTypes: Ground, Water, C4, Structure
+	# HITSHAPE-FIX (2026-08-03): Ohne eigene HitShape erbt dieses Wasser-Gebaeude ueber ^Building
+	# nur ^1x1Shape (1024x1024 = eine Zelle). Bei 3x3-Footprint war damit nur die Mittelzelle
+	# treffbar; Geschosse auf die aeusseren 8 Zellen detonierten ausserhalb der HitShape -> Falloff
+	# -> praktisch 0 Schaden (User-Test: "kein Schaden an der Werft", je nach Seite unterschiedlich).
+	# Es gibt keinen ^3x3Shape -> explizites 3x3-Rechteck (+-1536), das den ganzen Footprint deckt.
+	HitShape:
+		UseTargetableCellsOffsets: true
+		Type: Rectangle
+			TopLeft: -1536, -1536
+			BottomRight: 1536, 1536
 	Building:
 		Footprint: XXX xxx XXX
 		Dimensions: 3,3
@@ -4735,6 +4819,13 @@ aot-subpen:
 		Description: Naval production facility.
 	Targetable:
 		TargetTypes: Ground, Water, C4, Structure
+	# HITSHAPE-FIX (2026-08-03): identisch zur Werft (aot-shipyard) -- ohne eigene HitShape nur
+	# ^1x1Shape geerbt, 8 der 9 Zellen ungedeckt -> fast kein Schaden. 3x3-Rechteck deckt alles.
+	HitShape:
+		UseTargetableCellsOffsets: true
+		Type: Rectangle
+			TopLeft: -1536, -1536
+			BottomRight: 1536, 1536
 	Building:
 		Footprint: XXX xxx XXX
 		Dimensions: 3,3
@@ -6714,6 +6805,7 @@ aot-foundation:
 	# WithSpriteBody, Placement-Cursor). 3×3-Footprint -> weisses 3×3-Preview-Raster.
 	# AotPlaceFoundation spawnt danach eine aot-foundation-cell auf jeder Footprint-Zelle.
 	Inherits: ^Building
+	Inherits@shape: ^3x3Shape
 	Building:
 		# 3×3 Footprint: Preview zeigt 3×3 weiss/rot. TerrainTypes noetig sonst ist NICHTS baubar
 		# (^Building-Default TerrainTypes = leer -> IsCellBuildable immer false -> ueberall rot).

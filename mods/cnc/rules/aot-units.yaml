@@ -4287,11 +4287,22 @@ aot-gunboat:
 		Turret: pt
 		LocalOffset: 208,0,48
 		RequiresCondition: aot-gunboat-frigate-upgrade && !aot-gunboat-upgrade
-	# Destroyer-Waffe: Raketenwerfer (ssam-Heck-Turm), Luft + Land.
+	# Destroyer-Waffen (ab Destroyer-Upgrade): dieselben zwei Lenkrakten-Armaments wie das
+	# Missile Sub, aber mit den 1:1-RA-Destroyer-Stats (Stinger/StingerAA, Range 7c512 statt
+	# der 20c0 des Subs -- die kurze Reichweite ist der Hauptunterschied zum Sub).
+	# ZWILLINGSROHRE wie beim RA-DD (LocalOffset 0,-100 / 0,100 + LocalYaw 64,-64): mit Burst 2
+	# feuert der Destroyer damit eine Doppelsalve aus beiden Rohren -- genau wie das Sub.
 	Armament@dd:
-		Weapon: aot-DestroyerRockets
+		Weapon: aot-DestroyerStinger
 		Turret: dd
-		LocalOffset: 0,0,48
+		LocalOffset: 0,-100,48, 0,100,48
+		LocalYaw: 64, -64
+		RequiresCondition: aot-gunboat-upgrade
+	Armament@ddaa:
+		Weapon: aot-DestroyerStingerAA
+		Turret: dd
+		LocalOffset: 0,-100,48, 0,100,48
+		LocalYaw: 64, -64
 		RequiresCondition: aot-gunboat-upgrade
 	# DepthCharge DD: nur Destroyer hat Wasserbomben.
 	Armament@depthdd:
@@ -4595,6 +4606,9 @@ aot-msub:
 		AmmoPoolName: drones
 		DronesActiveCondition: aot-drones-active
 		RequiresCondition: aot-msub-drone-upgrade
+		# Reichweite 30c0 (Default war 40c0): etwas hoeher als Sub/Cruiser (16/20c0) -- ausgeglichen
+		# dadurch, dass die Drohnen von Flugabwehr abgeschossen werden koennen (User-Entscheidung).
+		MaxLaunchRange: 30c0
 	-Targetable:
 	Targetable@surface:
 		TargetTypes: Ground, Water
@@ -4611,6 +4625,19 @@ aot-msub:
 		PauseOnCondition: aot-msub-mine-upgrade || aot-msub-drone-upgrade
 	Armament@missile-mine:
 		Weapon: aot-SubMissileSingle
+		LocalOffset: 0,-171,0, 0,171,0
+		FireDelay: 2
+		PauseOnCondition: !aot-msub-mine-upgrade || aot-msub-drone-upgrade
+	# Flugabwehr (RA MSUB Armament@SECONDARY): dieselben Startrohre, RA SubMissileAA.
+	# Spiegelt die Pause-Logik der Bodenrakete -> Basis = Burst 2, Mine = Burst 1,
+	# Drohne = keine Rakete. AutoTarget (^AutoTargetAll) findet Luftziele selbst.
+	Armament@aa:
+		Weapon: aot-SubMissileAA
+		LocalOffset: 0,-171,0, 0,171,0
+		FireDelay: 2
+		PauseOnCondition: aot-msub-mine-upgrade || aot-msub-drone-upgrade
+	Armament@aa-mine:
+		Weapon: aot-SubMissileAASingle
 		LocalOffset: 0,-171,0, 0,171,0
 		FireDelay: 2
 		PauseOnCondition: !aot-msub-mine-upgrade || aot-msub-drone-upgrade

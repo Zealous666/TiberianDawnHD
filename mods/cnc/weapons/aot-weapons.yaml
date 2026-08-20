@@ -606,6 +606,68 @@ aot-DestroyerRockets:
 	Warhead@1Dam: SpreadDamage
 		Damage: 9000
 
+# === Age of Tiberium (aotmod) - Destroyer Lenkraketen (RA-Stinger) ===
+# RA-Stinger-IDENTITAET (engine/mods/ra/weapons/missiles.yaml): Schaden 2500, RA-Versus
+# (stark vs Heavy 120 / schwach vs Concrete 60 -- Panzerbrecher, kein Basiskiller), kurze
+# Reichweite 7c512 (vs 20c0 des Subs). Nur ab Destroyer-Upgrade aktiv.
+#
+# ZUSTELLUNG von der bewaehrten Sub-Rakete uebernommen, weil die ROHEN RA-Werte in diesem
+# Mod gegen Gebaeude quasi 0 Schaden machten (User-Test): RAs Gebaeude sind winzig, hier
+# haben sie 55k-80k HP mit grossen HitShapes. Zwei Ursachen behoben:
+#  1. Spread 128 + Default-Falloff [100,37,14,5,0] = viel zu enger Radius -> der Grossteil
+#     der Gebaeude-HitShape lag ausserhalb. Jetzt Spread 426 + sanfter Falloff wie beim Sub.
+#  2. CloseEnough 149 < Speed 170 -> die Rakete uebersprang das Detonationsfenster jeden
+#     Tick, kreiste und detonierte weit vom Ziel. CloseEnough entfernt = Default 298 (> Speed).
+aot-DestroyerStinger:
+	Inherits: ^MissileWeapon
+	ReloadDelay: 60
+	Range: 10c0
+	Burst: 2
+	# Gestaffelter Burst wie beim Missile Sub (nicht beide Raketen gleichzeitig, User-Wunsch).
+	BurstDelays: 15
+	Report: missile6.wav
+	ValidTargets: Ground, Water
+	InvalidTargets: Underwater
+	Projectile: Missile
+		Arm: 3
+		Inaccuracy: 0
+		HorizontalRateOfTurn: 80
+		# RangeLimit > Range (10c0) noetig, sonst geht der Rakete vor dem Ziel der Sprit aus.
+		RangeLimit: 12c0
+		Speed: 170
+	Warhead@1Dam: SpreadDamage
+		Spread: 426
+		Falloff: 1000, 368, 135, 50, 18, 7, 0
+		Damage: 2500
+		ValidTargets: Ground, Water
+		Versus:
+			None: 36
+			Wood: 88
+			Light: 66
+			Heavy: 120
+			Concrete: 60
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+
+# Flugabwehr-Lenkrakete: RA StingerAA (erbt Stinger, nur Luft, schneller, RA-Luftschaden).
+aot-DestroyerStingerAA:
+	Inherits: aot-DestroyerStinger
+	ValidTargets: Air
+	InvalidTargets: Ground, Water
+	Projectile: Missile
+		Arm: 3
+		Inaccuracy: 0
+		HorizontalRateOfTurn: 80
+		RangeLimit: 12c0
+		Speed: 255
+		CloseEnough: 298
+	Warhead@1Dam: SpreadDamage
+		Spread: 128
+		Damage: 1650
+		ValidTargets: Air
+		Versus:
+			Light: 100
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+
 # RA DepthCharge-Nachbau: Bogenprojektil (bomb.shp), feuert seitlich vom Schiff.
 # RA original: ValidTargets Underwater (U-Boote) -- in CnC kein Underwater, daher Water
 # (trifft Schiffe auf Wasser). LaunchAngle 62 + Speed 125 = sichtbarer Bogenflug wie
@@ -681,31 +743,44 @@ aot-SubTorpedo:
 		ImpactSounds: splash9.wav
 		ValidTargets: Water
 
-# Missile Sub Rakete: ballistische Bahn (Bullet LaunchAngle 120 = steil), Rauch-Schweif.
-# ValidTargets: Ground + Water. Analog RA SubMissile.
+# Missile Sub Rakete: ECHTE Lenkrakete mit Suchmodus (Projectile: Missile), 1:1 die
+# RA-Werte aus ^SubMissileDefault (engine/mods/ra/weapons/missiles.yaml): Speed 234,
+# HorizontalRateOfTurn 60 = homt aufs Ziel. Ersetzt die frueher ballistische Bahn
+# (Bullet LaunchAngle 120), die nur dorthin schlug wo das Ziel WAR, statt ihm zu folgen.
+# RangeLimit bewusst > Range (22c0 > 20c0), sonst geht der Rakete vor Reichweiten-Ende
+# der Sprit aus. Sprite (missile) + Sound (missile6) unveraendert = RA-korrekt.
 aot-SubMissile:
 	Inherits: ^BallisticWeapon
 	-Warhead@2Smu:
+	-Projectile:
 	ReloadDelay: 300
-	Range: 20c0
+	# Reichweite 20c0->16c0: klar mehr als der Destroyer (10c0), aber unter Cruiser (20c0)
+	# -- der Sub ist "etwas besser als der Destroyer", nicht gleichauf mit dem Cruiser (User-Ziel).
+	Range: 16c0
 	Report: missile6.wav
 	Burst: 2
 	BurstDelays: 15
-	ValidTargets: Ground, Water
-	Projectile: Bullet
-		Speed: 215
+	# Underwater/Submarine zusaetzlich (User 2026-08-04): die RAKETEN sollen auch aufgeklaerte
+	# getauchte U-Boote treffen koennen. Ohne diese Zieltypen feuerte die Missile Sub zwar, machte
+	# aber 0 Schaden (getauchtes Sub = Underwater/Submarine, Warhead traf nur Ground/Water).
+	ValidTargets: Ground, Water, Underwater, Submarine
+	Projectile: Missile
+		Speed: 234
 		Blockable: false
-		LaunchAngle: 120
 		Inaccuracy: 614
+		HorizontalRateOfTurn: 60
+		RangeLimit: 22c0
 		Image: missile
 		Shadow: True
 		TrailImage: smokey
 		ContrailLength: 30
 	Warhead@1Dam: SpreadDamage
 		Spread: 426
-		Damage: 2500
+		# Schaden 2500->3000: der Sub liegt damit ueber dem Destroyer (2500) -- "etwas besser
+		# als der Destroyer" bei Reichweite UND Schaden (User-Ziel).
+		Damage: 3000
 		Falloff: 1000, 368, 135, 50, 18, 7, 0
-		ValidTargets: Ground, Water
+		ValidTargets: Ground, Water, Underwater, Submarine
 		Versus:
 			None: 80
 			Wood: 50
@@ -716,12 +791,37 @@ aot-SubMissile:
 	Warhead@2Eff: CreateEffect
 		Explosions: poof
 		ImpactSounds: xplosml2.wav
-		ValidTargets: Ground, Water
+		ValidTargets: Ground, Water, Underwater, Submarine
 
 # === Age of Tiberium (aotmod) - Mine Layer Upgrade: Rakete + See-Mine ===
 # Nach Mine Layer Upgrade: Missile Sub feuert nur noch 1 Rakete (statt 2).
 aot-SubMissileSingle:
 	Inherits: aot-SubMissile
+	# Cruise-Modus (nach Mine-Upgrade): NUR die Salve halbiert (1 statt 2 Raketen) als Preis fuer
+	# die Minen -- Reichweite (16c0) und Schaden (3000) bleiben identisch zum Basis-Sub (User-Korrektur).
+	Burst: 1
+
+# Missile Sub Flugabwehr: 1:1 RA SubMissileAA (engine/mods/ra/weapons/missiles.yaml).
+# Erbt die Lenkrakete oben, zielt aber NUR auf Luft und mit RA-Luftschaden (450, Light 100).
+# Reichweite auf RA-Wert 8c0 gekuerzt (RA SubMissileAA erbt Range aus ^SubMissileDefault,
+# NICHT die 20c0-Ueberschreibung der Bodenrakete).
+aot-SubMissileAA:
+	Inherits: aot-SubMissile
+	Range: 8c0
+	ValidTargets: Air
+	Warhead@1Dam: SpreadDamage
+		Damage: 450
+		ValidTargets: Air
+		Versus:
+			Light: 100
+	Warhead@2Eff: CreateEffect
+		Explosions: poof
+		ImpactSounds: xplosml2.wav
+		ValidTargets: Air
+
+# Flugabwehr-Variante nach Mine Layer Upgrade: nur 1 Rakete (analog aot-SubMissileSingle).
+aot-SubMissileAASingle:
+	Inherits: aot-SubMissileAA
 	Burst: 1
 
 # See-Mine Explosion: hoher Schaden, kurzer Radius, nur Wasser/Submarine.
@@ -795,8 +895,10 @@ aot-8Inch:
 		Inaccuracy: 4c0
 		ContrailLength: 30
 	Warhead@1Dam: SpreadDamage
-		Spread: 213
-		Damage: 2500
+		# Cruiser = groesster Schaden + groesste Streuung (User-Ziel): Damage 2500->4500,
+		# Spread 213->512. Zusammen mit Inaccuracy 4c0 der Flaechenbombarder der Flotte.
+		Spread: 512
+		Damage: 4500
 		Falloff: 1000, 368, 135, 50, 18, 7, 0
 		Versus:
 			None: 60
