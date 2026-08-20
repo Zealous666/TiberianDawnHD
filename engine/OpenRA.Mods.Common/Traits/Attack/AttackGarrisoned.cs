@@ -167,37 +167,37 @@ namespace OpenRA.Mods.Common.Traits
 			}
 		}
 
-		bool PortFacesTarget(WAngle bodyYaw, FirePort port, WAngle targetYaw)
-		{
-			var yaw = bodyYaw + port.Yaw;
-			var leftTurn = (yaw - targetYaw).Angle;
-			var rightTurn = (targetYaw - yaw).Angle;
-			return Math.Min(leftTurn, rightTurn) <= port.Cone.Angle;
-		}
-
+		// aotmod 2026-08-05: den BEST ausgerichteten Port waehlen, nicht einen zufaelligen unter
+		// den passenden. Die Zufallswahl (Shuffle) war die Ursache fuer "granaten/raketen fliegen
+		// sporadisch in die falsche Richtung / in den Bunker": lag ein Ziel nahe der Grenze zweier
+		// Ports, wurde mal der eine, mal der andere gezogen -- die Einheit wurde an den falschen
+		// Port versetzt und feuerte quer. Der best ausgerichtete Port liegt immer zum Ziel; kein
+		// null-Rueckgabe mehr (die Kegel-PortCones dienen nur noch der Muzzle-Optik), damit die
+		// Garnison UNBEHINDERT in jede Richtung feuern kann, sofern die Reichweite es zulaesst.
 		FirePort SelectFirePort(Actor self, WAngle targetYaw)
 		{
-			// Pick a random port that faces the target
 			var bodyYaw = facing != null ? facing.Facing : WAngle.Zero;
-			var indices = Enumerable.Range(0, Info.Ports.Length).Shuffle(self.World.SharedRandom);
-			foreach (var i in indices)
-				if (PortFacesTarget(bodyYaw, Info.Ports[i], targetYaw))
-					return Info.Ports[i];
+			FirePort best = null;
+			var bestDelta = int.MaxValue;
+			foreach (var port in Info.Ports)
+			{
+				var yaw = bodyYaw + port.Yaw;
+				var delta = Math.Min((yaw - targetYaw).Angle, (targetYaw - yaw).Angle);
+				if (delta < bestDelta)
+				{
+					bestDelta = delta;
+					best = port;
+				}
+			}
 
-			return null;
+			return best;
 		}
 
-		// Keep using the same port across ticks while it still faces the target, instead
-		// of re-rolling a random (possibly different) matching port every tick. Passengers
-		// with their own turret compute their aim relative to this port's position, so a
-		// port that keeps jumping around every tick would make the turret jitter/never
-		// converge instead of smoothly rotating onto the target.
+		// Deterministisch bester Port (oben) -> fuer ein stabiles Ziel stabil, also ohne das
+		// Zittern, das die alte Zufallswahl pro Tick verursachte. Cache nur noch, damit die
+		// Muzzle-/Turret-Anzeige denselben Port referenziert.
 		FirePort SelectFirePortSticky(Actor self, Armament a, WAngle targetYaw)
 		{
-			var bodyYaw = facing != null ? facing.Facing : WAngle.Zero;
-			if (armamentPort.TryGetValue(a, out var cached) && PortFacesTarget(bodyYaw, cached, targetYaw))
-				return cached;
-
 			var port = SelectFirePort(self, targetYaw);
 			if (port != null)
 				armamentPort[a] = port;
