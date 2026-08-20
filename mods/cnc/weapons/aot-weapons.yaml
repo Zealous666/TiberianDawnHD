@@ -1383,10 +1383,34 @@ aot-BansheeMissile:
 		DedupeRange: 1c0
 
 # === Age of Tiberium (aotmod) - Heavy Artillery Shell (1/3 längere Reichweite, TS 155mm Sounds) ===
+# Mobile Howitzer: schnelleres, flacheres Projektil fuer praezisere ballistische Treffer,
+# v.a. gegen fahrende Ziele. Kuerzere Flugzeit (Speed 512 statt 204) + geringere Streuung +
+# flacherer Abschusswinkel = weniger Vorhalt noetig. Mittlere Reichweite (11c0) bleibt.
+# Gegenstueck zur Heavy Artillery (aot-ArtilleryShell-Heavy: lobend, langsam, grosse Reichweite).
+aot-ArtilleryShell-Howitzer:
+	Inherits: ArtilleryShell
+	Range: 11c0
+	Report: 120mmf.aud
+	Projectile: Bullet
+		Speed: 512
+		LaunchAngle: 40
+		Inaccuracy: 426
+	Warhead@2Eff: CreateEffect
+		Explosions: med_frag
+		ImpactSounds: expnew06.aud
+		ValidTargets: Ground, Air, GroundActor, AirborneActor, WaterActor, Trees
+
+# Heavy Artillery: langsames, hoch lobendes Geschoss mit grosser Reichweite (17c0, deutlich mehr
+# als der Howitzer). Traegt zusammen mit der groesseren Sichtweite den Belagerungs-Charakter.
 aot-ArtilleryShell-Heavy:
 	Inherits: ArtilleryShell
-	Range: 14c640
+	Range: 17c0
 	Report: 120mmf.aud
+	Projectile: Bullet
+		# Abschusswinkel = Rohrneigung, damit Flugbahn und Geschuetzlauf synchron sind.
+		# LaunchAngle ist WAngle (1024 = 360 Grad); der Barrel ist mit 45 Grad gebacken
+		# (ELEVATION=45 in bake-vxl-test.sh), also 45/360*1024 = 128.
+		LaunchAngle: 128
 	Warhead@2Eff: CreateEffect
 		Explosions: med_frag
 		ImpactSounds: expnew06.aud

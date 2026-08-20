@@ -3560,14 +3560,23 @@ aot-arty-howitzer:
 		Queue: Starport
 		BuildDuration: 0
 		Icon: aot-arty-howitzer-icon
-		Description: Medium-range howitzer artillery. Strong vs. light armor and structures.
+		Description: Medium-range howitzer. Fast, accurate shells that track moving targets well. Strong vs. light armor and structures.
 	GrantConditionOnPrerequisite@heavy:
 		Condition: aot-heavy-upgraded
 		Prerequisites: aot-heavy-artillery-upgrade
+	# Sichtweite: Mobile Howitzer klein (6c0), nach Heavy-Upgrade gross (13c0) wie aot-arty-heavy.
+	RevealsShroud:
+		Range: 6c0
+		RequiresCondition: !aot-heavy-upgraded
+	RevealsShroud@heavy:
+		Range: 13c0
+		RequiresCondition: aot-heavy-upgraded
 	# Nach Heavy-Upgrade: ARTY-Basisangriff (undeployed) komplett deaktivieren
 	AttackFrontal:
 		RequiresCondition: !aot-heavy-upgraded
 	Armament:
+		# Mobile Howitzer: schnelles, praezises Projektil (siehe aot-ArtilleryShell-Howitzer)
+		Weapon: aot-ArtilleryShell-Howitzer
 		RequiresCondition: !aot-heavy-upgraded
 	# Deployed: verankert wie Juggernaut (Immovable + Pause + Order-Reject)
 	Mobile:
@@ -3688,7 +3697,7 @@ aot-arty-heavy:
 		Queue: Starport
 		BuildDuration: 0
 		Icon: aot-arty-heavy-adv-icon
-		Description: Heavy siege artillery. Deploy to fire. Devastating vs. structures and armor.
+		Description: Heavy siege artillery. Deploy to fire. Long range and wide sight. Devastating vs. structures and armor.
 	Tooltip:
 		Name: actor-aot-arty-heavy.name
 		RequiresCondition: !arty-deployed
@@ -3709,7 +3718,7 @@ aot-arty-heavy:
 		RemoveOrders: true
 		RequiresCondition: arty-deployed
 	RevealsShroud:
-		Range: 10c0
+		Range: 13c0
 	RenderSprites:
 		Image: arty
 	# PFLICHT: ^Vehicle bringt einen eigenen WithFacingSpriteBody (Name "body", Sequence idle) mit.
