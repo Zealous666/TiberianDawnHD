@@ -3016,6 +3016,16 @@ gdi-hq:
 	Tooltip:
 		Name: Radar
 
+# === Age of Tiberium (aotmod) - Tooltip-Alias fuer die OR-Sammelvoraussetzung ===
+# aot-gdi-ordnance-upgrade wird von BEIDEN Age-2-Gatekeepern (GDI Mech Armaments / GDI Heavy
+# Ordonance) geliefert, damit das Orbital Command "eins von beiden" verlangt. Im Tooltip zeigte
+# ProductionTooltipLogic.ActorName() aber den nackten Prereq-String, weil kein Aktor so heisst.
+# Dieser reine Tooltip-Aktor (nie baubar, nie platziert) gibt dem String einen lesbaren Namen.
+aot-gdi-ordnance-upgrade:
+	Tooltip:
+		Name: GDI Mech Armaments or GDI Heavy Ordonance
+	Interactable:
+
 # === Age of Tiberium (aotmod) - MTNK Predator Upgrade ===
 # === Age of Tiberium (aotmod) - GDI Heavy Ordonance (Age-2-Gatekeeper) ===
 # User-Briefing 2026-08-01: konsolidiert das bisherige Predator-Upgrade mit dem Hover-MLRS-
