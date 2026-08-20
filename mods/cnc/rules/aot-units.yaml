@@ -687,7 +687,9 @@ JEEP:
 	# nur auf Boden. Diese zusaetzliche, an aot-jeep-humvee gebundene Prioritaet ergaenzt Luftziele
 	# -- der Basis-Jeep und der Wolverine bleiben unberuehrt, ihre Waffen treffen ohnehin keine Luft.
 	AutoTargetPriority@HUMVEEAA:
-		RequiresCondition: aot-jeep-humvee && !aot-jeep-wolverine
+		# HUMVEE UND Wolverine (User 2026-08-05): beide Varianten-MGs sind AA-faehig, der Basis-Jeep
+		# nicht. Der Basis-Jeep braucht die Prioritaet ohnehin nicht (MachineGunH trifft keine Luft).
+		RequiresCondition: aot-jeep-humvee || aot-jeep-wolverine
 		ValidTargets: Air
 		InvalidTargets: NoAutoTarget
 
@@ -1454,7 +1456,7 @@ aot-jeep-wolverine:
 		# kein eigenes Kauf-Upgrade, kein APC-Bezug mehr (2026-08-01, User-Briefing).
 		Prerequisites: lite, pyle, ~aot-mtnk-titan-upgrade, aot-mtnk-titan-upgrade
 		Icon: aot-wolverine-icon
-		Description: Wolverine Mech. Fast anti-infantry walker.
+		Description: Wolverine Mech. Fast anti-infantry walker with twin autocannons that also engage aircraft.
 	Tooltip:
 		Name: Wolverine
 

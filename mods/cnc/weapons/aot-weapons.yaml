@@ -27,9 +27,12 @@ HeliAGGun:
 aot-JeepHumvee:
 	Inherits: MachineGunH
 	# AA-faehig (User-Wunsch 2026-08-05): eigene HUMVEE-Waffe, der Basis-Jeep nutzt MachineGunH und
-	# bleibt reine Bodenwaffe. ValidTargets muss Air enthalten, sonst trifft das MG keine Flugziele.
+	# bleibt reine Bodenwaffe. ValidTargets muss Air enthalten -- und ZWINGEND auch am Warhead,
+	# sonst zielt/feuert das MG zwar auf Luft, macht aber 0 Schaden (User-Fund 2026-08-05). Gleiches
+	# Muster wie aot-FirehawkMissile/OrcaAGMissiles: Air auf Waffen- UND Warhead-Ebene.
 	ValidTargets: Ground, Water, Air
 	Warhead@1Dam: SpreadDamage
+		ValidTargets: Ground, Water, Air
 		Damage: 1500
 		Versus:
 			Light: 70
@@ -1157,10 +1160,15 @@ aot-MachineGunHGarrisoned:
 # GDI Wolverine Mech — AssaultCannon (TS: tsgun4.aud, Range 5, anti-infantry)
 aot-WolverineCannon:
 	Inherits: MachineGunH
+	# AA-faehig (User-Wunsch 2026-08-05): der Wolverine (Mech-Armaments-Pfad) ist die einzige mobile
+	# GDI-Boden-AA auf diesem Gatekeeper -- Hover AA haengt am anderen (Heavy Ordonance). Air auf
+	# Waffen- UND Warhead-Ebene, sonst kein Schaden auf Flugziele.
+	ValidTargets: Ground, Water, Air
 	Range: 5c0
 	ReloadDelay: 50
 	Report: tsgun4.aud
 	Warhead@1Dam:
+		ValidTargets: Ground, Water, Air
 		Damage: 2000
 
 aot-JeepHumveeGarrisoned:
