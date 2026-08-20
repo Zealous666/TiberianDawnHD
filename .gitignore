@@ -44,6 +44,7 @@ engine/**
 !engine/OpenRA.Mods.Common/Traits/Air/AotDroneLogic.cs
 !engine/OpenRA.Mods.Common/Traits/Air/AotReturnWhenEmpty.cs
 !engine/OpenRA.Mods.Common/Traits/Air/AotLandOnCreation.cs
+!engine/OpenRA.Mods.Common/Traits/Air/AotAirGuard.cs
 !engine/OpenRA.Mods.Common/Widgets/Logic/Ingame/CommandBarLogic.cs
 !engine/OpenRA.Mods.Common/Traits/OretSpawnStateCarrier.cs
 !engine/OpenRA.Mods.Common/Traits/Render/

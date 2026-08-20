@@ -20,7 +20,7 @@ namespace OpenRA.Mods.Common.Traits
 		public override object Create(ActorInitializer init) { return new AotReturnWhenEmpty(init, this); }
 	}
 
-	public class AotReturnWhenEmpty : INotifyCreated, ITick, INotifyDockClient, INotifyAttack
+	public class AotReturnWhenEmpty : INotifyCreated, ITick, INotifyDockClient, INotifyAttack, IResolveOrder
 	{
 		readonly AotReturnWhenEmptyInfo info;
 		AmmoPool[] ammoPools;
@@ -66,6 +66,32 @@ namespace OpenRA.Mods.Common.Traits
 			}
 
 			wasEmpty = isEmpty;
+		}
+
+		// Ein manueller/neuer Befehl loest den automatisch gemerkten Angriff ab: schickt der Spieler
+		// den Flieger unterwegs woandershin (Move/Stop/Idle), zum Aufmunitieren (ReturnToBase/Enter)
+		// oder auf ein neues Ziel, darf er nach dem Rearm NICHT das alte Ziel wieder anfliegen.
+		// Der automatische Rearm-Rueckflug selbst laeuft ueber QueueActivity, nicht ueber einen Order,
+		// und wird davon daher nicht geloescht.
+		void IResolveOrder.ResolveOrder(Actor self, Order order)
+		{
+			switch (order.OrderString)
+			{
+				case "Move":
+				case "Stop":
+				case "Scatter":
+				case "AttackMove":
+				case "Attack":
+				case "ForceAttack":
+				case "Guard":
+				case "ReturnToBase":
+				case "Enter":
+				case "Land":
+					hasResumeTarget = false;
+					resumeTarget = Target.Invalid;
+					lastAttackTarget = Target.Invalid;
+					break;
+			}
 		}
 
 		void INotifyDockClient.Docked(Actor self, Actor dock) { }

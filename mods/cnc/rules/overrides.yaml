@@ -1781,7 +1781,21 @@ TRAN:
 		RequiresCondition: aot-tran-doorgunner-upgrade
 	AutoTarget:
 		RequiresCondition: aot-tran-doorgunner-upgrade
-		ScanRadius: 8
+		ScanRadius: 3
+		ScanOnIdle: False
+	# Ohne AutoTargetPriority waehlt AutoTarget NIE ein Ziel (activePriorities leer) -- das war der
+	# Grund, warum das Gunship selbst direkt ueber einem Gegner nicht angriff.
+	AutoTargetPriority@GUNSHIP:
+		RequiresCondition: aot-tran-doorgunner-upgrade
+		ValidTargets: Infantry, Vehicle, Creep, Water, Air
+		InvalidTargets: NoAutoTarget
+	# Guard-Leash (aotmod 2026-08-20): das Gunship-Chinook geht aus dem Idle-Hover in den Angriff, wenn
+	# ein Gegner im Umkreis von 3 Zellen ist (auch direkt darunter), und kehrt danach zum Hover-Platz
+	# zurueck. Leash = Guard (3c0): keine echte Verfolgung darueber hinaus -> kein "Zergen" ueber die
+	# halbe Map. AutoTarget liefert nur die Zielauswahl; AotAirGuard steuert Angriff + Rueckkehr.
+	AotAirGuard:
+		RequiresCondition: aot-tran-doorgunner-upgrade
+		LeashRadius: 3c0
 
 # === Age of Tiberium (aotmod) - NOD Stealth Tank: Age-Gate + Cargo Upgrade ===
 # Baubar/sichtbar ab Age 1 statt techlevel.high (siehe Proxy-Aktoren aot-stnk-base/aot-stnk-cargo

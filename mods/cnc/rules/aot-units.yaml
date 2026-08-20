@@ -2460,6 +2460,16 @@ AJET:
 		FacingTolerance: 40
 		AttackType: Strafe
 		Voice: Attack
+	# Guard-Leash (aotmod 2026-08-20): der Jet verlaesst im Idle-Kreis seine Loiter-Position, um
+	# Gegner im Umkreis von 10 Zellen anzugreifen, und kehrt danach dorthin zurueck. AutoTarget liefert
+	# nur die Zielauswahl (ScanRadius = Guard-Radius); ScanOnIdle: False, damit die Vanilla-Routine
+	# nicht ZUSAETZLICH ihren eigenen (ungeleashten) Angriff ausloest -- das uebernimmt AotAirGuard.
+	# Ein Spieler-Move-Befehl (A->B) wird nie unterbrochen (Angriff nur aus dem Idle).
+	AutoTarget:
+		ScanRadius: 10
+		ScanOnIdle: False
+	AotAirGuard:
+		LeashRadius: 15c0
 	# Firehawk-Upgrade: darf auch Gebäude automatisch angreifen (DEFAULT-Prio hat kein Structure).
 	# A-10 bleibt unverändert (Default-Prio nur aktiv wenn !aot-firehawk).
 	AutoTargetPriority@DEFAULT:
@@ -4238,7 +4248,7 @@ aot-gunboat:
 	Turreted@dd:
 		Turret: dd
 		TurnSpeed: 28
-		Offset: 469,0,128
+		Offset: 704,0,128
 		RequiresCondition: aot-gunboat-upgrade
 	AttackTurreted:
 		Turrets: pt, dd
@@ -4253,10 +4263,10 @@ aot-gunboat:
 		Name: Gunboat
 		RequiresCondition: !aot-gunboat-frigate-upgrade
 	Tooltip@frigate:
-		Name: Frigate
+		Name: Missile Frigate
 		RequiresCondition: aot-gunboat-frigate-upgrade && !aot-gunboat-upgrade
 	Tooltip@dd:
-		Name: Destroyer
+		Name: Missile Destroyer
 		RequiresCondition: aot-gunboat-upgrade
 	WithFacingSpriteBody@pt:
 		Sequence: idle
@@ -4327,6 +4337,9 @@ aot-gunboat-base:
 
 aot-gunboat-frigate:
 	Inherits: aot-gunboat
+	Tooltip@base:
+		Name: Missile Frigate
+		RequiresCondition: !aot-gunboat-frigate-upgrade
 	Buildable:
 		LockedGroup: aot-grp-gunboat
 		Queue: Naval.GDI
@@ -4338,7 +4351,7 @@ aot-gunboat-frigate:
 aot-gunboat-destroyer:
 	Inherits: aot-gunboat
 	Tooltip@base:
-		Name: Destroyer
+		Name: Missile Destroyer
 		RequiresCondition: !aot-gunboat-upgrade
 	Buildable:
 		LockedGroup: aot-grp-gunboat
@@ -4958,11 +4971,11 @@ aot-cruiser:
 		Sequence: idle
 	Turreted@primary:
 		Turret: primary
-		Offset: -896,0,128
+		Offset: -1344,0,128
 		TurnSpeed: 12
 	Turreted@secondary:
 		Turret: secondary
-		Offset: 768,0,128
+		Offset: 1152,0,128
 		TurnSpeed: 12
 	AttackTurreted:
 		Turrets: primary, secondary
