@@ -252,19 +252,37 @@ namespace OpenRA.Mods.Common.Traits
 						{
 							hasMatchingTurret = true;
 							var beforeYaw = t.LocalOrientation.Yaw;
-							var achievedBefore = t.HasAchievedDesiredFacing;
-							var faced = t.FaceTarget(a.Actor, target);
+
+							// aotmod 2026-08-20: Turm des garrisonierten Passagiers DIREKT auf die vom Host
+							// berechnete Ziel-Welt-Yaw schnappen. Das eigene Attack-Trait des Passagiers ist
+							// im Cargo deaktiviert, deshalb drehte das regulaere FaceTarget den Turm NIE (es
+							// brach bei attack.IsTraitDisabled ab) und die Muendung blieb auf der eingefrorenen
+							// Koerper-Richtung -> bei Ziel exakt im Sueden (180 Grad) schlug die Homing-Rakete
+							// nach einer engen Kehre in der eigenen Pillbox ein.
+							t.FaceWorldYawInstantly(a.Actor, targetYaw);
 							if (AotFirePositionDebug.Enabled)
 							{
+								var muzzleYaw = a.Barrels.Length > 0 ? a.MuzzleOrientation(a.Actor, a.Barrels[0]).Yaw : WAngle.Zero;
 								AotFirePositionDebug.Trace($"tick={self.World.WorldTick} passenger={a.Actor.Info.Name} turret={t.Name} " +
 									$"targetYaw={targetYaw} portYaw={port.Yaw} bodyFacing={paxFacing[a.Actor].Facing} " +
-									$"turnSpeed={t.Info.TurnSpeed} before={beforeYaw} achievedBefore={achievedBefore} after={t.LocalOrientation.Yaw} " +
-									$"faceTargetResult={faced}");
+									$"before={beforeYaw} after={t.LocalOrientation.Yaw} worldMuzzleYaw={muzzleYaw}");
 							}
 						}
 
 				if (!hasMatchingTurret)
+				{
 					paxFacing[a.Actor].Facing = targetYaw;
+
+					if (AotFirePositionDebug.Enabled)
+					{
+						var paxOrient = a.Actor.Orientation.Yaw;
+						var muzzleYaw = a.Barrels.Length > 0 ? a.MuzzleOrientation(a.Actor, a.Barrels[0]).Yaw : WAngle.Zero;
+						AotFirePositionDebug.Trace($"tick={self.World.WorldTick} NOTURRET passenger={a.Actor.Info.Name} armament={a.Info.Name} weapon={a.Info.Weapon} " +
+							$"hostPos={self.CenterPosition} paxPos={a.Actor.CenterPosition} targetPos={targetedPosition} " +
+							$"targetYaw={targetYaw} setFacing={targetYaw} paxOrientYaw={paxOrient} muzzleYaw={muzzleYaw} " +
+							$"port.Yaw={port.Yaw} port.Offset={port.Offset}");
+					}
+				}
 
 				var fired = a.CheckFire(a.Actor, facing, target);
 

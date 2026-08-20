@@ -298,6 +298,23 @@ namespace OpenRA.Mods.Common.Traits
 			return HasAchievedDesiredFacing;
 		}
 
+		// aotmod 2026-08-20: Turm sofort auf eine WELT-Yaw schnappen, UNABHAENGIG vom eigenen
+		// Attack-Trait des Aktors. Grund: ein garrisonierter Passagier (AttackGarrisoned) hat sein
+		// eigenes AttackTurreted im Cargo DEAKTIVIERT -> das regulaere FaceTarget brach fruehzeitig
+		// ab (attack.IsTraitDisabled) und der Turm blieb auf der eingefrorenen Koerper-Richtung (Nord)
+		// stehen. Homing-Raketen kaschierten das bis ~90 Grad; bei GENAU 180 Grad (Ziel im Sueden)
+		// musste die Rakete eine 180-Grad-Kehre fliegen und schlug in der eigenen Pillbox ein.
+		// Der Host (AttackGarrisoned) kennt die korrekte Ziel-Yaw und uebergibt sie hier direkt.
+		public void FaceWorldYawInstantly(Actor self, WAngle worldYaw)
+		{
+			var bodyYaw = facing != null ? facing.Orientation.Yaw : WAngle.Zero;
+			LocalOrientation = LocalOrientation.WithYaw(worldYaw - bodyYaw);
+
+			// Kein turn-rate-getriebenes Nachdrehen: Ziel ist erreicht.
+			desiredDirection = WVec.Zero;
+			realignDesired = false;
+		}
+
 		public virtual bool HasAchievedDesiredFacing
 		{
 			get
