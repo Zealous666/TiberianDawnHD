@@ -97,6 +97,10 @@ engine/**
 !engine/OpenRA.Mods.Common/Traits/Turreted.cs
 !engine/OpenRA.Mods.Common/Traits/Attack/
 !engine/OpenRA.Mods.Common/Traits/Attack/AttackGarrisoned.cs
+# aotmod: GrantConditionOnPrerequisite meldet sich jetzt ueber Created/Disposing (statt
+# Added/RemovedFromWorld) beim TechTree an -> Upgrades erreichen auch garnisonierte Aktoren.
+!engine/OpenRA.Mods.Common/Traits/Conditions/
+!engine/OpenRA.Mods.Common/Traits/Conditions/GrantConditionOnPrerequisite.cs
 !engine/OpenRA.Mods.Common/Traits/Buildings/
 !engine/OpenRA.Mods.Common/Traits/Buildings/Gate.cs
 !engine/OpenRA.Mods.Common/Traits/Buildings/Reservable.cs
