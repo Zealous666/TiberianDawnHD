@@ -4977,6 +4977,16 @@ aot-cruiser:
 		Turret: secondary
 		Offset: 1152,0,128
 		TurnSpeed: 12
+	# Eigene (nicht-rotierende) Turrets NUR fuer die Carrier-Helipads. Sie duerfen NICHT den
+	# Namen der Geschuetz-Turrets (primary/secondary) teilen: WithSpriteTurret setzt im Ctor
+	# Turreted.QuantizedFacings = Sequence.Facings. Die carr-pad-Sequenz hat Facings:1 -> das
+	# fror sonst die Geschuetz-Turrets auf 1 Facing (immer Frame 0) ein.
+	Turreted@carrprimary:
+		Turret: carr-primary
+		Offset: -1344,0,128
+	Turreted@carrsecondary:
+		Turret: carr-secondary
+		Offset: 1152,0,128
 	AttackTurreted:
 		Turrets: primary, secondary
 		TargetFrozenActors: True
@@ -5054,23 +5064,24 @@ aot-cruiser:
 		Sequence: turret-railgun
 		RequiresCondition: aot-cruiser-railgun-upgrade && !aot-cruiser-carrier-upgrade
 	WithSpriteTurret@carr-primary:
-		Turret: primary
+		Turret: carr-primary
 		Sequence: carr-pad
 		RequiresCondition: aot-cruiser-carrier-upgrade && aot-cruiser-carrier-deployed
 	WithSpriteTurret@carr-primary-off:
-		Turret: primary
+		Turret: carr-primary
 		Sequence: carr-pad-inactive
 		RequiresCondition: aot-cruiser-carrier-upgrade && !aot-cruiser-carrier-deployed
 	WithSpriteTurret@carr-secondary:
-		Turret: secondary
+		Turret: carr-secondary
 		Sequence: carr-pad
 		RequiresCondition: aot-cruiser-carrier-upgrade && aot-cruiser-carrier-deployed
 	WithSpriteTurret@carr-secondary-off:
-		Turret: secondary
+		Turret: carr-secondary
 		Sequence: carr-pad-inactive
 		RequiresCondition: aot-cruiser-carrier-upgrade && !aot-cruiser-carrier-deployed
 	Selectable:
-		DecorationBounds: 1877, 1877
+		Bounds: 2560, 2560
+		DecorationBounds: 2560, 2560
 
 # Proxy: erscheint im Naval-Tab nach Railgun-Upgrade (ersetzt Base-Icon).
 aot-cruiser-railgun-proxy:

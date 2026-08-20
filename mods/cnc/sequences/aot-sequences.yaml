@@ -3434,11 +3434,14 @@ aot-gunboat:
 	idle:
 		RemasteredFilename: aot-gunboat-pt.zip
 		Facings: 16
+		Length: 8
+		Tick: 90
+		Scale: 1.25
 	turret:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\MGUN.ZIP
 		Facings: 32
 		UseClassicFacings: True
-		Scale: 1.8
+		Scale: 2.25
 	idle-frigate:
 		RemasteredFilename: aot-gunboat-frigate.zip
 		Facings: 8
@@ -3447,10 +3450,14 @@ aot-gunboat:
 	idle-dd:
 		RemasteredFilename: aot-gunboat-dd.zip
 		Facings: 16
+		Length: 8
+		Tick: 90
+		Scale: 1.5
 	turret-dd:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\SSAM.ZIP
 		Facings: 32
 		UseClassicFacings: True
+		Scale: 1.5
 	icon:
 		Filename: gun_base.png
 		Length: 1
@@ -3559,6 +3566,8 @@ aot-sub:
 	idle:
 		RemasteredFilename: aot-sub.zip
 		Facings: 16
+		Length: 8
+		Tick: 90
 	icon:
 		Filename: sub_base.png
 		Length: 1
@@ -3570,6 +3579,8 @@ aot-msub:
 	idle:
 		RemasteredFilename: aot-msub.zip
 		Facings: 16
+		Length: 8
+		Tick: 90
 	icon:
 		Filename: sub_missile.png
 		Length: 1
@@ -3664,24 +3675,29 @@ aot-cruiser:
 	idle:
 		RemasteredFilename: aot-cruiser-hull.zip
 		Facings: 16
+		Length: 8
+		Tick: 90
+		Scale: 1.5
 	turret:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\TURR.ZIP
 		Facings: 32
 		UseClassicFacings: True
+		Scale: 1.5
 	turret-railgun:
 		RemasteredFilename: aot-cruiser-turret.zip
 		Facings: 32
 		UseClassicFacings: True
+		Scale: 1.5
 	carr-pad:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\CARR.ZIP
 		Facings: 1
 		Length: 1
-		Scale: 0.75
+		Scale: 1.125
 	carr-pad-inactive:
 		RemasteredFilename: carr-inactive.zip
 		Facings: 1
 		Length: 1
-		Scale: 0.75
+		Scale: 1.125
 	muzzle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\VFX\GUNFIRE.ZIP
 		Length: 10
@@ -3701,6 +3717,7 @@ aot-cruiser-railgun:
 		RemasteredFilename: aot-cruiser-turret.zip
 		Facings: 32
 		UseClassicFacings: True
+		Scale: 1.5
 
 aot-upgrade-cruiser-railgun:
 	icon:
