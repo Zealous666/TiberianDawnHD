@@ -1125,8 +1125,12 @@ aot-MineDeploy:
 	ValidTargets: Ground, Water, Air, Trees
 	Projectile: Bullet
 		Speed: 800
+	# RequirePlaceable: landet die Mine auf Fels/Klippe oder einem Gebaeude/Mauer, erscheint sie NICHT
+	# dort, sondern detoniert sofort bei Kontakt (FallbackWeapon = ihre eigene Minenexplosion).
 	Warhead@1Spawn: AotSpawnActor
 		Actor: aot-minp
+		RequirePlaceable: true
+		FallbackWeapon: aot-APMine
 
 aot-MineDeployAntiPersonnel:
 	Inherits: aot-MineDeploy
@@ -1137,6 +1141,8 @@ aot-MineDeployAntiVehicle:
 		Speed: 800
 	Warhead@1Spawn: AotSpawnActor
 		Actor: aot-minv
+		RequirePlaceable: true
+		FallbackWeapon: aot-ATMine
 
 aot-MineClusterMissileEnhanced:
 	Inherits: aot-MineClusterMissile
