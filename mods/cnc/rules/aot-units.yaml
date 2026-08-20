@@ -683,6 +683,14 @@ JEEP:
 		Condition: aot-jeep-wolverine
 		Prerequisites: aot-mtnk-titan-upgrade
 
+	# AA nur im HUMVEE-Zustand (User-Wunsch 2026-08-05): ^AutoTargetGround (JEEP-Default) zielt
+	# nur auf Boden. Diese zusaetzliche, an aot-jeep-humvee gebundene Prioritaet ergaenzt Luftziele
+	# -- der Basis-Jeep und der Wolverine bleiben unberuehrt, ihre Waffen treffen ohnehin keine Luft.
+	AutoTargetPriority@HUMVEEAA:
+		RequiresCondition: aot-jeep-humvee && !aot-jeep-wolverine
+		ValidTargets: Air
+		InvalidTargets: NoAutoTarget
+
 	-Tooltip:
 
 	Tooltip@base:
@@ -1406,7 +1414,7 @@ aot-jeep-humvee:
 		BuildPaletteOrder: 3
 		Prerequisites: lite, pyle, ~aot-gdi-advtech-upgrade, ~!aot-mtnk-titan-upgrade
 		Icon: aot-humvee-icon
-		Description: Fast reconnaissance vehicle with HUMVEE armor and stronger machine gun.
+		Description: Fast reconnaissance vehicle with HUMVEE armor and a stronger machine gun that also engages aircraft.
 	Tooltip:
 		Name: GDI HUMVEE
 

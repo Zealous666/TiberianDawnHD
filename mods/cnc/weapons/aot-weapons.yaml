@@ -26,6 +26,9 @@ HeliAGGun:
 # Tier 1: MachineGunH-Basis, Damage 1150→1500 (~30% mehr), gleiche Versus-Werte.
 aot-JeepHumvee:
 	Inherits: MachineGunH
+	# AA-faehig (User-Wunsch 2026-08-05): eigene HUMVEE-Waffe, der Basis-Jeep nutzt MachineGunH und
+	# bleibt reine Bodenwaffe. ValidTargets muss Air enthalten, sonst trifft das MG keine Flugziele.
+	ValidTargets: Ground, Water, Air
 	Warhead@1Dam: SpreadDamage
 		Damage: 1500
 		Versus:
