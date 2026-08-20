@@ -267,3 +267,11 @@ mods/cnc/rules/structures.yaml
 
 # Tooltip-Rotfaerbung fehlender Voraussetzungen (2026-08-05)
 !engine/OpenRA.Mods.Common/Widgets/Logic/Ingame/ProductionTooltipLogic.cs
+
+# Spy-Plane Uncloak-Sound (2026-08-05)
+!engine/OpenRA.Mods.Common/Traits/AotCloakRevealSound.cs
+
+# Frachtflieger-Platzrunde (2026-08-05): eigene Anflugberechnung statt Land-Tangente
+!engine/OpenRA.Mods.Common/Activities/Air/
+!engine/OpenRA.Mods.Common/Activities/Air/DeliverBulkOrder.cs
+!engine/OpenRA.Mods.Common/Activities/Air/Land.cs

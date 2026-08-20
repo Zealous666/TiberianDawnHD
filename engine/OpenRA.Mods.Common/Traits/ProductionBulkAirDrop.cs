@@ -38,6 +38,10 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Offset the aircraft used for landing.")]
 		public readonly WVec LandOffset = WVec.Zero;
 
+		[Desc("aotmod: how far past the landing spot the transport overflies before circling back",
+			"to land (User 2026-08-05). 0 = land straight in without an overflight.")]
+		public readonly WDist OverflyDistance = WDist.FromCells(6);
+
 		public override object Create(ActorInitializer init) { return new ProductionBulkAirdrop(init, this); }
 	}
 

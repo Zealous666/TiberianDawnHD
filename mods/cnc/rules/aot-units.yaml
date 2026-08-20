@@ -2690,6 +2690,18 @@ aot-camera-spyplane:
 	# (sonst sucht die Engine Sequenzen unter dem Aktornamen aot-camera-spyplane -> Fehler).
 	RenderSpritesEditorOnly:
 		Image: camera
+	# Getarnte Einheiten & Gebaeude im Aufklaerungsgebiet aufdecken (User-Wunsch 2026-08-05).
+	# CAMERA hebt per RevealsShroud nur den Schleier -- Tarnung braucht DetectCloaked. Range 10c0
+	# deckt sich mit dem RevealsShroud-Radius der Kamera; "Mine" zusaetzlich, damit auch Minen und
+	# U-Boote (DetectionTypes: Mine) sichtbar werden. Wirksam so lange die Kamera lebt
+	# (CameraRemoveDelay der Spy Plane = 20s).
+	DetectCloaked:
+		Range: 10c0
+		DetectionTypes: Cloak, Mine
+	# Gebaeude-Uncloak-Geraeusch beim Aufdecken durch die Spy Plane (User-Wunsch 2026-08-05).
+	AotCloakRevealSound:
+		Range: 10c0
+		Sound: trans1.aud
 
 # === Age of Tiberium (aotmod) - aot-badr: Badger Bomber (NOD Parabombs-Superpower) ===
 # Nachbau der RA-Parabomb-Mechanik (RA BADR.Bomber): großes, langsames Flugzeug fliegt EINEN

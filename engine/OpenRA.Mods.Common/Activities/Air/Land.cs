@@ -51,8 +51,15 @@ namespace OpenRA.Mods.Common.Activities
 		public Land(Actor self, in Target target, in WVec offset, WAngle? facing = null, Color? targetLineColor = null, bool rotateLandingOffset = false)
 			: this(self, target, WDist.Zero, offset, facing, rotateLandingOffset: rotateLandingOffset, targetLineColor: targetLineColor) { }
 
-		public Land(Actor self, in Target target, WDist landRange, in WVec offset, WAngle? facing = null, CPos[] clearCells = null, Color? targetLineColor = null, bool rotateLandingOffset = false)
+		// aotmod 2026-08-05: skipApproach ueberspringt die EIGENE Anflugberechnung dieser Aktivitaet
+		// (der Tangenten-Block weiter unten, der laut Code-Kommentar dort ein offenes
+		// "TODO: correctly handle CCW <-> CW turns" hat). Wer den Anflug selbst fliegt und das
+		// Flugzeug ausgerichtet auf der Landeachse uebergibt, bekommt damit einen reinen
+		// Geradeaus-Sinkflug: die Endphase nutzt Fly.FlyTick(..., d.Yaw, ...), muss also nicht
+		// mehr drehen. Ohne das Flag verwirft die Tangentenmathematik die Ausrichtung wieder.
+		public Land(Actor self, in Target target, WDist landRange, in WVec offset, WAngle? facing = null, CPos[] clearCells = null, Color? targetLineColor = null, bool rotateLandingOffset = false, bool skipApproach = false)
 		{
+			finishedApproach = skipApproach;
 			aircraft = self.Trait<Aircraft>();
 			this.target = target;
 			this.offset = offset;

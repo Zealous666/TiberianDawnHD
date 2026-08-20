@@ -1854,7 +1854,10 @@ STEC:
 		InsufficientPowerTextNotification: notification-insufficient-power
 		UnitType: aot-yak
 		CameraActor: aot-camera-spyplane
-		CameraRemoveDelay: 150
+		# 20 Sekunden Aufklaerung (User-Wunsch 2026-08-05): 150 -> 500 Ticks. Gilt fuer Schleier-
+		# Reveal UND Tarnungs-Erkennung (DetectCloaked auf aot-camera-spyplane). Parabombs teilt
+		# sich die Kamera, behaelt aber seine kurze 150-Tick-Sicht.
+		CameraRemoveDelay: 500
 		DisplayBeacon: True
 		BeaconPoster: airstrike
 		BeaconPosterPalette: beaconposter

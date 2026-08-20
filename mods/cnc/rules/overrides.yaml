@@ -723,6 +723,9 @@ c17.bulk:
 	Tooltip:
 		Name: actor-c17-name
 	Aircraft:
+		# TurnSpeed 20: kleinere Werte (engerer Kreis) getestet (User 2026-08-05) -- der Flieger
+		# hat dann zu wenig Strecke, um sich vor dem Aufsetzen wieder auf die Ost-West-Achse
+		# auszurichten und landet schraeg. 20 + OverflyDistance 6 ist die kleinste saubere Schleife.
 		TurnSpeed: 20
 		Speed: 700
 		Repulsable: False
@@ -733,6 +736,12 @@ c17.bulk:
 		BeforeUnloadDelay: 12
 		BetweenUnloadDelay: 15
 		AfterUnloadDelay: 8
+	# Frachtflieger deckt auf seiner Route den Schleier auf (User-Wunsch 2026-08-05). C17 erbt
+	# keine RevealsShroud -- hier eigenstaendig. Type: CenterPosition deckt rund um die aktuelle
+	# Flugposition auf (inkl. Ueberflug und Landeschleife).
+	RevealsShroud:
+		Range: 8c0
+		Type: CenterPosition
 
 # === Age of Tiberium (aotmod) - HQ: nur GDI + EYE-Sprite nach Ion Cannon Upgrade ===
 # HQ ist jetzt GDI-exklusiv. NOD bekommt eigenen Radar (aot-nod-radar).
@@ -1220,6 +1229,9 @@ AFLD:
 		LandOffset: -1024,0,0
 		Facing: 768
 		ReadyTextNotification: notification-reinforcements-have-arrived
+		# Ueberflug-Strecke vor dem Einkreisen. 6 = kleinste Strecke, bei der die Landung noch
+		# sauber Ost-West ausgerichtet ist (kuerzer -> Flieger richtet sich nicht mehr aus).
+		OverflyDistance: 6
 	PrimaryBuilding:
 		ProductionQueues: Starport
 	ProductionBar:
