@@ -2443,6 +2443,11 @@ AJET:
 		IdleBehavior: None
 		TakeOffOnResupply: false
 		TakeOffOnCreation: true
+		# aotmod 2026-08-21: TS-Banshee/Scrin-Start/Lande-Sounds (Dropship-Jet-Sounds) fuer den
+		# GDI-Fighter-Jet -- gilt fuer den A10-Zustand UND den Firehawk-Zustand sowie
+		# aot-ajet-firehawk (erbt AJET). Extrahiert aus TS (dropup1/dropdwn1, s. [[ts-audio-extraction]]).
+		TakeoffSounds: dropup1.aud
+		LandingSounds: dropdwn1.aud
 	Health:
 		HP: 10000
 	Armor:

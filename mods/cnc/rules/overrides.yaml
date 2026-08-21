@@ -1510,6 +1510,9 @@ ORCA:
 		IdleBehavior: None
 		TakeOffOnResupply: false
 		TakeOffOnCreation: true
+		# aotmod 2026-08-21: TS-Orca-Start/Lande-Sounds (aus TS extrahiert, s. [[aot-orcatran-system]]).
+		TakeoffSounds: orcaup1.aud
+		LandingSounds: orcadwn1.aud
 	Rearmable:
 		RearmActors: aot-hpad-gdi, aot-cruiser
 	Repairable:
@@ -1566,6 +1569,9 @@ HELI:
 		IdleBehavior: None
 		TakeOffOnResupply: true
 		TakeOffOnCreation: true
+		# aotmod 2026-08-21: TS-Orca-Start/Lande-Sounds (Hind/Harpy), s. [[aot-orcatran-system]].
+		TakeoffSounds: orcaup1.aud
+		LandingSounds: orcadwn1.aud
 	GrantConditionOnPrerequisite@harpyupgrade:
 		Condition: aot-harpy-upgraded
 		Prerequisites: aot-harpy-upgrade
@@ -1678,6 +1684,11 @@ BGGY:
 # Beide Upgrades erteilen eine Condition via GrantConditionOnPrerequisite; TRAN reagiert darauf.
 TRAN:
 	-Buildable:
+	# aotmod 2026-08-21: TS-Orca-Start/Lande-Sounds (Chinook), s. [[aot-orcatran-system]].
+	# Partieller Aircraft-Override -> nur die Sound-Felder, alles andere erbt vom Engine-TRAN.
+	Aircraft:
+		TakeoffSounds: orcaup1.aud
+		LandingSounds: orcadwn1.aud
 	# Cargo: MaxWeight auf 5 reduziert (Engine-Default: 10). Trait komplett deaktiviert wenn Carryall aktiv
 	# (Cargo ist ConditionalTrait → CanLoad() prüft IsTraitDisabled → kein Boarding mehr möglich).
 	Cargo:
