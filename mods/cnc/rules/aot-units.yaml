@@ -603,10 +603,10 @@ aot-e4-nod-toxic:
 # Kein WithMakeAnimation auf Fahrzeugen nötig.
 MCV:
 	OretSpawnStateCarrier:
-	GrantConditionOnPrerequisite@aotage1:
+	AotGrantConditionOnPrerequisiteLatched@aotage1:
 		Condition: aot-age1-active
 		Prerequisites: aot-age1
-	GrantConditionOnPrerequisite@aotage2:
+	AotGrantConditionOnPrerequisiteLatched@aotage2:
 		Condition: aot-age2-active
 		Prerequisites: aot-age2
 	-WithFacingSpriteBody:
@@ -3848,7 +3848,7 @@ aot-bike-base:
 	Buildable:
 		Queue: LightVehicle.Nod
 		BuildPaletteOrder: 8
-		Prerequisites: ~aot-age1, lite, hand
+		Prerequisites: producer:aot-age1-active, lite, hand
 		Icon: aot-bike-icon
 		Description: Fast NOD recon bike armed with twin rocket launchers. Hits ground and air targets.
 	Tooltip:
@@ -3868,7 +3868,7 @@ aot-bggy-base:
 		LockedGroup: aot-grp-bggy
 		Queue: LightVehicle.Nod
 		BuildPaletteOrder: 7
-		Prerequisites: ~aot-age1, lite, hand, ~!aot-buggy-laser-upgrade
+		Prerequisites: producer:aot-age1-active, lite, hand, ~!aot-buggy-laser-upgrade
 		Icon: aot-bggy-icon
 		Description: Fast NOD scout buggy armed with a machine gun.
 	Tooltip:
@@ -3882,7 +3882,7 @@ aot-bggy-laser:
 		LockedGroup: aot-grp-bggy
 		Queue: LightVehicle.Nod
 		BuildPaletteOrder: 7
-		Prerequisites: ~aot-age1, lite, hand, ~aot-buggy-laser-upgrade
+		Prerequisites: producer:aot-age1-active, lite, hand, ~aot-buggy-laser-upgrade
 		Icon: aot-bggy-laser-icon
 		Description: NOD scout buggy upgraded with a laser cannon.
 	Tooltip:

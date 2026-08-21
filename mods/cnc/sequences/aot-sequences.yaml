@@ -5414,6 +5414,20 @@ aot-vein-heart:
 	gas:
 		Length: 12
 
+# === Age of Tiberium (aotmod) - Ant Nest (aot-ant-nest), 2026-08-21 ===
+# Sprite aus Temperate-Template 400 (hill01.tem) gebacken: Felshuegel mit zentralem Loch
+# als Nest-Eingang, Gras freigestellt (siehe bake in bits/aot-ant-nest.zip). Statischer
+# Einzelframe. Scale 0.75 -> ~96 HD-px/Zelle wie das Vein-Heart, passt auf den 4x3-Footprint.
+aot-ant-nest:
+	Defaults:
+		RemasteredFilename: aot-ant-nest.zip
+		RemasteredPremultiplied: false
+		ZOffset: -1023
+		Scale: 0.75
+	idle:
+		Start: 0
+		Length: 1
+
 # === Age of Tiberium (aotmod) - Ion Storm Blitz-Grafik ===
 # TS besitzt KEINE Blitz-Sprite (der Bolt wird dort prozedural im Engine-Code gezeichnet,
 # siehe TSpp src/ionstorm.h - kein einziges "Bolt"-Symbol, und die [Animations]-Liste in

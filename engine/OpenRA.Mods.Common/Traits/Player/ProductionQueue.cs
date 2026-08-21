@@ -141,7 +141,7 @@ namespace OpenRA.Mods.Common.Traits
 		}
 	}
 
-	public class ProductionQueue : IResolveOrder, ITick, ITechTreeElement, INotifyOwnerChanged, INotifyKilled, INotifySold, ISync, INotifyTransform, INotifyCreated
+	public class ProductionQueue : IResolveOrder, ITick, ITechTreeElement, INotifyOwnerChanged, INotifyKilled, INotifySold, ISync, INotifyTransform, INotifyCreated, IObservesVariables
 	{
 		public readonly ProductionQueueInfo Info;
 
@@ -150,6 +150,16 @@ namespace OpenRA.Mods.Common.Traits
 		protected readonly List<ProductionItem> Queue = [];
 		readonly IEnumerable<ActorInfo> allProducibles;
 		readonly IEnumerable<ActorInfo> buildableProducibles;
+
+		// aotmod: Voraussetzungen mit Praefix "producer:" werden NICHT gegen den Spieler-Tech-Tree
+		// geprueft, sondern gegen die Conditions des PRODUZIERENDEN Gebaeudes (Actor). Damit kann ein
+		// eingenommenes hoeher-Age-Gebaeude LOKAL seine Einheiten bauen, ohne den neuen Besitzer global
+		// im Age aufsteigen zu lassen -- die Age-Condition (aot-ageN-active) ist pro Gebaeude
+		// eingerastet (siehe AotGrantConditionOnPrerequisiteLatched).
+		public const string ProducerConditionPrefix = "producer:";
+		readonly Dictionary<ActorInfo, string[]> producerConditions = [];
+		readonly HashSet<string> activeProducerConds = [];
+		string[] producerConditionVars = [];
 
 		protected Production[] productionTraits;
 
@@ -178,8 +188,8 @@ namespace OpenRA.Mods.Common.Traits
 			IsValidFaction = info.Factions.Count == 0 || info.Factions.Contains(Faction);
 			Enabled = IsValidFaction;
 
-			allProducibles = Producible.Where(a => a.Value.Buildable || a.Value.Visible).Select(a => a.Key);
-			buildableProducibles = Producible.Where(a => a.Value.Buildable).Select(a => a.Key);
+			allProducibles = Producible.Where(a => (a.Value.Buildable || a.Value.Visible) && ProducerConditionsMet(a.Key)).Select(a => a.Key);
+			buildableProducibles = Producible.Where(a => a.Value.Buildable && ProducerConditionsMet(a.Key)).Select(a => a.Key);
 		}
 
 		void INotifyCreated.Created(Actor self)
@@ -242,16 +252,78 @@ namespace OpenRA.Mods.Common.Traits
 		void CacheProducibles()
 		{
 			Producible.Clear();
+			producerConditions.Clear();
 			if (!Enabled)
 				return;
 
+			var vars = new HashSet<string>();
 			foreach (var a in AllBuildables(Info.Type))
 			{
 				var bi = a.TraitInfo<BuildableInfo>();
 
 				Producible.Add(a, new ProductionState());
-				techTree.Add(a.Name, bi.Prerequisites, bi.BuildLimit, this);
+
+				// aotmod: "producer:"-Voraussetzungen aus der Tech-Tree-Pruefung herausloesen und
+				// separat gegen die Conditions des produzierenden Gebaeudes pruefen (siehe unten).
+				var hasProducer = false;
+				foreach (var p in bi.Prerequisites)
+					if (p.StartsWith(ProducerConditionPrefix, StringComparison.Ordinal))
+						hasProducer = true;
+
+				if (hasProducer)
+				{
+					var playerPrereqs = new List<string>();
+					var prodConds = new List<string>();
+					foreach (var p in bi.Prerequisites)
+					{
+						if (p.StartsWith(ProducerConditionPrefix, StringComparison.Ordinal))
+						{
+							var cond = p[ProducerConditionPrefix.Length..];
+							prodConds.Add(cond);
+							vars.Add(cond);
+						}
+						else
+							playerPrereqs.Add(p);
+					}
+
+					producerConditions[a] = prodConds.ToArray();
+					techTree.Add(a.Name, [.. playerPrereqs], bi.BuildLimit, this);
+				}
+				else
+					techTree.Add(a.Name, bi.Prerequisites, bi.BuildLimit, this);
 			}
+
+			// Die Menge der beobachteten "producer:"-Conditions ist regel-konstant -> einmal beim
+			// ersten Aufbau (vor GetVariableObservers, siehe Actor.Initialize) genuegt.
+			if (producerConditionVars.Length == 0 && vars.Count > 0)
+				producerConditionVars = [.. vars];
+		}
+
+		// Alle "producer:"-Conditions eines Items muessen aktuell am produzierenden Gebaeude aktiv sein.
+		bool ProducerConditionsMet(ActorInfo a)
+		{
+			if (!producerConditions.TryGetValue(a, out var conds))
+				return true;
+
+			foreach (var c in conds)
+				if (!activeProducerConds.Contains(c))
+					return false;
+
+			return true;
+		}
+
+		IEnumerable<VariableObserver> IObservesVariables.GetVariableObservers()
+		{
+			if (producerConditionVars.Length > 0)
+				yield return new VariableObserver(ProducerConditionsChanged, producerConditionVars);
+		}
+
+		void ProducerConditionsChanged(Actor self, IReadOnlyDictionary<string, int> conditions)
+		{
+			activeProducerConds.Clear();
+			foreach (var c in producerConditionVars)
+				if (conditions.TryGetValue(c, out var n) && n > 0)
+					activeProducerConds.Add(c);
 		}
 
 		IEnumerable<ActorInfo> AllBuildables(string category)
@@ -325,6 +397,11 @@ namespace OpenRA.Mods.Common.Traits
 				var lockedGroups = new Dictionary<string, ActorInfo>();
 				foreach (var kv in Producible)
 				{
+					// aotmod: producer-gegatete Items, deren Gebaeude-Condition fehlt, komplett aus
+					// dem Baumenue nehmen (kein Locked-Placeholder) -- wie ein nicht erfuelltes ~-Prereq.
+					if (!ProducerConditionsMet(kv.Key))
+						continue;
+
 					var bi = kv.Key.TraitInfo<BuildableInfo>();
 					var group = bi.LockedGroup ?? kv.Key.Name;
 					if (kv.Value.Buildable || kv.Value.Visible)

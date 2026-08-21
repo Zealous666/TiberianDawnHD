@@ -1598,8 +1598,9 @@ aot-AntBite:
 	Report: aot-antbite.wav
 	TargetActorCenter: true
 	Projectile: InstantHit
+	# aotmod 2026-08-21: alle Ant-Waffen +50% Schaden (User: "Ants toedlicher"). 6000 -> 9000.
 	Warhead@DAMAGE: TargetDamage
-		Damage: 6000
+		Damage: 9000
 		Versus:
 			None: 90
 			Wood: 10
@@ -1610,7 +1611,9 @@ aot-AntBite:
 
 # Fire Ant: Feuerball-Fernkampf (Range 4c0, wie RA AntFireball).
 aot-FireAntBite:
-	ValidTargets: Ground
+	# aotmod 2026-08-21: Feuerbaelle wirken jetzt auch als Anti-Air (User) -> ValidTargets +Air.
+	# Die Fire Ant ist damit toedlich gegen Boden UND Luft.
+	ValidTargets: Ground, Air
 	ReloadDelay: 50
 	Burst: 2
 	BurstDelays: 20
@@ -1626,15 +1629,33 @@ aot-FireAntBite:
 		Image: aot-ftur-fb1
 		TrailImage: aot-ftur-fb2
 		Blockable: false
+	# Boden-Warhead: nur Ground (der Luft-Schaden laeuft ueber Warhead@AIR). +50% (4000 -> 6000).
 	Warhead@DAMAGE: SpreadDamage
 		Spread: 213
-		Damage: 4000
+		Damage: 6000
+		ValidTargets: Ground
 		Versus:
 			None: 80
 			Wood: 85
 			Light: 45
 			Heavy: 20
 			Concrete: 15
+		DamageTypes: FireDeath
+	# aotmod 2026-08-21: dedizierter Anti-Air-Warhead. User: Fireballs muessen VERHEEREND gegen
+	# Luft sein. Der Boden-Warhead war mit Light 45%/Heavy 20% viel zu schwach gegen Flieger
+	# (HIND 12500 HP, Armor Light). Hier volle 100% gegen Flieger-Ruestung (Light/Heavy) +
+	# 12000 Schaden -> ein HIND faellt in ~1-2 Treffern. Nur ValidTargets:Air -> Bodenziele
+	# bleiben unberuehrt (bekommen ausschliesslich Warhead@DAMAGE).
+	Warhead@AIR: SpreadDamage
+		Spread: 256
+		Damage: 12000
+		ValidTargets: Air
+		Versus:
+			None: 100
+			Light: 100
+			Heavy: 100
+			Wood: 100
+			Concrete: 100
 		DamageTypes: FireDeath
 
 # Scout Ant: Schneller Doppelbiss wie Mandible (RA ScoutAnt nutzt dieselbe Waffe).
@@ -1647,8 +1668,9 @@ aot-ScoutAntBite:
 	Report: aot-antbite.wav
 	TargetActorCenter: true
 	Projectile: InstantHit
+	# aotmod 2026-08-21: +50% Schaden (6000 -> 9000).
 	Warhead@DAMAGE: TargetDamage
-		Damage: 6000
+		Damage: 9000
 		Versus:
 			None: 90
 			Wood: 10

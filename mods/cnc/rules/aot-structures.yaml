@@ -117,7 +117,12 @@ LITE:
 		ExitDelay: 3
 	Power:
 		Amount: -20
-	GrantConditionOnPrerequisite@aotage2:
+	# aot-age1-active am Gebaeude (eingerastet) -- Voraussetzung fuer die producer-gebundene
+	# Baubarkeit der Age-1-Einheiten (Bike/Buggy) an DIESER LITE, auch nach Uebernahme.
+	AotGrantConditionOnPrerequisiteLatched@aotage1:
+		Condition: aot-age1-active
+		Prerequisites: aot-age1
+	AotGrantConditionOnPrerequisiteLatched@aotage2:
 		Condition: aot-age2-active
 		Prerequisites: aot-age2
 	-WithSpriteBody:
@@ -403,13 +408,13 @@ FACT:
 # beim MCV-Deploy die echten FACT.ZIP-Frames 1-25 ab (siehe fact-mcv-sprites.md) — Kommentar
 # war stale, widersprach dem tatsächlichen Trait-Setup.
 FACT:
-	GrantConditionOnPrerequisite@aotage1:
+	AotGrantConditionOnPrerequisiteLatched@aotage1:
 		Condition: aot-age1-active
 		Prerequisites: aot-age1
-	GrantConditionOnPrerequisite@aotage2:
+	AotGrantConditionOnPrerequisiteLatched@aotage2:
 		Condition: aot-age2-active
 		Prerequisites: aot-age2
-	GrantConditionOnPrerequisite@aotage3:
+	AotGrantConditionOnPrerequisiteLatched@aotage3:
 		Condition: aot-age3-active
 		Prerequisites: aot-age3
 	-WithSpriteBody:
@@ -543,10 +548,10 @@ PYLE:
 	Exit@2:
 		SpawnOffset: -500,550,0
 		ExitCell: 0,1
-	GrantConditionOnPrerequisite@aotage1:
+	AotGrantConditionOnPrerequisiteLatched@aotage1:
 		Condition: aot-age1-active
 		Prerequisites: aot-age1
-	GrantConditionOnPrerequisite@aotage2:
+	AotGrantConditionOnPrerequisiteLatched@aotage2:
 		Condition: aot-age2-active
 		Prerequisites: aot-age2
 	-WithSpriteBody:
@@ -682,10 +687,10 @@ HAND:
 	Exit@1:
 		SpawnOffset: -512,1024,0
 		ExitCell: 0,2
-	GrantConditionOnPrerequisite@aotage1:
+	AotGrantConditionOnPrerequisiteLatched@aotage1:
 		Condition: aot-age1-active
 		Prerequisites: aot-age1
-	GrantConditionOnPrerequisite@aotage2:
+	AotGrantConditionOnPrerequisiteLatched@aotage2:
 		Condition: aot-age2-active
 		Prerequisites: aot-age2
 	-WithSpriteBody:
@@ -1611,10 +1616,10 @@ ATEC:
 	-SpawnActorsOnSell@nod:
 	Power:
 		Amount: -200
-	GrantConditionOnPrerequisite@aotage1:
+	AotGrantConditionOnPrerequisiteLatched@aotage1:
 		Condition: aot-age1-active
 		Prerequisites: aot-age1
-	GrantConditionOnPrerequisite@aotage2:
+	AotGrantConditionOnPrerequisiteLatched@aotage2:
 		Condition: aot-age2-active
 		Prerequisites: aot-age2
 	RenderSprites:
@@ -1796,10 +1801,10 @@ STEC:
 	InfiltrateForSupportPowerReset:
 		Types: SpyInfiltrate
 		PlayerExperience: 10
-	GrantConditionOnPrerequisite@aotage1:
+	AotGrantConditionOnPrerequisiteLatched@aotage1:
 		Condition: aot-age1-active
 		Prerequisites: aot-age1
-	GrantConditionOnPrerequisite@aotage2:
+	AotGrantConditionOnPrerequisiteLatched@aotage2:
 		Condition: aot-age2-active
 		Prerequisites: aot-age2
 	# === Age of Tiberium (aotmod) - NOD Airstrike-Superpower ===
@@ -2127,7 +2132,7 @@ MSLO:
 	WithBuildingBib:
 	RenderSprites:
 		Image: mslo
-	GrantConditionOnPrerequisite@aotage2:
+	AotGrantConditionOnPrerequisiteLatched@aotage2:
 		Condition: aot-age2-active
 		Prerequisites: aot-age2
 	GrantConditionOnPrerequisite@tiberiummissile:
@@ -2685,10 +2690,10 @@ aot-nod-radar:
 	Selectable:
 		Bounds: 2048, 2048
 	# Sprite-Switch: RA DOME (Age 0) → TS DOME+Dish composite (Age 1) → TS NOD Radar (Age 2).
-	GrantConditionOnPrerequisite@aotage1:
+	AotGrantConditionOnPrerequisiteLatched@aotage1:
 		Condition: aot-age1-active
 		Prerequisites: aot-age1
-	GrantConditionOnPrerequisite@aotage2:
+	AotGrantConditionOnPrerequisiteLatched@aotage2:
 		Condition: aot-age2-active
 		Prerequisites: aot-age2
 	-WithSpriteBody:
@@ -2849,7 +2854,7 @@ TMPL:
 	# 3x3-Footprint xxx xxx ===).
 	Selectable:
 		Bounds: 3072, 2048
-	GrantConditionOnPrerequisite@aotage2:
+	AotGrantConditionOnPrerequisiteLatched@aotage2:
 		Condition: aot-age2-active
 		Prerequisites: aot-age2
 	-WithSpriteBody:
@@ -3640,11 +3645,11 @@ FIX:
 	# Leerer Wert wuerde den geerbten true NICHT loeschen, daher explizit false.
 	WithBuildingBib:
 		HasMinibib: false
-	GrantConditionOnPrerequisite@aotage1:
+	AotGrantConditionOnPrerequisiteLatched@aotage1:
 		Condition: aot-age1-active
 		Prerequisites: aot-age1
 	# Age-2: beide Fraktionen wechseln auf TS GADEPT-Sprite
-	GrantConditionOnPrerequisite@aotage2:
+	AotGrantConditionOnPrerequisiteLatched@aotage2:
 		Condition: aot-fix-age2-active
 		Prerequisites: aot-age2
 	-WithSpriteBody:
@@ -3972,7 +3977,7 @@ NUKE:
 	-Buildable:
 	ProvidesPrerequisite@nukename:
 		Prerequisite: nuke
-	GrantConditionOnPrerequisite@aotage1:
+	AotGrantConditionOnPrerequisiteLatched@aotage1:
 		Condition: aot-age1-active
 		Prerequisites: aot-age1
 	GrantConditionOnPrerequisite@turbine:
@@ -3986,20 +3991,26 @@ NUKE:
 	WithSpriteBody@td:
 		Sequence: idle
 		Name: body-td
-		RequiresCondition: aot-age1-active && !aot-age2-gdi && !aot-age2-nod && !aot-turbine-active
-	# GDI Age-2: aot-weap nur bei GDI vorhanden → schaltet GDI-spezifischen TS-Sprite
-	GrantConditionOnPrerequisite@aotage2gdi:
-		Condition: aot-age2-gdi
-		Prerequisites: aot-age2, aot-weap
-	# NOD Age-2: afld nur bei NOD vorhanden → schaltet NOD-spezifischen TS-Sprite
-	GrantConditionOnPrerequisite@aotage2nod:
-		Condition: aot-age2-nod
-		Prerequisites: aot-age2, afld
+		RequiresCondition: aot-age1-active && !aot-age2-active && !aot-turbine-active
+	# Age 2 = erreichtes Zeitalter (der aot-age2-Marker ist permanent/unverwundbar). Die Fraktions-
+	# Optik wird NICHT mehr ueber die ZERSTOERBAREN Gebaeude aot-weap/afld diskriminiert -- deren
+	# Verlust liess den Sprite faelschlich auf Age 1 zurueckfallen. Stattdessen GrantConditionOnFaction:
+	# aot-nuke-fac-gdi/-nod bleiben an die urspruengliche Fraktion gebunden (ResetOnOwnerChange default
+	# false -> das Gebaeude behaelt seine Age-2-Optik auch nach einer Uebernahme).
+	AotGrantConditionOnPrerequisiteLatched@aotage2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
+	GrantConditionOnFaction@facgdi:
+		Condition: aot-nuke-fac-gdi
+		Factions: gdi
+	GrantConditionOnFaction@facnod:
+		Condition: aot-nuke-fac-nod
+		Factions: nod
 	# Age-2 GDI, kein Turbinen-Upgrade → GDI TS GTPOWR ohne Turbinen (Gemini-Render 2026-07-08)
 	WithSpriteBody@ts:
 		Sequence: aot-age2-idle
 		Name: body-ts
-		RequiresCondition: aot-age2-gdi && !aot-turbine-active
+		RequiresCondition: aot-age2-active && aot-nuke-fac-gdi && !aot-turbine-active
 		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
 		# PlayerColorShift verschiebt jeden Pixel im Blau-Farbton zur Spielerfarbe. Siehe
 		# silo-system.md / ts-gates-system.md fuer das gleiche Muster.
@@ -4009,53 +4020,53 @@ NUKE:
 		Sequence: aot-age2-idle-remap
 		Palette: player
 		IsPlayerPalette: True
-		RequiresCondition: aot-age2-gdi && !aot-turbine-active && !build-incomplete
+		RequiresCondition: aot-age2-active && aot-nuke-fac-gdi && !aot-turbine-active && !build-incomplete
 	# Age-2 GDI + Turbinen-Upgrade → GDI TS GTPOWR mit Turbinen (Gemini-Render 2026-07-08)
 	WithSpriteBody@tsturbine:
 		Sequence: aot-age2-turbine-idle
 		Name: body-tsturbine
-		RequiresCondition: aot-age2-gdi && aot-turbine-active
+		RequiresCondition: aot-age2-active && aot-nuke-fac-gdi && aot-turbine-active
 		Palette: effect
 		IsPlayerPalette: false
 	WithIdleOverlay@tsturbineremap:
 		Sequence: aot-age2-turbine-idle-remap
 		Palette: player
 		IsPlayerPalette: True
-		RequiresCondition: aot-age2-gdi && aot-turbine-active && !build-incomplete
+		RequiresCondition: aot-age2-active && aot-nuke-fac-gdi && aot-turbine-active && !build-incomplete
 	# Drei unabhängig langsam auf-/abdimmende gelbrötliche Lichtscheine an den offenen
 	# Schloten der Turbinen-Kuppeln (Gaussian-Puls-Technik wie GDI-HQ-Radar aot-age2-lights).
 	WithIdleOverlay@tsturbinelights:
 		Sequence: aot-age2-turbine-lights
 		Palette: effect
 		IsPlayerPalette: false
-		RequiresCondition: aot-age2-gdi && aot-turbine-active && !build-incomplete
+		RequiresCondition: aot-age2-active && aot-nuke-fac-gdi && aot-turbine-active && !build-incomplete
 	# Age-2 NOD → NOD TS NTPOWR (Gemini-Render 2026-07-08)
 	WithSpriteBody@tsnod:
 		Sequence: aot-age2-nod-idle
 		Name: body-tsnod
-		RequiresCondition: aot-age2-nod
+		RequiresCondition: aot-age2-active && aot-nuke-fac-nod
 		Palette: effect
 		IsPlayerPalette: false
 	WithIdleOverlay@tsnodrremap:
 		Sequence: aot-age2-nod-idle-remap
 		Palette: player
 		IsPlayerPalette: True
-		RequiresCondition: aot-age2-nod && !build-incomplete
+		RequiresCondition: aot-age2-active && aot-nuke-fac-nod && !build-incomplete
 	# Einzelne unabhängig flackernde Lichtpunkte an Rohr-/Ventil-Details (wie GDI-HQ-Radar).
 	WithIdleOverlay@tsnodlights:
 		Sequence: aot-age2-nod-lights
 		Palette: effect
 		IsPlayerPalette: false
-		RequiresCondition: aot-age2-nod && !build-incomplete
+		RequiresCondition: aot-age2-active && aot-nuke-fac-nod && !build-incomplete
 	# Age-1, Turbinen-Upgrade → TD NUKE + Turbinen (unverändert)
 	WithSpriteBody@turbine:
 		Sequence: aot-turbine-idle
 		Name: body-turbine
-		RequiresCondition: !aot-age2-gdi && aot-turbine-active
+		RequiresCondition: !(aot-age2-active && aot-nuke-fac-gdi) && aot-turbine-active
 	WithSpriteBody@turbineremap:
 		Sequence: aot-turbine-remap
 		Name: body-turbine-remap
-		RequiresCondition: !aot-age2-gdi && aot-turbine-active && !build-incomplete
+		RequiresCondition: !(aot-age2-active && aot-nuke-fac-gdi) && aot-turbine-active && !build-incomplete
 	-WithMakeAnimation:
 	WithMakeAnimation@ra:
 		BodyNames: body
@@ -4069,12 +4080,12 @@ NUKE:
 		BodyNames: body-ts
 		Condition: build-incomplete
 		Sequence: aot-age2-make
-		RequiresCondition: aot-age2-gdi && !aot-turbine-active
+		RequiresCondition: aot-age2-active && aot-nuke-fac-gdi && !aot-turbine-active
 	WithMakeAnimation@tsnod:
 		BodyNames: body-tsnod
 		Condition: build-incomplete
 		Sequence: aot-age2-nod-make
-		RequiresCondition: aot-age2-nod
+		RequiresCondition: aot-age2-active && aot-nuke-fac-nod
 	WithMakeAnimation@turbine:
 		BodyNames: body-turbine
 		Condition: build-incomplete
@@ -4088,7 +4099,7 @@ NUKE:
 		BodyNames: body-tsturbine
 		Condition: build-incomplete
 		Sequence: aot-age2-turbine-make
-		RequiresCondition: aot-age2-gdi && aot-turbine-active
+		RequiresCondition: aot-age2-active && aot-nuke-fac-gdi && aot-turbine-active
 	-Power:
 	# Faction-abhaengige Power (User 2026-07-19): NOD Nuke 150, GDI Nuke 200, GDI Turbine-Upgrade 300.
 	# Der geteilte age0/age1-Nuke wird von BEIDEN Fraktionen gebaut -> per Faction-Condition getrennt.
@@ -4149,7 +4160,7 @@ aot-nuke-age1:
 	-WithSpriteBody@ra:
 	-WithMakeAnimation@ra:
 	WithSpriteBody@td:
-		RequiresCondition: !aot-age2-gdi && !aot-age2-nod && !aot-turbine-active
+		RequiresCondition: !aot-age2-active && !aot-turbine-active
 
 aot-nuke-turbine:
 	Inherits: NUKE
@@ -4176,9 +4187,9 @@ aot-nuke-turbine:
 	-WithMakeAnimation@ra:
 	-WithMakeAnimation@td:
 	WithSpriteBody@turbine:
-		RequiresCondition: !aot-age2-gdi
+		RequiresCondition: !(aot-age2-active && aot-nuke-fac-gdi)
 	WithSpriteBody@turbineremap:
-		RequiresCondition: !aot-age2-gdi && !build-incomplete
+		RequiresCondition: !(aot-age2-active && aot-nuke-fac-gdi) && !build-incomplete
 
 aot-nuke-age2:
 	Inherits: NUKE
@@ -4261,13 +4272,13 @@ aot-nuke-age2-nod:
 	-WithMakeAnimation@ts:
 	-WithMakeAnimation@turbine:
 	WithSpriteBody@tsnod:
-		RequiresCondition: aot-age2-nod || !aot-age2-nod
+		RequiresCondition: aot-age2-active || !aot-age2-active
 	WithIdleOverlay@tsnodrremap:
 		RequiresCondition: !build-incomplete
 	WithIdleOverlay@tsnodlights:
 		RequiresCondition: !build-incomplete
 	WithMakeAnimation@tsnod:
-		RequiresCondition: aot-age2-nod || !aot-age2-nod
+		RequiresCondition: aot-age2-active || !aot-age2-active
 
 aot-nuke-turbine-age2:
 	Inherits: NUKE
@@ -4331,11 +4342,11 @@ NUK2:
 			TopLeft: -1536, -1024
 			BottomRight: 1536, 1024
 	-Buildable:
-	GrantConditionOnPrerequisite@aotage1:
+	AotGrantConditionOnPrerequisiteLatched@aotage1:
 		Condition: aot-age1-active
 		Prerequisites: aot-age1
 	-WithSpriteBody:
-	GrantConditionOnPrerequisite@aotage2:
+	AotGrantConditionOnPrerequisiteLatched@aotage2:
 		Condition: aot-age2-active
 		Prerequisites: aot-age2
 	WithSpriteBody@ra:
@@ -5085,7 +5096,7 @@ PROC:
 		InfiltratedNotification: BuildingInfiltrated
 		InfiltratedTextNotification: notification-building-infiltrated
 	-WithResourceLevelOverlay:
-	GrantConditionOnPrerequisite@aotage2:
+	AotGrantConditionOnPrerequisiteLatched@aotage2:
 		Condition: aot-age2-active
 		Prerequisites: aot-age2
 	-WithSpriteBody:
@@ -5171,10 +5182,10 @@ SILO:
 		AreaTypes: building
 	-WithBuildingBib:
 	WithBuildingBib:
-	GrantConditionOnPrerequisite@aotage1:
+	AotGrantConditionOnPrerequisiteLatched@aotage1:
 		Condition: aot-age1-active
 		Prerequisites: aot-age1
-	GrantConditionOnPrerequisite@aotage2:
+	AotGrantConditionOnPrerequisiteLatched@aotage2:
 		Condition: aot-age2-active
 		Prerequisites: aot-age2
 	-WithResourceLevelSpriteBody:
@@ -5529,7 +5540,7 @@ SLAB:
 	InfiltrateForSupportPowerReset:
 		Types: SpyInfiltrate
 		PlayerExperience: 10
-	GrantConditionOnPrerequisite@aotage2:
+	AotGrantConditionOnPrerequisiteLatched@aotage2:
 		Condition: aot-age2-active
 		Prerequisites: aot-age2
 	-WithSpriteBody:
@@ -8004,10 +8015,18 @@ aot-vein-heart:
 		DamageCooldown: 0
 	# Beim Tod zieht sich das Geflecht langsam zurueck, statt fuer immer stehen zu bleiben.
 	AotVeinRecedesOnDeath:
-	# aotmod (2026-07-29): AotVisceroidSpawner ENTFERNT (User-Wunsch). Visceroids werden jetzt
-	# ausschliesslich ueber den aot-critter-spawner platziert -- ein Ort fuer alle Critter statt
-	# zwei konkurrierender Quellen. Der Engine-Trait wurde mitgeloescht; die Visceroids selbst
-	# (aot-visceroid inkl. AotVisceroidWander) bleiben unveraendert bestehen.
+	# aotmod (2026-08-21): Visceroid-Spawner WIEDER direkt am Heart (User-Wunsch), zusaetzlich
+	# zum aot-critter-spawner-Editorobjekt. Nutzt jetzt den vereinheitlichten AotCritterSpawner
+	# (der eigene AotVisceroidSpawner-Trait war am 2026-07-29 geloescht worden) mit fest
+	# eingestelltem Visceroid-Typ, sonst gleiche Default-Settings wie das Editorobjekt.
+	# Spawnt dank Footprint-Escape (AotFootprintUtils) ausserhalb des 3x3-Footprints -- sonst
+	# saesse der Visceroid im soliden Heart fest. Der Editor-Slider "Max Critters"/"Patrol Radius"
+	# erscheint dadurch auch am Heart.
+	AotCritterSpawner:
+		DefaultCritterType: aot-visceroid
+		DefaultMaxCritters: 3
+		DefaultPatrolRadius: 5
+		SpawnInterval: 150
 	# Bei jedem Treffer eine Toxic-Gaswolke (Cooldown gegen Spam). Ignoriert das eigene
 	# Gaswolken-Damage (TiberiumDeath), damit keine Rueckkopplung entsteht.
 	AotEmitWeaponWhenAttacked:

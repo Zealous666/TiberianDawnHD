@@ -161,9 +161,17 @@ namespace OpenRA.Mods.Common.Traits
 				if (self.IsDead || !self.IsInWorld)
 					return;
 
+				// Spawn-Zelle MUSS ausserhalb des eigenen Footprints liegen: haengt der Spawner an
+				// einem soliden Gebaeude (Vein-Heart 3x3, Ant-Bau 4x3), kaeme der Critter sonst auf
+				// einer blockierten Zelle zur Welt und koennte nicht herauslaufen, bis das Gebaeude
+				// stirbt (Locomotor behandelt ein stationaeres Building als uncrushbaren Blocker).
+				// Beim unsichtbaren Editor-Marker (OccupiesSpace:false) faellt der Helper auf
+				// self.Location zurueck -> unveraendertes Verhalten.
+				var spawnCell = AotFootprintUtils.FindCellOutsideFootprint(self);
+
 				var inits = new TypeDictionary
 				{
-					new LocationInit(self.Location),
+					new LocationInit(spawnCell),
 					new OwnerInit(self.Owner),
 				};
 
@@ -175,6 +183,13 @@ namespace OpenRA.Mods.Common.Traits
 					inits.Add(new AotVisceroidWanderRadiusInit(patrolRadius));
 				else if (critterInfo.HasTraitInfo<AotAntWanderInfo>())
 					inits.Add(new AotAntPatrolRadiusInit(patrolRadius));
+
+				// Wander-Condition mitgeben: einzeln im Editor platzierte Critter bleiben per Default
+				// STEHEN (Checkbox "Wander Around" aus), aber ein Spawner soll patrouillierende Critter
+				// erzeugen -- also die Condition beim Spawn setzen. Bei aktiver Angriffswelle unnoetig
+				// (die Welle schaltet das Wandern ohnehin ab), aber harmlos.
+				if (critterInfo.HasTraitInfo<AotWanderAroundInfo>())
+					inits.Add(new AotWanderAroundInit(true));
 
 				// Nur setzen wenn aktiv: der Critter-Default (DefaultAttackWave) soll sonst gelten,
 				// damit im Editor direkt platzierte Critter unabhaengig vom Spawner bleiben.

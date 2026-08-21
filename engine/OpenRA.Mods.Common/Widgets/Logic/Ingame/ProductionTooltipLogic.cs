@@ -105,7 +105,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				// Geprueft wird PRO Eintrag ueber den TechTree; '~'/'!'-Praefixe zaehlen dabei nicht
 				// zur Anzeige (wie bisher), muessen aber fuer die Pruefung erhalten bleiben.
 				var prereqs = buildable.Prerequisites
-					.Where(a => !a.StartsWith('~') && !a.StartsWith('!'))
+					.Where(a => !a.StartsWith('~') && !a.StartsWith('!') && !a.StartsWith(ProductionQueue.ProducerConditionPrefix, System.StringComparison.Ordinal))
 					.Select(a =>
 					{
 						var name = ActorName(mapRules, a);

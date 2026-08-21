@@ -765,7 +765,7 @@ HQ:
 	GrantConditionOnPrerequisite@age1sprite:
 		Condition: aot-hq-advanced
 		Prerequisites: aot-age1
-	GrantConditionOnPrerequisite@aotage2:
+	AotGrantConditionOnPrerequisiteLatched@aotage2:
 		Condition: aot-age2-active
 		Prerequisites: aot-age2
 	-WithSpriteBody:

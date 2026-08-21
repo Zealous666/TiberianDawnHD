@@ -275,6 +275,9 @@ actor-aot-scoutant =
 actor-aot-critter-spawner =
     .name = Critter Spawner
 
+actor-aot-ant-nest =
+    .name = Ant Nest
+
 actor-aot-light-system =
     .name = Light System (Day/Night Cycle)
 

@@ -280,3 +280,19 @@ mods/cnc/rules/structures.yaml
 !engine/OpenRA.Mods.Common/Activities/Air/
 !engine/OpenRA.Mods.Common/Activities/Air/DeliverBulkOrder.cs
 !engine/OpenRA.Mods.Common/Activities/Air/Land.cs
+!engine/OpenRA.Mods.Common/Traits/Conditions/AotGrantConditionOnPrerequisiteLatched.cs
+!engine/OpenRA.Mods.Common/Lint/LintBuildablePrerequisites.cs
+!engine/OpenRA.Mods.Common/Lint/
+
+# aotmod: Vein-System + Critter-Spawner/Wander (waren bisher ungetrackt -> gingen bei
+# Engine-Neubezug verloren, obwohl live in der Mod-YAML referenziert). Siehe Memory
+# feedback-verify-engine-patches-tracked.
+!engine/OpenRA.Mods.Cnc/Traits/AotVeinLayer.cs
+!engine/OpenRA.Mods.Cnc/Traits/AotVeinGrowth.cs
+!engine/OpenRA.Mods.Cnc/Traits/AotVeinRecession.cs
+!engine/OpenRA.Mods.Cnc/Traits/AotDamagedByAdjacentVeins.cs
+!engine/OpenRA.Mods.Cnc/Traits/AotEmitWeaponWhenAttacked.cs
+!engine/OpenRA.Mods.Cnc/Traits/AotEjectCargoOnCondition.cs
+!engine/OpenRA.Mods.Cnc/Traits/Render/AotVeinCellBody.cs
+!engine/OpenRA.Mods.Common/Traits/AotFootprintUtils.cs
+!engine/OpenRA.Mods.Common/Traits/AotWanderAround.cs
