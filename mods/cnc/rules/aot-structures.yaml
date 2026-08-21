@@ -3665,6 +3665,16 @@ FIX:
 		Palette: player
 		IsPlayerPalette: True
 		RequiresCondition: aot-fix-age2-active && !build-incomplete
+	# Ring pulst weiss NUR waehrend der Reparatur (WithRepairOverlay rendert nur bei aktivem
+	# Reparatur-Auftrag). Maske = nur die groesste Remap-Komponente (der Ring), der Anbau bleibt
+	# statisch (ueber WithIdleOverlay@tsremap). OHNE StartSequence: die Engine spielt die Sequenz
+	# pro Reparatur-Tick einmal und setzt danach visible=false -> loopt waehrend der Reparatur und
+	# STOPPT automatisch, sobald sie abgeschlossen ist (mit StartSequence liefe PlayRepeating endlos).
+	WithRepairOverlay@ringpulse:
+		Sequence: aot-fix-ring-pulse
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-fix-age2-active && !build-incomplete
 	-WithMakeAnimation:
 	WithMakeAnimation@ra:
 		BodyNames: body
@@ -3692,6 +3702,22 @@ aot-fix-age0:
 	Inherits: FIX
 	RenderSprites:
 		Image: fix
+	# Repair-Animation pro Age: ein age0-gebautes FIX morpht RA->TD->TS, daher braucht es fuer JEDEN
+	# Body eine eigene Repair-Anim -- sonst fehlt sie nach dem Age-Aufstieg (Body wechselt, die alte
+	# Anim haengt am nun deaktivierten Body). Age 0 = RA-Remaster (FIX.ZIP active), Age 1 = TD-active,
+	# Age 2 = statischer Gemini-Frame (die Animation uebernimmt dort der pulsierende Ring-Overlay).
+	WithResupplyAnimation:
+		Body: body
+		Sequence: aot-ra-active
+		RequiresCondition: !aot-age1-active
+	WithResupplyAnimation@td:
+		Body: body-td
+		Sequence: active
+		RequiresCondition: aot-age1-active && !aot-fix-age2-active
+	WithResupplyAnimation@ts:
+		Body: body-ts
+		Sequence: aot-age2-nod-idle
+		RequiresCondition: aot-fix-age2-active
 	ProvidesPrerequisite@fixname:
 		Prerequisite: fix
 	-ActorPreviewPlaceBuildingPreview:
@@ -3736,6 +3762,11 @@ aot-fix-age1:
 		RequiresCondition: !aot-fix-age2-active
 	WithResupplyAnimation:
 		Body: body-td
+		RequiresCondition: !aot-fix-age2-active
+	WithResupplyAnimation@ts:
+		Body: body-ts
+		Sequence: aot-age2-nod-idle
+		RequiresCondition: aot-fix-age2-active
 
 aot-fix-age2:
 	Inherits: FIX
@@ -3752,7 +3783,7 @@ aot-fix-age2:
 		Queue: Building.GDI
 		BuildPaletteOrder: 80
 		Prerequisites: ~aot-age2, vehicleproduction
-		Icon: aot-td-icon
+		Icon: aot-age2-icon
 		Description: Repairs vehicles.
 	Tooltip:
 		Name: actor-fix.name
@@ -3770,6 +3801,7 @@ aot-fix-age2:
 		RequiresCondition: aot-fix-age2-active || !aot-fix-age2-active
 	WithResupplyAnimation:
 		Body: body-ts
+		Sequence: aot-age2-nod-idle
 
 aot-fix-age1-nod:
 	Inherits: FIX
@@ -3799,6 +3831,11 @@ aot-fix-age1-nod:
 		RequiresCondition: !aot-fix-age2-active
 	WithResupplyAnimation:
 		Body: body-td
+		RequiresCondition: !aot-fix-age2-active
+	WithResupplyAnimation@ts:
+		Body: body-ts
+		Sequence: aot-age2-nod-idle
+		RequiresCondition: aot-fix-age2-active
 
 aot-fix-age2-nod:
 	Inherits: FIX
@@ -3815,7 +3852,7 @@ aot-fix-age2-nod:
 		Queue: Building.Nod
 		BuildPaletteOrder: 80
 		Prerequisites: ~aot-age2, vehicleproduction
-		Icon: aot-td-icon
+		Icon: aot-age2-icon
 		Description: Repairs vehicles.
 	Tooltip:
 		Name: actor-fix.name
@@ -3833,6 +3870,7 @@ aot-fix-age2-nod:
 		RequiresCondition: aot-fix-age2-active || !aot-fix-age2-active
 	WithResupplyAnimation:
 		Body: body-ts
+		Sequence: aot-age2-nod-idle
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Shroud Generator (GDI, RA Gap Generator) ===

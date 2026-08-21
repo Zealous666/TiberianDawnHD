@@ -2567,6 +2567,12 @@ fix:
 		Filename: fix_ages.png
 		RemasteredFilename:
 		Length: 1
+	# Age-2 Repair Pad (GDI + NOD): eigenes Baumenue-Icon (vorher teilte sich Age 2 das
+	# aot-td-icon mit Age 1).
+	aot-age2-icon:
+		Filename: fix_age2.png
+		RemasteredFilename:
+		Length: 1
 	aot-ra-idle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\FIX.ZIP
 		RemasteredLength: 1
@@ -2588,32 +2594,57 @@ fix:
 	damaged-aot-ra-build:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\FIXMAKE.ZIP
 		RemasteredLength: 14
+	# Repair-Animation (Age 0): RA-Remaster Service-Depot-Plattform. FIX.ZIP-Frames analog zum
+	# klassischen fix.shp: 0 idle, 1-6 active (rotierende Reparatur-Plattform), 7 damaged-idle,
+	# 8-13 damaged-active. Vorher fehlte im fix:-Block eine eigene "active"-Sequenz, daher spielte
+	# das geerbte cnc-WithResupplyAnimation die TD-active (Age-1-Optik) auch am Age-0-Gebaeude.
+	aot-ra-active:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\FIX.ZIP
+		RemasteredStart: 1
+		RemasteredLength: 6
+		ZOffset: -1c511
+	damaged-aot-ra-active:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\FIX.ZIP
+		RemasteredStart: 8
+		RemasteredLength: 6
+		ZOffset: -1c511
 		# Age-2: Gemini-Render GDI Repair Depot
 	aot-age2-nod-idle:
 		Filename: aot-gadept-gemini-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.046
+		Scale: 0.0557
 		Offset: 0, 0
 		ZOffset: -1c511
 	damaged-aot-age2-nod-idle:
 		Filename: aot-gadept-gemini-idle.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.046
+		Scale: 0.0557
 		ZOffset: -1c511
 	aot-age2-nod-idle-remap:
 		Filename: aot-gadept-gemini-idle-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.046
+		Scale: 0.0557
 		Offset: 0, 0
 		ZOffset: -1c511
 	damaged-aot-age2-nod-idle-remap:
 		Filename: aot-gadept-gemini-idle-remap.png
 		RemasteredFilename:
 		Length: 1
-		Scale: 0.046
+		Scale: 0.0557
+		Offset: 0, 0
+		ZOffset: -1c511
+	# Age-2 Player-Color-Ring, der weiss aufpulst (24-Frame-Cosinus-Helligkeitspuls, gebacken aus
+	# dem Ring-Remap; Technik wie atec-ts-dome-pulse). Ueber WithIdleOverlay@tsremap mit
+	# Palette player / IsPlayerPalette gerendert.
+	aot-fix-ring-pulse:
+		Filename: aot-fix-ring-pulse.png
+		RemasteredFilename:
+		Length: 24
+		Tick: 240
+		Scale: 0.0557
 		Offset: 0, 0
 		ZOffset: -1c511
 	aot-age2-nod-make:
