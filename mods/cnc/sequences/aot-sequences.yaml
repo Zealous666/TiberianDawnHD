@@ -801,38 +801,60 @@ mcv:
 	# aot-age2-idle + aot-age2-remap: in vehicles-overrides.yaml unter mcv: (TDHDSpriteSequence erhält mode-P)
 # === Ende aotmod ===
 
-# === Tiberium Silo (silo): Age-0 RA-Doppel-Sprite + Age-2 TD-Klassik im selben Image ===
-# Statische Composites (kein dynamisches Füllstands-Rendering für Age-0): links immer voll,
-# rechts immer halbvoll — sowohl im Normal- als auch im beschädigten Zustand.
-# aot-silo-idle.png: links=Frame4 (voll, unbeschädigt), rechts=Frame2 (halbvoll, unbeschädigt).
-# aot-silo-damaged.png: links=Frame9 (voll, beschädigt), rechts=Frame7 (halbvoll, beschädigt).
+# === Tiberium Silo (silo): Age-0 RA-Tank + Gemini-Pumpstation, Age-2 TD-Klassik im selben Image ===
+# Age-0 (aot-silo-ra-stages.png, 5 Frames leer->voll): der Gemini-Tank wurde KOMPLETT entfernt
+# (nur die "Process Pump Station" blieb stehen) und durch das echte RA-Remaster-Einzelsilo
+# ersetzt, ausgerichtet an dessen Sockelring (Ziel x30..645, Unterkante y683, Scale ~4.85).
+# Das RA-Silo liegt HINTER der Pumpstation -- Ventil/Manometer/Rohre muessen davor bleiben,
+# sonst werden sie ueberdeckt. Der Fuellstand kommt aus den Originalframes, nicht aus Synthese.
 # Scale 0.1875 = 24/128 (TileSize/RemasteredTileSize) — der Faktor den RemasterSpriteSequence
 # sonst automatisch anwendet; unsere PNGs laufen über den klassischen Filename-Pfad und brauchen
 # ihn daher explizit. Gleicher Image-Name "silo" wie Engine — Sequenzen werden gemergt, nicht
 # ersetzt, damit auch der unveränderte Basis-SILO-Aktor (Image: silo) sie findet (Muster wie PYLE/HAND).
 silo:
+	# Einzelframe (Frame 0 = leer) fuer den Platzier-Ghost. NIE auf aot-ra-stages zeigen
+	# lassen -- ein mehrframiger Preview loopt durch alle Fuellstaende (Alt-Bug, s.u.).
 	aot-ra-idle:
-		Filename: aot-silo-gemini-idle.png
+		Filename: aot-silo-ra-stages.png
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.036
 		Offset: 0,-120
 	damaged-aot-ra-idle:
-		Filename: aot-silo-gemini-idle.png
+		Filename: aot-silo-ra-stages.png
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.036
 		Offset: 0,-120
+	# Player-Color-Overlay: NUR der runde RA-Sockel + aufsteigendes Rohr. Bewusst EINFRAMIG --
+	# WithIdleOverlay animiert stumpf durch alle Frames, der Ring ist aber in jeder
+	# Fuellstufe identisch. Die Pumpstation bleibt bewusst ohne Player-Color.
 	aot-ra-idle-remap:
-		Filename: aot-silo-gemini-idle-remap.png
+		Filename: aot-silo-ra-stages-remap.png
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.036
 		Offset: 0,-120
 	damaged-aot-ra-idle-remap:
-		Filename: aot-silo-gemini-idle-remap.png
+		Filename: aot-silo-ra-stages-remap.png
 		RemasteredFilename:
 		Length: 1
+		Scale: 0.036
+		Offset: 0,-120
+	# Dynamische Fuellstands-Frames (empty->full, 5 Stufen, wie klassische TD-'stages').
+	# KEINE Synthese: das sind die ECHTEN RA-Remaster-Frames 0-4 aus
+	# TEXTURES_RA_SRGB.MEG > RED_ALERT\STRUCTURES\SILO.ZIP (Einzelsilo 128x120).
+	# Von WithResourceLevelSpriteBody@ra gerendert.
+	aot-ra-stages:
+		Filename: aot-silo-ra-stages.png
+		RemasteredFilename:
+		Length: 5
+		Scale: 0.036
+		Offset: 0,-120
+	damaged-aot-ra-stages:
+		Filename: aot-silo-ra-stages.png
+		RemasteredFilename:
+		Length: 5
 		Scale: 0.036
 		Offset: 0,-120
 	aot-ra-make:
@@ -864,6 +886,21 @@ silo:
 		Filename: aot-nod-silo-ts-idle-remap.png
 		RemasteredFilename:
 		Length: 1
+		Scale: 0.051
+		Offset: 0,-20
+	# Dynamische Fuellstands-Frames Age-2 (empty->full, 5 Stufen). Aus dem NOD-Dome-Render
+	# synthetisiert: das gruene Tiberium-Leuchten wird pro Stufe abgedunkelt (leer=dunkel,
+	# voll=hell). Von WithResourceLevelSpriteBody@ts gerendert. Palette effect (kein ColorShift).
+	aot-ts-stages:
+		Filename: aot-nod-silo-ts-stages.png
+		RemasteredFilename:
+		Length: 5
+		Scale: 0.051
+		Offset: 0,-20
+	damaged-aot-ts-stages:
+		Filename: aot-nod-silo-ts-stages.png
+		RemasteredFilename:
+		Length: 5
 		Scale: 0.051
 		Offset: 0,-20
 	aot-ts-make:

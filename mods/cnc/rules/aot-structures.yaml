@@ -5178,9 +5178,11 @@ SILO:
 		Condition: aot-age2-active
 		Prerequisites: aot-age2
 	-WithResourceLevelSpriteBody:
-	WithSpriteBody@ra:
-		Sequence: aot-ra-idle
+	WithResourceLevelSpriteBody@ra:
+		Sequence: aot-ra-stages
 		Name: body
+		# Dynamischer Fuellstand (empty->full) wie klassisches TD-Silo. Frame-Index folgt
+		# StoresPlayerResources/Capacity ueber alle Depots. 5 Frames im Sheet.
 		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
 		# PlayerColorShift verschiebt jeden Pixel im entsprechenden Farbton zur Spielerfarbe.
 		Palette: effect
@@ -5195,10 +5197,12 @@ SILO:
 		Sequence: stages
 		Name: body-td
 		RequiresCondition: aot-age1-active && !aot-age2-active
-	WithSpriteBody@ts:
-		Sequence: aot-ts-idle
+	WithResourceLevelSpriteBody@ts:
+		Sequence: aot-ts-stages
 		Name: body-ts
 		RequiresCondition: aot-age2-active
+		# Dynamischer Fuellstand (5 Frames leer->voll): das gruene Tiberium-Leuchten in
+		# der Kuppel dunkelt bei niedrigem Stand ab. Index folgt Resources/Capacity.
 		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player"
 		# zurueck -> PlayerColorShift (combined.frag ColorShift(), MinHue 0.29 /
 		# MaxHue 0.37) verschiebt JEDEN Pixel im Gruen-Farbton zur Spielerfarbe.
@@ -5267,7 +5271,7 @@ aot-silo-age1:
 		Queue: Building.GDI, Building.Nod
 		Description: actor-silo.description
 		Icon: aot-icon-age1
-	-WithSpriteBody@ra:
+	-WithResourceLevelSpriteBody@ra:
 	-WithIdleOverlay@raremap:
 	-WithMakeAnimation@ra:
 	WithResourceLevelSpriteBody@td:
@@ -5290,12 +5294,12 @@ aot-silo-age2:
 		Queue: Building.GDI, Building.Nod
 		Description: actor-silo.description
 		Icon: aot-icon-age2
-	-WithSpriteBody@ra:
+	-WithResourceLevelSpriteBody@ra:
 	-WithIdleOverlay@raremap:
 	-WithResourceLevelSpriteBody@td:
 	-WithMakeAnimation@ra:
 	-WithMakeAnimation@td:
-	WithSpriteBody@ts:
+	WithResourceLevelSpriteBody@ts:
 		RequiresCondition: aot-age2-active || !aot-age2-active
 	WithIdleOverlay@tsremap:
 		RequiresCondition: !build-incomplete
