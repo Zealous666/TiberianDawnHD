@@ -1001,6 +1001,13 @@ namespace OpenRA.Mods.Common.Traits
 			"priority, so the balance genuinely accumulates.")]
 		public readonly int ExpansionOrderCashThreshold = 6000;
 
+		[Desc("Cash threshold when the convoy already has its MCV -- one collected from a failed earlier",
+			"attempt -- so only the escorts still need funding. Lower than ExpansionOrderCashThreshold by",
+			"the MCV's price, so a bot too poor to save the full 6000 can still finish a convoy around a",
+			"reused MCV instead of leaving it stranded (User 2026-08-22: 'neuer anlauf soll ihn",
+			"einsammeln').")]
+		public readonly int ExpansionEscortOnlyCashThreshold = 4000;
+
 		[Desc("Escort size. Four rather than the six of the original briefing (User 2026-08-04): at",
 			"1500 credits each, six tanks plus a 3000-credit MCV is 12000 for one convoy -- roughly",
 			"four minutes of an Age-1 bot's entire income, and in testing nothing ever finished. The",

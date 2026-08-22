@@ -3205,29 +3205,35 @@ namespace OpenRA.Mods.Common.Traits
 					// balance genuinely accumulates instead of being spent elsewhere.
 					if (!ordered)
 					{
-						if (Ops.AvailableCash() < Ops.Info.ExpansionOrderCashThreshold)
-							break;
-
-						if (Ops.Info.ExpansionMcvTypes.Length > 0)
+						// COLLECT a stranded MCV FIRST, before saving a single credit. An MCV a failed
+						// convoy left behind -- one that survived the crossing but lost its escorts, say --
+						// is a free head start, but the reuse used to sit BEHIND the save gate below, so a
+						// bot too poor to ever reach the full 6000 never picked it up and it stood idle on
+						// the map forever (User 2026-08-22: "neuer anlauf soll ihn einsammeln"). Grabbing it
+						// now means only the escorts still need funding, at the lower escort-only threshold.
+						if (Mcv() == null && Ops.Info.ExpansionMcvTypes.Length > 0)
 						{
-							// Reuse before buying: an MCV orphaned by a failed convoy is worth more than
-							// the 2000-odd credits a replacement costs, and it was previously invisible
-							// -- MCVs are excluded from the unit pool, so nothing ever picked one up.
 							var spare = Ops.FindUnclaimed(Ops.Info.ExpansionMcvTypes);
 							if (spare != null)
 							{
 								Ops.AssignFromPool(this, [spare]);
-								Log($"reusing idle {spare.Info.Name}@{spare.Location} instead of ordering one");
+								Log($"collected idle {spare.Info.Name}@{spare.Location} -> only escorts left to fund");
 							}
-							else
-								Ops.QueueRequest(this, "mcv", Ops.Info.ExpansionMcvTypes, 1);
 						}
+
+						var haveMcv = Mcv() != null;
+						var threshold = haveMcv ? Ops.Info.ExpansionEscortOnlyCashThreshold : Ops.Info.ExpansionOrderCashThreshold;
+						if (Ops.AvailableCash() < threshold)
+							break;
+
+						if (!haveMcv && Ops.Info.ExpansionMcvTypes.Length > 0)
+							Ops.QueueRequest(this, "mcv", Ops.Info.ExpansionMcvTypes, 1);
 
 						if (Ops.Info.ExpansionEscortTypes.Length > 0 && Ops.Info.ExpansionEscortCount > 0)
 							Ops.QueueRequest(this, "escort", Ops.Info.ExpansionEscortTypes, Ops.Info.ExpansionEscortCount);
 
 						ordered = true;
-						Log($"saved up {Ops.AvailableCash()} -> ordering MCV + {Ops.Info.ExpansionEscortCount} escort(s) at once");
+						Log($"saved up {Ops.AvailableCash()} -> ordering {(haveMcv ? "" : "MCV + ")}{Ops.Info.ExpansionEscortCount} escort(s) at once");
 					}
 
 					var mcv = Mcv();
