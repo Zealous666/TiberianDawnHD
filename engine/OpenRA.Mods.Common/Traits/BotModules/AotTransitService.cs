@@ -201,12 +201,20 @@ namespace OpenRA.Mods.Common.Traits
 				return;
 
 			// ---- Far stops -------------------------------------------------------------------
-			// One per enemy spawn, measured as a SEA distance from our own prime berth, so the water
-			// leg stays short and the group walks the rest (the old "coastal cell nearest the enemy"
-			// rule unloaded convoys straight into the enemy's defences).
+			// One per DESTINATION that a ticket can cross to, measured as a SEA distance from our own
+			// prime berth, so the water leg stays short and the group walks the rest (the old "coastal
+			// cell nearest the enemy" rule unloaded convoys straight into the enemy's defences).
+			//
+			// This used to survey ONLY enemy spawns, because ferrying started life as an attack-wave
+			// feature. But the base EXPANSION crosses too, to an empty spawn that is NOT an enemy -- and
+			// with no quay near it, FarStopFor fell back to the nearest EXISTING quay, which is always
+			// one built at an enemy spawn. The MCV convoy was therefore shipped to a landing right at an
+			// enemy's beach and wiped out, never near its actual (safe, empty) target (User 2026-08-22:
+			// "sie fahren zu den falschen stellen und sterben deshalb"). Surveying the active expansion
+			// sites too gives each its own quay, so FarStopFor returns the correct near-target landing.
 			var fromBerth = HomeStop.Berths.Count > 0 ? HomeStop.Berths[0] : HomeStop.Shore;
 
-			foreach (var spawn in intel.EnemySpawns)
+			foreach (var spawn in intel.EnemySpawns.Concat(ops.ActiveExpansionSites).Distinct())
 			{
 				if (farBySpawn.TryGetValue(spawn, out var existing) && StillGood(existing, home: false))
 					continue;
