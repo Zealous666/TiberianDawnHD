@@ -138,7 +138,6 @@ LITE:
 		BodyNames: body
 		Condition: build-incomplete
 		Sequence: make
-		RequiresCondition: !aot-age2-active
 	-ActorPreviewPlaceBuildingPreview:
 	SequencePlaceBuildingPreview:
 		Sequence: place
@@ -210,7 +209,6 @@ aot-lite-gdi:
 		BodyNames: body-ts
 		Condition: build-incomplete
 		Sequence: aot-age2-make
-		RequiresCondition: aot-age2-active
 
 aot-lite-nod:
 	Inherits: LITE
@@ -278,7 +276,6 @@ aot-lite-nod:
 		BodyNames: body-ts
 		Condition: build-incomplete
 		Sequence: aot-age2-make
-		RequiresCondition: aot-age2-active
 
 # === Age of Tiberium (aotmod) - LITE Editor-Platzierer fuer die Age-2-Optik (2026-07-26) ===
 # aot-lite-gdi/-nod selbst zeigen im Karteneditor bereits korrekt die Age-0/1-Optik (das ist
@@ -306,7 +303,6 @@ aot-lite-gdi-editor-age2:
 	WithIdleOverlay@tsblink:
 		RequiresCondition: !build-incomplete
 	WithMakeAnimation@ts:
-		RequiresCondition: aot-age2-active || !aot-age2-active
 
 aot-lite-nod-editor-age2:
 	Inherits: aot-lite-nod
@@ -327,7 +323,6 @@ aot-lite-nod-editor-age2:
 	WithIdleOverlay@tsblink:
 		RequiresCondition: !build-incomplete
 	WithMakeAnimation@ts:
-		RequiresCondition: aot-age2-active || !aot-age2-active
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Ore Mine ===
@@ -498,7 +493,6 @@ aot-fact-gdi-editor-age2:
 	WithIdleOverlay@lights:
 		RequiresCondition: !build-incomplete
 	WithMakeAnimation@ts:
-		RequiresCondition: aot-age2-active || !aot-age2-active
 
 aot-fact-nod-editor-age1:
 	Inherits: FACT.NOD
@@ -531,7 +525,6 @@ aot-fact-nod-editor-age2:
 	WithIdleOverlay@lights:
 		RequiresCondition: !build-incomplete
 	WithMakeAnimation@ts:
-		RequiresCondition: aot-age2-active || !aot-age2-active
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - PYLE: RA Allied Barracks Sprites in Age 0, TD ab Age 1 ===
@@ -1148,7 +1141,6 @@ aot-upgrade-gdi-advtech:
 		# Laser Technologies bleibt bewusst aussen vor (User: separat anschauen).
 		BuildDuration: 5000
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Upgrades the Recon Jeep to HUMVEE armor, equips the Mammoth Tank with rockets, unlocks the Rocket Launcher in the Advanced War Factory, and unlocks the Tiberium Refinery.
 
 	Valued:
@@ -1173,7 +1165,6 @@ aot-upgrade-apc2:
 		Prerequisites: ~aot-age2, ~!aot-minelayer-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Transforms all APCs into amphibious but unarmed APCs. Lockouts the Mine Layer.
 
 	Valued:
@@ -1202,7 +1193,6 @@ aot-upgrade-minelayer:
 		Prerequisites: ~aot-age2, ~!aot-amphibious-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Transforms all APCs into unarmed Mine Layers with anti-tank mines. Lockouts the Amphibious APC.
 
 	Valued:
@@ -1257,7 +1247,6 @@ aot-upgrade-nod-secrettech:
 		# Laser Technologies bleibt bewusst aussen vor (User: separat anschauen).
 		BuildDuration: 5000
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Upgrades the Heavy Tank with flamethrowers, replaces the V2 Rocket Launcher's warhead with napalm, unlocks the Stealth Tank, and unlocks the Tiberium Refinery.
 
 	Valued:
@@ -1287,7 +1276,6 @@ aot-upgrade-ltnk-tick:
 		Prerequisites: ~aot-age2, stec, afld, fix
 		Queue: Upgrade.Nod
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Replaces the Light Tank chassis with a Tick Tank hull. Enables dig-in mode.
 
 	Valued:
@@ -1324,7 +1312,6 @@ aot-upgrade-ttnk-subterrain:
 		Prerequisites: ~aot-age2, stec
 		Queue: Upgrade.Nod
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Upgrades the Flame Tank and Toxin Tank to subterranean variants that can tunnel underground. Also unlocks the Subterranean Infantry Transport.
 
 	Valued:
@@ -1362,7 +1349,6 @@ aot-upgrade-e4-toxic:
 		Prerequisites: ~aot-age3, tmpl, stec, aot-shrine
 		Queue: Upgrade.Nod
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Upgrades all Flamethrowers, Flame Tanks, Flame Towers, Napalm Rocket Launchers, and the Nod Avatar with toxic weaponry for improved damage vs. all ground targets. Toxic rockets leave a lingering tiberium gas field on impact.
 
 	Valued:
@@ -1400,7 +1386,6 @@ aot-upgrade-v2-howitzer:
 		Icon: aot-arty-howitzer-icon
 		Queue: Upgrade.Nod
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Transforms Napalm Rocket Launcher into a Howitzer for later Heavy Artillery usage. Lockout of Toxic Rocket Launchers.
 
 	Valued:
@@ -1423,7 +1408,6 @@ aot-upgrade-heavy-artillery:
 		Prerequisites: ~aot-age3, aot-howitzer-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Upgrades the Mobile Howitzer with heavy siege artillery. Adds deploy capability and devastating firepower vs. structures.
 
 	Valued:
@@ -1451,7 +1435,6 @@ aot-upgrade-ion-cannon:
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		Icon: ioncannon
-		MoveIntoWorld: false
 		Description: Upgrades Orbital Command with an Uplink to call Ion Cannon Strikes.
 
 	Valued:
@@ -1479,7 +1462,6 @@ aot-upgrade-infantry-railgun:
 		Prerequisites: ~aot-age3, pyle, atec
 		Queue: Upgrade.GDI
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Equips GDI infantry with experimental railgun technology. Required for Zone Trooper deployment.
 
 	Valued:
@@ -1506,7 +1488,6 @@ aot-upgrade-zonetrooper-drop:
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		Icon: icon
-		MoveIntoWorld: false
 		Description: Upgrades Orbital Command to deploy Zone Troopers via orbital drop pods.
 
 	Valued:
@@ -1565,7 +1546,6 @@ ATEC:
 		Name: Tech Center
 	Production@UPGRADEGDI:
 		Produces: Upgrade.GDI
-		MoveIntoWorld: false
 	# Baufortschritts-Balken unter der Healthbar (User-Wunsch 2026-08-02): zeigt den Fortschritt
 	# des laufenden Upgrades -- u.a. der Age-Aufstiege, die ueber genau diese Queue laufen.
 	# ProductionBar verlangt ein Production-Trait am Aktor (Requires<ProductionInfo>), das hier
@@ -1662,12 +1642,10 @@ ATEC:
 		BodyNames: body-td
 		Condition: build-incomplete
 		Sequence: aot-td-make
-		RequiresCondition: aot-age1-active && !aot-age2-active
 	WithMakeAnimation@ts:
 		BodyNames: body-ts
 		Condition: build-incomplete
 		Sequence: atec-ts-make
-		RequiresCondition: aot-age2-active
 # === Ende aotmod ===
 
 
@@ -1736,7 +1714,6 @@ aot-atec-age2:
 	WithIdleOverlay@domepulse:
 		RequiresCondition: aot-age2-active || !aot-age2-active
 	WithMakeAnimation@ts:
-		RequiresCondition: aot-age2-active || !aot-age2-active
 # === Age of Tiberium (aotmod) - STEC (Soviet Tech Centre, NOD) ===
 # NOD-exklusives Tech-Gebäude. Sprite: RA Soviet Tech Centre (STEKMAKE-Frames).
 # Schaltet NOD-Tier-2-Upgrades frei (aot-stec Prerequisite).
@@ -1755,7 +1732,6 @@ STEC:
 		Name: Tech Center
 	Production@UPGRADENOD:
 		Produces: Upgrade.Nod
-		MoveIntoWorld: false
 	# Siehe ATEC: Baufortschritts-Balken fuer die Upgrade-Queue (inkl. Age-Aufstiege).
 	ProductionBar@UPGRADENOD:
 		ProductionType: Upgrade.Nod
@@ -2018,12 +1994,10 @@ STEC:
 		BodyNames: body-td
 		Condition: build-incomplete
 		Sequence: aot-td-make
-		RequiresCondition: aot-age1-active && !aot-age2-active
 	WithMakeAnimation@ts:
 		BodyNames: body-ts
 		Condition: build-incomplete
 		Sequence: stec-ts-make
-		RequiresCondition: aot-age2-active
 # === Ende aotmod ===
 
 
@@ -2065,7 +2039,6 @@ aot-stec-age1:
 	WithSpriteBody@td:
 		RequiresCondition: !aot-age2-active
 	WithMakeAnimation@td:
-		RequiresCondition: !aot-age2-active
 
 aot-stec-age2:
 	Inherits: STEC
@@ -2094,7 +2067,6 @@ aot-stec-age2:
 	WithIdleOverlay@lights:
 		RequiresCondition: aot-age2-active || !aot-age2-active
 	WithMakeAnimation@ts:
-		RequiresCondition: aot-age2-active || !aot-age2-active
 # === Age of Tiberium (aotmod) - MSLO (Nuke Silo, NOD) ===
 # NOD-exklusives Superweapon-Gebäude (RA Nuclear Missile Silo, RA MSLO-Sprites).
 # Sichtbar ab Age 1, baubar sobald STEC + Radar Dome (anyhq) stehen.
@@ -2398,7 +2370,6 @@ aot-upgrade-tiberium-missile:
 		BuildPaletteOrder: 230
 		Prerequisites: ~aot-age2, stec, aot-mslo, ~!aot-mine-cluster-enhancement
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Icon: aot-tiberiummissile-icon
 		Description: Unlocks the Tiberium Missile support power on the Missile Silo. Devastating against infantry, far less effective against structures.
 	ProvidesPrerequisite:
@@ -2417,7 +2388,6 @@ aot-upgrade-atom-bomb:
 		BuildPaletteOrder: 330
 		Prerequisites: ~aot-age3, stec, aot-mslo
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Icon: aot-atombomb-icon
 		Description: Unlocks the Atom Bomb support power on the Missile Silo. Devastating against everything.
 	ProvidesPrerequisite:
@@ -2436,7 +2406,6 @@ aot-upgrade-mine-cluster-enhancement:
 		BuildPaletteOrder: 235
 		Prerequisites: ~aot-age2, stec, aot-mslo, ~!aot-tiberium-missile-upgrade
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Icon: aot-minecluster-icon
 		Description: Enhances the Mine Cluster Missile with 5 anti-vehicle mines. Exclusive with Tiberium Missile upgrade.
 	ProvidesPrerequisite:
@@ -3020,6 +2989,7 @@ aot-age3-upgrade-nod:
 gdi-hq:
 	Tooltip:
 		Name: Radar
+	Interactable:
 
 # === Age of Tiberium (aotmod) - Tooltip-Alias fuer die OR-Sammelvoraussetzung ===
 # aot-gdi-ordnance-upgrade wird von BEIDEN Age-2-Gatekeepern (GDI Mech Armaments / GDI Heavy
@@ -3053,7 +3023,6 @@ aot-upgrade-mtnk-predator:
 		# Laser Technologies bleibt bewusst aussen vor (User: separat anschauen).
 		BuildDuration: 5000
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Upgrades the Medium Tank with the Predator Turret, transforms the Rocket Launcher into a Hover Rocket Launcher and unlocks the Hover AA. Lockout of GDI Mech Armament.
 
 	Valued:
@@ -3090,7 +3059,6 @@ aot-upgrade-mtnk-railgun:
 		Prerequisites: ~aot-age3, ~techlevel.medium, atec, lite, ~aot-mtnk-predator-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Equips the Predator Main Tank and Mammoth Tank with high-powered railguns. Requires the Predator Upgrade - incompatible with the Titan chassis path.
 
 	Valued:
@@ -3123,7 +3091,6 @@ aot-upgrade-mtnk-titan:
 		# Laser Technologies bleibt bewusst aussen vor (User: separat anschauen).
 		BuildDuration: 5000
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Transforms the Medium Tank into a Titan battle mech, the HMVEE into a Wolverine anti-infantry mech and unlocks the Juggernaut artillery. Lockout of GDI Heavy Ordonance.
 
 	Valued:
@@ -3155,7 +3122,6 @@ aot-upgrade-mtnk-titan-railgun:
 		Prerequisites: ~aot-age3, ~techlevel.medium, atec, lite, ~aot-mtnk-titan-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Upgrades the Titan Mech with Railgun for higher damage.
 
 	Valued:
@@ -3277,7 +3243,6 @@ aot-upgrade-nod-airstrike:
 		Prerequisites: ~aot-age1, stec, afld, ~!aot-nod-spyplane-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Unlocks the Airstrike support power: two MiG jets make two attack passes, each firing two guided rockets at the target. Mutually exclusive with the Spy Plane upgrade.
 
 	Valued:
@@ -3304,7 +3269,6 @@ aot-upgrade-nod-spyplane:
 		Prerequisites: ~aot-age1, stec, afld, ~!aot-nod-airstrike-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Unlocks the Spy Plane support power: a Yak recon plane flies over a target area and reveals it for a short time. Mutually exclusive with the Airstrike upgrade.
 
 	Valued:
@@ -3336,7 +3300,6 @@ aot-upgrade-nod-parabombs:
 		Prerequisites: ~aot-age3, stec, ~aot-nod-spyplane-upgrade, aot-toxic-upgrade, ~!aot-nod-airstrike-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Unlocks the Parabombs support power: a heavy bomber flies over the target and drops five toxic parabombs, each leaving a lingering gas cloud. Requires the Spy Plane and Toxic upgrades.
 
 	Valued:
@@ -3367,7 +3330,6 @@ aot-upgrade-nod-banshee:
 		Prerequisites: ~aot-age3, stec, tmpl, ~aot-nod-airstrike-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Unlocks the Banshee Airstrike, replacing the MiG Airstrike: three Banshee fighters make two passes firing plasma salvos that leave toxic gas clouds. Requires Age 3 and a Temple of Nod.
 
 	Valued:
@@ -3393,7 +3355,6 @@ aot-upgrade-harpy:
 		Prerequisites: ~aot-age2, stec, anyhq, hpad
 		Queue: Upgrade.Nod
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Upgrades all HINDs to Harpy attack helicopters. Increases damage output and fire rate. Reloads ammunition automatically while airborne. Grants stealth capability when not engaged.
 
 	Valued:
@@ -3419,7 +3380,6 @@ aot-upgrade-orca:
 		Prerequisites: ~aot-age1, atec, anyhq, hpad, weap
 		Queue: Upgrade.GDI
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Upgrades all Apaches to ORCA gunships. Adds anti-air missile capability.
 
 	Valued:
@@ -3447,7 +3407,6 @@ aot-upgrade-tran-doorgunner:
 		Prerequisites: ~aot-age2, anyhq, hpad, ~!aot-tran-carryall-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Icon: icon
 		Description: actor-aot-upgrade-tran-doorgunner.description
 
@@ -3478,7 +3437,6 @@ aot-upgrade-tran-carryall:
 		Prerequisites: ~aot-age2, anyhq, hpad, ~!aot-tran-doorgunner-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Icon: icon
 		Description: actor-aot-upgrade-tran-carryall.description
 
@@ -3507,7 +3465,6 @@ aot-upgrade-tran-parachute:
 		Prerequisites: ~aot-age2, anyhq, hpad
 		Queue: Upgrade.Nod
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Icon: icon
 		Description: actor-aot-upgrade-tran-parachute.description
 
@@ -3536,7 +3493,6 @@ aot-upgrade-firehawk:
 		Prerequisites: ~aot-age3, atec, aflt, aot-slab
 		Queue: Upgrade.GDI
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Replaces all A-10 fighters with Firehawks. Swaps Vulcan cannons and napalm for triple-double rocket salvos, effective against ground and air targets.
 
 	Valued:
@@ -3693,7 +3649,6 @@ FIX:
 		BodyNames: body-ts
 		Condition: build-incomplete
 		Sequence: aot-age2-nod-make
-		RequiresCondition: aot-fix-age2-active
 	WithBuildingPlacedAnimation@ra:
 		Body: body
 		Sequence: aot-ra-build
@@ -3803,7 +3758,6 @@ aot-fix-age2:
 	WithIdleOverlay@tsremap:
 		RequiresCondition: !build-incomplete
 	WithMakeAnimation@ts:
-		RequiresCondition: aot-fix-age2-active || !aot-fix-age2-active
 	WithResupplyAnimation:
 		Body: body-ts
 		Sequence: aot-age2-nod-idle
@@ -3872,7 +3826,6 @@ aot-fix-age2-nod:
 	WithIdleOverlay@tsremap:
 		RequiresCondition: !build-incomplete
 	WithMakeAnimation@ts:
-		RequiresCondition: aot-fix-age2-active || !aot-fix-age2-active
 	WithResupplyAnimation:
 		Body: body-ts
 		Sequence: aot-age2-nod-idle
@@ -4080,12 +4033,10 @@ NUKE:
 		BodyNames: body-ts
 		Condition: build-incomplete
 		Sequence: aot-age2-make
-		RequiresCondition: aot-age2-active && aot-nuke-fac-gdi && !aot-turbine-active
 	WithMakeAnimation@tsnod:
 		BodyNames: body-tsnod
 		Condition: build-incomplete
 		Sequence: aot-age2-nod-make
-		RequiresCondition: aot-age2-active && aot-nuke-fac-nod
 	WithMakeAnimation@turbine:
 		BodyNames: body-turbine
 		Condition: build-incomplete
@@ -4099,7 +4050,6 @@ NUKE:
 		BodyNames: body-tsturbine
 		Condition: build-incomplete
 		Sequence: aot-age2-turbine-make
-		RequiresCondition: aot-age2-active && aot-nuke-fac-gdi && aot-turbine-active
 	-Power:
 	# Faction-abhaengige Power (User 2026-07-19): NOD Nuke 150, GDI Nuke 200, GDI Turbine-Upgrade 300.
 	# Der geteilte age0/age1-Nuke wird von BEIDEN Fraktionen gebaut -> per Faction-Condition getrennt.
@@ -4233,7 +4183,6 @@ aot-nuke-age2:
 	WithIdleOverlay@tsturbinelights:
 		RequiresCondition: aot-turbine-active && !build-incomplete
 	WithMakeAnimation@ts:
-		RequiresCondition: !aot-turbine-active
 
 # NOD-Variante: eigenes Age-2-Icon (nuke_age2.png statt GDI-Turbine-Icon)
 # und NOD-Age2-Platzier-Preview (aot-age2-nod-idle statt GDI aot-age2-idle).
@@ -4278,7 +4227,6 @@ aot-nuke-age2-nod:
 	WithIdleOverlay@tsnodlights:
 		RequiresCondition: !build-incomplete
 	WithMakeAnimation@tsnod:
-		RequiresCondition: aot-age2-active || !aot-age2-active
 
 aot-nuke-turbine-age2:
 	Inherits: NUKE
@@ -4469,7 +4417,6 @@ aot-upgrade-nuke-turbine:
 		Prerequisites: ~aot-age2, atec, anypower
 		Queue: Upgrade.GDI
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Upgrades all GDI Power Plants with Turbine Technology, doubling energy output.
 
 	Valued:
@@ -4499,7 +4446,6 @@ aot-upgrade-cruiser-railgun:
 		Prerequisites: ~aot-age3, aot-shipyard, atec, ~!aot-cruiser-carrier-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Replaces both Battle Cruiser turrets with 4 high-powered Railguns. Shorter range, no minimum distance, very precise.
 
 	Valued:
@@ -4525,7 +4471,6 @@ aot-upgrade-cruiser-carrier:
 		Prerequisites: ~aot-age3, aot-shipyard, atec, ~!aot-cruiser-railgun-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Replaces both Battle Cruiser turrets with two Helibays. Deploy the carrier to allow nearby aircraft to land and resupply.
 
 	Valued:
@@ -4548,7 +4493,6 @@ aot-upgrade-gunboat-frigate:
 		Prerequisites: ~aot-age1, aot-shipyard, fix
 		Queue: Upgrade.GDI
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Upgrades all Gunboats into Frigates capable of attacking land targets.
 
 	Valued:
@@ -4571,7 +4515,6 @@ aot-upgrade-gunboat-destroyer:
 		Prerequisites: ~aot-age2, aot-shipyard, fix, aot-gunboat-frigate-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Upgrades all Frigates into Destroyers with rockets, depth charges, and anti-air.
 
 	Valued:
@@ -4979,7 +4922,6 @@ aot-upgrade-stnk-cargo:
 		Prerequisites: ~aot-age3, aot-shrine, tmpl
 		Queue: Upgrade.Nod
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Icon: icon
 		Description: actor-aot-upgrade-stnk-cargo.description
 
@@ -5007,7 +4949,6 @@ aot-upgrade-transport-gun:
 		Prerequisites: ~aot-age1, fix, aot-subpen
 		Queue: Upgrade.Nod
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Icon: icon
 		Description: actor-aot-upgrade-transport-gun.description
 
@@ -5035,7 +4976,6 @@ aot-upgrade-msub-mine:
 		Prerequisites: ~aot-age3, aot-subpen, stec, fix, anyhq, ~!aot-msub-drone-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Icon: icon
 		Description: actor-aot-upgrade-msub-mine.description
 
@@ -5062,7 +5002,6 @@ aot-upgrade-msub-drone:
 		Prerequisites: ~aot-age3, aot-subpen, stec, fix, anyhq, ~!aot-msub-mine-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Icon: icon
 		Description: actor-aot-upgrade-msub-drone.description
 
@@ -5677,7 +5616,6 @@ aot-upgrade-nod-forbidden:
 		# Laser Technologies bleibt bewusst aussen vor (User: separat anschauen).
 		BuildDuration: 5000
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Unlocks Chameleon Spy, Cyborgs and the Secret Shrine.
 
 	Valued:
@@ -6021,7 +5959,6 @@ SAM:
 		BodyNames: body-ra
 		Condition: build-incomplete
 		Sequence: ra-make
-		RequiresCondition: !aot-sam-bunkered
 
 	# TD-Render-Pfad (Bunkered SAM-Upgrade): bereits nativ vorhandene
 	# WithEmbeddedTurretSpriteBody bleibt inhaltlich unveraendert - nur
@@ -6124,7 +6061,6 @@ aot-upgrade-sam-bunkered:
 		Prerequisites: ~aot-age1
 		Queue: Upgrade.Nod
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: SAM sites retract underground between shots for increased armor protection.
 
 	Valued:
@@ -6147,7 +6083,6 @@ aot-upgrade-sam-cloak:
 		Prerequisites: ~aot-age2, aot-sam-bunkered-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Grants SAM sites stealth technology. Cloaked while not firing, above 50% health, and not low on power.
 
 	Valued:
@@ -6176,7 +6111,6 @@ aot-upgrade-avatar-laser:
 		Prerequisites: ~aot-age3, aot-shrine
 		Queue: Upgrade.Nod
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Replaces the Nod Avatar's cyborg chaingun with a devastating laser cannon.
 
 	Valued:
@@ -6508,7 +6442,6 @@ aot-upgrade-guard-tower:
 		Prerequisites: ~aot-age1, aot-slab, ~!aot-camo-pillbox-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Upgrades all Pillboxes to Guard Towers with extended sight and weapon range (+50%). Exclusive with the Camo Pillbox upgrade.
 
 	Valued:
@@ -6536,7 +6469,6 @@ aot-upgrade-camo-pillbox:
 		Prerequisites: ~aot-age1, aot-slab, ~!aot-guard-tower-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Upgrades all Pillboxes to Camo Pillboxes, cloaked from the enemy until detected or engaging. Exclusive with the Guard Tower upgrade.
 
 	Valued:
@@ -6714,7 +6646,6 @@ aot-upgrade-firestorm-defense:
 		Prerequisites: ~aot-age2, aot-slab
 		Queue: Upgrade.GDI
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Enables the Firestorm Generator in the Science lab and reinforces all GDI walls with Firestorm-powergrids
 
 	Valued:
@@ -6968,7 +6899,6 @@ aot-upgrade-laser-fence:
 		Prerequisites: ~aot-age2, aot-shrine
 		Queue: Upgrade.Nod
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Description: Replaces fences and gates with laser barriers and unlocks the Laser Defense turret. Prerequisite for the Obelisk of Light and for the separate Light Tank, Buggy and Harpy laser upgrades in the 3rd Tiberium Age.
 
 	Valued:
@@ -6996,7 +6926,6 @@ aot-upgrade-ltnk-laser:
 		Prerequisites: ~aot-age3, aot-laser-fence-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Icon: ltnk-laser-icon
 		Description: Upgrades the Light Tank with a Scorpio laser turret. Requires Laser Technologies.
 	Valued:
@@ -7015,7 +6944,6 @@ aot-upgrade-buggy-laser:
 		Prerequisites: ~aot-age3, aot-laser-fence-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Icon: aot-bggy-laser-icon
 		Description: Upgrades the Attack Buggy with a laser cannon. Requires Laser Technologies.
 	Valued:
@@ -7035,7 +6963,6 @@ aot-upgrade-harpy-laser:
 		Prerequisites: ~aot-age3, aot-laser-fence-upgrade, aot-harpy-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
-		MoveIntoWorld: false
 		Icon: aot-harpy-laser-icon
 		Description: Arms the Harpy with laser cannons. Requires Laser Technologies.
 	Valued:

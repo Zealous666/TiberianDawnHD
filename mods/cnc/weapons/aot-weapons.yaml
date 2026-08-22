@@ -328,7 +328,7 @@ aot-HarpyLaser:
 	Range: 6c0
 	Report: obelray1.aud
 	Burst: 3
-	BurstDelay: 8
+	BurstDelays: 8
 	Projectile: LaserZap
 		Width: 40
 		HitAnim: laserfire
@@ -377,7 +377,6 @@ aot-AjetNapalm:
 	Projectile: GravityBomb
 		Image: BOMBLET
 		Shadow: true
-		Delay: 8
 	Warhead@1Dam: SpreadDamage
 		Spread: 341
 		Damage: 2250
@@ -960,7 +959,7 @@ aot-MsamHoverAA:
 aot-HoverAAGun:
 	Inherits: APCGun
 	Burst: 2
-	BurstDelay: 4
+	BurstDelays: 4
 	ReloadDelay: 13
 	Warhead@1Dam: SpreadDamage
 		Spread: 128
@@ -984,7 +983,7 @@ aot-HoverAAGun:
 aot-HoverAAGun.AA:
 	Inherits: APCGun.AA
 	Burst: 2
-	BurstDelay: 4
+	BurstDelays: 4
 	ReloadDelay: 13
 	Warhead@1Dam: SpreadDamage
 		ValidTargets: Air

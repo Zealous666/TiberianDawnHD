@@ -62,7 +62,6 @@ aot-dog-nod:
 	IgnoresDisguise:
 	DetectCloaked:
 	WithDeathAnimation:
-		DeathSequences: die1, die2, die3, die4, die5
 		UseDeathTypeSuffix: false
 # === Ende aotmod ===
 
@@ -125,7 +124,6 @@ aot-spy-nod:
 	Voiced:
 		VoiceSet: ChameleonSpyVoice
 	WithDeathAnimation:
-		DeathSequences: die1, die2
 		UseDeathTypeSuffix: false
 		DeathSequencePalette: aot-ts-player
 		DeathPaletteIsPlayerPalette: true
@@ -187,7 +185,6 @@ aot-spy-gdi:
 	Voiced:
 		VoiceSet: SpyVoice
 	WithDeathAnimation:
-		DeathSequences: die1, die2, die3, die4, die5
 		UseDeathTypeSuffix: false
 # === Ende aotmod ===
 
@@ -384,7 +381,6 @@ aot-e6-nod:
 		StandSequences: stand
 		IdleSequences: idle1, idle2
 	WithDeathAnimation:
-		DeathSequences: die1, die2
 		UseDeathTypeSuffix: false
 		DeathSequencePalette: aot-saboteur-player
 		DeathPaletteIsPlayerPalette: true
@@ -469,7 +465,6 @@ aot-cark-nod:
 	Voiced:
 		VoiceSet: CarjackerVoice
 	WithDeathAnimation:
-		DeathSequences: die1, die2
 		UseDeathTypeSuffix: false
 		DeathSequencePalette: aot-ts-player
 		DeathPaletteIsPlayerPalette: true
@@ -717,6 +712,7 @@ JEEP:
 
 	WithFacingSpriteBody@humvee:
 		Sequence: idle
+		Name: body-humvee
 		RequiresCondition: aot-jeep-humvee && !aot-jeep-wolverine
 
 	WithFacingSpriteBody@wolverine:
@@ -1565,6 +1561,13 @@ aot-minelayer:
 	# Kein Transport (RA MNLY hat keinen Cargo)
 	-Cargo:
 	-WithCargoPipsDecoration:
+	# Ohne Cargo grantet nichts mehr die notmobile-Condition (kam sonst aus Cargo.LoadingCondition),
+	# aber das geerbte Mobile.PauseOnCondition: notmobile konsumiert sie weiter. Ein leerer
+	# PauseOnCondition-Override greift nicht (MiniYaml merged leere Werte nicht). notmobile daher
+	# als externe Condition deklarieren: erfuellt den Lint (Condition ist grantbar) und bleibt zur
+	# Laufzeit ungenutzt (nichts grantet sie), sodass Mobile faktisch nie pausiert.
+	ExternalCondition@notmobile:
+		Condition: notmobile
 	# MNLY-Sprite (Team-Color automatisch), ersetzt APC-Body-Swap
 	-WithFacingSpriteBody@base:
 	-WithFacingSpriteBody@amphibious:
@@ -1803,6 +1806,7 @@ LTNK:
 
 	WithFacingSpriteBody@ttnk:
 		Sequence: aot-tick-idle
+		Name: body-ttnk
 		RequiresCondition: aot-ltnk-upgraded || aot-ltnk-upgraded2
 	WithFacingSpriteBody@ttnk-remap:
 		Sequence: aot-tick-remap
@@ -3122,11 +3126,11 @@ aot-ttnk-devil-base:
 		RequiresCondition: !submerged && !digging
 	WithFacingSpriteBody@dig:
 		Sequence: aot-subtank-tilt
-		Name: body
+		Name: body-dig
 		RequiresCondition: digging
 	WithFacingSpriteBody@digremap:
 		Sequence: aot-subtank-tilt-remap
-		Name: body-remap
+		Name: body-remap-dig
 		Palette: aot-vxl-player
 		IsPlayerPalette: True
 		RequiresCondition: digging
@@ -3262,11 +3266,11 @@ aot-subapc:
 		RequiresCondition: !submerged && !digging
 	WithFacingSpriteBody@dig:
 		Sequence: tilt
-		Name: body
+		Name: body-dig
 		RequiresCondition: digging
 	WithFacingSpriteBody@digremap:
 		Sequence: tilt-remap
-		Name: body-remap
+		Name: body-remap-dig
 		Palette: aot-vxl-player
 		IsPlayerPalette: True
 		RequiresCondition: digging
@@ -3281,7 +3285,6 @@ aot-subapc:
 		MaxWeight: 5
 		UnloadVoice: Unload
 		EjectOnDeath: true
-		PauseOnCondition: submerged
 	Targetable:
 		RequiresCondition: !submerged
 	Targetable@UNDERGROUND:
@@ -4278,9 +4281,11 @@ aot-gunboat:
 		RequiresCondition: !aot-gunboat-frigate-upgrade
 	WithFacingSpriteBody@frigate:
 		Sequence: idle-frigate
+		Name: body-frigate
 		RequiresCondition: aot-gunboat-frigate-upgrade && !aot-gunboat-upgrade
 	WithFacingSpriteBody@dd:
 		Sequence: idle-dd
+		Name: body-dd
 		RequiresCondition: aot-gunboat-upgrade
 	WithSpriteTurret@pt:
 		Turret: pt
@@ -5404,10 +5409,12 @@ aot-civ-pick:
 			red: pip-red
 	RenderSprites:
 		Image: aot-civ-pick
+	-WithFacingSpriteBody:
 	WithFacingSpriteBody@BODY:
 		Sequence: idle
 	WithFacingSpriteBody@REMAP:
 		Sequence: idle-remap
+		Name: body-remap
 		Palette: player
 		IsPlayerPalette: True
 	WithShadow:
@@ -5445,10 +5452,12 @@ aot-civ-wini:
 			red: pip-red
 	RenderSprites:
 		Image: aot-civ-wini
+	-WithFacingSpriteBody:
 	WithFacingSpriteBody@BODY:
 		Sequence: idle
 	WithFacingSpriteBody@REMAP:
 		Sequence: idle-remap
+		Name: body-remap
 		Palette: player
 		IsPlayerPalette: True
 	WithShadow:
@@ -5486,10 +5495,12 @@ aot-civ-bus:
 			red: pip-red
 	RenderSprites:
 		Image: aot-civ-bus
+	-WithFacingSpriteBody:
 	WithFacingSpriteBody@BODY:
 		Sequence: idle
 	WithFacingSpriteBody@REMAP:
 		Sequence: idle-remap
+		Name: body-remap
 		Palette: player
 		IsPlayerPalette: True
 	WithShadow:
@@ -5519,10 +5530,12 @@ aot-civ-trucka:
 	Inherits: ^Vehicle
 	RenderSprites:
 		Image: aot-civ-trucka
+	-WithFacingSpriteBody:
 	WithFacingSpriteBody@BODY:
 		Sequence: idle
 	WithFacingSpriteBody@REMAP:
 		Sequence: idle-remap
+		Name: body-remap
 		Palette: player
 		IsPlayerPalette: True
 	WithShadow:
@@ -5548,10 +5561,12 @@ aot-civ-truckb:
 	Inherits: ^Vehicle
 	RenderSprites:
 		Image: aot-civ-truckb
+	-WithFacingSpriteBody:
 	WithFacingSpriteBody@BODY:
 		Sequence: idle
 	WithFacingSpriteBody@REMAP:
 		Sequence: idle-remap
+		Name: body-remap
 		Palette: player
 		IsPlayerPalette: True
 	WithShadow:
@@ -5585,10 +5600,12 @@ aot-civ-car:
 			red: pip-red
 	RenderSprites:
 		Image: aot-civ-car
+	-WithFacingSpriteBody:
 	WithFacingSpriteBody@BODY:
 		Sequence: idle
 	WithFacingSpriteBody@REMAP:
 		Sequence: idle-remap
+		Name: body-remap
 		Palette: player
 		IsPlayerPalette: True
 	WithShadow:

@@ -800,7 +800,6 @@ HQ:
 	WithMakeAnimation@aot:
 		BodyNames: body, body-eye
 		Condition: build-incomplete
-		RequiresCondition: !aot-age2-active
 	WithMakeAnimation@ts:
 		BodyNames: body-ts
 		Condition: build-incomplete
@@ -2040,7 +2039,6 @@ BIKE:
 	CaptureManager:
 	Capturable@CARJACK:
 		Types: vehicle
-		ValidRelationships: Enemy, Neutral
 	AotSpawnCarjackerOnCaptureDeath:
 		Actor: aot-cark-nod
 		CaptureTypes: vehicle

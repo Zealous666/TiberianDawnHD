@@ -26,6 +26,7 @@ DogVoice:
 		Select: dogw3px
 		Move: dogy1
 		Attack: dogg5p
+		Action: dogy1
 		Die: dogw5, dogw7
 		Burned: dogw6
 		Zapped: dogw6
@@ -170,6 +171,7 @@ MedicVoice:
 		Die: dedman1, dedman2, dedman3, dedman4, dedman5, dedman7, dedman8
 		Burned: dedman10
 		Zapped: dedman6
+		Poisoned: dedman5, dedman7
 
 # === Age of Tiberium (aotmod) - GDI Field Mechanic Voice (RA Allied Mechanic) ===
 MechanicVoice:
@@ -180,6 +182,7 @@ MechanicVoice:
 		Die: dedman1, dedman2, dedman3, dedman4, dedman5, dedman7, dedman8
 		Burned: dedman10
 		Zapped: dedman6
+		Poisoned: dedman5, dedman7
 
 # === Age of Tiberium (aotmod) - NOD Carjacker Voice (TS Hijacker series 24) ===
 CarjackerVoice:
