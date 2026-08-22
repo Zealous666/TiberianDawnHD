@@ -1133,7 +1133,18 @@ namespace OpenRA.Mods.Common.Traits
 			// is genuinely holding upgrades back: a hold that the cash override is already waving through
 			// costs no budget, so the "rich right now" case can never exhaust the backups meant for the
 			// "actually stuck" case.
-			if (!upgradeGateReleased && UpgradeHoldRequested()
+			//
+			// The EXPANSION hold is deliberately excluded from BOTH retirement counters (user decision
+			// 2026-08-22): a legitimately-slow expansion -- ferrying across water, or a broke bot saving
+			// the convoy's 6000 for a while -- must never burn the safety valve and let Age-1 upgrades
+			// through before the expansion is even up ("gegner baut upgrades in age 1 obwohl er noch
+			// nichtmal eine expansion hat"). This is safe because the expansion cannot hold the gate
+			// forever anyway: HoldsPriority is bounded by ExpansionPriorityTimeout, and the mission itself
+			// times out (ExpansionFormingTimeout / MoveTimeout / DeployTimeout -> Finish) -- so once the
+			// expansion stops holding, any OTHER lasting hold resumes advancing the counters and the valve
+			// still fires. The gate STILL holds upgrades during the expansion (RhythmPriorityActive reads
+			// the full UpgradeHoldRequested); only its march toward retirement is paused.
+			if (!upgradeGateReleased && UpgradeHoldRequestedExceptExpansion()
 				&& (playerResources == null || playerResources.GetCashAndResources() < Info.PriorityGateCashOverride))
 			{
 				upgradeGateTicks += Info.Interval;
@@ -1597,6 +1608,14 @@ namespace OpenRA.Mods.Common.Traits
 		bool UpgradeHoldRequested() =>
 			CorePriorityPending() || GatekeeperPriorityPending()
 			|| DefencePriorityPending() || ExpansionPriorityPending()
+			|| AgeSavingPending() || CurrentAgeIncomplete() || AgeProgrammeIncomplete();
+
+		// Same, minus the expansion. Used ONLY to advance the gate-retirement counters: a slow expansion
+		// still HOLDS upgrades (via UpgradeHoldRequested above) but must not march the safety valve toward
+		// giving up -- see the counter block in BotTick.
+		bool UpgradeHoldRequestedExceptExpansion() =>
+			CorePriorityPending() || GatekeeperPriorityPending()
+			|| DefencePriorityPending()
 			|| AgeSavingPending() || CurrentAgeIncomplete() || AgeProgrammeIncomplete();
 
 		// Nothing at all until the building programme up to UpgradesAfterAge is finished. Age 0's own
