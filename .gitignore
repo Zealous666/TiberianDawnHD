@@ -296,3 +296,13 @@ mods/cnc/rules/structures.yaml
 !engine/OpenRA.Mods.Cnc/Traits/Render/AotVeinCellBody.cs
 !engine/OpenRA.Mods.Common/Traits/AotFootprintUtils.cs
 !engine/OpenRA.Mods.Common/Traits/AotWanderAround.cs
+
+# aotmod: Sprite-Atlas ueber Welten hinweg wiederverwenden (Ladezeit-Patch) — sonst bei
+# Engine-Neubezug verloren. Der Atlas (~25 s Aufbau) wird nur noch einmal je Tileset gebaut
+# und bei gleicher Kachel (Menue<->Skirmish) wiederverwendet statt jedes Mal neu.
+!engine/OpenRA.Game/
+!engine/OpenRA.Game/ModData.cs
+!engine/OpenRA.Game/Map/
+!engine/OpenRA.Game/Map/Map.cs
+!engine/OpenRA.Game/Graphics/
+!engine/OpenRA.Game/Graphics/SequenceSet.cs
