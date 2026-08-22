@@ -194,6 +194,11 @@ namespace OpenRA
 		SequenceSet cachedSequences;
 		string cachedSequencesKey;
 
+		/// <summary>aotmod: the tileset whose sprite atlas is currently kept warm by the cache
+		/// (null before the first world). The shell-map chooser uses this to pick a menu map of
+		/// the same tileset so returning to the menu reuses the atlas instead of rebuilding it.</summary>
+		public string CachedSequencesTileset => cachedSequencesKey;
+
 		/// <summary>
 		/// aotmod: return a SequenceSet (the sprite atlas) for a world, reusing the previous one
 		/// when the tileset matches so returning to the shell map / starting another same-tileset

@@ -306,3 +306,6 @@ mods/cnc/rules/structures.yaml
 !engine/OpenRA.Game/Map/Map.cs
 !engine/OpenRA.Game/Graphics/
 !engine/OpenRA.Game/Graphics/SequenceSet.cs
+# aotmod: ChooseShellmap bevorzugt eine Shellmap mit dem gerade gecachten Tileset, damit der
+# Menue-Ruecksprung den Atlas wiederverwendet statt neu zu bauen (eine Shellmap je Tileset).
+!engine/OpenRA.Game/Game.cs
