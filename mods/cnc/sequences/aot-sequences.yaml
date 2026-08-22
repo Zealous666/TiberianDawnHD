@@ -4016,6 +4016,14 @@ aot-medi-gdi:
 		Start: 229
 		Length: 18
 		Tick: 80
+	# Crushed-Death (von ^Soldier via CrushedSequence: die-crushed verlangt). Das RA-Medic-SHP hat
+	# keinen eigenen Zerquetsch-Frame -> letzter Todesframe flach auf den Boden gelegt (ZOffset wie
+	# bei den Infanterie-Geschwistern). Ohne diese Sequenz stuerzt das Spiel ab, sobald ein Medic
+	# ueberrollt wird (WithDeathAnimation.OnCrush spielt CrushedSequence bedingungslos).
+	die-crushed:
+		Start: 246
+		Length: 1
+		ZOffset: -511
 	icon:
 		Filename: gdi_medic.png
 		Length: 1
@@ -4065,6 +4073,12 @@ aot-mech-gdi:
 		Start: 229
 		Length: 18
 		Tick: 80
+	# Crushed-Death (siehe aot-medi-gdi): RA-Mechanic-SHP hat keinen Zerquetsch-Frame, letzter
+	# Todesframe flach gelegt. Ohne die Sequenz Absturz beim Ueberrollen des Mechanics.
+	die-crushed:
+		Start: 246
+		Length: 1
+		ZOffset: -511
 	icon:
 		Filename: gdi_mechanic.png
 		Length: 1

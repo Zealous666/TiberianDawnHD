@@ -93,6 +93,12 @@ LITE:
 	# geerbt) würde beim Zerstören crashen ("Image `lite-gdi`/`lite-nod` does not have a
 	# sequence named `dead`").
 	-WithDeathAnimation:
+	# LITE ist nur Basis-Template; die konkreten Fabriken aot-lite-gdi/-nod ueberschreiben das
+	# Image. Ohne eigenes Image faellt der nie platzierte Basis-Aktor `lite` auf den nicht
+	# existierenden Image-Namen `lite` zurueck (check-yaml: "Image `lite` does not have any
+	# sequences defined"). Ein gueltiges Default-Image genuegt; Inheritors setzen ihr eigenes.
+	RenderSprites:
+		Image: lite-gdi
 	Tooltip:
 		Name: actor-lite.name
 	Valued:

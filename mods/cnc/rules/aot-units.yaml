@@ -1548,7 +1548,6 @@ aot-minelayer:
 	-AutoTargetPriority@DEFAULT:
 	-AutoTargetPriority@ATTACKANYTHING:
 	-AutoTargetPriority@Air:
-	-AttackMove:
 	-Armament@PRIMARY:
 	-Armament@SECONDARY:
 	-Armament@garrisoned:

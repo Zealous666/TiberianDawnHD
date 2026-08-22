@@ -755,7 +755,7 @@ HQ:
 	Buildable:
 		ShowWhenLocked: False
 		Queue: Building.GDI
-		Prerequisites: vehicleproduction, barracks, ~techlevel.medium, ~aot-hq-never
+		Prerequisites: vehicleproduction, barracks, ~techlevel.medium, ~disabled
 	-AirstrikePower:
 	-SupportPowerChargeBar:
 	ProvidesPrerequisite@gdihq:
