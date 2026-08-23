@@ -310,3 +310,28 @@ aot-rapt:
 		ValidOwnerNames: Neutral, Creeps
 	MapEditorData:
 		Categories: Critter
+
+# === Age of Tiberium (aotmod) — AI Expansion Marker (2026-08-22) ===
+# Optionaler, im Spiel unsichtbarer Editor-Marker. Der Map-Maker platziert ihn dort, wo die
+# NOD-KI bevorzugt ihre Base-Expansion gruenden soll. Muster 1:1 wie aot-critter-spawner /
+# aot-light-system. Die KI liest ihn ueber World.ActorsWithTrait<AotExpansionMarker>() in
+# FindExpansionSite (siehe ai-base-expansion-layout.md). Checkbox "Prior Spawn Marker" hebt ihn
+# ueber einen leeren Spawn-Punkt. Das cyanfarbene Rechteck zeigt die Compound-Groesse (8x9 Zellen).
+aot-expansion-marker:
+	Inherits@1: ^ExistsInWorld
+	Tooltip:
+		Name: actor-aot-expansion-marker.name
+	Selectable:
+		Bounds: 512, 512
+	MapEditorData:
+		Categories: System
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral
+	Immobile:
+		OccupiesSpace: false
+	RenderSpritesEditorOnly:
+	WithSpriteBody:
+	BodyOrientation:
+		QuantizedFacings: 1
+	AotExpansionMarker:
+		DefaultPriorSpawn: false

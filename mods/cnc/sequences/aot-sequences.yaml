@@ -5216,7 +5216,7 @@ aot-ice01:
 		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\TEMPERATE\ICE01.TEM\ICE01.TEM-0000-{0:D4}.DDS
 			Count: 1
 		RemasteredTilesetFilenamesPattern:
-			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\ICE01.SNO\ICE01.SNO-0000-{0:D4}.DDS
+			AOT_ARCTIC: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\ICE01.SNO\ICE01.SNO-0000-{0:D4}.DDS
 				Count: 1
 		RemasteredPremultiplied: false
 	idle:
@@ -5231,7 +5231,7 @@ aot-ice02:
 		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\TEMPERATE\ICE02.TEM\ICE02.TEM-0000-{0:D4}.DDS
 			Count: 1
 		RemasteredTilesetFilenamesPattern:
-			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\ICE02.SNO\ICE02.SNO-0000-{0:D4}.DDS
+			AOT_ARCTIC: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\ICE02.SNO\ICE02.SNO-0000-{0:D4}.DDS
 				Count: 1
 		RemasteredPremultiplied: false
 	idle:
@@ -5246,7 +5246,7 @@ aot-ice03:
 		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\TEMPERATE\ICE03.TEM\ICE03.TEM-0000-{0:D4}.DDS
 			Count: 1
 		RemasteredTilesetFilenamesPattern:
-			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\ICE03.SNO\ICE03.SNO-0000-{0:D4}.DDS
+			AOT_ARCTIC: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\ICE03.SNO\ICE03.SNO-0000-{0:D4}.DDS
 				Count: 1
 		RemasteredPremultiplied: false
 	idle:
@@ -5261,7 +5261,7 @@ aot-ice04:
 		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\TEMPERATE\ICE04.TEM\ICE04.TEM-0000-{0:D4}.DDS
 			Count: 1
 		RemasteredTilesetFilenamesPattern:
-			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\ICE04.SNO\ICE04.SNO-0000-{0:D4}.DDS
+			AOT_ARCTIC: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\ICE04.SNO\ICE04.SNO-0000-{0:D4}.DDS
 				Count: 1
 		RemasteredPremultiplied: false
 	idle:
@@ -5276,7 +5276,7 @@ aot-ice05:
 		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\TEMPERATE\ICE05.TEM\ICE05.TEM-0000-{0:D4}.DDS
 			Count: 1
 		RemasteredTilesetFilenamesPattern:
-			AOT_SNOW: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\ICE05.SNO\ICE05.SNO-0000-{0:D4}.DDS
+			AOT_ARCTIC: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\SNOW\ICE05.SNO\ICE05.SNO-0000-{0:D4}.DDS
 				Count: 1
 		RemasteredPremultiplied: false
 	idle:
@@ -5299,6 +5299,13 @@ aot-ice-cell:
 aot-critter-spawner:
 	idle:
 		Filename: aot-ant-spawner-marker.png
+		Length: 1
+
+# aotmod (2026-08-22) — AI Expansion Marker: reuses the light-system marker sprite; the cyan
+# rectangle (AotExpansionMarker.RenderAnnotations) is what identifies it in the editor.
+aot-expansion-marker:
+	idle:
+		Filename: aot-light-system-marker.png
 		Length: 1
 
 # === Age of Tiberium (aotmod) — Light System Marker (Tag/Nacht-Zyklus) ===

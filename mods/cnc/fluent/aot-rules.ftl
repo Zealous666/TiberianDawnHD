@@ -1,8 +1,7 @@
 # === Age of Tiberium (aotmod) - Actor-Texte ===
 
 tileset-aot-temperat = AoT - Temperate (RA)
-tileset-aot-snow = AoT - Snow (RA)
-tileset-aot-winter = AoT - Winter (TD)
+tileset-aot-arctic = AoT - Arctic (TD/RA)
 tileset-aot-desert = AoT - Desert (TD)
 
 actor-lite =
@@ -274,6 +273,9 @@ actor-aot-scoutant =
 
 actor-aot-critter-spawner =
     .name = Critter Spawner
+
+actor-aot-expansion-marker =
+    .name = AI Expansion Marker
 
 actor-aot-ant-nest =
     .name = Ant Nest
