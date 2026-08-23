@@ -1108,6 +1108,18 @@ namespace OpenRA.Mods.Common.Traits
 			targetActor = null;
 			targetCell = null;
 
+			// EXPANSION UNDER CONTEST (user spec 2026-08-22): while the bot is still forcing its first
+			// expansion and an enemy has taken the ground it wants, this wave goes there to CLEAR it
+			// instead of hitting the enemy's main base -- the expansion is existential for scaling, so
+			// reclaiming its spot comes first. Once it is built (or the force gives up) this returns null
+			// and targeting is normal again.
+			var contested = Ops.ContestedExpansionSite();
+			if (contested != null)
+			{
+				targetCell = contested;
+				return;
+			}
+
 			// Once the wave has ferried across water it stands on the far shore, outside the AI's
 			// own base-side ground-reachability set -- stop requiring reachability from there on.
 			var requireReachable = !ashore;
@@ -3118,6 +3130,11 @@ namespace OpenRA.Mods.Common.Traits
 			&& priorityTicks < Ops.Info.ExpansionPriorityTimeout;
 
 		public readonly CPos Site;
+
+		// The yard deployed -- read after the mission ends to tell a success from a failure (the force /
+		// fallback counter in AotOperationsBotModule).
+		public bool Succeeded => yard != null;
+
 		Phase phase = Phase.Forming;
 		int formingTicks;
 		int phaseTicks;

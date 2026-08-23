@@ -955,6 +955,19 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Age tier at which the expansion unlocks. Also requires a refinery to be standing.")]
 		public readonly int ExpansionAgeTier = 1;
 
+		[Desc("Until the bot has BUILT its first expansion, founding one is existential for scaling and",
+			"outranks everything (user spec 2026-08-22): while forcing, an active expansion holds",
+			"priority no matter how long it takes -- money, base build, upgrades and attack waves all",
+			"stand down for it. After this many FAILED attempts the bot gives up forcing and plays",
+			"normally again, so a genuinely un-expandable map (or a lost cause) never freezes it forever.")]
+		public readonly int ExpansionForceMaxAttempts = 3;
+
+		[Desc("Cell radius around an expansion site within which an enemy building or unit counts as",
+			"having TAKEN the ground. While forcing (see ExpansionForceMaxAttempts), regular waves are",
+			"redirected to a taken site to clear it instead of hitting the enemy main base (user spec",
+			"2026-08-22).")]
+		public readonly int ExpansionContestRadius = 8;
+
 		[Desc("Ticks between expansion attempts (only while none is standing or under way).")]
 		public readonly int ExpansionInterval = 6000;
 
@@ -1716,6 +1729,25 @@ namespace OpenRA.Mods.Common.Traits
 							if (waveFailureStreak > 0)
 								Log($"escalation: {m.Name} succeeded -> streak reset (was {waveFailureStreak})");
 							waveFailureStreak = 0;
+						}
+
+						// Expansion force/fallback bookkeeping (user spec 2026-08-22): a finished expansion
+						// that deployed a yard is the success we were forcing towards -- latch it, the force
+						// ends. One that never deployed is a failure; after ExpansionForceMaxAttempts of
+						// those the force gives up and the bot plays normally again.
+						if (m is AotExpansionMission em)
+						{
+							if (em.Succeeded)
+							{
+								expansionBuilt = true;
+								Log($"[expansion] built -> force ends (was {expansionFailures} failure(s))");
+							}
+							else
+							{
+								expansionFailures++;
+								Log($"[expansion] attempt failed ({expansionFailures}/{Info.ExpansionForceMaxAttempts}) " +
+									$"-- {(expansionFailures >= Info.ExpansionForceMaxAttempts ? "force GIVES UP, playing normally" : "still forcing")}");
+							}
 						}
 
 						CancelRequests(m);
@@ -2532,7 +2564,12 @@ namespace OpenRA.Mods.Common.Traits
 			// waves stand down and every credit goes to the upgrade -- the same call a human makes,
 			// "put the buildings up, build one wave's worth, then stop and save the rest". Base
 			// defence is untouched and still answers attacks; this only stops NEW offensives.
-			if (Info.EnableWaves && !ExpansionHoldsPriority() && !EconomyEmergency() && !AgeSprintActive()
+			// The expansion hold normally silences new waves so the whole income goes into the convoy --
+			// UNLESS the expansion's own ground has been taken by an enemy, in which case a wave IS
+			// wanted, precisely to clear that spot (ContestedExpansionSite; user spec 2026-08-22). So the
+			// hold is bypassed exactly when there is contested ground to reclaim.
+			if (Info.EnableWaves && (!ExpansionHoldsPriority() || ContestedExpansionSite() != null)
+				&& !EconomyEmergency() && !AgeSprintActive()
 				&& !Missions.OfType<AotRegularWaveMission>().Any() && !Missions.OfType<AotAirRaidMission>().Any()
 				&& !Missions.OfType<AotDevilRaidMission>().Any()
 				&& WaveUnlocked())
@@ -2771,10 +2808,29 @@ namespace OpenRA.Mods.Common.Traits
 
 			var home = BaseCentre();
 
+			// PRIORITY 0: a map-maker's Expansion Marker flagged "Prior Spawn Marker" outranks
+			// everything, even an empty spawn (user decision 2026-08-22): the AI always tries here first.
+			var priorMarker = FindMarkerSite(home, priorOnly: true);
+			if (priorMarker != null)
+			{
+				Log($"expansion site: PRIOR expansion marker at {priorMarker.Value}");
+				return priorMarker;
+			}
+
 			// PRIORITY 1: an unclaimed start position (User 2026-08-03). On a map with more spawn
 			// points than players these are the best real estate on the board -- flat, pre-cleared,
 			// and placed next to tiberium by the mapper. "Unused" means no construction yard of ANY
 			// player anywhere near it, which also rules out a spawn somebody already expanded onto.
+			//
+			// A non-prior Expansion Marker ranks with an unused spawn (user: marker = empty spawn), and
+			// is checked first so a mapper's hint wins the tie.
+			var marker = FindMarkerSite(home, priorOnly: false);
+			if (marker != null)
+			{
+				Log($"expansion site: expansion marker at {marker.Value}");
+				return marker;
+			}
+
 			var freeSpawn = FindFreeSpawnSite(home);
 			if (freeSpawn != null)
 			{
@@ -2909,6 +2965,63 @@ namespace OpenRA.Mods.Common.Traits
 
 			LayoutFits(site, out var siteWhy);
 			Log($"expansion site near {site} rejected: no fitting cell around it (at the centre: {siteWhy})");
+			return null;
+		}
+
+		// A map-maker's Expansion Marker (aot-expansion-marker), if one qualifies. The marker cell IS
+		// the intended yard cell, validated exactly like a spawn -- safe from enemy bases, clear of
+		// hazards, layout fits -- except the min-distance-from-home rule is skipped: the mapper placed
+		// it deliberately and their intent wins. Prior/non-prior is chosen by the caller.
+		CPos? FindMarkerSite(CPos home, bool priorOnly)
+		{
+			var markers = World.ActorsWithTrait<AotExpansionMarker>()
+				.Where(m => !m.Actor.IsDead && m.Actor.IsInWorld && m.Trait.PriorSpawn == priorOnly)
+				.Select(m => m.Actor.Location)
+				.OrderBy(c => (c - home).LengthSquared)
+				.ToList();
+			if (markers.Count == 0)
+				return null;
+
+			var enemyYards = World.Actors
+				.Where(a => !a.IsDead && a.IsInWorld && a.Owner != Player
+					&& Player.RelationshipWith(a.Owner) == PlayerRelationship.Enemy
+					&& Info.ConstructionYardTypes.Contains(a.Info.Name))
+				.Select(a => a.Location)
+				.ToList();
+
+			var enemyBuildings = World.Actors
+				.Where(a => !a.IsDead && a.IsInWorld && a.Owner != Player
+					&& Player.RelationshipWith(a.Owner) == PlayerRelationship.Enemy
+					&& !a.Owner.NonCombatant && a.Info.HasTraitInfo<BuildingInfo>())
+				.Select(a => a.Location)
+				.ToList();
+
+			var hazards = Info.ExpansionHazardTypes.Count == 0
+				? []
+				: World.Actors
+					.Where(a => !a.IsDead && a.IsInWorld && a.OccupiesSpace != null
+						&& Info.ExpansionHazardTypes.Contains(a.Info.Name))
+					.Select(a => a.Location)
+					.ToList();
+
+			var allySites = AllyExpansionSites();
+
+			foreach (var mk in markers)
+			{
+				bool SafeNear(CPos c) =>
+					World.Map.Contains(c)
+					&& !enemyYards.Any(y => (y - c).Length < Info.ExpansionEnemyClearance)
+					&& enemyBuildings.Count(b => (b - c).Length < Info.ExpansionEnemyClearance) < Info.ExpansionEnemyClusterSize
+					&& !hazards.Any(h => (h - c).Length < Info.ExpansionHazardClearance)
+					&& !allySites.Any(a => (a - c).Length < Info.ExpansionAllyClearance);
+
+				var fit = FitNear(mk, Info.ExpansionFitRadius, SafeNear, out var why);
+				if (fit != null)
+					return fit;
+
+				Log($"expansion marker {mk} skipped: {why}");
+			}
+
 			return null;
 		}
 
@@ -3290,8 +3403,49 @@ namespace OpenRA.Mods.Common.Traits
 		public bool AgeSprintActive() =>
 			Player.PlayerActor.TraitsImplementing<AotAgePowerBotModule>().Any(m => !m.IsTraitDisabled && m.HardSaving);
 
+		// How many expansion attempts have failed without ever deploying a yard, and whether one has
+		// finally succeeded. Drive the "force the expansion" state (user spec 2026-08-22).
+		int expansionFailures;
+		bool expansionBuilt;
+
+		// While TRUE the expansion is existential and its priority never expires: an active expansion
+		// mission holds priority regardless of its own ExpansionPriorityTimeout, so the whole economy
+		// keeps pouring into it. Ends the moment an expansion is built, or after ExpansionForceMaxAttempts
+		// failures (the fallback -- so an un-expandable map never freezes the bot), or if the economy
+		// itself is collapsing (EconomyEmergency owns that hole first).
+		public bool ExpansionForceActive() =>
+			Info.EnableExpansion
+			&& !expansionBuilt
+			&& expansionFailures < Info.ExpansionForceMaxAttempts
+			&& !EconomyEmergency();
+
 		public bool ExpansionHoldsPriority() =>
-			Missions.OfType<AotExpansionMission>().Any(m => !m.Done && m.HoldsPriority);
+			Missions.OfType<AotExpansionMission>().Any(m => !m.Done && (m.HoldsPriority || ExpansionForceActive()));
+
+		// The site of an active expansion that an enemy has moved onto -- while forcing, a regular wave
+		// goes there to clear it rather than attack the enemy's base (user spec 2026-08-22: "regular
+		// waves stattdessen richtung expansion ort schicken, falls dieser besetzt war um ihn
+		// einzunehmen"). Null unless forcing, so once the expansion is built or the force gives up the
+		// waves attack normally again. Read by AotRegularWaveMission.ChooseTarget.
+		public CPos? ContestedExpansionSite()
+		{
+			if (!ExpansionForceActive())
+				return null;
+
+			foreach (var m in Missions.OfType<AotExpansionMission>().Where(m => !m.Done))
+			{
+				var centre = World.Map.CenterOfCell(m.Site);
+				var taken = World.FindActorsInCircle(centre, WDist.FromCells(Info.ExpansionContestRadius))
+					.Any(a => !a.IsDead && a.IsInWorld && a.Owner != Player
+						&& Player.RelationshipWith(a.Owner) == PlayerRelationship.Enemy
+						&& !a.Owner.NonCombatant
+						&& (a.Info.HasTraitInfo<BuildingInfo>() || a.Info.HasTraitInfo<MobileInfo>()));
+				if (taken)
+					return m.Site;
+			}
+
+			return null;
+		}
 
 		void TryStartEngineerRaid()
 		{
