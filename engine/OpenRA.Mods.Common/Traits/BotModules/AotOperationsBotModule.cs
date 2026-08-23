@@ -3416,6 +3416,11 @@ namespace OpenRA.Mods.Common.Traits
 		public bool ExpansionForceActive() =>
 			Info.EnableExpansion
 			&& !expansionBuilt
+			// A successful expansion stays alive in its Holding phase and is never removed, so the
+			// expansionBuilt latch (which fires on removal) would never set for it -- the force would then
+			// hold priority forever and the bot would never resume normal play after building its
+			// expansion. Treat a live mission that has deployed its yard as "built" too.
+			&& !Missions.OfType<AotExpansionMission>().Any(m => !m.Done && m.Succeeded)
 			&& expansionFailures < Info.ExpansionForceMaxAttempts
 			&& !EconomyEmergency();
 

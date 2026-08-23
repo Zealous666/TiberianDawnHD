@@ -317,8 +317,14 @@ namespace OpenRA.Mods.Common.Traits
 			if (actorCells.Contains(c) && !clearableTreeCells.Contains(c))
 				return false;
 
+			// Clear.Snow is the AOT_ARCTIC/AOT_SNOW ground -- the buildable equivalent of Clear on the
+			// snow tilesets. Omitting it here made the base planner treat every cell on a snow map as
+			// unbuildable, so the pocket came back empty and NOTHING but the yard fence was ever placed
+			// (User 2026-08-23, exposed when a tileset merge renamed AOT_WINTER -> AOT_ARCTIC and its
+			// ground reads as Clear.Snow). See memory/clear-snow-terrain-type.md: any terrain-type list
+			// must carry Clear.Snow next to Clear or it breaks silently on snow.
 			var t = world.Map.GetTerrainInfo(c).Type;
-			if (t != "Clear" && t != "Road")
+			if (t != "Clear" && t != "Road" && t != "Clear.Snow")
 				return false;
 
 			return resourceLayer == null || resourceLayer.GetResource(c).Type == null;
