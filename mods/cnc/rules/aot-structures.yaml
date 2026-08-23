@@ -1428,8 +1428,9 @@ aot-upgrade-heavy-artillery:
 	Interactable:
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - Ion Cannon Upgrade (Orbital Command, Age 2) ===
-# Erfordert Age 2 + Orbital Command. Schaltet aot-ion-cannon-upgrade frei →
+# === Age of Tiberium (aotmod) - Ion Cannon Upgrade (Orbital Command, Age 3) ===
+# Erfordert Age 3 + Orbital Command (User 2026-08-22: erst ab Age 3 sichtbar, wie die Atom Bomb).
+# Schaltet aot-ion-cannon-upgrade frei →
 # ORBC bekommt die Ion Cannon Strike Support Power (siehe ORBC.IonCannonPower).
 aot-upgrade-ion-cannon:
 	Tooltip:
@@ -1437,7 +1438,7 @@ aot-upgrade-ion-cannon:
 
 	Buildable:
 		BuildPaletteOrder: 240
-		Prerequisites: ~aot-age2, atec, aot-orbc
+		Prerequisites: ~aot-age3, atec, aot-orbc
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		Icon: ioncannon
@@ -6174,6 +6175,11 @@ aot-upgrade-stealth-harvester:
 aot-pillbox:
 	Inherits: ^Support
 	Inherits@AUTOTARGET: ^AutoTargetAll
+	# Beim Verkauf KEINE Infanterie ausspucken (User-Wunsch). Das geerbte ^BaseBuilding-
+	# SpawnActorsOnSell muss in BEIDEN Instanzen entfernt werden (@nod separat, sonst spuckt
+	# es bei NOD-Besitz doch Infanterie aus -- siehe Dateikopf).
+	-SpawnActorsOnSell:
+	-SpawnActorsOnSell@nod:
 	# Custom RA-Sprite ohne "dead"-Rubble-Frame -> WithDeathAnimation (von
 	# ^Support/^BaseBuilding geerbt) wuerde beim Zerstoeren crashen (siehe
 	# building-dead-sequence-crash.md - reiner Laufzeit-Crash, check-yaml
@@ -6240,7 +6246,7 @@ aot-pillbox:
 	# Risiko einer zweiten-Instanz-Kollision.
 	RangeMultiplier:
 		RequiresCondition: aot-guard-tower-active
-		Modifier: 150
+		Modifier: 130
 	# Kein eigenes Buildable mehr (2026-07-05) - Proxy-Pattern (aot-pillbox-base/
 	# aot-pillbox-guard unten) steuert Bau-Icon-Wechsel nach dem Upgrade, 1:1
 	# das GUN/FTUR-Muster.

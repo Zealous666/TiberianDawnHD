@@ -575,7 +575,11 @@ aot-TiberiumGasBurst2:
 aot-GunboatGun:
 	Inherits: ^BallisticWeapon
 	ReloadDelay: 60
-	Range: 5c512
+	# Reichweite auf U-Boot-Niveau (Sub-Torpedo 9c0): vorher 5c512 -> die Gunboat konnte sich gegen
+	# aus 9 Zellen feuernde U-Boote nicht wehren. Submarine als ValidTarget, damit sie U-Boote auch
+	# geortet-getaucht anvisieren kann.
+	Range: 9c0
+	ValidTargets: Ground, Water, Submarine
 	Report: aot-cannon2.wav
 	Warhead@1Dam: SpreadDamage
 		Spread: 256
@@ -585,14 +589,30 @@ aot-GunboatGun:
 			Wood: 72
 			Light: 72
 			Concrete: 48
+	# EXKLUSIVER Anti-U-Boot-Zusatzschaden: trifft nur Aktoren mit Ziel-Typ "Submarine" (den nur
+	# U-Boote/Missile-U-Boote dauerhaft tragen, siehe Targetable@antisub) -- also KEINE anderen
+	# Schiffe. Macht die Gunboat zum Sub-Jaeger, ohne Transporter/Warships mitzubuffen.
+	Warhead@2Sub: SpreadDamage
+		Spread: 256
+		Damage: 3000
+		ValidTargets: Submarine
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
 # Frigate: 3 Raketen, längere Pause als Destroyer (2 Raketen). Kein Luftangriff.
 aot-FrigateMissiles:
 	Inherits: BoatMissile
 	ReloadDelay: 50
-	Range: 6c512
+	# Reichweite auf U-Boot-Niveau (9c0) wie die Gunboat-Kanone.
+	Range: 9c0
 	Burst: 3
 	BurstDelays: 12
-	ValidTargets: Ground, Water
+	ValidTargets: Ground, Water, Submarine
+	# Exklusiver Anti-U-Boot-Zusatzschaden (nur Ziel-Typ Submarine), analog Gunboat-Kanone.
+	# Kleiner als bei der Gunboat (1500 statt 3000), weil die Frigate Burst 3 feuert -> 3x pro Salve.
+	Warhead@2Sub: SpreadDamage
+		Spread: 256
+		Damage: 1500
+		ValidTargets: Submarine
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
 	Warhead@1Dam: SpreadDamage
 		Damage: 4000
 aot-DestroyerRockets:
@@ -676,8 +696,10 @@ aot-DepthCharge:
 	-Report:
 	-Warhead@2Smu:
 	ReloadDelay: 60
-	Range: 5c0
-	ValidTargets: Underwater
+	# Immer gegen U-Boote (Ziel-Typ Submarine, den U-Boote dauerhaft tragen) statt nur getaucht
+	# (Underwater); Reichweite auf U-Boot-Niveau (9c0).
+	Range: 9c0
+	ValidTargets: Submarine
 	Projectile: Bullet
 		Image: bomb
 		Speed: 125

@@ -4228,8 +4228,10 @@ aot-gunboat:
 	Inherits@AUTOTARGET: ^AutoTargetAll
 	RenderSprites:
 		Image: aot-gunboat
+	# Preise pro Ausbaustufe (User 2026-08-22): Gunboat 1000, Frigate 1500, Destroyer 2000
+	# (Frigate/Destroyer ueberschreiben Valued in ihren Proxy-Aktoren unten).
 	Valued:
-		Cost: 500
+		Cost: 1000
 	UpdatesPlayerStatistics:
 		AddToArmyValue: true
 	Health:
@@ -4245,6 +4247,26 @@ aot-gunboat:
 	RevealsShroud:
 		Range: 7c0
 		Type: CenterPosition
+	# Kleiner U-Boot-Ortungsradius (Cloak = Sub-Standardtyp): getarnte U-Boote werden erst im
+	# Nahbereich (3 Zellen) sichtbar/ortbar, damit die Gunboat sie verfolgen und beim Auftauchen
+	# (UncloakOn: Attack) bekaempfen kann. Gilt fuer Gunboat, Frigate UND Destroyer (Basis-Aktor).
+	# U-Boot-Ortung, pro Ausbaustufe groesser: Gunboat 4, Missile Frigate 5, Missile Destroyer 6
+	# Zellen. Getarnte U-Boote werden im jeweiligen Radius sichtbar/ortbar.
+	DetectCloaked@base:
+		Range: 4c0
+		DetectionTypes: Cloak
+		RequiresCondition: !aot-gunboat-frigate-upgrade
+	DetectCloaked@frigate:
+		Range: 5c0
+		DetectionTypes: Cloak
+		RequiresCondition: aot-gunboat-frigate-upgrade && !aot-gunboat-upgrade
+	DetectCloaked@dd:
+		Range: 6c0
+		DetectionTypes: Cloak
+		RequiresCondition: aot-gunboat-upgrade
+	# Sichtbarer Ortungs-Kreis bei Selektion (liest die aktive DetectCloaked-Range), wie bei
+	# Sensor-Array/Gebaeuden mit Detektion.
+	RenderDetectionCircle:
 	Turreted@pt:
 		Turret: pt
 		TurnSpeed: 28
@@ -4342,10 +4364,12 @@ aot-gunboat-base:
 		BuildPaletteOrder: 10
 		Prerequisites: lite, aot-shipyard, ~!aot-gunboat-frigate-upgrade
 		Icon: icon
-		Description: Naval combat vessel. Upgradeable to a Frigate.
+		Description: Cheap anti-submarine boat. Detects nearby subs and out-ranges their torpedoes. Weak against surface warships. Upgradeable to a Missile Frigate.
 
 aot-gunboat-frigate:
 	Inherits: aot-gunboat
+	Valued:
+		Cost: 1500
 	Tooltip@base:
 		Name: Missile Frigate
 		RequiresCondition: !aot-gunboat-frigate-upgrade
@@ -4355,10 +4379,12 @@ aot-gunboat-frigate:
 		BuildPaletteOrder: 10
 		Prerequisites: lite, aot-shipyard, ~aot-gunboat-frigate-upgrade, ~!aot-gunboat-upgrade
 		Icon: icon-frigate
-		Description: Upgraded naval vessel. Attacks land and sea targets. Upgradeable to a Destroyer.
+		Description: Dedicated sub-hunter with extended submarine detection and long-range missiles. Also strikes land and surface targets. Upgradeable to a Destroyer.
 
 aot-gunboat-destroyer:
 	Inherits: aot-gunboat
+	Valued:
+		Cost: 2000
 	Tooltip@base:
 		Name: Missile Destroyer
 		RequiresCondition: !aot-gunboat-upgrade
@@ -4475,6 +4501,10 @@ aot-sub:
 	Targetable@sub:
 		TargetTypes: Underwater, Submarine
 		RequiresCondition: aot-sub-cloaked
+	# Dauerhafter "Submarine"-Ziel-Typ (getaucht UND aufgetaucht): daran haengt der EXKLUSIVE
+	# Anti-U-Boot-Zusatzschaden von Gunboat/Frigate/Depth-Charge (Warhead ValidTargets: Submarine).
+	Targetable@antisub:
+		TargetTypes: Submarine
 	WithFacingSpriteBody:
 		Sequence: idle
 	# Torpedo: feuert von Bug, keine Turret (kein sichtbarer Turm auf RA-Sub).
@@ -4638,6 +4668,9 @@ aot-msub:
 	Targetable@sub:
 		TargetTypes: Underwater, Submarine
 		RequiresCondition: aot-msub-cloaked
+	# Dauerhafter "Submarine"-Ziel-Typ (siehe aot-sub) -> exklusiver Anti-U-Boot-Zusatzschaden.
+	Targetable@antisub:
+		TargetTypes: Submarine
 	WithFacingSpriteBody:
 		Sequence: idle
 	Armament@missile:
@@ -4950,7 +4983,7 @@ aot-cruiser:
 	RenderSprites:
 		Image: aot-cruiser
 	Valued:
-		Cost: 3600
+		Cost: 4000
 	UpdatesPlayerStatistics:
 		AddToArmyValue: true
 	Buildable:

@@ -16,11 +16,17 @@ using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Traits
 {
-	[Desc("Docks and lands at a rearm pad if the actor becomes idle within a short window after creation. Ignored once the window has passed, so it can't misfire on a much later idle event (e.g. after a combat rearm).")]
+	[Desc("Docks and lands at a rearm pad if the actor becomes idle within a short window after creation",
+		"AND is still near its spawn position. If a rally point (or a player order) has already flown it",
+		"away before it first goes idle, it stays there instead of returning to the pad.")]
 	public class AotLandOnCreationInfo : TraitInfo, Requires<AircraftInfo>, Requires<RearmableInfo>
 	{
 		[Desc("Ticks after creation during which a becoming-idle event is treated as \"just spawned\" and forces a landing.")]
 		public readonly int WindowTicks = 250;
+
+		[Desc("Only force the landing if the aircraft is still within this distance of its spawn position.",
+			"A rally point flies it further than this, so a padded rally point is respected.")]
+		public readonly WDist MaxSpawnDistance = WDist.FromCells(2);
 
 		public override object Create(ActorInitializer init) { return new AotLandOnCreation(this); }
 	}
@@ -30,6 +36,7 @@ namespace OpenRA.Mods.Common.Traits
 		readonly AotLandOnCreationInfo info;
 		bool handled;
 		int createdTick;
+		WPos spawnPos;
 
 		public AotLandOnCreation(AotLandOnCreationInfo info)
 		{
@@ -39,6 +46,7 @@ namespace OpenRA.Mods.Common.Traits
 		void INotifyCreated.Created(Actor self)
 		{
 			createdTick = self.World.WorldTick;
+			spawnPos = self.CenterPosition;
 		}
 
 		void INotifyBecomingIdle.OnBecomingIdle(Actor self)
@@ -49,6 +57,12 @@ namespace OpenRA.Mods.Common.Traits
 			handled = true;
 
 			if (self.World.WorldTick - createdTick > info.WindowTicks)
+				return;
+
+			// aotmod: Nur dann aufs Pad zuruecklanden, wenn der Heli beim ersten Idle noch beim
+			// Spawn (auf/neben dem Pad) haengt -- also das reine Hover-Nach-Start-Problem. Hat ihn
+			// ein Rallypoint (oder ein Spieler-Befehl) vorher weggeflogen, bleibt er dort.
+			if ((self.CenterPosition - spawnPos).HorizontalLengthSquared > (long)info.MaxSpawnDistance.Length * info.MaxSpawnDistance.Length)
 				return;
 
 			var aircraft = self.Trait<Aircraft>();

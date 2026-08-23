@@ -82,6 +82,7 @@ namespace OpenRA.Mods.Common.Traits
 	{
 		public new readonly AttackGarrisonedInfo Info;
 		INotifyAttack[] notifyAttacks;
+		IRangeModifier[] hostRangeModifiers;
 		readonly Lazy<BodyOrientation> coords;
 		readonly List<Armament> armaments;
 		readonly List<AnimationWithOffset> muzzles;
@@ -108,7 +109,25 @@ namespace OpenRA.Mods.Common.Traits
 		protected override void Created(Actor self)
 		{
 			notifyAttacks = self.TraitsImplementing<INotifyAttack>().ToArray();
+
+			// Range-Modifier-Traits des HOSTS (z.B. RangeMultiplier des Guard-Tower-Upgrades). Diese
+			// werden auf die geliehenen Garrison-Waffen uebertragen, damit ein hoeherwertiger Bunker
+			// seinen Insassen tatsaechlich mehr Reichweite gibt (Armament.Created sammelt sonst nur
+			// die Modifier des jeweiligen Passagiers, nie die des Bunkers).
+			hostRangeModifiers = self.TraitsImplementing<IRangeModifier>().ToArray();
+
 			base.Created(self);
+		}
+
+		// Kombinierter Host-Reichweiten-Modifier in Prozent (100 = kein Effekt), unter Beruecksichtigung
+		// von RequiresCondition (deaktivierte Modifier liefern 100).
+		int HostRangeModifier()
+		{
+			if (hostRangeModifiers == null || hostRangeModifiers.Length == 0)
+				return 100;
+
+			var mods = hostRangeModifiers.Select(m => m.GetRangeModifier()).ToArray();
+			return Util.ApplyPercentageModifiers(100, mods);
 		}
 
 		protected override Func<IEnumerable<Armament>> InitializeGetArmaments(Actor self)
@@ -160,6 +179,9 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				if (a.Actor == passenger)
 				{
+					// Host-Reichweiten-Bonus zuruecknehmen, sonst behaelt die ausgestiegene Einheit
+					// die erhoehte Reichweite ihrer eigenen Waffe.
+					a.GarrisonRangeModifier = 100;
 					a.RemoveNotifyAttacks(notifyAttacks);
 					armaments.Remove(a);
 					armamentPort.Remove(a);
@@ -331,6 +353,16 @@ namespace OpenRA.Mods.Common.Traits
 		protected override void Tick(Actor self)
 		{
 			base.Tick(self);
+
+			// Host-Reichweiten-Modifier (z.B. Guard-Tower-RangeMultiplier) laufend auf die geliehenen
+			// Garrison-Waffen spiegeln -- so nutzen AutoTarget-Scan UND Feuern die erhoehte Reichweite,
+			// und Condition-Wechsel (Upgrade aktiv) greifen sofort.
+			if (armaments.Count > 0)
+			{
+				var mod = HostRangeModifier();
+				foreach (var a in armaments)
+					a.GarrisonRangeModifier = mod;
+			}
 
 			// Take a copy so that Tick() can remove animations
 			foreach (var m in muzzles.ToArray())

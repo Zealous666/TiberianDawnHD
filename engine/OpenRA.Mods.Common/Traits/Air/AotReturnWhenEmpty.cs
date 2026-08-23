@@ -29,6 +29,12 @@ namespace OpenRA.Mods.Common.Traits
 		Target resumeTarget;
 		Target lastAttackTarget;
 
+		// aotmod: Position, an der der Heli beim Leerschuss stand -> nach dem Rearm fliegt er DORTHIN
+		// zurueck (nicht ans Pad). Lebt das alte Ziel noch, greift er es von dort erneut an; ist es
+		// tot, bleibt er an der Position (Idle-Guard-Verhalten via AutoTarget).
+		bool hasReturnPos;
+		WPos returnPos;
+
 		public AotReturnWhenEmpty(ActorInitializer init, AotReturnWhenEmptyInfo info)
 		{
 			this.info = info;
@@ -54,8 +60,12 @@ namespace OpenRA.Mods.Common.Traits
 
 			var isEmpty = ammoPools.Length > 0 && ammoPools.All(p => !p.HasAmmo);
 
-			if (!wasEmpty && isEmpty && !hasResumeTarget)
+			if (!wasEmpty && isEmpty && !hasReturnPos)
 			{
+				// Rueckkehr-Position merken (dort geht es nach dem Rearm wieder hin).
+				returnPos = self.CenterPosition;
+				hasReturnPos = true;
+
 				if (lastAttackTarget.Type != TargetType.Invalid)
 				{
 					resumeTarget = lastAttackTarget;
@@ -90,6 +100,7 @@ namespace OpenRA.Mods.Common.Traits
 					hasResumeTarget = false;
 					resumeTarget = Target.Invalid;
 					lastAttackTarget = Target.Invalid;
+					hasReturnPos = false;
 					break;
 			}
 		}
@@ -98,14 +109,19 @@ namespace OpenRA.Mods.Common.Traits
 
 		void INotifyDockClient.Undocked(Actor self, Actor dock)
 		{
+			// Zuerst zurueck an die Position, an der leergeschossen wurde (nicht am Pad haengen bleiben).
+			if (hasReturnPos)
+				self.QueueActivity(new Fly(self, Target.FromPos(returnPos)));
+
+			// Lebt das alte Ziel noch, danach wieder angreifen; ist es tot, laeuft das FlyAttack ins
+			// Leere und der Heli bleibt an der Position (AutoTarget uebernimmt neue Bedrohungen).
 			if (hasResumeTarget)
-			{
-				var target = resumeTarget;
-				hasResumeTarget = false;
-				resumeTarget = Target.Invalid;
-				lastAttackTarget = Target.Invalid;
-				self.QueueActivity(new FlyAttack(self, AttackSource.Default, target, true, Color.Red));
-			}
+				self.QueueActivity(new FlyAttack(self, AttackSource.Default, resumeTarget, true, Color.Red));
+
+			hasResumeTarget = false;
+			resumeTarget = Target.Invalid;
+			lastAttackTarget = Target.Invalid;
+			hasReturnPos = false;
 		}
 	}
 }
