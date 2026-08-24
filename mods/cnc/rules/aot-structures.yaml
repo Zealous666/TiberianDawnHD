@@ -80,6 +80,13 @@
 		ActorTypes: aot-e6-nod, aot-e1-nod, aot-e1-nod, aot-e1-nod
 		GuaranteedActorTypes: aot-e1-nod
 		Factions: nod
+	# aotmod 2026-08-22: Capturable-Types auf "building" statt geerbtem "building-sabotage"
+	# umstellen. Engine-E6 hat ZWEI Captures-Traits: @SABOTAGE (building-sabotage) und @CAPTURES
+	# (building). Mit dem geerbten Vanilla-Typ "building-sabotage" griff IMMER die @SABOTAGE-
+	# Variante -> ein einzelner Engineer sabotierte nur (Uebernahme erst bei <=55% HP). Mit
+	# "building" greift @CAPTURES -> ein Engineer reicht, um das Gebaeude direkt einzunehmen.
+	Capturable:
+		Types: building
 
 # === Age of Tiberium (aotmod) - Vehicle Factory (LITE) ===
 # Günstigere Fahrzeugfabrik. Nur Powerplant nötig (kein Refinery).
@@ -376,6 +383,15 @@ aot-ore-mine:
 	SpawnCompanionActor:
 		Actor: aot-ore-mine-keepout
 		Offset: -3,-3
+	# Rote Bau-Sperrzone im Editor: deckt die 8x8-Keepout-Zone (aot-ore-mine-keepout, Offset -3,-3)
+	# rund um die 2x2-Mine ab -> Zellen -3..+4 relativ zur Minen-Zelle. Gezeichnet von
+	# AotEditorBoundsOverlay (EditorWorld).
+	AotEditorBounds:
+		MinX: -3
+		MinY: -3
+		MaxX: 4
+		MaxY: 4
+		Color: E03030A0
 	MapEditorData:
 		Categories: Neutral
 # === Ende aotmod ===
@@ -1004,7 +1020,7 @@ aot-kennel-nod:
 	# User-Fund 2026-08-01: ^Building allein (im Gegensatz zu ^BaseBuilding) hat kein
 	# Building.TerrainTypes, kein RequiresBuildableArea und kein RequiresBaseProvider -> auf
 	# KEINEM Tileset platzierbar (die Building-Terraintyp-Liste ist implizit leer). ^BaseBuilding
-	# liefert `TerrainTypes: Clear,Road,Clear.Snow` (inkl. AOT_WINTER-Sonderfall, siehe Kommentar
+	# liefert `TerrainTypes: Clear,Road,Clear.Snow` (inkl. AOT_ARCTIC-Sonderfall, siehe Kommentar
 	# dort in engine/mods/cnc/rules/defaults.yaml) + die Bauzonen-Pruefung -- PFLICHT fuer jedes
 	# platzierbare Gebaeude in diesem Mod, nicht nur ^Building.
 	Inherits: ^BaseBuilding
@@ -7656,7 +7672,7 @@ aot-hospital:
 # Bridge-Aktoren für AOT_TEMPERAT: BRIDGE1/2 benutzen Template@165-168 = Cliff-Tiles auf
 # AOT_TEMPERAT. Die richtigen Bridge-Templates liegen hier auf @131-134 / @378-379.
 # BRIDGE3/4 haben keine passenden Templates auf AOT_TEMPERAT → nicht unterstützt.
-# Auf AOT_SNOW / WINTER: BRIDGE1/2 (165-168) funktionieren nativ → keine Extra-Aktoren.
+# Auf AOT_ARCTIC / WINTER: BRIDGE1/2 (165-168) funktionieren nativ → keine Extra-Aktoren.
 # Auf DESERT: BRIDGE3/4 (169-172 = bridge3/4.des) funktionieren nativ → keine Extra-Aktoren.
 # Exakt übernommen aus RA civilian.yaml BRIDGE1/BRIDGE2 — gleiche Template-IDs,
 # gleiche Footprints (5×3 / 5×2), gleiche FreeActor-Offsets wie in Red Alert.
@@ -7696,7 +7712,7 @@ aot-tem-bridge2:
 		Categories: Terrain
 
 # ── Zerstörbare Fluss-Brücken (Steinbogen) ────────────────────────────────────
-# 1:1-Nachbau von RA's BR1/BR2/BR3. Die Tilesets AOT_TEMPERAT und AOT_SNOW teilen
+# 1:1-Nachbau von RA's BR1/BR2/BR3. Die Tilesets AOT_TEMPERAT und AOT_ARCTIC teilen
 # sich dieselben Template-IDs (235-246), daher decken diese drei Aktoren BEIDE
 # Tilesets ab. Der LegacyBridgeLayer wandelt beim Kartenladen jedes gemalte
 # br1a/br2a/br3a-Terrain-Tile automatisch in einen dieser Aktoren um → dadurch
@@ -7817,7 +7833,7 @@ aot-bridgehut:
 	HiddenUnderShroud:
 	MapEditorData:
 		Categories: Ice
-		RequireTilesets: AOT_SNOW, AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 	RequiresSpecificOwners:
 		ValidOwnerNames: Neutral
 
@@ -7835,52 +7851,6 @@ aot-ice04:
 
 aot-ice05:
 	Inherits: ^AotIceFloe
-
-# Eiszelle: Sprite wird aus den 4 geteilten Ecken + (x%4,y%4) gewaehlt (256 gebackene Frames).
-# Truecolor-RGBA aus dem ZIP -> KEINE Palette (aot-isosno galt nur fuer die alte .sno-Kachel).
-aot-ice-cell:
-	# OccupiesSpace MUSS false sein: sonst belegt die Eiszelle ihre eigene Zelle und blockiert
-	# damit genau die Einheiten, die aufs Eis sollen (Movecursor da, Einheit kommt nicht hin).
-	# ChangesTerrain braucht nur Immobile als Trait, nicht dessen Platzbelegung.
-	Immobile:
-		OccupiesSpace: false
-	RenderSprites:
-	AotIceCellBody:
-		Period: 4
-	# Macht die Wasserzelle zu begehbarem Eis (Speeds siehe Locomotors in overrides.yaml).
-	ChangesTerrain:
-		TerrainType: Ice
-	# PFLICHT bei OccupiesSpace: false! Der Default ist Type: Footprint, und der prueft
-	# Shroud.AnyExplored(OccupiesSpace.OccupiedCells()) -- ohne belegte Zellen ist die Liste
-	# leer, AnyExplored liefert false, und HiddenUnderShroud (IRenderModifier) rendert GAR
-	# NICHTS. Das Eis wuchs dann unsichtbar weiter. CenterPosition nutzt Immobile.CenterPosition,
-	# die auch ohne Platzbelegung gesetzt ist.
-	HiddenUnderShroud:
-		Type: CenterPosition
-	# === Eis ist sehr leicht zerstoerbar: HP wie E1 (5000) ===
-	# Stirbt die Zelle, meldet AotIceCellBody.RemovedFromWorld sie aus dem AotIceLayer ab
-	# -> Version++ -> alle Nachbarn waehlen ihr Sprite neu und kurven um das Loch.
-	Health:
-		HP: 5000
-	Armor:
-		Type: None
-	# BodyOrientation ist PFLICHT fuer HitShape (Requires<BodyOrientationInfo>). Fehlt es,
-	# crasht die Zelle beim Erzeugen ("Unresolved: HitShapeInfo") -- check-yaml faengt das NICHT.
-	# QuantizedFacings MUSS gesetzt sein, sobald ein Sprite-Body da ist, sonst:
-	# "has a sprite body but no facing quantization". 1 = dreht sich nie (statische Kachel).
-	BodyOrientation:
-		QuantizedFacings: 1
-	HitShape:
-	Targetable:
-		TargetTypes: Ground
-	# === Einbrechen unter Bodenfahrzeugen ===
-	# Crack ertoent sofort beim Auffahren (Warnung), Splash erst beim Durchbrechen nach Delay.
-	# Es zaehlen NUR Ticks im Stand (StationaryOnly): Durchfahren ist immer sicher, auch fuer
-	# langsame Fahrzeuge -- aber kurzes Anhalten genuegt zum Einbrechen.
-	AotIceBreaks:
-		Delay: 15
-	RequiresSpecificOwners:
-		ValidOwnerNames: Neutral
 
 # === Ende aotmod ===
 

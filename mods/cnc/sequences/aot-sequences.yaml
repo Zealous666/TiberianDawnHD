@@ -3299,6 +3299,45 @@ aot-plasma-green:
 		RemasteredFilename:
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - TTNK Wrack-Sprites (drei Varianten) ===
+# Der TTNK aendert nach Flame-/Toxin-Upgrade sein Aussehen deutlich. Damit das Wrack (Husk) zum
+# Zustand VOR dem Abschuss passt, gibt es drei .destroyed-Sequenzen und drei Husk-Aktoren (siehe
+# aot-units.yaml: TTNK.Husk, TTNK.Husk.Flame, TTNK.Husk.Toxin). Facing-Konvention: 1:1 wie
+# ltnk.destroyed / RA 3tnk.destroyed.
+3tnk.destroyed:
+	idle:
+		Filename: ltnk.shp
+		RemasteredFilename: aot-ttnk-3tnk.zip
+		Facings: 32
+		UseClassicFacings: True
+		ZOffset: -512
+	turret:
+		Filename: ltnk.shp
+		RemasteredFilename: aot-ttnk-3tnk.zip
+		Start: 32
+		Facings: 32
+		UseClassicFacings: True
+		ZOffset: -512
+
+# Flame-Variante: FTNK-Sprites (turretloses Single-Hull-Chassis wie am lebenden Flame-Tank ->
+# keine turret-Sequenz; FTNK.ZIP hat nur Frames 0-31).
+3tnk-flame.destroyed:
+	idle:
+		Filename: ltnk.shp
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\FTNK.ZIP
+		Facings: 32
+		UseClassicFacings: True
+		ZOffset: -512
+
+# Toxin-Variante: recolored FTNK (aot-ttnk-toxin.zip), ebenfalls turretlos.
+3tnk-toxin.destroyed:
+	idle:
+		Filename: ltnk.shp
+		RemasteredFilename: aot-ttnk-toxin.zip
+		Facings: 32
+		UseClassicFacings: True
+		ZOffset: -512
+
 # === Age of Tiberium (aotmod) - TTNK Heavy Tank ===
 # Basis: ltnk.shp (liefert Facing-Count 32), HD: aot-ttnk-3tnk.zip (3TNK-Sprites).
 ttnk:
@@ -5305,7 +5344,7 @@ aot-critter-spawner:
 # rectangle (AotExpansionMarker.RenderAnnotations) is what identifies it in the editor.
 aot-expansion-marker:
 	idle:
-		Filename: aot-light-system-marker.png
+		Filename: aot-expansion-marker.png
 		Length: 1
 
 # === Age of Tiberium (aotmod) — Light System Marker (Tag/Nacht-Zyklus) ===

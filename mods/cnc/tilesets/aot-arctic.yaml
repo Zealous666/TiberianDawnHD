@@ -1,6 +1,6 @@
 General:
-	Name: tileset-aot-winter
-	Id: AOT_WINTER
+	Name: tileset-aot-arctic
+	Id: AOT_ARCTIC
 	EditorTemplateOrder: Terrain, Debris, Road, Cliffs, Beach, River, Bridge, Terrain (Snow), Debris (Snow), Road (Snow), Cliffs (Snow), Water Cliffs (Snow), Beach (Snow), River (Snow), Bridge (Snow)
 	HeightDebugColors: 880000
 	# Winter+Snow+Temperate-Beach kombiniert hat weit mehr einzigartige DDS-Sprites als jedes
@@ -85,10 +85,13 @@ Terrain:
 		TargetTypes: Water
 		Color: 5C74A4
 		RestrictPlayerColor: true
-	# Eis (aot-ice-cell via ChangesTerrain). Wie in TS befahrbar; Farbe = TS-Volleis (AFCBED).
+	# Eis (via AotIceLayer / ChangesTerrain). Wie in TS befahrbar; Farbe = TS-Volleis (AFCBED).
+	# TargetTypes: Ground + Water -- unter Eis IST Wasser, deshalb koennen Wasser-Waffen (Torpedos)
+	# auf Eis-Zellen ForceAttack machen. So funktioniert das "durchs-Eis-schiessen" fuer U-Boote
+	# und Schiffe, deren Waffen `ValidTargets: Water` haben (siehe aot-SubTorpedo etc.).
 	TerrainType@Ice:
 		Type: Ice
-		TargetTypes: Ground
+		TargetTypes: Ground, Water
 		AcceptsSmudgeType: Crater, Scorch
 		Color: AFCBED
 

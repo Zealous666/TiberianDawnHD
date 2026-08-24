@@ -738,11 +738,11 @@
 		RequiresBaseProvider: true
 		BuildSounds: constru2.aud, hvydoor1.aud
 		UndeploySounds: cashturn.aud
-		# aotmod (2026-07-29): Clear.Snow MUSS mit rein. AOT_WINTER fuehrt fuer die aus AOT_SNOW
+		# aotmod (2026-07-29): Clear.Snow MUSS mit rein. AOT_ARCTIC fuehrt fuer die aus AOT_ARCTIC
 		# uebernommenen Clear-Zellen einen EIGENEN Terraintyp "Clear.Snow" (aot-winter.yaml,
 		# nur wegen der hellen Minimap-Farbe -- Passierbarkeit ist identisch mit Clear).
 		# Locomotors (overrides.yaml TerrainSpeeds) und Tiberium-Wachstum (AllowedTerrainTypes)
-		# wurden damals nachgezogen, die GEBAEUDE-Platzierung nicht -> auf AOT_WINTER-Karten war
+		# wurden damals nachgezogen, die GEBAEUDE-Platzierung nicht -> auf AOT_ARCTIC-Karten war
 		# auf dem gesamten Schneeboden NICHTS baubar, nur auf den Strassen-Streifen.
 		# Nachgewiesen auf aot_hammerfest: die komplette GDI-Basis im Norden (x25-39, y27-36)
 		# ist Clear.Snow, nur y=26/y=37 und x=37 sind Road -> exakt dort ging Bauen.
@@ -933,7 +933,7 @@
 		# Karte mit breiterem Strandsaum unmoeglich -- fuer KI wie Spieler. Nachgewiesen auf
 		# aot_hammerfest: Flutung erreichte 721 statt 1070 Landzellen, kein Pen-Platz je in Reichweite.
 		# aotmod (2026-07-29): Clear.Snow ergaenzt, siehe ^BaseBuilding oben -- sonst enden Mauern
-		# auf AOT_WINTER-Karten an jeder Schneekante.
+		# auf AOT_ARCTIC-Karten an jeder Schneekante.
 		TerrainTypes: Clear,Road,Beach,Clear.Snow
 	FootprintPlaceBuildingPreview:
 		LineBuildFootprintAlpha: 0.65

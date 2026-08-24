@@ -1,5 +1,5 @@
-# === Age of Tiberium (aotmod) - Snow-Varianten fuer AOT_WINTER-Kombitileset ===
-# Eigenstaendige Aktoren (nicht Tileset-Override!): T0x/TC0x/V0x bleiben auf AOT_WINTER
+# === Age of Tiberium (aotmod) - Snow-Varianten fuer AOT_ARCTIC-Kombitileset ===
+# Eigenstaendige Aktoren (nicht Tileset-Override!): T0x/TC0x/V0x bleiben auf AOT_ARCTIC
 # unveraendert (TD-Winter-Optik). Die -Snow-Varianten sind separat platzierbar,
 # eigene Editor-Kategorie "... (Snow)", nur mit RA-Snow-Remaster-Kunst.
 
@@ -9,13 +9,13 @@ T01-Snow:
 		Actor: T01-Snow.Husk
 	MapEditorData:
 		Categories: Tree (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T01-Snow.Husk:
 	Inherits: T01.Husk
 	MapEditorData:
 		Categories: Husk (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T02-Snow:
 	Inherits: T02
@@ -23,13 +23,13 @@ T02-Snow:
 		Actor: T02-Snow.Husk
 	MapEditorData:
 		Categories: Tree (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T02-Snow.Husk:
 	Inherits: T02.Husk
 	MapEditorData:
 		Categories: Husk (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T03-Snow:
 	Inherits: T03
@@ -37,13 +37,13 @@ T03-Snow:
 		Actor: T03-Snow.Husk
 	MapEditorData:
 		Categories: Tree (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T03-Snow.Husk:
 	Inherits: T03.Husk
 	MapEditorData:
 		Categories: Husk (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T05-Snow:
 	Inherits: T05
@@ -51,13 +51,13 @@ T05-Snow:
 		Actor: T05-Snow.Husk
 	MapEditorData:
 		Categories: Tree (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T05-Snow.Husk:
 	Inherits: T05.Husk
 	MapEditorData:
 		Categories: Husk (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T06-Snow:
 	Inherits: T06
@@ -65,13 +65,13 @@ T06-Snow:
 		Actor: T06-Snow.Husk
 	MapEditorData:
 		Categories: Tree (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T06-Snow.Husk:
 	Inherits: T06.Husk
 	MapEditorData:
 		Categories: Husk (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T07-Snow:
 	Inherits: T07
@@ -79,13 +79,13 @@ T07-Snow:
 		Actor: T07-Snow.Husk
 	MapEditorData:
 		Categories: Tree (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T07-Snow.Husk:
 	Inherits: T07.Husk
 	MapEditorData:
 		Categories: Husk (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T08-Snow:
 	Inherits: T08
@@ -93,13 +93,13 @@ T08-Snow:
 		Actor: T08-Snow.Husk
 	MapEditorData:
 		Categories: Tree (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T08-Snow.Husk:
 	Inherits: T08.Husk
 	MapEditorData:
 		Categories: Husk (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T10-Snow:
 	Inherits: T10
@@ -107,13 +107,13 @@ T10-Snow:
 		Actor: T10-Snow.Husk
 	MapEditorData:
 		Categories: Tree (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T10-Snow.Husk:
 	Inherits: T10.Husk
 	MapEditorData:
 		Categories: Husk (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T11-Snow:
 	Inherits: T11
@@ -121,13 +121,13 @@ T11-Snow:
 		Actor: T11-Snow.Husk
 	MapEditorData:
 		Categories: Tree (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T11-Snow.Husk:
 	Inherits: T11.Husk
 	MapEditorData:
 		Categories: Husk (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T12-Snow:
 	Inherits: T12
@@ -135,13 +135,13 @@ T12-Snow:
 		Actor: T12-Snow.Husk
 	MapEditorData:
 		Categories: Tree (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T12-Snow.Husk:
 	Inherits: T12.Husk
 	MapEditorData:
 		Categories: Husk (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T13-Snow:
 	Inherits: T13
@@ -149,13 +149,13 @@ T13-Snow:
 		Actor: T13-Snow.Husk
 	MapEditorData:
 		Categories: Tree (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T13-Snow.Husk:
 	Inherits: T13.Husk
 	MapEditorData:
 		Categories: Husk (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T14-Snow:
 	Inherits: T14
@@ -163,13 +163,13 @@ T14-Snow:
 		Actor: T14-Snow.Husk
 	MapEditorData:
 		Categories: Tree (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T14-Snow.Husk:
 	Inherits: T14.Husk
 	MapEditorData:
 		Categories: Husk (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T15-Snow:
 	Inherits: T15
@@ -177,13 +177,13 @@ T15-Snow:
 		Actor: T15-Snow.Husk
 	MapEditorData:
 		Categories: Tree (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T15-Snow.Husk:
 	Inherits: T15.Husk
 	MapEditorData:
 		Categories: Husk (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T16-Snow:
 	Inherits: T16
@@ -191,13 +191,13 @@ T16-Snow:
 		Actor: T16-Snow.Husk
 	MapEditorData:
 		Categories: Tree (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T16-Snow.Husk:
 	Inherits: T16.Husk
 	MapEditorData:
 		Categories: Husk (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T17-Snow:
 	Inherits: T17
@@ -205,61 +205,61 @@ T17-Snow:
 		Actor: T17-Snow.Husk
 	MapEditorData:
 		Categories: Tree (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 T17-Snow.Husk:
 	Inherits: T17.Husk
 	MapEditorData:
 		Categories: Husk (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 TC01-Snow:
 	Inherits: TC01
 	MapEditorData:
 		Categories: Tree (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 TC02-Snow:
 	Inherits: TC02
 	MapEditorData:
 		Categories: Tree (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 TC03-Snow:
 	Inherits: TC03
 	MapEditorData:
 		Categories: Tree (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 TC04-Snow:
 	Inherits: TC04
 	MapEditorData:
 		Categories: Tree (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 TC05-Snow:
 	Inherits: TC05
 	MapEditorData:
 		Categories: Tree (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 V01-Snow:
 	Inherits: V01
 	MapEditorData:
 		Categories: Civilian building (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 V02-Snow:
 	Inherits: V02
 	MapEditorData:
 		Categories: Civilian building (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 V03-Snow:
 	Inherits: V03
 	MapEditorData:
 		Categories: Civilian building (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 V04-Snow:
 	Inherits: V04
@@ -267,13 +267,13 @@ V04-Snow:
 		Actor: V04-Snow.Husk
 	MapEditorData:
 		Categories: Civilian building (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 V04-Snow.Husk:
 	Inherits: V04.Husk
 	MapEditorData:
 		Categories: Husk (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 V05-Snow:
 	Inherits: V05
@@ -281,19 +281,19 @@ V05-Snow:
 		Actor: V05-Snow.Husk
 	MapEditorData:
 		Categories: Civilian building (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 V05-Snow.Husk:
 	Inherits: V05.Husk
 	MapEditorData:
 		Categories: Husk (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 V06-Snow:
 	Inherits: V06
 	MapEditorData:
 		Categories: Civilian building (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 V07-Snow:
 	Inherits: V07
@@ -301,77 +301,77 @@ V07-Snow:
 		Actor: V07-Snow.Husk
 	MapEditorData:
 		Categories: Civilian building (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 V07-Snow.Husk:
 	Inherits: V07.Husk
 	MapEditorData:
 		Categories: Husk (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 V08-Snow:
 	Inherits: V08
 	MapEditorData:
 		Categories: Civilian building (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 V09-Snow:
 	Inherits: V09
 	MapEditorData:
 		Categories: Civilian building (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 V10-Snow:
 	Inherits: V10
 	MapEditorData:
 		Categories: Civilian building (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 V11-Snow:
 	Inherits: V11
 	MapEditorData:
 		Categories: Civilian building (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 V12-Snow:
 	Inherits: V12
 	MapEditorData:
 		Categories: Civilian building (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 V13-Snow:
 	Inherits: V13
 	MapEditorData:
 		Categories: Civilian building (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 V14-Snow:
 	Inherits: V14
 	MapEditorData:
 		Categories: Civilian building (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 V15-Snow:
 	Inherits: V15
 	MapEditorData:
 		Categories: Civilian building (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 V16-Snow:
 	Inherits: V16
 	MapEditorData:
 		Categories: Civilian building (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 V17-Snow:
 	Inherits: V17
 	MapEditorData:
 		Categories: Civilian building (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 
 V18-Snow:
 	Inherits: V18
 	MapEditorData:
 		Categories: Civilian building (Snow)
-		RequireTilesets: AOT_WINTER
+		RequireTilesets: AOT_ARCTIC
 

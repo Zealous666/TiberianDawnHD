@@ -554,7 +554,7 @@ namespace OpenRA
 		}
 
 		// aotmod: startup / no-match default menu tileset (deterministic instead of random).
-		const string DefaultShellmapTileset = "AOT_WINTER";
+		const string DefaultShellmapTileset = "AOT_ARCTIC";
 
 		static string ChooseShellmap()
 		{
@@ -568,7 +568,7 @@ namespace OpenRA
 			// aotmod: prefer the shell map whose tileset matches the sprite atlas currently kept warm
 			// by the cache (i.e. the last world's tileset) so returning to the menu reuses that atlas
 			// instead of rebuilding it (~25s). At startup (nothing cached) or when no shell map matches
-			// the warm tileset, fall back to a FIXED default tileset (AOT_WINTER) rather than a random
+			// the warm tileset, fall back to a FIXED default tileset (AOT_ARCTIC) rather than a random
 			// menu, so the startup menu is deterministic. A random pick is the last resort only if even
 			// the default tileset has no shell map.
 			foreach (var preferredTileset in new[] { ModData.CachedSequencesTileset, DefaultShellmapTileset })

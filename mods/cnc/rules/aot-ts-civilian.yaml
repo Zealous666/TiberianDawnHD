@@ -46,8 +46,8 @@
 		Color: FFFFFF
 
 # === Age of Tiberium (aotmod) - TS Civilian Buildings (CA-Serie) ===
-# Normal-Instanz (Temperate-Look): AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
-# Snow-Instanz (separater Aktor, wie T01/T01-Snow): AOT_WINTER, AOT_SNOW
+# Normal-Instanz (Temperate-Look): AOT_TEMPERAT, AOT_DESERT, AOT_ARCTIC
+# Snow-Instanz (separater Aktor, wie T01/T01-Snow): AOT_ARCTIC, AOT_ARCTIC
 
 aot-ts-ct0001:
 	Inherits: ^CivBuilding
@@ -68,7 +68,7 @@ aot-ts-ct0001:
 		Name: Rade's Roadhouse
 	MapEditorData:
 		Categories: Civilian Buildings (TS)
-		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_ARCTIC
 
 aot-ts-ca0001:
 	Inherits: ^CivBuilding
@@ -89,7 +89,7 @@ aot-ts-ca0001:
 		Name: Rade's Roadhouse
 	MapEditorData:
 		Categories: Civilian Buildings (TS) (Snow)
-		RequireTilesets: AOT_WINTER, AOT_SNOW
+		RequireTilesets: AOT_ARCTIC
 
 aot-ts-ct0002:
 	Inherits: ^CivBuilding
@@ -110,7 +110,7 @@ aot-ts-ct0002:
 		Name: Sandberg and Son's
 	MapEditorData:
 		Categories: Civilian Buildings (TS)
-		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_ARCTIC
 
 aot-ts-ca0002:
 	Inherits: ^CivBuilding
@@ -131,7 +131,7 @@ aot-ts-ca0002:
 		Name: Sandberg and Son's
 	MapEditorData:
 		Categories: Civilian Buildings (TS) (Snow)
-		RequireTilesets: AOT_WINTER, AOT_SNOW
+		RequireTilesets: AOT_ARCTIC
 
 aot-ts-ct0003:
 	Inherits: ^CivBuilding
@@ -151,7 +151,7 @@ aot-ts-ct0003:
 		Name: Temp Housing
 	MapEditorData:
 		Categories: Civilian Buildings (TS)
-		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_ARCTIC
 
 aot-ts-ca0003:
 	Inherits: ^CivBuilding
@@ -171,7 +171,7 @@ aot-ts-ca0003:
 		Name: Temp Housing
 	MapEditorData:
 		Categories: Civilian Buildings (TS) (Snow)
-		RequireTilesets: AOT_WINTER, AOT_SNOW
+		RequireTilesets: AOT_ARCTIC
 
 aot-ts-ct0004:
 	Inherits: ^CivBuilding
@@ -191,7 +191,7 @@ aot-ts-ct0004:
 		Name: Waystation
 	MapEditorData:
 		Categories: Civilian Buildings (TS)
-		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_ARCTIC
 
 aot-ts-ca0004:
 	Inherits: ^CivBuilding
@@ -211,7 +211,7 @@ aot-ts-ca0004:
 		Name: Waystation
 	MapEditorData:
 		Categories: Civilian Buildings (TS) (Snow)
-		RequireTilesets: AOT_WINTER, AOT_SNOW
+		RequireTilesets: AOT_ARCTIC
 
 aot-ts-ct0005:
 	Inherits: ^CivBuilding
@@ -231,7 +231,7 @@ aot-ts-ct0005:
 		Name: Ferbie's 4 Sale
 	MapEditorData:
 		Categories: Civilian Buildings (TS)
-		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_ARCTIC
 
 aot-ts-ca0005:
 	Inherits: ^CivBuilding
@@ -251,7 +251,7 @@ aot-ts-ca0005:
 		Name: Ferbie's 4 Sale
 	MapEditorData:
 		Categories: Civilian Buildings (TS) (Snow)
-		RequireTilesets: AOT_WINTER, AOT_SNOW
+		RequireTilesets: AOT_ARCTIC
 
 aot-ts-ct0006:
 	Inherits: ^CivBuilding
@@ -271,7 +271,7 @@ aot-ts-ct0006:
 		Name: Deluxe Accomodations
 	MapEditorData:
 		Categories: Civilian Buildings (TS)
-		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_ARCTIC
 
 aot-ts-ca0006:
 	Inherits: ^CivBuilding
@@ -291,7 +291,7 @@ aot-ts-ca0006:
 		Name: Deluxe Accomodations
 	MapEditorData:
 		Categories: Civilian Buildings (TS) (Snow)
-		RequireTilesets: AOT_WINTER, AOT_SNOW
+		RequireTilesets: AOT_ARCTIC
 
 aot-ts-ct0007:
 	Inherits: ^CivBuilding
@@ -311,7 +311,7 @@ aot-ts-ct0007:
 		Name: Field Generator
 	MapEditorData:
 		Categories: Civilian Buildings (TS)
-		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_ARCTIC
 
 aot-ts-ca0007:
 	Inherits: ^CivBuilding
@@ -331,7 +331,7 @@ aot-ts-ca0007:
 		Name: Field Generator
 	MapEditorData:
 		Categories: Civilian Buildings (TS) (Snow)
-		RequireTilesets: AOT_WINTER, AOT_SNOW
+		RequireTilesets: AOT_ARCTIC
 
 aot-ts-ct0008:
 	Inherits: ^CivBuilding
@@ -352,7 +352,7 @@ aot-ts-ct0008:
 		Name: Subterranean Dwelling
 	MapEditorData:
 		Categories: Civilian Buildings (TS)
-		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_ARCTIC
 
 aot-ts-ca0008:
 	Inherits: ^CivBuilding
@@ -373,7 +373,7 @@ aot-ts-ca0008:
 		Name: Subterranean Dwelling
 	MapEditorData:
 		Categories: Civilian Buildings (TS) (Snow)
-		RequireTilesets: AOT_WINTER, AOT_SNOW
+		RequireTilesets: AOT_ARCTIC
 
 aot-ts-ct0009:
 	Inherits: ^CivBuilding
@@ -394,7 +394,7 @@ aot-ts-ct0009:
 		Name: Subterranean Dwelling
 	MapEditorData:
 		Categories: Civilian Buildings (TS)
-		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_ARCTIC
 
 aot-ts-ca0009:
 	Inherits: ^CivBuilding
@@ -415,7 +415,7 @@ aot-ts-ca0009:
 		Name: Subterranean Dwelling
 	MapEditorData:
 		Categories: Civilian Buildings (TS) (Snow)
-		RequireTilesets: AOT_WINTER, AOT_SNOW
+		RequireTilesets: AOT_ARCTIC
 
 aot-ts-ct0010:
 	Inherits: ^CivBuilding
@@ -435,7 +435,7 @@ aot-ts-ct0010:
 		Name: Leary Traveller Inn
 	MapEditorData:
 		Categories: Civilian Buildings (TS)
-		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_ARCTIC
 
 aot-ts-ca0010:
 	Inherits: ^CivBuilding
@@ -455,7 +455,7 @@ aot-ts-ca0010:
 		Name: Leary Traveller Inn
 	MapEditorData:
 		Categories: Civilian Buildings (TS) (Snow)
-		RequireTilesets: AOT_WINTER, AOT_SNOW
+		RequireTilesets: AOT_ARCTIC
 
 aot-ts-ct0011:
 	Inherits: ^CivBuilding
@@ -475,7 +475,7 @@ aot-ts-ct0011:
 		Name: Water Tank
 	MapEditorData:
 		Categories: Civilian Buildings (TS)
-		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_ARCTIC
 
 aot-ts-ca0011:
 	Inherits: ^CivBuilding
@@ -495,7 +495,7 @@ aot-ts-ca0011:
 		Name: Water Tank
 	MapEditorData:
 		Categories: Civilian Buildings (TS) (Snow)
-		RequireTilesets: AOT_WINTER, AOT_SNOW
+		RequireTilesets: AOT_ARCTIC
 
 aot-ts-ct0012:
 	Inherits: ^CivBuilding
@@ -515,7 +515,7 @@ aot-ts-ct0012:
 		Name: Greenhouse
 	MapEditorData:
 		Categories: Civilian Buildings (TS)
-		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_ARCTIC
 
 aot-ts-ca0012:
 	Inherits: ^CivBuilding
@@ -535,7 +535,7 @@ aot-ts-ca0012:
 		Name: Greenhouse
 	MapEditorData:
 		Categories: Civilian Buildings (TS) (Snow)
-		RequireTilesets: AOT_WINTER, AOT_SNOW
+		RequireTilesets: AOT_ARCTIC
 
 aot-ts-ct0013:
 	Inherits: ^CivBuilding
@@ -555,7 +555,7 @@ aot-ts-ct0013:
 		Name: Water Purifier
 	MapEditorData:
 		Categories: Civilian Buildings (TS)
-		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_ARCTIC
 
 aot-ts-ca0013:
 	Inherits: ^CivBuilding
@@ -575,7 +575,7 @@ aot-ts-ca0013:
 		Name: Water Purifier
 	MapEditorData:
 		Categories: Civilian Buildings (TS) (Snow)
-		RequireTilesets: AOT_WINTER, AOT_SNOW
+		RequireTilesets: AOT_ARCTIC
 
 aot-ts-ct0014:
 	Inherits: ^CivBuilding
@@ -595,7 +595,7 @@ aot-ts-ct0014:
 		Name: Observation Tower
 	MapEditorData:
 		Categories: Civilian Buildings (TS)
-		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_ARCTIC
 
 aot-ts-ca0014:
 	Inherits: ^CivBuilding
@@ -615,7 +615,7 @@ aot-ts-ca0014:
 		Name: Observation Tower
 	MapEditorData:
 		Categories: Civilian Buildings (TS) (Snow)
-		RequireTilesets: AOT_WINTER, AOT_SNOW
+		RequireTilesets: AOT_ARCTIC
 
 aot-ts-ct0015:
 	Inherits: ^CivBuilding
@@ -635,7 +635,7 @@ aot-ts-ct0015:
 		Name: Port-A-Shack
 	MapEditorData:
 		Categories: Civilian Buildings (TS)
-		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_ARCTIC
 
 aot-ts-ca0015:
 	Inherits: ^CivBuilding
@@ -655,7 +655,7 @@ aot-ts-ca0015:
 		Name: Port-A-Shack
 	MapEditorData:
 		Categories: Civilian Buildings (TS) (Snow)
-		RequireTilesets: AOT_WINTER, AOT_SNOW
+		RequireTilesets: AOT_ARCTIC
 
 aot-ts-ct0016:
 	Inherits: ^CivBuilding
@@ -675,7 +675,7 @@ aot-ts-ct0016:
 		Name: Port-A-Shack Deluxe
 	MapEditorData:
 		Categories: Civilian Buildings (TS)
-		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_ARCTIC
 
 aot-ts-ca0016:
 	Inherits: ^CivBuilding
@@ -695,7 +695,7 @@ aot-ts-ca0016:
 		Name: Port-A-Shack Deluxe
 	MapEditorData:
 		Categories: Civilian Buildings (TS) (Snow)
-		RequireTilesets: AOT_WINTER, AOT_SNOW
+		RequireTilesets: AOT_ARCTIC
 
 aot-ts-ct0017:
 	Inherits: ^CivBuilding
@@ -715,7 +715,7 @@ aot-ts-ct0017:
 		Name: Energy Transformer
 	MapEditorData:
 		Categories: Civilian Buildings (TS)
-		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_ARCTIC
 
 aot-ts-ca0017:
 	Inherits: ^CivBuilding
@@ -735,7 +735,7 @@ aot-ts-ca0017:
 		Name: Energy Transformer
 	MapEditorData:
 		Categories: Civilian Buildings (TS) (Snow)
-		RequireTilesets: AOT_WINTER, AOT_SNOW
+		RequireTilesets: AOT_ARCTIC
 
 aot-ts-ct0018:
 	Inherits: ^CivBuilding
@@ -755,7 +755,7 @@ aot-ts-ct0018:
 		Name: Solar Panel
 	MapEditorData:
 		Categories: Civilian Buildings (TS)
-		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_ARCTIC
 
 aot-ts-ca0018:
 	Inherits: ^CivBuilding
@@ -775,7 +775,7 @@ aot-ts-ca0018:
 		Name: Solar Panel
 	MapEditorData:
 		Categories: Civilian Buildings (TS) (Snow)
-		RequireTilesets: AOT_WINTER, AOT_SNOW
+		RequireTilesets: AOT_ARCTIC
 
 aot-ts-ct0019:
 	Inherits: ^CivBuilding
@@ -795,7 +795,7 @@ aot-ts-ct0019:
 		Name: Solar Panel
 	MapEditorData:
 		Categories: Civilian Buildings (TS)
-		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_ARCTIC
 
 aot-ts-ca0019:
 	Inherits: ^CivBuilding
@@ -815,7 +815,7 @@ aot-ts-ca0019:
 		Name: Solar Panel
 	MapEditorData:
 		Categories: Civilian Buildings (TS) (Snow)
-		RequireTilesets: AOT_WINTER, AOT_SNOW
+		RequireTilesets: AOT_ARCTIC
 
 aot-ts-ct0020:
 	Inherits: ^CivBuilding
@@ -835,7 +835,7 @@ aot-ts-ct0020:
 		Name: Solar Panel
 	MapEditorData:
 		Categories: Civilian Buildings (TS)
-		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_ARCTIC
 
 aot-ts-ca0020:
 	Inherits: ^CivBuilding
@@ -855,7 +855,7 @@ aot-ts-ca0020:
 		Name: Solar Panel
 	MapEditorData:
 		Categories: Civilian Buildings (TS) (Snow)
-		RequireTilesets: AOT_WINTER, AOT_SNOW
+		RequireTilesets: AOT_ARCTIC
 
 aot-ts-ct0021:
 	Inherits: ^CivBuilding
@@ -875,7 +875,7 @@ aot-ts-ct0021:
 		Name: Solar Panel
 	MapEditorData:
 		Categories: Civilian Buildings (TS)
-		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_WINTER
+		RequireTilesets: AOT_TEMPERAT, AOT_DESERT, AOT_ARCTIC
 
 aot-ts-ca0021:
 	Inherits: ^CivBuilding
@@ -895,7 +895,7 @@ aot-ts-ca0021:
 		Name: Solar Panel
 	MapEditorData:
 		Categories: Civilian Buildings (TS) (Snow)
-		RequireTilesets: AOT_WINTER, AOT_SNOW
+		RequireTilesets: AOT_ARCTIC
 
 # === Age of Tiberium (aotmod) - TS Civilian City (CITY-Serie) ===
 # Kein Snow-Reskin im Original -> ein Aktor je Gebaeude, alle Tilesets.

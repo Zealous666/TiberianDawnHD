@@ -6,8 +6,7 @@ Title: AOT Winter Shellmap
 
 Author: aotmod
 
-Tileset: AOT_WINTER
-
+Tileset: AOT_ARCTIC
 MapSize: 36,36
 
 Bounds: 1,1,34,34

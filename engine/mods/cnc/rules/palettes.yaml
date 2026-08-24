@@ -49,14 +49,14 @@
 		Tileset: AOT_TEMPERAT
 		Filename: temperat.pal
 		ShadowIndex: 4
-	PaletteFromFile@terrain-aot-winter:
+	PaletteFromFile@terrain-aot-arctic:
 		Name: terrain
-		Tileset: AOT_WINTER
+		Tileset: AOT_ARCTIC
 		Filename: winter.pal
 		ShadowIndex: 4
-	PaletteFromFile@staticterrain-aot-winter:
+	PaletteFromFile@staticterrain-aot-arctic:
 		Name: staticterrain
-		Tileset: AOT_WINTER
+		Tileset: AOT_ARCTIC
 		Filename: winter.pal
 		ShadowIndex: 4
 	PaletteFromFile@terrain-aot-desert:
@@ -68,16 +68,6 @@
 		Name: staticterrain
 		Tileset: AOT_DESERT
 		Filename: desert.pal
-		ShadowIndex: 4
-	PaletteFromFile@terrain-aot-snow:
-		Name: terrain
-		Tileset: AOT_SNOW
-		Filename: snow.pal
-		ShadowIndex: 4
-	PaletteFromFile@staticterrain-aot-snow:
-		Name: staticterrain
-		Tileset: AOT_SNOW
-		Filename: snow.pal
 		ShadowIndex: 4
 	PaletteFromFile@chrome:
 		Name: chrome

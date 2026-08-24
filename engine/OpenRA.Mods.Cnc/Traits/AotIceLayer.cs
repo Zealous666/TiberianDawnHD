@@ -14,36 +14,98 @@ using OpenRA.Traits;
 
 namespace OpenRA.Mods.Cnc.Traits
 {
-	[Desc("Tracks every cell currently covered by ice (hosts + grown cells). Attach to World.")]
+	[TraitLocation(SystemActors.World)]
+	[Desc("Tracks every cell currently covered by ice (hosts + grown cells). Attach to World.",
+		"aotmod: the ice is a cell LAYER, not one actor per cell -- AotIceRenderer draws it and",
+		"AotIceBreakLayer handles vehicles breaking through. This trait owns the cell set and the",
+		"Ice terrain override, and records which cells changed so the renderer only refreshes those.")]
 	sealed class AotIceLayerInfo : TraitInfo
 	{
-		public override object Create(ActorInitializer init) { return new AotIceLayer(); }
+		[Desc("Terrain type the ice makes a water cell walkable as (movement speeds live in the Locomotors).")]
+		public readonly string TerrainType = "Ice";
+
+		public override object Create(ActorInitializer init) { return new AotIceLayer(init.World, this); }
 	}
 
 	sealed class AotIceLayer
 	{
+		readonly World world;
+		readonly AotIceLayerInfo info;
 		readonly HashSet<CPos> ice = [];
 
-		/// <summary>Incremented whenever the ice set changes, so cells can refresh their sprite.</summary>
-		public int Version { get; private set; }
+		// Original CustomTerrain value per iced cell, so removing the ice restores exactly what was there.
+		readonly Dictionary<CPos, byte> previousTerrain = [];
+
+		// Cells whose rendered sprite must be recomputed (the changed cell plus its neighbours, whose
+		// shared corners moved). AotIceRenderer drains this each render tick.
+		readonly HashSet<CPos> dirty = [];
+
+		byte iceTerrainIndex;
+		bool terrainIndexResolved;
+
+		public AotIceLayer(World world, AotIceLayerInfo info)
+		{
+			this.world = world;
+			this.info = info;
+		}
+
+		byte IceTerrainIndex()
+		{
+			// Lazy so it never depends on trait-creation order (Map.Rules is ready by the first Add).
+			if (!terrainIndexResolved)
+			{
+				iceTerrainIndex = world.Map.Rules.TerrainInfo.GetTerrainIndex(info.TerrainType);
+				terrainIndexResolved = true;
+			}
+
+			return iceTerrainIndex;
+		}
 
 		public bool Contains(CPos c) { return ice.Contains(c); }
 
+		public IReadOnlyCollection<CPos> Cells => ice;
+
 		public void Add(CPos c)
 		{
-			if (ice.Add(c))
-				Version++;
+			if (!ice.Add(c))
+				return;
+
+			previousTerrain[c] = world.Map.CustomTerrain[c];
+			world.Map.CustomTerrain[c] = IceTerrainIndex();
+
+			MarkDirtyWithNeighbours(c);
 		}
 
 		public void Remove(CPos c)
 		{
-			if (ice.Remove(c))
-				Version++;
+			if (!ice.Remove(c))
+				return;
+
+			if (previousTerrain.Remove(c, out var prev))
+				world.Map.CustomTerrain[c] = prev;
+
+			MarkDirtyWithNeighbours(c);
+		}
+
+		void MarkDirtyWithNeighbours(CPos c)
+		{
+			dirty.Add(c);
+			foreach (var d in CVec.Directions)
+				dirty.Add(c + d);
+		}
+
+		/// <summary>Renderer pulls the set of cells that changed since the last render tick.</summary>
+		public void DrainDirty(ICollection<CPos> into)
+		{
+			foreach (var c in dirty)
+				into.Add(c);
+
+			dirty.Clear();
 		}
 
 		/// <summary>
 		/// A corner point is shared by the four cells around it. Returns how many of them are ice.
-		/// Neighbouring cells query the same corner and therefore always agree — this is what makes
+		/// Neighbouring cells query the same corner and therefore always agree -- this is what makes
 		/// the rendered ice edge continuous across cell borders.
 		/// </summary>
 		public int CornerIceCount(CPos corner)

@@ -309,3 +309,25 @@ mods/cnc/rules/structures.yaml
 # aotmod: ChooseShellmap bevorzugt eine Shellmap mit dem gerade gecachten Tileset, damit der
 # Menue-Ruecksprung den Atlas wiederverwendet statt neu zu bauen (eine Shellmap je Tileset).
 !engine/OpenRA.Game/Game.cs
+
+# aotmod: Savegame-Desync-Debug -- per-frame Sync-Trace + Referenz beim Speichern.
+# Der Load-Replay laeuft ueber eine ReplayConnection, dort war die Report-Generierung stumm.
+# Ohne diesen Patch liefert ein Save-Load-Desync einen leeren syncreport.log.
+!engine/OpenRA.Game/Network/
+!engine/OpenRA.Game/Network/SyncReport.cs
+!engine/OpenRA.Game/Network/OrderManager.cs
+!engine/OpenRA.Game/Network/UnitOrders.cs
+
+# aotmod: Eis als Zell-Layer statt 1 Actor/Zelle (Perf + Ladezeit).
+# AotIceLayer haelt den Zustand + Ice-Terrain, AotIceRenderer zeichnet alles in einem Batch,
+# AotIceBreakLayer laesst Fahrzeuge unter Eis einbrechen, AotBreakIceWarhead entfernt Zellen
+# beim Waffeneinschlag. Ersetzt AotIceCellBody/AotIceBreaks (geloescht).
+!engine/OpenRA.Mods.Cnc/
+!engine/OpenRA.Mods.Cnc/Traits/
+!engine/OpenRA.Mods.Cnc/Traits/AotIceLayer.cs
+!engine/OpenRA.Mods.Cnc/Traits/AotIceGrowth.cs
+!engine/OpenRA.Mods.Cnc/Traits/AotIceBreakLayer.cs
+!engine/OpenRA.Mods.Cnc/Traits/World/
+!engine/OpenRA.Mods.Cnc/Traits/World/AotIceRenderer.cs
+!engine/OpenRA.Mods.Cnc/Warheads/
+!engine/OpenRA.Mods.Cnc/Warheads/AotBreakIceWarhead.cs

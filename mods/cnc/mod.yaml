@@ -295,8 +295,7 @@ TileSets:
 	cnchd|tilesets/snow.yaml
 	cnchd|tilesets/temperat.yaml
 	cnchd|tilesets/aot-temperat.yaml
-	cnchd|tilesets/aot-snow.yaml
-	cnchd|tilesets/aot-winter.yaml
+	cnchd|tilesets/aot-arctic.yaml
 	cnchd|tilesets/aot-desert.yaml
 
 Weapons:

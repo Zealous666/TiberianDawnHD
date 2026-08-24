@@ -1,3 +1,114 @@
+# === Age of Tiberium (aotmod) - Eis wegschiessen ===
+# Analog zum Einbrechen: wo eine Waffe einschlaegt, bricht auch das Eis darunter auf.
+# AotBreakIceWarhead entfernt Eiszellen aus AotIceLayer im Radius. Angehaengt an die geteilten
+# VANILLA-Waffen-Basen, die einen Einschlags-Warhead tragen (aot-weapons.yaml laedt NACH den
+# cnc|weapons/*.yaml -> YAML-Merge fuegt den Warhead hinzu, ohne die Vanilla-Datei zu editieren):
+# ^BallisticWeapon (Panzer, ~11 Erben), ^HeavyMG (^LightMG erbt davon), ^MissileWeapon (Raketen),
+# ^DamagingExplosion(HE) (Explosionsprojektile/Superwaffen), ^FlameWeapon (Flamme/Toxin),
+# ^DinoWeapon (Kampagne).
+# Radius: 0 = nur die Impact-Zelle (Default fuer alle Waffen); 1 = 3x3 Umkreis, reserviert fuer
+# HE + Superwaffen (Parabomb, TiberiumStrike/GasBurst, DropshipExplode, 227mm/-stnk).
+^BallisticWeapon:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+
+^HeavyMG:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+
+^MissileWeapon:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+
+^DamagingExplosion:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+
+^DamagingExplosionHE:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 1
+
+^FlameWeapon:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+
+^DinoWeapon:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+
+# AOT-Waffen ohne Vanilla-Basis (eigene Warheads) -- die Merge-Sektion pro Waffe fuegt nur diesen
+# einen zusaetzlichen Warhead hinzu, aendert nichts anderes. Radius nach Waffentyp:
+# 0 = gerichteter Strahl/Laser/MG/PPK, 1 = HE/Rakete/Flamme, 2 = Superwaffen/Cluster.
+aot-CommandoRailgun:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-MtnkRailgun:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-HtnkLaser:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-LtnkLaser:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-HarpyLaser:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-CruiserRailgun:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-DroneLaser:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-CyCannon:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-SilencedPPK:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-FturFlame:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-BansheeMissile:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-ATMine:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-MineClusterMissile:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-ZoneTrooperDropMissile:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-Parabomb:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 1
+aot-TiberiumStrike:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 1
+aot-TiberiumGasBurst:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 1
+aot-VeinGas:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-DropshipExplode:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 1
+aot-dropship-machinegun:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+OrcaAGMissiles:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+227mm:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 1
+227mm.stnk:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 1# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - Satellite Launch: Dummy-Waffe ohne Schaden ===
 # Wird von AotSatellitePower genutzt um NukeLaunch-Effekt zu spawnen.
 # Kein Warhead = keine Wirkung. Target-Position ist weit oberhalb der Karte.

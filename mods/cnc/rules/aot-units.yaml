@@ -271,14 +271,18 @@ aot-e6-gdi:
 	RenderSprites:
 		Image: aot-e6-gdi
 	Tooltip:
-		Name: actor-e6.name
+		Name: Engineer
 	Voiced:
 		VoiceSet: EngineerVoice
+	# Reiner Einnehmer: keine Sabotage-Variante (User 2026-08-22, GDI soll immer INSTANT
+	# einnehmen), kein Husk-Capture (bleibt exklusiv beim NOD-Saboteur).
+	-Captures@SABOTAGE:
+	-Captures@CATURESHUSK:
 	Buildable:
 		BuildPaletteOrder: 30
 		Prerequisites: barracks
 		Queue: Infantry.GDI
-		Description: actor-e6.description
+		Description: Captures enemy structures instantly on contact and repairs damaged friendly structures. Unarmed and consumed on use.
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - GDI Combat Medic ===
@@ -391,11 +395,21 @@ aot-e6-nod:
 		Name: Saboteur
 	Voiced:
 		VoiceSet: NodRiflemanVoice
+	# Sabotage-Modell (User 2026-08-22): erster Saboteur schlaegt Gebaeude unter 50% HP; zweiter
+	# nimmt es ein. SabotageThreshold 50 -> >50% HP: Sabotage. <=50% HP: capture. Abzug 55% (statt
+	# 50): sonst landet das Gebaeude genau auf 50% HP -> immer noch NICHT <= Threshold, der zweite
+	# Saboteur wuerde erneut sabotieren statt einnehmen. Tooltip bleibt bewusst auf "50% HP" (User).
+	# Reine @CAPTURES-Variante entfaellt (sonst konkurriert sie), Husk-Restore bleibt.
+	-Captures@CAPTURES:
+	Captures@SABOTAGE:
+		CaptureTypes: building
+		SabotageThreshold: 50
+		SabotageHPRemoval: 55
 	Buildable:
 		BuildPaletteOrder: 30
 		Prerequisites: barracks
 		Queue: Infantry.Nod
-		Description: actor-e6.description
+		Description: Sabotages enemy structures on contact, dropping them to 50% HP. A second saboteur captures a damaged structure. Also restores destroyed vehicle wrecks (husks). Unarmed and consumed on use.
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - NOD Carjacker (aot-cark-nod) ===
@@ -2979,10 +2993,27 @@ TTNK:
 		Weapon: FlametankExplode
 		EmptyWeapon: FlametankExplode
 		RequiresCondition: aot-ttnk-flame
-	SpawnActorOnDeath:
-		Actor: LTNK.Husk
+	# Husk: eigener TTNK.Husk (siehe unten), damit das Wrack korrekt zum TTNK zurueck-transformiert
+	# wird. Vorher LTNK.Husk -> nach Engineer/Saboteur-Capture wurde faelschlich ein Light Tank
+	# daraus (User-Fund 2026-08-22). Drei Varianten je nach aktivem Upgrade, damit das Wrack-
+	# Sprite dem Zustand VOR dem Abschuss entspricht (Base/Flame/Toxin sehen deutlich anders aus).
+	# (Kein "-SpawnActorOnDeath:" -- der TTNK erbt keine unbenannte Instanz; unsere unbenannte
+	# Instanz von zuvor wird durch die drei @base/@flame/@toxin schlicht abgeloest.)
+	SpawnActorOnDeath@base:
+		Actor: TTNK.Husk
 		OwnerType: InternalName
 		EffectiveOwnerFromOwner: true
+		RequiresCondition: !aot-ttnk-flame
+	SpawnActorOnDeath@flame:
+		Actor: TTNK.Husk.Flame
+		OwnerType: InternalName
+		EffectiveOwnerFromOwner: true
+		RequiresCondition: aot-ttnk-flame && !aot-ttnk-toxin
+	SpawnActorOnDeath@toxin:
+		Actor: TTNK.Husk.Toxin
+		OwnerType: InternalName
+		EffectiveOwnerFromOwner: true
+		RequiresCondition: aot-ttnk-toxin
 	Selectable:
 		DecorationBounds: 1194, 1194
 	# Feld-Transform zur Devil's Tongue, sobald Subterrain-Upgrade UND Flame-Upgrade aktiv sind.
@@ -3303,10 +3334,10 @@ aot-subapc:
 		RequiresCondition: submerged
 		UncloakSound:
 		CloakSound:
-	SpawnActorOnDeath:
-		Actor: LTNK.Husk
-		OwnerType: InternalName
-		EffectiveOwnerFromOwner: true
+	# Kein Husk (User 2026-08-22): subterrane Einheit hinterlaesst kein Wrack -- passt zur "unter
+	# der Oberflaeche"-Fiktion. Vorher LTNK.Husk (falsche Zuordnung, wurde nach Capture zum Light
+	# Tank). APC vererbt seit 2026-08-23 keinen SpawnActorOnDeath mehr -- das `-SpawnActorOnDeath:`
+	# stand hier vergeblich und crashte den Rule-Load (`no elements with key ... to remove`).
 	Selectable:
 		DecorationBounds: 1024, 1024
 
@@ -4468,7 +4499,9 @@ aot-sub:
 	Armor:
 		Type: Heavy
 	Mobile:
-		Locomotor: naval
+		# aot-submarine = naval + Ice: U-Boot darf UNTER Eis durchfahren, reine Schiffe nicht.
+		# Unter Eis darf es aber nicht angreifen/auftauchen und ist nicht ortbar (siehe Traits unten).
+		Locomotor: aot-submarine
 		TurnSpeed: 20
 		Speed: 70
 	RepairableNear:
@@ -4476,19 +4509,46 @@ aot-sub:
 	RevealsShroud:
 		Range: 6c0
 		Type: CenterPosition
+	# Unter Eis: keine Angriffe. AotGrantConditionOnTerrain feuert die Condition, sobald das Sub
+	# auf einer Ice-Zelle steht; wieder aus, sobald es die Kachel verlaesst.
+	AotGrantConditionOnTerrain@ice:
+		Condition: aot-under-ice
+		TerrainTypes: Ice
 	AttackFrontal:
 		FacingTolerance: 15
-	# Auto-Tauch-Mechanik: kein UncloakOn: Attack → Sub feuert Torpedos getarnt.
+		RequiresCondition: !aot-under-ice
+	# Zwei Cloak-Instanzen mit gleichem CloakType "sub" -> otherCloaks-Sound-Suppression greift,
+	# der Uebergang Wasser<->Eis loest KEINEN Uncloak/Cloak-Sound aus (Cloak.cs:244+269 pruefen
+	# otherCloaks.Any(c => c.Cloaked)). Cloak@ICE hat InitialDelay 0, so ist der Sub im selben Frame
+	# schon wieder cloaked. Wichtig: CloakSound bleibt leer (Recloak-Sound), UncloakSound (subshow1)
+	# nur an der Wasser-Instanz -- spielt fuer ECHTES Auftauchen (Attack/Damage), nicht beim
+	# Ice-Uebergang. Nicht-Ortbarkeit unter Eis: Cloak@ICE.DetectionTypes ist "IceHidden", kein
+	# DetectCloaked-Sensor sucht danach.
 	Cloak:
-		InitialDelay: 85
+		CloakType: sub
+		RequiresCondition: !aot-under-ice
+		# InitialDelay 0 (statt 85): sonst waere der Sub nach dem Verlassen einer Eiszelle 85 Ticks
+		# voll sichtbar, weil Re-Enable von Cloak den Delay neu startet. Beim Erstspawn im Sub-Pen
+		# wird er ohnehin nicht gesehen. CloakDelay bleibt 85 -- gilt fuer den echten Auftauch-Cycle
+		# nach Attack/Damage.
+		InitialDelay: 0
 		CloakDelay: 85
 		CloakStyle: Alpha
 		CloakedAlpha: 0.35
-		CloakSound: subshow1.wav
 		UncloakSound: subshow1.wav
 		UncloakOn: Damage, Attack
 		CloakedCondition: aot-sub-cloaked
 		PauseOnCondition: aot-sub-critical
+	Cloak@ICE:
+		CloakType: sub
+		RequiresCondition: aot-under-ice
+		InitialDelay: 0
+		CloakDelay: 0
+		CloakStyle: Alpha
+		CloakedAlpha: 0.35
+		DetectionTypes: IceHidden
+		UncloakOn: None
+		CloakedCondition: aot-sub-cloaked
 	# Bei kritischen HP (≈20% verbleibend): Cloak pausiert → Sub bleibt sichtbar.
 	GrantConditionOnDamageState@critical:
 		Condition: aot-sub-critical
@@ -4591,7 +4651,8 @@ aot-msub:
 	Armor:
 		Type: Light
 	Mobile:
-		Locomotor: naval
+		# aot-submarine = naval + Ice (siehe aot-sub oben): darf unter Eis durchfahren.
+		Locomotor: aot-submarine
 		TurnSpeed: 12
 		Speed: 44
 	RepairableNear:
@@ -4603,18 +4664,35 @@ aot-msub:
 	RevealsShroud:
 		Range: 8c0
 		Type: CenterPosition
+	# Unter Eis: keine Angriffe, kein Auftauchen, nicht ortbar (identisches Muster wie aot-sub,
+	# siehe dortiger Kommentar zu CloakType/InitialDelay/DetectionTypes).
+	AotGrantConditionOnTerrain@ice:
+		Condition: aot-under-ice
+		TerrainTypes: Ice
 	AttackFrontal:
 		FacingTolerance: 0
+		RequiresCondition: !aot-under-ice
 	Cloak:
-		InitialDelay: 85
+		CloakType: sub
+		RequiresCondition: !aot-under-ice
+		InitialDelay: 0
 		CloakDelay: 85
 		CloakStyle: Alpha
 		CloakedAlpha: 0.35
-		CloakSound: subshow1.wav
 		UncloakSound: subshow1.wav
 		UncloakOn: Damage, Attack
 		CloakedCondition: aot-msub-cloaked
 		PauseOnCondition: aot-msub-critical || aot-drones-active
+	Cloak@ICE:
+		CloakType: sub
+		RequiresCondition: aot-under-ice
+		InitialDelay: 0
+		CloakDelay: 0
+		CloakStyle: Alpha
+		CloakedAlpha: 0.35
+		DetectionTypes: IceHidden
+		UncloakOn: None
+		CloakedCondition: aot-msub-cloaked
 	GrantConditionOnDamageState@critical:
 		Condition: aot-msub-critical
 		ValidDamageStates: Critical
@@ -4923,9 +5001,11 @@ aot-transport:
 	Armor:
 		Type: Heavy
 	Mobile:
-		# aot-lst = naval + Ice: das LST ist amphibisch und darf auf zugefrorene Flaechen,
-		# die reinen Schiffe (naval) nicht. Siehe [[ice-growth-system]].
-		Locomotor: aot-lst
+		# NOD-Transport-Vessel: reines Schiff (naval), darf NICHT auf zugefrorene Flaechen.
+		# Der GDI-Aequivalent ist der aot-transport-hover mit HOVER-Locomotor (Ice: 100).
+		# Nicht-Hover-Marine (Gunboat/Sub/MSub/Cruiser/dieses Transportschiff) muessen sich
+		# durch Eis freischiessen wie alles andere. Siehe [[ice-growth-system]].
+		Locomotor: naval
 		Speed: 115
 		TurnSpeed: 20
 		PauseOnCondition: notmobile
@@ -6451,5 +6531,46 @@ aot-outpost-nod:
 		Color: 8844FFB4
 		BorderColor: 20102080
 		RequiresCondition: aot-nod-outpost-active
+
+# === Age of Tiberium (aotmod) - TTNK.Husk (Wrack fuer den Tick/Flame/Toxic Tank) ===
+# 1:1 aus RA-3TNK.Husk (Heavy Tank, engine/mods/ra/rules/husks.yaml), mit IntoActor: ttnk statt
+# 3tnk. Drei Varianten, damit der Wrack-Sprite zum Zustand VOR dem Abschuss passt:
+#   Base   -> 3tnk.destroyed        (3TNK-Remaster)
+#   Flame  -> 3tnk-flame.destroyed  (FTNK-Sprites)
+#   Toxin  -> 3tnk-toxin.destroyed  (recolored FTNK, aot-ttnk-toxin.zip)
+# Der TTNK-Aktor waehlt beim Tod per SpawnActorOnDeath@... RequiresCondition den passenden Husk.
+# Nach Capture wird immer wieder "ttnk"; die Upgrade-Condition liegt am Spieler-Techtree und
+# stellt die entsprechenden WithFacingSpriteBody-Varianten korrekt her.
+TTNK.Husk:
+	Inherits: ^Husk
+	Tooltip:
+		Name: Heavy Tank Husk
+	ThrowsParticle@turret:
+		Anim: turret
+	TransformOnCapture:
+		IntoActor: ttnk
+	RenderSprites:
+		Image: 3tnk.destroyed
+
+TTNK.Husk.Flame:
+	Inherits: ^Husk
+	Tooltip:
+		Name: Flame Tank Husk
+	# FTNK ist turretlos -> kein Turret-Partikel werfen (aot-flame-idle hat auch nur einen Body).
+	-ThrowsParticle@turret:
+	TransformOnCapture:
+		IntoActor: ttnk
+	RenderSprites:
+		Image: 3tnk-flame.destroyed
+
+TTNK.Husk.Toxin:
+	Inherits: ^Husk
+	Tooltip:
+		Name: Toxin Tank Husk
+	-ThrowsParticle@turret:
+	TransformOnCapture:
+		IntoActor: ttnk
+	RenderSprites:
+		Image: 3tnk-toxin.destroyed
 
 # === Ende aotmod ===

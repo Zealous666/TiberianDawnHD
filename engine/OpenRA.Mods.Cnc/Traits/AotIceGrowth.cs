@@ -74,10 +74,6 @@ namespace OpenRA.Mods.Cnc.Traits
 			"floe sprite (up to 2x2 cells) never has open water showing under its edges.")]
 		public readonly int InitialRadius = 1;
 
-		[Desc("Actor type spawned for each frozen cell.")]
-		[ActorReference]
-		public readonly string SpawnActor = "aot-ice-cell";
-
 		[Desc("Terrain type of open water that ice may grow over.")]
 		public readonly string WaterTerrain = "Water";
 
@@ -123,14 +119,8 @@ namespace OpenRA.Mods.Cnc.Traits
 					if (!map.Contains(c) || layer.Contains(c) || map.GetTerrainInfo(c).Type != Info.WaterTerrain)
 						continue;
 
-					var target = c;
-					layer.Add(target);
-					self.World.AddFrameEndTask(w =>
-						w.CreateActor(Info.SpawnActor, new TypeDictionary
-						{
-							new LocationInit(target),
-							new OwnerInit(self.Owner),
-						}));
+					// aotmod: ice is a cell layer now (see AotIceLayer/AotIceRenderer) -- just seed the cell.
+					layer.Add(c);
 				}
 			}
 
@@ -196,14 +186,9 @@ namespace OpenRA.Mods.Cnc.Traits
 
 			foreach (var cell in newCells)
 			{
-				var target = cell;
-				layer.Add(target);
-				self.World.AddFrameEndTask(w =>
-					w.CreateActor(Info.SpawnActor, new TypeDictionary
-					{
-						new LocationInit(target),
-						new OwnerInit(self.Owner),
-					}));
+				// aotmod: ice is a cell layer now, not one actor per cell. Adding to the layer applies
+				// the Ice terrain override and flags the cell (and its neighbours) for AotIceRenderer.
+				layer.Add(cell);
 			}
 		}
 	}

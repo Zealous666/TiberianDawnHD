@@ -156,7 +156,9 @@ Player:
 		# aot-transport's actual Locomotor (aot-units.yaml) -- verifies the dock's adjacent water is
 		# really ship-navigable, not just terrain-adjacent to Water (User 2026-07-22: rock-enclosed
 		# inlets can pass the naive terrain check but trap a ship a few cells short forever).
-		NavalLocomotor: aot-lst
+		# aotmod 2026-08-23: aot-lst -> naval (der NOD-Transport nutzt naval, seit die reinen Schiffe
+		# nicht mehr aufs Eis duerfen und aot-lst entfernt wurde).
+		NavalLocomotor: naval
 		# AgeUpgradeTypes ist ENTFALLEN (2026-08-04): der Age-Aufstieg ist seit dem Techtree-Umbau
 		# keine Produktionsqueue mehr, sondern eine Super Power auf dem Spieler-Aktor -- die
 		# aot-ageN-upgrade-*-Aktoren haben kein Buildable mehr, das Feld lief also ins Leere.
@@ -857,7 +859,8 @@ Player:
 		# embark/landing cell's adjacent water is really ship-navigable, not just terrain-adjacent to
 		# Water (User 2026-07-22: rock-enclosed inlets can pass the naive terrain check but trap a ship
 		# a few cells short of the shore forever, boarding never completes).
-		FerryLocomotor: aot-lst
+		# aotmod 2026-08-23: aot-lst -> naval (siehe NavalLocomotor oben).
+		FerryLocomotor: naval
 		# Bike/Buggy need ~aot-age1 -> not buildable in Age 0. Scout squad is a 5-man
 		# infantry mix instead (User 2026-07-21, corrected 2026-07-21b): 3x Gunner (Role A) +
 		# 2x Flame Trooper (Role B, falls back to the toxic variant post-Age3). Rocket

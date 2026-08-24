@@ -8,7 +8,7 @@
 # NUR auf World (nicht EditorWorld) erlaubt, deshalb eigener Block statt ^BaseWorld.
 World:
 	# === Age of Tiberium (aotmod) - Tiberium/BlueTiberium auch auf Clear.Snow platzierbar ===
-	# AOT_WINTER hat fuer die aus AOT_SNOW uebernommenen Zellen einen eigenen Terrain-Typ
+	# AOT_ARCTIC hat fuer die aus AOT_ARCTIC uebernommenen Zellen einen eigenen Terrain-Typ
 	# "Clear.Snow" (siehe aot-winter.yaml, Minimap-Farbtrennung). Ohne diese Ergaenzung würde
 	# die Engine-Basis (AllowedTerrainTypes: Clear, Road) Tiberium dort nicht mehr zulassen.
 	ResourceLayer:
@@ -23,9 +23,12 @@ World:
 	# betreten -> GrantConditionOnSubterraneanLayer feuert nie -> Ein-/Ausgraben funktioniert nicht.
 	# NUR auf World (nicht EditorWorld) erlaubt, deshalb eigener Block statt ^BaseWorld.
 	SubterraneanActorLayer:
-	# Eis-System: haelt die Menge aller vereisten Zellen (Hosts + gewachsene Zellen).
-	# Die Zellen fragen darueber ihre geteilten Ecken ab -> stetige Kanten.
+	# Eis-System (aotmod: Zell-LAYER statt 1 Actor/Zelle): AotIceLayer haelt die Zellmenge + das
+	# Ice-Terrain, AotIceRenderer zeichnet alle Zellen in EINEM Batch (ersetzt die per-Zelle
+	# AotIceCellBody), AotIceBreakLayer laesst Fahrzeuge einbrechen (ersetzt per-Zelle AotIceBreaks).
 	AotIceLayer:
+	AotIceRenderer:
+	AotIceBreakLayer:
 	# Tiberian-Veins-System (Klon des Eis-Systems): haelt alle vom Geflecht bedeckten Zellen.
 	AotVeinLayer:
 	# Foundation-System: haelt die Menge aller platzierten BIB-Boden-Zellen.
@@ -33,7 +36,7 @@ World:
 	AotFoundationLayer:
 	LegacyBridgeLayer:
 		# Originalaktoren (bridge1-4) + AoT-TEMPERAT-Varianten mit korrekten Template-IDs
-		# + zerstörbare Fluss-Brücken (aot-br1/br2/br3, Templates 235-246, AOT_TEMPERAT & AOT_SNOW)
+		# + zerstörbare Fluss-Brücken (aot-br1/br2/br3, Templates 235-246, AOT_TEMPERAT & AOT_ARCTIC)
 		Bridges: bridge1, bridge2, bridge3, bridge4, aot-tem-bridge1, aot-tem-bridge2, aot-br1, aot-br2, aot-br3
 
 # === Age of Tiberium (aotmod) - Editor-Pendant zur Clear.Snow-Ressourcenfreischaltung oben ===
@@ -46,6 +49,9 @@ EditorWorld:
 				AllowedTerrainTypes: Clear, Road, Clear.Snow
 	BuildableTerrainOverlay:
 		AllowedTerrainTypes: Clear, Road, Clear.Snow
+	# Zeichnet im Editor um jeden Aktor mit AotEditorBounds ein Rechteck (Expansion-Marker cyan,
+	# Ore-Mine rote Bau-Sperrzone).
+	AotEditorBoundsOverlay:
 
 # === Age of Tiberium (aotmod) - EdibleByLeap + Heal-TargetType für alle Infanterie ===
 ^Infantry:
@@ -601,17 +607,19 @@ RMBO:
 			# Amphibisch -> darf aufs Eis (wie Hover/LST). Reine Schiffe duerfen das NICHT.
 			Ice: 90
 			Veins: 100
-	# === Age of Tiberium (aotmod) - LST-Locomotor: naval + Eis ===
-	# Das LST (aot-transport) ist amphibisch und soll auf zugefrorene Flaechen koennen.
-	# Es teilte sich bisher "naval" mit den echten Schiffen (aot-gunboat/-sub/-msub/-cruiser),
-	# deshalb ein eigener Locomotor: nur so bleibt "naval" ohne Ice und die Schiffe draussen.
-	Locomotor@AOT_LST:
-		Name: aot-lst
+	# === Age of Tiberium (aotmod) - U-Boot-Locomotor: naval + Eis (durchfahren) ===
+	# U-Boote (aot-sub, aot-msub) sollen unter zugefrorenen Flaechen DURCHFAHREN koennen.
+	# Reine Schiffe (naval) duerfen das nicht -- deswegen eigener Locomotor. Attackieren/Auftauchen
+	# unter Eis wird ueber die aot-under-ice-Condition auf dem Sub gesperrt (siehe aot-units.yaml).
+	# Ortbarkeit unter Eis: der Sub schaltet dort auf einen zweiten Cloak mit anderem CloakType,
+	# den kein DetectCloaked-Sensor sucht -- so bleibt er ungetarnt sichtbar/ortbar erst wieder
+	# nach Verlassen der Eisflaeche.
+	Locomotor@AOT_SUBMARINE:
+		Name: aot-submarine
 		Crushes: crate, mine
 		TerrainSpeeds:
 			Water: 100
-			Ice: 80
-			Veins: 100
+			Ice: 100
 	# === Age of Tiberium (aotmod) - Zone Trooper Jumpjet-Locomotor ===
 	# Kann Rock (unpassierbare Klippen/Berge) und River kurz überspringen (JumpjetTransitionTerrainTypes),
 	# aber NICHT Water (Ozean) — bewusst kein Hovercraft-Ersatz, siehe [[orbc-system]].
@@ -2262,7 +2270,7 @@ BRIDGE1:
 	-FreeActor@north:
 	-FreeActor@south:
 	MapEditorData:
-		RequireTilesets: AOT_SNOW, WINTER
+		RequireTilesets: AOT_ARCTIC, WINTER
 		Categories: Terrain
 
 BRIDGE2:
@@ -2270,7 +2278,7 @@ BRIDGE2:
 	-FreeActor@north:
 	-FreeActor@south:
 	MapEditorData:
-		RequireTilesets: AOT_SNOW, WINTER
+		RequireTilesets: AOT_ARCTIC, WINTER
 		Categories: Terrain
 
 BRIDGE3:
