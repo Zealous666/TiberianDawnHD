@@ -6556,8 +6556,8 @@ TTNK.Husk.Flame:
 	Inherits: ^Husk
 	Tooltip:
 		Name: Flame Tank Husk
-	# FTNK ist turretlos -> kein Turret-Partikel werfen (aot-flame-idle hat auch nur einen Body).
-	-ThrowsParticle@turret:
+	# Kein ThrowsParticle@turret: FTNK ist turretlos. ^Husk erbt keinen solchen Trait, daher
+	# muss auch keine "-"-Direktive gesetzt werden (die crashte den Load, "no elements to remove").
 	TransformOnCapture:
 		IntoActor: ttnk
 	RenderSprites:
@@ -6567,7 +6567,6 @@ TTNK.Husk.Toxin:
 	Inherits: ^Husk
 	Tooltip:
 		Name: Toxin Tank Husk
-	-ThrowsParticle@turret:
 	TransformOnCapture:
 		IntoActor: ttnk
 	RenderSprites:
