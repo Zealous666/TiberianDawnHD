@@ -1930,3 +1930,10 @@ aot-RepairBeam:
 		ExplosionPalette: effect
 		ValidTargets: Repair
 		ValidRelationships: Ally
+
+# === Age of Tiberium (aotmod) - GUN Turret Reichweite (User 2026-08-24) ===
+# Basis-Gun-Turret auf 5 Zellen (vorher engine-default 6c0). Das Laser-Upgrade (aot-GunLaser ->
+# aot-LtnkLaser) bleibt bei 6c0 und bringt so einen echten Reichweiten-Vorteil (5 -> 6).
+# Field-Merge-Override der Engine-Waffe (aot-weapons.yaml laedt nach ballistics.yaml).
+TurretGun:
+	Range: 5c0

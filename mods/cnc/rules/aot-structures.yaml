@@ -6256,13 +6256,16 @@ aot-pillbox:
 	RevealsShroud@camo:
 		Range: 6c0
 		RequiresCondition: aot-camo-pillbox-active
-	# RangeMultiplier wirkt auf JEDE Waffe, die von diesem Aktor abgefeuert wird
-	# - also auch auf die geliehene Garrison-Waffe der eingeladenen Infanterie.
-	# Eigenstaendiger Modifier-Trait (kein AttackBase-Abkoemmling), daher ohne
-	# Risiko einer zweiten-Instanz-Kollision.
-	RangeMultiplier:
+	# RangeMultiplier wirkt (via AttackGarrisoned -> Armament.GarrisonRangeModifier) auf die
+	# geliehene Garrison-Waffe der Insassen. Ziel-Reichweiten fuer Rocket-Infanterie (Rockets 6c0,
+	# User 2026-08-24): Pillbox = 5 Zellen (x84 -> ~5,0), Guard Tower = 6 Zellen (x100 -> 6,0).
+	# @base gilt auch fuer die Camo-Pillbox (kein eigener Reichweiten-Bonus).
+	RangeMultiplier@base:
+		RequiresCondition: !aot-guard-tower-active
+		Modifier: 84
+	RangeMultiplier@guard:
 		RequiresCondition: aot-guard-tower-active
-		Modifier: 130
+		Modifier: 100
 	# Kein eigenes Buildable mehr (2026-07-05) - Proxy-Pattern (aot-pillbox-base/
 	# aot-pillbox-guard unten) steuert Bau-Icon-Wechsel nach dem Upgrade, 1:1
 	# das GUN/FTUR-Muster.
@@ -6347,6 +6350,18 @@ aot-pillbox:
 		PortOffsets: 384,0,128, 224,-341,128, -224,-341,128, -384,0,128, -224,341,128, 224,341,128
 		PortYaws: 0, 176, 341, 512, 682, 853
 		PortCones: 88, 88, 88, 88, 88, 88
+		# NUR im Guard Tower (aot-guard-tower-active): die geliehenen Garrison-Waffen duerfen
+		# zusaetzlich getauchte/geortete U-Boote (Ziel-Typen Submarine/Underwater) bekaempfen. Die
+		# normale Pillbox kann das NICHT (obwohl sie ebenfalls ortet). Kein Zusatzschaden -- die
+		# Insassen treffen mit ihren vorhandenen Waffen. Zusammen mit AutoTargetPriority@sub unten.
+		ExtraValidTargets: Submarine, Underwater
+		ExtraValidTargetsCondition: aot-guard-tower-active
+	# Guard Tower: getauchte/geortete U-Boote werden als Auto-Ziel beruecksichtigt (sonst ignoriert
+	# AutoTarget sie mangels passender Prioritaet). Nur bei aktivem Guard-Tower-Upgrade.
+	AutoTargetPriority@sub:
+		RequiresCondition: aot-guard-tower-active
+		ValidTargets: Submarine, Underwater
+		InvalidTargets: NoAutoTarget
 	Power:
 		Amount: 0
 	# RenderDetectionCircle (von ^Support geerbt) verlangt DetectCloaked -
@@ -6408,7 +6423,7 @@ aot-pillbox-guard:
 		Prerequisites: barracks, ~aot-guard-tower-upgrade
 		Queue: Building.GDI
 		Icon: guard-icon
-		Description: Upgraded Pillbox with extended sight and weapon range. Holds up to 5 infantry, who fire out through the tower using their own weapons.
+		Description: Upgraded Pillbox with increased sight and weapon range. Its garrison can also engage detected and submerged submarines. Holds up to 5 infantry, who fire out through the tower using their own weapons.
 	-Tooltip@normal:
 	-RevealsShroud@normal:
 	-WithSpriteBody@normal:
@@ -6417,8 +6432,14 @@ aot-pillbox-guard:
 		RequiresCondition: aot-guard-tower-active || !aot-guard-tower-active
 	RevealsShroud@guard:
 		RequiresCondition: aot-guard-tower-active || !aot-guard-tower-active
-	RangeMultiplier:
+	# Guard-Proxy: der Range-Bonus des Guard Towers ist hier immer aktiv (umbenannt von der frueheren
+	# unbenannten RangeMultiplier-Instanz auf @guard, seit Split Pillbox/Guard Tower).
+	RangeMultiplier@guard:
 		RequiresCondition: aot-guard-tower-active || !aot-guard-tower-active
+	# Die Basis-@base (Pillbox-Reichweite) an DIESEM Proxy deaktivieren, sonst wuerde sie den
+	# Guard-Multiplier ueberlagern (beide gaebe es sonst gleichzeitig aktiv).
+	RangeMultiplier@base:
+		RequiresCondition: aot-guard-tower-active && !aot-guard-tower-active
 	WithSpriteBody@guard:
 		RequiresCondition: aot-guard-tower-active || !aot-guard-tower-active
 	WithSpriteBody@guardremap:
@@ -6470,7 +6491,7 @@ aot-upgrade-guard-tower:
 		Prerequisites: ~aot-age1, aot-slab, ~!aot-camo-pillbox-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
-		Description: Upgrades all Pillboxes to Guard Towers with extended sight and weapon range (+50%). Exclusive with the Camo Pillbox upgrade.
+		Description: Upgrades all Pillboxes to Guard Towers: increased sight and weapon range, and lets the garrison engage detected and submerged submarines with their own weapons. Exclusive with the Camo Pillbox upgrade.
 
 	Valued:
 		Cost: 750

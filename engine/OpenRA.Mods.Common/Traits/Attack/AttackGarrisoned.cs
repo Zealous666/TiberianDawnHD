@@ -48,6 +48,17 @@ namespace OpenRA.Mods.Common.Traits
 		[PaletteReference]
 		public readonly string MuzzlePalette = "effect";
 
+		// aotmod: Zusaetzliche gueltige Ziel-Typen fuer die geliehenen Garrison-Waffen, waehrend
+		// ExtraValidTargetsCondition erfuellt ist (z.B. Guard Tower: Submarine, Underwater -> die
+		// Insassen koennen getauchte/geortete U-Boote mit ihren eigenen Waffen bekaempfen).
+		[Desc("Extra target types the borrowed garrison weapons may fire at while",
+			"ExtraValidTargetsCondition holds (e.g. Submarine, Underwater for a guard tower vs subs).")]
+		public readonly BitSet<TargetableType> ExtraValidTargets = default;
+
+		[Desc("Condition under which ExtraValidTargets is granted to the garrison weapons.")]
+		[ConsumedConditionReference]
+		public readonly string ExtraValidTargetsCondition = null;
+
 		public override object Create(ActorInitializer init) { return new AttackGarrisoned(init.Self, this); }
 		public override void RulesetLoaded(Ruleset rules, ActorInfo ai)
 		{
@@ -83,6 +94,7 @@ namespace OpenRA.Mods.Common.Traits
 		public new readonly AttackGarrisonedInfo Info;
 		INotifyAttack[] notifyAttacks;
 		IRangeModifier[] hostRangeModifiers;
+		bool extraValidTargetsActive;
 		readonly Lazy<BodyOrientation> coords;
 		readonly List<Armament> armaments;
 		readonly List<AnimationWithOffset> muzzles;
@@ -117,6 +129,20 @@ namespace OpenRA.Mods.Common.Traits
 			hostRangeModifiers = self.TraitsImplementing<IRangeModifier>().ToArray();
 
 			base.Created(self);
+		}
+
+		public override IEnumerable<VariableObserver> GetVariableObservers()
+		{
+			foreach (var o in base.GetVariableObservers())
+				yield return o;
+
+			if (!string.IsNullOrEmpty(Info.ExtraValidTargetsCondition))
+				yield return new VariableObserver(ExtraValidTargetsConditionChanged, new[] { Info.ExtraValidTargetsCondition });
+		}
+
+		void ExtraValidTargetsConditionChanged(Actor self, IReadOnlyDictionary<string, int> conditions)
+		{
+			extraValidTargetsActive = conditions.TryGetValue(Info.ExtraValidTargetsCondition, out var n) && n > 0;
 		}
 
 		// Kombinierter Host-Reichweiten-Modifier in Prozent (100 = kein Effekt), unter Beruecksichtigung
@@ -179,9 +205,10 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				if (a.Actor == passenger)
 				{
-					// Host-Reichweiten-Bonus zuruecknehmen, sonst behaelt die ausgestiegene Einheit
-					// die erhoehte Reichweite ihrer eigenen Waffe.
+					// Host-Boni zuruecknehmen, sonst behaelt die ausgestiegene Einheit die erhoehte
+					// Reichweite und die Extra-Ziel-Typen ihrer eigenen Waffe.
 					a.GarrisonRangeModifier = 100;
+					a.ExtraValidTargets = default;
 					a.RemoveNotifyAttacks(notifyAttacks);
 					armaments.Remove(a);
 					armamentPort.Remove(a);
@@ -360,8 +387,12 @@ namespace OpenRA.Mods.Common.Traits
 			if (armaments.Count > 0)
 			{
 				var mod = HostRangeModifier();
+				var extra = extraValidTargetsActive ? Info.ExtraValidTargets : default;
 				foreach (var a in armaments)
+				{
 					a.GarrisonRangeModifier = mod;
+					a.ExtraValidTargets = extra;
+				}
 			}
 
 			// Take a copy so that Tick() can remove animations
