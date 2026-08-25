@@ -1742,6 +1742,17 @@ namespace OpenRA.Mods.Common.Traits
 								expansionBuilt = true;
 								Log($"[expansion] built -> force ends (was {expansionFailures} failure(s))");
 							}
+							else if (em.SiteTaken)
+							{
+								// Ground claimed by somebody else -- explicitly NOT counted against the
+								// attempt budget (see AotExpansionMission.SiteTaken). The budget is there to
+								// stop a bot chasing an expansion it cannot pull off; losing a race for one
+								// particular plot says nothing about that, and on a map where several bots
+								// share the same prior markers it would otherwise eat all three attempts
+								// without the bot ever having marched anywhere.
+								Log($"[expansion] site was claimed by another player -- not counted as a " +
+									$"failed attempt (still at {expansionFailures}/{Info.ExpansionForceMaxAttempts})");
+							}
 							else
 							{
 								expansionFailures++;

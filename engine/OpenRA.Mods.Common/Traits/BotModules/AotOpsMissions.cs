@@ -1113,16 +1113,31 @@ namespace OpenRA.Mods.Common.Traits
 			// instead of hitting the enemy's main base -- the expansion is existential for scaling, so
 			// reclaiming its spot comes first. Once it is built (or the force gives up) this returns null
 			// and targeting is normal again.
+			// Once the wave has ferried across water it stands on the far shore, outside the AI's
+			// own base-side ground-reachability set -- stop requiring reachability from there on.
+			var requireReachable = !ashore;
+
 			var contested = Ops.ContestedExpansionSite();
-			if (contested != null)
+			if (contested != null && (!requireReachable || Ops.Intel.IsReachable(contested.Value)))
 			{
 				targetCell = contested;
 				return;
 			}
 
-			// Once the wave has ferried across water it stands on the far shore, outside the AI's
-			// own base-side ground-reachability set -- stop requiring reachability from there on.
-			var requireReachable = !ashore;
+			// Contested ground we cannot WALK to: leave both target fields null on purpose. The caller
+			// treats "no target at all" as the signal to book a crossing (TryStartFerry), so the wave
+			// still goes for that ground -- by sea instead of marching into the coastline. Every other
+			// branch below already honours requireReachable; this one used to return before the flag
+			// even existed, and it was the only targeting path that could hand out an unreachable cell.
+			//
+			// Cost of that omission, measured 2026-08-25 (Multi5, the only bot on its own landmass):
+			// its expansion site was taken by another bot, so ContestedExpansionSite() pointed at
+			// 46,51 across the water, and waves 3/4/5 each marched at it, stalled on the shore around
+			// (6-13, 117-132), and were abandoned on the executing timeout -- 30 units and roughly
+			// 25000 credits, while the expansion itself was saving for a 6000 convoy it never reached.
+			// Bots on the same landmass as their contested site are unaffected either way.
+			if (contested != null)
+				return;
 
 			if (ecoWave)
 			{
@@ -3135,6 +3150,26 @@ namespace OpenRA.Mods.Common.Traits
 		// fallback counter in AotOperationsBotModule).
 		public bool Succeeded => yard != null;
 
+		// Ended because somebody else built on the ground we had picked, NOT because this bot failed at
+		// anything. Read by the force bookkeeping in AotOperationsBotModule, which deliberately does not
+		// count it against ExpansionForceMaxAttempts: the 3-attempt budget exists to stop a bot chasing
+		// an expansion it cannot manage, and "the plot was taken, choose another" is not that. Without
+		// the distinction a bot could burn its whole budget on land grabs it never even marched to.
+		public bool SiteTaken { get; private set; }
+
+		// The site is picked once, when the mission is created, and validated against the yards standing
+		// AT THAT MOMENT (FindMarkerSite). A rival convoy already on its way to the same marker is
+		// invisible to that check -- confirmed 2026-08-25: Multi5 chose 46,51 at 24:22 and Multi1
+		// deployed there at 25:22, one minute later, after which Multi5 spent 25 minutes saving for a
+		// convoy to ground that was no longer free. Re-checking costs one actor scan per mission tick.
+		// Spatial query rather than a scan over World.Actors: this runs every mission tick for the whole
+		// forming and marching phase, and the same pattern is already used by ContestedExpansionSite.
+		bool SiteTakenByOther() =>
+			Ops.World.FindActorsInCircle(Ops.World.Map.CenterOfCell(Site),
+					WDist.FromCells(Ops.Info.ExpansionEnemyClearance))
+				.Any(a => a.Owner != Ops.Player && !a.IsDead && a.IsInWorld
+					&& Ops.Info.ConstructionYardTypes.Contains(a.Info.Name));
+
 		Phase phase = Phase.Forming;
 		int formingTicks;
 		int phaseTicks;
@@ -3213,6 +3248,16 @@ namespace OpenRA.Mods.Common.Traits
 				{
 					formingTicks += Ops.Info.MissionInterval;
 
+					// Somebody else built here while we were saving -- abandon and let a fresh mission
+					// pick new ground. Cheaper than marching there to find out (see SiteTakenByOther).
+					if (SiteTakenByOther())
+					{
+						SiteTaken = true;
+						Log($"site {Site} was taken while forming -> looking for new ground");
+						Finish();
+						break;
+					}
+
 					// SAVE UP, THEN ORDER THE WHOLE CONVOY AT ONCE (User 2026-08-04: "der spieler
 					// spart bis er 6000 hat und dann: 4 ltnks auf einmal bestellt und den mcv in
 					// auftrag gibt"). Ordering piecemeal as credits trickled in meant each unit ate
@@ -3240,17 +3285,33 @@ namespace OpenRA.Mods.Common.Traits
 
 						var haveMcv = Mcv() != null;
 						var threshold = haveMcv ? Ops.Info.ExpansionEscortOnlyCashThreshold : Ops.Info.ExpansionOrderCashThreshold;
-						if (Ops.AvailableCash() < threshold)
-							break;
 
-						if (!haveMcv && Ops.Info.ExpansionMcvTypes.Length > 0)
-							Ops.QueueRequest(this, "mcv", Ops.Info.ExpansionMcvTypes, 1);
+						// Deliberately NOT an early `break` any more (User-Fund 2026-08-25). That break left
+						// the whole switch case, so the departure and timeout checks below were unreachable
+						// for as long as the bot was still short of the threshold -- i.e. exactly while the
+						// mission was doing nothing. A poor bot therefore sat in Forming indefinitely: Multi5
+						// spent 25 minutes there, and the forming timeout that is supposed to bound the wait
+						// (see the comment above this switch) never once got to run.
+						if (Ops.AvailableCash() >= threshold)
+						{
+							if (!haveMcv && Ops.Info.ExpansionMcvTypes.Length > 0)
+								Ops.QueueRequest(this, "mcv", Ops.Info.ExpansionMcvTypes, 1);
 
-						if (Ops.Info.ExpansionEscortTypes.Length > 0 && Ops.Info.ExpansionEscortCount > 0)
-							Ops.QueueRequest(this, "escort", Ops.Info.ExpansionEscortTypes, Ops.Info.ExpansionEscortCount);
+							if (Ops.Info.ExpansionEscortTypes.Length > 0 && Ops.Info.ExpansionEscortCount > 0)
+								Ops.QueueRequest(this, "escort", Ops.Info.ExpansionEscortTypes, Ops.Info.ExpansionEscortCount);
 
-						ordered = true;
-						Log($"saved up {Ops.AvailableCash()} -> ordering {(haveMcv ? "" : "MCV + ")}{Ops.Info.ExpansionEscortCount} escort(s) at once");
+							ordered = true;
+
+							// The clock restarts HERE, and that matters more than the timeout itself: it had
+							// been running since the mission was created, so by the time Multi5 could finally
+							// afford the convoy the budget was long gone and the stale timer killed the
+							// mission in the very same tick it placed its orders -- "STILLBORN: ended after
+							// 2044 tick(s) without ever holding a unit or an order". Assembling the convoy
+							// gets its own full window, measured from the order going out.
+							formingTicks = 0;
+
+							Log($"saved up {Ops.AvailableCash()} -> ordering {(haveMcv ? "" : "MCV + ")}{Ops.Info.ExpansionEscortCount} escort(s) at once");
+						}
 					}
 
 					var mcv = Mcv();
@@ -3273,8 +3334,18 @@ namespace OpenRA.Mods.Common.Traits
 					}
 					else if (formingTicks >= Ops.Info.ExpansionFormingTimeout)
 					{
-						Log($"expansion convoy never came together (mcv={mcv != null}, escorts={escortCount}/" +
-							$"{Ops.Info.ExpansionEscortCount}, min={Ops.Info.ExpansionEscortMinimum}) -> mission over");
+						// Two very different failures share this timeout, and telling them apart is the
+						// whole point: "could never afford it" is an economy problem, "ordered but the
+						// units never turned up" is a production/pathing one. Before the timeout was
+						// reachable during saving at all, the first case simply hung forever and was
+						// invisible.
+						if (!ordered)
+							Log($"could never afford the convoy ({Ops.AvailableCash()} banked, need " +
+								$"{Ops.Info.ExpansionOrderCashThreshold}) -> mission over");
+						else
+							Log($"expansion convoy never came together (mcv={mcv != null}, escorts={escortCount}/" +
+								$"{Ops.Info.ExpansionEscortCount}, min={Ops.Info.ExpansionEscortMinimum}) -> mission over");
+
 						Finish();
 					}
 
@@ -3395,6 +3466,17 @@ namespace OpenRA.Mods.Common.Traits
 				return;
 			}
 
+			// Also while under way: the convoy can be several minutes out, and a rival that deploys in
+			// the meantime turns the whole march into a dead end -- the MCV cannot deploy on occupied
+			// ground. Turning back now keeps the MCV and its escorts for the next attempt.
+			if (SiteTakenByOther())
+			{
+				SiteTaken = true;
+				Log($"site {Site} was taken while under way -> looking for new ground");
+				Finish();
+				return;
+			}
+
 			// EXACT cell, not "close enough" (User 2026-08-03: "der deploy-platz des MCV muss exakt da
 			// sein, wo im expansion-bauplan der construction yard platziert ist"). The whole layout is
 			// expressed as offsets from the yard's top-left cell, so a yard one cell off shifts every
@@ -3430,26 +3512,32 @@ namespace OpenRA.Mods.Common.Traits
 
 			var escorts = Escorts();
 
-			// Escorts head for their PERIMETER POSTS, never for Site itself. Sending them to the same
-			// cell as the MCV is self-defeating: the MCV has to occupy that exact cell to deploy, and
-			// four tanks converging on it park right where it needs to stand. The convoy then sits
-			// there in a heap doing nothing until the move timeout kills the mission -- which is
-			// exactly what happened on the first convoy that ever got this far (User 2026-08-05:
-			// "aber dann stehen sie nur rum ... blocken sie sich gegenseitig?").
+			// History of this block, because it has been inverted once and the reason matters:
+			// ordering the arrival formation straight from departure gave the convoy no cohesion at
+			// all, and since an escort was only re-ordered while IsIdle, a tank that stopped to
+			// engage something en route was never gathered up again -- the MCV arrived alone (User
+			// 2026-08-11: "jetzt faehrt mcv weiter. aber ohne eskorte"). The answer then was to stop
+			// the MCV for stragglers. That is what changes below.
 			//
-			// The posts are the positions they take up once the yard is built anyway, so they screen
-			// the site on approach and are already in place when it deploys.
+			// The cohesion rule USED TO stop the MCV whenever an escort trailed, and only released it
+			// once the group had closed up. That is now inverted (user spec 2026-08-25): once the
+			// convoy has FORMED -- and forming already requires the MCV plus its escorts to be built
+			// and ready, which is the expensive part -- the MCV drives to the site on its own and
+			// deploys. The escorts follow.
 			//
-			// But that is the ARRIVAL formation, not the march. Ordering it from the moment of
-			// departure gave the convoy no cohesion whatsoever: MCV and each tank picked their own
-			// path to their own cell, and because an escort was only ever re-ordered while IsIdle, a
-			// tank that stopped to engage something en route was never gathered up again. The MCV
-			// then arrived alone (User 2026-08-11: "jetzt faehrt mcv weiter. aber ohne eskorte") and
-			// deployed an undefended compound.
+			// The reasoning is simply which vehicle sets the pace: "er ist eh das langsamste fahrzeug
+			// sobald sie sich mal in bewegung setzen". Once everyone is moving, the MCV is the slowest
+			// thing in the group, so stopping it for a straggler costs time that the straggler would
+			// have made up by itself anyway. Measured cost of the old behaviour in the 09:11 log:
+			// Multi1 sat 4:23 between "ordering" and "convoy departing", then needed only 1:15 for the
+			// drive itself.
 			//
-			// So: while any escort trails further than ExpansionConvoyCohesion behind, the MCV holds
-			// and the stragglers are ordered onto it -- unconditionally, not just when idle, because
-			// "busy shooting at something back home" is precisely the state that has to be broken.
+			// What is KEPT from the old rule is the part that actually mattered: a trailing escort is
+			// re-ordered UNCONDITIONALLY, not just when idle -- "busy shooting at something back home"
+			// is precisely the state that has to be broken, and it was why an escort that stopped en
+			// route was never gathered up again. It is now sent to its own guard post rather than to
+			// the MCV's current cell: same direction of travel, but a fixed destination, so a moving
+			// MCV no longer re-targets the whole escort every tick.
 			var trailing = escorts
 				.Where(e => (e.Location - mcv.Location).LengthSquared > Ops.Info.ExpansionConvoyCohesion * Ops.Info.ExpansionConvoyCohesion)
 				.ToList();
@@ -3457,18 +3545,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (++diagTicks % Ops.Info.ExpansionConvoyDiagInterval == 0)
 				Log($"convoy diag: mcv@{mcv.Location} idle={mcv.IsIdle} dist²={(mcv.Location - Site).LengthSquared} " +
 					$"escorts=[{string.Join(", ", escorts.Select(e => $"{e.Location}{(e.IsIdle ? " idle" : "")}/{(e.CurrentActivity?.GetType().Name ?? "none")}"))}] " +
-					$"trailing={trailing.Count}");
-
-			if (trailing.Count > 0)
-			{
-				// Hold the MCV where it stands. Re-issuing Stop every tick would cancel the escort's
-				// own approach, so only the MCV is stopped, and only while it still has orders.
-				if (!mcv.IsIdle)
-					bot.QueueOrder(new Order("Stop", mcv, false));
-
-				AttackMoveGroup(bot, trailing, mcv.Location);
-				return;
-			}
+					$"trailing={trailing.Count} (mcv runs ahead)");
 
 			if (mcv.IsIdle)
 				MoveUnit(bot, mcv, Site, false);
@@ -3476,7 +3553,13 @@ namespace OpenRA.Mods.Common.Traits
 			for (var i = 0; i < escorts.Count; i++)
 			{
 				var escort = escorts[i];
-				if (escort.IsIdle)
+
+				// PERIMETER POSTS, never Site itself: the MCV has to occupy that exact cell to
+				// deploy, and four tanks converging on it park right where it needs to stand (User
+				// 2026-08-05: "aber dann stehen sie nur rum ... blocken sie sich gegenseitig?").
+				// The posts are also where they end up once the yard is built, so they screen the
+				// site on approach and are already in place when it deploys.
+				if (trailing.Contains(escort) || escort.IsIdle)
 					AttackMoveGroup(bot, [escort], Site + GuardPosts[i % GuardPosts.Length]);
 			}
 		}
