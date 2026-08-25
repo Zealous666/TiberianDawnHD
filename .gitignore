@@ -331,3 +331,16 @@ mods/cnc/rules/structures.yaml
 !engine/OpenRA.Mods.Cnc/Traits/World/AotIceRenderer.cs
 !engine/OpenRA.Mods.Cnc/Warheads/
 !engine/OpenRA.Mods.Cnc/Warheads/AotBreakIceWarhead.cs
+
+# Automatisch archivierte Spiel-Logs (launch-game.sh, 2026-08-24) -- lokale Diagnose-Daten.
+/logs-archive/
+
+# Save-Load-Desync-Fix (2026-08-25): order-basierter Cash-Vault fuer die Age-Sparlogik der Bots
+# und der Pro-Modul-Detektor in ModularBot, der Bot-Module findet, die synchronisierten Zustand
+# direkt aendern statt Orders zu geben.
+!engine/OpenRA.Mods.Common/
+!engine/OpenRA.Mods.Common/Traits/
+!engine/OpenRA.Mods.Common/Traits/BotModules/
+!engine/OpenRA.Mods.Common/Traits/BotModules/AotBotCashVault.cs
+!engine/OpenRA.Mods.Common/Traits/Player/
+!engine/OpenRA.Mods.Common/Traits/Player/ModularBot.cs

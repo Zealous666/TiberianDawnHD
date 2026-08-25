@@ -118,6 +118,18 @@ namespace OpenRA.Mods.Common.Traits
 			"unit production again.")]
 		public readonly int RefineryPausesArmyBudgetTicks = 9000;
 
+		[Desc("Core roles the expansion priority hold must NEVER block, because the expansion convoy",
+			"itself depends on them. PROC is income. AFLD is the hard one, found in-game 2026-08-24:",
+			"every ExpansionEscortTypes variant (aot-ltnk-*) lists `afld` in its own Prerequisites AND",
+			"is produced from the Starport queue, which is the Airfield's. Holding AFLD therefore",
+			"deadlocks in a perfect circle -- no Airfield, so no Light Tanks, so escorts stay at 0/4,",
+			"so the convoy never forms, so the expansion keeps forcing, so the hold never lifts, so no",
+			"Airfield. Latent until the build-order swap of 2026-08-04 put the Refinery before the",
+			"Airfield: the hold starts after the Refinery, so before the swap the Airfield was already",
+			"standing when it engaged. Symptom: silos pegged at capacity, five-figure cash, and nothing",
+			"being built at all.")]
+		public readonly string[] ExpansionPriorityExemptRoles = ["PROC", "AFLD"];
+
 		[ActorReference]
 		[Desc("Techtree GATEKEEPER upgrades: upgrades that are not optional combat perks but hard",
 			"prerequisites for later PLAN buildings (Nod: aot-upgrade-nod-forbidden unlocks the Shrine,",
@@ -346,6 +358,26 @@ namespace OpenRA.Mods.Common.Traits
 		public bool HasNavalProduction() =>
 			Info.NavalPenTypes.Length > 0
 			&& world.Actors.Any(a => a.Owner == player && !a.IsDead && a.IsInWorld && Info.NavalPenTypes.Contains(a.Info.Name));
+
+		// Every SAVING hold (economy emergency, Age sprint, expansion priority) must ask this first:
+		// is something actively stuck waiting for exactly this step right now? Holding then is not
+		// "spending discipline", it is self-sabotage -- the hold blocks its own goal.
+		//
+		// The naval pen is the case that proved it (User-Fund 2026-08-25, Multi4 in the 09:11 log):
+		// the pen was destroyed while the expansion convoy had already booked a crossing, so the
+		// convoy sat on the shore waiting for a transport that could not be built, the expansion
+		// priority hold blocked the rebuild for ~19 minutes, the mission died with "convoy could not
+		// reach ... -> mission over" -- and the pen went up 155 log lines later, the moment the failing
+		// mission lifted the hold it had caused.
+		//
+		// Reference comparison against navalStep, not Role == "NAVAL": NAVAL exists ONLY as this
+		// on-demand step (never in the Rhythm), and navalRequested is set by AotTransitTraffic the
+		// instant a crossing is booked -- so this is exactly "a mission is standing still because of
+		// this building", not a general naval exemption. step.Rebuilding does NOT cover it: that flag
+		// is only ever set by RebuildScan for Rhythm steps, and BuildNavalStep creates a fresh step
+		// each time, so a destroyed pen never looked like a rebuild to any of the holds.
+		bool UnblocksWaitingDemand(AotPlanStep step) =>
+			step != null && step == navalStep && navalRequested && !HasNavalProduction();
 
 		// Where ships will actually appear: the finished pen if there is one, otherwise the planned
 		// site. The ferry seeds its water search from here so embark and landing are guaranteed to be
@@ -1898,7 +1930,7 @@ namespace OpenRA.Mods.Common.Traits
 			// starten ohne wiederaufzubauen").
 			if (ops != null && ops.Info.Faction == Info.Faction && ops.EconomyEmergency()
 				&& step.Role != "PROC" && !step.Role.StartsWith("EXP_", StringComparison.Ordinal)
-				&& !step.Rebuilding
+				&& !step.Rebuilding && !UnblocksWaitingDemand(step)
 				&& RefineryBuildable())
 			{
 				if (++economyPauseLog % 16 == 0)
@@ -1920,7 +1952,7 @@ namespace OpenRA.Mods.Common.Traits
 			// saved need somewhere to sit.
 			if (ops != null && ops.Info.Faction == Info.Faction && ops.AgeSprintActive()
 				&& step.Role != "PROC" && step.Role != "SILO"
-				&& !step.Rebuilding)
+				&& !step.Rebuilding && !UnblocksWaitingDemand(step))
 			{
 				if (++ageSprintPauseLog % 16 == 0)
 					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Age sprint: holding {step.Role} until the upgrade is bought");
@@ -1967,13 +1999,15 @@ namespace OpenRA.Mods.Common.Traits
 			// builder was the last hole in that bucket, and the biggest -- it kept spending the very
 			// credits the convoy was saving for, so the expansion never reached its threshold.
 			//
-			// PROC and the expansion's own EXP_* steps stay exempt: a second refinery is income, and
-			// blocking the expansion layout would deadlock the thing being prioritised. The hold ends
-			// by itself when the yard deploys, and ExpansionHoldsPriority is bounded by
-			// ExpansionPriorityTimeout, so an expansion that never works out cannot freeze the base.
+			// ExpansionPriorityExemptRoles and the expansion's own EXP_* steps stay exempt: a second
+			// refinery is income, and blocking the expansion layout would deadlock the thing being
+			// prioritised. The hold ends by itself when the yard deploys, and ExpansionHoldsPriority is
+			// bounded by ExpansionPriorityTimeout, so an expansion that never works out cannot freeze
+			// the base.
 			if (ops != null && ops.Info.Faction == Info.Faction && ops.ExpansionHoldsPriority()
-				&& step.Role != "PROC" && !step.Role.StartsWith("EXP_", StringComparison.Ordinal)
-				&& !step.Rebuilding)
+				&& !Info.ExpansionPriorityExemptRoles.Contains(step.Role)
+				&& !step.Role.StartsWith("EXP_", StringComparison.Ordinal)
+				&& !step.Rebuilding && !UnblocksWaitingDemand(step))
 			{
 				if (++expansionPauseLog % 16 == 0)
 					Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Expansion has priority: holding {step.Role}");
@@ -2109,8 +2143,18 @@ namespace OpenRA.Mods.Common.Traits
 			}
 		}
 
-		// Own units standing on the footprint are asked to step aside (the engine's own nudge routine:
-		// NotifyBlocker -> INotifyBlockingMove -> idle friendly Mobile units queue a Nudge activity).
+		// Own units standing on the footprint are asked to step aside, by issuing each of them the
+		// engine's own "Scatter" order (Mobile.ResolveOrder -> Nudge activity).
+		//
+		// This used to call notifier.NotifyBlocker(blockers) directly, which made the blocked units
+		// queue a Nudge activity there and then. That was THE save-load desync: bot code may only act
+		// by issuing orders (ModularBot: "Bot logic is not allowed to affect world state"), and bots
+		// are suppressed while a save reloads. The queued Nudge draws SharedRandom on the following
+		// tick (Nudge.OnFirstRun -> Mobile.GetAdjacentCell), so on reload that draw never happened --
+		// one missing draw shifted the whole shared random stream and every later frame diverged.
+		// Confirmed by per-draw call-site tracing: the single divergent draw in the entire window was
+		// "Mobile.GetAdjacentCell <- Nudge.OnFirstRun", present in the play pass, absent on reload.
+		// An order is recorded in the save/replay stream, so the reload reproduces it exactly.
 		void NudgeBlockers(string type, CPos cell)
 		{
 			var ai = world.Map.Rules.Actors[type];
@@ -2118,20 +2162,20 @@ namespace OpenRA.Mods.Common.Traits
 			if (bi == null)
 				return;
 
-			var notifier = world.ActorsHavingTrait<Building>()
-				.FirstOrDefault(a => a.Owner == player && !a.IsDead && a.IsInWorld);
-			if (notifier == null)
-				return;
-
+			// Only idle units, matching what INotifyBlockingMove did: a unit that is busy moving is
+			// left alone (Mobile.OnNotifyBlockingMove only nudges when self.IsIdle).
 			var blockers = bi.Tiles(cell)
 				.SelectMany(world.ActorMap.GetActorsAt)
-				.Where(a => a.Owner == player && !a.IsDead && a.Info.HasTraitInfo<MobileInfo>())
+				.Where(a => a.Owner == player && !a.IsDead && a.IsInWorld && a.IsIdle
+					&& a.Info.HasTraitInfo<MobileInfo>())
 				.Distinct()
 				.ToList();
 			if (blockers.Count == 0)
 				return;
 
-			notifier.NotifyBlocker(blockers);
+			foreach (var blocker in blockers)
+				world.IssueOrder(new Order("Scatter", blocker, false));
+
 			Log.Write("debug", $"[AotBuild][{player.InternalName}/{player.PlayerName}] Nudging {blockers.Count} own unit(s) off {type} site at {cell}");
 		}
 

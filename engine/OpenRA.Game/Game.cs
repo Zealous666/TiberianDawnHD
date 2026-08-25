@@ -999,7 +999,13 @@ namespace OpenRA
 				Name = "Skirmish Game",
 				Map = map,
 				AdvertiseOnline = false,
-				AdvertiseOnLocalNetwork = !isSkirmish
+				AdvertiseOnLocalNetwork = !isSkirmish,
+
+				// aotmod: a local/skirmish server otherwise starts with a fresh ServerSettings where
+				// EnableSyncReports defaults to false -- so single-player play sessions never buffered
+				// sync data and a save-load desync had no play-side reference to diff against. Carry
+				// the user's setting through so the play session records the same as the load replay.
+				EnableSyncReports = Settings.Server.EnableSyncReports
 			};
 
 			// Always connect to local games using the same loopback connection

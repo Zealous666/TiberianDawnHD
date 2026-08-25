@@ -990,6 +990,11 @@ Player:
 	#
 	# Faction-Split ist unnoetig: die Powers selbst sind faction-neutral, ihre Freischaltung
 	# haengt an ATEC bzw. STEC (siehe overrides.yaml, Player-Block).
+	# Hält das vom AotAgePowerBotModule fuer das naechste Age reservierte Geld. Bewegung laeuft ueber
+	# eine aufgezeichnete Order (nicht direktes TakeCash aus Bot-Code) -> save-load-sicher. Immer aktiv;
+	# bei menschlichen Spielern bleibt Stored einfach 0.
+	AotBotCashVault:
+
 	AotAgePowerBotModule:
 		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
 		PowerOrderNames: AotAge1PowerInfoOrder, AotAge2PowerInfoOrder, AotAge3PowerInfoOrder

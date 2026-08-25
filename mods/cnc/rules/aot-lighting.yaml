@@ -41,6 +41,13 @@ aot-light-system:
 		DuskHour: 18
 		DawnHour: 6
 		TransitionHours: 2
+		# PERFORMANCE (Uhrzeitwechsel): jeder Beleuchtungsschritt loest einen vollen Karten-Re-Tint aus
+		# (alle Terrain-Layer, 4 TintAt/Zelle + Vertex-Upload). Bei Epsilon 0.002 waren das ~225 volle
+		# Re-Tints je Uebergang -> spuerbarer, minutenlanger Einbruch waehrend Daemmerung/Morgen. Groesser
+		# = weniger, groebere Schritte (hier ~37 statt 225); ueber Minuten voellig unmerklich, da der
+		# Uebergang ohnehin langsam ist. SweepTicks verteilt jeden Re-Tint duenner ueber mehr Ticks.
+		Epsilon: 0.012
+		SweepTicks: 40
 		# Nacht: dunkler + leichter Blaustich (Mondlicht). Tag bleibt neutral.
 		DayIntensity: 1.0
 		NightIntensity: 0.55

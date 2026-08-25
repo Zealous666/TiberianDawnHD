@@ -1189,8 +1189,18 @@ namespace OpenRA.Mods.Common.Traits
 					}
 				}
 
-			if (blockers.Count > 0)
-				ship.NotifyBlocker(blockers);
+			// Issue the engine's own "Scatter" order rather than calling NotifyBlocker directly: bot code
+			// may only act through orders. NotifyBlocker made the blockers queue a Nudge activity on the
+			// spot, whose SharedRandom draw (Nudge -> Mobile.GetAdjacentCell) is absent when a save
+			// reloads with the bots suppressed -- the same save-load desync fixed in
+			// AotBaseBuilderBotModule.NudgeBlockers. Only idle units, matching what the engine's
+			// INotifyBlockingMove path did.
+			// Own units only: NotifyBlocker used to reach the friendly check inside the engine
+			// (Mobile.OnNotifyBlockingMove ignores anything not AppearsFriendlyTo), and an order aimed at
+			// a foreign actor would just be thrown away by the order validator anyway.
+			foreach (var blocker in blockers)
+				if (blocker.Owner == ops.Player && blocker.IsIdle && !blocker.IsDead && blocker.IsInWorld)
+					ops.World.IssueOrder(new Order("Scatter", blocker, false));
 		}
 	}
 

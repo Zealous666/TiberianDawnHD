@@ -64,6 +64,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		SupportPowerManager supportPowerManager;
 		PlayerResources playerResources;
+		AotBotCashVault vault;
 		AotOperationsBotModule[] ops = [];
 
 		public AotAgePowerBotModule(Actor self, AotAgePowerBotModuleInfo info)
@@ -76,6 +77,7 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			supportPowerManager = self.Owner.PlayerActor.Trait<SupportPowerManager>();
 			playerResources = self.Owner.PlayerActor.Trait<PlayerResources>();
+			vault = self.Owner.PlayerActor.TraitOrDefault<AotBotCashVault>();
 
 			// TraitsImplementing, not TraitOrDefault: the player actor carries one operations module
 			// per faction and TraitOrDefault throws on the second one.
@@ -127,6 +129,10 @@ namespace OpenRA.Mods.Common.Traits
 			var income = Math.Max(0, playerResources.Earned - lastEarned);
 			lastEarned = playerResources.Earned;
 			skim = income * Info.IncomeShare / 100;
+
+			// The Age tier to buy this tick, if the reserve is full. Deferred to after SyncVault so the
+			// vault-release order is issued before the purchase order (see the power.Ready branch).
+			string toBuy = null;
 
 			foreach (var key in Info.PowerOrderNames)
 			{
@@ -214,14 +220,15 @@ namespace OpenRA.Mods.Common.Traits
 
 				if (power.Ready)
 				{
-					// Enough put by -- hand it back and buy. Refund first, because the power bills the
-					// account itself when the order resolves. If the order fails the money is simply
-					// loose again and gets skimmed back next tick, so the loop settles by itself.
+					// Enough put by -- drop the reserve (SyncVault then releases the vaulted cash back to
+					// the account) and mark this tier for purchase after the loop. The power bills the
+					// account when its order resolves, and the release order is issued first so the cash
+					// is there. If the buy fails the money is loose again and gets skimmed back next tick.
 					if (saved >= info.Cost)
 					{
 						hardSaving.Remove(key);
 						Refund(key, saved);
-						world.IssueOrder(new Order(key, supportPowerManager.Self, false));
+						toBuy = key;
 						continue;
 					}
 
@@ -287,6 +294,14 @@ namespace OpenRA.Mods.Common.Traits
 
 				// Active but not Ready means the research is running (handled above) -- nothing to do.
 			}
+
+			// Move real cash to match the reserve, via a recorded order (save-load safe). Once per tick.
+			// Issued BEFORE the purchase order below so the released cash is back on the account by the
+			// time the power bills it.
+			SyncVault();
+
+			if (toBuy != null)
+				world.IssueOrder(new Order(toBuy, supportPowerManager.Self, false));
 		}
 
 		// Legt bis zu "wanted" zur Seite und gibt den neuen Kontostand zurueck. Ist weniger da,
@@ -304,9 +319,9 @@ namespace OpenRA.Mods.Common.Traits
 		// overrun while saving would be the one way this backfires.
 		public bool HardSaving => hardSaving.Count > 0;
 
-		// What is put by for the next tier, and what it costs. Savings are taken OFF the account by
-		// TakeCash, so a bot saving hard reads cash=0 and is indistinguishable from a bankrupt one --
-		// which is exactly why "are they saving or stuck?" could not be answered from a status line.
+		// What is put by for the next tier, and what it costs. Savings are reserved VIRTUALLY (see
+		// Reserved/Save): the money stays on the account but the spend modules hide it, so this ledger
+		// is the only place the saving-vs-stuck state can be read from.
 		public (int Saved, int Cost, bool Sprinting) AgeSavingProgress()
 		{
 			foreach (var key in Info.PowerOrderNames)
@@ -342,13 +357,34 @@ namespace OpenRA.Mods.Common.Traits
 				Save(key, saved, wanted);
 		}
 
+		// Total intended reserve for the next Age across all keys. The real cash backing it lives in the
+		// AotBotCashVault (off the spendable account, exactly as the old TakeCash drained it), synced to
+		// this figure once per tick via a recorded order -- see SyncVault. Direct TakeCash from bot code
+		// desynced every save-load: Cash is a [Sync] field and bot code is suppressed during the reload
+		// replay, so the drain never happened on load and the whole economy -- and the reported Age --
+		// diverged. Routing it through an order makes the exact same cash movement replay deterministically.
+		public int Reserved
+		{
+			get
+			{
+				var total = 0;
+				foreach (var v in savings.Values)
+					total += v;
+
+				return total;
+			}
+		}
+
 		int Save(string key, int saved, int wanted)
 		{
-			// Never more than is actually on the account -- the share is computed by the caller from
-			// income, this is only the hard limit.
-			var available = playerResources.GetCashAndResources();
-			var take = wanted < available ? wanted : available;
-			if (take <= 0 || !playerResources.TakeCash(take))
+			// Bookkeeping only -- the real cash is moved by SyncVault (below) through the vault, so this
+			// does NOT touch Cash. Bound the intent by everything the player actually owns: spendable
+			// account PLUS what is already vaulted, minus everything already reserved. The share is
+			// computed by the caller from income; this is only the hard limit.
+			var owned = playerResources.GetCashAndResources() + (vault?.Stored ?? 0);
+			var free = owned - Reserved;
+			var take = wanted < free ? wanted : free;
+			if (take <= 0)
 				return saved;
 
 			savings[key] = saved + take;
@@ -357,11 +393,28 @@ namespace OpenRA.Mods.Common.Traits
 
 		void Refund(string key, int saved)
 		{
+			// Bookkeeping only -- drop the reservation. SyncVault returns the real cash from the vault
+			// to the account next time it runs.
 			if (saved <= 0)
 				return;
 
-			playerResources.GiveCash(saved);
 			savings[key] = 0;
+		}
+
+		// aotmod: move real cash into/out of the vault so it matches the intended reserve, via a RECORDED
+		// order. The order replays during a save-load reload (when this bot code does not run at all), so
+		// the cash history is reproduced exactly and the reload stays in sync. Absolute target = idempotent
+		// and self-correcting: issued at most once per tick, and only when the vault is not already there.
+		void SyncVault()
+		{
+			// Never issue an order during the save-load replay: the recorded orders from the play session
+			// are being replayed here, and a fresh one would not exist on the original run -> desync.
+			if (vault == null || world.IsLoadingGameSave)
+				return;
+
+			var target = Reserved;
+			if (target != vault.Stored)
+				world.IssueOrder(new Order(AotBotCashVault.OrderName, vault.Self, false) { ExtraData = (uint)Math.Max(0, target) });
 		}
 
 		protected override void TraitDisabled(Actor self)
@@ -369,6 +422,9 @@ namespace OpenRA.Mods.Common.Traits
 			foreach (var key in Info.PowerOrderNames)
 				if (savings.TryGetValue(key, out var saved))
 					Refund(key, saved);
+
+			// Hand the vaulted cash back to the account (reserve is now 0), unless we are mid-reload.
+			SyncVault();
 		}
 	}
 }
