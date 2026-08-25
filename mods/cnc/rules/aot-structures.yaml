@@ -7792,6 +7792,108 @@ aot-br3:
 	Interactable:
 		Bounds: 4096, 2048
 
+# ── Arctic-Brücken (Snow-Herkunft, Template +1000) ────────────────────────────
+# Nach dem AOT_SNOW→AOT_ARCTIC-Merge liegen die aus AOT_SNOW uebernommenen Bruecken-
+# Templates bei +1000: Holz bridge1/2 = 1165-1168 (nativ waren 165-168), Stein
+# br1/2/3 = 1235-1246 (Temperate-IDs 235-246). Die nativen Aktoren (BRIDGE1/2 = 165-168,
+# aot-br1/2/3 = 235-246) matchen diese +1000-Tiles NICHT -> ohne diese Varianten entsteht
+# auf Arctic-Karten kein Bruecken-Aktor -> die Reparaturhuette findet nichts (User-Fund
+# Polar Panic 2026-08-24: Engineer kann Huette neben zerstoerter Bruecke nicht betreten).
+# Muster/Footprints exakt wie die nativen Vorlagen, nur Template +1000. Keine Auto-Huette
+# (wie BRIDGE1/2 in overrides.yaml und die aot-tem-/aot-br-Bruecken): Reparatur nur ueber
+# eine im Editor platzierte aot-bridgehut.
+# Snow-Bruecken 131-134/378-379 (bridge1/2 + h-Varianten) +1000 -> 1131-1134/1378-1379,
+# 1:1 wie aot-tem-bridge1/2 (RA BRIDGE1/2). Die x-Rampen (bridge1x/2x=1382/1383) bleiben
+# Terrain (kein Aktor referenziert sie), der zerstoerbare Teil ist bridge*/*d/*h.
+aot-arc-bridge1:
+	Inherits: ^Bridge
+	Inherits@EXPLOSIVE: ^ExplosiveBridge
+	Bridge:
+		Template: 1131
+		DamagedTemplate: 1378
+		DestroyedTemplate: 1132
+	Building:
+		Footprint: _____ _____ _____
+		Dimensions: 5,3
+	Interactable:
+		Bounds: 5120, 3072
+	MapEditorData:
+		RequireTilesets: AOT_ARCTIC
+		Categories: Terrain
+
+aot-arc-bridge2:
+	Inherits: ^Bridge
+	Inherits@EXPLOSIVE: ^ExplosiveBridge
+	Bridge:
+		Template: 1133
+		DamagedTemplate: 1379
+		DestroyedTemplate: 1134
+	Building:
+		Footprint: _____ _____
+		Dimensions: 5,2
+	Interactable:
+		Bounds: 5120, 2048
+	MapEditorData:
+		RequireTilesets: AOT_ARCTIC
+		Categories: Terrain
+
+aot-arc-br1:
+	Inherits: ^Bridge
+	Inherits@EXPLOSIVE: ^ExplosiveBridge
+	Bridge:
+		Template: 1235
+		DamagedTemplate: 1236
+		DestroyedTemplate: 1237
+		SouthOffset: 0,2
+	Building:
+		Footprint: ____ ____ ____
+		Dimensions: 4,3
+	Interactable:
+		Bounds: 4096, 3072
+	MapEditorData:
+		RequireTilesets: AOT_ARCTIC
+		Categories: Terrain
+
+aot-arc-br2:
+	Inherits: ^Bridge
+	Inherits@EXPLOSIVE: ^ExplosiveBridge
+	Bridge:
+		Template: 1238
+		DamagedTemplate: 1239
+		DestroyedTemplate: 1240
+		NorthOffset: 3,0
+	Building:
+		Footprint: _____ _____ _____
+		Dimensions: 5,3
+	Interactable:
+		Bounds: 5120, 3072
+	MapEditorData:
+		RequireTilesets: AOT_ARCTIC
+		Categories: Terrain
+
+aot-arc-br3:
+	Inherits: ^Bridge
+	Inherits@EXPLOSIVE: ^ExplosiveBridge
+	Bridge:
+		Long: true
+		ShorePieces: aot-arc-br1,aot-arc-br2
+		Template: 1241
+		DamagedTemplate: 1242
+		DestroyedTemplate: 1243
+		DestroyedPlusNorthTemplate: 1245
+		DestroyedPlusSouthTemplate: 1244
+		DestroyedPlusBothTemplate: 1246
+		NorthOffset: 2,0
+		SouthOffset: 0,1
+	Building:
+		Footprint: ____ ____
+		Dimensions: 4,2
+	Interactable:
+		Bounds: 4096, 2048
+	MapEditorData:
+		RequireTilesets: AOT_ARCTIC
+		Categories: Terrain
+
 # Brücken-Reparatur-Hütte: frei im Map-Editor platzierbares 1×1-Gebäude.
 # Wenn ein Engineer/Saboteur eintritt, wird die nächste Brücke im Radius 8 repariert/gesprengt.
 # Sprite: ctbhut.shp (TS conquer.mix via TS-Mod-Utility extrahieren → mods/cnc/bits/ legen).

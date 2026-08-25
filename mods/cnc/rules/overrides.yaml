@@ -37,7 +37,7 @@ World:
 	LegacyBridgeLayer:
 		# Originalaktoren (bridge1-4) + AoT-TEMPERAT-Varianten mit korrekten Template-IDs
 		# + zerstörbare Fluss-Brücken (aot-br1/br2/br3, Templates 235-246, AOT_TEMPERAT & AOT_ARCTIC)
-		Bridges: bridge1, bridge2, bridge3, bridge4, aot-tem-bridge1, aot-tem-bridge2, aot-br1, aot-br2, aot-br3
+		Bridges: bridge1, bridge2, bridge3, bridge4, aot-tem-bridge1, aot-tem-bridge2, aot-br1, aot-br2, aot-br3, aot-arc-bridge1, aot-arc-bridge2, aot-arc-br1, aot-arc-br2, aot-arc-br3
 
 # === Age of Tiberium (aotmod) - Editor-Pendant zur Clear.Snow-Ressourcenfreischaltung oben ===
 EditorWorld:

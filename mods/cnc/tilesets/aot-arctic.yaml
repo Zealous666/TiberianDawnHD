@@ -23,7 +23,6 @@ Terrain:
 	TerrainType@Bridge:
 		Type: Bridge
 		TargetTypes: Ground, Bridge
-		AcceptsSmudgeType: Crater, Scorch
 		Color: 606060
 	TerrainType@Clear:
 		Type: Clear
@@ -5476,7 +5475,7 @@ Templates:
 		Id: 1129
 		Filename: ford1.sno
 		Size: 3,3
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			0: Rough
 			1: River
@@ -5501,7 +5500,7 @@ Templates:
 		Id: 1130
 		Filename: ford2.sno
 		Size: 3,3
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			0: Rough
 			1: Rough
@@ -5526,7 +5525,7 @@ Templates:
 		Id: 1131
 		Filename: bridge1.sno
 		Size: 5,3
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			1: Rock
 			2: Bridge
@@ -5553,7 +5552,7 @@ Templates:
 		Id: 1132
 		Filename: bridge1d.sno
 		Size: 5,3
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			1: Rock
 			2: Rock
@@ -5580,7 +5579,7 @@ Templates:
 		Id: 1133
 		Filename: bridge2.sno
 		Size: 5,2
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			0: Rock
 			1: Bridge
@@ -5605,7 +5604,7 @@ Templates:
 		Id: 1134
 		Filename: bridge2d.sno
 		Size: 5,2
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			0: Rock
 			1: Rock
@@ -7148,7 +7147,7 @@ Templates:
 		Id: 1235
 		Filename: br1a.sno
 		Size: 4,3
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			1: Rock
 			2: Bridge
@@ -7173,7 +7172,7 @@ Templates:
 		Id: 1236
 		Filename: br1b.sno
 		Size: 4,3
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			1: Rock
 			2: Rough
@@ -7198,7 +7197,7 @@ Templates:
 		Id: 1237
 		Filename: br1c.sno
 		Size: 4,3
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			1: Rock
 			2: Rock
@@ -7223,7 +7222,7 @@ Templates:
 		Id: 1238
 		Filename: br2a.sno
 		Size: 5,3
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			1: Rock
 			2: Bridge
@@ -7250,7 +7249,7 @@ Templates:
 		Id: 1239
 		Filename: br2b.sno
 		Size: 5,3
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			1: Rock
 			2: Rough
@@ -7277,7 +7276,7 @@ Templates:
 		Id: 1240
 		Filename: br2c.sno
 		Size: 5,3
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			1: Water
 			2: Water
@@ -7304,7 +7303,7 @@ Templates:
 		Id: 1241
 		Filename: br3a.sno
 		Size: 4,2
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			0: Rock
 			1: Bridge
@@ -7321,7 +7320,7 @@ Templates:
 		Id: 1242
 		Filename: br3b.sno
 		Size: 4,2
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			0: Rock
 			1: Bridge
@@ -7338,7 +7337,7 @@ Templates:
 		Id: 1243
 		Filename: br3c.sno
 		Size: 4,2
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			0: Rock
 			1: Rock
@@ -7355,7 +7354,7 @@ Templates:
 		Id: 1244
 		Filename: br3d.sno
 		Size: 4,2
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			0: River
 			1: Rock
@@ -7372,7 +7371,7 @@ Templates:
 		Id: 1245
 		Filename: br3e.sno
 		Size: 4,2
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			0: Water
 			1: Water
@@ -7389,7 +7388,7 @@ Templates:
 		Id: 1246
 		Filename: br3f.sno
 		Size: 4,2
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			0: Water
 			1: Water
@@ -7406,7 +7405,7 @@ Templates:
 		Id: 1247
 		Filename: f01.sno
 		Size: 3,3
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			0: Rough
 			1: Road
@@ -7431,7 +7430,7 @@ Templates:
 		Id: 1248
 		Filename: f02.sno
 		Size: 3,3
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			0: Beach
 			1: Beach
@@ -7456,7 +7455,7 @@ Templates:
 		Id: 1249
 		Filename: f03.sno
 		Size: 3,3
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			0: Beach
 			1: Beach
@@ -7481,7 +7480,7 @@ Templates:
 		Id: 1250
 		Filename: f04.sno
 		Size: 3,3
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			0: Clear.Snow
 			1: Beach
@@ -7506,7 +7505,7 @@ Templates:
 		Id: 1251
 		Filename: f05.sno
 		Size: 3,3
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			0: Beach
 			1: Beach
@@ -7531,7 +7530,7 @@ Templates:
 		Id: 1252
 		Filename: f06.sno
 		Size: 3,3
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			0: Beach
 			1: Beach
@@ -7556,7 +7555,7 @@ Templates:
 		Id: 1378
 		Filename: bridge1h.sno
 		Size: 5,3
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			1: Rock
 			2: Rough
@@ -7583,7 +7582,7 @@ Templates:
 		Id: 1379
 		Filename: bridge2h.sno
 		Size: 5,2
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			0: Rock
 			1: Rough
@@ -7608,7 +7607,7 @@ Templates:
 		Id: 1380
 		Filename: br1x.sno
 		Size: 5,3
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			0: Rock
 			3: Road
@@ -7625,7 +7624,7 @@ Templates:
 		Id: 1381
 		Filename: br2x.sno
 		Size: 5,1
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			0: Road
 			4: Beach
@@ -7636,7 +7635,7 @@ Templates:
 		Id: 1382
 		Filename: bridge1x.sno
 		Size: 5,4
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			2: Clear.Snow
 			3: Road
@@ -7659,7 +7658,7 @@ Templates:
 		Id: 1383
 		Filename: bridge2x.sno
 		Size: 5,5
-		Categories: Bridge (Snow)
+		Categories: Bridge
 		Tiles:
 			0: Road
 			1: Road
