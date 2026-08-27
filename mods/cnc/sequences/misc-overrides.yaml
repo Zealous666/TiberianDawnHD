@@ -243,6 +243,54 @@ beacon:
 		RemasteredPremultiplied: false
 	circles:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\FPLS.ZIP
+	# === Age of Tiberium (aotmod) - Super-Power-Beacon-Poster ===
+	# Ziel-Marker jeder Superpower zeigt das EIGENE Power-Icon (statt des generischen
+	# "airstrike"/"atomic"-Platzhalters). Es sind exakt dieselben RGBA-Icon-PNGs wie in der
+	# Sidebar (Image "icon", aot-sequences.yaml). Als Beacon-Poster liegen sie hier auf dem
+	# "beacon"-Image (BeaconImage-Default), damit ArrowSequence/CircleSequence/ClockSequence
+	# weiter auf ihren beacon-Sequenzen greifen. Offset 0,-42 wie die Stock-Poster
+	# (airstrike/atomic in engine/mods/cnc/sequences/misc.yaml), damit der Poster ueber dem
+	# Kreis schwebt. RGBA -> Palette (beaconposter) wird nur zum Blenden benutzt, faerbt nicht.
+	aot-poster-airstrike:
+		Filename: mig_base.png
+		Length: 1
+		Offset: 0,-42
+	aot-poster-banshee:
+		Filename: mig_banshee.png
+		Length: 1
+		Offset: 0,-42
+	aot-poster-spyplane:
+		Filename: mig_yak.png
+		Length: 1
+		Offset: 0,-42
+	aot-poster-parabombs:
+		Filename: mig_parabomb.png
+		Length: 1
+		Offset: 0,-42
+	aot-poster-minecluster:
+		Filename: aot-minecluster-icon.png
+		Length: 1
+		Offset: 0,-42
+	aot-poster-tiberiummissile:
+		Filename: aot-tiberiummissile-icon.png
+		Length: 1
+		Offset: 0,-42
+	aot-poster-atombomb:
+		Filename: aot-atombomb-icon.png
+		Length: 1
+		Offset: 0,-42
+	aot-poster-orcatransport:
+		Filename: aot-orcatransport-icon.png
+		Length: 1
+		Offset: 0,-42
+	aot-poster-zone-drop:
+		Filename: aot-zone-drop-icon.png
+		Length: 1
+		Offset: 0,-42
+	aot-poster-forward-hq:
+		Filename: aot-forward-hq-icon.png
+		Length: 1
+		Offset: 0,-42
 
 scrate:
 	idle:

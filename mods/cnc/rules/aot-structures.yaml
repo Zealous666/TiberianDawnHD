@@ -1843,7 +1843,7 @@ STEC:
 		IncomingTextNotification: notification-enemy-planes-approaching
 		UnitType: aot-mig
 		DisplayBeacon: True
-		BeaconPoster: airstrike
+		BeaconPoster: aot-poster-airstrike
 		BeaconPosterPalette: beaconposter
 		DisplayRadarPing: True
 		CameraActor: camera
@@ -1884,7 +1884,7 @@ STEC:
 		IncomingTextNotification: notification-enemy-planes-approaching
 		UnitType: aot-banshee
 		DisplayBeacon: True
-		BeaconPoster: airstrike
+		BeaconPoster: aot-poster-banshee
 		BeaconPosterPalette: beaconposter
 		DisplayRadarPing: True
 		CameraActor: camera
@@ -1930,7 +1930,7 @@ STEC:
 		# sich die Kamera, behaelt aber seine kurze 150-Tick-Sicht.
 		CameraRemoveDelay: 500
 		DisplayBeacon: True
-		BeaconPoster: airstrike
+		BeaconPoster: aot-poster-spyplane
 		BeaconPosterPalette: beaconposter
 		DisplayRadarPing: True
 		ArrowSequence: arrow
@@ -1970,7 +1970,7 @@ STEC:
 		CameraActor: aot-camera-spyplane
 		CameraRemoveDelay: 150
 		DisplayBeacon: True
-		BeaconPoster: airstrike
+		BeaconPoster: aot-poster-parabombs
 		BeaconPosterPalette: beaconposter
 		DisplayRadarPing: True
 		ArrowSequence: arrow
@@ -2206,6 +2206,8 @@ MSLO:
 		MissileDelay: 11
 		SpawnOffset: 3c0,0,-1c512
 		DisplayBeacon: True
+		BeaconPoster: aot-poster-minecluster
+		BeaconPosterPalette: beaconposter
 		DisplayRadarPing: True
 		CameraRange: 8c0
 		ArrowSequence: arrow
@@ -2236,6 +2238,8 @@ MSLO:
 		MissileDelay: 11
 		SpawnOffset: 3c0,0,-1c512
 		DisplayBeacon: True
+		BeaconPoster: aot-poster-minecluster
+		BeaconPosterPalette: beaconposter
 		DisplayRadarPing: True
 		CameraRange: 8c0
 		ArrowSequence: arrow
@@ -2266,6 +2270,8 @@ MSLO:
 		MissileDelay: 11
 		SpawnOffset: 3c0,0,-1c512
 		DisplayBeacon: True
+		BeaconPoster: aot-poster-tiberiummissile
+		BeaconPosterPalette: beaconposter
 		DisplayRadarPing: True
 		CameraRange: 8c0
 		ArrowSequence: arrow
@@ -2303,7 +2309,7 @@ MSLO:
 		MissileDelay: 11
 		SpawnOffset: 3c0,0,-1c512
 		DisplayBeacon: True
-		BeaconPoster: atomic
+		BeaconPoster: aot-poster-atombomb
 		BeaconPosterPalette: beaconposter
 		DisplayRadarPing: True
 		CameraRange: 10c0
@@ -3929,6 +3935,17 @@ aot-gap:
 	CreatesShroud:
 		Range: 8c0
 		RequiresCondition: !lowpower && !aot-gap-powerdown
+	# --- Eigen-FoW-Feld (kosmetisch, nur Besitzer + Verbuendete) ---
+	# GDI-Gegenstueck zum NOD-Stealth-Generator: statt Gebaeude transparent zu machen, legt das
+	# Feld den ECHTEN Fog-of-War-Look ueber die gesamte Zone. Zwei Abweichungen von normalem FoW:
+	# (1) Besitzer + Allies sehen es IMMER, auch mit eigenen Einheiten drin; (2) eigene Einheiten
+	# und Gebaeude werden DARUNTER voll gezeichnet (nur leicht verdeckt), weil im
+	# IRenderAboveWorld-Pass gezeichnet wird -- nach den Aktoren, vor dem echten Shroud. Gegner
+	# sehen unveraendert den CreatesShroud (schwarz), der bei ihnen ueber diesem Overlay liegt.
+	# Range MUSS mit CreatesShroud uebereinstimmen; Aktiv-Bedingung ebenso (Strom + nicht abgeschaltet).
+	AotFogField:
+		Range: 8c0
+		RequiresCondition: !lowpower && !aot-gap-powerdown
 	RenderShroudCircle:
 	# --- Sprite/Animation (RA GAP.ZIP Spin, PauseOnCondition stoppt bei Energiemangel) ---
 	-ActorPreviewPlaceBuildingPreview:
@@ -5330,6 +5347,8 @@ ORBC:
 		SelectTargetTextNotification: notification-select-target
 		InsufficientPowerTextNotification: notification-insufficient-power
 		DisplayBeacon: True
+		BeaconPoster: aot-poster-orcatransport
+		BeaconPosterPalette: beaconposter
 		DisplayRadarPing: True
 		ArrowSequence: arrow
 		ClockSequence: clock
@@ -5392,6 +5411,8 @@ ORBC:
 		SelectTargetTextNotification: notification-select-target
 		InsufficientPowerTextNotification: notification-insufficient-power
 		DisplayBeacon: True
+		BeaconPoster: aot-poster-zone-drop
+		BeaconPosterPalette: beaconposter
 		DisplayRadarPing: True
 		ArrowSequence: arrow
 		ClockSequence: clock
@@ -7597,7 +7618,7 @@ aot-forward-hq:
 		DropItems: aot-para-gunner, aot-para-gunner, aot-para-gunner, aot-para-gunner, aot-para-gunner, aot-para-rocketeer, aot-para-rocketeer, aot-para-rocketeer
 		AllowImpassableCells: true
 		DisplayBeacon: true
-		BeaconPoster: airstrike
+		BeaconPoster: aot-poster-forward-hq
 		BeaconPosterPalette: beaconposter
 		DisplayRadarPing: true
 		ArrowSequence: arrow
