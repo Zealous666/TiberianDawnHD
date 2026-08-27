@@ -494,18 +494,21 @@ RMBO:
 			Ice: 85
 			Veins: 100
 			Clear.Snow: 100
+			ClearNoSmudges: 100
 	Locomotor@CHEM:
 		Crushes: crate, mine
 		TerrainSpeeds:
 			Ice: 85
 			Veins: 100
 			Clear.Snow: 100
+			ClearNoSmudges: 100
 	Locomotor@WHEELED:
 		Crushes: crate, mine
 		TerrainSpeeds:
 			Ice: 90
 			Veins: 100
 			Clear.Snow: 100
+			ClearNoSmudges: 100
 			# User-Wunsch 2026-07-30: Strassenbonus von vanilla 125 auf 150 angehoben.
 			Road: 150
 	Locomotor@HEAVYWHEELED:
@@ -514,6 +517,7 @@ RMBO:
 			Ice: 90
 			Veins: 100
 			Clear.Snow: 100
+			ClearNoSmudges: 100
 			Road: 150
 	Locomotor@TRACKED:
 		Crushes: wall, crate, infantry, mine
@@ -521,6 +525,7 @@ RMBO:
 			Ice: 95
 			Veins: 100
 			Clear.Snow: 100
+			ClearNoSmudges: 100
 			Road: 150
 	Locomotor@HEAVYTRACKED:
 		Crushes: wall, heavywall, crate, infantry, mine
@@ -528,16 +533,20 @@ RMBO:
 			Ice: 95
 			Veins: 100
 			Clear.Snow: 100
+			ClearNoSmudges: 100
 			Road: 150
 	Locomotor@LANDINGCRAFT:
 		TerrainSpeeds:
 			Clear.Snow: 100
+			ClearNoSmudges: 100
 	Locomotor@CRITTER:
 		TerrainSpeeds:
 			Clear.Snow: 100
+			ClearNoSmudges: 100
 	Locomotor@VISC:
 		TerrainSpeeds:
 			Clear.Snow: 100
+			ClearNoSmudges: 100
 			Veins: 100
 	# Hover gleitet ueber Eis wie ueber Wasser.
 	# Land-Malus abgeschwaecht: Engine-Original hat 33 auf Clear/Rough/Road/Tiberium/
@@ -568,6 +577,7 @@ RMBO:
 			Veins: 100
 			Clear: 75
 			Clear.Snow: 75
+			ClearNoSmudges: 75
 			Rough: 75
 			Road: 75
 			Tiberium: 75
@@ -580,6 +590,7 @@ RMBO:
 		TerrainSpeeds:
 			Clear: 100
 			Clear.Snow: 100
+			ClearNoSmudges: 100
 			Rough: 88
 			Road: 125
 			Bridge: 125
@@ -597,6 +608,7 @@ RMBO:
 		TerrainSpeeds:
 			Clear: 100
 			Clear.Snow: 100
+			ClearNoSmudges: 100
 			Rough: 88
 			Road: 125
 			Bridge: 125
@@ -639,6 +651,7 @@ RMBO:
 		TerrainSpeeds:
 			Clear: 100
 			Clear.Snow: 100
+			ClearNoSmudges: 100
 			Rough: 89
 			Road: 111
 			Bridge: 111
@@ -661,6 +674,7 @@ RMBO:
 		TerrainSpeeds:
 			Clear: 80
 			Clear.Snow: 80
+			ClearNoSmudges: 80
 			Road: 100
 			Rough: 65
 			Tiberium: 70

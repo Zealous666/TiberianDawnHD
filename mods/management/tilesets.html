@@ -293,24 +293,23 @@ const tilesets = [
 const phase2 = [
   {
     id: "aot-interior",
-    title: "Interior",
-    tilesetId: "AOT_INTERIOR",
+    title: "Interior (Indoor)",
+    tilesetId: "in TEMPERAT",
     phase: 2,
     meta: [
-      { label: "Basis", value: "RA Interior (engine/mods/ra/tilesets/interior.yaml)" },
-      { label: "Templates", value: "142 – .int-Dateien" },
-      { label: "Tile-Dateien", value: ".int – aus RA interior.mix" },
-      { label: "Benötigt für", value: "5 RA-Kampagnenmissionen (Bunker/Indoor)" },
+      { label: "Ansatz", value: "KEIN eigenes Tileset — RA-Interior EXKLUSIV an AOT_TEMPERAT angehängt (wie Snow→Winter). Desert bewusst NICHT (User 2026-08-25)." },
+      { label: "Templates", value: "141 (RA Interior 253-399), Offset +3000, Kategorien 'Floor (Indoor)' / 'Wall (Indoor)'" },
+      { label: "Tile-Dateien", value: ".int – DDS direkt aus TEXTURES_RA_SRGB.MEG" },
+      { label: "Terrain/Bewegung", value: "TerrainType@ClearNoSmudges ergänzt + in 14 Locomotors begehbar; DDS truecolor (keine Palette nötig)" },
     ],
     milestones: [
-      "RA-Content via ra-classic-content Installer installieren (interior.mix)",
-      "interior.mix als Package in mod.yaml mounten",
-      "aot-interior.yaml aus RA-Engine (engine/mods/ra/tilesets/interior.yaml) kopieren",
-      "Tileset-ID auf AOT_INTERIOR setzen",
-      "Terrain-Typen prüfen: ClearNoSmudges, Gems (RA) – ggf. für AoT anpassen",
-      "TileSets-Eintrag in mod.yaml: cnchd|tilesets/aot-interior.yaml",
-      "Im Editor laden – Floor, Wall Kategorien vollständig?",
-      "Test-Map: typische Innenraum-Layouts (Flure, Räume, Wände) validieren",
+      "MEG-Interior inventarisiert (163 .INT, RA interior.yaml als Vorlage)",
+      "141 Interior-Templates (+3000) an AOT_TEMPERAT angehängt",
+      "TerrainType@ClearNoSmudges in AOT_TEMPERAT + Locomotor-Speeds (14)",
+      "EditorTemplateOrder um Floor (Indoor)/Wall (Indoor) erweitert",
+      "Im Editor Temperate getestet (Kategorien, Optik, Begehbarkeit)",
+      "End-to-End: RA-Map 'Core of the Matter' 1:1 als AOT_TEMPERAT-Indoor nachgebaut (+3000-Remap, 120x120)",
+      "Desert-Integration wieder entfernt — Indoor bleibt Temperate-exklusiv",
     ]
   },
   {
