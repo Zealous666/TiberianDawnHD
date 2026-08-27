@@ -1485,10 +1485,36 @@ MSAM:
 		Prerequisites: anyhq, ~techlevel.medium, ~aot-age1, aot-age1, weap, aot-gdi-advtech-upgrade, ~!aot-heavy-ordonance-upgrade, ~!aot-mtnk-titan-upgrade
 		Queue: Vehicle.GDI
 		BuildPaletteOrder: 20
+		Description: Multiple Rocket Launcher. Long-range rocket artillery. Strong vs ground. Can engage aircraft in a pinch.
 	# GrantConditionOnPrerequisite noetig: AotTransformsOnTerrain.RequiresCondition liest eine
 	# RUNTIME-Condition (vom Trait-System), keinen TechTree-Prerequisite-String -- ohne diesen
 	# Trait waere aot-heavy-ordonance-upgrade auf MSAM nie gegrantet ("consumes conditions that
 	# are not granted").
+	AutoTargetPriority@Air:
+		ValidTargets: Air
+		Priority: 2
+	# Boden: unveraenderte ballistische 227mm-Doppelsalve (Original-Feel).
+	# Luft: eigene air-only Sekundaerwaffe (aot-MSAM-AA, zielsuchend, schwach).
+	Armament@AA:
+		Name: aa
+		Weapon: aot-MSAM-AA
+		# Offsets alternieren pro Burst-Schuss -> die 4 gleichzeitigen Raketen starten
+		# aus beiden Pods (gleiche Y-Offsets wie die ballistische Bodenwaffe).
+		LocalOffset: 213,128,96, 213,-128,96
+	# AttackFrontal (FacingTolerance 0) zwang das ganze Chassis, sich exakt zum Ziel zu drehen
+	# -- gegen fliegende Ziele praktisch nie feuerbar. Der MSAM-Turret hat 32 Facings (voll
+	# rotierbar), daher wie beim funktionierenden Hover MLRS auf AttackTurreted umgestellt:
+	# der Raketenwerfer zielt unabhaengig, Boden UND Luft. Die ballistische Boden-Salve bleibt
+	# davon unberuehrt (nur die Turret-Ausrichtung wird unabhaengig).
+	-AttackFrontal:
+	AttackTurreted:
+		Voice: Attack
+		# PFLICHT: AttackBase.Armaments ist per Default NUR ["primary", "secondary"]
+		# (AttackBase.cs:28 + :129 filtert per Name). Ohne "aa" hier wird Armament@AA
+		# schlicht ignoriert -> MSAM sieht Lufteinheiten gar nicht als gueltiges Ziel,
+		# Force-Fire faellt auf die Boden-Zelle zurueck (User-Fund: kein Aufblinken,
+		# kein Verfolgen, nur Boden-Salve).
+		Armaments: primary, secondary, aa
 	GrantConditionOnPrerequisite@HEAVYORD:
 		Condition: aot-heavy-ordonance-upgrade
 		Prerequisites: aot-heavy-ordonance-upgrade

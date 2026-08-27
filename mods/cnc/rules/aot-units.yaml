@@ -5261,14 +5261,22 @@ aot-msam-hover-mlrs:
 	Armament:
 		Weapon: aot-DestroyerRockets
 	-Armament@SECONDARY:
+	# Luft laeuft ueber eine eigene, schwache air-only Waffe (die Bodenwaffe ist reines
+	# Ground/Water) -- Versus kann Luft nicht trennen, s. Kommentar an aot-DestroyerRockets.
+	Armament@AA:
+		Name: aa
+		Weapon: aot-HoverMLRS-AA
+		LocalOffset: 213,128,96, 213,-128,96
 	Armament@garrisoned:
 		Weapon: aot-DestroyerRocketsGarrisoned
 	Turreted:
 		TurnSpeed: 512
 		Offset: -256, 0, 200
-	-AttackFrontal:
 	-WithTurretAimAnimation:
 	AttackTurreted:
+		# PFLICHT, sonst wird Armament@AA ignoriert (AttackBase.Armaments ist per Default
+		# nur ["primary", "secondary"], AttackBase.cs:28 + :129).
+		Armaments: primary, secondary, aa
 	-WithSpriteTurret:
 	WithSpriteTurret@hvr:
 		Sequence: aot-hvr-turret
@@ -5284,7 +5292,7 @@ aot-msam-hover-mlrs:
 		Prerequisites: anyhq, ~aot-heavy-ordonance-upgrade
 		Queue: Vehicle.GDI
 		Icon: aot-hvr-mlrs-icon
-		Description: Hover Rocket Launcher. Amphibious rocket artillery. Strong vs all ground units.
+		Description: Hover MLRS. Amphibious rocket artillery. Strong vs all ground units. Can engage aircraft, but poorly suited for AA.
 	Tooltip:
 		Name: Hover MLRS
 
@@ -5313,7 +5321,6 @@ aot-msam-hover-aa:
 		IsPlayerPalette: true
 	-Armament:
 	-Armament@SECONDARY:
-	-AttackFrontal:
 	-WithTurretAimAnimation:
 	AttackTurreted:
 	Turreted:
@@ -5361,10 +5368,14 @@ aot-msam-hover-aa:
 	Buildable:
 		LockedGroup: aot-grp-msam
 		BuildPaletteOrder: 20
-		Prerequisites: anyhq, ~aot-heavy-ordonance-upgrade, ~aot-orbc
+		# Sichtbarkeit vs. Baubarkeit (Praefix-Semantik, s. [[openra-prerequisite-syntax]]):
+		#   ~aot-heavy-ordonance-upgrade -> VERSTECKT bis GDI Heavy Ordonance gebaut, danach sichtbar
+		#   aot-orbc (KEIN ~)            -> sichtbar-ausgegraut bis Orbital Command steht, dann baubar
+		# (frueher faelschlich ~aot-orbc -> versteckte bis Orbital Command, User-Fund)
+		Prerequisites: anyhq, ~aot-heavy-ordonance-upgrade, aot-orbc
 		Queue: Vehicle.GDI
 		Icon: aot-hvr-aa-icon
-		Description: Hover AA. Amphibious anti-air platform. Devastating vs aircraft.
+		Description: Hover AA. Amphibious anti-air platform. Devastating vs aircraft and infantry.
 	Tooltip:
 		Name: Hover AA
 

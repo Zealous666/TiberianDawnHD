@@ -732,9 +732,46 @@ aot-DestroyerRockets:
 	Range: 9c0
 	Burst: 2
 	BurstDelays: 8
-	ValidTargets: Ground, Water, Air
+	# NUR Boden/Wasser -- Luft laeuft ueber die separate, schwache aot-HoverMLRS-AA
+	# (Armament@AA am aot-msam-hover-mlrs), gleiches Muster wie beim MSAM.
+	# ACHTUNG: "Versus: Air" waere ein NO-OP -- Versus-Schluessel sind RUESTUNGSTYPEN
+	# (Heavy/Light/Wood/Concrete/None/Tree), und Flugzeuge tragen Armor Type: Light.
+	# Ein Versus-Eintrag kann Luft also NIE getrennt von Boden-Light-Fahrzeugen schwaechen.
+	ValidTargets: Ground, Water
 	Warhead@1Dam: SpreadDamage
 		Damage: 9000
+
+# === Age of Tiberium (aotmod) - Hover MLRS Flugabwehr (schwach) ===
+# Eigene air-only Rakete, damit der Hover MLRS Luft bekaempfen kann, aber deutlich
+# schwaecher als die Hover AA bleibt (User-Vorgabe). Salvenbild wie seine Bodenwaffe:
+# Burst 2, aber gleichzeitig (BurstDelays 0).
+aot-HoverMLRS-AA:
+	Inherits: ^MissileWeapon
+	ReloadDelay: 30
+	Range: 9c0
+	MinRange: 0
+	ValidTargets: Air
+	Report: missile6.wav
+	Burst: 2
+	BurstDelays: 0
+	Projectile: Missile
+		Image: DRAGON
+		Speed: 384
+		Arm: 2
+		Blockable: false
+		Shadow: true
+		TrailImage: smokey
+		ContrailLength: 8
+		Inaccuracy: 256
+		HorizontalRateOfTurn: 50
+		RangeLimit: 11c0
+	Warhead@1Dam: SpreadDamage
+		Spread: 256
+		Damage: 900
+		ValidTargets: Air
+		Versus:
+			Light: 100
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
 
 # === Age of Tiberium (aotmod) - Destroyer Lenkraketen (RA-Stinger) ===
 # RA-Stinger-IDENTITAET (engine/mods/ra/weapons/missiles.yaml): Schaden 2500, RA-Versus
@@ -1087,8 +1124,46 @@ aot-MsamHoverAA:
 			Heavy: 15
 			Concrete: 5
 
-# === Age of Tiberium (aotmod) - Hover AA Guns ===
-# Burst: 2 kurze Doppelschüsse, dann Pause → "dak-dak ... dak-dak"-Rhythmus
+# === Age of Tiberium (aotmod) - MSAM Flugabwehr-Rakete (NUR Luft, schwach) ===
+# Der MSAM behaelt gegen Boden seine ballistische 227mm-Salve (Original-Feel). Fuer Luft
+# reicht das nicht: der 227mm ist ein BALLISTISCHER Lob (LaunchAngle 62), arct zu Boden und
+# trifft fliegende Ziele nie. Daher eine EIGENE, air-only zielsuchende Rakete als
+# Sekundaerwaffe -- deutlich schwaecher als die Hover AA (User: "MSAM viel weniger effizient
+# gegen Air als Hover AA"). DRAGON-Optik wie die Boden-Rakete.
+aot-MSAM-AA:
+	Inherits: ^MissileWeapon
+	ReloadDelay: 90
+	Range: 9c0
+	MinRange: 0
+	ValidTargets: Air
+	Report: rocket1.aud
+	# Salven-Bild wie die ballistische Bodenwaffe: dort feuern 2 Armaments (primary+secondary)
+	# mit je Burst 4 / BurstDelays 0,4,0 -> 4 Raketen GLEICHZEITIG, kurze Pause, nochmal 4.
+	# Die AA ist nur EIN Armament, daher Burst 4 mit BurstDelays 0 = alle 4 auf einmal
+	# (kein gestaffelter Burst, User-Wunsch). LocalOffset alterniert ueber beide Raketenpods.
+	Burst: 4
+	BurstDelays: 0
+	Projectile: Missile
+		Image: DRAGON
+		Speed: 384
+		Arm: 2
+		Blockable: false
+		Shadow: true
+		TrailImage: smokey
+		ContrailLength: 8
+		Inaccuracy: 256
+		HorizontalRateOfTurn: 50
+		RangeLimit: 11c0
+	Warhead@1Dam: SpreadDamage
+		Spread: 256
+		# 4 statt 2 Raketen pro Salve bei unveraendertem Einzelschaden -> doppelte
+		# Salvenwirkung (2800 statt 1400), User-Wunsch.
+		Damage: 700
+		ValidTargets: Air
+		Versus:
+			Light: 100
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+
 aot-HoverAAGun:
 	Inherits: APCGun
 	Burst: 2
