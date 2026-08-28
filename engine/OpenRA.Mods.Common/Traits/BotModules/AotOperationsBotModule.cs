@@ -88,6 +88,12 @@ namespace OpenRA.Mods.Common.Traits
 		public bool Done { get; protected set; }
 		public AotMissionOutcome Outcome { get; protected set; } = AotMissionOutcome.Unknown;
 
+		// aotmod (snapshot): infrastructure missions are recreated and wired up by the module/service
+		// itself on start (they hold live, non-serialisable references). They must NOT be saved or
+		// reconstructed from a snapshot -- the live instance created on load is the correct one, and a
+		// reconstructed shell would be missing those references and crash on its first tick.
+		public virtual bool IsInfrastructure => false;
+
 		protected AotMission(AotOperationsBotModule ops, string name)
 		{
 			Ops = ops;
@@ -1218,7 +1224,7 @@ namespace OpenRA.Mods.Common.Traits
 		public override object Create(ActorInitializer init) { return new AotOperationsBotModule(init.Self, this); }
 	}
 
-	public class AotOperationsBotModule : ConditionalTrait<AotOperationsBotModuleInfo>, IBotTick, INotifyActorDisposing
+	public class AotOperationsBotModule : ConditionalTrait<AotOperationsBotModuleInfo>, IBotTick, INotifyActorDisposing, IGameSaveTraitData
 	{
 		public readonly World World;
 		public readonly Player Player;
@@ -1378,6 +1384,83 @@ namespace OpenRA.Mods.Common.Traits
 			var yard = constructionYards.Actors.FirstOrDefault(a => a.Owner == Player && !a.IsDead && a.IsInWorld);
 			return yard?.Location ?? (Intel?.Ready == true ? Intel.BaseCentre : CPos.Zero);
 		}
+
+		#region Snapshot save games
+
+		// Running operations survive a save. The user's requirement (2026-08-25) is explicit: which
+		// operations a bot has started and how far along they are must be restored -- only the BUILD
+		// cycle is allowed to restart. Field state is serialised generically by AotMissionState, so a
+		// mission added in a later session is covered automatically; see the notes there before adding
+		// exotic field types.
+		List<MiniYamlNode> IGameSaveTraitData.IssueTraitData(Actor self)
+		{
+			var missions = new List<MiniYamlNode>();
+			var index = 0;
+
+			foreach (var mission in Missions)
+			{
+				if (mission.Done || mission.IsInfrastructure)
+					continue;
+
+				missions.Add(new MiniYamlNode(index.ToStringInvariant(), new MiniYaml("", new List<MiniYamlNode>
+				{
+					new("Type", mission.GetType().Name),
+					new("Name", mission.Name ?? ""),
+					new("State", new MiniYaml("", AotMissionState.Save(mission)))
+				})));
+
+				index++;
+			}
+
+			return [new MiniYamlNode("Missions", new MiniYaml("", missions))];
+		}
+
+		void IGameSaveTraitData.ResolveTraitData(Actor self, MiniYaml data)
+		{
+			var root = data.ToDictionary();
+			if (!root.TryGetValue("Missions", out var missions))
+				return;
+
+			// Replace only the discrete operations; keep infrastructure missions (e.g. the transit
+			// service's own mission) that the module already created and wired up on this load.
+			Missions.RemoveAll(m => !m.IsInfrastructure);
+
+			var restored = 0;
+			foreach (var node in missions.Nodes)
+			{
+				var fields = node.Value.ToDictionary();
+				if (!fields.TryGetValue("Type", out var typeName))
+					continue;
+
+				try
+				{
+					var mission = AotMissionState.Reconstruct(typeName.Value, this,
+						fields.TryGetValue("Name", out var name) ? name.Value : null);
+
+					if (mission == null)
+					{
+						OpenRA.Log.Write("debug", $"[AotSnapshot] mission type '{typeName.Value}' could not be reconstructed -- operation lost");
+						continue;
+					}
+
+					if (fields.TryGetValue("State", out var state))
+						AotMissionState.Load(mission, state, World);
+
+					Missions.Add(mission);
+					restored++;
+				}
+				catch (Exception e)
+				{
+					// A single malformed operation must not abort the load or leave the bot with a
+					// half-built mission -- drop just this one and keep the rest.
+					OpenRA.Log.Write("debug", $"[AotSnapshot] operation '{typeName.Value}' failed to restore (dropped): {e.Message}");
+				}
+			}
+
+			OpenRA.Log.Write("debug", $"[AotSnapshot] restored {restored} running operation(s) for {Player.InternalName}");
+		}
+
+		#endregion
 
 		public int AvailableCash() => playerResources.GetCashAndResources();
 
@@ -1707,7 +1790,23 @@ namespace OpenRA.Mods.Common.Traits
 				foreach (var m in Missions.ToList())
 				{
 					if (!m.Done)
-						m.Tick(bot);
+					{
+						try
+						{
+							m.Tick(bot);
+						}
+						catch (Exception e)
+						{
+							// Self-healing safety net (snapshot restore hardening): a mission that throws
+							// -- e.g. a restored operation whose target actor did not survive into the save
+							// -- must never crash the whole game. Drop it and carry on. Bot code is
+							// unsynced, so this cannot affect multiplayer determinism. Logged so a genuine
+							// bug is still discoverable.
+							OpenRA.Log.Write("debug", $"[AotOps] mission {m.GetType().Name} threw and was dropped: {e}");
+							Missions.Remove(m);
+							continue;
+						}
+					}
 
 					if (m.Done)
 					{
@@ -2832,21 +2931,20 @@ namespace OpenRA.Mods.Common.Traits
 			// points than players these are the best real estate on the board -- flat, pre-cleared,
 			// and placed next to tiberium by the mapper. "Unused" means no construction yard of ANY
 			// player anywhere near it, which also rules out a spawn somebody already expanded onto.
-			//
-			// A non-prior Expansion Marker ranks with an unused spawn (user: marker = empty spawn), and
-			// is checked first so a mapper's hint wins the tie.
-			var marker = FindMarkerSite(home, priorOnly: false);
-			if (marker != null)
-			{
-				Log($"expansion site: expansion marker at {marker.Value}");
-				return marker;
-			}
-
 			var freeSpawn = FindFreeSpawnSite(home);
 			if (freeSpawn != null)
 			{
 				Log($"expansion site: unused spawn point at {freeSpawn.Value}");
 				return freeSpawn;
+			}
+
+			// PRIORITY 2: a non-prior Expansion Marker. Below empty spawns, above the tiberium fields
+			// (user decision 2026-08-28: prior-marker > empty spawn > non-prior marker > field).
+			var marker = FindMarkerSite(home, priorOnly: false);
+			if (marker != null)
+			{
+				Log($"expansion site: expansion marker at {marker.Value}");
+				return marker;
 			}
 			var enemyBuildings = World.Actors
 				.Where(a => !a.IsDead && a.IsInWorld
@@ -2926,17 +3024,14 @@ namespace OpenRA.Mods.Common.Traits
 
 				considered++;
 
-				// More tiberium is better, closer to home is better (shorter, safer convoy). The bonus
-				// is for BLOSSOM TREES (ResourceCreatorTypes = split2/split3/splitblue), not ore mines:
-				// a regrowing field keeps paying out, and ore mines mostly sit at enemy spawns anyway
-				// (User 2026-08-03). Purely a bonus -- a plain big field is a perfectly good site.
-				// PRIORITY 2 and 3 (User 2026-08-03): fields WITH a blossom tree always outrank fields
-				// without one, regardless of size -- a regrowing field is worth more than a bigger dead
-				// one. Only within the same class does size (and then proximity) decide. Implemented as
-				// a tier offset rather than a weight so a very large plain field can never overtake a
-				// blossom field, which a plain bonus allowed.
-				var score = indice.ResourceCellsCount
-					- distHome
+				// NEAREST field wins (User 2026-08-28: "immer den naechsten waehlen, nicht am andern ende
+				// der map"). Size no longer competes with distance -- a huge far field used to beat a small
+				// near one, which is exactly the "far end" pick the user objected to; ExpansionMinResourceCells
+				// already rules out fields too small to be worth it, so among the qualifying ones proximity
+				// decides. BLOSSOM TREES still win as a class (User 2026-08-03: a regrowing field outranks a
+				// dead one regardless), implemented as a tier offset (1000 >> any map distance), so the pick
+				// is "the nearest blossom field, else the nearest plain field".
+				var score = -distHome
 					+ (indice.ResourceCreatorLocs.Length > 0 ? Info.ExpansionBlossomTierBonus : 0);
 
 				if (score > bestScore)
