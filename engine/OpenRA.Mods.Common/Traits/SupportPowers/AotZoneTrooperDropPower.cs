@@ -111,6 +111,9 @@ namespace OpenRA.Mods.Common.Traits
 					info.ReinforcementsArrivedSpeechNotification, self.Owner.Faction.InternalName);
 				TextNotificationsManager.AddTransientLine(self.Owner, info.ReinforcementsArrivedTextNotification);
 
+				Actor distanceTestActor = null;
+				var maxWaitTicks = 0;
+
 				for (var i = -info.Count / 2; i <= info.Count / 2; i++)
 				{
 					// Even-sized squads skip the lead dropship.
@@ -138,6 +141,7 @@ namespace OpenRA.Mods.Common.Traits
 					w.Add(dropship);
 					dropship.QueueActivity(new Fly(dropship, Target.FromPos(burstPoint)));
 					dropship.QueueActivity(new RemoveSelf());
+					distanceTestActor ??= dropship;
 
 					// Invisible timer (no actor, no render output at all -- nothing hangs in the air
 					// beforehand) that waits roughly as long as the cosmetic dropship's flight would
@@ -145,7 +149,33 @@ namespace OpenRA.Mods.Common.Traits
 					// activity/collision/pathing state, so it always fires reliably.
 					var travelDistance = (spawnPos - burstPoint).Length;
 					var waitTicks = speed > 0 ? travelDistance / speed : 0;
+					if (waitTicks > maxWaitTicks)
+						maxWaitTicks = waitTicks;
 					w.Add(new AotZoneTrooperBurstTimer(waitTicks, burstPoint, self.Owner, info));
+				}
+
+				// On-map target marker showing the drop's own icon; the clock fills as the lead
+				// dropship approaches, and the beacon auto-removes once the squad has arrived.
+				if (Info.DisplayBeacon && distanceTestActor != null)
+				{
+					var distance = (startEdge - approachTarget).HorizontalLength;
+					var beacon = new Beacon(
+						self.Owner,
+						targetCenter,
+						Info.BeaconPaletteIsPlayerPalette,
+						Info.BeaconPalette,
+						Info.BeaconImage,
+						Info.BeaconPoster,
+						Info.BeaconPosterPalette,
+						Info.BeaconSequence,
+						Info.ArrowSequence,
+						Info.CircleSequence,
+						Info.ClockSequence,
+						() => distance == 0 ? 1f : 1 - (distanceTestActor.CenterPosition - approachTarget).HorizontalLength * 1f / distance,
+						Info.BeaconDelay,
+						maxWaitTicks);
+
+					w.Add(beacon);
 				}
 			});
 		}

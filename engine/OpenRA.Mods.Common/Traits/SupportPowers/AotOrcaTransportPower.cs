@@ -12,6 +12,7 @@
 using System.Collections.Generic;
 using OpenRA.Activities;
 using OpenRA.Mods.Common.Activities;
+using OpenRA.Mods.Common.Effects;
 using OpenRA.Primitives;
 using OpenRA.Traits;
 
@@ -150,6 +151,40 @@ namespace OpenRA.Mods.Common.Traits
 
 				w.Add(aircraft);
 
+				// On-map target marker showing the transport's own icon; the clock fills as the
+				// aircraft approaches, and the beacon is removed once it lands (mirrors ParatroopersPower).
+				Beacon beacon = null;
+				if (Info.DisplayBeacon)
+				{
+					var distance = (target - startEdge).HorizontalLength;
+					beacon = new Beacon(
+						self.Owner,
+						target,
+						Info.BeaconPaletteIsPlayerPalette,
+						Info.BeaconPalette,
+						Info.BeaconImage,
+						Info.BeaconPoster,
+						Info.BeaconPosterPalette,
+						Info.BeaconSequence,
+						Info.ArrowSequence,
+						Info.CircleSequence,
+						Info.ClockSequence,
+						() => distance == 0 ? 1f : 1 - (aircraft.CenterPosition - target).HorizontalLength * 1f / distance,
+						Info.BeaconDelay);
+
+					w.Add(beacon);
+				}
+
+				void RemoveBeacon()
+				{
+					if (beacon == null)
+						return;
+
+					var b = beacon;
+					beacon = null;
+					self.World.AddFrameEndTask(ww => ww.Remove(b));
+				}
+
 				var cargo = aircraft.Trait<Cargo>();
 				foreach (var unit in units)
 					cargo.Load(aircraft, unit);
@@ -158,6 +193,7 @@ namespace OpenRA.Mods.Common.Traits
 				aircraft.QueueActivity(new UnloadCargo(aircraft, Target.FromPos(target), info.LandRange));
 				aircraft.QueueActivity(new CallFunc(() =>
 				{
+					RemoveBeacon();
 					Game.Sound.PlayNotification(self.World.Map.Rules, self.Owner, "Speech",
 						info.ReinforcementsArrivedSpeechNotification, self.Owner.Faction.InternalName);
 					TextNotificationsManager.AddTransientLine(self.Owner, info.ReinforcementsArrivedTextNotification);
