@@ -3946,6 +3946,15 @@ aot-gap:
 	AotFogField:
 		Range: 8c0
 		RequiresCondition: !lowpower && !aot-gap-powerdown
+	# Spionage: ein infiltrierender Spy deckt genau die vom Shroud-Generator versteckte Zone
+	# (Feld-Radius 8c0) auf -> Schleier weg UND getarnte Gebaeude/Einheiten sichtbar (Spy-Kamera mit
+	# DetectCloaked). Bleibt bestehen, solange dieser Generator steht.
+	AotInfiltrateForAreaReveal:
+		Types: SpyInfiltrate
+		CameraActor: aot-camera-gap-scan
+		PlayerExperience: 10
+		InfiltratedNotification: BuildingInfiltrated
+		InfiltratedTextNotification: notification-building-infiltrated
 	RenderShroudCircle:
 	# --- Sprite/Animation (RA GAP.ZIP Spin, PauseOnCondition stoppt bei Energiemangel) ---
 	-ActorPreviewPlaceBuildingPreview:
@@ -5504,7 +5513,7 @@ SLAB:
 		PauseOnCondition: lowpower
 		Icon: aot-satellite
 		Name: Satellite Surveillance
-		Description: Uncovers the entire map and lifts the fog of war for 30 seconds, exposing all enemy units. Afterwards the fog returns, but the terrain stays revealed.
+		Description: Uncovers the entire map and lifts the fog of war for 10 seconds, exposing all enemy units. Afterwards the fog returns, but the terrain stays revealed.
 		SupportPowerPaletteOrder: 55
 	AotFirestormMatrixPower:
 		OrderName: AotFirestormMatrix
@@ -5876,6 +5885,15 @@ aot-sgen:
 		Range: 12c665
 		Color: 8844FFB4
 		BorderColor: 20102080
+	# Spionage: ein infiltrierender Spy deckt genau die vom Stealth-Generator getarnte Zone
+	# (Feld-Radius 12c665) auf -> Schleier weg UND die getarnten Gebaeude/Einheiten sichtbar
+	# (Spy-Kamera mit DetectCloaked). Bleibt bestehen, solange dieser Generator steht.
+	AotInfiltrateForAreaReveal:
+		Types: SpyInfiltrate
+		CameraActor: aot-camera-sgen-scan
+		PlayerExperience: 10
+		InfiltratedNotification: BuildingInfiltrated
+		InfiltratedTextNotification: notification-building-infiltrated
 	ProvidesPrerequisite:
 		Prerequisite: aot-sgen
 	Buildable:

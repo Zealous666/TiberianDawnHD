@@ -1560,10 +1560,14 @@ ORCA:
 		# aotmod 2026-08-21: TS-Orca-Start/Lande-Sounds (aus TS extrahiert, s. [[aot-orcatran-system]]).
 		TakeoffSounds: orcaup1.aud
 		LandingSounds: orcadwn1.aud
+	# aot-cruiser-carrier-proxy MUSS mit gelistet sein: der aus dem Naval-Tab (nach Carrier-Upgrade)
+	# gebaute Carrier ist dieser separate Aktorname, waehrend ein hochgeruesteter Basis-aot-cruiser
+	# denselben Deploy-Carrier-Modus hat. Rearmable/Repairable matchen per Aktorname -> ohne den Proxy
+	# konnten ORCAs auf einem gebauten (statt hochgeruesteten) deployten Carrier nicht landen/aufladen.
 	Rearmable:
-		RearmActors: aot-hpad-gdi, aot-cruiser
+		RearmActors: aot-hpad-gdi, aot-cruiser, aot-cruiser-carrier-proxy
 	Repairable:
-		RepairActors: aot-hpad-gdi, aot-cruiser
+		RepairActors: aot-hpad-gdi, aot-cruiser, aot-cruiser-carrier-proxy
 	AotReturnWhenEmpty:
 	# Guard-Leash (aotmod 2026-08-27): Apache/ORCA hovern im Idle und griffen ueber ^AutoTargetAllAssaultMove
 	# mit ScanOnIdle=True ungeleasht an -> liessen sich (z.B. von vorbeifliegenden MiGs) ueber die ganze
@@ -2153,6 +2157,10 @@ BIKE:
 		Condition: aot-iron-dome
 	# Carryable: Fahrzeuge können vom GDI Carryall-TRAN aufgenommen werden (manuelle PickupUnit-Order)
 	Carryable:
+	# Ohne dies zeigt der Carryall die getragene Einheit als Actor-Preview, die nur den
+	# EnabledByDefault-Body kennt -> condition-gesteuerte Varianten (z.B. MCV age0/age1/age2) fallen
+	# beim Tragen auf den age0-Body zurueck. Der Forwarder reicht die Live-Conditions in die Preview.
+	AotForwardConditionsToPreview:
 	# === Ende aotmod ===
 	AotDamagedByCondition:
 		RequiresCondition: aot-tiberium-gassed

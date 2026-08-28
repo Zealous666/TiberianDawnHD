@@ -46,8 +46,8 @@ namespace OpenRA.Mods.Common.Traits
 		public readonly int RevealDelay = 50;
 
 		[Desc("Ticks the entire map stays revealed through fog-of-war (units visible) after ExploreAll. " +
-			"Once elapsed the fog returns; the shroud stays explored. 750 ticks = 30s at 25 ticks/s.")]
-		public readonly int FogRevealDuration = 750;
+			"Once elapsed the fog returns; the shroud stays explored. 250 ticks = 10s at 25 ticks/s.")]
+		public readonly int FogRevealDuration = 250;
 
 		[PaletteReference]
 		public readonly string MissilePalette = "effect";

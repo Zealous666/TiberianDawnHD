@@ -44,9 +44,21 @@ namespace OpenRA.Mods.Common.Traits.Render
 
 		public override object Create(ActorInitializer init) { return new WithSpriteBody(init, this); }
 
+		// aotmod: preview enablement that respects live conditions when they were forwarded
+		// (AotForwardConditionsToPreview -> AotPreviewConditionsInit). Without that init -- placement
+		// previews and actors that don't forward conditions -- this is identical to EnabledByDefault.
+		protected bool EnabledForPreview(ActorPreviewInitializer init)
+		{
+			var ci = init.GetOrDefault<AotPreviewConditionsInit>();
+			if (ci != null)
+				return RequiresCondition == null || RequiresCondition.Evaluate(ci.Value);
+
+			return EnabledByDefault;
+		}
+
 		public virtual IEnumerable<IActorPreview> RenderPreviewSprites(ActorPreviewInitializer init, string image, int facings, PaletteReference p)
 		{
-			if (!EnabledByDefault)
+			if (!EnabledForPreview(init))
 				yield break;
 
 			if (IsPlayerPalette)

@@ -2194,6 +2194,11 @@ aot-tran-gdi-base:
 	RenderSprites:
 		Image: aot-tran-cary
 	Buildable:
+		# Gemeinsame LockedGroup fuer ALLE GDI-Transport-Varianten (Chinook/Gunship/Carryall/Ferry):
+		# ein einziger Menue-Slot, den jeweils die aktuell baubare Variante beansprucht. Ohne dies war
+		# jede Variante ein eigener Slot -> die per Upgrade nicht gewaehlten (Doorgunner vs. Carryall
+		# schliessen sich aus) blieben dauerhaft als ausgegraute Platzhalter stehen. Analog aot-grp-orca.
+		LockedGroup: aot-grp-tran-gdi
 		Queue: Aircraft.GDI
 		BuildPaletteOrder: 10
 		Prerequisites: anyhq, ~!aot-tran-carryall-upgrade, ~!aot-tran-doorgunner-upgrade
@@ -2212,6 +2217,7 @@ aot-tran-gdi-gunship:
 	RenderSprites:
 		Image: aot-tran-cary
 	Buildable:
+		LockedGroup: aot-grp-tran-gdi
 		Queue: Aircraft.GDI
 		BuildPaletteOrder: 10
 		Prerequisites: anyhq, ~!aot-tran-carryall-upgrade, ~aot-tran-doorgunner-upgrade
@@ -2230,6 +2236,7 @@ aot-tran-gdi-cary:
 	Valued:
 		Cost: 1500
 	Buildable:
+		LockedGroup: aot-grp-tran-gdi
 		Queue: Aircraft.GDI
 		BuildPaletteOrder: 10
 		Prerequisites: anyhq, ~aot-tran-carryall-upgrade, ~!aot-carryall-harvest-upgrade
@@ -2248,6 +2255,7 @@ aot-tran-gdi-cary-ferry:
 	Valued:
 		Cost: 2250
 	Buildable:
+		LockedGroup: aot-grp-tran-gdi
 		Queue: Aircraft.GDI
 		BuildPaletteOrder: 10
 		Prerequisites: anyhq, ~aot-tran-carryall-upgrade, ~aot-carryall-harvest-upgrade
@@ -2744,6 +2752,36 @@ aot-camera-spyplane:
 	AotCloakRevealSound:
 		Range: 10c0
 		Sound: trans1.aud
+
+# === Age of Tiberium (aotmod) - Spy-Scan-Kameras (Shroud-/Stealth-Generator-Infiltration) ===
+# Vom AotInfiltrateForAreaReveal-Trait gespawnt, wenn ein Spy den jeweiligen Generator infiltriert.
+# Gehoert dem Spy-Besitzer, sitzt AUF dem Generator und bleibt bestehen, solange der Generator steht
+# (der Trait entfernt die Kamera erst, wenn der Generator die Welt verlaesst). RevealsShroud hebt den
+# Schleier, DetectCloaked deckt die getarnten Gebaeude/Einheiten im Feld auf (reine Sicht reicht nicht).
+# Range = Feld-Radius des jeweiligen Generators (Shroud-Gen 8c0, Stealth-Gen 12c665).
+aot-camera-gap-scan:
+	Inherits: CAMERA
+	RenderSpritesEditorOnly:
+		Image: camera
+	RevealsShroud:
+		Range: 8c0
+		Type: CenterPosition
+	DetectCloaked:
+		Range: 8c0
+		DetectionTypes: Cloak, Mine
+	-MapEditorData:
+
+aot-camera-sgen-scan:
+	Inherits: CAMERA
+	RenderSpritesEditorOnly:
+		Image: camera
+	RevealsShroud:
+		Range: 12c665
+		Type: CenterPosition
+	DetectCloaked:
+		Range: 12c665
+		DetectionTypes: Cloak, Mine
+	-MapEditorData:
 
 # === Age of Tiberium (aotmod) - aot-badr: Badger Bomber (NOD Parabombs-Superpower) ===
 # Nachbau der RA-Parabomb-Mechanik (RA BADR.Bomber): großes, langsames Flugzeug fliegt EINEN
@@ -5954,15 +5992,25 @@ aot-mgap:
 		Facing: 384
 		DeploySounds: place2.aud
 		UndeploySounds: clicky1.aud
-	# Kernfunktion: Shroud-Vorhang NUR solange deployed. Identisch aot-gap (Range 8c0).
+	# Kernfunktion: Shroud-Vorhang NUR solange deployed. Etwas kleiner als der stationaere aot-gap
+	# (8c0), damit das mobile Feld bewusst schwaecher/kompakter ist -> 6c0 (deckt sich mit der
+	# eigenen Innensicht GAPGEN_MAIN Range 6c0).
 	CreatesShroud:
-		Range: 8c0
+		Range: 6c0
+		RequiresCondition: aot-mgap-deployed
+	# Kosmetisches Eigen-FoW-Feld (Shroud-Wolke), wie stationaerer aot-gap. Zeichnet im
+	# IRenderAboveWorld-Pass -> Besitzer/Allies sehen die Wolke, eigene Einheiten bleiben sichtbar.
+	# Range + Aktiv-Condition MUESSEN zu CreatesShroud passen. AotFogField liest CenterPosition
+	# dynamisch, funktioniert also auch mobil (Wolke sitzt am deployten Fahrzeug).
+	AotFogField:
+		Range: 6c0
 		RequiresCondition: aot-mgap-deployed
 	# Feindliche Einheiten im Feld -> Sicht auf 2c0 kappen. SELBE Condition (aot-gap-suppressed)
 	# wie stationaerer aot-gap -> overrides.yaml bereits fertig verdrahtet, KEINE Aenderung noetig.
+	# Range deckt sich mit CreatesShroud (6c0).
 	ProximityExternalCondition@GAPSUPPRESS:
 		Condition: aot-gap-suppressed
-		Range: 8c0
+		Range: 6c0
 		ValidRelationships: Enemy, Neutral
 		RequiresCondition: aot-mgap-deployed
 	# Shroud-Radius-Kreis (bei Selektion). Zeigt immer wenn selektiert (kein ConditionalTrait).

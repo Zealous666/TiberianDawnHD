@@ -9,8 +9,11 @@
  */
 #endregion
 
+using System;
 using System.Collections.Generic;
 using OpenRA.Activities;
+using OpenRA.Effects;
+using OpenRA.Graphics;
 using OpenRA.Mods.Common.Activities;
 using OpenRA.Mods.Common.Effects;
 using OpenRA.Primitives;
@@ -185,6 +188,13 @@ namespace OpenRA.Mods.Common.Traits
 					self.World.AddFrameEndTask(ww => ww.Remove(b));
 				}
 
+				// Safety net: if the transport is shot down (or otherwise leaves the world) BEFORE the
+				// arrival CallFunc runs, that queued RemoveBeacon never fires and the on-map marker would
+				// linger forever. This watcher removes the beacon the moment the aircraft is gone.
+				// RemoveBeacon is idempotent, so the normal arrival path staying the primary remover is fine.
+				if (beacon != null)
+					w.Add(new AotOrcaTransportBeaconWatcher(aircraft, RemoveBeacon));
+
 				var cargo = aircraft.Trait<Cargo>();
 				foreach (var unit in units)
 					cargo.Load(aircraft, unit);
@@ -202,5 +212,31 @@ namespace OpenRA.Mods.Common.Traits
 				aircraft.QueueActivity(new RemoveSelf());
 			});
 		}
+	}
+
+	// Removes the transport's on-map beacon once the aircraft is dead or no longer in the world.
+	// Guards against the marker leaking when the transport is destroyed mid-delivery (e.g. shot down
+	// while unloading under fire), where the queued arrival CallFunc that normally removes it never runs.
+	sealed class AotOrcaTransportBeaconWatcher : IEffect
+	{
+		readonly Actor aircraft;
+		readonly Action removeBeacon;
+
+		public AotOrcaTransportBeaconWatcher(Actor aircraft, Action removeBeacon)
+		{
+			this.aircraft = aircraft;
+			this.removeBeacon = removeBeacon;
+		}
+
+		public void Tick(World world)
+		{
+			if (aircraft.IsInWorld && !aircraft.IsDead)
+				return;
+
+			world.AddFrameEndTask(w => w.Remove(this));
+			removeBeacon();
+		}
+
+		public IEnumerable<IRenderable> Render(WorldRenderer wr) { yield break; }
 	}
 }
