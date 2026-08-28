@@ -376,6 +376,18 @@ aot-ore-mine:
 		DockAngle: 0
 		DockOffset: 0,-1c512,0
 	WithBuildingBib:
+	# Explosion beim Erschoepfen ohne Krater-Smudge (User-Wunsch 2026-08-28): ^Building feuert
+	# beim Tod BuildingExplode, dessen LeaveSmudge(Crater)-Warhead den Krater hinterliesse.
+	# aot-mine-explode-nocrater (aot-weapons.yaml) ist dieselbe Explosion OHNE Smudge.
+	FireWarheadsOnDeath:
+		Weapon: aot-mine-explode-nocrater
+		EmptyWeapon: aot-mine-explode-nocrater
+	# Locker verstreutes RA-Erz rund um die Mine (User-Wunsch 2026-08-28). Unsichtbar-gekoppelte,
+	# nicht-blockierende Deko-Aktoren, die mit der Mine wieder verschwinden. Pro Zelle terrain-
+	# abhaengig: Clear.Snow -> Snow-Sprite, sonst Temperate (AOT_ARCTIC mischt pro Zelle).
+	ScatterDecorationActors:
+		TemperateActor: aot-ore-scatter-temp
+		SnowActor: aot-ore-scatter-snow
 	# Vergroesserte Nicht-bebaubar-Zone: spawnt bei Spielstart einen unsichtbaren Begleit-Aktor
 	# (aot-ore-mine-keepout, 8x8) zentriert auf die 2x2-Mine (Offset -3,-3 = 3-Zellen-Ring rundherum).
 	# Bewusst ueber einen SEPARATEN Aktor statt groesserer Building.Dimensions: sonst wuerden Bib
@@ -407,6 +419,70 @@ aot-ore-mine-keepout:
 		Dimensions: 8,8
 		AllowInvalidPlacement: true
 	Interactable:
+	SnapshotTransient:
+# === Ende aotmod ===
+
+# Scatter-Deko-Aktoren fuer die Ore Mines (RA GOLD/GEM Terrain-Tiles). Nicht-blockierend
+# (Immobile OccupiesSpace:false), nicht anklickbar, kein Health/Targetable -> rein visuell.
+# WithRandomSpriteBody waehlt pro Aktor deterministisch eine der 8 Cluster-Sequenzen (c0..c7)
+# aus seiner Zellposition -> Varianz ohne RNG (sync/replay-sicher). Werden von
+# ScatterDecorationActors auf der jeweiligen Mine zur Laufzeit erzeugt und mit ihr entfernt,
+# nie im Editor platziert (kein MapEditorData).
+aot-ore-scatter-temp:
+	Inherits: ^SpriteActor
+	Immobile:
+		OccupiesSpace: false
+	RenderSprites:
+		Image: aot-ore-scatter-temp
+	SnapshotTransient:
+	WithRandomGroundSprite:
+		Sequences: idle, c1, c2, c3, c4, c5, c6, c7
+aot-ore-scatter-snow:
+	Inherits: ^SpriteActor
+	Immobile:
+		OccupiesSpace: false
+	RenderSprites:
+		Image: aot-ore-scatter-snow
+	SnapshotTransient:
+	WithRandomGroundSprite:
+		Sequences: idle, c1, c2, c3, c4, c5, c6, c7
+aot-gem-scatter-temp:
+	Inherits: ^SpriteActor
+	Immobile:
+		OccupiesSpace: false
+	RenderSprites:
+		Image: aot-gem-scatter-temp
+	SnapshotTransient:
+	WithRandomGroundSprite:
+		Sequences: idle, c1, c2, c3, c4, c5, c6, c7
+aot-gem-scatter-snow:
+	Inherits: ^SpriteActor
+	Immobile:
+		OccupiesSpace: false
+	RenderSprites:
+		Image: aot-gem-scatter-snow
+	SnapshotTransient:
+	WithRandomGroundSprite:
+		Sequences: idle, c1, c2, c3, c4, c5, c6, c7
+# === Ende aotmod ===
+
+# Rich Ore Mine: doppelter Inhalt (70 statt 35 Fuhren), gem-Streuung statt Erz. Erbt Sprite,
+# Bib, Keep-out-Zone, No-Crater-Explosion und Dock von aot-ore-mine. RenderSprites.Image muss
+# explizit auf aot-ore-mine zeigen (sonst Default = Aktorname 'aot-ore-mine-rich' ohne Sequenz).
+aot-ore-mine-rich:
+	Inherits: aot-ore-mine
+	RenderSprites:
+		Image: aot-ore-mine
+	Tooltip:
+		Name: actor-aot-ore-mine-rich.name
+		GenericName: actor-aot-ore-mine-rich.generic-name
+	StoresResources:
+		Capacity: 70
+	ScatterDecorationActors:
+		TemperateActor: aot-gem-scatter-temp
+		SnowActor: aot-gem-scatter-snow
+	AotEditorBounds:
+		Color: A030E0A0
 # === Ende aotmod ===
 
 

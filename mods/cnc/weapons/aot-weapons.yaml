@@ -2012,3 +2012,15 @@ aot-RepairBeam:
 # Field-Merge-Override der Engine-Waffe (aot-weapons.yaml laedt nach ballistics.yaml).
 TurretGun:
 	Range: 5c0
+
+# === Age of Tiberium (aotmod) - Ore-Minen: Explosion ohne Krater-Smudge ===
+# Ore-Minen (aot-ore-mine, aot-ore-mine-rich) explodieren beim Erschoepfen/Zerstoeren, sollen
+# aber KEINEN Krater-Smudge auf dem Boden hinterlassen. Kopie von BuildingExplode (engine/mods/
+# cnc/weapons/explosions.yaml) OHNE dessen Warhead@2Smu (LeaveSmudge/SmudgeType: Crater). Die
+# Zerstoerungs-Sounds haengen an ^Building.SoundOnDamageTransition und bleiben davon unberuehrt.
+aot-mine-explode-nocrater:
+	Warhead@1Eff: CreateEffect
+		Explosions: building, building_napalm, med_frag, poof, small_building
+		Delay: 1
+		ImpactActors: false
+# === Ende aotmod ===

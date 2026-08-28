@@ -964,6 +964,182 @@ aot-ore-mine:
 		RemasteredPremultiplied: false
 # === Ende aotmod ===
 
+# === Ore/Gem Scatter-Deko (aot-ore-scatter-temp): RA GOLD/GEM Terrain-Tiles ===
+aot-ore-scatter-temp:
+	idle:
+		Filename: aot-orsc-t0.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+	c1:
+		Filename: aot-orsc-t1.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+	c2:
+		Filename: aot-orsc-t2.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+	c3:
+		Filename: aot-orsc-t3.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+	c4:
+		Filename: aot-orsc-t4.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+	c5:
+		Filename: aot-orsc-t5.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+	c6:
+		Filename: aot-orsc-t6.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+	c7:
+		Filename: aot-orsc-t7.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+# === Ende aotmod ===
+
+# === Ore/Gem Scatter-Deko (aot-ore-scatter-snow): RA GOLD/GEM Terrain-Tiles ===
+aot-ore-scatter-snow:
+	idle:
+		Filename: aot-orsc-s0.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+	c1:
+		Filename: aot-orsc-s1.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+	c2:
+		Filename: aot-orsc-s2.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+	c3:
+		Filename: aot-orsc-s3.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+	c4:
+		Filename: aot-orsc-s4.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+	c5:
+		Filename: aot-orsc-s5.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+	c6:
+		Filename: aot-orsc-s6.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+	c7:
+		Filename: aot-orsc-s7.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+# === Ende aotmod ===
+
+# === Ore/Gem Scatter-Deko (aot-gem-scatter-temp): RA GOLD/GEM Terrain-Tiles ===
+aot-gem-scatter-temp:
+	idle:
+		Filename: aot-gmsc-t0.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+	c1:
+		Filename: aot-gmsc-t1.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+	c2:
+		Filename: aot-gmsc-t2.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+	c3:
+		Filename: aot-gmsc-t3.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+	c4:
+		Filename: aot-gmsc-t4.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+	c5:
+		Filename: aot-gmsc-t5.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+	c6:
+		Filename: aot-gmsc-t6.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+	c7:
+		Filename: aot-gmsc-t7.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+# === Ende aotmod ===
+
+# === Ore/Gem Scatter-Deko (aot-gem-scatter-snow): RA GOLD/GEM Terrain-Tiles ===
+aot-gem-scatter-snow:
+	idle:
+		Filename: aot-gmsc-s0.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+	c1:
+		Filename: aot-gmsc-s1.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+	c2:
+		Filename: aot-gmsc-s2.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+	c3:
+		Filename: aot-gmsc-s3.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+	c4:
+		Filename: aot-gmsc-s4.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+	c5:
+		Filename: aot-gmsc-s5.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+	c6:
+		Filename: aot-gmsc-s6.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+	c7:
+		Filename: aot-gmsc-s7.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.2
+# === Ende aotmod ===
+
 # === Ore Transporter (ORET): RA Harvester Sprites ===
 # HARV.ZIP Frame-Layout: idle 0-31 (32 Facings, UseClassicFacings), harvest 32-63, dock 64-110
 oret:
