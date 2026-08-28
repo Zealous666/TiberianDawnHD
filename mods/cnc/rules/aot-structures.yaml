@@ -5504,7 +5504,7 @@ SLAB:
 		PauseOnCondition: lowpower
 		Icon: aot-satellite
 		Name: Satellite Surveillance
-		Description: Reveals the entire map.
+		Description: Uncovers the entire map and lifts the fog of war for 30 seconds, exposing all enemy units. Afterwards the fog returns, but the terrain stays revealed.
 		SupportPowerPaletteOrder: 55
 	AotFirestormMatrixPower:
 		OrderName: AotFirestormMatrix
