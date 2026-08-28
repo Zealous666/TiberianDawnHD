@@ -5410,7 +5410,7 @@ aot-msam-hover-aa:
 		#   ~aot-heavy-ordonance-upgrade -> VERSTECKT bis GDI Heavy Ordonance gebaut, danach sichtbar
 		#   aot-orbc (KEIN ~)            -> sichtbar-ausgegraut bis Orbital Command steht, dann baubar
 		# (frueher faelschlich ~aot-orbc -> versteckte bis Orbital Command, User-Fund)
-		Prerequisites: anyhq, ~aot-heavy-ordonance-upgrade, aot-orbc
+		Prerequisites: anyhq, ~aot-heavy-ordonance-upgrade, aot-slab
 		Queue: Vehicle.GDI
 		Icon: aot-hvr-aa-icon
 		Description: Hover AA. Amphibious anti-air platform. Devastating vs aircraft and infantry.
@@ -5453,7 +5453,7 @@ aot-jugg:
 		ShowWhenLocked: False
 		Queue: Vehicle.GDI
 		BuildPaletteOrder: 50
-		Prerequisites: ~aot-weap, ~aot-age2, aot-age2, ~aot-mtnk-titan-upgrade, aot-mtnk-titan-upgrade, aot-orbc, ~!aot-mtnk-predator-upgrade
+		Prerequisites: ~aot-weap, ~aot-age2, aot-age2, ~aot-mtnk-titan-upgrade, aot-mtnk-titan-upgrade, aot-slab, ~!aot-mtnk-predator-upgrade
 		Icon: aot-jugg-icon
 		Description: GDI Juggernaut. Siege artillery mech. Deploy to fire. Devastating vs. structures.
 	-Tooltip:

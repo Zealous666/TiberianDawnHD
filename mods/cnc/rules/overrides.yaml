@@ -784,21 +784,18 @@ HQ:
 		Prerequisite: gdi-hq
 	ProvidesPrerequisite@anyhq:
 		Prerequisite: anyhq
-	GrantConditionOnPrerequisite@age1sprite:
-		Condition: aot-hq-advanced
-		Prerequisites: aot-age1
 	AotGrantConditionOnPrerequisiteLatched@aotage2:
 		Condition: aot-age2-active
 		Prerequisites: aot-age2
 	-WithSpriteBody:
+	# ORBC/SLAB-Tier-Tausch (2026-08-28): das Radar behaelt in Age 1 das Age-0-Sprite
+	# (hq.shp). Der fruehere EYE-Wechsel bei aot-age1 (@eye + aot-hq-advanced) ist
+	# entfernt -- das EYE-Sprite wandert ans Orbital Command (Age-1-Sprite). Age 2
+	# schaltet weiterhin auf das TS-Sprite (@ts) um.
 	WithSpriteBody@hq:
 		Sequence: idle
 		Name: body
-		RequiresCondition: !aot-hq-advanced && !aot-age2-active
-	WithSpriteBody@eye:
-		Sequence: aot-eye-idle
-		Name: body-eye
-		RequiresCondition: aot-hq-advanced && !aot-age2-active
+		RequiresCondition: !aot-age2-active
 	WithSpriteBody@ts:
 		Sequence: aot-age2-idle
 		Name: body-ts
@@ -820,7 +817,7 @@ HQ:
 		RequiresCondition: aot-age2-active && !build-incomplete
 	-WithMakeAnimation:
 	WithMakeAnimation@aot:
-		BodyNames: body, body-eye
+		BodyNames: body
 		Condition: build-incomplete
 	WithMakeAnimation@ts:
 		BodyNames: body-ts
@@ -909,13 +906,18 @@ Player:
 		Prerequisites: stec
 	GrantConditionOnPrerequisite@age2gdi:
 		Condition: aot-age2-unlocked
-		Prerequisites: aot-age1, aot-slab
+		# GDI-Age-2-Gatekeeper: seit dem ORBC/SLAB-Tier-Tausch (2026-08-28) schaltet das
+		# Orbital Command (Age 1) den Age-2-Aufstieg frei -- vormals aot-slab (Science Lab).
+		Prerequisites: aot-age1, aot-orbc
 	GrantConditionOnPrerequisite@age2nod:
 		Condition: aot-age2-unlocked
 		Prerequisites: aot-age1, aot-tmpl
 	GrantConditionOnPrerequisite@age3gdi:
 		Condition: aot-age3-unlocked
-		Prerequisites: aot-age2, aot-orbc
+		# GDI-Age-3-Gatekeeper: seit dem ORBC/SLAB-Tier-Tausch (2026-08-28) schaltet das
+		# Science Lab (jetzt Age-2/3-Gebaeude) den Age-3-Aufstieg frei -- vormals aot-orbc.
+		# Zwingend: aot-orbc gibt es jetzt schon ab Age 1, wuerde Age 3 sofort mit Age 2 oeffnen.
+		Prerequisites: aot-age2, aot-slab
 	GrantConditionOnPrerequisite@age3nod:
 		Condition: aot-age3-unlocked
 		Prerequisites: aot-age2, aot-shrine
@@ -1032,10 +1034,11 @@ Player:
 		Icon: icon
 		Name: 2nd Tiberium Age
 		Description: Moves forward in the Tiberium technologies with new upgrades and additional equipment.
-		TooltipRequirements: Science Lab
+		TooltipRequirements: Orbital Command
 		# Nur fuer die Einfaerbung: fehlt die Voraussetzung, faerbt der Tooltip die
 		# Zeile rot. Gatet die Power NICHT -- das macht PauseOnCondition.
-		TooltipRequirementsPrerequisites: aot-slab
+		# Seit ORBC/SLAB-Tier-Tausch (2026-08-28): Age 2 gatet jetzt das Orbital Command.
+		TooltipRequirementsPrerequisites: aot-orbc
 		SupportPowerPaletteOrder: 1
 	AotAge2Power@nod:
 		# Fraktionsspezifische Variante (User 2026-08-05). Beide Traits teilen sich denselben
@@ -1106,10 +1109,11 @@ Player:
 		Icon: icon
 		Name: 3rd Tiberium Age
 		Description: Upgrades to the most advanced Tiberium units, buildings and upgrades.
-		TooltipRequirements: Orbital Command
+		TooltipRequirements: Science Lab
 		# Nur fuer die Einfaerbung: fehlt die Voraussetzung, faerbt der Tooltip die
 		# Zeile rot. Gatet die Power NICHT -- das macht PauseOnCondition.
-		TooltipRequirementsPrerequisites: aot-orbc
+		# Seit ORBC/SLAB-Tier-Tausch (2026-08-28): Age 3 gatet jetzt das Science Lab.
+		TooltipRequirementsPrerequisites: aot-slab
 		SupportPowerPaletteOrder: 2
 	AotAge3Power@nod:
 		# Fraktionsspezifische Variante (User 2026-08-05). Beide Traits teilen sich denselben

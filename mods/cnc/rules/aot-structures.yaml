@@ -1530,7 +1530,7 @@ aot-upgrade-ion-cannon:
 
 	Buildable:
 		BuildPaletteOrder: 240
-		Prerequisites: ~aot-age3, atec, aot-orbc
+		Prerequisites: ~aot-age3, atec, aot-slab
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		Icon: ioncannon
@@ -1544,6 +1544,34 @@ aot-upgrade-ion-cannon:
 
 	ProvidesPrerequisite:
 		Prerequisite: aot-ion-cannon-upgrade
+
+	Interactable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Orca Transport Upgrade (Orbital Command, Age 2) ===
+# Schaltet die Orca-Transport-Support-Power am Orbital Command frei. Sichtbar erst ab Age 2
+# (~aot-age2), baubar mit Tech Centre + Orbital Command. Liefert aot-orca-transport-upgrade
+# -> Condition aot-orca-transport-active auf ORBC (Power + 3. Sockel-Overlay).
+aot-upgrade-orca-transport:
+	Tooltip:
+		Name: Orca Transport Upgrade
+
+	Buildable:
+		BuildPaletteOrder: 235
+		Prerequisites: ~aot-age2, atec, aot-orbc, ~!aot-orca-transport-upgrade
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		Icon: aot-orcatransport
+		Description: Enables the Orca Transport support power at the Orbital Command.
+
+	Valued:
+		Cost: 2000
+
+	RenderSprites:
+		Image: aot-upgrade-orca-transport
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-orca-transport-upgrade
 
 	Interactable:
 # === Ende aotmod ===
@@ -1583,7 +1611,7 @@ aot-upgrade-zonetrooper-drop:
 
 	Buildable:
 		BuildPaletteOrder: 340
-		Prerequisites: ~aot-age3, atec, aot-orbc, aot-infantry-railgun-upgrade
+		Prerequisites: ~aot-age3, atec, aot-slab, aot-infantry-railgun-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		Icon: icon
@@ -2680,9 +2708,9 @@ aot-hq-ion:
 		BuildPaletteOrder: 90
 		Prerequisites: vehicleproduction, ~techlevel.medium, ~!aot-age2, ~aot-ion-cannon-upgrade
 		Icon: aot-ion-icon
-	-WithSpriteBody@hq:
-	WithSpriteBody@eye:
-		RequiresCondition: !aot-age2-active
+	# ORBC/SLAB-Tier-Tausch (2026-08-28): das EYE-Sprite ist ans Orbital Command gewandert.
+	# Das Radar (auch ion-cannon-aufgewertet) behaelt jetzt das hq.shp-Sprite (@hq) -- der
+	# fruehere EYE-Wechsel entfaellt.
 
 aot-hq-base-age2:
 	Inherits: HQ
@@ -2696,7 +2724,6 @@ aot-hq-base-age2:
 		Prerequisites: vehicleproduction, ~aot-age2, ~!aot-ion-cannon-upgrade
 		Icon: aot-age2-icon
 	-WithSpriteBody@hq:
-	-WithSpriteBody@eye:
 	WithSpriteBody@ts:
 		RequiresCondition: aot-age2-active || !aot-age2-active
 	WithIdleOverlay@tsremap:
@@ -2716,7 +2743,6 @@ aot-hq-ion-age2:
 		Prerequisites: vehicleproduction, ~aot-age2, ~aot-ion-cannon-upgrade
 		Icon: aot-ion-icon
 	-WithSpriteBody@hq:
-	-WithSpriteBody@eye:
 	WithSpriteBody@ts:
 		RequiresCondition: aot-age2-active || !aot-age2-active
 	WithIdleOverlay@tsremap:
@@ -3981,7 +4007,7 @@ aot-gap:
 		Queue: Building.GDI
 		BuildPaletteOrder: 170
 		# Sichtbar ab Age 1 (~aot-age1), baubar ab Age 1 + Science Lab (aot-slab von SLAB).
-		Prerequisites: ~aot-age1, aot-slab
+		Prerequisites: ~aot-age1, aot-orbc
 		Icon: icon
 		Description: Generates shroud over the surrounding area, hiding your base from the enemy. Enemy units caught inside can only see 2 cells. Requires power to operate.
 	ProvidesPrerequisite@buildingname:
@@ -5418,7 +5444,24 @@ ORBC:
 	InfiltrateForSupportPowerReset:
 		Types: SpyInfiltrate
 		PlayerExperience: 10
+	# ORBC/SLAB-Tier-Tausch (2026-08-28): Satellite Surveillance von SLAB hierher verlegt
+	# (ab Age 1 verfuegbar). Prerequisites von aot-slab -> aot-orbc; sonst 1:1 uebernommen.
+	AotSatellitePower:
+		Prerequisites: aot-orbc
+		ChargeInterval: 30000
+		RequiresCondition: !satellite-used
+		PauseOnCondition: lowpower
+		Icon: aot-satellite
+		Name: Satellite Surveillance
+		Description: Uncovers the entire map and lifts the fog of war for 10 seconds, exposing all enemy units. Afterwards the fog returns, but the terrain stays revealed.
+		SupportPowerPaletteOrder: 55
+	# Orca Transport ist jetzt ein Age-2-Upgrade (2026-08-28): die Power erscheint erst, wenn
+	# aot-upgrade-orca-transport gekauft wurde (Condition aot-orca-transport-active).
+	GrantConditionOnPrerequisite@orcatransport:
+		Condition: aot-orca-transport-active
+		Prerequisites: aot-orca-transport-upgrade
 	AotOrcaTransportPower:
+		RequiresCondition: aot-orca-transport-active
 		Prerequisites: aot-orbc
 		ChargeInterval: 15000
 		IconImage: icon
@@ -5505,19 +5548,38 @@ ORBC:
 		SupportPowerPaletteOrder: 30
 	SupportPowerChargeBar@zonetrooperdrop:
 		RequiresCondition: aot-zonetrooper-drop-active
-	WithSpriteBody:
+	# ORBC/SLAB-Tier-Tausch (2026-08-28): Age-Sprite-Switch. Age 1 = altes TD EYE-Sprite
+	# (eye-idle), ab Age 2 = Gemini-Body (idle). Umschaltung ueber aot-age2-active. Die
+	# Addon-Overlays (active/ioncannon/zonetrooperdrop) gehoeren zum Gemini-Body und werden
+	# daher zusaetzlich an aot-age2-active gebunden, damit sie nicht ueber dem EYE-Sprite liegen.
+	AotGrantConditionOnPrerequisiteLatched@aotage2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
+	-WithSpriteBody:
+	WithSpriteBody@eye:
+		Sequence: eye-idle
+		Name: body-eye
+		RequiresCondition: !aot-age2-active
+	WithSpriteBody@ts:
 		Sequence: idle
+		Name: body
 		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
 		# PlayerColorShift verschiebt jeden Pixel im entsprechenden Farbton zur Spielerfarbe.
 		Palette: effect
 		IsPlayerPalette: false
+		RequiresCondition: aot-age2-active
 	WithIdleOverlay@remap:
 		Sequence: idle-remap
 		Palette: player
 		IsPlayerPalette: True
+		RequiresCondition: aot-age2-active && !build-incomplete
+	# @active (rotierende GAPLUG-Antenne aot-orbc-active.png): auf User-Wunsch wieder aktiv,
+	# per Sequenz-Offset nach rechts-unten unter das rote Blinklicht gesetzt.
 	WithIdleOverlay@active:
 		Sequence: active
-		RequiresCondition: !build-incomplete
+		Palette: effect
+		IsPlayerPalette: false
+		RequiresCondition: aot-age2-active && !build-incomplete
 	WithIdleOverlay@ioncannon:
 		Sequence: ioncannon-addon
 		RequiresCondition: aot-ion-cannon-active && !build-incomplete
@@ -5529,16 +5591,39 @@ ORBC:
 		Palette: player
 		IsPlayerPalette: True
 		RequiresCondition: aot-zonetrooper-drop-active && !build-incomplete
-	WithMakeAnimation:
+	# 3. Sockel (vorne links): Orca-Transport-Overlay -- erscheint mit dem Age-2-Upgrade.
+	# Palette: effect -> kein Player-Color-Shift (Sprite ist dunkles Gunmetal, nicht gold).
+	WithIdleOverlay@orcatransport:
+		Sequence: orcatransport-addon
+		Palette: effect
+		IsPlayerPalette: false
+		RequiresCondition: aot-orca-transport-active && !build-incomplete
+	# WithMakeAnimation ist KEIN ConditionalTrait -> kein RequiresCondition. Die Age-Trennung
+	# passiert ueber die BodyNames: @eye animiert den EYE-Body (nur !aot-age2-active sichtbar),
+	# @ts den Gemini-Body (nur aot-age2-active sichtbar). Der jeweils unsichtbare Body zeigt
+	# seine Make-Anim schlicht nicht (identisches Muster wie SLAB @ra/@ts).
+	-WithMakeAnimation:
+	WithMakeAnimation@eye:
+		BodyNames: body-eye
+		Condition: build-incomplete
+		Sequence: eye-make
+	WithMakeAnimation@ts:
+		BodyNames: body
+		Condition: build-incomplete
 		Sequence: make
 	-ActorPreviewPlaceBuildingPreview:
 	SequencePlaceBuildingPreview:
-		Sequence: place
+		# ORBC/SLAB-Tier-Tausch (2026-08-28): Vorschau zeigt das Age-1-EYE-Sprite statt des
+		# Gemini-Umrisses -- ORBC wird (BuildLimit 1) im Regelfall in Age 1 platziert.
+		Sequence: eye-place
 		SequenceAlpha: 0.65
 	Buildable:
 		Queue: Building.GDI
-		BuildPaletteOrder: 200
-		Prerequisites: ~aot-age2, aot-gdi-ordnance-upgrade
+		BuildPaletteOrder: 180
+		# ORBC/SLAB-Tier-Tausch (2026-08-28): ORBC ist jetzt das Age-1-Tech-Gebaeude
+		# (vormals Age 2). Baugate = altes SLAB-Age-1-Gate (War Factory + GDI-Refinery).
+		# Das Orbital Command liefert aot-orbc -> schaltet Age 2 frei (overrides.yaml).
+		Prerequisites: ~aot-age1, aot-weap, aot-proc-gdi
 		BuildLimit: 1
 		Icon: icon
 		Description: GDI uplink facility. Unlocks advanced support powers as your tech level increases.
@@ -5582,15 +5667,9 @@ SLAB:
 	RenderSprites:
 		Image: slab
 	SupportPowerChargeBar:
-	AotSatellitePower:
-		Prerequisites: aot-slab
-		ChargeInterval: 30000
-		RequiresCondition: !satellite-used
-		PauseOnCondition: lowpower
-		Icon: aot-satellite
-		Name: Satellite Surveillance
-		Description: Uncovers the entire map and lifts the fog of war for 10 seconds, exposing all enemy units. Afterwards the fog returns, but the terrain stays revealed.
-		SupportPowerPaletteOrder: 55
+	# ORBC/SLAB-Tier-Tausch (2026-08-28): Satellite Surveillance ist ans Orbital Command
+	# (jetzt Age-1-Gebaeude) gewandert -- die Aufklaerung soll ab Age 1 verfuegbar sein, und
+	# SLAB ist jetzt ein Age-2/3-Gebaeude. SLAB behaelt nur die Firestorm Defense Matrix.
 	AotFirestormMatrixPower:
 		OrderName: AotFirestormMatrix
 		Prerequisites: aot-firestorm-defense-upgrade
@@ -5674,6 +5753,10 @@ SLAB:
 # === Age of Tiberium (aotmod) - SLAB Build-Menu Icons (Proxy-Aktoren) ===
 # Zwei Proxy-Aktoren steuern das Icon im Baumenue, analog ATEC/STEC/MSLO/NOD-Radar:
 # aot-slab-age1: sichtbar Age 1 bis vor Age 2 (RA-Icon). aot-slab-age2: sichtbar ab Age 2 (TS-Icon).
+# ORBC/SLAB-Tier-Tausch (2026-08-28): SLAB ist jetzt ein Age-2/3-Gebaeude. Der fruehere
+# Age-1-Proxy (RA-Chronosphere-Sprite) hat keine Baubarkeit mehr -- er bleibt nur als
+# definierter Aktor bestehen, weil aot-ai.yaml ihn noch namentlich referenziert (Bereinigung
+# in der KI-Nachziehphase). Ohne Buildable erscheint er nie im Baumenue.
 aot-slab-age1:
 	Inherits: SLAB
 	RenderSprites:
@@ -5682,14 +5765,6 @@ aot-slab-age1:
 	SequencePlaceBuildingPreview:
 		Sequence: place
 		SequenceAlpha: 0.65
-	Buildable:
-		LockedGroup: aot-grp-slab
-		Queue: Building.GDI
-		BuildPaletteOrder: 180
-		Prerequisites: ~aot-age1, aot-weap, aot-proc-gdi, ~!aot-age2
-		BuildLimit: 1
-		Icon: icon
-		Description: GDI research facility. Provides a prerequisite for future GDI technologies.
 
 aot-slab-age2:
 	Inherits: SLAB
@@ -5702,8 +5777,11 @@ aot-slab-age2:
 	Buildable:
 		LockedGroup: aot-grp-slab
 		Queue: Building.GDI
-		BuildPaletteOrder: 180
-		Prerequisites: ~aot-age1, aot-weap, aot-proc-gdi, ~aot-age2, !aot-slab
+		BuildPaletteOrder: 200
+		# ORBC/SLAB-Tier-Tausch (2026-08-28): SLAB ist jetzt das Age-2/3-Gebaeude und
+		# der einzige baubare SLAB-Proxy. Baugate = Age-2-Gatekeeper (aot-gdi-ordnance-
+		# upgrade, vormals an ORBC). SLAB liefert aot-slab -> schaltet Age 3 frei.
+		Prerequisites: ~aot-age2, aot-gdi-ordnance-upgrade, !aot-slab
 		BuildLimit: 1
 		Icon: aot-age2-icon
 		Description: GDI research facility. Provides a prerequisite for future GDI technologies.
@@ -6603,7 +6681,7 @@ aot-upgrade-guard-tower:
 		# Ausschluss-Upgrade (2026-07-27): entweder Guard Tower ODER Camo Pillbox,
 		# nie beides - ~! versteckt den Bau-Button sobald das jeweils andere
 		# Upgrade gekauft wurde (siehe openra-prerequisite-syntax.md).
-		Prerequisites: ~aot-age1, aot-slab, ~!aot-camo-pillbox-upgrade
+		Prerequisites: ~aot-age1, aot-orbc, ~!aot-camo-pillbox-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		Description: Upgrades all Pillboxes to Guard Towers: increased sight and weapon range, and lets the garrison engage detected and submerged submarines with their own weapons. Exclusive with the Camo Pillbox upgrade.
@@ -6630,7 +6708,7 @@ aot-upgrade-camo-pillbox:
 
 	Buildable:
 		BuildPaletteOrder: 115
-		Prerequisites: ~aot-age1, aot-slab, ~!aot-guard-tower-upgrade
+		Prerequisites: ~aot-age1, aot-orbc, ~!aot-guard-tower-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
 		Description: Upgrades all Pillboxes to Camo Pillboxes, cloaked from the enemy until detected or engaging. Exclusive with the Guard Tower upgrade.
@@ -7209,7 +7287,7 @@ aot-gate-gdi:
 		BuildPaletteOrder: 190
 		# Sichtbar ab Age 1 (~aot-age1), baubar sobald das Science Lab steht
 		# (User-Wunsch 2026-08-01) - aot-slab bleibt klartext, graut also nur aus.
-		Prerequisites: ~aot-age1, aot-slab
+		Prerequisites: ~aot-age1, aot-orbc
 		Queue: Building.GDI
 		Description: Automated gate for walls, opening and closing on friend-or-foe identification.
 	# Footprint/Dimensions unangetastet (siehe REVERT-Historie in ts-gates-system.md,

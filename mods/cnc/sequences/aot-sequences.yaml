@@ -2037,23 +2037,50 @@ orbc:
 	idle:
 		Filename: aot-orbc-gemini-idle.png
 		Length: 1
-		Scale: 0.0628
+		Scale: 0.0558
 		Offset: 25,64
 	idle-remap:
 		Filename: aot-orbc-gemini-idle-remap.png
 		Length: 1
-		Scale: 0.0628
+		Scale: 0.0558
 		Offset: 25,64
 	damaged-idle:
 		Filename: aot-orbc-gemini-idle.png
 		Length: 1
-		Scale: 0.0628
+		Scale: 0.0558
 		Offset: 25,64
 	damaged-idle-remap:
 		Filename: aot-orbc-gemini-idle-remap.png
 		Length: 1
-		Scale: 0.0628
+		Scale: 0.0558
 		Offset: 25,64
+	# ORBC/SLAB-Tier-Tausch (2026-08-28): Age-1-Sprite des Orbital Command = altes TD EYE
+	# (Advanced Communications Center, eye.shp / EYE.ZIP), vormals das Age-1-Radar-Sprite am HQ.
+	# Ab Age 2 zeigt ORBC den Gemini-Body (idle) -- Umschaltung ueber aot-age2-active.
+	# ⚠️ Scale/Offset noch NICHT in-game kalibriert: EYE ist nativ ~2x2, ORBC ein 3x3-Footprint.
+	# Erste Naeherung ohne Scale/Offset (wie am HQ); nach Screenshot-Check feinjustieren.
+	eye-idle:
+		Filename: eye.shp
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\EYE.ZIP
+		Length: 16
+		Tick: 100
+	damaged-eye-idle:
+		Filename: eye.shp
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\EYE.ZIP
+		Start: 16
+		Length: 16
+		Tick: 100
+	eye-make:
+		Filename: eyemake.shp
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\EYEMAKE.ZIP
+		Length: *
+		Tick: 80
+	# Bau-Vorschau (Platzierungs-Geist) fuer Age 1: ORBC wird (BuildLimit 1) normal in Age 1
+	# platziert -> Vorschau zeigt EYE, nicht den Gemini-Umriss.
+	eye-place:
+		Filename: eye.shp
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\EYE.ZIP
+		Length: 1
 	make:
 		# Bau-Animation aus dem Gemini-Idle interpoliert (Bottom-up-Reveal-Wipe,
 		# 14 Frames, Tick 40). Ersetzt die fruehere TS-/Vanilla-Make-Animation, die
@@ -2064,8 +2091,8 @@ orbc:
 		RemasteredFilename:
 		Length: 14
 		Tick: 40
-		Scale: 0.1667
-		Offset: 9, 24
+		Scale: 0.1674
+		Offset: 8, 21
 	make-remap:
 		Filename: aot-orbc-make-remap.png
 		Length: 17
@@ -2076,33 +2103,41 @@ orbc:
 		Length: 20
 		Tick: 100
 		Scale: 0.55
-		Offset: 20,0
-	# Offsets neu berechnet gegen die zwei runden Sockel im neuen Gemini-Body (links/hinten
-	# = Ion Cannon, rechts/vorne = Zone Trooper Drop) — Scale bleibt 0.55 (altes 144x120-TS-
-	# Canvas, unveraendert), nur Offset an die neue Body-Registrierung angepasst. Erste
-	# Näherung, ggf. nach Screenshot-Check noch feinjustieren (User-Ankündigung).
+		# rechts-unterhalb des roten Blinklichts (vorher 20,0 = direkt darauf)
+		Offset: 36,6
+	# 3-Sockel-Gemini-Body (2026-08-28): Offsets grob aus der Sockel-Geometrie berechnet
+	# (Body Scale 0.0558, Sockel-Pixel + Overlay-Content-Zentroid). Zuordnung nach User:
+	# hinten mitte = Ion Cannon, vorne rechts = Zone Trooper Drop, vorne links = Orca Transport.
+	# ⚠️ Erste Naeherung -- nach Screenshot-Check feinjustieren.
 	ioncannon-addon:
 		Filename: aot-orbc-ioncannon.png
 		Length: 28
 		Tick: 100
 		Scale: 0.55
-		Offset: -1,-10
+		Offset: 18,-14
 	zonetrooperdrop-addon:
 		Filename: aot-orbc-zonetrooperdrop.png
 		Length: 28
 		Tick: 100
 		Scale: 0.55
-		Offset: 22,-3
+		Offset: 16,-3
 	zonetrooperdrop-addon-remap:
 		Filename: aot-orbc-zonetrooperdrop-remap.png
 		Length: 28
 		Tick: 100
 		Scale: 0.55
-		Offset: 22,-3
+		Offset: 16,-3
+	# Orca Transport nutzt das TS GAPLUG_E ("Seeker Control")-Sprite als 3. Sockel (vorne links).
+	orcatransport-addon:
+		Filename: aot-orbc-orcatransport.png
+		Length: 28
+		Tick: 100
+		Scale: 0.55
+		Offset: -2,-12
 	place:
 		Filename: aot-orbc-gemini-idle.png
 		Length: 1
-		Scale: 0.0628
+		Scale: 0.0558
 		Offset: 25,64
 # === Ende aotmod ===
 
@@ -2257,6 +2292,14 @@ aot-upgrade-ion-cannon:
 aot-upgrade-zonetrooper-drop:
 	icon:
 		Filename: aot-zone-drop-icon.png
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Orca Transport Upgrade: eigenes Icon (aot-orcatransport) ===
+aot-upgrade-orca-transport:
+	icon:
+		Filename: aot-orcatransport-icon.png
+	aot-orcatransport:
+		Filename: aot-orcatransport-icon.png
 # === Ende aotmod ===
 
 icon:
