@@ -1565,6 +1565,15 @@ ORCA:
 	Repairable:
 		RepairActors: aot-hpad-gdi, aot-cruiser
 	AotReturnWhenEmpty:
+	# Guard-Leash (aotmod 2026-08-27): Apache/ORCA hovern im Idle und griffen ueber ^AutoTargetAllAssaultMove
+	# mit ScanOnIdle=True ungeleasht an -> liessen sich (z.B. von vorbeifliegenden MiGs) ueber die ganze
+	# Karte ziehen und kehrten nie zurueck. Fix: ScanOnIdle False + AotAirGuard uebernimmt Angriff+Rueckkehr
+	# mit LeashRadius. AutoTargetPriority wird aus ^AutoTargetAllAssaultMove geerbt (enthaelt Air).
+	AutoTarget:
+		ScanRadius: 6
+		ScanOnIdle: False
+	AotAirGuard:
+		LeashRadius: 10c0
 	# TakeOffOnCreation:false landet an der Exit-Zelle direkt auf dem Helipad-Footprint -
 	# CanLand() prueft dort aber Terrain+blockierende Aktoren OHNE dockingActor-Ausnahme
 	# und scheitert am eigenen Gebaeude, daher sofortiges Hovern (Bug). Fix: normal
@@ -1619,6 +1628,13 @@ HELI:
 		# aotmod 2026-08-21: TS-Orca-Start/Lande-Sounds (Hind/Harpy), s. [[aot-orcatran-system]].
 		TakeoffSounds: orcaup1.aud
 		LandingSounds: orcadwn1.aud
+	# Guard-Leash (aotmod 2026-08-27): analog ORCA - Hind/Harpy nicht mehr ungeleasht ueber die
+	# ganze Karte ziehbar. ScanOnIdle False + AotAirGuard (Angriff+Rueckkehr, LeashRadius).
+	AutoTarget:
+		ScanRadius: 6
+		ScanOnIdle: False
+	AotAirGuard:
+		LeashRadius: 10c0
 	GrantConditionOnPrerequisite@harpyupgrade:
 		Condition: aot-harpy-upgraded
 		Prerequisites: aot-harpy-upgrade

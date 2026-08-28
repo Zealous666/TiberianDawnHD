@@ -2152,11 +2152,13 @@ aot-heli:
 		Filename: orca.shp
 		Facings: 32
 		UseClassicFacings: True
+		Scale: 1.21
 	move:
 		Filename: orca.shp
 		Start: 32
 		Facings: 32
 		UseClassicFacings: True
+		Scale: 1.21
 	aot-apache-idle:
 		Filename: heli.shp
 		Facings: 32
