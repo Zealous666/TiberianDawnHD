@@ -10,6 +10,7 @@
 #endregion
 
 using System.Collections.Generic;
+using System.Linq;
 using OpenRA.Traits;
 
 namespace OpenRA.Mods.Cnc.Traits
@@ -27,7 +28,7 @@ namespace OpenRA.Mods.Cnc.Traits
 		public override object Create(ActorInitializer init) { return new AotIceLayer(init.World, this); }
 	}
 
-	sealed class AotIceLayer
+	sealed class AotIceLayer : IGameSaveTraitData
 	{
 		readonly World world;
 		readonly AotIceLayerInfo info;
@@ -64,6 +65,32 @@ namespace OpenRA.Mods.Cnc.Traits
 		public bool Contains(CPos c) { return ice.Contains(c); }
 
 		public IReadOnlyCollection<CPos> Cells => ice;
+
+		// Snapshot save/load: the grown ice is world state, not actors, so it must be carried explicitly
+		// or a loaded game starts with no ice at all (only the growth hosts re-seed their immediate
+		// cells). Add is idempotent, so re-adding a cell the hosts already re-seeded is harmless.
+		List<MiniYamlNode> IGameSaveTraitData.IssueTraitData(Actor self)
+		{
+			if (ice.Count == 0)
+				return null;
+
+			var cells = string.Join(" ", ice.OrderBy(c => c.X).ThenBy(c => c.Y).Select(c => $"{c.X},{c.Y}"));
+			return [new MiniYamlNode("Ice", cells)];
+		}
+
+		void IGameSaveTraitData.ResolveTraitData(Actor self, MiniYaml data)
+		{
+			var node = data.NodeWithKeyOrDefault("Ice");
+			if (node == null)
+				return;
+
+			foreach (var pair in node.Value.Value.Split(' ', System.StringSplitOptions.RemoveEmptyEntries))
+			{
+				var parts = pair.Split(',');
+				if (parts.Length == 2)
+					Add(new CPos(Exts.ParseInt32Invariant(parts[0]), Exts.ParseInt32Invariant(parts[1])));
+			}
+		}
 
 		public void Add(CPos c)
 		{

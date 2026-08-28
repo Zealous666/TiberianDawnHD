@@ -107,7 +107,7 @@ namespace OpenRA.Mods.Cnc.Traits
 		public override object Create(ActorInitializer init) { return new AotDayNightCycle(init, this); }
 	}
 
-	sealed class AotDayNightCycle : ConditionalTrait<AotDayNightCycleInfo>, ITick, INotifyAddedToWorld
+	sealed class AotDayNightCycle : ConditionalTrait<AotDayNightCycleInfo>, ITick, INotifyAddedToWorld, IGameSaveTraitData
 	{
 		// Per-actor values from the map editor sliders/checkbox; fall back to the rules defaults.
 		readonly int startHour;
@@ -188,6 +188,17 @@ namespace OpenRA.Mods.Cnc.Traits
 		{
 			t = t.Clamp(0f, 1f);
 			return t * t * (3f - 2f * t);
+		}
+
+		// Snapshot save/load: the virtual clock position. Without it a loaded game jumps back to the
+		// map's start hour instead of the time of day it was saved at.
+		List<MiniYamlNode> IGameSaveTraitData.IssueTraitData(Actor self) => [new MiniYamlNode("Elapsed", elapsed.ToStringInvariant())];
+
+		void IGameSaveTraitData.ResolveTraitData(Actor self, MiniYaml data)
+		{
+			var node = data.NodeWithKeyOrDefault("Elapsed");
+			if (node != null)
+				elapsed = Exts.ParseInt32Invariant(node.Value.Value);
 		}
 
 		void ITick.Tick(Actor self)

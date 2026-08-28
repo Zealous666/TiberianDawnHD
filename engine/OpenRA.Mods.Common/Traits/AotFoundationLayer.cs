@@ -9,7 +9,9 @@
  */
 #endregion
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Traits
@@ -21,7 +23,7 @@ namespace OpenRA.Mods.Common.Traits
 		public override object Create(ActorInitializer init) { return new AotFoundationLayer(); }
 	}
 
-	public sealed class AotFoundationLayer
+	public sealed class AotFoundationLayer : IGameSaveTraitData
 	{
 		readonly HashSet<CPos> cells = [];
 
@@ -37,6 +39,27 @@ namespace OpenRA.Mods.Common.Traits
 		static CPos Ground(CPos c) { return new CPos(c.X, c.Y); }
 
 		public bool Contains(CPos c) { return cells.Contains(Ground(c)); }
+
+		// Snapshot save/load: foundation is world state, carried explicitly (not actors).
+		List<MiniYamlNode> IGameSaveTraitData.IssueTraitData(Actor self)
+		{
+			return cells.Count == 0 ? null
+				: [new MiniYamlNode("Foundation", string.Join(" ", cells.OrderBy(c => c.X).ThenBy(c => c.Y).Select(c => $"{c.X},{c.Y}")))];
+		}
+
+		void IGameSaveTraitData.ResolveTraitData(Actor self, MiniYaml data)
+		{
+			var node = data.NodeWithKeyOrDefault("Foundation");
+			if (node == null)
+				return;
+
+			foreach (var pair in node.Value.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+			{
+				var parts = pair.Split(',');
+				if (parts.Length == 2)
+					Add(new CPos(Exts.ParseInt32Invariant(parts[0]), Exts.ParseInt32Invariant(parts[1])));
+			}
+		}
 
 		public void Add(CPos c)
 		{

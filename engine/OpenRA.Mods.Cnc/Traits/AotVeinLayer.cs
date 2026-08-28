@@ -9,7 +9,9 @@
  */
 #endregion
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using OpenRA.Traits;
 
 namespace OpenRA.Mods.Cnc.Traits
@@ -21,7 +23,7 @@ namespace OpenRA.Mods.Cnc.Traits
 		public override object Create(ActorInitializer init) { return new AotVeinLayer(); }
 	}
 
-	sealed class AotVeinLayer
+	sealed class AotVeinLayer : IGameSaveTraitData
 	{
 		readonly HashSet<CPos> veins = [];
 
@@ -32,6 +34,27 @@ namespace OpenRA.Mods.Cnc.Traits
 
 		/// <summary>Snapshot of all currently veined cells, for the heart-death recession sweep.</summary>
 		public IReadOnlyCollection<CPos> Cells => veins;
+
+		// Snapshot save/load: veins are world state, carried explicitly (not actors).
+		List<MiniYamlNode> IGameSaveTraitData.IssueTraitData(Actor self)
+		{
+			return veins.Count == 0 ? null
+				: [new MiniYamlNode("Veins", string.Join(" ", veins.OrderBy(c => c.X).ThenBy(c => c.Y).Select(c => $"{c.X},{c.Y}")))];
+		}
+
+		void IGameSaveTraitData.ResolveTraitData(Actor self, MiniYaml data)
+		{
+			var node = data.NodeWithKeyOrDefault("Veins");
+			if (node == null)
+				return;
+
+			foreach (var pair in node.Value.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+			{
+				var parts = pair.Split(',');
+				if (parts.Length == 2)
+					Add(new CPos(Exts.ParseInt32Invariant(parts[0]), Exts.ParseInt32Invariant(parts[1])));
+			}
+		}
 
 		public void Add(CPos c)
 		{
