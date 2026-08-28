@@ -1958,6 +1958,7 @@ STEC:
 		DirectionArrowAnimation: airstrikedirection
 		SupportPowerPaletteOrder: 10
 	SupportPowerChargeBar:
+		Power: AotMigAirstrikeOrder
 		RequiresCondition: aot-nod-airstrike-active && !aot-nod-banshee-active
 	# === Age of Tiberium (aotmod) - NOD Banshee-Airstrike-Superpower (Age-3-Folge des MiG-Airstrike) ===
 	# Ersetzt den MiG-Airstrike (siehe !aot-nod-banshee-active oben). Custom AotAirstrikePower
@@ -1999,6 +2000,7 @@ STEC:
 		DirectionArrowAnimation: airstrikedirection
 		SupportPowerPaletteOrder: 13
 	SupportPowerChargeBar@banshee:
+		Power: AotBansheeAirstrikeOrder
 		RequiresCondition: aot-nod-banshee-active
 	# === Age of Tiberium (aotmod) - NOD Spy-Plane-Superpower (Alternative zu Airstrike) ===
 	# Exakter Nachbau der RA-Soviet-Spy-Plane (AirstrikePower@spyplane): EIN Yak fliegt einen
@@ -2044,6 +2046,7 @@ STEC:
 		DirectionArrowAnimation: airstrikedirection
 		SupportPowerPaletteOrder: 11
 	SupportPowerChargeBar@spyplane:
+		Power: AotSpyPlaneOrder
 		RequiresCondition: aot-nod-spyplane-active && !aot-nod-parabombs-active
 	# === Age of Tiberium (aotmod) - NOD Parabombs-Superpower (Age-3-Folge der Spy Plane) ===
 	# Nachbau der RA-Parabomb-Power (stock AirstrikePower, Single-Pass): 1 Badger-Bomber fliegt
@@ -2084,6 +2087,7 @@ STEC:
 		DirectionArrowAnimation: airstrikedirection
 		SupportPowerPaletteOrder: 12
 	SupportPowerChargeBar@parabombs:
+		Power: AotParabombsOrder
 		RequiresCondition: aot-nod-parabombs-active
 	RenderSprites:
 		Image: stec
@@ -2281,10 +2285,20 @@ MSLO:
 	# 10 aot-minp Anti-Personen-Minen im selben Streukreis wie Tiberium Missile, kein Sofortschaden.
 	# Age 2 Upgrade (aot-upgrade-tiberium-missile): schaltet Tiberium Missile frei.
 	# Age 3 Upgrade (aot-upgrade-atom-bomb): schaltet ZUSÄTZLICH Atom Bomb frei (vormals TMPL).
+	# Je eine Ladeleiste PRO Power, an ihren OrderName gebunden (2026-08-28, Engine-Bugfix
+	# SupportPowerChargeBar.Power) -- sonst zeigen alle Balken denselben Fortschritt. Slot 1 =
+	# mine cluster / enhanced / tiberium (exklusiv, je nach Upgrade), Slot 2 = atom bomb.
 	SupportPowerChargeBar@minecluster:
+		Power: NukePowerInfoOrder
+		RequiresCondition: !aot-mine-cluster-enhanced && !aot-tiberium-missile-active
+	SupportPowerChargeBar@minecluster-enhanced:
+		Power: AotMineClusterEnhancedPowerInfoOrder
+		RequiresCondition: aot-mine-cluster-enhanced
 	SupportPowerChargeBar@tiberium:
-		RequiresCondition: aot-tiberium-missile-active
+		Power: AotTiberiumMissilePowerInfoOrder
+		RequiresCondition: aot-tiberium-missile-active && !aot-mine-cluster-enhanced
 	SupportPowerChargeBar@atombomb:
+		Power: AotAtomBombPowerInfoOrder
 		RequiresCondition: aot-atom-bomb-active
 	NukePower@minecluster:
 		RequiresCondition: !aot-mine-cluster-enhanced && !aot-tiberium-missile-active
@@ -5440,7 +5454,14 @@ ORBC:
 	WithBuildingBib:
 	RenderSprites:
 		Image: orbc
-	SupportPowerChargeBar:
+	# Je eine Ladeleiste PRO Power, an ihren OrderName gebunden (2026-08-28) -- sonst zeigen
+	# alle Balken denselben Fortschritt (Engine-Bugfix SupportPowerChargeBar.Power). Reihenfolge
+	# = Stapelreihenfolge der Balken unter dem Gebaeude.
+	SupportPowerChargeBar@satellite:
+		Power: AotSatellitePowerInfoOrder
+	SupportPowerChargeBar@orca:
+		Power: AotOrcaTransportPowerInfoOrder
+		RequiresCondition: aot-orca-transport-active
 	InfiltrateForSupportPowerReset:
 		Types: SpyInfiltrate
 		PlayerExperience: 10
@@ -5512,6 +5533,7 @@ ORBC:
 		CameraActor: camera.small
 		SupportPowerPaletteOrder: 20
 	SupportPowerChargeBar@ion:
+		Power: IonCannonPowerInfoOrder
 		RequiresCondition: aot-ion-cannon-active
 	GrantConditionOnPrerequisite@zonetrooperdrop:
 		Condition: aot-zonetrooper-drop-active
@@ -5547,6 +5569,7 @@ ORBC:
 		CircleSequence: circles
 		SupportPowerPaletteOrder: 30
 	SupportPowerChargeBar@zonetrooperdrop:
+		Power: AotZoneTrooperDropPowerInfoOrder
 		RequiresCondition: aot-zonetrooper-drop-active
 	# ORBC/SLAB-Tier-Tausch (2026-08-28): Age-Sprite-Switch. Age 1 = altes TD EYE-Sprite
 	# (eye-idle), ab Age 2 = Gemini-Body (idle). Umschaltung ueber aot-age2-active. Die
