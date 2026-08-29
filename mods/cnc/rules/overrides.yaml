@@ -1643,7 +1643,8 @@ ORCA:
 
 HELI:
 	-Buildable:
-	-WithMuzzleOverlay:
+	# aotmod 2026-08-29: WithMuzzleOverlay wieder aktiv – der aot-hind-Image-Block hat jetzt eine
+	# muzzle-Sequenz (aot-sequences.yaml). HIND/Harpy zeigen dadurch das Chaingun-Muendungsfeuer.
 	Repairable:
 		RepairActors: aot-hpad-nod
 	RenderSprites:
@@ -1705,10 +1706,15 @@ HELI:
 		Weapon: aot-HindAGGun
 		LocalOffset: 128,-213,-85, 128,213,-85
 		PauseOnCondition: !ammo || aot-harpy-upgraded
+		# aotmod 2026-08-29: MuzzleSequence war beim -Armament@PRIMARY/Neu-Definieren verlorengegangen
+		# (Engine-HELI setzt es). Ohne dieses Feld filtert WithMuzzleOverlay das Armament komplett raus
+		# -> gar kein Muendungsfeuer. Referenziert die neue muzzle-Sequenz im aot-hind-Image.
+		MuzzleSequence: muzzle
 	Armament@PRIMARY_harpy:
 		Weapon: aot-HarpyAGGun
 		LocalOffset: 128,-213,-85, 128,213,-85
 		PauseOnCondition: !ammo || !aot-harpy-upgraded || aot-harpy-laser
+		MuzzleSequence: muzzle
 	Armament@PRIMARY_harpy_laser:
 		Weapon: aot-HarpyLaser
 		LocalOffset: 128,-213,-85, 128,213,-85

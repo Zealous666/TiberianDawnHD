@@ -2536,6 +2536,16 @@ aot-hind:
 		Start: 4
 		Length: 8
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\COMMON\VFX\LROTOR.ZIP
+	# Muendungsfeuer fuer HIND/Harpy-Chaingun (aotmod 2026-08-29): der aot-hind-Image-Block hatte
+	# – anders als das Vanilla-heli-Image – keine muzzle-Sequenz, weshalb HELI in overrides.yaml
+	# WithMuzzleOverlay per -WithMuzzleOverlay entfernen musste (sonst Fehler). Klassisch minigun.shp,
+	# im Remaster COMMON\VFX\MINIGUN.ZIP (wie das heli-/a10-Muzzle in aircraft-overrides.yaml) --
+	# ein leerer RemasteredFilename haette im HD-Modus GAR NICHTS gerendert (User-Fund 2026-08-29).
+	muzzle:
+		Filename: minigun.shp
+		Length: 6
+		Facings: 8
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\COMMON\VFX\MINIGUN.ZIP
 	icon:
 		Filename: hind_base.png
 		Length: 1
