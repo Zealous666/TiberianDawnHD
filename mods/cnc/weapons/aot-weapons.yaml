@@ -2031,3 +2031,25 @@ aot-mine-explode-nocrater:
 		Delay: 1
 		ImpactActors: false
 # === Ende aotmod ===
+
+# === Age of Tiberium (aotmod 2026-08-29) - Allied Flak (RA AA Gun ZSU-23) ===
+# Portiert aus engine/mods/ra ^AACannon + ZSU-23. ValidTargets Air (cnc-Flieger tragen Air,
+# nicht RAs AirborneActor). Luft-Impact-Effekt small_building wie die cnc-SAM (Dragon@4EffAir).
+aot-FlakAA:
+	ReloadDelay: 6
+	Range: 10c0
+	Report: aot-flak-fire.wav
+	Burst: 2
+	BurstDelays: 0
+	ValidTargets: Air
+	Projectile: InstantHit
+	Warhead@1Dam: SpreadDamage
+		Spread: 213
+		Damage: 900
+		ValidTargets: Air
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+	Warhead@2Eff: CreateEffect
+		Explosions: small_building
+		ImpactSounds: xplos.aud
+		ImpactActors: false
+		ValidTargets: Air, Ground, Water

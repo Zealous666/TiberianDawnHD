@@ -5846,6 +5846,27 @@ aot-tesla:
 		Length: 9
 		Tick: 100
 
+# === Age of Tiberium (aotmod 2026-08-29) - Allied Flak (RA AA Gun, Editor-only) ===
+# Turret 32 Facings direkt aus dem RA-Remaster-MEG (AGUN.ZIP, 128 Frames = 4x32:
+# turret 0-31, recoil 32-63, damaged-turret 64-95, damaged-recoil 96-127). Der Turret-Frame
+# enthaelt die Basis bereits -> Body ist ein 1x1-Transparent-Placeholder (RAs Leerframe-Trick).
+aot-flak:
+	idle:
+		Filename: aot-flak-blank.png
+		RemasteredFilename:
+		Length: 1
+	turret:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\AGUN.ZIP
+		RemasteredOffset: 0, -40
+		Facings: 32
+		UseClassicFacings: True
+	damaged-turret:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\AGUN.ZIP
+		RemasteredOffset: 0, -40
+		Start: 64
+		Facings: 32
+		UseClassicFacings: True
+
 # === Age of Tiberium (aotmod) - Lightpost (baubar ab Age 3) ===
 # Sprite BYTE-IDENTISCH zum Editor-Light-Post aot-ts-galite (gtlite.shp, siehe
 # aot-ts-civilian-sequences.yaml) -- gleiche Scale 0.55, kein Remap-Overlay: der baubare Post

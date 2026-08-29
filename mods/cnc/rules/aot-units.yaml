@@ -5441,7 +5441,7 @@ aot-msam-hover-aa:
 		Prerequisites: anyhq, ~aot-heavy-ordonance-upgrade, aot-slab
 		Queue: Vehicle.GDI
 		Icon: aot-hvr-aa-icon
-		Description: Hover AA. Amphibious anti-air platform. Devastating vs aircraft and infantry.
+		Description: Amphibious anti-air platform equipped with a Slingshot-Quadgun. Devastating vs aircraft and infantry.
 	Tooltip:
 		Name: Hover AA
 

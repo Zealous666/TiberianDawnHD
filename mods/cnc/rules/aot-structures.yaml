@@ -3997,6 +3997,12 @@ aot-fix-age2-nod:
 # Frame-Mitte); LocalCenterOffset schiebt den Body über dem fixen Footprint/Bib nach
 # oben, damit er mittig sitzt (Y in World-Units: 1024 = 1 Zelle, negativ = nach oben).
 aot-gap:
+	# Editor-Checkbox "Requires power" (Default an, wie aot-tesla/ATWR): aus = voellig
+	# stromunabhaengig (Neutral-/Deko-Platzierung ohne Kraftwerk).
+	AotOptionalPower:
+		Condition: aot-power-required
+	GrantConditionOnPowerState@LOWPOWER:
+		RequiresCondition: aot-power-required
 	Inherits: ^BaseBuilding
 	Inherits@IDISABLE: ^DisabledOverlay
 	# RA-Sprite ohne "dead"-Rubble-Frame -> WithDeathAnimation (von ^BaseBuilding geerbt)
@@ -4015,7 +4021,7 @@ aot-gap:
 	# Strom nur wenn NICHT per Deploy abgeschaltet (aot-gap-powerdown) - wie Stealth Generator.
 	Power:
 		Amount: -60
-		RequiresCondition: !aot-gap-powerdown
+		RequiresCondition: aot-power-required && !aot-gap-powerdown
 	# Deploy-Toggle: Generator an/aus schalten (wie aot-sgen). Startet AKTIV; ein Deploy-Befehl
 	# schaltet ab -> aot-gap-powerdown -> Power aus (0 Strom), Shroud + Sicht-Kappung + Dish aus.
 	# Erneuter Deploy reaktiviert. SkipMakeAnimation: kein Bauanim-Replay beim Umschalten.
@@ -4713,6 +4719,14 @@ aot-upgrade-gunboat-destroyer:
 # (aot-gun-base/aot-gun-laser) fuer Bau-Icon-Wechsel, Condition-Switch direkt auf
 # GUN fuer bereits gebaute Tuerme (1:1 das HTNK/LTNK-Muster).
 GUN:
+	# Editor-Checkbox "Requires power" (Default an, wie aot-tesla/ATWR): aus = voellig
+	# stromunabhaengig (Neutral-/Deko-Platzierung ohne Kraftwerk).
+	AotOptionalPower:
+		Condition: aot-power-required
+	Power:
+		RequiresCondition: aot-power-required
+	GrantConditionOnPowerState@LOWPOWER:
+		RequiresCondition: aot-power-required
 	# User-Fund 2026-07-30: "lowpower" in AttackTurreted.PauseOnCondition unten war zunaechst
 	# wirkungslos -- GUN erbt nur ^Support, das im Gegensatz zu SAM/OBLI/STEC etc. KEIN
 	# ^DisabledOverlay einbindet. Ohne diesen Trait wird "lowpower" auf GUN nie gewaehrt (check-yaml:
@@ -4823,6 +4837,12 @@ GUN:
 # Guard Tower: fuer alle Fraktionen nicht baubar (User-Wunsch 2026-07-12).
 # -Buildable muss hier stehen (aot-structures laedt nach overrides.yaml).
 GTWR:
+	# Editor-Checkbox "Requires power" (Default an, wie aot-tesla/ATWR): aus = voellig
+	# stromunabhaengig (Neutral-/Deko-Platzierung ohne Kraftwerk).
+	AotOptionalPower:
+		Condition: aot-power-required
+	Power:
+		RequiresCondition: aot-power-required
 	-Buildable:
 
 # === Age of Tiberium (aotmod) - GUN Proxy-Aktoren (Bau-Icon-Wechsel) ===
@@ -6085,6 +6105,19 @@ aot-shrine:
 #  - Der eigentliche Cloak-Trait (Cloak@AOTSTEALTH) + ExternalCondition@AOTSTEALTH haengen an
 #    ^Building (overrides.yaml), damit JEDES Gebaeude im Feld tarnbar wird.
 aot-sgen:
+	# Editor-Checkbox "Requires power" (Default an, wie aot-tesla/ATWR): aus = voellig
+	# stromunabhaengig (Neutral-/Deko-Platzierung ohne Kraftwerk).
+	AotOptionalPower:
+		Condition: aot-power-required
+	GrantConditionOnPowerState@LOWPOWER:
+		RequiresCondition: aot-power-required
+	GrantConditionOnPowerState@POWERED:
+		RequiresCondition: aot-power-required
+	# Checkbox aus: Generator gilt dauerhaft als "powered" (sonst liefe der Effekt ohne
+	# Kraftwerk nie an, da aot-sgen-powered nur bei Normal-Power gewaehrt wuerde).
+	GrantCondition@nopower:
+		Condition: aot-sgen-powered
+		RequiresCondition: !aot-power-required
 	Inherits: ^BaseBuilding
 	Inherits@IDISABLE: ^DisabledOverlay
 	Inherits@shape: ^3x2Shape
@@ -6107,7 +6140,7 @@ aot-sgen:
 	# Strom nur wenn NICHT per Deploy abgeschaltet (aot-sgen-powerdown).
 	Power:
 		Amount: -150
-		RequiresCondition: !aot-sgen-powerdown
+		RequiresCondition: aot-power-required && !aot-sgen-powerdown
 	WithBuildingBib:
 	RenderSprites:
 		Image: aot-sgen
@@ -6191,6 +6224,14 @@ aot-sgen:
 # statt Support.Nod (User-Wunsch, wie GUN/FTUR). Custom-Icon siehe
 # structures-overrides.yaml (aot-obli-icon.png, User-Icon).
 OBLI:
+	# Editor-Checkbox "Requires power" (Default an, wie aot-tesla/ATWR): aus = voellig
+	# stromunabhaengig (Neutral-/Deko-Platzierung ohne Kraftwerk).
+	AotOptionalPower:
+		Condition: aot-power-required
+	Power:
+		RequiresCondition: aot-power-required
+	GrantConditionOnPowerState@LOWPOWER:
+		RequiresCondition: aot-power-required
 	Buildable:
 		BuildPaletteOrder: 230
 		Prerequisites: ~aot-age3, aot-shrine, aot-laser-fence-upgrade
@@ -6214,6 +6255,14 @@ OBLI:
 # "Cloaked SAM"-Upgrade (Age 2) ergaenzt Stealth-Tarnung analog zum U-Boot
 # (siehe sub-system.md), pausiert bei Angriff/Beschaedigung/Low-Power.
 SAM:
+	# Editor-Checkbox "Requires power" (Default an, wie aot-tesla/ATWR): aus = voellig
+	# stromunabhaengig (Neutral-/Deko-Platzierung ohne Kraftwerk).
+	AotOptionalPower:
+		Condition: aot-power-required
+	Power:
+		RequiresCondition: aot-power-required
+	GrantConditionOnPowerState@LOWPOWER:
+		RequiresCondition: aot-power-required
 	# Bau-Vorschau (User-Fund 2026-08-02: "SAM ist in Age 0 definitiv das bunkered/cloaked
 	# Preview statt des RA-Sprites", Icon war korrekt).
 	# Ursache: SAM nutzt schon in der Vanilla-Definition KEINE Aktor-Vorschau, sondern
@@ -6390,8 +6439,7 @@ aot-sam-editor-bunkered-cloak:
 	Armor@bunkered:
 		RequiresCondition: aot-sam-bunkered || !aot-sam-bunkered
 	Cloak:
-		RequiresCondition: aot-sam-cloak-active || !aot-sam-cloak-active
-# === Ende aotmod ===
+		RequiresCondition: aot-sam-cloak-active || !aot-sam-cloak-active# === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - SAM Upgrades: Bunkered (Age 1) + Cloak (Age 2) ===
 aot-upgrade-sam-bunkered:
@@ -7537,6 +7585,12 @@ aot-gate-nod:
 # aot-FturToxic (Chemspray-Basis, wie E4/TTNK). Sprite bleibt vorerst unveraendert
 # (kein neues Toxic-Tower-Asset vorhanden) - nur Name+Waffe wechseln.
 aot-ftur:
+	# Editor-Checkbox "Requires power" (Default an, wie aot-tesla/ATWR): aus = voellig
+	# stromunabhaengig (Neutral-/Deko-Platzierung ohne Kraftwerk).
+	AotOptionalPower:
+		Condition: aot-power-required
+	Power:
+		RequiresCondition: aot-power-required
 	# ^BaseBuilding -> ^Support gewechselt (2026-07-04, User-Fund: "Stop" und
 	# "Waypoint Mode"-Buttons fehlen im Vergleich zu GUN). Ursache:
 	# CommandBarBlacklist (auf ^Building, versteckt per Default GENAU diese beiden
@@ -8605,6 +8659,66 @@ aot-tesla:
 		RequiresCondition: aot-power-required
 	Tooltip:
 		Name: actor-aot-tesla.name
+	MapEditorData:
+		Categories: Civilians
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod 2026-08-29) - Allied Flak (RA AA Gun) - Editor-only, Neutral ===
+# Wie aot-tesla: neutrales, nur im Editor platzierbares Gebaeude mit Power-Checkbox. Zusaetzlich
+# turretiert (32 Facings, RA-Remaster AGUN) + AA-Waffe (aot-FlakAA). Body = 1x1-Transparent,
+# der Turret zeigt das ganze Geschuetz (Basis inklusive).
+aot-flak:
+	Inherits: ^CivBuilding
+	RenderSprites:
+		Image: aot-flak
+	Building:
+		Footprint: x
+		Dimensions: 1,1
+	Selectable:
+		Bounds: 1024, 1024
+	Health:
+		HP: 40000
+	Armor:
+		Type: Heavy
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral, Creeps
+	RevealsShroud:
+		Range: 10c0
+	-BodyOrientation:
+	ClassicFacingBodyOrientation:
+	Turreted:
+		TurnSpeed: 60
+		InitialFacing: 832
+		RealignDelay: -1
+	WithSpriteBody:
+		Sequence: idle
+	WithSpriteTurret:
+		Sequence: turret
+		Recoils: false
+	Armament:
+		Weapon: aot-FlakAA
+		LocalOffset: 520,100,450, 520,-150,450
+	AttackTurreted:
+		PauseOnCondition: lowpower
+	AutoTarget:
+		InitialStance: AttackAnything
+		InitialStanceAI: AttackAnything
+	AutoTargetPriority@DEFAULT:
+		ValidTargets: Air
+		InvalidTargets: NoAutoTarget
+	# Power-Checkbox wie aot-tesla/ATWR (Default an). Aus = feuert ohne Kraftwerk.
+	# GrantConditionOnPowerState fehlt bei ^CivBuilding -> hier selbst granten.
+	GrantConditionOnPowerState@LOWPOWER:
+		Condition: lowpower
+		ValidPowerStates: Low, Critical
+		RequiresCondition: aot-power-required
+	AotOptionalPower:
+		Condition: aot-power-required
+	Power:
+		Amount: -50
+		RequiresCondition: aot-power-required
+	Tooltip:
+		Name: actor-aot-flak.name
 	MapEditorData:
 		Categories: Civilians
 # === Ende aotmod ===

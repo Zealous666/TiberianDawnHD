@@ -297,3 +297,6 @@ actor-aot-upgrade-foundation =
 actor-t03-transformableblue-name = (Tree that can transform into a Blue Blossom Tree)
 actor-t03-transformable-snow-name = (Snow tree that can transform into a Blossom Tree)
 actor-t03-transformableblue-snow-name = (Snow tree that can transform into a Blue Blossom Tree)
+
+actor-aot-flak =
+    .name = Allied Flak Cannon
