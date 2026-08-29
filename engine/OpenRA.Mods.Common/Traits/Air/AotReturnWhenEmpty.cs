@@ -24,6 +24,7 @@ namespace OpenRA.Mods.Common.Traits
 	{
 		readonly AotReturnWhenEmptyInfo info;
 		AmmoPool[] ammoPools;
+		Armament[] armaments;
 		bool wasEmpty;
 		bool hasResumeTarget;
 		Target resumeTarget;
@@ -44,6 +45,41 @@ namespace OpenRA.Mods.Common.Traits
 		void INotifyCreated.Created(Actor self)
 		{
 			ammoPools = self.TraitsImplementing<AmmoPool>().ToArray();
+			armaments = self.TraitsImplementing<Armament>().ToArray();
+		}
+
+		// aotmod: Nur Ammo-Pools zaehlen, die eine AKTUELL aktivierte Waffe speisen (Waffe per
+		// RequiresCondition enabled -- Pause zaehlt NICHT, denn genau die leere Waffe pausiert sich
+		// per PauseOnCondition: !<ammo>). Sonst blockieren stillgelegte Pools die Leer-Erkennung:
+		// der Firehawk (aot-firehawk) feuert nur die Rocket-Pool, traegt aber weiterhin die vollen
+		// A-10-Pools vulcan/napalm -> ammoPools.All(!HasAmmo) wurde nie wahr -> kein Rearm-
+		// Rueckflug, der Jet kreiste leer ueber dem Ziel.
+		bool AllActivePoolsEmpty()
+		{
+			var sawActive = false;
+			foreach (var p in ammoPools)
+			{
+				var isFed = false;
+				foreach (var arm in armaments)
+				{
+					if (arm.IsTraitDisabled)
+						continue;
+					if (p.Info.Armaments.Contains(arm.Info.Name))
+					{
+						isFed = true;
+						break;
+					}
+				}
+
+				if (!isFed)
+					continue;
+
+				sawActive = true;
+				if (p.HasAmmo)
+					return false;
+			}
+
+			return sawActive;
 		}
 
 		void INotifyAttack.PreparingAttack(Actor self, in Target target, Armament a, Barrel barrel) { }
@@ -58,7 +94,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (!self.IsInWorld || self.IsDead)
 				return;
 
-			var isEmpty = ammoPools.Length > 0 && ammoPools.All(p => !p.HasAmmo);
+			var isEmpty = AllActivePoolsEmpty();
 
 			if (!wasEmpty && isEmpty && !hasReturnPos)
 			{

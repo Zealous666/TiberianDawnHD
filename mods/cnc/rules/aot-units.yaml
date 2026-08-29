@@ -2490,6 +2490,9 @@ AJET:
 		FacingTolerance: 40
 		AttackType: Strafe
 		Voice: Attack
+		# aotmod: die Firehawk-Rakete ist ein eigenes Armament (Name rockets), sonst wuerde
+		# AttackBase.Armaments (Default primary, secondary) sie im Feld nie feuern.
+		Armaments: primary, secondary, rockets
 	# Guard-Leash (aotmod 2026-08-20): der Jet verlaesst im Idle-Kreis seine Loiter-Position, um
 	# Gegner im Umkreis von 10 Zellen anzugreifen, und kehrt danach dorthin zurueck. AutoTarget liefert
 	# nur die Zielauswahl (ScanRadius = Guard-Radius); ScanOnIdle: False, damit die Vanilla-Routine
@@ -2509,18 +2512,21 @@ AJET:
 		ValidTargets: Infantry, Vehicle, Creep, Water, Air, Support, Structure
 		InvalidTargets: NoAutoTarget
 	Armament@PRIMARY:
+		Name: primary
 		Weapon: aot-AjetVulcan
 		LocalOffset: 1024,0,-85
 		PauseOnCondition: !vulcan-ammo
 		RequiresCondition: !aot-firehawk
 	WithMuzzleOverlay:
 	Armament@SECONDARY:
+		Name: secondary
 		Weapon: aot-AjetNapalm
 		LocalOffset: 0,-256,-43, 0,256,-43
 		PauseOnCondition: !napalm-ammo
 		RequiresCondition: !aot-firehawk
 	# Firehawk-Raketen: 3x Doppel-Burst, zwei Tragflächen-Startpunkte (wie Napalm).
 	Armament@ROCKETS:
+		Name: rockets
 		Weapon: aot-FirehawkMissile
 		LocalOffset: 0,-256,-43, 0,256,-43
 		PauseOnCondition: !rocket-ammo
@@ -2535,16 +2541,19 @@ AJET:
 		StartColorAlpha: 128
 	AmmoPool@VULCAN:
 		Name: vulcan
+		Armaments: primary
 		Ammo: 10
 		AmmoCondition: vulcan-ammo
 		ReloadDelay: 8
 	AmmoPool@NAPALM:
 		Name: napalm
+		Armaments: secondary
 		Ammo: 20
 		AmmoCondition: napalm-ammo
 		ReloadDelay: 8
 	AmmoPool@ROCKET:
 		Name: rocket
+		Armaments: rockets
 		Ammo: 6
 		AmmoCondition: rocket-ammo
 		ReloadDelay: 8
@@ -4702,6 +4711,12 @@ aot-msub:
 	RevealsShroud:
 		Range: 8c0
 		Type: CenterPosition
+	# aotmod 2026-08-29: aufgetaucht (nicht getarnt) grosse Sichtweite, damit die 16c0-Raketen
+	# nicht ins Blinde feuern; getaucht bleibt es bei 8c0 (Stealth-Positionsschutz).
+	RevealsShroud@surfaced:
+		Range: 14c0
+		Type: CenterPosition
+		RequiresCondition: !aot-msub-cloaked
 	# Unter Eis: keine Angriffe, kein Auftauchen, nicht ortbar (identisches Muster wie aot-sub,
 	# siehe dortiger Kommentar zu CloakType/InitialDelay/DetectionTypes).
 	AotGrantConditionOnTerrain@ice:
@@ -5122,8 +5137,15 @@ aot-cruiser:
 		PauseOnCondition: aot-cruiser-carrier-deployed
 	RepairableNear:
 		RepairActors: aot-shipyard, aot-shipyard-age2, aot-subpen, aot-subpen-age2
+	# aotmod 2026-08-29: Sichtweite fast so weit wie die Schussreichweite, damit der Cruiser
+	# seine lange Reichweite auch autonom nutzen kann (vorher 7c0 -> blindes Weitfeuern).
+	# 8-Inch: Range 20c0 -> Sicht 18c0. Railgun-Upgrade: Range 15c0 -> Sicht 14c0.
 	RevealsShroud:
-		Range: 7c0
+		Range: 18c0
+		RequiresCondition: !aot-cruiser-railgun-upgrade
+	RevealsShroud@railgun:
+		Range: 14c0
+		RequiresCondition: aot-cruiser-railgun-upgrade
 	-Tooltip:
 	Tooltip:
 		Name: Battle Cruiser
