@@ -91,19 +91,61 @@ namespace OpenRA.Mods.Common.Traits
 		}
 
 		// Returns the first available non-disabled slot and its reservation, or (null, null) if none free.
+		// aotmod: two passes. A parked aircraft that stays on its pad (TakeOffOnResupply: false) calls
+		// AllowYieldingReservation, so its slot counts as claimable -- with a single pass the next
+		// aircraft grabbed that OCCUPIED slot even though other pads were completely free, landed on
+		// top of the parked one and nudged it into the air (multi-pad helipads: everyone piled onto
+		// the same one or two pads). So prefer a genuinely EMPTY slot first, and only fall back to a
+		// yielded (still physically occupied) slot when nothing is free -- which preserves the
+		// original behaviour for single-pad hosts.
 		public static (Reservable Slot, IDisposable Reservation) TryReserve(Actor reservable, Actor forActor, Aircraft forAircraft)
 		{
+			Reservable yielded = null;
 			foreach (var res in reservable.TraitsImplementing<Reservable>())
 			{
-				if (!res.IsTraitDisabled &&
-					(res.reservedForAircraft == null || res.reservedForAircraft.MayYieldReservation))
+				if (res.IsTraitDisabled)
+					continue;
+
+				// Free slot: not reserved AND nothing physically parked on it (an aircraft that
+				// released its reservation entirely still sits on the pad).
+				if (res.reservedForAircraft == null)
 				{
-					var reservation = res.Reserve(reservable, forActor, forAircraft);
-					return (res, reservation);
+					if (!res.IsOccupied(reservable, forActor))
+						return (res, res.Reserve(reservable, forActor, forAircraft));
+
+					if (yielded == null)
+						yielded = res;
+
+					continue;
 				}
+
+				if (yielded == null && res.reservedForAircraft.MayYieldReservation)
+					yielded = res;
 			}
 
+			if (yielded != null)
+				return (yielded, yielded.Reserve(reservable, forActor, forAircraft));
+
 			return (null, null);
+		}
+
+		// aotmod: is another (landed) aircraft physically sitting on this slot's landing spot?
+		// Needed because an aircraft that fully released its reservation still occupies the pad.
+		bool IsOccupied(Actor self, Actor forActor)
+		{
+			var slotPos = self.CenterPosition + Info.LandingOffset;
+			var cell = self.World.Map.CellContaining(slotPos);
+			foreach (var a in self.World.ActorMap.GetActorsAt(cell))
+			{
+				if (a == forActor || a == self || a.IsDead || !a.IsInWorld)
+					continue;
+
+				var ac = a.TraitOrDefault<Aircraft>();
+				if (ac != null && ac.GetActorBelow() == self)
+					return true;
+			}
+
+			return false;
 		}
 
 		public static bool IsReserved(Actor a)

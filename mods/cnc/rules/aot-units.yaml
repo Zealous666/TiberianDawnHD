@@ -1184,7 +1184,7 @@ aot-htnk-base:
 		LockedGroup: aot-grp-htnk
 		Queue: Vehicle.GDI
 		BuildPaletteOrder: 30
-		Prerequisites: ~aot-weap, ~aot-age1, aot-age1, weap, atec, ~!aot-gdi-advtech-upgrade, ~!aot-mtnk-railgun-upgrade
+		Prerequisites: ~aot-weap, ~aot-age1, aot-age1, weap, atec, aot-orbc, ~!aot-gdi-advtech-upgrade, ~!aot-mtnk-railgun-upgrade
 		Description: Heavily armored GDI battle tank with dual 120mm cannons.
 	Tooltip:
 		Name: Mammoth Tank
@@ -1204,7 +1204,7 @@ aot-htnk-rocket:
 		LockedGroup: aot-grp-htnk
 		Queue: Vehicle.GDI
 		BuildPaletteOrder: 30
-		Prerequisites: ~aot-age1, aot-age1, ~aot-gdi-advtech-upgrade, ~!aot-mtnk-railgun-upgrade
+		Prerequisites: ~aot-age1, aot-age1, ~aot-gdi-advtech-upgrade, aot-orbc, ~!aot-mtnk-railgun-upgrade
 		Icon: aot-htnk-rocket-icon
 		Description: Mammoth Tank equipped with dual rocket launchers for additional anti-air and ground firepower.
 	Tooltip:
@@ -1235,7 +1235,7 @@ aot-htnk-laser:
 		LockedGroup: aot-grp-htnk
 		Queue: Vehicle.GDI
 		BuildPaletteOrder: 30
-		Prerequisites: ~aot-age1, aot-age1, ~aot-mtnk-railgun-upgrade
+		Prerequisites: ~aot-age1, aot-age1, aot-orbc, ~aot-mtnk-railgun-upgrade
 		Icon: aot-htnk-laser-icon
 		Description: Mammoth Tank with dual high-powered railguns. Requires the Tank Railguns upgrade (Predator path).
 	Tooltip:
@@ -4509,10 +4509,10 @@ aot-seamine:
 	Immobile:
 		OccupiesSpace: true
 	Targetable:
-		# Siehe aot-minv: "Ground" ergaenzt und RequiresForceFire an DIESES Trait, damit die
-		# Seemine per Force-Fire zerstoerbar ist, ohne zum Auto-Angriffsziel zu werden.
+		# Siehe aot-minv: RequiresForceFire ENTFERNT (2026-08-28) -- aufgeklaerte feindliche Minen
+		# sollen automatisch beschossen werden. Cloak (DetectionTypes: Mine) haelt unentdeckte
+		# Minen unsichtbar/unangreifbar; nur ein Detektor macht sie zum Auto-Ziel.
 		TargetTypes: Water, Mine, Ground
-		RequiresForceFire: true
 
 # === Age of Tiberium (aotmod) - NOD Submarine (aot-sub) ===
 # Auto-Tauch-Mechanik analog STNK: Cloak mit CloakedCondition → TargetType-Switch.

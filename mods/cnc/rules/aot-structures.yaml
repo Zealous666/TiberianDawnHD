@@ -2596,15 +2596,14 @@ aot-minv:
 	Tooltip:
 		Name: Vehicle Mine
 	Targetable:
-		# "Ground" ergaenzt + RequiresForceFire (User 2026-08-05: Minen sollen per Force-Fire
-		# zerstoerbar sein). Ohne "Ground" trifft sie gar keine normale Waffe -- die Waffen des
-		# Mods pruefen gegen "Ground", die Mine trug nur "GroundActor"/"Mine".
-		# RequiresForceFire MUSS an DIESES Trait: Target.RequiresForceFire ist laut Kommentar im
-		# Engine-Code "all or nothing" und liefert false, sobald IRGENDEIN aktives Targetable es
-		# nicht setzt -- ein zusaetzliches Trait haette die Sperre also aufgehoben statt gesetzt
-		# und die Minen zum Auto-Angriffsziel gemacht.
+		# "Ground" ergaenzt, damit die normalen Mod-Waffen (pruefen gegen "Ground") die Mine
+		# ueberhaupt treffen (sie trug urspruenglich nur "GroundActor"/"Mine").
+		# RequiresForceFire ENTFERNT (User 2026-08-28): AUFGEKLAERTE feindliche Minen sollen von
+		# Einheiten automatisch beschossen werden. Da die Mine per Cloak (DetectionTypes: Mine)
+		# getarnt ist, wird sie NUR angreifbar, wenn ein Detektor sie aufdeckt -- ungetarnte/
+		# unentdeckte Minen bleiben unsichtbar und werden nicht angegriffen. AutoTarget zielt nur
+		# auf FEINDLICHE, sichtbare Aktoren -> eigene Minen bleiben unbehelligt.
 		TargetTypes: GroundActor, Mine, Ground
-		RequiresForceFire: true
 	Immobile:
 		OccupiesSpace: true
 	RenderSprites:
@@ -3328,6 +3327,12 @@ aot-hpad-gdi:
 	Reservable@sw:
 		LandingOffset: -1024,1024,0
 		ReservedCondition: aot-hpad-gdi-sw-reserved
+	# RA-Stil (2026-08-29): gebaute Aircraft spawnen am Kartenrand und fliegen das Helipad an,
+	# statt am Gebaeude zu poppen (loest das Vier-Pad-Crowding). Ohne Rallypoint dockt sie auf dem
+	# naechsten freien Pad, mit Rallypoint fliegt sie erst das Gebaeude, dann den Rallypoint an.
+	-Production:
+	AotProductionFromMapEdge:
+		Produces: Aircraft.GDI, Aircraft.Nod
 	Buildable:
 		BuildPaletteOrder: 100
 		Prerequisites: anyhq
@@ -3354,6 +3359,10 @@ aot-hpad-nod:
 		Description: Landing pad for helicopters. Required for air unit production.
 	ProvidesPrerequisite@buildingname:
 		Prerequisite: hpad
+	# RA-Stil (2026-08-29): gebaute Aircraft spawnen am Kartenrand und fliegen das Helipad an.
+	-Production:
+	AotProductionFromMapEdge:
+		Produces: Aircraft.GDI, Aircraft.Nod
 	# Bib-Smudge (User-Wunsch 2026-08-02), Ausmasse exakt wie beim NOD Radar (aot-nod-radar):
 	# HPAD ist von Haus aus 2x2 ("xx xx", Dimensions 2,2, kein LocalCenterOffset). Der Bib
 	# braucht eine EIGENE Footprint-Zeile, sonst wird er auf die Gebaeudezellen gemalt und
@@ -3686,7 +3695,8 @@ AFLT:
 	Exit@1:
 		SpawnOffset: 0,-256,0
 		Facing: 768
-	Production:
+	# RA-Stil (2026-08-29): A10/Firehawk/AJET spawnen am Kartenrand und fliegen das Air Field an.
+	AotProductionFromMapEdge:
 		Produces: Aircraft.GDI.AFLT
 	Reservable:
 	WithBuildingBib:

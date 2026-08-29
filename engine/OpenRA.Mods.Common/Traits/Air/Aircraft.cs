@@ -763,7 +763,13 @@ namespace OpenRA.Mods.Common.Traits
 				var dat = self.World.Map.DistanceAboveTerrain(CenterPosition);
 				if (dat == LandAltitude)
 				{
-					if (!CanLand(self.Location) && ReservedActor == null)
+					// aotmod: `&& GetActorBelow() == null` -- do NOT take off when parked on a rearm
+					// pad (a Reservable actor below us). Multiple helis built from one multi-pad
+					// helipad crowd each other's cells, so CanLand(self.Location) reads false for an
+					// already-docked heli; without this guard it took off and hovered, and with the
+					// retry-land trait two helis ping-ponged between the near pads forever. A heli
+					// sitting on open ground (no dock below) still takes off to free the cell.
+					if (!CanLand(self.Location) && ReservedActor == null && GetActorBelow() == null)
 						self.QueueActivity(new TakeOff(self));
 
 					// All remaining idle behaviors rely on not being at LandAltitude, so unconditionally return

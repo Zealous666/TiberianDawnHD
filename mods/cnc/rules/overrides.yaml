@@ -7,6 +7,16 @@
 # Movement-Layer nie betreten -> GrantConditionOnJumpjetLayer feuert nie -> Hover-Anim fehlt.
 # NUR auf World (nicht EditorWorld) erlaubt, deshalb eigener Block statt ^BaseWorld.
 World:
+	# === Age of Tiberium (aotmod) - Shroud-Generator Nebel-Feld, gemeinsamer Renderer ===
+	# Zeichnet die UNION aller aktiven AotFogField-Felder (aot-gap / aot-mgap) als EIN
+	# durchgehendes Nebel-Meer statt vieler ueberlappender Scheiben (kein Doppel-Alpha im
+	# Ueberlappungsbereich, keine internen Kanten-Naehte). Siehe AotFogField.cs.
+	# Alpha < 1 macht das EIGENE/verbuendete Generator-Feld transparenter als echten Fog-of-War,
+	# damit man auf einen Blick unterscheidet, was man selbst per Generator verbirgt und was echter
+	# Schleier ist (Feinde sehen davon nichts -- die bekommen den echten schwarzen CreatesShroud).
+	# 1.0 = so stark wie echter Fog (eff. 0.5), 0.6 = deutlich leichter. Frei justierbar.
+	AotFogFieldManager:
+		Alpha: 0.6
 	# === Age of Tiberium (aotmod) - Tiberium/BlueTiberium auch auf Clear.Snow platzierbar ===
 	# AOT_ARCTIC hat fuer die aus AOT_ARCTIC uebernommenen Zellen einen eigenen Terrain-Typ
 	# "Clear.Snow" (siehe aot-winter.yaml, Minimap-Farbtrennung). Ohne diese Ergaenzung würde
