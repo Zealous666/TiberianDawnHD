@@ -1541,6 +1541,15 @@ MSAM:
 	Armament@garrisoned:
 		Name: garrisoned
 		Weapon: 227mm
+	# Garrison-Flugabwehr (2026-08-29): die Feld-AA (aot-MSAM-AA) laeuft nur ueber das
+	# "aa"-Armament, das AttackGarrisoned (Filter "garrisoned") ignoriert -> garnisonierter
+	# MSAM konnte keine Luftziele bekaempfen. Zweites Garrison-Armament mit Name "garrisoned"
+	# fuer die AA-Waffe (1:1 Hover-AA-Muster @garrisonedair). AttackGarrisoned filtert per
+	# Name, nicht per Instanz -> zwei "garrisoned"-Armaments (Boden+Luft) sind zulaessig.
+	Armament@garrisonedair:
+		Name: garrisoned
+		Weapon: aot-MSAM-AA
+		LocalOffset: 213,128,96, 213,-128,96
 # === Ende aotmod ===
 
 # MLRS (NOD Anti-Air): aus Bauliste entfernen

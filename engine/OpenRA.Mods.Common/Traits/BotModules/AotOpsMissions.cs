@@ -2665,17 +2665,34 @@ namespace OpenRA.Mods.Common.Traits
 			// dann einen zielort erreicht hat und dort ein gebäude stand, hat er keinen landeplatz in
 			// der nähe gesucht"). Buildings sit on passable ground, so the old terrain-only test happily
 			// picked a cell inside the enemy base and the transport then had nowhere to set down.
-			bool Free(CPos c) =>
-				Ops.World.Map.Contains(c)
-				&& Ops.Intel.IsPassable(c)
-				&& !Ops.World.ActorMap.GetActorsAt(c).Any(a => a.Info.HasTraitInfo<BuildingInfo>());
+			//
+			// It must also have ROOM AROUND IT for the whole squad to disembark (User 2026-08-29: "er
+			// flog sauber hinter feindlicher base, aber verharrt dort ... vermutlich weil felsen unter
+			// ihm"). A lone passable cell hemmed in by rock is a deadlock: the Chinook's UnloadCargo
+			// activity can never place five infantry, never completes, and the transport then hovers
+			// over enemy AA forever. Require enough clear-passable cells in the 5x5 around the drop so
+			// the squad actually fits. IsClearPassable folds in both the terrain (rock fails the ground
+			// locomotor) and the building exclusion above.
+			int ClearAround(CPos c)
+			{
+				var n = Ops.Intel.IsClearPassable(c) ? 1 : 0;
+				for (var r = 1; r <= 2; r++)
+					foreach (var d in AotOpsUtils.Ring(c, r))
+						if (Ops.Intel.IsClearPassable(d))
+							n++;
 
-			if (Free(ideal))
+				return n;
+			}
+
+			bool Droppable(CPos c) =>
+				Ops.Intel.IsClearPassable(c) && ClearAround(c) >= Ops.Info.RaidSquadSize + 1;
+
+			if (Droppable(ideal))
 				return ideal;
 
 			for (var r = 1; r <= 12; r++)
 				foreach (var c in AotOpsUtils.Ring(ideal, r))
-					if (Free(c))
+					if (Droppable(c))
 						return c;
 
 			return targetCell;
@@ -3027,8 +3044,15 @@ namespace OpenRA.Mods.Common.Traits
 				case Phase.Raiding:
 				{
 					// Send the empty helicopter home instead of leaving it hovering over enemy AA.
+					// Deadlock brake (User 2026-08-29): if the drop zone had no room to disembark, the
+					// Chinook stays wedged in an UnloadCargo activity that never completes, so it is
+					// never ReadyForOrders again and a plain ready-gated move-home never fires -- it
+					// would hover over enemy AA indefinitely. Re-issue the move periodically too;
+					// MoveUnit queues with queued:false, which cancels the stuck unload and gets the
+					// helicopter out (squad aboard or not -- better than losing it to AA).
 					var transport = Transport();
-					if (transport != null && transportSurvivedDelivery && ReadyForOrders(transport))
+					var reissueHome = phaseTicks % Ops.Info.RaidBoardingReissueTicks < Ops.Info.MissionInterval;
+					if (transport != null && transportSurvivedDelivery && (ReadyForOrders(transport) || reissueHome))
 						MoveUnit(bot, transport, Ops.BaseCentre(), false);
 
 					TickRaiding(bot);
