@@ -4312,7 +4312,7 @@ aot-gunboat:
 		TurnSpeed: 28
 		Speed: 92
 	RepairableNear:
-		RepairActors: aot-shipyard, aot-subpen
+		RepairActors: aot-shipyard, aot-shipyard-age2, aot-subpen, aot-subpen-age2
 	RevealsShroud:
 		Range: 7c0
 		Type: CenterPosition
@@ -4543,7 +4543,7 @@ aot-sub:
 		TurnSpeed: 20
 		Speed: 70
 	RepairableNear:
-		RepairActors: aot-shipyard, aot-subpen
+		RepairActors: aot-shipyard, aot-shipyard-age2, aot-subpen, aot-subpen-age2
 	RevealsShroud:
 		Range: 6c0
 		Type: CenterPosition
@@ -4694,10 +4694,10 @@ aot-msub:
 		TurnSpeed: 12
 		Speed: 44
 	RepairableNear:
-		RepairActors: aot-shipyard, aot-subpen
+		RepairActors: aot-shipyard, aot-shipyard-age2, aot-subpen, aot-subpen-age2
 		CloseEnough: 1c512
 	Rearmable:
-		RearmActors: aot-subpen
+		RearmActors: aot-subpen, aot-subpen-age2
 		AmmoPools: primary, drones
 	RevealsShroud:
 		Range: 8c0
@@ -5011,7 +5011,7 @@ aot-transport-hover:
 			gray: pip-gray
 			green: pip-green
 	RepairableNear:
-		RepairActors: aot-shipyard
+		RepairActors: aot-shipyard, aot-shipyard-age2
 	-AttackMove:
 	-Guard:
 	-Guardable:
@@ -5065,7 +5065,7 @@ aot-transport:
 		Margin: 4, 3
 		RequiresSelection: true
 	RepairableNear:
-		RepairActors: aot-shipyard, aot-subpen
+		RepairActors: aot-shipyard, aot-shipyard-age2, aot-subpen, aot-subpen-age2
 	Turreted@gun:
 		Turret: gun
 		TurnSpeed: 20
@@ -5121,7 +5121,7 @@ aot-cruiser:
 		Speed: 44
 		PauseOnCondition: aot-cruiser-carrier-deployed
 	RepairableNear:
-		RepairActors: aot-shipyard, aot-subpen
+		RepairActors: aot-shipyard, aot-shipyard-age2, aot-subpen, aot-subpen-age2
 	RevealsShroud:
 		Range: 7c0
 	-Tooltip:

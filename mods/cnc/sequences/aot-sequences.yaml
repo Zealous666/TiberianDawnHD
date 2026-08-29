@@ -1400,6 +1400,58 @@ aot-shipyard:
 		Filename: aot-shipyard.png
 		RemasteredFilename:
 		Length: 1
+	# Age-2 Gemini-Sprite (2026-08-29). Player-Color NUR auf den blauen Kuppeln (idle-remap),
+	# Metall/Kran/Beton bleiben neutral. Scale/Offset erste Naeherung -> in-game kalibrieren.
+	aot-age2-idle:
+		Filename: aot-shipyard-gemini-idle.png
+		Length: 1
+		Scale: 0.079189
+		Offset: 0,0
+		ZOffset: 1024
+	damaged-aot-age2-idle:
+		Filename: aot-shipyard-gemini-idle.png
+		Length: 1
+		Scale: 0.079189
+		Offset: 0,0
+		ZOffset: 1024
+	aot-age2-idle-remap:
+		Filename: aot-shipyard-gemini-idle-remap.png
+		Length: 1
+		Scale: 0.079189
+		Offset: 0,0
+		ZOffset: 1024
+	damaged-aot-age2-idle-remap:
+		Filename: aot-shipyard-gemini-idle-remap.png
+		Length: 1
+		Scale: 0.079189
+		Offset: 0,0
+		ZOffset: 1024
+	aot-age2-make:
+		Filename: aot-shipyard-gemini-make.png
+		Length: 14
+		Tick: 40
+		Scale: 0.2376
+		Offset: 0,0
+	aot-age2-place:
+		Filename: aot-shipyard-gemini-idle.png
+		Length: 1
+		Scale: 0.079189
+		Offset: 0,0
+		ZOffset: 1024
+	aot-age2-icon:
+		Filename: aot-shipyard-age2-icon.png
+		RemasteredFilename:
+		Length: 1
+	# Prozedural erzeugtes Kielwasser an den 3 sichtbaren Saeulenfuessen (2026-08-29): krisse
+	# Pixel-Schaumringe im Schiffs-Wake-Stil (kein Blur), konzentrisch expandierend, 8-Frame-Loop.
+	# Voll-Res wie Body -> Scale = Body-Scale, Offset 0,0 (deckt sich pixelgenau mit dem Idle-Body).
+	aot-age2-water:
+		Filename: aot-shipyard-gemini-water.png
+		Length: 8
+		Tick: 140
+		Scale: 0.079189
+		Offset: 0,0
+		ZOffset: 1024
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Submarine Pen (aot-subpen): RA SPEN Remaster (flach umgepackt) ===
@@ -1426,6 +1478,43 @@ aot-subpen:
 		Scale: 0.85
 	aot-subpen-icon:
 		Filename: aot-subpen.png
+		RemasteredFilename:
+		Length: 1
+	# Age-2 Gemini-Sprite (2026-08-29). Player-Color NUR auf den roten Streifen/Faessern (idle-remap),
+	# Metall/Beton/Globus bleiben neutral. Scale/Offset erste Naeherung -> in-game kalibrieren.
+	aot-age2-idle:
+		Filename: aot-subpen-gemini-idle.png
+		Length: 1
+		Scale: 0.06375
+		Offset: 0,0
+	damaged-aot-age2-idle:
+		Filename: aot-subpen-gemini-idle.png
+		Length: 1
+		Scale: 0.06375
+		Offset: 0,0
+	aot-age2-idle-remap:
+		Filename: aot-subpen-gemini-idle-remap.png
+		Length: 1
+		Scale: 0.06375
+		Offset: 0,0
+	damaged-aot-age2-idle-remap:
+		Filename: aot-subpen-gemini-idle-remap.png
+		Length: 1
+		Scale: 0.06375
+		Offset: 0,0
+	aot-age2-make:
+		Filename: aot-subpen-gemini-make.png
+		Length: 14
+		Tick: 40
+		Scale: 0.19125
+		Offset: 0,0
+	aot-age2-place:
+		Filename: aot-subpen-gemini-idle.png
+		Length: 1
+		Scale: 0.06375
+		Offset: 0,0
+	aot-age2-icon:
+		Filename: aot-subpen-age2-icon.png
 		RemasteredFilename:
 		Length: 1
 # === Ende aotmod ===

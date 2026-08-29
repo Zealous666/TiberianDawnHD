@@ -4884,9 +4884,13 @@ aot-shipyard:
 		Cost: 1000
 	Health:
 		HP: 80000
+	# Basis bleibt in Age 0/1 baubar (Age-0-Icon) und behaelt ihren Namen "aot-shipyard" -> alle
+	# Referenzen (RepairActors, AI, Prereqs) gelten weiter. Ab Age 2 uebernimmt der Proxy
+	# aot-shipyard-age2 (~aot-age2) mit dem Age-2-Icon. Der Sprite-Switch liegt ohnehin am Aktor.
 	Buildable:
 		BuildPaletteOrder: 120
-		Prerequisites: lite
+		LockedGroup: aot-grp-shipyard
+		Prerequisites: lite, ~!aot-age2
 		Queue: Building.GDI
 		Icon: aot-shipyard-icon
 		Description: Naval production facility.
@@ -4919,6 +4923,7 @@ aot-shipyard:
 	RevealsShroud:
 		Range: 4c0
 	ProvidesPrerequisite@buildingname:
+		Prerequisite: aot-shipyard
 	RallyPoint:
 	CommandBarBlacklist:
 		DisableStop: false
@@ -4963,14 +4968,59 @@ aot-shipyard:
 		ProductionType: Naval.GDI
 	RenderSprites:
 		Image: aot-shipyard
-	WithSpriteBody:
+	# Age-2 Sprite-Switch (2026-08-29): Age 0/1 = RA SYRD (idle), ab Age 2 = Gemini-Render.
+	AotGrantConditionOnPrerequisiteLatched@aotage2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
+	-WithSpriteBody:
+	WithSpriteBody@ra:
 		Sequence: idle
 		Name: body
-	WithMakeAnimation:
+		RequiresCondition: !aot-age2-active
+	WithSpriteBody@ts:
+		Sequence: aot-age2-idle
+		Name: body-ts
+		Palette: effect
+		IsPlayerPalette: false
+		RequiresCondition: aot-age2-active
+	WithIdleOverlay@tsremap:
+		Sequence: aot-age2-idle-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-age2-active && !build-incomplete
+	WithIdleOverlay@tswater:
+		Sequence: aot-age2-water
+		Palette: effect
+		IsPlayerPalette: false
+		RequiresCondition: aot-age2-active && !build-incomplete
+	-WithMakeAnimation:
+	WithMakeAnimation@ra:
+		BodyNames: body
 		Condition: build-incomplete
+	WithMakeAnimation@ts:
+		BodyNames: body-ts
+		Condition: build-incomplete
+		Sequence: aot-age2-make
 	-ActorPreviewPlaceBuildingPreview:
 	SequencePlaceBuildingPreview:
 		Sequence: place
+		SequenceAlpha: 0.65
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Shipyard Age-2 Icon-Proxy (Basis baut Age 0/1) ===
+aot-shipyard-age2:
+	Inherits: aot-shipyard
+	RenderSprites:
+		Image: aot-shipyard
+	Buildable:
+		BuildPaletteOrder: 120
+		LockedGroup: aot-grp-shipyard
+		Prerequisites: lite, ~aot-age2
+		Queue: Building.GDI
+		Icon: aot-age2-icon
+		Description: Naval production facility.
+	SequencePlaceBuildingPreview:
+		Sequence: aot-age2-place
 		SequenceAlpha: 0.65
 # === Ende aotmod ===
 
@@ -4988,9 +5038,12 @@ aot-subpen:
 		Cost: 1000
 	Health:
 		HP: 80000
+	# Basis bleibt in Age 0/1 baubar (Age-0-Icon), behaelt Namen "aot-subpen". Ab Age 2 uebernimmt
+	# der Proxy aot-subpen-age2 (~aot-age2) mit dem Age-2-Icon.
 	Buildable:
 		BuildPaletteOrder: 120
-		Prerequisites: lite
+		LockedGroup: aot-grp-subpen
+		Prerequisites: lite, ~!aot-age2
 		Queue: Building.Nod
 		Icon: aot-subpen-icon
 		Description: Naval production facility.
@@ -5068,14 +5121,54 @@ aot-subpen:
 		ProductionType: Naval.Nod
 	RenderSprites:
 		Image: aot-subpen
-	WithSpriteBody:
+	# Age-2 Sprite-Switch (2026-08-29): Age 0/1 = RA SPEN (idle), ab Age 2 = Gemini-Render.
+	AotGrantConditionOnPrerequisiteLatched@aotage2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
+	-WithSpriteBody:
+	WithSpriteBody@ra:
 		Sequence: idle
 		Name: body
-	WithMakeAnimation:
+		RequiresCondition: !aot-age2-active
+	WithSpriteBody@ts:
+		Sequence: aot-age2-idle
+		Name: body-ts
+		Palette: effect
+		IsPlayerPalette: false
+		RequiresCondition: aot-age2-active
+	WithIdleOverlay@tsremap:
+		Sequence: aot-age2-idle-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-age2-active && !build-incomplete
+	-WithMakeAnimation:
+	WithMakeAnimation@ra:
+		BodyNames: body
 		Condition: build-incomplete
+	WithMakeAnimation@ts:
+		BodyNames: body-ts
+		Condition: build-incomplete
+		Sequence: aot-age2-make
 	-ActorPreviewPlaceBuildingPreview:
 	SequencePlaceBuildingPreview:
 		Sequence: place
+		SequenceAlpha: 0.65
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Sub Pen Age-2 Icon-Proxy (Basis baut Age 0/1) ===
+aot-subpen-age2:
+	Inherits: aot-subpen
+	RenderSprites:
+		Image: aot-subpen
+	Buildable:
+		BuildPaletteOrder: 120
+		LockedGroup: aot-grp-subpen
+		Prerequisites: lite, ~aot-age2
+		Queue: Building.Nod
+		Icon: aot-age2-icon
+		Description: Naval production facility.
+	SequencePlaceBuildingPreview:
+		Sequence: aot-age2-place
 		SequenceAlpha: 0.65
 
 

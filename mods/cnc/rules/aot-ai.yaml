@@ -152,7 +152,7 @@ Player:
 		# wenn eine Operation sie via Ops.RequestNavalProduction() anfordert (z.B. ein Wave-Ferry ohne
 		# Landweg zum Gegner) -- Wall-Bridge zur nächsten erreichbaren Küste, exakt wie jeder andere
 		# unerreichbare Rhythmus-Schritt.
-		NavalPenTypes: aot-subpen
+		NavalPenTypes: aot-subpen, aot-subpen-age2
 		# aot-transport's actual Locomotor (aot-units.yaml) -- verifies the dock's adjacent water is
 		# really ship-navigable, not just terrain-adjacent to Water (User 2026-07-22: rock-enclosed
 		# inlets can pass the naive terrain check but trap a ship a few cells short forever).
@@ -239,7 +239,7 @@ Player:
 		# der ORET sofort abliefern. Siehe memory/ai-system.md.
 		SilosNearOreMines: 1
 		ProductionTypes: aot-lite-gdi, aot-lite-nod, weap, afld, aot-pyle-age0, aot-pyle-age1, aot-pyle-age2, aot-hand-age0, aot-hand-age1, aot-hand-age2, aflt, aot-hpad-gdi, aot-hpad-nod, hpad, aot-kennel-nod
-		NavalProductionTypes: aot-shipyard, aot-subpen
+		NavalProductionTypes: aot-shipyard, aot-shipyard-age2, aot-subpen, aot-subpen-age2
 		TechTypes: aot-atec-age0, aot-atec-age1, aot-atec-age2, aot-stec-age0, aot-stec-age1, aot-stec-age2, aot-hq-base, aot-hq-base-age2, aot-hq-ion, aot-hq-ion-age2, aot-nod-radar-age0, aot-nod-radar-age1, aot-nod-radar-age2, aot-tmpl-age1, aot-tmpl-age2, aot-shrine, orbc, aot-slab-age1, aot-slab-age2, aot-mslo-age1, aot-mslo-age2, eye
 		# Mauern (aot-wall-gdi/nod, sbag/cycl/brik) NICHT hier — der AotChokeFortifierBotModule verwaltet
 		# Mauern exklusiv (Wall-Bridge zum Chokepoint + späteres Umzäunen), sonst Queue-Konflikt.
@@ -703,7 +703,7 @@ Player:
 		# Naval ferry (User 2026-07-21): if there is no ground route to the enemy, a wave builds/
 		# reuses 2 Hovercraft once the Shipyard exists, ferries itself across water in batches
 		# (1 vehicle per transport), regroups on the far shore, then continues the attack.
-		NavalProductionTypes: aot-shipyard
+		NavalProductionTypes: aot-shipyard, aot-shipyard-age2
 		FerryTypes: aot-transport-hover-proxy
 		FerryCount: 3
 		FerryMaxTotal: 3
@@ -844,7 +844,7 @@ Player:
 		# Naval ferry (User 2026-07-21): if there is no ground route to the enemy, a wave builds/
 		# reuses 2 Transport Vessels once the Sub Pen exists, ferries itself across water in
 		# batches (1 vehicle per transport), regroups on the far shore, then continues the attack.
-		NavalProductionTypes: aot-subpen
+		NavalProductionTypes: aot-subpen, aot-subpen-age2
 		FerryTypes: aot-transport-base, aot-transport-gun-proxy
 		# 3 Vessels fahren als EIN Konvoi (laden -> gemeinsam ueberfahren -> gemeinsam anlanden).
 		FerryCount: 3
