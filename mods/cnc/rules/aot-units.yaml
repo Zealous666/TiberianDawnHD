@@ -79,7 +79,7 @@ aot-spy-nod:
 		Bounds: 512, 725, -42, -170
 		DecorationBounds: 512, 725, -42, -170
 	Valued:
-		Cost: 1050
+		Cost: 1500
 	Tooltip:
 		Name: Chameleon Spy
 	UpdatesPlayerStatistics:
@@ -141,7 +141,7 @@ aot-spy-gdi:
 		Bounds: 512, 725, -42, -170
 		DecorationBounds: 512, 725, -42, -170
 	Valued:
-		Cost: 500
+		Cost: 1500
 	Tooltip:
 		Name: Undercover Spy
 	UpdatesPlayerStatistics:
@@ -2486,6 +2486,12 @@ AJET:
 		Range: 20c0
 		Type: GroundPosition
 		RequiresCondition: aot-firehawk
+	# aotmod 2026-08-29: Der Firehawk ortet im Umkreis von 10 Zellen getarnte Einheiten -- v.a.
+	# getauchte U-Boote (Cloak-Typ) -- damit seine Anti-Sub-Raketen ein Ziel bekommen.
+	DetectCloaked@firehawk:
+		Range: 10c0
+		DetectionTypes: Cloak
+		RequiresCondition: aot-firehawk
 	AttackAircraft:
 		FacingTolerance: 40
 		AttackType: Strafe
@@ -2509,7 +2515,7 @@ AJET:
 		RequiresCondition: !stance-attackanything && !aot-firehawk
 	AutoTargetPriority@firehawk:
 		RequiresCondition: !stance-attackanything && aot-firehawk
-		ValidTargets: Infantry, Vehicle, Creep, Water, Air, Support, Structure
+		ValidTargets: Infantry, Vehicle, Creep, Water, Air, Support, Structure, Underwater, Submarine
 		InvalidTargets: NoAutoTarget
 	Armament@PRIMARY:
 		Name: primary
@@ -2641,7 +2647,7 @@ aot-ajet-firehawk:
 		Prerequisites: ~aot-age3, aflt, aot-firehawk-upgrade
 		Queue: Aircraft.GDI.AFLT
 		Icon: firehawk-icon
-		Description: Firehawk strike fighter. Fires triple-double rocket salvos, effective against ground and air targets.
+		Description: Firehawk strike fighter. Triple-double rocket salvos vs ground and air. Detects and strikes surfaced and submerged submarines.
 	# aotmod (2026-07-29): Editor-Vorschau. ConditionalTrait.EnabledByDefault wertet die
 	# RequiresCondition mit ALLEN Variablen = false aus; nur dann rendert der Trait im
 	# Karteneditor. Deshalb gewann bisher der Basis-Trait ("!variante" ist bei 0 wahr) und

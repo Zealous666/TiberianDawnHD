@@ -407,9 +407,12 @@ aot-FirehawkMissile:
 	Burst: 6
 	BurstDelays: 4, 4, 4, 4, 4
 	Report: rocket1.aud
-	ValidTargets: Ground, Water, Air
+	# aotmod 2026-08-29: Underwater/Submarine ergaenzt -> die Rakete trifft auch GETAUCHTE
+	# U-Boote (aufgetauchte sind bereits ueber Water/Ground abgedeckt). Ortung liefert der
+	# DetectCloaked@firehawk am AJET.
+	ValidTargets: Ground, Water, Air, Underwater, Submarine
 	Warhead@1Dam: SpreadDamage
-		ValidTargets: Ground, Water, Air
+		ValidTargets: Ground, Water, Air, Underwater, Submarine
 		# aotmod 2026-08-29: 7500 statt geerbter 7000, damit eine volle Raketen-Ladung
 		# (6 Ammo x Burst 6 = alle 6 Raketen pro Anflug) in der Summe mind. so viel Schaden
 		# macht wie eine volle Napalm-Ladung (20 Ammo x 2250 = 45.000): 6 x 7500 = 45.000.

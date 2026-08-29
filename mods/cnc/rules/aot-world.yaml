@@ -6,6 +6,10 @@ World:
 	StartingUnits@defaultgdia:
 		Class: light
 		ClassName: options-starting-units.light-support
+	# Latch: wahr, sobald der ERSTE Spieler Age 1 abgeschlossen hat (aot-age1-Marker existiert).
+	# Deckelt den Blossom-Tree-Transform-Timer (T03/T13.Transformable, siehe unten).
+	AotGlobalPrerequisiteFlag@age1:
+		Prerequisite: aot-age1
 		Factions: gdi
 		BaseActor: mcv
 		SupportActors: aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e3-gdi,aot-e3-gdi,aot-e2-gdi
@@ -95,15 +99,43 @@ World:
 
 # T03.Transformable/T13.Transformable mutieren zu Blossom Trees (TransformsNearResources),
 # sobald Tiberium angrenzt. Default-Delay war 1000-3000 Ticks (= 40-120s bei Timestep 40ms) -
-# viel zu schnell. User-Wunsch (2026-07-27): fruehestens nach 10 Minuten. 10min = 600s / 0.04s
-# pro Tick = 15000 Ticks Minimum, mit etwas Streuung bis 20000 (~13,3min).
+# viel zu schnell. User-Wunsch (2026-08-29): 15-20 Min (15min=900s/0.04=22500, 20min=30000),
+# ABER spaetestens sobald der erste Spieler Age 1 abgeschlossen hat (ForcePrerequisite:
+# aot-age1, gedeckelt ueber den World-Latch AotGlobalPrerequisiteFlag@age1 oben).
 T03.Transformable:
 	TransformsNearResources:
-		Delay: 15000, 20000
+		Delay: 22500, 30000
+		ForcePrerequisite: aot-age1
+
+# aotmod 2026-08-29: eigener, separat platzierbarer Baum, der neben BLAUEM Tiberium (>=1 Zelle)
+# unter denselben Bedingungen wie T03/T13.Transformable zu einem Blue Blossom Tree (splitblue)
+# wird. Optik = t03 (normaler Baum) bis zur Verwandlung. IntoActor splitblue seedet BlueTiberium.
+T03.TransformableBlue:
+	Inherits: ^Tree
+	RenderSprites:
+		Image: t03
+	# Eigene Editor-Kategorie "Resource spawn" (wie splitblue/split2), damit der Baum nicht
+	# zwischen ~20 optisch identischen gruenen Baeumen der "Tree"-Kategorie untergeht. Er sieht
+	# bis zur Mutation aus wie ein normaler t03-Baum; Hover-Name macht ihn eindeutig.
+	MapEditorData:
+		Categories: Resource spawn
+		ExcludeTilesets: DESERT
+	SpawnActorOnDeath:
+		Actor: T03.Husk
+	TransformsNearResources:
+		Type: BlueTiberium
+		IntoActor: splitblue
+		Offset: 0,1
+		Adjacency: 1
+		Delay: 22500, 30000
+		ForcePrerequisite: aot-age1
+	EditorOnlyTooltip:
+		Name: actor-t03-transformableblue-name
 
 T13.Transformable:
 	TransformsNearResources:
-		Delay: 15000, 20000
+		Delay: 22500, 30000
+		ForcePrerequisite: aot-age1
 
 # Blossom-Tree-Wachstum (SeedsResource) von 55/55/110 auf 100 Ticks fuer alle drei
 # (User-Wunsch 2026-07-30). trees.yaml selbst ist Teil der Engine-Kopie und gitignored

@@ -293,3 +293,7 @@ actor-aot-foundation =
 
 actor-aot-upgrade-foundation =
     .description = Expands the Fortified Foundation from a 2x2 to a 3x3 plate at the same build cost.
+
+actor-t03-transformableblue-name = (Tree that can transform into a Blue Blossom Tree)
+actor-t03-transformable-snow-name = (Snow tree that can transform into a Blossom Tree)
+actor-t03-transformableblue-snow-name = (Snow tree that can transform into a Blue Blossom Tree)

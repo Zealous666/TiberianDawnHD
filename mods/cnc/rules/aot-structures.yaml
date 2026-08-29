@@ -3647,7 +3647,7 @@ aot-upgrade-firehawk:
 		Prerequisites: ~aot-age3, atec, aflt, aot-slab
 		Queue: Upgrade.GDI
 		BuildLimit: 1
-		Description: Replaces all A-10 fighters with Firehawks. Swaps Vulcan cannons and napalm for triple-double rocket salvos, effective against ground and air targets.
+		Description: Replaces all A-10 fighters with Firehawks. Swaps Vulcan cannons and napalm for triple-double rocket salvos, effective versus ground and air targets – as a submarine-hunter aswell.
 
 	Valued:
 		Cost: 10500

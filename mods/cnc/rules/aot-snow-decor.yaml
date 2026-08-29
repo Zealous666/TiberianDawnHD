@@ -375,3 +375,46 @@ V18-Snow:
 		Categories: Civilian building (Snow)
 		RequireTilesets: AOT_ARCTIC
 
+
+# === Age of Tiberium (aotmod 2026-08-29) - Snow-Varianten der Transformable-Baeume ===
+# Nur AOT_ARCTIC. RA-Snow-Optik via Image t03-snow (Sequenzen in decorations-overrides.yaml).
+# Transform-Verhalten identisch zu T03.Transformable / T03.TransformableBlue (aot-world.yaml):
+# neben Tiberium bzw. Blue Tiberium (>=1 Zelle) -> nach 15-20 Min, spaetestens bei Age 1,
+# Verwandlung in den (blauen) Blossom Tree. Eigene Editor-Kategorie zum schnellen Auffinden.
+T03.Transformable-Snow:
+	Inherits: ^Tree
+	RenderSprites:
+		Image: t05-snow
+	MapEditorData:
+		Categories: Resource spawn (Snow)
+		RequireTilesets: AOT_ARCTIC
+	SpawnActorOnDeath:
+		Actor: T05-Snow.Husk
+	TransformsNearResources:
+		Type: Tiberium
+		IntoActor: split2
+		Offset: 0,1
+		Adjacency: 1
+		Delay: 22500, 30000
+		ForcePrerequisite: aot-age1
+	EditorOnlyTooltip:
+		Name: actor-t03-transformable-snow-name
+
+T03.TransformableBlue-Snow:
+	Inherits: ^Tree
+	RenderSprites:
+		Image: t05-snow
+	MapEditorData:
+		Categories: Resource spawn (Snow)
+		RequireTilesets: AOT_ARCTIC
+	SpawnActorOnDeath:
+		Actor: T05-Snow.Husk
+	TransformsNearResources:
+		Type: BlueTiberium
+		IntoActor: splitblue
+		Offset: 0,1
+		Adjacency: 1
+		Delay: 22500, 30000
+		ForcePrerequisite: aot-age1
+	EditorOnlyTooltip:
+		Name: actor-t03-transformableblue-snow-name
