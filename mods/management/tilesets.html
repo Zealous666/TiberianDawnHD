@@ -313,8 +313,32 @@ const phase2 = [
     ]
   },
   {
+    id: "aot-jungle-ai",
+    title: "Jungle (KI-Assets)",
+    tilesetId: "in TEMPERAT",
+    phase: 2,
+    meta: [
+      { label: "Ansatz", value: "Kein Remaster-Jungle vorhanden (siehe verworfener Eintrag unten) — stattdessen Klippen + Bäume per Gemini aus den Temperate-Originalen begrünt und an AOT_TEMPERAT angehängt." },
+      { label: "Klippen", value: "38 Templates, Offset +4000, Kategorie 'Cliffs (Jungle)', 157 DDS in mods/cnc/bits/jungle/" },
+      { label: "Bäume", value: "15 Aktoren aot-jng-t01…t17 (rules/aot-jungle.yaml), erben von T## → Original-Husk, Kategorie 'Trees (Jungle)', RequireTilesets AOT_TEMPERAT" },
+      { label: "Mount", value: "OverridePackages: cnchd|bits/jungle (cnchd| = mods/cnc — NICHT cnc|, das ist die Vanilla-Engine)" },
+      { label: "Bake-Regel Klippen", value: "KRITISCH: Gras/Alpha 1:1 vom Original übernehmen, Ranken NUR innerhalb der Felsfläche (1px erodiert). Jede Alpha-/Gras-Manipulation erzeugt sichtbare Kachel-Rahmen." },
+      { label: "Bake-Regel Bäume", value: "Gemini auf Magenta-Grund → weicher Chroma-Key + De-Spill; enger Crop (4px Sheet-Inset) + Clip auf dilatierte Original-Silhouette gegen Sheet-Gitterlinien; Schatten aus dem Original extrahieren (Alpha 40–235 & Luminanz<40) und unterlegen." },
+    ],
+    milestones: [
+      "Klippen + Bäume als Sheets exportiert und von Gemini begrünt (Klippen: Gras behalten / Bäume: Magenta-Grund)",
+      "38 Jungle-Cliff-Templates (+4000) an AOT_TEMPERAT angehängt, 157 DDS gebacken",
+      "15 Baum-Aktoren + Sequenzen (aot-jungle.yaml / aot-sequences.yaml)",
+      "cnchd|bits/jungle als OverridePackage gemountet",
+      "Klippen: Grasnaht gelöst (Original-Gras bitgenau, 0/4199 Pixel verändert)",
+      "Bäume: Magenta-Reste, weiße Sheet-Linien und Halo entfernt (0 Restlinien über alle 15)",
+      "Original-Schattenwurf übernommen; t01/t02/t07/t16 nutzen den Schatten von t03",
+      "Im Editor abgenommen (User 2026-08-29)",
+    ]
+  },
+  {
     id: "aot-jungle",
-    title: "Jungle",
+    title: "Jungle (Remaster-Theater)",
     tilesetId: "AOT_JUNGLE",
     phase: 2,
     scrapped: true,

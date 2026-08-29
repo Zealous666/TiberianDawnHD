@@ -5909,3 +5909,80 @@ aot-lightpost:
 		Length: 1
 		Scale: 0.55
 # === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) — Jungle-Baum-Sprites (Gemini, truecolor DDS) ===
+aot-jng-t01:
+	idle:
+		RemasteredFilename: jng-tree-t01.dds
+		Length: 1
+		RemasteredPremultiplied: false
+aot-jng-t02:
+	idle:
+		RemasteredFilename: jng-tree-t02.dds
+		Length: 1
+		RemasteredPremultiplied: false
+aot-jng-t03:
+	idle:
+		RemasteredFilename: jng-tree-t03.dds
+		Length: 1
+		RemasteredPremultiplied: false
+aot-jng-t05:
+	idle:
+		RemasteredFilename: jng-tree-t05.dds
+		Length: 1
+		RemasteredPremultiplied: false
+aot-jng-t06:
+	idle:
+		RemasteredFilename: jng-tree-t06.dds
+		Length: 1
+		RemasteredPremultiplied: false
+aot-jng-t07:
+	idle:
+		RemasteredFilename: jng-tree-t07.dds
+		Length: 1
+		RemasteredPremultiplied: false
+aot-jng-t08:
+	idle:
+		RemasteredFilename: jng-tree-t08.dds
+		Length: 1
+		RemasteredPremultiplied: false
+aot-jng-t10:
+	idle:
+		RemasteredFilename: jng-tree-t10.dds
+		Length: 1
+		RemasteredPremultiplied: false
+aot-jng-t11:
+	idle:
+		RemasteredFilename: jng-tree-t11.dds
+		Length: 1
+		RemasteredPremultiplied: false
+aot-jng-t12:
+	idle:
+		RemasteredFilename: jng-tree-t12.dds
+		Length: 1
+		RemasteredPremultiplied: false
+aot-jng-t13:
+	idle:
+		RemasteredFilename: jng-tree-t13.dds
+		Length: 1
+		RemasteredPremultiplied: false
+aot-jng-t14:
+	idle:
+		RemasteredFilename: jng-tree-t14.dds
+		Length: 1
+		RemasteredPremultiplied: false
+aot-jng-t15:
+	idle:
+		RemasteredFilename: jng-tree-t15.dds
+		Length: 1
+		RemasteredPremultiplied: false
+aot-jng-t16:
+	idle:
+		RemasteredFilename: jng-tree-t16.dds
+		Length: 1
+		RemasteredPremultiplied: false
+aot-jng-t17:
+	idle:
+		RemasteredFilename: jng-tree-t17.dds
+		Length: 1
+		RemasteredPremultiplied: false

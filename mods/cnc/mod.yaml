@@ -1,6 +1,6 @@
 Metadata:
 	Title: mod-title
-	Version: {DEV_VERSION}
+	Version: AoT-Alpha-1.0
 	Website: https://www.openra.net
 	WebIcon32: https://www.openra.net/images/icons/cnc_32x32.png
 	WindowTitle: mod-windowtitle
@@ -19,6 +19,7 @@ FileSystem: RemasterFileSystem
 	OverridePackages:
 		cnc|bits/snow.mix
 		cnc|bits
+		cnchd|bits/jungle
 		cnchd|bits
 		cnc|bits/desert
 		cnc|bits/ss
@@ -231,7 +232,7 @@ FileSystem: RemasterFileSystem
 MapFolders:
 	cnc|maps: System
 	cnchd|maps: System
-	~^SupportDir|maps/cnc/{DEV_VERSION}: User
+	~^SupportDir|maps/cnc/AoT-Alpha-1.0: User
 
 Rules:
 	cnc|rules/misc.yaml
@@ -261,6 +262,7 @@ Rules:
 	cnchd|rules/aot-world.yaml
 	cnchd|rules/aot-ai.yaml
 	cnchd|rules/aot-snow-decor.yaml
+	cnchd|rules/aot-jungle.yaml
 	cnchd|rules/aot-ts-civilian.yaml
 	cnchd|rules/aot-lighting.yaml
 	# === Ende aotmod ===

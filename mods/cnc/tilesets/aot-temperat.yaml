@@ -2,7 +2,7 @@ General:
 	Name: tileset-aot-temperat
 	Id: AOT_TEMPERAT
 	IndexedSheetSize: 1024
-	EditorTemplateOrder: Terrain, Debris, Road, Cliffs, Water Cliffs, Beach, River, Bridge, Floor (Indoor), Wall (Indoor)
+	EditorTemplateOrder: Terrain, Debris, Road, Cliffs, Water Cliffs, Beach, River, Bridge, Floor (Indoor), Wall (Indoor), Cliffs (Jungle)
 	HeightDebugColors: AA0000
 
 Terrain:
@@ -6973,6 +6973,588 @@ Templates:
 			5: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\INTERIOR\XTRA0016.INT\XTRA0016.INT-0005-0000.DDS, DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\INTERIOR\XTRA0016.INT\XTRA0016.INT-0005-0001.DDS, DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\INTERIOR\XTRA0016.INT\XTRA0016.INT-0005-0002.DDS, DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\INTERIOR\XTRA0016.INT\XTRA0016.INT-0005-0003.DDS, DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\INTERIOR\XTRA0016.INT\XTRA0016.INT-0005-0004.DDS, DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\INTERIOR\XTRA0016.INT\XTRA0016.INT-0005-0005.DDS, DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\INTERIOR\XTRA0016.INT\XTRA0016.INT-0005-0006.DDS, DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\INTERIOR\XTRA0016.INT\XTRA0016.INT-0005-0007.DDS
 			6: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\INTERIOR\XTRA0016.INT\XTRA0016.INT-0006-0000.DDS, DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\INTERIOR\XTRA0016.INT\XTRA0016.INT-0006-0001.DDS, DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\INTERIOR\XTRA0016.INT\XTRA0016.INT-0006-0002.DDS, DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\INTERIOR\XTRA0016.INT\XTRA0016.INT-0006-0003.DDS, DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\INTERIOR\XTRA0016.INT\XTRA0016.INT-0006-0004.DDS, DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\INTERIOR\XTRA0016.INT\XTRA0016.INT-0006-0005.DDS, DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\INTERIOR\XTRA0016.INT\XTRA0016.INT-0006-0006.DDS, DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\INTERIOR\XTRA0016.INT\XTRA0016.INT-0006-0007.DDS
 			7: DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\INTERIOR\XTRA0016.INT\XTRA0016.INT-0007-0000.DDS, DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\INTERIOR\XTRA0016.INT\XTRA0016.INT-0007-0001.DDS, DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\INTERIOR\XTRA0016.INT\XTRA0016.INT-0007-0002.DDS, DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\INTERIOR\XTRA0016.INT\XTRA0016.INT-0007-0003.DDS, DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\INTERIOR\XTRA0016.INT\XTRA0016.INT-0007-0004.DDS, DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\INTERIOR\XTRA0016.INT\XTRA0016.INT-0007-0005.DDS, DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\INTERIOR\XTRA0016.INT\XTRA0016.INT-0007-0006.DDS, DATA\ART\TEXTURES\SRGB\RED_ALERT\TERRAIN\INTERIOR\XTRA0016.INT\XTRA0016.INT-0007-0007.DDS
+
+
+	Template@4135:
+		Id: 4135
+		Filename: jng-s01.tem
+		Size: 2,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rock
+			3: Rock
+		RemasteredFilenames:
+			0: jng-s01-0.dds
+			1: jng-s01-1.dds
+			2: jng-s01-2.dds
+			3: jng-s01-3.dds
+	Template@4136:
+		Id: 4136
+		Filename: jng-s02.tem
+		Size: 2,3
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rough
+			2: Rock
+			3: Rock
+			4: Rock
+			5: Rock
+		RemasteredFilenames:
+			0: jng-s02-0.dds
+			1: jng-s02-1.dds
+			2: jng-s02-2.dds
+			3: jng-s02-3.dds
+			4: jng-s02-4.dds
+			5: jng-s02-5.dds
+	Template@4137:
+		Id: 4137
+		Filename: jng-s03.tem
+		Size: 2,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rock
+			3: Rock
+		RemasteredFilenames:
+			0: jng-s03-0.dds
+			1: jng-s03-1.dds
+			2: jng-s03-2.dds
+			3: jng-s03-3.dds
+	Template@4138:
+		Id: 4138
+		Filename: jng-s04.tem
+		Size: 2,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rock
+			3: Rock
+		RemasteredFilenames:
+			0: jng-s04-0.dds
+			1: jng-s04-1.dds
+			2: jng-s04-2.dds
+			3: jng-s04-3.dds
+	Template@4139:
+		Id: 4139
+		Filename: jng-s05.tem
+		Size: 2,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rock
+			3: Rock
+		RemasteredFilenames:
+			0: jng-s05-0.dds
+			1: jng-s05-1.dds
+			2: jng-s05-2.dds
+			3: jng-s05-3.dds
+	Template@4140:
+		Id: 4140
+		Filename: jng-s06.tem
+		Size: 2,3
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rough
+			1: Rock
+			2: Rock
+			3: Rock
+			4: Rock
+		RemasteredFilenames:
+			0: jng-s06-0.dds
+			1: jng-s06-1.dds
+			2: jng-s06-2.dds
+			3: jng-s06-3.dds
+			4: jng-s06-4.dds
+	Template@4141:
+		Id: 4141
+		Filename: jng-s07.tem
+		Size: 2,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rock
+			3: Rock
+		RemasteredFilenames:
+			0: jng-s07-0.dds
+			1: jng-s07-1.dds
+			2: jng-s07-2.dds
+			3: jng-s07-3.dds
+	Template@4142:
+		Id: 4142
+		Filename: jng-s08.tem
+		Size: 2,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rock
+			3: Rock
+		RemasteredFilenames:
+			0: jng-s08-0.dds
+			1: jng-s08-1.dds
+			2: jng-s08-2.dds
+			3: jng-s08-3.dds
+	Template@4143:
+		Id: 4143
+		Filename: jng-s09.tem
+		Size: 3,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rock
+			3: Rock
+			4: Rock
+			5: Rock
+		RemasteredFilenames:
+			0: jng-s09-0.dds
+			1: jng-s09-1.dds
+			2: jng-s09-2.dds
+			3: jng-s09-3.dds
+			4: jng-s09-4.dds
+			5: jng-s09-5.dds
+	Template@4144:
+		Id: 4144
+		Filename: jng-s10.tem
+		Size: 2,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rock
+			3: Rock
+		RemasteredFilenames:
+			0: jng-s10-0.dds
+			1: jng-s10-1.dds
+			2: jng-s10-2.dds
+			3: jng-s10-3.dds
+	Template@4145:
+		Id: 4145
+		Filename: jng-s11.tem
+		Size: 2,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rock
+			3: Rock
+		RemasteredFilenames:
+			0: jng-s11-0.dds
+			1: jng-s11-1.dds
+			2: jng-s11-2.dds
+			3: jng-s11-3.dds
+	Template@4146:
+		Id: 4146
+		Filename: jng-s12.tem
+		Size: 2,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rock
+			3: Rock
+		RemasteredFilenames:
+			0: jng-s12-0.dds
+			1: jng-s12-1.dds
+			2: jng-s12-2.dds
+			3: jng-s12-3.dds
+	Template@4147:
+		Id: 4147
+		Filename: jng-s13.tem
+		Size: 3,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rough
+			3: Rock
+			4: Rock
+			5: Rough
+		RemasteredFilenames:
+			0: jng-s13-0.dds
+			1: jng-s13-1.dds
+			2: jng-s13-2.dds
+			3: jng-s13-3.dds
+			4: jng-s13-4.dds
+			5: jng-s13-5.dds
+	Template@4148:
+		Id: 4148
+		Filename: jng-s14.tem
+		Size: 2,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rough
+			2: Rock
+		RemasteredFilenames:
+			0: jng-s14-0.dds
+			1: jng-s14-1.dds
+			2: jng-s14-2.dds
+	Template@4149:
+		Id: 4149
+		Filename: jng-s15.tem
+		Size: 2,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rock
+			3: Rock
+		RemasteredFilenames:
+			0: jng-s15-0.dds
+			1: jng-s15-1.dds
+			2: jng-s15-2.dds
+			3: jng-s15-3.dds
+	Template@4150:
+		Id: 4150
+		Filename: jng-s16.tem
+		Size: 2,3
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rough
+			2: Rock
+			3: Rock
+			5: Rock
+		RemasteredFilenames:
+			0: jng-s16-0.dds
+			2: jng-s16-2.dds
+			3: jng-s16-3.dds
+			5: jng-s16-5.dds
+	Template@4151:
+		Id: 4151
+		Filename: jng-s17.tem
+		Size: 2,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rock
+			3: Rock
+		RemasteredFilenames:
+			0: jng-s17-0.dds
+			1: jng-s17-1.dds
+			2: jng-s17-2.dds
+			3: jng-s17-3.dds
+	Template@4152:
+		Id: 4152
+		Filename: jng-s18.tem
+		Size: 2,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rock
+			3: Rock
+		RemasteredFilenames:
+			0: jng-s18-0.dds
+			1: jng-s18-1.dds
+			2: jng-s18-2.dds
+			3: jng-s18-3.dds
+	Template@4153:
+		Id: 4153
+		Filename: jng-s19.tem
+		Size: 2,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rock
+			3: Rock
+		RemasteredFilenames:
+			0: jng-s19-0.dds
+			1: jng-s19-1.dds
+			2: jng-s19-2.dds
+			3: jng-s19-3.dds
+	Template@4154:
+		Id: 4154
+		Filename: jng-s20.tem
+		Size: 2,3
+		Categories: Cliffs (Jungle)
+		Tiles:
+			1: Rock
+			2: Rock
+			3: Rock
+			4: Rock
+			5: Rough
+		RemasteredFilenames:
+			1: jng-s20-1.dds
+			2: jng-s20-2.dds
+			3: jng-s20-3.dds
+			4: jng-s20-4.dds
+			5: jng-s20-5.dds
+	Template@4155:
+		Id: 4155
+		Filename: jng-s21.tem
+		Size: 1,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+		RemasteredFilenames:
+			0: jng-s21-0.dds
+			1: jng-s21-1.dds
+	Template@4156:
+		Id: 4156
+		Filename: jng-s22.tem
+		Size: 2,1
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+		RemasteredFilenames:
+			0: jng-s22-0.dds
+			1: jng-s22-1.dds
+	Template@4157:
+		Id: 4157
+		Filename: jng-s23.tem
+		Size: 3,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rock
+			3: Rock
+			4: Rock
+			5: Rough
+		RemasteredFilenames:
+			0: jng-s23-0.dds
+			1: jng-s23-1.dds
+			2: jng-s23-2.dds
+			3: jng-s23-3.dds
+			4: jng-s23-4.dds
+			5: jng-s23-5.dds
+	Template@4158:
+		Id: 4158
+		Filename: jng-s24.tem
+		Size: 2,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rock
+			3: Rock
+		RemasteredFilenames:
+			0: jng-s24-0.dds
+			1: jng-s24-1.dds
+			2: jng-s24-2.dds
+			3: jng-s24-3.dds
+	Template@4159:
+		Id: 4159
+		Filename: jng-s25.tem
+		Size: 2,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rock
+			3: Rock
+		RemasteredFilenames:
+			0: jng-s25-0.dds
+			1: jng-s25-1.dds
+			2: jng-s25-2.dds
+			3: jng-s25-3.dds
+	Template@4160:
+		Id: 4160
+		Filename: jng-s26.tem
+		Size: 2,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rock
+			3: Rock
+		RemasteredFilenames:
+			0: jng-s26-0.dds
+			1: jng-s26-1.dds
+			2: jng-s26-2.dds
+			3: jng-s26-3.dds
+	Template@4161:
+		Id: 4161
+		Filename: jng-s27.tem
+		Size: 3,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rough
+			3: Rough
+			4: Rock
+			5: Rock
+		RemasteredFilenames:
+			0: jng-s27-0.dds
+			1: jng-s27-1.dds
+			2: jng-s27-2.dds
+			3: jng-s27-3.dds
+			4: jng-s27-4.dds
+			5: jng-s27-5.dds
+	Template@4162:
+		Id: 4162
+		Filename: jng-s28.tem
+		Size: 2,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			3: Rock
+		RemasteredFilenames:
+			0: jng-s28-0.dds
+			1: jng-s28-1.dds
+			3: jng-s28-3.dds
+	Template@4163:
+		Id: 4163
+		Filename: jng-s29.tem
+		Size: 2,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rock
+			3: Rock
+		RemasteredFilenames:
+			0: jng-s29-0.dds
+			1: jng-s29-1.dds
+			2: jng-s29-2.dds
+			3: jng-s29-3.dds
+	Template@4164:
+		Id: 4164
+		Filename: jng-s30.tem
+		Size: 2,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rock
+			3: Rock
+		RemasteredFilenames:
+			0: jng-s30-0.dds
+			1: jng-s30-1.dds
+			2: jng-s30-2.dds
+			3: jng-s30-3.dds
+	Template@4165:
+		Id: 4165
+		Filename: jng-s31.tem
+		Size: 2,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rough
+			2: Rock
+			3: Rock
+		RemasteredFilenames:
+			0: jng-s31-0.dds
+			1: jng-s31-1.dds
+			2: jng-s31-2.dds
+			3: jng-s31-3.dds
+	Template@4166:
+		Id: 4166
+		Filename: jng-s32.tem
+		Size: 2,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rough
+		RemasteredFilenames:
+			0: jng-s32-0.dds
+			1: jng-s32-1.dds
+			2: jng-s32-2.dds
+	Template@4167:
+		Id: 4167
+		Filename: jng-s33.tem
+		Size: 2,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rock
+			3: Rock
+		RemasteredFilenames:
+			0: jng-s33-0.dds
+			1: jng-s33-1.dds
+			2: jng-s33-2.dds
+			3: jng-s33-3.dds
+	Template@4168:
+		Id: 4168
+		Filename: jng-s34.tem
+		Size: 2,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rock
+			3: Rock
+		RemasteredFilenames:
+			0: jng-s34-0.dds
+			1: jng-s34-1.dds
+			2: jng-s34-2.dds
+			3: jng-s34-3.dds
+	Template@4169:
+		Id: 4169
+		Filename: jng-s35.tem
+		Size: 2,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rock
+			3: Rock
+		RemasteredFilenames:
+			0: jng-s35-0.dds
+			1: jng-s35-1.dds
+			2: jng-s35-2.dds
+			3: jng-s35-3.dds
+	Template@4170:
+		Id: 4170
+		Filename: jng-s36.tem
+		Size: 2,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rock
+			3: Rock
+		RemasteredFilenames:
+			0: jng-s36-0.dds
+			1: jng-s36-1.dds
+			2: jng-s36-2.dds
+			3: jng-s36-3.dds
+	Template@4171:
+		Id: 4171
+		Filename: jng-s37.tem
+		Size: 2,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rock
+			3: Rock
+		RemasteredFilenames:
+			0: jng-s37-0.dds
+			1: jng-s37-1.dds
+			2: jng-s37-2.dds
+			3: jng-s37-3.dds
+	Template@4172:
+		Id: 4172
+		Filename: jng-s38.tem
+		Size: 2,2
+		Categories: Cliffs (Jungle)
+		Tiles:
+			0: Rock
+			1: Rock
+			2: Rock
+			3: Rock
+		RemasteredFilenames:
+			0: jng-s38-0.dds
+			1: jng-s38-1.dds
+			2: jng-s38-2.dds
+			3: jng-s38-3.dds
 
 MultiBrushCollections:
 	Trees:
