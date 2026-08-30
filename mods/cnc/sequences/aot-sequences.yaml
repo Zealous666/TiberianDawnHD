@@ -2097,6 +2097,39 @@ mslo:
 		Offset: -4,9
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - Cluster Missile Projektil (TS mislmlti.vxl) ===
+# Fliegendes Projektil der drei MSLO-Superwaffen (Mine Cluster / Enhanced / Tiberium).
+# Zwei-Layer-Voxel-Bake (scale 24) wie MCV/Harpy: Body = RGBA-ZIP, Player-Color = indiziertes
+# Remap-Overlay (Indizes 176-191 -> player-Palette). 32 klassische Facings, vom AotClusterMissileLaunch
+# je nach Flugrichtung (heading + Wobble) frameweise angesteuert.
+aot-clustermissile:
+	# Drei feste Recolors (luminanz-erhaltend eingefaerbt) statt Player-Color: das TS-Voxel
+	# mislmlti hat gar keine Remap-Region, daher wird die ganze Rakete pro Variante getoent.
+	# Mine Cluster = schwarz, Enhanced = silbergrau, Tiberium = hellgruen. 32 klassische Facings.
+	idle-black:
+		RemasteredFilename: aot-clustermissile-black.zip
+		Facings: 32
+		UseClassicFacings: True
+	idle-silver:
+		RemasteredFilename: aot-clustermissile-silver.zip
+		Facings: 32
+		UseClassicFacings: True
+	idle-green:
+		RemasteredFilename: aot-clustermissile-green.zip
+		Facings: 32
+		UseClassicFacings: True
+	# up/down werden vom Effect NICHT genutzt (Flug ist frei), existieren aber als Aliase,
+	# damit die geerbten NukePowerInfo.MissileUp/MissileDown-SequenceReferences valide bleiben.
+	up:
+		RemasteredFilename: aot-clustermissile-black.zip
+		Facings: 32
+		UseClassicFacings: True
+	down:
+		RemasteredFilename: aot-clustermissile-black.zip
+		Facings: 32
+		UseClassicFacings: True
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - ORBC: Orbital Command (ab Age 2) ===
 # TS GDI Upgrade Center (GAPLUG/GAPLUGMK/GAPLUG_A), Zwei-Layer-Compositing gebacken (ohne Upgrade-Overlays GAPLUG_B/GAPLUG_C).
 # RA Chronosphere (PDOX) Sprites wurden entfernt, siehe [[firestorm-system]].

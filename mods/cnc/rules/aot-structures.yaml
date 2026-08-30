@@ -2289,7 +2289,7 @@ MSLO:
 	# SupportPowerChargeBar.Power) -- sonst zeigen alle Balken denselben Fortschritt. Slot 1 =
 	# mine cluster / enhanced / tiberium (exklusiv, je nach Upgrade), Slot 2 = atom bomb.
 	SupportPowerChargeBar@minecluster:
-		Power: NukePowerInfoOrder
+		Power: AotMineClusterMissilePowerInfoOrder
 		RequiresCondition: !aot-mine-cluster-enhanced && !aot-tiberium-missile-active
 	SupportPowerChargeBar@minecluster-enhanced:
 		Power: AotMineClusterEnhancedPowerInfoOrder
@@ -2300,7 +2300,7 @@ MSLO:
 	SupportPowerChargeBar@atombomb:
 		Power: AotAtomBombPowerInfoOrder
 		RequiresCondition: aot-atom-bomb-active
-	NukePower@minecluster:
+	AotMineClusterMissilePower@minecluster:
 		RequiresCondition: !aot-mine-cluster-enhanced && !aot-tiberium-missile-active
 		PauseOnCondition: lowpower
 		Prerequisites: ~techlevel.superweapons
@@ -2320,7 +2320,9 @@ MSLO:
 		SelectTargetTextNotification: notification-select-target
 		InsufficientPowerTextNotification: notification-insufficient-power
 		MissileWeapon: aot-MineClusterMissile
-		MissileImage: atomic
+		MissileImage: aot-clustermissile
+		BodySequence: idle-silver
+		OverlaySequence:
 		MissileDelay: 11
 		SpawnOffset: 3c0,0,-1c512
 		DisplayBeacon: True
@@ -2352,7 +2354,9 @@ MSLO:
 		SelectTargetTextNotification: notification-select-target
 		InsufficientPowerTextNotification: notification-insufficient-power
 		MissileWeapon: aot-MineClusterMissileEnhanced
-		MissileImage: atomic
+		MissileImage: aot-clustermissile
+		BodySequence: idle-black
+		OverlaySequence:
 		MissileDelay: 11
 		SpawnOffset: 3c0,0,-1c512
 		DisplayBeacon: True
@@ -2384,7 +2388,9 @@ MSLO:
 		SelectTargetTextNotification: notification-select-target
 		InsufficientPowerTextNotification: notification-insufficient-power
 		MissileWeapon: aot-TiberiumStrike
-		MissileImage: atomic
+		MissileImage: aot-clustermissile
+		BodySequence: idle-green
+		OverlaySequence:
 		MissileDelay: 11
 		SpawnOffset: 3c0,0,-1c512
 		DisplayBeacon: True
