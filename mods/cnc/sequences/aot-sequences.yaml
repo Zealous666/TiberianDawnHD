@@ -5228,6 +5228,44 @@ aot-hpad4:
 	hpad-blue-icon:
 		Filename: hpad_blue.png
 		Length: 1
+	# Age-2 Gemini-Composite (2026-08-30): 4 Gemini-Pad-Plattformen + zentraler moderner Turm.
+	# Basis entsaettigt (-75% Saettigung / -10% Helligkeit), blaue Container + gruenes Turmdach
+	# -> Player-Color (indizierter Remap, blur-before-ramp = sauber/gleichmaessig, s. NOD-Fix).
+	# Scale 0.1667 (6x-Supersample-Downscale wie NOD/make-animation-interpolation.md).
+	# ZOffset -1536 wie die klassischen Quad-Sequenzen, damit gelandete Aircraft korrekt vor
+	# dem Gebaeude sortieren (Sortier-Formel siehe oben / hpad-quad-system.md).
+	aot-age2-idle:
+		Filename: aot-hpad4-age2-idle-base.png
+		Length: 1
+		Scale: 0.1667
+		Offset: 0,-1
+		ZOffset: -1536
+	damaged-aot-age2-idle:
+		Filename: aot-hpad4-age2-idle-base.png
+		Length: 1
+		Scale: 0.1667
+		Offset: 0,-1
+		ZOffset: -1536
+	aot-age2-remap:
+		Filename: aot-hpad4-age2-idle-remap.png
+		Length: 1
+		Scale: 0.1667
+		Offset: 0,-1
+		ZOffset: -1536
+	damaged-aot-age2-remap:
+		Filename: aot-hpad4-age2-idle-remap.png
+		Length: 1
+		Scale: 0.1667
+		Offset: 0,-1
+		ZOffset: -1536
+	# 2-Phasen-Make: erst die 4 Pads (Frames 0-11), dann der Turm (Frames 12-19).
+	aot-age2-make:
+		Filename: aot-hpad4-age2-make.png
+		Length: 20
+		Tick: 60
+		Scale: 0.1667
+		Offset: 0,-1
+		ZOffset: -1536
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - GDI Pillbox (RA-Import, 2026-07-05) ===

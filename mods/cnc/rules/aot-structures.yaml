@@ -3321,18 +3321,34 @@ aot-hpad-gdi:
 	# Reihenfolge nw->ne->se->sw = im Uhrzeigersinn. Reservable.TryReserve() nimmt den
 	# ersten freien Slot in Deklarationsreihenfolge, das bestimmt also auch die
 	# Belegungsreihenfolge frisch gebauter/rueckkehrender Aircraft.
+	# Nord-Docks (nw/ne) sitzen bei beiden Ages gleich (-1024 Y passt fuer Klassik UND Age-2).
 	Reservable@nw:
 		LandingOffset: -1024,-1024,0
 		ReservedCondition: aot-hpad-gdi-nw-reserved
 	Reservable@ne:
 		LandingOffset: 1024,-1024,0
 		ReservedCondition: aot-hpad-gdi-ne-reserved
+	# Sued-Docks: das Age-2-Gemini-Sprite ist vertikal NICHT symmetrisch (obere Pad-Zentren
+	# dy~-110px, untere nur dy~+34px im 586px-Sprite) -> +1024 Y laesst die unteren Helis zu
+	# weit suedlich landen. Gemessen: unteres Pad = Welt-Y ~+315. Klassik-Quad (Age 0/1) ist
+	# dagegen symmetrisch (+1024 korrekt). Reservable ist ConditionalTrait -> je Age eine
+	# Variante, TryReserve ueberspringt die disabled. Nord bleibt geteilt.
 	Reservable@se:
 		LandingOffset: 1024,1024,0
 		ReservedCondition: aot-hpad-gdi-se-reserved
+		RequiresCondition: !aot-age2-active
+	Reservable@se-ts:
+		LandingOffset: 1024,315,0
+		ReservedCondition: aot-hpad-gdi-se-reserved
+		RequiresCondition: aot-age2-active
 	Reservable@sw:
 		LandingOffset: -1024,1024,0
 		ReservedCondition: aot-hpad-gdi-sw-reserved
+		RequiresCondition: !aot-age2-active
+	Reservable@sw-ts:
+		LandingOffset: -1024,315,0
+		ReservedCondition: aot-hpad-gdi-sw-reserved
+		RequiresCondition: aot-age2-active
 	# RA-Stil (2026-08-29): gebaute Aircraft spawnen am Kartenrand und fliegen das Helipad an,
 	# statt am Gebaeude zu poppen (loest das Vier-Pad-Crowding). Ohne Rallypoint dockt sie auf dem
 	# naechsten freien Pad, mit Rallypoint fliegt sie erst das Gebaeude, dann den Rallypoint an.
@@ -3347,6 +3363,41 @@ aot-hpad-gdi:
 		Description: Quad landing pad for helicopters. Four aircraft can land and rearm simultaneously. Required for air unit production.
 	ProvidesPrerequisite@buildingname:
 		Prerequisite: hpad
+	# Age-2 Sprite-Switch (Gemini 4-Pad-Composite + moderner Mittelturm). Age 0/1 = klassisches
+	# aot-hpad4-Composite (unveraendert), ab Age 2 = Gemini-Render. EIN Aktor, kein Icon-Proxy
+	# (Build-Icon bleibt). Muster wie NOD-Helipad/Werft (naval-system.md, hpad-quad-system.md).
+	AotGrantConditionOnPrerequisiteLatched@aotage2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
+	# Platzier-Ghost soll ab Age 2 das neue Sprite zeigen (kein echter Aktor existiert beim
+	# Platzieren -> TechTree des Spielers abfragen, siehe AotForwardTechTreeConditionToPlacementPreview.cs).
+	AotForwardTechTreeConditionToPlacementPreview:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
+	-WithSpriteBody:
+	WithSpriteBody@ra:
+		Sequence: idle
+		Name: body
+		RequiresCondition: !aot-age2-active
+	WithSpriteBody@ts:
+		Sequence: aot-age2-idle
+		Name: body-ts
+		Palette: effect
+		IsPlayerPalette: false
+		RequiresCondition: aot-age2-active
+	WithIdleOverlay@tsremap:
+		Sequence: aot-age2-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-age2-active && !build-incomplete
+	-WithMakeAnimation:
+	WithMakeAnimation@ra:
+		BodyNames: body
+		Condition: build-incomplete
+	WithMakeAnimation@ts:
+		BodyNames: body-ts
+		Condition: build-incomplete
+		Sequence: aot-age2-make
 
 aot-hpad-nod:
 	Inherits: HPAD
