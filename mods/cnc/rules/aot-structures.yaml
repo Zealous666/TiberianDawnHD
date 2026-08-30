@@ -124,9 +124,16 @@ LITE:
 		Condition: build-incomplete
 	RevealsShroud:
 		Range: 4c0
+	# Fahrzeuge fahren erst eine Zelle weiter nach Sueden (1,2 -> 1,3), bevor sie anhalten oder
+	# zum Wegpunkt weiterfahren. LITE hat KEIN Tor — hier geht es nur um die Ziel-/Halte-Zelle.
+	# Gilt automatisch fuer BEIDE Fraktionen: aot-lite-gdi und aot-lite-nod erben Exit@1 von
+	# hier und ueberschreiben nur Production.
+	# ACHTUNG: 1,3 liegt AUSSERHALB des Footprints ("xxx xxx ===" endet bei Reihe 2), also auf
+	# normalem Gelaende. Steht dort ein Gebaeude/Hindernis, blockiert der Exit die Produktion.
+	# Innerhalb des Footprints ging es nicht: 1,2 war bereits die letzte (Bib-)Reihe.
 	Exit@1:
 		SpawnOffset: 0,512,0
-		ExitCell: 1,2
+		ExitCell: 1,3
 		ExitDelay: 3
 	Power:
 		Amount: -20
@@ -5456,7 +5463,8 @@ PROC:
 
 WEAP:
 	WithProductionDoorOverlay:
-		RequiresCondition: !build-incomplete
+		Sequence: aot-age1-top
+		RequiresCondition: !build-incomplete && !aot-age2-active
 	-WithSpriteBody:
 	WithSpriteBody@base:
 		Sequence: idle
@@ -5482,17 +5490,100 @@ SILO:
 # WithSpriteBody@ts (statisches TS-Doppel-Sprite, links voll/rechts halbvoll) ab Age-2.
 # Einheitliches Image (silo) für alle drei Proxies — Sprite-Wechsel via Condition, nicht via Image-Swap.
 SILO:
+	# === Age-2-Sprite-Wechsel (Gemini-Import, zweiteilig Body+Tor) — Muster wie PROC/PYLE ===
+	# aot-age2-active kommt vom Gatekeeper-Upgrade. WEAP bleibt der Age-1-Bau-Eintrag; der
+	# Age-2-Bau-Proxy (aot-weap-age2, unten) liefert nur die Age-2-Platzier-Vorschau.
+	AotGrantConditionOnPrerequisiteLatched@aotage2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
+	# KEINE RenderSprites.Palette-Sperre hier! Die wuerde auch fuer Age 1 gelten und dort die
+	# normale Spielerfarbe des TD-WEAP-Sprites abschalten (User-Report 2026-08-30: "age 1 hat
+	# keine player color"). Alle Ebenen behalten die Default-"player"-Palette, das Gruen wird
+	# also — in beiden Ages gleich — per PlayerColorShift zur Spielerfarbe. Einzige Ausnahme:
+	# die Zahnrad-Animation (grau, explizit "effect").
+	# Age-1-Bau nur solange NICHT Age-2 (danach uebernimmt aot-weap-age2 den Menue-Eintrag).
+	Buildable:
+		LockedGroup: aot-grp-weap
+		Prerequisites: ~aot-age1, aot-age1, lite, aot-gdi-advtech-upgrade, ~!aot-age2
+	# Age-1: TD-Produktionstor. Eigene Sequenz aot-age1-top statt der geerbten build-top --
+	# nur unter eigenem Namen laesst sich der Remaster-Pfad abschalten (siehe aot-sequences.yaml).
 	-Buildable:
 	# Vanilla-SILO entfernt bereits die unbenannte Verkaufs-Infanterie
 	# (engine/mods/cnc/rules/structures.yaml); das NOD-Gegenstueck aus ^BaseBuilding
 	# muss hier mit entfernt werden (siehe Kommentar ganz oben in dieser Datei).
 	-SpawnActorsOnSell@nod:
 	# 2x2-Footprint: die smudge-freie Nordreihe des alten 2x3 (xx xx ==) entfernt,
+		RequiresCondition: !aot-age2-active
+	# KOMPLETTES Gebaeude, liegt UNTER den Fahrzeugen (an der Torstelle eine dunkle Hoehle).
+	# KEINE Palette-Sperre: das Gruen traegt das Sprite selbst und wird — wie beim Age-1-Sprite —
+	# ueber die Default-"player"-Palette eingefaerbt. Body und Tor laufen so ueber denselben
+	# Farbpfad (kein Farbversatz, und das bewegte Tor bekommt dieselbe Spielerfarbe).
+	WithSpriteBody@ts:
+		Sequence: aot-age2-idle
+		Name: body-ts
+		RequiresCondition: aot-age2-active
+	# Die zwei kreisrund ausgeschnittenen Zahnraeder drehen sich in sich (volle 360° = nahtloser
+	# Loop). Grau/ohne Farbton -> Palette egal; explizit "effect", damit der PlayerColorShift sie
+	# garantiert nicht anfasst. In Body UND Tor-Overlay sind sie wegretuschiert.
+	WithIdleOverlay@tsgears:
+		Sequence: aot-age2-gears
+		Palette: effect
+		IsPlayerPalette: false
+		RequiresCondition: aot-age2-active && !build-incomplete
+	# NUR das Torpanel — es gleitet nach oben ins Gebaeude (Frame 0 = geschlossen).
+	# WithProductionDoorOverlay rendert mit konstantem zOffset (CenterOffset.Y + 512), liegt also
+	# pauschal ueber allen Einheiten der Umgebung. Deshalb gehoert hier NUR die Torflaeche rein:
+	# ein groesseres Overlay (Dach/Maschinerie) laesst Einheiten verschwinden, die davor stehen.
+	# Fahrzeuge fahren erst eine Zelle weiter nach Sueden (Vanilla 0,1 -> 0,2; 0,2 ist im
+	# Footprint "xxx +++ ===" die '='-Reihe = OccupiedPassable, dort darf angehalten werden;
+	# 0,1 ist '+' = TransitOnly). Laengere ReturnToCellActivity -> das Tor bleibt laenger offen,
+	# sonst schliesst es dem noch ausfahrenden Fahrzeug ins Bild (WithProductionDoorOverlay
+	# schliesst, sobald diese Activity endet).
+	Exit@1:
+		ExitCell: 0,2
+	WithProductionDoorOverlay@ts:
+		Sequence: aot-age2-door
+		RequiresCondition: !build-incomplete && aot-age2-active
 	# analog zum Gate-Fix (siehe ts-gates-system.md). WithBuildingBib deckt nur die
 	# unteren 2 Reihen ab -> alte Nordreihe "xx" war ohnehin ohne Bib. LocalCenterOffset
 	# um -512 (eine Zeilen-Reduktion) nachgezogen, damit Silo+Smudge an derselben
 	# Stelle bleiben wie zuvor (100 -> -412).
 	Building:
+	WithMakeAnimation@ts:
+		BodyNames: body-ts
+		Condition: build-incomplete
+		Sequence: aot-age2-make
+
+# Age-2-Bau-Proxy: eigener Aktor NUR fuer die Platzier-Vorschau ab Age 2 (SequencePlaceBuildingPreview
+# zeigt das Age-2-Vollgebaeude als Ghost). WEAP selbst ist der Age-1-Menue-Eintrag; beide teilen
+# LockedGroup + BuildLimit, und "!weap" verhindert einen zweiten (ein bereits ge-upgradeter WEAP
+# stellt "weap" bereit). Muster wie aot-atec-age2, aber nur 2-stufig (kein Age-0).
+aot-weap-age2:
+	Inherits: WEAP
+	# Image explizit auf weap (sonst faellt es auf den Aktornamen aot-weap-age2 ohne Sequenzen zurueck).
+	# KEINE Palette-Sperre — die Default-"player"-Palette wird fuer Tor/Spielerfarbe gebraucht.
+	RenderSprites:
+		Image: weap
+	# behaelt "weap" als bereitgestelltes Prerequisite (MTNK-Upgrades/Techtree), nicht den
+	# eigenen Aktornamen (ProvidesPrerequisite@buildingname ohne Prerequisite = Aktorname).
+	ProvidesPrerequisite@buildingname:
+		Prerequisite: weap
+	# WEAP ersetzt ActorPreviewPlaceBuildingPreview bereits durch SequencePlaceBuildingPreview
+	# (structures.yaml, Sequence "place") — hier nur die Ghost-Sequenz auf das Age-2-Vollbild umbiegen.
+	SequencePlaceBuildingPreview:
+		Sequence: aot-age2-full
+		SequenceAlpha: 0.65
+	Buildable:
+		LockedGroup: aot-grp-weap
+		Queue: Building.GDI
+		BuildPaletteOrder: 150
+		BuildLimit: 1
+		Prerequisites: ~aot-age2, aot-age2, lite, aot-gdi-advtech-upgrade, !weap
+		# reale Sequenz unter image weap (traegt weap_base.png); WEAPs "weap_base" ist keine Sequenz.
+		Icon: icon
+		Description: actor-weap.description
+	Tooltip:
+		Name: actor-weap.name
 		Footprint: xx ==
 		Dimensions: 2,2
 		LocalCenterOffset: 0,-412,0

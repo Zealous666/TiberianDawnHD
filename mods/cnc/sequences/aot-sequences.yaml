@@ -1591,12 +1591,138 @@ proc:
 		Scale: 0.100
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - WEAP (Weapons Factory): Custom Icon ===
+# === Age of Tiberium (aotmod) - WEAP (Weapons Factory): Custom Icon + Age-2-Gemini-Sprites ===
+# Age-2 (ab aot-age2) tauscht das TD-WEAP-Sprite gegen den zweiteiligen Gemini-Import:
+#   aot-age2-idle = unterer Body (Gebaeude ohne Dach), gerendert via WithSpriteBody@ts
+#   aot-age2-door = das aufklappende Dach/Tor (8 Frames, Frame 0 = zu), via WithProductionDoorOverlay@ts
+#   aot-age2-make = Bau-Animation (Bottom-up-Wipe des GESAMTgebaeudes, siehe make-animation-interpolation)
+#   aot-age2-full = Vollgebaeude fuer die Platzier-Vorschau (SequencePlaceBuildingPreview am aot-weap-age2-Proxy)
+# Alle Filename-only (klassischer Pfad) -> GetScale = classicUpscaleFactor(5.333)*Scale. Zwei
+# Downscales (Body 0.5 / Tor 0.25) mit je kompensiertem Scale; beide zentriert -> deckungsgleich.
+# Offset 0,0 = Startwert, ggf. im Spiel vertikal nachjustieren.
 weap:
 	icon:
 		Filename: weap_base.png
 		RemasteredFilename:
 		Length: 1
+	# --- Age 1 / Vanilla: Schornsteinringe auf Spielerfarbe ---
+	# Das Remaster-Sprite hat MESSING-Ringe (Hue ~0.1). PlayerColorShift faerbt aber nur
+	# Hue 0.29-0.37 um, also blieben sie gold, waehrend die gruenen Kragen daneben zur
+	# Spielerfarbe wurden. Beide build-top-Sequenzen zeigen deshalb auf neu gebackene PNGs
+	# (siehe asset wip/weap/bake-weap-age1.py): identisch zum Original, nur die Ringe auf
+	# Hue 0.333 mit angehobener Saettigung. Das Basis-Sprite (idle) bleibt unangetastet auf
+	# dem Remaster-Pfad -- die Schornsteine liegen komplett im build-top-Layer.
+	# Klassischer Pfad: GetScale = classicUpscaleFactor(5.3333) * Scale -> 0.1875 ergibt 1:1.
+	# Offset 0,-64 repliziert das RemasteredOffset aus structures-overrides.yaml.
+	# ⚠️ EIGENER Sequenzname statt build-top/damaged-build-top: structures-overrides.yaml setzt
+	# RemasteredFilename DIREKT auf diesen Knoten, und ein leeres RemasteredFilename: ueber-
+	# schreibt beim MiniYaml-Merge einen bereits vorhandenen Wert NICHT (es loescht nur einen
+	# aus Defaults geerbten -- deshalb funktioniert idle/damaged-idle unter eigenem Namen).
+	# Folge waere: Engine laedt weiter WEAP2.ZIP, aber mit Scale 0.1875 -> Sprite auf 19%
+	# geschrumpft und praktisch unsichtbar. Der Trait zeigt per Rules auf aot-age1-top.
+	idle:
+		Filename: weap-age1-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.1875
+		Offset: 0, -64
+	damaged-idle:
+		Filename: weap-age1-damaged-idle.png
+		RemasteredFilename:
+		# Start MUSS explizit 0 sein: die Vanilla-Sequenz erbt Start (damaged-idle 1,
+		# damaged-build-top 10), weil dort alle Zustaende in EINER SHP/ZIP liegen. Unsere
+		# PNGs enthalten nur den damaged-Satz ab Frame 0 -> sonst Ladecrash
+		# "does not contain frames".
+		Start: 0
+		Length: 1
+		Scale: 0.1875
+		Offset: 0, -64
+	aot-age1-top:
+		Filename: weap-age1-top.png
+		RemasteredFilename:
+		Length: 10
+		Scale: 0.1875
+		Offset: 0, -64
+	damaged-aot-age1-top:
+		Filename: weap-age1-damaged-top.png
+		RemasteredFilename:
+		# Start MUSS explizit 0 sein: die Vanilla-Sequenz erbt Start (damaged-idle 1,
+		# damaged-build-top 10), weil dort alle Zustaende in EINER SHP/ZIP liegen. Unsere
+		# PNGs enthalten nur den damaged-Satz ab Frame 0 -> sonst Ladecrash
+		# "does not contain frames".
+		Start: 0
+		Length: 10
+		Scale: 0.1875
+		Offset: 0, -64
+	aot-age2-idle:
+		Filename: weap-age2-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.1466
+		Offset: -6, -104
+	damaged-aot-age2-idle:
+		Filename: weap-age2-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.1466
+		Offset: -6, -104
+	# rotierende Zahnraeder: NUR die zwei kreisrund ausgeschnittenen Cogs am rechten
+	# Maschinenteil drehen sich in sich (Scheiben um ihren eigenen Mittelpunkt rotiert; in Body
+	# UND Tor-Overlay sind sie wegretuschiert, damit nichts durch die Zahnluecken durchscheint).
+	# 24 Frames = volle 360° -> der Loop ist nahtlos. NICHT auf einen Teilwinkel kuerzen,
+	# sonst springt die Drehung am Loop-Ende sichtbar zurueck.
+	aot-age2-gears:
+		Filename: weap-age2-gears.png
+		RemasteredFilename:
+		Length: 24
+		Tick: 90
+		Scale: 0.1466
+		Offset: -6, -104
+	damaged-aot-age2-gears:
+		Filename: weap-age2-gears.png
+		RemasteredFilename:
+		Length: 24
+		Tick: 90
+		Scale: 0.1466
+		Offset: -6, -104
+	aot-age2-full:
+		Filename: weap-age2-full.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.1466
+		Offset: -6, -104
+	# Schichtung (Lehre aus dem Fehlversuch): das Tor-Overlay laeuft ueber
+	# WithProductionDoorOverlay und bekommt einen KONSTANTEN zOffset (CenterOffset.Y + 512),
+	# liegt also pauschal ueber ALLEN Einheiten im Umkreis. Deshalb darf es nur so wenig
+	# Flaeche wie moeglich belegen — sonst verschwinden Einheiten, die eigentlich davor
+	# stehen (User-Report: "Einheiten verschwinden hinterm geschlossenen Tor / fahren
+	# unterm Gebaeude durch").
+	#   aot-age2-idle = das KOMPLETTE Gebaeude (Dach, Maschinerie, Plattform) mit dunkler
+	#                   Hoehle an der Torstelle. Liegt UNTER den Einheiten.
+	#   aot-age2-door = AUSSCHLIESSLICH das Torpanel, gleitet nach oben ins Gebaeude.
+	#                   Frame 0 = geschlossen. Liegt UEBER den Einheiten, verdeckt aber nur
+	#                   noch die Torflaeche selbst (= korrekt: da steht das Fahrzeug drin).
+	aot-age2-door:
+		Filename: weap-age2-door.png
+		RemasteredFilename:
+		Length: 8
+		Tick: 110
+		Scale: 0.1466
+		Offset: -6, -104
+	damaged-aot-age2-door:
+		Filename: weap-age2-door.png
+		RemasteredFilename:
+		Length: 8
+		Tick: 110
+		Scale: 0.1466
+		Offset: -6, -104
+	aot-age2-make:
+		Filename: weap-age2-make.png
+		RemasteredFilename:
+		Length: 14
+		Tick: 40
+		Scale: 0.1466
+		Offset: -6, -104
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Shroud Generator (RA Gap Generator, GDI) ===
