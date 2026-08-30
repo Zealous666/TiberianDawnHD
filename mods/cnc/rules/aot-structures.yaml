@@ -3789,7 +3789,8 @@ AFLT:
 		Name: Air Field
 	Buildable:
 		BuildPaletteOrder: 140
-		Prerequisites: ~aot-age1, anyhq
+		LockedGroup: aot-grp-aflt
+		Prerequisites: ~aot-age1, anyhq, ~!aot-age2
 		Queue: Building.GDI
 		Icon: aflt-gdi-icon
 		Description: Advanced air production facility. Produces GDI fighter jets.
@@ -3813,8 +3814,52 @@ AFLT:
 		PlayerExperience: 5
 		StartRepairingNotification: Repairing
 		StartRepairingTextNotification: notification-repairing
-	WithResupplyAnimation:
-		RequiresCondition: !build-incomplete
+	# === Age-2-Sprite-Wechsel (Gemini-Import) ===
+	# Die 8 active-Frames tragen wie in Age 1 das Windhosen-Flattern + den Rollbahn-Puls und
+	# werden vom selben Mechanismus abgespielt: WithResupplyAnimation ruft
+	# PlayCustomAnimationRepeating auf dem WithSpriteBody, dessen Name in "Body" steht.
+	# Deshalb zwei Instanzen -- je eine pro Age-Body.
+	AotGrantConditionOnPrerequisiteLatched@aotage2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
+	-WithSpriteBody:
+	WithSpriteBody@base:
+		Sequence: idle
+		Name: body
+		RequiresCondition: !aot-age2-active
+	WithSpriteBody@ts:
+		Sequence: aot-age2-idle
+		Name: body-ts
+		RequiresCondition: aot-age2-active
+	# WithResupplyAnimation raus: sie spielte die Animation NUR beim Auftanken, im Ruhezustand
+	# stand alles still. Beide Ages animieren jetzt dauerhaft ueber eigene Overlays. Zusaetzlich
+	# wuerde "active" das Original-Frame samt eingebackener Windhose einblenden -- doppelt zur
+	# Overlay-Windhose. AFLT definiert den Trait selbst (erbt ihn NICHT), deshalb einfach
+	# weglassen statt "-WithResupplyAnimation:" -- letzteres crasht mangels Vorgaenger.
+	WithIdleOverlay@rawindsock:
+		Sequence: aot-ra-windsock
+		RequiresCondition: !aot-age2-active && !build-incomplete
+	WithIdleOverlay@ralights:
+		Sequence: aot-ra-lights
+		RequiresCondition: !aot-age2-active && !build-incomplete
+	# Age 2: Windhose und Rollbahn-Lichter laufen DAUERHAFT als eigene Overlays. Ueber
+	# WithResupplyAnimation haetten sie sich nur beim Auftanken bewegt -- im Ruhezustand
+	# stand alles still (User-Report 2026-08-30).
+	WithIdleOverlay@tswindsock:
+		Sequence: aot-age2-windsock
+		RequiresCondition: aot-age2-active && !build-incomplete
+	WithIdleOverlay@tslights:
+		Sequence: aot-age2-lights
+		RequiresCondition: aot-age2-active && !build-incomplete
+	-WithMakeAnimation:
+	WithMakeAnimation@base:
+		BodyNames: body
+		Condition: build-incomplete
+		Sequence: make
+	WithMakeAnimation@ts:
+		BodyNames: body-ts
+		Condition: build-incomplete
+		Sequence: aot-age2-make
 	RallyPoint:
 	CommandBarBlacklist:
 		DisableStop: false
@@ -3841,6 +3886,33 @@ AFLT:
 	ProvidesPrerequisite@buildingname:
 	RenderSprites:
 		Image: aflt
+
+# Age-2-Bau-Proxy: liefert ab Age 2 die Platzier-Vorschau mit dem Gemini-Sprite. AFLT selbst
+# bleibt der Age-1-Menue-Eintrag (Muster wie aot-weap-age2); beide teilen LockedGroup, und
+# "!aflt" verhindert einen zweiten (ein bereits ge-upgradetes AFLT stellt "aflt" bereit).
+aot-aflt-age2:
+	Inherits: AFLT
+	RenderSprites:
+		Image: aflt
+	ProvidesPrerequisite@buildingname:
+		Prerequisite: aflt
+	# ^BaseBuilding liefert ActorPreviewPlaceBuildingPreview -- Duplikat waere ein
+	# TypeDictionary-Crash, deshalb erst entfernen (siehe gemini-building-import).
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: aot-age2-idle
+		SequenceAlpha: 0.65
+	Buildable:
+		BuildPaletteOrder: 140
+		LockedGroup: aot-grp-aflt
+		Queue: Building.GDI
+		# KEIN "!aflt" hier: das wirkte wie BuildLimit 1 (nach dem ersten Bau stellte das
+		# Gebaeude "aflt" bereit und der Menue-Eintrag verschwand). AFLT ist unbegrenzt baubar.
+		Prerequisites: ~aot-age2, anyhq
+		Icon: aflt-gdi-icon
+		Description: Advanced air production facility. Produces GDI fighter jets.
+	Tooltip:
+		Name: Air Field
 
 # === Age of Tiberium (aotmod) - FIX: RA Repair Facility Sprites in Age 0, TD ab Age 1 ===
 # Doppel-Aktor-Pattern analog PYLE. FIX muss das Prerequisite "fix" explizit bereitstellen.

@@ -2053,3 +2053,15 @@ aot-FlakAA:
 		ImpactSounds: xplos.aud
 		ImpactActors: false
 		ValidTargets: Air, Ground, Water
+
+# === Age of Tiberium (aotmod) - A10 Vulcan: MG-Sound statt "Pistole" ===
+# gun5.aud existiert in TD UND in Red Alert mit UNTERSCHIEDLICHEM Klang. Der Remaster legt
+# beide Varianten nebeneinander ab (SFX3D.MEG: TDR_/TDC_/RAR_/RAC_SFX_GUN5.WAV). Gewinnt die
+# RA-Variante die Aufloesung, klingt das MG wie eine Pistole -- genau der Bug, der beim HIND
+# immer wieder auftrat und dort mit einer eigenen, kollisionsfreien Datei geloest wurde
+# (aot-HindAGGun -> aot-hind-mg.aud). Vulcan wird ausschliesslich vom A10 benutzt, deshalb
+# hier derselbe Fix. Kein Sound-Fehler im Log: die Datei WIRD gefunden, nur die falsche.
+Vulcan:
+	Report: aot-hind-mg.aud
+# === Ende aotmod ===
+

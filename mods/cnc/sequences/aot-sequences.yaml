@@ -1591,6 +1591,202 @@ proc:
 		Scale: 0.100
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - AFLD (NOD Airstrip/Starport): Age-2-Gemini-Sprites ===
+# Leinwand 512x256 = EXAKT die Original-Geometrie (128 px/Zelle, 4x2), daher Scale 0.1875 und
+# Offset 0,0 wie beim Original. Gebacken von asset wip/afld/bake-afld-age2.py.
+# Die 16 Lichter-Frames bilden die Original-Animation nach (aus den TD-Frames vermessen):
+# vier Lichtpaare laufen von rechts nach links auf die Landeplatte zu (Frames 1-4), dann drei
+# Frames Pause, dann Wiederholung; die Landeplatte blitzt in Frame 5 und 12 auf.
+# Player-Color: das Original nutzt RemasteredMaskFilename -- auf dem klassischen Pfad gibt es
+# das nicht, deshalb sind die Gruentoene ins PlayerColorShift-Fenster normalisiert.
+afld:
+	# --- Age 1 (TD-Sprite): dieselben Landelichter als Dauer-Overlay ---
+	# Im Original stecken sie in der 16-Frame-"active"-Sequenz, die im Ruhezustand nicht laeuft.
+	# Uebernommen sind NUR die aufleuchtenden Lichter und der Plattenblitz -- der ebenfalls
+	# animierte Ladearm bleibt aussen vor, sonst stuende er doppelt im Bild (Body zeigt ihn
+	# bereits in Frame-0-Stellung). Body bleibt unveraendert: die Lichter sind in Frame 0 aus.
+	aot-td-lights:
+		Filename: afld-age1-lights.png
+		RemasteredFilename:
+		Length: 16
+		Tick: 120
+		ZOffset: -1023
+		Scale: 0.1875
+		Offset: 0, 0
+	damaged-aot-td-lights:
+		Filename: afld-age1-damaged-lights.png
+		RemasteredFilename:
+		Start: 0
+		Length: 16
+		Tick: 120
+		ZOffset: -1023
+		Scale: 0.1875
+		Offset: 0, 0
+	aot-age2-idle:
+		Filename: afld-age2-idle.png
+		RemasteredFilename:
+		Length: 1
+		ZOffset: -1023
+		Scale: 0.1875
+		Offset: 0, 0
+	damaged-aot-age2-idle:
+		Filename: afld-age2-idle.png
+		RemasteredFilename:
+		Start: 0
+		Length: 1
+		ZOffset: -1023
+		Scale: 0.1875
+		Offset: 0, 0
+	aot-age2-lights:
+		Filename: afld-age2-lights.png
+		RemasteredFilename:
+		Length: 16
+		Tick: 120
+		ZOffset: -1023
+		Scale: 0.1875
+		Offset: 0, 0
+	damaged-aot-age2-lights:
+		Filename: afld-age2-lights.png
+		RemasteredFilename:
+		Start: 0
+		Length: 16
+		Tick: 120
+		ZOffset: -1023
+		Scale: 0.1875
+		Offset: 0, 0
+	aot-age2-make:
+		Filename: afld-age2-make.png
+		RemasteredFilename:
+		Length: 14
+		Tick: 40
+		Scale: 0.1875
+		Offset: 0, 0
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - AFLT (GDI Air Field): Age-2-Gemini-Sprites ===
+# Leinwand 384x256 = EXAKT die Age-1-Geometrie (128 px/Zelle bei 3x2-Footprint), daher
+# dieselben Scale/Offset-Werte wie Age 1 und die uebernommene RA-Windhose 1:1 ohne
+# Umskalieren. Die 8 active-Frames enthalten wie im Original das Windhosen-Flattern
+# (echte RA-Frames) plus den Rollbahn-Puls (Helligkeit, aus dem Original gemessen:
+# Frame 1 +10%, Frame 3 +20%). Gebacken von asset wip/aflt/bake-aflt-age2.py.
+# Klassischer Pfad: GetScale = classicUpscaleFactor(5.3333) * 0.1875 = 1:1.
+aflt:
+	# --- Age 1 (RA-Sprite): dieselbe Animation als Dauer-Overlay wie in Age 2 ---
+	# Windhose ist im Body RETUSCHIERT (aflt-age1-idle.png), sonst blitzt die statische unter
+	# der animierten hervor. "active" bleibt ungenutzt: WithResupplyAnimation ist entfernt,
+	# sonst wuerde beim Auftanken das Original-Frame samt eigener Windhose einspringen.
+	idle:
+		Filename: aflt-age1-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.1875
+		Offset: 0, -64
+	damaged-idle:
+		Filename: aflt-age1-damaged-idle.png
+		RemasteredFilename:
+		Start: 0
+		Length: 1
+		Scale: 0.1875
+		Offset: 0, -64
+	aot-ra-windsock:
+		Filename: aflt-age1-windsock.png
+		RemasteredFilename:
+		Length: 8
+		Tick: 100
+		ZOffset: -1023
+		Scale: 0.1875
+		Offset: 0, -64
+	damaged-aot-ra-windsock:
+		Filename: aflt-age1-damaged-windsock.png
+		RemasteredFilename:
+		Start: 0
+		Length: 8
+		Tick: 100
+		ZOffset: -1023
+		Scale: 0.1875
+		Offset: 0, -64
+	aot-ra-lights:
+		Filename: aflt-age1-lights.png
+		RemasteredFilename:
+		Length: 8
+		Tick: 100
+		ZOffset: -1023
+		Scale: 0.1875
+		Offset: 0, -64
+	damaged-aot-ra-lights:
+		Filename: aflt-age1-damaged-lights.png
+		RemasteredFilename:
+		Start: 0
+		Length: 8
+		Tick: 100
+		ZOffset: -1023
+		Scale: 0.1875
+		Offset: 0, -64
+	aot-age2-idle:
+		Filename: aflt-age2-idle.png
+		RemasteredFilename:
+		Length: 1
+		ZOffset: -1023
+		Scale: 0.1875
+		Offset: 0, -64
+	damaged-aot-age2-idle:
+		Filename: aflt-age2-idle.png
+		RemasteredFilename:
+		Start: 0
+		Length: 1
+		ZOffset: -1023
+		Scale: 0.1875
+		Offset: 0, -64
+	# Windhose: die KOMPLETTEN 8 Original-Frames aus dem RA-Sprite (inkl. ganzer Stange und
+	# Fuss), 1:1 uebernommen -- die Leinwand ist identisch zu Age 1, also passt die Position
+	# ohne Umrechnung. Laeuft als Dauer-Overlay, nicht ueber WithResupplyAnimation: das haette
+	# sie nur beim Auftanken bewegt (so wie im Original, wo im Ruhezustand alles stillsteht).
+	aot-age2-windsock:
+		Filename: aflt-age2-windsock.png
+		RemasteredFilename:
+		Length: 8
+		Tick: 100
+		ZOffset: -1023
+		Scale: 0.1875
+		Offset: 0, -64
+	damaged-aot-age2-windsock:
+		Filename: aflt-age2-windsock.png
+		RemasteredFilename:
+		Start: 0
+		Length: 8
+		Tick: 100
+		ZOffset: -1023
+		Scale: 0.1875
+		Offset: 0, -64
+	# Rollbahn-Lichter: nur die gruenen Markierungen, Helligkeit gepulst (Frame 1 +10%,
+	# Frame 3 +20% -- so im Original gemessen). Liegt deckungsgleich ueber denselben Pixeln
+	# im Body und ersetzt sie.
+	aot-age2-lights:
+		Filename: aflt-age2-lights.png
+		RemasteredFilename:
+		Length: 8
+		Tick: 100
+		ZOffset: -1023
+		Scale: 0.1875
+		Offset: 0, -64
+	damaged-aot-age2-lights:
+		Filename: aflt-age2-lights.png
+		RemasteredFilename:
+		Start: 0
+		Length: 8
+		Tick: 100
+		ZOffset: -1023
+		Scale: 0.1875
+		Offset: 0, -64
+	aot-age2-make:
+		Filename: aflt-age2-make.png
+		RemasteredFilename:
+		Length: 14
+		Tick: 40
+		Scale: 0.1875
+		Offset: 0, -64
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - WEAP (Weapons Factory): Custom Icon + Age-2-Gemini-Sprites ===
 # Age-2 (ab aot-age2) tauscht das TD-WEAP-Sprite gegen den zweiteiligen Gemini-Import:
 #   aot-age2-idle = unterer Body (Gebaeude ohne Dach), gerendert via WithSpriteBody@ts

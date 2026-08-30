@@ -1252,6 +1252,41 @@ WEAP:
 # -ProductionAirdrop / -ProductionQueue entfernen Engine-Traits (Vehicle.Nod queue entfällt).
 # BulkProductionQueue@Starport (Player-Level in overrides.yaml) wird durch ProductionBulkAirdrop aktiviert.
 AFLD:
+	# === Age-2-Sprite-Wechsel (Gemini-Import) ===
+	# Lichter laufen DAUERHAFT als eigenes Overlay (WithIdleOverlay), nicht ueber die
+	# "active"-Sequenz: die haengt an der Produktion und stand im Ruhezustand still.
+	AotGrantConditionOnPrerequisiteLatched@aotage2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
+	-WithSpriteBody:
+	WithSpriteBody@base:
+		Sequence: idle
+		Name: body
+		RequiresCondition: !aot-age2-active
+	WithSpriteBody@ts:
+		Sequence: aot-age2-idle
+		Name: body-ts
+		RequiresCondition: aot-age2-active
+	# Die rotierende Schuessel gehoert zum Age-1-Sprite; im Gemini-Koerper ist sie enthalten.
+	WithIdleOverlay@DISH:
+		RequiresCondition: !aot-age2-active
+	WithIdleOverlay@tslights:
+		Sequence: aot-age2-lights
+		RequiresCondition: aot-age2-active && !build-incomplete
+	# Age 1 bekommt dieselbe Lichtanimation (im Original nur in der nie laufenden
+	# "active"-Sequenz enthalten).
+	WithIdleOverlay@tdlights:
+		Sequence: aot-td-lights
+		RequiresCondition: !aot-age2-active && !build-incomplete
+	-WithMakeAnimation:
+	WithMakeAnimation@base:
+		BodyNames: body
+		Condition: build-incomplete
+		Sequence: make
+	WithMakeAnimation@ts:
+		BodyNames: body-ts
+		Condition: build-incomplete
+		Sequence: aot-age2-make
 	Buildable:
 		BuildPaletteOrder: 150
 		# Umkehrung 2026-08-04 (User), siehe WEAP: Gatekeeper schaltet das Airfield frei.
