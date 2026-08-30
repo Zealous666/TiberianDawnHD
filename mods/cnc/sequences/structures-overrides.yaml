@@ -231,6 +231,60 @@ hpad:
 		Filename: hpad_red.png
 		Length: 1
 		RemasteredFilename:
+	# Age-2 Gemini-Sprite NOD-Helipad (2026-08-30). Scale = 0.1875 (Referenz-HPAD-Pad-
+	# Breite, 128px/Zelle) * 256 (Referenz-Content-Breite) / 1113 (Gemini-Content-Breite,
+	# vor dem 20px-Padding-Crop gemessen) = 0.0431, dann -10% (User-Test: "10% kleiner")
+	# = 0.0388. Downscale-before-bake auf Scale 0.1667 (factor=min(1.0,6*0.0388)=0.2328,
+	# Scale_neu=1/6, siehe make-animation-interpolation.md) NACHTRAEGLICH ergaenzt: bei
+	# voller 1148px-Aufloesung + Scale 0.0388 (~26x Supersampling) hat die Engine beim
+	# Runterskalieren auf Bildschirmgroesse rohe PALETTE-INDIZES des Remap-Layers geblendet
+	# statt aufgeloester Farben -- die 16 Rampen-Level liegen an nicht benachbarten
+	# Index-Nummern (176,178,...,191,177,...), Blending zwischen ihnen ergibt Muell-Indizes
+	# = sichtbares "pixeliges/kraeuseliges" Rauschen auf dem Container (User-Befund). Fix:
+	# Quelle selbst auf ~6x Supersampling vorskaliert, Rot-Erkennung+Rampe laeuft auf dem
+	# bereits kleinen Bild -- Diskretisierung passiert einmalig nah an der Zielaufloesung.
+	# ZOffset -1023 identisch zur "idle"-Sequenz oben, damit gelandete Aircraft weiter
+	# korrekt vor dem Pad sortieren (siehe hpad-quad-system.md fuer die Sortier-Formel).
+	aot-age2-nod-idle:
+		Filename: aot-hpad-nod-age2-idle-base.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.1667
+		Offset: 0,0
+		ZOffset: -1023
+	damaged-aot-age2-nod-idle:
+		Filename: aot-hpad-nod-age2-idle-base.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.1667
+		Offset: 0,0
+		ZOffset: -1023
+	aot-age2-nod-idle-remap:
+		Filename: aot-hpad-nod-age2-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.1667
+		Offset: 0,0
+		ZOffset: -1023
+	damaged-aot-age2-nod-idle-remap:
+		Filename: aot-hpad-nod-age2-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.1667
+		Offset: 0,0
+		ZOffset: -1023
+	# Synthetische Bau-Animation (Bottom-up-Reveal-Wipe aus dem fertigen Age-2-Idle-Sprite,
+	# siehe make-animation-interpolation.md) - kein echtes Bau-Renderset vorhanden. Downscale
+	# vor dem Backen (factor=min(1.0, 6*0.0388)=0.2328) haelt die 14-Frame-Sheet klein;
+	# Scale_neu = Scale_alt/factor = 1/6 = 0.1667 (Idle UND Make sind beide reine Filename:-
+	# Sequenzen, kein classicUpscaleFactor-Mismatch wie bei gemischten Remastered/Filename-Paaren).
+	aot-age2-nod-make:
+		Filename: aot-hpad-nod-age2-make.png
+		RemasteredFilename:
+		Length: 14
+		Tick: 40
+		Scale: 0.1667
+		Offset: 0,0
 
 # === Age of Tiberium (aotmod) - AFLT: Air Field Sprites (RA Soviet Airfield) ===
 # 0–7:  Idle-Loop unbeschädigt (leuchtende Lichter)

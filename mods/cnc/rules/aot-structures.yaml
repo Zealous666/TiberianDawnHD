@@ -3386,6 +3386,50 @@ aot-hpad-nod:
 		Dimensions: 2,3
 		LocalCenterOffset: 0,-512,0
 	WithBuildingBib:
+	# Age-2 Sprite-Switch (Gemini-Render, gleiches Muster wie aot-shipyard/aot-subpen,
+	# siehe naval-system.md): Age 0/1 = klassisches HPAD-Sprite (unveraendert), ab Age 2 =
+	# Gemini-Render. EIN Aktor fuer beide Ages (kein Icon-Proxy - Build-Icon bleibt
+	# ausdruecklich unveraendert, User-Wunsch). Rote Container/Kanister -> Player-Color-Remap
+	# (Body auf Neutralgrau entfaerbt, Remap-Layer indiziert 176-191, volle 16er-Rampe wegen
+	# der grossen flachen Container-Flaeche - 4-stufiger Remap haette gebandet).
+	AotGrantConditionOnPrerequisiteLatched@aotage2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
+	# Platzier-Ghost kennt sonst keine Bedingungen (kein echter Aktor existiert noch) und faellt
+	# immer auf den EnabledByDefault-Body (klassisch) zurueck, selbst wenn Age 2 laengst aktiv
+	# ist. Fragt stattdessen den TechTree des platzierenden Spielers ab (siehe
+	# AotForwardTechTreeConditionToPlacementPreview.cs).
+	AotForwardTechTreeConditionToPlacementPreview:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
+	-WithSpriteBody:
+	WithSpriteBody@ra:
+		Sequence: idle
+		Name: body
+		RequiresCondition: !aot-age2-active
+	WithSpriteBody@ts:
+		Sequence: aot-age2-nod-idle
+		Name: body-ts
+		Palette: effect
+		IsPlayerPalette: false
+		RequiresCondition: aot-age2-active
+	WithIdleOverlay@tsremap:
+		Sequence: aot-age2-nod-idle-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-age2-active && !build-incomplete
+	# Age-2-Bauanimation: synthetischer Bottom-up-Reveal-Wipe aus dem fertigen Gemini-Idle-
+	# Sprite gebacken (siehe make-animation-interpolation.md), NICHT die klassische HPADMAKE
+	# wiederverwendet - die zeigte das alte RA-Pad wachsen, obwohl am Ende das neue Age-2-
+	# Gebaeude steht (falscher Look waehrend des Baus, User-Korrektur).
+	-WithMakeAnimation:
+	WithMakeAnimation@ra:
+		BodyNames: body
+		Condition: build-incomplete
+	WithMakeAnimation@ts:
+		BodyNames: body-ts
+		Condition: build-incomplete
+		Sequence: aot-age2-nod-make
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - NOD Airstrike-Freischaltung ===
