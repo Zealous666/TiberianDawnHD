@@ -36,10 +36,13 @@ heli:
 orca:
 	Defaults:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\ORCA.ZIP
+		Scale: 0.9
 	icon:
 		Filename: helo_orca.png
 		Length: 1
 		RemasteredFilename:
+		# Icon laeuft ueber den klassischen Pfad -- die 0.9 aus Defaults wuerde es mit schrumpfen.
+		Scale: 1
 
 a10:
 	Defaults:

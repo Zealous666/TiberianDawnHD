@@ -2254,6 +2254,19 @@ ARTY:
 # === Age of Tiberium (aotmod) - Shroud Generator: Sicht-Kappung für Schiffe/Flieger ===
 # Wie bei ^Vehicle/^Infantry: im Gap-Feld eines feindlichen Shroud Generators wird
 # die RevealsShroud abgeschaltet und durch eine 2c0-Instanz ersetzt.
+# === Age of Tiberium (aotmod) - Muendungsfeuer deckt auf (Vanilla-C&C-Verhalten) ===
+# Feuert eine Einheit, wird sie dem Beschossenen kurz im Fog/Shroud sichtbar. Sitzt an
+# ^ExistsInWorld, der gemeinsamen Wurzel von ^Vehicle/^Tank/^Infantry/^Helicopter/^Plane/
+# ^Ship/^Building -- damit gilt es einheitlich fuer ALLES, was schiesst.
+# ⚠️ ArmamentNames filtert: nur gelistete Armament-Namen loesen das Aufdecken aus. Die Liste
+# enthaelt alle im Mod vergebenen Namen (aus den Rules extrahiert) -- bei NEUEN Armament-Namen
+# hier ergaenzen, sonst deckt die Waffe lautlos nicht auf.
+^ExistsInWorld:
+	RevealOnFire:
+		ArmamentNames: primary, secondary, aa, bombs, garrisoned, gun, laser, orca, rockets, toxic
+		Duration: 25
+		Radius: 2c0
+
 ^Ship:
 	ExternalCondition@GAPSUPPRESS:
 		Condition: aot-gap-suppressed

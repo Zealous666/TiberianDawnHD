@@ -4872,11 +4872,13 @@ aot-upgrade-gunboat-destroyer:
 		Name: Destroyer Enhancement
 
 	Buildable:
+		# Branch-Paar mit der Corvette: genau EIN Zweig materialisiert sich (LockedGroup).
+		LockedGroup: aot-grp-up-gunboat
 		BuildPaletteOrder: 250
-		Prerequisites: ~aot-age2, aot-shipyard, fix, aot-gunboat-frigate-upgrade
+		Prerequisites: ~aot-age2, aot-shipyard, fix, aot-gunboat-frigate-upgrade, ~!aot-gunboat-corvette-upgrade
 		Queue: Upgrade.GDI
 		BuildLimit: 1
-		Description: Upgrades all Frigates into Destroyers with rockets, depth charges, and anti-air.
+		Description: Upgrades all Frigates into Destroyers with rockets, depth charges, and anti-air. AEGIS system intercepts cluster missiles.
 
 	Valued:
 		Cost: 4300
@@ -4886,6 +4888,31 @@ aot-upgrade-gunboat-destroyer:
 
 	ProvidesPrerequisite:
 		Prerequisite: aot-gunboat-upgrade
+
+	Interactable:
+
+# === Age of Tiberium (aotmod) - Sub-Hunter Corvette Enhancement (Frigate -> Corvette) ===
+# Gegenseitiger Ausschluss mit dem Destroyer (Branch-Paar, LockedGroup aot-grp-up-gunboat).
+aot-upgrade-gunboat-corvette:
+	Tooltip:
+		Name: Corvette Enhancement
+
+	Buildable:
+		LockedGroup: aot-grp-up-gunboat
+		BuildPaletteOrder: 251
+		Prerequisites: ~aot-age2, aot-shipyard, fix, aot-gunboat-frigate-upgrade, ~!aot-gunboat-upgrade
+		Queue: Upgrade.GDI
+		BuildLimit: 1
+		Description: Upgrades all Frigates into Sub-Hunter Corvettes. Each carries an Orca Torpedo-Bomber that drops homing torpedoes on submarines.
+
+	Valued:
+		Cost: 4300
+
+	RenderSprites:
+		Image: aot-upgrade-gunboat-corvette
+
+	ProvidesPrerequisite:
+		Prerequisite: aot-gunboat-corvette-upgrade
 
 	Interactable:
 

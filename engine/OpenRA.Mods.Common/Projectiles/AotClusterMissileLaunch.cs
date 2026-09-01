@@ -75,6 +75,15 @@ namespace OpenRA.Mods.Common.Effects
 		bool aotEnclosureChecked;
 		AotFirestormMatrixPower aotEnclosingMatrix;
 
+		// aotmod: naval AEGIS interception — set while a real interceptor missile is inbound.
+		bool aotInterceptPending;
+
+		/// <summary>Live centre position, tracked by an inbound AEGIS interceptor missile.</summary>
+		public WPos Position => pos;
+
+		/// <summary>Called by the AEGIS interceptor missile when it reaches us: destroy the missile.</summary>
+		public void RemoveByInterceptor(World world) { AotRemoveIntercepted(world); }
+
 		public AotClusterMissileLaunch(Player firedBy, string image, WeaponInfo weapon,
 			string bodyPalette, string overlayPalette, string bodySequence, string overlaySequence,
 			WPos launchPos, WPos targetPos, WDist cruiseAltitude,
@@ -228,8 +237,21 @@ namespace OpenRA.Mods.Common.Effects
 			var dat = world.Map.DistanceAboveTerrain(pos);
 			var isDescending = ticks >= apexTick;
 
+			// aotmod: naval AEGIS point-defense (Missile Destroyer). A ready battery launches a real
+			// interceptor missile at us; we keep flying (aotInterceptPending) until it arrives and
+			// removes us — so the player can watch the rocket close the distance.
+			if (!aotIntercepted && !aotInterceptPending && !detonated)
+			{
+				var aegis = AotAegisInterceptor.FindInterceptorNear(world, pos, firedBy);
+				if (aegis != null)
+				{
+					aotInterceptPending = true;
+					aegis.LaunchInterceptor(world, this);
+				}
+			}
+
 			// aotmod: Firestorm Defense Matrix Interception (siehe AotFirestormMatrixPower).
-			if (!aotIntercepted && !detonated)
+			if (!aotIntercepted && !aotInterceptPending && !detonated)
 			{
 				var cell = world.Map.CellContaining(pos);
 				var direct = AotFirestormMatrixPower.FindInterceptorAt(world, cell, firedBy);
@@ -256,7 +278,9 @@ namespace OpenRA.Mods.Common.Effects
 				}
 			}
 
-			if (ticks == impactDelay || (isDescending && dat <= detonationAltitude))
+			// While an interceptor is inbound, hold the warhead: the missile is doomed, it just
+			// hasn't been reached yet. ComputePosition clamps it at the target once ticks >= impactDelay.
+			if (!aotInterceptPending && (ticks == impactDelay || (isDescending && dat <= detonationAltitude)))
 				Explode(world, ticks == impactDelay || removeOnDetonation);
 
 			if (bodyAnim != null)
@@ -267,9 +291,17 @@ namespace OpenRA.Mods.Common.Effects
 
 		void AotIntercept(World world, AotFirestormMatrixPower matrix)
 		{
+			matrix.PlayInterceptEffect(world, pos);
+			AotRemoveIntercepted(world);
+		}
+
+		// Shared teardown for any interceptor (matrix or AEGIS): mark done, fade the contrail,
+		// and remove the projectile at frame end.
+		void AotRemoveIntercepted(World world)
+		{
 			aotIntercepted = true;
 			detonated = true;
-			matrix.PlayInterceptEffect(world, pos);
+
 			if (hasContrail)
 				world.AddFrameEndTask(w => w.Add(new ContrailFader(pos, contrail)));
 

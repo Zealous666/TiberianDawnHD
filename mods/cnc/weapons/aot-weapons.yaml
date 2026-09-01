@@ -801,7 +801,10 @@ aot-DestroyerStinger:
 	BurstDelays: 15
 	Report: missile6.wav
 	ValidTargets: Ground, Water
-	InvalidTargets: Underwater
+	# Submarine MUSS mit rein: ein AUFGETAUCHTES U-Boot traegt Ground/Water wie ein Schiff,
+	# nur der bedingungslose Typ "Submarine" (Targetable@antisub) verraet es. Gegen U-Boote
+	# ist ausschliesslich die Wasserbombe zustaendig.
+	InvalidTargets: Underwater, Submarine
 	Projectile: Missile
 		Arm: 3
 		Inaccuracy: 0
@@ -814,6 +817,7 @@ aot-DestroyerStinger:
 		Falloff: 1000, 368, 135, 50, 18, 7, 0
 		Damage: 2500
 		ValidTargets: Ground, Water
+		InvalidTargets: Underwater, Submarine
 		Versus:
 			None: 36
 			Wood: 88
@@ -848,9 +852,15 @@ aot-DestroyerStingerAA:
 # beim RA-Original. Beide Schiffszustände (PT + DD) nutzen dieselbe Waffe.
 aot-DepthCharge:
 	Inherits: ^BallisticWeapon
-	-Report:
+	# Originaler RA-Wasserbomben-Sound (h2obomb2.aud aus sounds.mix extrahiert). Das RA-Original
+	# hat bewusst KEINEN eigenen Abschuss-Report -- dieser Sound IST der Wasserbomben-Sound.
+	Report: h2obomb2.aud
 	-Warhead@2Smu:
 	ReloadDelay: 60
+	# Immer Doppelabwurf: zwei Ladungen backbord + steuerbord (LocalOffset/LocalYaw am
+	# Armament@depthdd des Destroyers) -> zusammen doppelter Schaden.
+	Burst: 2
+	BurstDelays: 3
 	# Immer gegen U-Boote (Ziel-Typ Submarine, den U-Boote dauerhaft tragen) statt nur getaucht
 	# (Underwater); Reichweite auf U-Boot-Niveau (9c0).
 	Range: 9c0
@@ -861,7 +871,10 @@ aot-DepthCharge:
 		LaunchAngle: 62
 		Shadow: true
 		Inaccuracy: 128
+	# Die Ladung sinkt erst und detoniert dann in der Tiefe: Schaden 1 Sekunde (25 Ticks)
+	# verzoegert, damit er zur spaeten Explosion passt (Warhead.Delay).
 	Warhead@1Dam: SpreadDamage
+		Delay: 25
 		Spread: 128
 		Damage: 6000
 		ValidTargets: Submarine
@@ -872,10 +885,20 @@ aot-DepthCharge:
 			Heavy: 40
 			Concrete: 20
 		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+	# SOFORT beim Aufschlag: Wasserflatschen + Fontaene (RA H2O_EXP-VFX).
+	Warhead@2EffSplash: CreateEffect
+		Explosions: aot-h2o-splash, aot-h2o-splash2, aot-h2o-splash3
+		ImpactSounds: splash9.aud
+		ValidTargets: Submarine, Water, Underwater
+	# 1 Sekunde spaeter die eigentliche Detonation unter Wasser.
+	# ⚠️ "Water" MUSS mit rein: CreateEffect spawnt nur, wenn am Aufschlagpunkt ein gueltiger
+	# AKTOR liegt ODER das TERRAIN gueltig ist. Mit nur "Submarine" greift beides nicht (die
+	# HitShape des getauchten U-Boots zaehlt dort nicht) -> es gab Schaden, aber keine Explosion.
 	Warhead@3Eff: CreateEffect
-		Explosions: poof
-		ImpactSounds: xplobig4.aud
-		ValidTargets: Submarine
+		Delay: 25
+		Explosions: med_frag
+		ImpactSounds: kaboom15.aud
+		ValidTargets: Submarine, Water, Underwater
 
 # RA Torpedo-Nachbau: schnelles Unterwasser-Projektil, trifft Schiffe + Küsten-Gebäude.
 # Sub feuert von Bug (LocalOffset +X). UncloakOn: None → Sub bleibt getarnt beim Feuern.
@@ -2065,3 +2088,76 @@ Vulcan:
 	Report: aot-hind-mg.aud
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - Sub-Hunter Corvette: Orca-Bomber Fallschirm-Torpedo ===
+# Zweistufig, wie vom User spezifiziert:
+#  1. aot-CorvetteTorpedoDrop -- der Bomber wirft im Ueberflug (AttackBomber, wie die Badger-
+#     Parabombs) ZWEI Torpedos als Burst ab. Sie sinken am RA-Remaster-Fallschirm (parach).
+#  2. Beim Wasserkontakt: Splash-Sound + -Animation, dann startet via AotLaunchTorpedo der
+#     ECHTE Torpedo (aot-CorvetteTorpedo) und faehrt sofort aufs naechste U-Boot zu.
+aot-CorvetteTorpedoDrop:
+	# KEIN Burst: der Bomber wirft EINZELN ab, eine halbe Sekunde (12 Ticks) auseinander. Zusammen
+	# mit AmmoPool 3 sind das hoechstens 3 Torpedos -- und wenn das Ziel vorher sinkt, spart er
+	# die restlichen Schuesse (die Corvette holt ihn dann zurueck).
+	ReloadDelay: 12
+	# Kleine Range = der Abwurf passiert eng um den angepeilten Punkt (AttackBomber feuert,
+	# sobald das Ziel in Waffenreichweite ist). Der Punkt selbst liegt via
+	# AotCorvetteBomber.DropLead bewusst VOR dem U-Boot.
+	Range: 1c512
+	Report: aot-chute1.aud
+	Burst: 1
+	ValidTargets: Water, Underwater
+	Projectile: GravityBomb
+		Image: parach
+		OpenSequence: open
+		Sequence: idle
+		Velocity: 0, 0, -38
+		Acceleration: 0, 0, 0
+		Shadow: True
+	# Wasser-"Flatschen" beim Aufsetzen des Fallschirms.
+	Warhead@1Splash: CreateEffect
+		Explosions: aot-h2o-splash, aot-h2o-splash2, aot-h2o-splash3
+		ImpactSounds: splash9.wav
+		ValidTargets: Water, Underwater
+	# Der Torpedo loest sich und nimmt Fahrt auf das naechste U-Boot auf.
+	Warhead@2Launch: AotLaunchTorpedo
+		Weapon: aot-CorvetteTorpedo
+		SearchRadius: 12c0
+		ValidTargets: Water, Underwater
+
+# Der eigentliche Torpedo: identische Werte zum U-Boot-Torpedo (aot-SubTorpedo), aber
+# Burst 1 (jeder abgeworfene Fallschirm-Torpedo ist ein einzelner Torpedo).
+aot-CorvetteTorpedo:
+	Inherits: aot-SubTorpedo
+	Burst: 1
+	ReloadDelay: 1
+	Range: 14c0
+	Report: torpedo1.wav
+	Projectile: Missile
+		Image: aot-torpedo-remastered
+		Arm: 2
+		Speed: 85
+		TrailImage: bubbles
+		HorizontalRateOfTurn: 8
+		RangeLimit: 16c0
+		BoundToTerrainType: Water
+		Shadow: false
+		MaximumLaunchAngle: 0
+		CruiseAltitude: 0
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Corvette: "Waffe" die nur den Orca-Start ausloest ===
+# Traegt KEINEN Schaden. Sie existiert, damit die Corvette ein echtes AttackBase hat: dadurch
+# liefert die Engine Angriffs-Cursor, Reichweitenpruefung UND das Heranfahren an ein zu weit
+# entferntes Ziel. Den eigentlichen Angriff macht AotCorvetteBomber (IResolveOrder).
+aot-CorvetteOrcaLaunch:
+	ReloadDelay: 200
+	# BEWUSST kleiner als AotCorvetteBomber.MaxLaunchRange (14c0): die Engine faehrt das Schiff
+	# nur bis an diese Waffenreichweite heran. Waeren beide gleich gross, stuende die Corvette
+	# exakt am Rand und der Bomber startete erst nach weiterer Annaeherung.
+	Range: 12c0
+	ValidTargets: Ground, Water, Underwater, Air
+	Projectile: InstantHit
+	Warhead@nothing: SpreadDamage
+		Spread: 1
+		Damage: 0
+		ValidTargets: NoSuchTarget

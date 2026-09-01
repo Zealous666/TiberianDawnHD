@@ -3162,6 +3162,28 @@ aot-banshee:
 		Scale: 1.0
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - aot-orcab: TS Orca Bomber (orcab.vxl) fuer die Sub-Hunter Corvette ===
+# Zwei-Layer gebackenes Voxel (bake-vxl-test.sh orcab 48 orcab):
+# body = aot-orcab.zip (RGBA, GDI-gelb), remap = aot-orcab-remap.png (Player-Color, idx 176-191).
+aot-orcab:
+	idle:
+		RemasteredFilename: aot-orcab.zip
+		RemapFilename: aot-orcab-remap.png
+		Facings: 32
+		UseClassicFacings: True
+		Length: 1
+		Scale: 0.66
+		ZOffset: 1023
+	idle-remap:
+		RemasteredFilename: aot-orcab-remap.png
+		RemasteredPremultiplied: False
+		Facings: 32
+		UseClassicFacings: True
+		Length: 1
+		Scale: 0.66
+		ZOffset: 1023
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - aot-upgrade-nod-banshee: Icon der Banshee-Airstrike-Freischaltung ===
 aot-upgrade-nod-banshee:
 	icon:
@@ -4229,17 +4251,23 @@ aot-gunboat:
 		Facings: 8
 		Start: 0
 		Length: 1
+	# Corvette: Frigate-Huelle OHNE Raketenwerfer, mit Helipad am Bug fuer den Orca Bomber.
+	idle-corvette:
+		RemasteredFilename: aot-gunboat-corvette.zip
+		Facings: 8
+		Start: 0
+		Length: 1
 	idle-dd:
 		RemasteredFilename: aot-gunboat-dd.zip
 		Facings: 16
 		Length: 8
 		Tick: 90
-		Scale: 1.5
+		Scale: 1.2
 	turret-dd:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\SSAM.ZIP
 		Facings: 32
 		UseClassicFacings: True
-		Scale: 1.5
+		Scale: 1.2
 	icon:
 		Filename: gun_base.png
 		Length: 1
@@ -4248,6 +4276,9 @@ aot-gunboat:
 		Length: 1
 	icon-dd:
 		Filename: gun_destroyer.png
+		Length: 1
+	icon-corvette:
+		Filename: boat_corvette.png
 		Length: 1
 # === Ende aotmod ===
 
@@ -4427,6 +4458,16 @@ torpedo:
 		UseClassicFacings: True
 		ZOffset: -1023
 
+# Remasterter Torpedo (Corvette): RA-Remaster MISSILE.ZIP statt der klassischen missile.shp.
+# ⚠️ Bewusst OHNE Palette-Trick: der Remaster-Pfad ist RGBA und ignoriert `Palette: cloak`,
+# der Torpedo wirkt daher nicht halbtransparent-untergetaucht wie der des U-Boots.
+aot-torpedo-remastered:
+	idle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\VFX\MISSILE.ZIP
+		Facings: 32
+		UseClassicFacings: True
+		ZOffset: -1023
+
 # Blasen-Schweif des Torpedos (RA-Original bubbles.shp, aus RA-Mod extrahiert).
 bubbles:
 	idle:
@@ -4447,6 +4488,12 @@ aot-upgrade-gunboat-destroyer:
 	icon:
 		Filename: gun_destroyer.png
 		Length: 1
+
+# === Age of Tiberium (aotmod) - Sub-Hunter Corvette Enhancement Upgrade ===
+aot-upgrade-gunboat-corvette:
+	icon:
+		Filename: boat_corvette.png
+		Length: 1
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - GDI Battle Cruiser (aot-cruiser) ===
@@ -4459,27 +4506,27 @@ aot-cruiser:
 		Facings: 16
 		Length: 8
 		Tick: 90
-		Scale: 1.5
+		Scale: 1.35
 	turret:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\TURR.ZIP
 		Facings: 32
 		UseClassicFacings: True
-		Scale: 1.5
+		Scale: 1.35
 	turret-railgun:
 		RemasteredFilename: aot-cruiser-turret.zip
 		Facings: 32
 		UseClassicFacings: True
-		Scale: 1.5
+		Scale: 1.35
 	carr-pad:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\CARR.ZIP
 		Facings: 1
 		Length: 1
-		Scale: 1.125
+		Scale: 1.0125
 	carr-pad-inactive:
 		RemasteredFilename: carr-inactive.zip
 		Facings: 1
 		Length: 1
-		Scale: 1.125
+		Scale: 1.0125
 	muzzle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\VFX\GUNFIRE.ZIP
 		Length: 10
@@ -4499,7 +4546,7 @@ aot-cruiser-railgun:
 		RemasteredFilename: aot-cruiser-turret.zip
 		Facings: 32
 		UseClassicFacings: True
-		Scale: 1.5
+		Scale: 1.35
 
 aot-upgrade-cruiser-railgun:
 	icon:

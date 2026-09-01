@@ -4343,11 +4343,16 @@ aot-gunboat:
 	DetectCloaked@frigate:
 		Range: 5c0
 		DetectionTypes: Cloak
-		RequiresCondition: aot-gunboat-frigate-upgrade && !aot-gunboat-upgrade
+		RequiresCondition: aot-gunboat-frigate-upgrade && !aot-gunboat-upgrade && !aot-gunboat-corvette-upgrade
 	DetectCloaked@dd:
 		Range: 6c0
 		DetectionTypes: Cloak
 		RequiresCondition: aot-gunboat-upgrade
+	# Corvette: groessere U-Boot-Ortung als Gunboat (4c0), Frigate (5c0) und Destroyer (6c0).
+	DetectCloaked@corvette:
+		Range: 14c0
+		DetectionTypes: Cloak
+		RequiresCondition: aot-gunboat-corvette-upgrade
 	# Sichtbarer Ortungs-Kreis bei Selektion (liest die aktive DetectCloaked-Range), wie bei
 	# Sensor-Array/Gebaeuden mit Detektion.
 	RenderDetectionCircle:
@@ -4355,43 +4360,113 @@ aot-gunboat:
 		Turret: pt
 		TurnSpeed: 28
 		Offset: 512,0,0
-		RequiresCondition: !aot-gunboat-upgrade
+		RequiresCondition: !aot-gunboat-upgrade && !aot-gunboat-corvette-upgrade
 	# Destroyer: EIN Turm hinten = Raketenwerfer (ssam-Sprite + Raketen am selben Heck-Turm).
 	# Keine Kanone. Offset -X = hinten.
 	Turreted@dd:
 		Turret: dd
 		TurnSpeed: 28
-		Offset: 704,0,128
+		# Mit dem Rumpf mitskaliert (Sprite-Scale 1.5 -> 1.2): 704 * 0.8.
+		Offset: 563,0,102
 		RequiresCondition: aot-gunboat-upgrade
 	AttackTurreted:
 		Turrets: pt, dd
+		RequiresCondition: !aot-gunboat-corvette-upgrade
 	GrantConditionOnPrerequisite@frigate:
 		Condition: aot-gunboat-frigate-upgrade
 		Prerequisites: aot-gunboat-frigate-upgrade
 	GrantConditionOnPrerequisite@destroyer:
 		Condition: aot-gunboat-upgrade
 		Prerequisites: aot-gunboat-upgrade
+	GrantConditionOnPrerequisite@corvette:
+		Condition: aot-gunboat-corvette-upgrade
+		Prerequisites: aot-gunboat-corvette-upgrade
 	-Tooltip:
 	Tooltip@base:
 		Name: Gunboat
 		RequiresCondition: !aot-gunboat-frigate-upgrade
 	Tooltip@frigate:
 		Name: Missile Frigate
-		RequiresCondition: aot-gunboat-frigate-upgrade && !aot-gunboat-upgrade
+		RequiresCondition: aot-gunboat-frigate-upgrade && !aot-gunboat-upgrade && !aot-gunboat-corvette-upgrade
 	Tooltip@dd:
 		Name: Missile Destroyer
 		RequiresCondition: aot-gunboat-upgrade
+	Tooltip@corvette:
+		Name: Sub-Hunter Corvette
+		RequiresCondition: aot-gunboat-corvette-upgrade
 	WithFacingSpriteBody@pt:
 		Sequence: idle
 		RequiresCondition: !aot-gunboat-frigate-upgrade
 	WithFacingSpriteBody@frigate:
 		Sequence: idle-frigate
 		Name: body-frigate
-		RequiresCondition: aot-gunboat-frigate-upgrade && !aot-gunboat-upgrade
+		RequiresCondition: aot-gunboat-frigate-upgrade && !aot-gunboat-upgrade && !aot-gunboat-corvette-upgrade
 	WithFacingSpriteBody@dd:
 		Sequence: idle-dd
 		Name: body-dd
 		RequiresCondition: aot-gunboat-upgrade
+	# Echtes Attack-Trait NUR als Order-Quelle: liefert Angriffs-Cursor, Reichweitenpruefung und
+	# vor allem das HERANFAHREN an ein zu weit entferntes Ziel. Die Waffe selbst macht nichts --
+	# den Angriff fuehrt AotCorvetteBomber aus (Muster wie beim Missile Sub / AotDroneAttack).
+	Armament@orca:
+		Name: orca
+		Weapon: aot-CorvetteOrcaLaunch
+		RequiresCondition: aot-gunboat-corvette-upgrade
+	AttackFrontal@orca:
+		Armaments: orca
+		FacingTolerance: 512
+		RequiresCondition: aot-gunboat-corvette-upgrade
+	# Traegt EINEN Orca Bomber, der selbstaendig U-Boote in Reichweite angreift (nicht steuerbar).
+	# Verlust -> die Corvette muss zur Werft (RearmActors) fuer einen neuen.
+	AotCorvetteBomber:
+		RequiresCondition: aot-gunboat-corvette-upgrade
+		BomberActor: aot-orcab
+		# Aufklaerung (DetectCloaked 14c0) > Auto-Angriff (ScanRange 9c0) -> ein am Ortungsrand
+		# entdecktes U-Boot wird NICHT sofort automatisch angegriffen, nur auf Befehl oder wenn
+		# die Corvette naeher heranfaehrt. Handbefehl reicht am weitesten (MaxLaunchRange).
+		ScanRange: 9c0
+		DockOffset: 512,0,64
+		DockFacings: 8
+		# Am Sprite ausgemessene Pad-Position je gezeichnetem Rumpf-Frame (Weltkoordinaten).
+		# Die vorgerenderte RA-Art folgt NICHT OpenRAs Perspektivmodell -- ein einzelner
+		# rotierender Offset kann daher nie in allen 8 Frames auf dem Pad sitzen.
+		DockOffsets: 87,-523,48, -496,-415,48, -504,0,48, -506,-65,48, 48,236,48, 491,-69,48, 608,-25,48, 515,-397,48
+		# Die umgepackten RA-Rumpf-Zips (Gunboat/Frigate/Corvette/Destroyer gleichermassen) speichern
+		# ihre Facings in umgekehrter Drehrichtung zur Engine -- am Sprite gemessen: Pad-Winkel geht
+		# -45 Grad pro Facing-Schritt. Ohne Spiegelung landet der Orca bei Schraegfahrt am falschen Ende.
+		MirrorDockFacing: True
+		TakeoffSound: orcaup1.aud
+		LandingSound: orcadwn1.aud
+		# Gesamtdauer des Aufmunitionierens an Deck (50 Ticks = 2 s). Die Torpedos kommen dabei
+		# einzeln zurueck, damit der Vorgang sichtbar ist statt schlagartig voll zu sein.
+		RearmDelay: 50
+		# Abwurfpunkt liegt 6 Zellen VOR dem Ziel: der Fallschirm-Torpedo kann waehrend des Sinkens
+		# nicht lenken (braucht Wasserstrecke zum Aufschalten) UND der Bomber dreht schon hier ab,
+		# statt ueber ein AA-Schiff zu fliegen -- das ist der Entfernungsvorteil der Corvette.
+		DropLead: 5c0
+		Overshoot: 2c0
+		ArmDelay: 40
+		PostAttackDelay: 25
+		# Ein Ueberflug = EIN Abwurf (kein Burst, 1 s Nachladen). Ist der Anflug vorbei und der
+		# Bomber hat noch Torpedos, dreht er nach PassTimeout eine neue Schleife -- sonst wuerde
+		# er nach dem ersten Abwurf in der Luft stehenbleiben.
+		PassTimeout: 90
+		DockedCondition: aot-orcab-docked
+		AttackingCondition: aot-orcab-attacking
+		AmmoPoolName: bomber
+		MaxLaunchRange: 14c0
+		LeashRange: 18c0
+		RunTimeout: 500
+		RearmActors: aot-shipyard, aot-shipyard-age2
+		RearmActorRange: 6c0
+	# Zeigt an, ob der Bomber einsatzbereit an Bord ist (Pip voll), unterwegs/am Aufmunitionieren
+	# (leer) oder abgeschossen. Die Pool-Werte setzt AotCorvetteBomber, es haengt keine Waffe dran.
+	# Corvette nutzt das Missile-Frigate-Sprite weiter (idle-frigate). KEINE Direktwaffe —
+	# einzige Bewaffnung ist der Torpedo-Orca-Bomber (siehe Bomber-Mechanik).
+	WithFacingSpriteBody@corvette:
+		Sequence: idle-corvette
+		Name: body-corvette
+		RequiresCondition: aot-gunboat-corvette-upgrade
 	WithSpriteTurret@pt:
 		Turret: pt
 		Sequence: turret
@@ -4411,7 +4486,7 @@ aot-gunboat:
 		Weapon: aot-FrigateMissiles
 		Turret: pt
 		LocalOffset: 208,0,48
-		RequiresCondition: aot-gunboat-frigate-upgrade && !aot-gunboat-upgrade
+		RequiresCondition: aot-gunboat-frigate-upgrade && !aot-gunboat-upgrade && !aot-gunboat-corvette-upgrade
 	# Destroyer-Waffen (ab Destroyer-Upgrade): dieselben zwei Lenkrakten-Armaments wie das
 	# Missile Sub, aber mit den 1:1-RA-Destroyer-Stats (Stinger/StingerAA, Range 7c512 statt
 	# der 20c0 des Subs -- die kurze Reichweite ist der Hauptunterschied zum Sub).
@@ -4435,6 +4510,38 @@ aot-gunboat:
 		Turret: dd
 		LocalOffset: -512,-100,0, -512,100,0
 		LocalYaw: 80, -80
+		RequiresCondition: aot-gunboat-upgrade
+	# AEGIS: der Missile Destroyer faengt anfliegende Cluster Missiles (MSLO-Superpower,
+	# AotClusterMissileLaunch) ab, die in Reichweite seiner Flugabwehr durchfliegen.
+	AotAegisInterceptor:
+		RequiresCondition: aot-gunboat-upgrade
+		Range: 9c0
+		ReloadDelay: 200
+		EffectSequence: med_frag
+		LaunchSound: missile6.wav
+	# "Bomber an Bord"-Pool: rein als Rearm-Zustand, KEINE Waffe haengt dran. Ist der Bomber
+	# verloren, leert AotCorvetteBomber den Pool -> RepairableNear/Rearmable melden "muss
+	# aufmunitionieren" -> die Werft zeigt den aktiven Reparatur-Cursor statt des durchgestrichenen.
+	AmmoPool@bomber:
+		Name: bomber
+		Ammo: 1
+		ReloadDelay: 0
+		Armaments: none-bomber
+	Rearmable@bomber:
+		AmmoPools: bomber
+		RearmActors: aot-shipyard, aot-shipyard-age2
+	# Eigener Pip an der Corvette: zeigt, ob sie einen lebenden Bomber an Bord hat.
+	WithAmmoPipsDecoration@bomber:
+		Position: BottomLeft
+		Margin: 4, 3
+		RequiresSelection: True
+		AmmoPools: bomber
+		RequiresCondition: aot-gunboat-corvette-upgrade
+	# Sichtbarer Abfang-Radius (Range = AotAegisInterceptor.Range), nur bei Auswahl.
+	WithRangeCircle@aegis:
+		Type: aot-aegis
+		Range: 9c0
+		Color: 5AB9FFC0
 		RequiresCondition: aot-gunboat-upgrade
 
 # aot-gunboat-base: Gunboat-Icon vor Frigate-Upgrade.
@@ -4461,9 +4568,9 @@ aot-gunboat-frigate:
 		LockedGroup: aot-grp-gunboat
 		Queue: Naval.GDI
 		BuildPaletteOrder: 10
-		Prerequisites: lite, aot-shipyard, ~aot-gunboat-frigate-upgrade, ~!aot-gunboat-upgrade
+		Prerequisites: lite, aot-shipyard, ~aot-gunboat-frigate-upgrade, ~!aot-gunboat-upgrade, ~!aot-gunboat-corvette-upgrade
 		Icon: icon-frigate
-		Description: Dedicated sub-hunter with extended submarine detection and long-range missiles. Also strikes land and surface targets. Upgradeable to a Destroyer.
+		Description: Versatile warship with long-range missiles. Strikes land, surface and air targets. Upgradeable to a Missile Destroyer or a Sub-Hunter Corvette.
 
 aot-gunboat-destroyer:
 	Inherits: aot-gunboat
@@ -4478,7 +4585,149 @@ aot-gunboat-destroyer:
 		BuildPaletteOrder: 10
 		Prerequisites: lite, aot-shipyard, ~aot-gunboat-upgrade
 		Icon: icon-dd
-		Description: Naval combat vessel with rockets and depth charges. Can attack air.
+		Description: Naval combat vessel with rockets and depth charges. Can attack air. AEGIS system intercepts cluster missiles.
+
+aot-gunboat-corvette:
+	Inherits: aot-gunboat
+	Valued:
+		Cost: 2000
+	Tooltip@base:
+		Name: Sub-Hunter Corvette
+		RequiresCondition: !aot-gunboat-corvette-upgrade
+	Buildable:
+		LockedGroup: aot-grp-gunboat
+		Queue: Naval.GDI
+		BuildPaletteOrder: 10
+		Prerequisites: lite, aot-shipyard, ~aot-gunboat-corvette-upgrade
+		Icon: icon-corvette
+		Description: Dedicated submarine hunter. Carries an Orca Torpedo-Bomber that drops homing torpedoes on submarines.
+
+# Editor-only Testaktor: platziert direkt einen voll ausgeruesteten Missile Destroyer.
+# GrantCondition@variant setzt aot-gunboat-upgrade UNBEDINGT (unabhaengig vom Besitzer-Upgrade),
+# damit dd-Waffen, dd-Sprites UND die AEGIS-Interception sofort aktiv sind. Basis-/Frigate-
+# Render-Traits raus + dd-Render-Traits stets-wahr, damit auch die Editor-Vorschau den Destroyer zeigt.
+aot-gunboat-destroyer-editor:
+	Inherits: aot-gunboat
+	RenderSprites:
+		Image: aot-gunboat
+	GrantCondition@variant:
+		Condition: aot-gunboat-upgrade
+	EditorOnlyTooltip:
+		Name: Missile Destroyer (AEGIS Test)
+	-WithFacingSpriteBody@pt:
+	-WithFacingSpriteBody@frigate:
+	-WithSpriteTurret@pt:
+	WithFacingSpriteBody@dd:
+		Sequence: idle-dd
+		Name: body-dd
+		RequiresCondition: aot-gunboat-upgrade || !aot-gunboat-upgrade
+	WithSpriteTurret@dd:
+		Turret: dd
+		Sequence: turret-dd
+		RequiresCondition: aot-gunboat-upgrade || !aot-gunboat-upgrade
+
+# Editor-only Testaktor: platziert direkt eine Sub-Hunter Corvette (Condition unbedingt gegrantet).
+aot-gunboat-corvette-editor:
+	Inherits: aot-gunboat
+	RenderSprites:
+		Image: aot-gunboat
+	GrantCondition@variant:
+		Condition: aot-gunboat-corvette-upgrade
+	EditorOnlyTooltip:
+		Name: Sub-Hunter Corvette (Test)
+	-WithFacingSpriteBody@pt:
+	-WithSpriteTurret@pt:
+	WithFacingSpriteBody@corvette:
+		Sequence: idle-corvette
+		Name: body-corvette
+		RequiresCondition: aot-gunboat-corvette-upgrade || !aot-gunboat-corvette-upgrade
+
+# === Age of Tiberium (aotmod) - aot-orcab: Orca Bomber der Sub-Hunter Corvette ===
+# TS-Voxel (orcab.vxl), zwei-Layer gebacken: Body behaelt das originale GDI-Gelb, der
+# Remap-Overlay traegt die Spielerfarbe. NICHT direkt steuerbar (kein Buildable, keine
+# Selectable/AttackMove/Guard) -- die Corvette schickt ihn los (AotCorvetteBomber).
+# Er wirft im Ueberflug (AttackBomber) 2 Fallschirm-Torpedos als Burst, fliegt zurueck,
+# landet auf der Corvette und munitioniert in ~3s auf. Kann abgeschossen werden.
+aot-orcab:
+	Inherits: ^Helicopter
+	Interactable:
+	Tooltip:
+		Name: Orca Bomber
+	Valued:
+		Cost: 600
+	UpdatesPlayerStatistics:
+		AddToAssetsValue: false
+	RenderSprites:
+		Image: aot-orcab
+	-WithFacingSpriteBody:
+	WithFacingSpriteBody@BODY:
+		Sequence: idle
+		Name: body
+	WithFacingSpriteBody@REMAP:
+		Sequence: idle-remap
+		Name: body-remap
+		Palette: player
+		IsPlayerPalette: True
+	Health:
+		HP: 18000
+	Armor:
+		Type: Light
+	# Kein Lebensbalken -- ab der Haelfte Schaden zieht er stattdessen eine deutliche Rauchfahne
+	# hinter sich her. DamageState Heavy greift ab <=50% HP, Critical ab <=25%.
+	GrantConditionOnDamageState@smoke:
+		Condition: aot-orcab-smoking
+		ValidDamageStates: Heavy, Critical
+	LeavesTrails@smoke:
+		Image: smokey
+		Sequences: idle
+		Palette: effect
+		Type: CenterPosition
+		MovingInterval: 4
+		TrailWhileStationary: True
+		StationaryInterval: 6
+		Offsets: -256,0,0
+		RequiresCondition: aot-orcab-smoking
+	Aircraft:
+		TurnSpeed: 20
+		Speed: 99
+		Repulsable: False
+		TakeoffSounds: orcaup1.aud
+		LandingSounds: orcadwn1.aud
+	AttackBomber:
+		FacingTolerance: 8
+	# Die Bewaffnung ist NUR waehrend des Angriffsflugs aktiv. Sonst wuerde AttackBomber
+	# (das jeden Tick auf sein Ziel feuert, sobald es in Reichweite ist) die Torpedos direkt
+	# auf dem Deck abwerfen -- die Corvette parkt den Bomber ja an seiner eigenen Zielposition.
+	ExternalCondition@ATTACKING:
+		Condition: aot-orcab-attacking
+	# ⚠️ Armament.CanFire prueft die Munition NICHT -- AmmoPool zaehlt nur mit (bei 0 gekappt).
+	# Ohne dieses Condition-Gate wirft AttackBomber weiter ab, solange das Ziel in Reichweite ist
+	# (Ursache der "4 Torpedos trotz 3 Pips"). AmmoCondition wird pro Munitionspunkt gewaehrt.
+	Armament:
+		Weapon: aot-CorvetteTorpedoDrop
+		RequiresCondition: aot-orcab-attacking && aot-orcab-hasammo
+	# 1 "Schuss" = EIN Burst = 2 Torpedos. ReloadDelay MUSS 0 sein: sonst lud der Pool waehrend
+	# des Anflugs selbst nach und AttackBomber feuerte einen zweiten Burst (= 4 Torpedos).
+	# Nachgeladen wird ausschliesslich beim Andocken (AotCorvetteBomber.Dock).
+	# 1 Pip = 1 Torpedo. Aufmunitioniert wird ausschliesslich an Bord der Corvette
+	# (AotCorvetteBomber.Dock), nicht selbstaendig in der Luft.
+	AmmoPool:
+		Ammo: 3
+		ReloadDelay: 0
+		AmmoCondition: aot-orcab-hasammo
+	# Zeigt die verbleibenden Torpedos direkt am Bomber. RequiresSelection: False, weil er
+	# bewusst nicht anwaehlbar ist -- sonst waeren die Pips nie zu sehen.
+	WithAmmoPipsDecoration:
+		Position: BottomLeft
+		Margin: 2, 2
+		RequiresSelection: False
+	# ^Helicopter bringt einen Husk-SpawnActorOnDeath mit, den es fuer den Bomber nicht gibt.
+	-SpawnActorOnDeath:
+	-AttackMove:
+	-Guard:
+	-Guardable:
+	-Selectable:
+	-MapEditorData:
 
 # === Age of Tiberium (aotmod) - See-Mine (aot-seamine) ===
 # Wird vom Missile Sub nach Mine Layer Upgrade gelegt (Minelayer-Trait).
@@ -5129,7 +5378,7 @@ aot-cruiser:
 		LockedGroup: aot-grp-cruiser
 		Queue: Naval.GDI
 		BuildPaletteOrder: 30
-		Prerequisites: ~aot-age2, aot-age2, aot-shipyard, atec, ~!aot-cruiser-railgun-upgrade, ~!aot-cruiser-carrier-upgrade
+		Prerequisites: ~aot-age2, aot-age2, aot-shipyard, atec, aot-slab, ~!aot-cruiser-railgun-upgrade, ~!aot-cruiser-carrier-upgrade
 		Icon: icon
 		Description: Heavy naval fire support. Two 8-inch gun turrets.
 	Health:
@@ -5157,13 +5406,14 @@ aot-cruiser:
 		Name: Battle Cruiser
 	WithFacingSpriteBody:
 		Sequence: idle
+	# Offsets mit dem Rumpf mitskaliert (Sprite-Scale 1.5 -> 1.35): x0.9.
 	Turreted@primary:
 		Turret: primary
-		Offset: -1344,0,128
+		Offset: -1210,0,115
 		TurnSpeed: 12
 	Turreted@secondary:
 		Turret: secondary
-		Offset: 1152,0,128
+		Offset: 1037,0,115
 		TurnSpeed: 12
 	# Eigene (nicht-rotierende) Turrets NUR fuer die Carrier-Helipads. Sie duerfen NICHT den
 	# Namen der Geschuetz-Turrets (primary/secondary) teilen: WithSpriteTurret setzt im Ctor
@@ -5171,10 +5421,10 @@ aot-cruiser:
 	# fror sonst die Geschuetz-Turrets auf 1 Facing (immer Frame 0) ein.
 	Turreted@carrprimary:
 		Turret: carr-primary
-		Offset: -1344,0,128
+		Offset: -1210,0,115
 	Turreted@carrsecondary:
 		Turret: carr-secondary
-		Offset: 1152,0,128
+		Offset: 1037,0,115
 	AttackTurreted:
 		Turrets: primary, secondary
 		TargetFrozenActors: True
@@ -5280,7 +5530,7 @@ aot-cruiser-railgun-proxy:
 		LockedGroup: aot-grp-cruiser
 		Queue: Naval.GDI
 		BuildPaletteOrder: 30
-		Prerequisites: ~aot-age2, aot-age2, aot-shipyard, atec, ~aot-cruiser-railgun-upgrade, ~!aot-cruiser-carrier-upgrade
+		Prerequisites: ~aot-age2, aot-age2, aot-shipyard, atec, aot-slab, ~aot-cruiser-railgun-upgrade, ~!aot-cruiser-carrier-upgrade
 		Icon: railgun-icon
 		Description: Battle Cruiser with Railgun turrets. Shorter range but highly precise with no minimum distance.
 	Tooltip:
@@ -5295,7 +5545,7 @@ aot-cruiser-carrier-proxy:
 		LockedGroup: aot-grp-cruiser
 		Queue: Naval.GDI
 		BuildPaletteOrder: 30
-		Prerequisites: ~aot-age2, aot-age2, aot-shipyard, atec, ~aot-cruiser-carrier-upgrade
+		Prerequisites: ~aot-age2, aot-age2, aot-shipyard, atec, aot-slab, ~aot-cruiser-carrier-upgrade
 		Icon: carrier-icon
 		Description: Battle Cruiser converted to Heli Carrier. Deploy to activate landing bays for aircraft resupply.
 	Tooltip:
