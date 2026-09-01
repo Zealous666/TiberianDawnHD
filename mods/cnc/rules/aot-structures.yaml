@@ -344,7 +344,9 @@ aot-ore-mine:
 		ResourceType: Tiberium
 	DockHost:
 		Type: OreLoad
-		DockAngle: 0
+		# aotmod 2026-09-01: 512 = Sued (vorher 0 = Nord). ORET dockt noerdlich der Mine und soll
+		# beim Sammeln zur Mine zeigen (Schaufel Richtung Sued). Harvest-Anim ist richtungsabhaengig.
+		DockAngle: 512
 		DockOffset: 0,-1c512,0
 	WithBuildingBib:
 	# Explosion beim Erschoepfen ohne Krater-Smudge (User-Wunsch 2026-08-28): ^Building feuert

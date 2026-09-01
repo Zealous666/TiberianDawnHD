@@ -8,6 +8,7 @@
 
 using System.Linq;
 using OpenRA.Mods.Common.Activities;
+using OpenRA.Mods.Common.Traits.Render;
 using OpenRA.Primitives;
 using OpenRA.Traits;
 
@@ -22,6 +23,29 @@ namespace OpenRA.Mods.Common.Traits
 
 		[Desc("Ticks to wait at the mine while loading (25 = 1 second at default game speed).")]
 		public readonly int OreLoadDelay = 25;
+
+		[SequenceReference]
+		[Desc("aotmod: Erz-Sammel-Animation (Schaufel rauf/runter), abgespielt waehrend des Ladens ",
+			"an der Ore Mine. Leer = keine Animation. Wird auf dem WithSpriteBody 'body' abgespielt.")]
+		public readonly string HarvestSequence = "harvest";
+
+		[SequenceReference]
+		[Desc("aotmod: Entlade-Animation (Ladeflaeche oeffnet) am Silo. Einmal abgespielt, dann DockLoopSequence.")]
+		public readonly string DockSequence = "dock";
+
+		[SequenceReference]
+		[Desc("aotmod: Entlade-Schleife (Ladeflaeche gekippt) am Silo, waehrend die Credits uebergeben werden.")]
+		public readonly string DockLoopSequence = "dock-loop";
+
+		[Desc("aotmod: Ticks, die am Silo mit laufender Entlade-Animation verharrt wird, bevor die ",
+			"Credits gutgeschrieben werden (nur wenn Lagerplatz frei ist). 0 = sofort ohne Animation.")]
+		public readonly int UnloadDelay = 20;
+
+		[Desc("aotmod: Fahrzeug-Ausrichtung, in die sich der ORET am Silo eindreht, BEVOR die Entlade-",
+			"Animation startet. Die dock/dock-loop-Frames sind richtungslos gebacken (Ost-West-Optik), ",
+			"daher muss der Koerper vorher dorthin drehen, sonst springt das Sprite. ",
+			"WAngle: 0=Nord, 256=Ost, 512=Sued, 768=West.")]
+		public readonly WAngle UnloadFacing = new(256);
 
 		[Desc("Resource type used to drive the pip display (must match StoresResources).")]
 		public readonly string OreResourceType = "Tiberium";
@@ -58,6 +82,12 @@ namespace OpenRA.Mods.Common.Traits
 		IStoresResources storesResources;
 		IMove move;
 		readonly Actor self;
+
+		// aotmod: Sammel-/Entlade-Animation. Optional -- ohne WithSpriteBody laeuft der Zyklus wie bisher.
+		WithSpriteBody wsb;
+		IFacing facing;
+		bool unloading;
+		int unloadTicks;
 
 		// Stall recovery, see StallRecoveryTicks.
 		Actor lastDeliveryTarget;
@@ -140,6 +170,8 @@ namespace OpenRA.Mods.Common.Traits
 			storesResources = self.TraitsImplementing<IStoresResources>()
 				.FirstOrDefault(sr => sr.HasType(Info.OreResourceType));
 			move = self.Trait<IMove>();
+			wsb = self.TraitsImplementing<WithSpriteBody>().FirstOrDefault();
+			facing = self.TraitOrDefault<IFacing>();
 			base.Created(self);
 		}
 
@@ -299,6 +331,10 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				state = TransportState.Loading;
 				loadTicks = Info.OreLoadDelay;
+
+				// Erz-Sammel-Animation (Schaufel rauf/runter) fuer die Dauer des Ladens laufen lassen.
+				if (wsb != null && !string.IsNullOrEmpty(Info.HarvestSequence))
+					wsb.PlayCustomAnimationRepeating(self, Info.HarvestSequence);
 			}
 		}
 
@@ -315,6 +351,9 @@ namespace OpenRA.Mods.Common.Traits
 				state = TransportState.Full;
 				storesResources?.AddResource(Info.OreResourceType, storesResources.Capacity);
 				hostActor.TraitOrDefault<OreMineDurability>()?.OnTrip(hostActor, self);
+
+				// Laden fertig -> zurueck auf idle.
+				wsb?.CancelCustomAnimation(self);
 				return true;
 			}
 
@@ -324,15 +363,64 @@ namespace OpenRA.Mods.Common.Traits
 				if (!playerResources.CanGiveResources(Info.OreLoadAmount))
 					return false;
 
+				// Erst auf die Entlade-Ausrichtung (West) eindrehen -- die dock-Frames sind richtungslos
+				// gebacken, ohne Eindrehen wuerde das Sprite beim Animationsstart springen. Nur wenn eine
+				// Animation vorhanden ist; sonst liefert der ORET wie zuvor ohne Drehung ab.
+				if (wsb != null && facing != null && facing.Facing != Info.UnloadFacing)
+				{
+					facing.Facing = Util.TickFacing(facing.Facing, Info.UnloadFacing, facing.TurnSpeed);
+					return false;
+				}
+
+				// Entlade-Animation abspielen und dafuer kurz verharren, bevor gutgeschrieben wird.
+				if (!unloading)
+				{
+					unloading = true;
+					unloadTicks = Info.UnloadDelay;
+					PlayUnloadAnimation(self);
+				}
+
+				if (--unloadTicks > 0)
+					return false;
+
 				playerResources.GiveResources(Info.OreLoadAmount);
 				state = TransportState.Empty;
 				storesResources?.RemoveResource(Info.OreResourceType, storesResources.Capacity);
+				unloading = false;
+				wsb?.CancelCustomAnimation(self);
 				return true;
 			}
 
 			return true;
 		}
 
-		// No OnDockCompleted override: the load/deliver cycle is driven entirely from ITick.
+		// aotmod: Ladeflaeche einmal oeffnen (dock), dann die Kipp-Schleife (dock-loop) waehrend des Verharrens.
+		void PlayUnloadAnimation(Actor self)
+		{
+			if (wsb == null)
+				return;
+
+			if (!string.IsNullOrEmpty(Info.DockSequence))
+				wsb.PlayCustomAnimation(self, Info.DockSequence, () =>
+				{
+					if (!string.IsNullOrEmpty(Info.DockLoopSequence))
+						wsb.PlayCustomAnimationRepeating(self, Info.DockLoopSequence);
+				});
+			else if (!string.IsNullOrEmpty(Info.DockLoopSequence))
+				wsb.PlayCustomAnimationRepeating(self, Info.DockLoopSequence);
+		}
+
+		// Safety-Reset: raeumt eine laufende Sammel-/Entlade-Animation weg, wenn ein Andockvorgang endet
+		// (auch bei Abbruch, z.B. Mine zwischen An- und Abfahrt zerstoert). Ein waehrend des Ladens
+		// (state==Loading) abgebrochener Dock wird auf Empty zurueckgesetzt, damit die Schaufel-Animation
+		// nicht waehrend der Weiterfahrt haengen bleibt und der Zyklus sauber neu greift.
+		public override void OnDockCompleted(Actor self, Actor hostActor, IDockHost host)
+		{
+			if (state == TransportState.Loading)
+				state = TransportState.Empty;
+
+			unloading = false;
+			wsb?.CancelCustomAnimation(self);
+		}
 	}
 }

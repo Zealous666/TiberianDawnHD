@@ -1141,12 +1141,32 @@ aot-gem-scatter-snow:
 # === Ende aotmod ===
 
 # === Ore Transporter (ORET): RA Harvester Sprites ===
-# HARV.ZIP Frame-Layout: idle 0-31 (32 Facings, UseClassicFacings), harvest 32-63, dock 64-110
+# RA-HARV.ZIP Frame-Layout (111 Frames, identisch zur klassischen harv.shp, per MEG-Extraktion
+# 2026-09-01 verifiziert): idle 0-31 (32 Facings), harvest 32-95 (8 Facings x 8 Frames, Schaufel
+# vorne rauf/runter), dock 96-103 + dock-loop 104-110 (Ladeflaeche kippt seitlich zum Entladen).
 oret:
 	idle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\HARV.ZIP
 		Facings: 32
 		UseClassicFacings: True
+		Scale: 0.9
+	# Erz-Sammel-Animation an der Ore Mine: 8 Facings, je 8 Frames (Schaufel rauf/runter).
+	harvest:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\HARV.ZIP
+		Start: 32
+		Length: 8
+		Facings: 8
+		Scale: 0.9
+	# Entlade-Animation am Silo: Ladeflaeche oeffnet (dock) und kippt seitlich (dock-loop).
+	dock:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\HARV.ZIP
+		Start: 96
+		Length: 8
+		Scale: 0.9
+	dock-loop:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\HARV.ZIP
+		Start: 104
+		Length: 7
 		Scale: 0.9
 	icon:
 		Filename: oret_base.png

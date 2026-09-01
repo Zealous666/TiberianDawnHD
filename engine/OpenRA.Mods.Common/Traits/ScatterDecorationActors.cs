@@ -13,6 +13,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Traits
@@ -76,6 +78,15 @@ namespace OpenRA.Mods.Common.Traits
 			"variant*2 + densityLevel, where level 0 = weak/sparse and level 1 = full).")]
 		public readonly int Variants = 4;
 
+		[Desc("aotmod: Resource-Fuellstaende (in %) der Mine, bei denen jeweils die naechste (aeusserste) ",
+			"Erz-Schale rund um die Mine verschwindet -- absteigend anzugeben. Das Erzfeld schrumpft so mit ",
+			"sinkendem Vorrat langsam von aussen nach innen; beim letzten (kleinsten) Wert ist es leer. ",
+			"Leere Liste = altes Verhalten (Feld bleibt bis zur Zerstoerung voll stehen).")]
+		public readonly ImmutableArray<int> DepletionFillPercentages = [75, 50, 25, 5];
+
+		[Desc("Ticks zwischen den Fuellstands-Pruefungen (Deko-Abbau). Grob genuegt.")]
+		public readonly int DepletionCheckInterval = 25;
+
 		public override object Create(ActorInitializer init) { return new ScatterDecorationActors(this); }
 	}
 
@@ -87,12 +98,26 @@ namespace OpenRA.Mods.Common.Traits
 			: base(value) { }
 	}
 
-	public class ScatterDecorationActors : INotifyAddedToWorld, INotifyRemovedFromWorld
+	public class ScatterDecorationActors : INotifyAddedToWorld, INotifyRemovedFromWorld, INotifyCreated, ITick
 	{
 		readonly ScatterDecorationActorsInfo info;
+
+		// Sortiert nach Distanz zur Mine (nah -> fern), damit beim Abbau die aeussersten zuerst gehen.
 		readonly List<Actor> spawned = new();
 
+		IStoresResources store;
+		StoresResources concreteStore;
+		int keptCount;
+		int checkTick;
+
 		public ScatterDecorationActors(ScatterDecorationActorsInfo info) { this.info = info; }
+
+		void INotifyCreated.Created(Actor self)
+		{
+			// Dieselbe Quelle wie OreMineDurability/ISelectionBar: aktueller Fuellstand der Mine.
+			store = self.TraitsImplementing<IStoresResources>().FirstOrDefault();
+			concreteStore = store as StoresResources;
+		}
 
 		static uint Hash(CPos c, int salt)
 		{
@@ -109,6 +134,10 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				var map = w.Map;
 				var origin = self.Location;
+
+				// (Aktor, Distanz zur Mine) -- nach dem Streuen nach Distanz sortiert, damit der
+				// Fuellstands-Abbau die aeussersten Cluster zuerst entfernt.
+				var placed = new List<(Actor Actor, int Dist)>();
 
 				var centre = self.CenterPosition;
 				var outer = info.Radius.Length;
@@ -163,24 +192,90 @@ namespace OpenRA.Mods.Common.Traits
 						// arctic map picks snow on Clear.Snow and temperate on grass/Clear).
 						var snow = info.SnowTerrainTypes.Contains(type);
 
-						spawned.Add(w.CreateActor(snow ? info.SnowActor : info.TemperateActor,
+						var actor = w.CreateActor(snow ? info.SnowActor : info.TemperateActor,
 						[
 							new LocationInit(cell),
 							new OwnerInit(self.Owner),
 							new ScatterSpriteInit(seq),
-						]));
+						]);
+						placed.Add((actor, d));
 					}
 				}
+
+				// Nah -> fern. OrderBy ist stabil, also bei Distanz-Gleichstand deterministisch
+				// (Reihenfolge = Streureihenfolge) -> auf allen Clients identisch.
+				foreach (var p in placed.OrderBy(p => p.Dist))
+					spawned.Add(p.Actor);
+
+				keptCount = spawned.Count;
+
+				// Direkt auf den aktuellen Fuellstand einstellen (z.B. nach Snapshot-Load einer
+				// schon teils erschoepften Mine spawnt sie neu, aber mit weniger Erz drumherum).
+				Prune(self);
+			});
+		}
+
+		void ITick.Tick(Actor self)
+		{
+			if (info.DepletionFillPercentages.IsDefaultOrEmpty || spawned.Count == 0)
+				return;
+
+			if (--checkTick > 0)
+				return;
+
+			checkTick = Math.Max(1, info.DepletionCheckInterval);
+			Prune(self);
+		}
+
+		// Haelt nur so viele der (nach Distanz sortierten) Cluster wie zum aktuellen Fuellstand
+		// passen und wirft die uebrigen -- die aeussersten -- weg. Monoton: die Mine fuellt sich
+		// nie wieder auf, also wird nur entfernt, nie neu gestreut.
+		void Prune(Actor self)
+		{
+			if (info.DepletionFillPercentages.IsDefaultOrEmpty || spawned.Count == 0 || store == null || store.Capacity == 0)
+				return;
+
+			var stored = concreteStore != null ? concreteStore.ContentsSum : store.Capacity;
+			var fillPercent = (long)stored * 100 / store.Capacity;
+
+			// Jede Schwelle, die der Fuellstand erreicht/unterschritten hat, entfernt eine Schale.
+			var removedShells = info.DepletionFillPercentages.Count(t => fillPercent <= t);
+			var shells = info.DepletionFillPercentages.Length;
+
+			// keepFraction = (shells - removedShells) / shells, angewandt auf die Clusterzahl.
+			var total = spawned.Count;
+			var keep = (int)((long)total * (shells - removedShells) / shells);
+			keep = Math.Clamp(keep, 0, keptCount);
+
+			if (keep >= keptCount)
+				return;
+
+			self.World.AddFrameEndTask(w =>
+			{
+				// Von hinten (fernste zuerst) bis auf 'keep' abbauen.
+				for (var i = keptCount - 1; i >= keep; i--)
+				{
+					var a = spawned[i];
+					if (a != null && a.IsInWorld && !a.IsDead)
+						a.Dispose();
+				}
+
+				keptCount = keep;
 			});
 		}
 
 		void INotifyRemovedFromWorld.RemovedFromWorld(Actor self)
 		{
-			foreach (var a in spawned)
-				if (a != null && !a.IsDead)
+			// Nur die noch vorhandenen (der Fuellstands-Abbau hat evtl. schon welche entfernt).
+			for (var i = 0; i < keptCount && i < spawned.Count; i++)
+			{
+				var a = spawned[i];
+				if (a != null && a.IsInWorld && !a.IsDead)
 					a.Dispose();
+			}
 
 			spawned.Clear();
+			keptCount = 0;
 		}
 	}
 }
