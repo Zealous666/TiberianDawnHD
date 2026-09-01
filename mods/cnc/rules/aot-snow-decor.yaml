@@ -397,6 +397,8 @@ T03.Transformable-Snow:
 		Adjacency: 1
 		Delay: 22500, 30000
 		ForcePrerequisite: aot-age1
+	Tooltip:
+		Name: meta-tiberium-infested-tree-name
 	EditorOnlyTooltip:
 		Name: actor-t03-transformable-snow-name
 
@@ -416,5 +418,7 @@ T03.TransformableBlue-Snow:
 		Adjacency: 1
 		Delay: 22500, 30000
 		ForcePrerequisite: aot-age1
+	Tooltip:
+		Name: meta-tiberium-infested-tree-name
 	EditorOnlyTooltip:
 		Name: actor-t03-transformableblue-snow-name

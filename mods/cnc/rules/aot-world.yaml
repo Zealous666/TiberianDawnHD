@@ -106,6 +106,9 @@ T03.Transformable:
 	TransformsNearResources:
 		Delay: 22500, 30000
 		ForcePrerequisite: aot-age1
+	# aotmod 2026-09-01: In-game Hover-Name statt "Tree".
+	Tooltip:
+		Name: meta-tiberium-infested-tree-name
 
 # aotmod 2026-08-29: eigener, separat platzierbarer Baum, der neben BLAUEM Tiberium (>=1 Zelle)
 # unter denselben Bedingungen wie T03/T13.Transformable zu einem Blue Blossom Tree (splitblue)
@@ -129,6 +132,8 @@ T03.TransformableBlue:
 		Adjacency: 1
 		Delay: 22500, 30000
 		ForcePrerequisite: aot-age1
+	Tooltip:
+		Name: meta-tiberium-infested-tree-name
 	EditorOnlyTooltip:
 		Name: actor-t03-transformableblue-name
 
@@ -136,6 +141,8 @@ T13.Transformable:
 	TransformsNearResources:
 		Delay: 22500, 30000
 		ForcePrerequisite: aot-age1
+	Tooltip:
+		Name: meta-tiberium-infested-tree-name
 
 # Blossom-Tree-Wachstum (SeedsResource) von 55/55/110 auf 100 Ticks fuer alle drei
 # (User-Wunsch 2026-07-30). trees.yaml selbst ist Teil der Engine-Kopie und gitignored

@@ -9,8 +9,10 @@
  */
 #endregion
 
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using OpenRA.Mods.Common;
 using OpenRA.Mods.Common.Activities;
 using OpenRA.Mods.Common.Traits;
 using OpenRA.Traits;
@@ -18,7 +20,7 @@ using OpenRA.Traits;
 namespace OpenRA.Mods.Cnc.Traits
 {
 	[Desc("Replace with another actor when a resource spawns adjacent.")]
-	public class TransformsNearResourcesInfo : TraitInfo
+	public class TransformsNearResourcesInfo : TraitInfo, IEditorActorOptions
 	{
 		[FieldLoader.Require]
 		[ActorReference]
@@ -39,6 +41,22 @@ namespace OpenRA.Mods.Cnc.Traits
 		[Desc("This many adjacent resource tiles are required.")]
 		public readonly int Adjacency = 1;
 
+		[Desc("aotmod: CHECKBOX \"Needs Tiberium around\" (Map-Editor, pro Baum). Default an =",
+			"Vanilla-Verhalten: transformiert nur, solange angrenzendes Tiberium den Timer treibt.",
+			"Aus = ignoriert die Adjazenz komplett und transformiert IMMER nach Ablauf des Delay-Timers",
+			"(bzw. sofort, sobald ForcePrerequisite erreicht ist), auch ohne angrenzendes Tiberium.")]
+		public readonly bool RequireResource = true;
+
+		[Desc("Display order for the \"Needs Tiberium around\" checkbox in the map editor.")]
+		public readonly int EditorRequireResourceDisplayOrder = 5;
+
+		IEnumerable<EditorActorOption> IEditorActorOptions.ActorOptions(ActorInfo ai, World world)
+		{
+			yield return new EditorActorCheckbox("Needs Tiberium around", EditorRequireResourceDisplayOrder,
+				actor => actor.GetInitOrDefault<TransformsNeedsResourceInit>()?.Value ?? RequireResource,
+				(actor, value) => actor.ReplaceInit(new TransformsNeedsResourceInit(value)));
+		}
+
 		[Desc("The range of time (in ticks) until the transformation starts.")]
 		public readonly ImmutableArray<int> Delay = [1000, 3000];
 
@@ -48,7 +66,7 @@ namespace OpenRA.Mods.Cnc.Traits
 			"'spaetestens wenn der erste Spieler dieses Age erreicht'. Leer = kein Cap.")]
 		public readonly string ForcePrerequisite = null;
 
-		public override object Create(ActorInitializer init) { return new TransformsNearResources(init.Self, this); }
+		public override object Create(ActorInitializer init) { return new TransformsNearResources(init, this); }
 	}
 
 	public class TransformsNearResources : ITick
@@ -56,13 +74,18 @@ namespace OpenRA.Mods.Cnc.Traits
 		readonly TransformsNearResourcesInfo info;
 		readonly IResourceLayer resourceLayer;
 		readonly AotGlobalPrerequisiteFlag forceFlag;
+
+		// aotmod: pro-Baum aus der Editor-Checkbox "Needs Tiberium around" (Default = info.RequireResource).
+		readonly bool requireResource;
 		int delay;
 
-		public TransformsNearResources(Actor self, TransformsNearResourcesInfo info)
+		public TransformsNearResources(ActorInitializer init, TransformsNearResourcesInfo info)
 		{
+			var self = init.Self;
 			resourceLayer = self.World.WorldActor.Trait<IResourceLayer>();
 			delay = Common.Util.RandomInRange(self.World.SharedRandom, info.Delay);
 			this.info = info;
+			requireResource = init.GetValue<TransformsNeedsResourceInit, bool>(info.RequireResource);
 
 			if (!string.IsNullOrEmpty(info.ForcePrerequisite))
 				forceFlag = self.World.WorldActor.TraitsImplementing<AotGlobalPrerequisiteFlag>()
@@ -73,6 +96,21 @@ namespace OpenRA.Mods.Cnc.Traits
 		{
 			if (delay < 0)
 				return;
+
+			// aotmod: requireResource=false -> Adjazenz ignorieren, Timer laeuft immer.
+			// Age erreicht -> sofort; sonst herunterzaehlen (auch ohne angrenzendes Tiberium).
+			if (!requireResource)
+			{
+				if (forceFlag != null && forceFlag.Reached)
+					delay = -1;
+				else
+					delay--;
+
+				if (delay < 0)
+					Transform(self);
+
+				return;
+			}
 
 			var adjacent = 0;
 			foreach (var direction in CVec.Directions)
@@ -115,5 +153,12 @@ namespace OpenRA.Mods.Cnc.Traits
 
 			self.QueueActivity(false, transform);
 		}
+	}
+
+	// aotmod: traegt die Map-Editor-Checkbox "Needs Tiberium around" in den gespeicherten Aktor.
+	public class TransformsNeedsResourceInit : ValueActorInit<bool>, ISingleInstanceInit
+	{
+		public TransformsNeedsResourceInit(bool value)
+			: base(value) { }
 	}
 }
