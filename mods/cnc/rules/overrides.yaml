@@ -813,13 +813,6 @@ HQ:
 		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
 		# PlayerColorShift verschiebt jeden Pixel im Gruen-Hue-Fenster zur Spielerfarbe
 		# (siehe silo-system.md). Body ist RGBA/truecolor -> explizit absichern.
-		Palette: effect
-		IsPlayerPalette: false
-	WithIdleOverlay@tsremap:
-		Sequence: aot-age2-idle-remap
-		Palette: player
-		IsPlayerPalette: True
-		RequiresCondition: aot-age2-active && !build-incomplete
 	WithIdleOverlay@lights:
 		Sequence: aot-age2-lights
 		Palette: effect
@@ -1384,11 +1377,6 @@ aot-proc-gdi:
 		Sequence: aot-age2-nod-idle
 		Name: body-ts
 		RequiresCondition: aot-age2-active
-	WithIdleOverlay@tsremap:
-		Sequence: aot-age2-nod-idle-remap
-		Palette: player
-		IsPlayerPalette: True
-		RequiresCondition: aot-age2-active && !build-incomplete
 	WithIdleOverlay@tsanim:
 		Sequence: aot-age2-nod-anim
 		RequiresCondition: aot-age2-active && !build-incomplete
@@ -1412,11 +1400,6 @@ aot-proc-gdi-age2:
 		Sequence: aot-age2-nod-idle
 		Name: body-ts
 		RequiresCondition: aot-age2-active || !aot-age2-active
-	WithIdleOverlay@tsremap:
-		Sequence: aot-age2-nod-idle-remap
-		Palette: player
-		IsPlayerPalette: True
-		RequiresCondition: !build-incomplete
 	WithIdleOverlay@tsanim:
 		Sequence: aot-age2-nod-anim
 		RequiresCondition: !build-incomplete
@@ -1448,11 +1431,6 @@ aot-proc-nod:
 		Sequence: aot-age2-nod-idle
 		Name: body-ts
 		RequiresCondition: aot-age2-active
-	WithIdleOverlay@tsremap:
-		Sequence: aot-age2-nod-idle-remap
-		Palette: player
-		IsPlayerPalette: True
-		RequiresCondition: aot-age2-active && !build-incomplete
 	WithIdleOverlay@tsanim:
 		Sequence: aot-age2-nod-anim
 		RequiresCondition: aot-age2-active && !build-incomplete
@@ -1480,11 +1458,6 @@ aot-proc-nod-age2:
 		Sequence: aot-age2-nod-idle
 		Name: body-ts
 		RequiresCondition: aot-age2-active || !aot-age2-active
-	WithIdleOverlay@tsremap:
-		Sequence: aot-age2-nod-idle-remap
-		Palette: player
-		IsPlayerPalette: True
-		RequiresCondition: !build-incomplete
 	WithIdleOverlay@tsanim:
 		Sequence: aot-age2-nod-anim
 		RequiresCondition: !build-incomplete

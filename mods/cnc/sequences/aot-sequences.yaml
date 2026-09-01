@@ -1403,13 +1403,13 @@ aot-shipyard:
 	# Age-2 Gemini-Sprite (2026-08-29). Player-Color NUR auf den blauen Kuppeln (idle-remap),
 	# Metall/Kran/Beton bleiben neutral. Scale/Offset erste Naeherung -> in-game kalibrieren.
 	aot-age2-idle:
-		Filename: aot-shipyard-gemini-idle.png
+		Filename: aot-shipyard-age2-idle.png
 		Length: 1
 		Scale: 0.079189
 		Offset: 0,0
 		ZOffset: 1024
 	damaged-aot-age2-idle:
-		Filename: aot-shipyard-gemini-idle.png
+		Filename: aot-shipyard-age2-idle.png
 		Length: 1
 		Scale: 0.079189
 		Offset: 0,0

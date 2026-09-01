@@ -202,25 +202,11 @@ aot-lite-gdi:
 		Name: body-ts
 		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
 		# PlayerColorShift verschiebt jeden Pixel im entsprechenden Farbton zur Spielerfarbe.
-		Palette: effect
-		IsPlayerPalette: false
 		RequiresCondition: aot-age2-active
-	WithIdleOverlay@tsremap:
-		Sequence: aot-age2-idle-remap
-		Palette: player
-		IsPlayerPalette: True
-		RequiresCondition: aot-age2-active && !build-incomplete
 	# Zwei-Layer-System wie Age 0/1 (body unterhalb, roof oberhalb der Einheit) -
 	# ROOF-Overlay ersetzt fuer Age 2 die alte Einzel-Sprite-Loesung.
 	WithIdleOverlay@tsroof:
 		Sequence: aot-age2-roof
-		Palette: effect
-		IsPlayerPalette: false
-		RequiresCondition: aot-age2-active && !build-incomplete
-	WithIdleOverlay@tsroofremap:
-		Sequence: aot-age2-roof-remap
-		Palette: player
-		IsPlayerPalette: True
 		RequiresCondition: aot-age2-active && !build-incomplete
 	WithIdleOverlay@tsblink:
 		Sequence: aot-age2-blink
@@ -269,25 +255,11 @@ aot-lite-nod:
 		Name: body-ts
 		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
 		# PlayerColorShift verschiebt jeden Pixel im entsprechenden Farbton zur Spielerfarbe.
-		Palette: effect
-		IsPlayerPalette: false
 		RequiresCondition: aot-age2-active
-	WithIdleOverlay@tsremap:
-		Sequence: aot-age2-idle-remap
-		Palette: player
-		IsPlayerPalette: True
-		RequiresCondition: aot-age2-active && !build-incomplete
 	# Zwei-Layer-System wie Age 0/1 (body unterhalb, roof oberhalb der Einheit) -
 	# ROOF-Overlay ersetzt fuer Age 2 die alte Einzel-Sprite-Loesung.
 	WithIdleOverlay@tsroof:
 		Sequence: aot-age2-roof
-		Palette: effect
-		IsPlayerPalette: false
-		RequiresCondition: aot-age2-active && !build-incomplete
-	WithIdleOverlay@tsroofremap:
-		Sequence: aot-age2-roof-remap
-		Palette: player
-		IsPlayerPalette: True
 		RequiresCondition: aot-age2-active && !build-incomplete
 	WithIdleOverlay@tsblink:
 		Sequence: aot-age2-blink
@@ -314,11 +286,7 @@ aot-lite-gdi-editor-age2:
 	-WithMakeAnimation@base:
 	WithSpriteBody@ts:
 		RequiresCondition: aot-age2-active || !aot-age2-active
-	WithIdleOverlay@tsremap:
-		RequiresCondition: !build-incomplete
 	WithIdleOverlay@tsroof:
-		RequiresCondition: !build-incomplete
-	WithIdleOverlay@tsroofremap:
 		RequiresCondition: !build-incomplete
 	WithIdleOverlay@tsblink:
 		RequiresCondition: !build-incomplete
@@ -334,11 +302,7 @@ aot-lite-nod-editor-age2:
 	-WithMakeAnimation@base:
 	WithSpriteBody@ts:
 		RequiresCondition: aot-age2-active || !aot-age2-active
-	WithIdleOverlay@tsremap:
-		RequiresCondition: !build-incomplete
 	WithIdleOverlay@tsroof:
-		RequiresCondition: !build-incomplete
-	WithIdleOverlay@tsroofremap:
 		RequiresCondition: !build-incomplete
 	WithIdleOverlay@tsblink:
 		RequiresCondition: !build-incomplete
@@ -530,11 +494,6 @@ FACT:
 		Sequence: aot-age2-idle
 		Name: body-ts
 		RequiresCondition: aot-age2-active
-	WithIdleOverlay@tsremap:
-		Sequence: aot-age2-idle-remap
-		Palette: player
-		IsPlayerPalette: True
-		RequiresCondition: aot-age2-active && !build-incomplete
 	WithIdleOverlay@lights:
 		Sequence: aot-age2-lights
 		RequiresCondition: aot-age2-active && !build-incomplete
@@ -593,8 +552,6 @@ aot-fact-gdi-editor-age2:
 	-WithBuildingPlacedAnimation@td:
 	WithSpriteBody@ts:
 		RequiresCondition: aot-age2-active || !aot-age2-active
-	WithIdleOverlay@tsremap:
-		RequiresCondition: !build-incomplete
 	WithIdleOverlay@lights:
 		RequiresCondition: !build-incomplete
 	WithMakeAnimation@ts:
@@ -625,8 +582,6 @@ aot-fact-nod-editor-age2:
 	-WithBuildingPlacedAnimation@td:
 	WithSpriteBody@ts:
 		RequiresCondition: aot-age2-active || !aot-age2-active
-	WithIdleOverlay@tsremap:
-		RequiresCondition: !build-incomplete
 	WithIdleOverlay@lights:
 		RequiresCondition: !build-incomplete
 	WithMakeAnimation@ts:
@@ -666,14 +621,7 @@ PYLE:
 		Name: body-ts
 		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
 		# PlayerColorShift verschiebt jeden Pixel im entsprechenden Farbton zur Spielerfarbe.
-		Palette: effect
-		IsPlayerPalette: false
 		RequiresCondition: aot-age2-active
-	WithIdleOverlay@tsremap:
-		Sequence: aot-age2-idle-remap
-		Palette: player
-		IsPlayerPalette: True
-		RequiresCondition: aot-age2-active && !build-incomplete
 	WithIdleOverlay@tsblink:
 		Sequence: aot-age2-blink
 		RequiresCondition: aot-age2-active && !build-incomplete
@@ -771,8 +719,6 @@ aot-pyle-age2:
 	-WithBuildingPlacedAnimation@td:
 	WithSpriteBody@ts:
 		RequiresCondition: aot-age2-active || !aot-age2-active
-	WithIdleOverlay@tsremap:
-		RequiresCondition: !build-incomplete
 	WithIdleOverlay@tsblink:
 		RequiresCondition: !build-incomplete
 # === Ende aotmod ===
@@ -805,14 +751,7 @@ HAND:
 		Name: body-ts
 		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
 		# PlayerColorShift verschiebt jeden Pixel im entsprechenden Farbton zur Spielerfarbe.
-		Palette: effect
-		IsPlayerPalette: false
 		RequiresCondition: aot-age2-active
-	WithIdleOverlay@tsremap:
-		Sequence: aot-age2-idle-remap
-		Palette: player
-		IsPlayerPalette: True
-		RequiresCondition: aot-age2-active && !build-incomplete
 	WithIdleOverlay@tsblink:
 		Sequence: aot-age2-blink
 		RequiresCondition: aot-age2-active && !build-incomplete
@@ -910,8 +849,6 @@ aot-hand-age2:
 	-WithBuildingPlacedAnimation@td:
 	WithSpriteBody@ts:
 		RequiresCondition: aot-age2-active || !aot-age2-active
-	WithIdleOverlay@tsremap:
-		RequiresCondition: !build-incomplete
 	WithIdleOverlay@tsblink:
 		RequiresCondition: !build-incomplete
 # === Ende aotmod ===
@@ -1752,20 +1689,11 @@ ATEC:
 		Name: body-ts
 		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
 		# PlayerColorShift verschiebt jeden Pixel im entsprechenden Farbton zur Spielerfarbe.
-		Palette: effect
-		IsPlayerPalette: false
-		RequiresCondition: aot-age2-active
-	WithIdleOverlay@remap:
-		Sequence: atec-ts-idle-remap
-		Palette: player
-		IsPlayerPalette: True
 		RequiresCondition: aot-age2-active
 	# Kuppel: eigene pulsierende Player-Color-Sequenz (16 Helligkeitsstufen, Cosinus-Puls
 	# ueber 24 Frames), analog Secret Shrine Spitze - ersetzt die alte fixe Lichter-Animation.
 	WithIdleOverlay@domepulse:
 		Sequence: atec-ts-dome-pulse
-		Palette: player
-		IsPlayerPalette: True
 		RequiresCondition: aot-age2-active
 	-WithMakeAnimation:
 	WithMakeAnimation@ra:
@@ -1842,8 +1770,6 @@ aot-atec-age2:
 	-WithMakeAnimation@ra:
 	-WithMakeAnimation@td:
 	WithSpriteBody@ts:
-		RequiresCondition: aot-age2-active || !aot-age2-active
-	WithIdleOverlay@remap:
 		RequiresCondition: aot-age2-active || !aot-age2-active
 	WithIdleOverlay@domepulse:
 		RequiresCondition: aot-age2-active || !aot-age2-active
@@ -2112,13 +2038,6 @@ STEC:
 		Name: body-ts
 		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
 		# PlayerColorShift verschiebt jeden Pixel im entsprechenden Farbton zur Spielerfarbe.
-		Palette: effect
-		IsPlayerPalette: false
-		RequiresCondition: aot-age2-active
-	WithIdleOverlay@tsremap:
-		Sequence: stec-ts-remap
-		Palette: player
-		IsPlayerPalette: True
 		RequiresCondition: aot-age2-active
 	WithIdleOverlay@lights:
 		Sequence: stec-ts-lights
@@ -2199,8 +2118,6 @@ aot-stec-age2:
 	-WithMakeAnimation@ra:
 	-WithMakeAnimation@td:
 	WithSpriteBody@ts:
-		RequiresCondition: aot-age2-active || !aot-age2-active
-	WithIdleOverlay@tsremap:
 		RequiresCondition: aot-age2-active || !aot-age2-active
 	WithIdleOverlay@lights:
 		RequiresCondition: aot-age2-active || !aot-age2-active
@@ -2752,8 +2669,6 @@ aot-hq-base-age2:
 	-WithSpriteBody@hq:
 	WithSpriteBody@ts:
 		RequiresCondition: aot-age2-active || !aot-age2-active
-	WithIdleOverlay@tsremap:
-		RequiresCondition: !build-incomplete
 	WithIdleOverlay@lights:
 		RequiresCondition: !build-incomplete
 
@@ -2771,8 +2686,6 @@ aot-hq-ion-age2:
 	-WithSpriteBody@hq:
 	WithSpriteBody@ts:
 		RequiresCondition: aot-age2-active || !aot-age2-active
-	WithIdleOverlay@tsremap:
-		RequiresCondition: !build-incomplete
 	WithIdleOverlay@lights:
 		RequiresCondition: !build-incomplete
 # === Ende aotmod ===
@@ -3001,8 +2914,6 @@ TMPL:
 	WithSpriteBody@tsremap:
 		Sequence: aot-age2-remap
 		Name: body-ts-remap
-		Palette: player
-		IsPlayerPalette: True
 		RequiresCondition: aot-age2-active && !build-incomplete
 	WithIdleOverlay@tslight:
 		Sequence: aot-age2-light
@@ -3394,8 +3305,6 @@ aot-hpad-gdi:
 		RequiresCondition: aot-age2-active
 	WithIdleOverlay@tsremap:
 		Sequence: aot-age2-remap
-		Palette: player
-		IsPlayerPalette: True
 		RequiresCondition: aot-age2-active && !build-incomplete
 	-WithMakeAnimation:
 	WithMakeAnimation@ra:
@@ -3956,11 +3865,6 @@ FIX:
 		Sequence: aot-age2-nod-idle
 		Name: body-ts
 		RequiresCondition: aot-fix-age2-active
-	WithIdleOverlay@tsremap:
-		Sequence: aot-age2-nod-idle-remap
-		Palette: player
-		IsPlayerPalette: True
-		RequiresCondition: aot-fix-age2-active && !build-incomplete
 	# Ring pulst weiss NUR waehrend der Reparatur (WithRepairOverlay rendert nur bei aktivem
 	# Reparatur-Auftrag). Maske = nur die groesste Remap-Komponente (der Ring), der Anbau bleibt
 	# statisch (ueber WithIdleOverlay@tsremap). OHNE StartSequence: die Engine spielt die Sequenz
@@ -4090,8 +3994,6 @@ aot-fix-age2:
 	-WithBuildingPlacedAnimation@td:
 	WithSpriteBody@ts:
 		RequiresCondition: aot-fix-age2-active || !aot-fix-age2-active
-	WithIdleOverlay@tsremap:
-		RequiresCondition: !build-incomplete
 	WithMakeAnimation@ts:
 	WithResupplyAnimation:
 		Body: body-ts
@@ -4158,8 +4060,6 @@ aot-fix-age2-nod:
 	-WithBuildingPlacedAnimation@td:
 	WithSpriteBody@ts:
 		RequiresCondition: aot-fix-age2-active || !aot-fix-age2-active
-	WithIdleOverlay@tsremap:
-		RequiresCondition: !build-incomplete
 	WithMakeAnimation@ts:
 	WithResupplyAnimation:
 		Body: body-ts
@@ -4328,25 +4228,11 @@ NUKE:
 		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
 		# PlayerColorShift verschiebt jeden Pixel im Blau-Farbton zur Spielerfarbe. Siehe
 		# silo-system.md / ts-gates-system.md fuer das gleiche Muster.
-		Palette: effect
-		IsPlayerPalette: false
-	WithIdleOverlay@tsremap:
-		Sequence: aot-age2-idle-remap
-		Palette: player
-		IsPlayerPalette: True
-		RequiresCondition: aot-age2-active && aot-nuke-fac-gdi && !aot-turbine-active && !build-incomplete
 	# Age-2 GDI + Turbinen-Upgrade → GDI TS GTPOWR mit Turbinen (Gemini-Render 2026-07-08)
 	WithSpriteBody@tsturbine:
 		Sequence: aot-age2-turbine-idle
 		Name: body-tsturbine
 		RequiresCondition: aot-age2-active && aot-nuke-fac-gdi && aot-turbine-active
-		Palette: effect
-		IsPlayerPalette: false
-	WithIdleOverlay@tsturbineremap:
-		Sequence: aot-age2-turbine-idle-remap
-		Palette: player
-		IsPlayerPalette: True
-		RequiresCondition: aot-age2-active && aot-nuke-fac-gdi && aot-turbine-active && !build-incomplete
 	# Drei unabhängig langsam auf-/abdimmende gelbrötliche Lichtscheine an den offenen
 	# Schloten der Turbinen-Kuppeln (Gaussian-Puls-Technik wie GDI-HQ-Radar aot-age2-lights).
 	WithIdleOverlay@tsturbinelights:
@@ -4359,13 +4245,6 @@ NUKE:
 		Sequence: aot-age2-nod-idle
 		Name: body-tsnod
 		RequiresCondition: aot-age2-active && aot-nuke-fac-nod
-		Palette: effect
-		IsPlayerPalette: false
-	WithIdleOverlay@tsnodrremap:
-		Sequence: aot-age2-nod-idle-remap
-		Palette: player
-		IsPlayerPalette: True
-		RequiresCondition: aot-age2-active && aot-nuke-fac-nod && !build-incomplete
 	# Einzelne unabhängig flackernde Lichtpunkte an Rohr-/Ventil-Details (wie GDI-HQ-Radar).
 	WithIdleOverlay@tsnodlights:
 		Sequence: aot-age2-nod-lights
@@ -4527,7 +4406,6 @@ aot-nuke-age2:
 	-WithSpriteBody@turbine:
 	-WithSpriteBody@turbineremap:
 	-WithSpriteBody@tsnod:
-	-WithIdleOverlay@tsnodrremap:
 	-WithIdleOverlay@tsnodlights:
 	-WithMakeAnimation@ra:
 	-WithMakeAnimation@td:
@@ -4535,12 +4413,8 @@ aot-nuke-age2:
 	-WithMakeAnimation@turbine:
 	WithSpriteBody@ts:
 		RequiresCondition: !aot-turbine-active
-	WithIdleOverlay@tsremap:
-		RequiresCondition: !aot-turbine-active && !build-incomplete
 	WithSpriteBody@tsturbine:
 		RequiresCondition: aot-turbine-active
-	WithIdleOverlay@tsturbineremap:
-		RequiresCondition: aot-turbine-active && !build-incomplete
 	WithIdleOverlay@tsturbinelights:
 		RequiresCondition: aot-turbine-active && !build-incomplete
 	WithMakeAnimation@ts:
@@ -4573,9 +4447,7 @@ aot-nuke-age2-nod:
 	-WithSpriteBody@turbine:
 	-WithSpriteBody@turbineremap:
 	-WithSpriteBody@ts:
-	-WithIdleOverlay@tsremap:
 	-WithSpriteBody@tsturbine:
-	-WithIdleOverlay@tsturbineremap:
 	-WithIdleOverlay@tsturbinelights:
 	-WithMakeAnimation@ra:
 	-WithMakeAnimation@td:
@@ -4583,8 +4455,6 @@ aot-nuke-age2-nod:
 	-WithMakeAnimation@turbine:
 	WithSpriteBody@tsnod:
 		RequiresCondition: aot-age2-active || !aot-age2-active
-	WithIdleOverlay@tsnodrremap:
-		RequiresCondition: !build-incomplete
 	WithIdleOverlay@tsnodlights:
 		RequiresCondition: !build-incomplete
 	WithMakeAnimation@tsnod:
@@ -4615,9 +4485,7 @@ aot-nuke-turbine-age2:
 	-WithSpriteBody@turbine:
 	-WithSpriteBody@turbineremap:
 	-WithSpriteBody@ts:
-	-WithIdleOverlay@tsremap:
 	-WithSpriteBody@tsnod:
-	-WithIdleOverlay@tsnodrremap:
 	-WithIdleOverlay@tsnodlights:
 	-WithMakeAnimation@ra:
 	-WithMakeAnimation@td:
@@ -4626,8 +4494,6 @@ aot-nuke-turbine-age2:
 	-WithMakeAnimation@turbine:
 	WithSpriteBody@tsturbine:
 		RequiresCondition: aot-turbine-active || !aot-turbine-active
-	WithIdleOverlay@tsturbineremap:
-		RequiresCondition: !build-incomplete
 	WithIdleOverlay@tsturbinelights:
 		RequiresCondition: !build-incomplete
 # === Ende aotmod ===
@@ -4670,13 +4536,6 @@ NUK2:
 		Sequence: aot-age2-idle
 		Name: body-ts
 		RequiresCondition: aot-age2-active
-		Palette: effect
-		IsPlayerPalette: false
-	WithIdleOverlay@tsremap:
-		Sequence: aot-age2-idle-remap
-		Palette: player
-		IsPlayerPalette: True
-		RequiresCondition: aot-age2-active && !build-incomplete
 	# Einzelne unabhängig flackernde Lichtpunkte an Rohr-/Ventil-Details (wie GDI-HQ-Radar).
 	WithIdleOverlay@tslights:
 		Sequence: aot-age2-lights
@@ -4760,8 +4619,6 @@ aot-nuk2-age2:
 	-WithMakeAnimation@td:
 	WithSpriteBody@ts:
 		RequiresCondition: aot-age2-active || !aot-age2-active
-	WithIdleOverlay@tsremap:
-		RequiresCondition: !build-incomplete
 	WithIdleOverlay@tslights:
 		RequiresCondition: !build-incomplete
 # === Ende aotmod ===
@@ -5204,17 +5061,14 @@ aot-shipyard:
 		Sequence: idle
 		Name: body
 		RequiresCondition: !aot-age2-active
+	# Player-Color ueber den Shader-Pfad (kein indiziertes Remap mehr): der Body traegt die
+	# Player-Region als Gruen (Hue 0.333) im Truecolor-Sprite und laeuft ueber die Default-
+	# "player"-Palette. Sprite gebacken von asset wip/_lib/aot_playercolor.py (rebuild_from_remap:
+	# grau-Body + altes Remap -> ein Sprite). Siehe gemini-playercolor-shader-recipe.
 	WithSpriteBody@ts:
 		Sequence: aot-age2-idle
 		Name: body-ts
-		Palette: effect
-		IsPlayerPalette: false
 		RequiresCondition: aot-age2-active
-	WithIdleOverlay@tsremap:
-		Sequence: aot-age2-idle-remap
-		Palette: player
-		IsPlayerPalette: True
-		RequiresCondition: aot-age2-active && !build-incomplete
 	WithIdleOverlay@tswater:
 		Sequence: aot-age2-water
 		Palette: effect
@@ -5360,14 +5214,7 @@ aot-subpen:
 	WithSpriteBody@ts:
 		Sequence: aot-age2-idle
 		Name: body-ts
-		Palette: effect
-		IsPlayerPalette: false
 		RequiresCondition: aot-age2-active
-	WithIdleOverlay@tsremap:
-		Sequence: aot-age2-idle-remap
-		Palette: player
-		IsPlayerPalette: True
-		RequiresCondition: aot-age2-active && !build-incomplete
 	-WithMakeAnimation:
 	WithMakeAnimation@ra:
 		BodyNames: body
@@ -5542,11 +5389,6 @@ PROC:
 		Sequence: aot-age2-idle
 		Name: body-ts
 		RequiresCondition: aot-age2-active
-	WithIdleOverlay@tsremap:
-		Sequence: aot-age2-idle-remap
-		Palette: player
-		IsPlayerPalette: True
-		RequiresCondition: aot-age2-active && !build-incomplete
 	WithIdleOverlay@tsanim:
 		Sequence: aot-age2-anim
 		RequiresCondition: aot-age2-active && !build-incomplete
@@ -5561,34 +5403,6 @@ PROC:
 		Sequence: aot-age2-make
 
 WEAP:
-	WithProductionDoorOverlay:
-		Sequence: aot-age1-top
-		RequiresCondition: !build-incomplete && !aot-age2-active
-	-WithSpriteBody:
-	WithSpriteBody@base:
-		Sequence: idle
-		Name: body
-	-WithMakeAnimation:
-	WithMakeAnimation@base:
-		BodyNames: body
-		Condition: build-incomplete
-		Sequence: make
-
-SILO:
-	InfiltrateForCash:
-		Percentage: 50
-		PlayerExperience: 10
-		Types: SpyInfiltrate
-		InfiltratedNotification: BuildingInfiltrated
-		InfiltratedTextNotification: notification-building-infiltrated
-
-# === Age of Tiberium (aotmod) - SILO: OreDeliver Dock + Age-Sprite-Wechsel (Muster wie PYLE/HAND) ===
-# ORET liefert Erz am Silo ab (Südseite). Silo immer baubar (nur anypower, kein Age-Gate).
-# WithSpriteBody@ra (statisches RA-Doppel-Sprite, links voll/rechts halbvoll) bis Age-1,
-# WithResourceLevelSpriteBody@td (klassische TD-Füllstands-Animation) Age-1 bis Age-2,
-# WithSpriteBody@ts (statisches TS-Doppel-Sprite, links voll/rechts halbvoll) ab Age-2.
-# Einheitliches Image (silo) für alle drei Proxies — Sprite-Wechsel via Condition, nicht via Image-Swap.
-SILO:
 	# === Age-2-Sprite-Wechsel (Gemini-Import, zweiteilig Body+Tor) — Muster wie PROC/PYLE ===
 	# aot-age2-active kommt vom Gatekeeper-Upgrade. WEAP bleibt der Age-1-Bau-Eintrag; der
 	# Age-2-Bau-Proxy (aot-weap-age2, unten) liefert nur die Age-2-Platzier-Vorschau.
@@ -5606,12 +5420,13 @@ SILO:
 		Prerequisites: ~aot-age1, aot-age1, lite, aot-gdi-advtech-upgrade, ~!aot-age2
 	# Age-1: TD-Produktionstor. Eigene Sequenz aot-age1-top statt der geerbten build-top --
 	# nur unter eigenem Namen laesst sich der Remaster-Pfad abschalten (siehe aot-sequences.yaml).
-	-Buildable:
-	# Vanilla-SILO entfernt bereits die unbenannte Verkaufs-Infanterie
-	# (engine/mods/cnc/rules/structures.yaml); das NOD-Gegenstueck aus ^BaseBuilding
-	# muss hier mit entfernt werden (siehe Kommentar ganz oben in dieser Datei).
-	-SpawnActorsOnSell@nod:
-	# 2x2-Footprint: die smudge-freie Nordreihe des alten 2x3 (xx xx ==) entfernt,
+	WithProductionDoorOverlay:
+		Sequence: aot-age1-top
+		RequiresCondition: !build-incomplete && !aot-age2-active
+	-WithSpriteBody:
+	WithSpriteBody@base:
+		Sequence: idle
+		Name: body
 		RequiresCondition: !aot-age2-active
 	# KOMPLETTES Gebaeude, liegt UNTER den Fahrzeugen (an der Torstelle eine dunkle Hoehle).
 	# KEINE Palette-Sperre: das Gruen traegt das Sprite selbst und wird — wie beim Age-1-Sprite —
@@ -5643,11 +5458,11 @@ SILO:
 	WithProductionDoorOverlay@ts:
 		Sequence: aot-age2-door
 		RequiresCondition: !build-incomplete && aot-age2-active
-	# analog zum Gate-Fix (siehe ts-gates-system.md). WithBuildingBib deckt nur die
-	# unteren 2 Reihen ab -> alte Nordreihe "xx" war ohnehin ohne Bib. LocalCenterOffset
-	# um -512 (eine Zeilen-Reduktion) nachgezogen, damit Silo+Smudge an derselben
-	# Stelle bleiben wie zuvor (100 -> -412).
-	Building:
+	-WithMakeAnimation:
+	WithMakeAnimation@base:
+		BodyNames: body
+		Condition: build-incomplete
+		Sequence: make
 	WithMakeAnimation@ts:
 		BodyNames: body-ts
 		Condition: build-incomplete
@@ -5683,6 +5498,33 @@ aot-weap-age2:
 		Description: actor-weap.description
 	Tooltip:
 		Name: actor-weap.name
+
+SILO:
+	InfiltrateForCash:
+		Percentage: 50
+		PlayerExperience: 10
+		Types: SpyInfiltrate
+		InfiltratedNotification: BuildingInfiltrated
+		InfiltratedTextNotification: notification-building-infiltrated
+
+# === Age of Tiberium (aotmod) - SILO: OreDeliver Dock + Age-Sprite-Wechsel (Muster wie PYLE/HAND) ===
+# ORET liefert Erz am Silo ab (Südseite). Silo immer baubar (nur anypower, kein Age-Gate).
+# WithSpriteBody@ra (statisches RA-Doppel-Sprite, links voll/rechts halbvoll) bis Age-1,
+# WithResourceLevelSpriteBody@td (klassische TD-Füllstands-Animation) Age-1 bis Age-2,
+# WithSpriteBody@ts (statisches TS-Doppel-Sprite, links voll/rechts halbvoll) ab Age-2.
+# Einheitliches Image (silo) für alle drei Proxies — Sprite-Wechsel via Condition, nicht via Image-Swap.
+SILO:
+	-Buildable:
+	# Vanilla-SILO entfernt bereits die unbenannte Verkaufs-Infanterie
+	# (engine/mods/cnc/rules/structures.yaml); das NOD-Gegenstueck aus ^BaseBuilding
+	# muss hier mit entfernt werden (siehe Kommentar ganz oben in dieser Datei).
+	-SpawnActorsOnSell@nod:
+	# 2x2-Footprint: die smudge-freie Nordreihe des alten 2x3 (xx xx ==) entfernt,
+	# analog zum Gate-Fix (siehe ts-gates-system.md). WithBuildingBib deckt nur die
+	# unteren 2 Reihen ab -> alte Nordreihe "xx" war ohnehin ohne Bib. LocalCenterOffset
+	# um -512 (eine Zeilen-Reduktion) nachgezogen, damit Silo+Smudge an derselben
+	# Stelle bleiben wie zuvor (100 -> -412).
+	Building:
 		Footprint: xx ==
 		Dimensions: 2,2
 		LocalCenterOffset: 0,-412,0
@@ -5743,8 +5585,6 @@ aot-weap-age2:
 	# (Indizes 187-190 -> PlayerColorPalette RemapIndex 176-191): Streben + Fin.
 	WithIdleOverlay@tsremap:
 		Sequence: aot-ts-idle-remap
-		Palette: player
-		IsPlayerPalette: True
 		RequiresCondition: aot-age2-active && !build-incomplete
 	-WithMakeAnimation:
 	WithMakeAnimation@ra:
@@ -6002,14 +5842,7 @@ ORBC:
 		Name: body
 		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
 		# PlayerColorShift verschiebt jeden Pixel im entsprechenden Farbton zur Spielerfarbe.
-		Palette: effect
-		IsPlayerPalette: false
 		RequiresCondition: aot-age2-active
-	WithIdleOverlay@remap:
-		Sequence: idle-remap
-		Palette: player
-		IsPlayerPalette: True
-		RequiresCondition: aot-age2-active && !build-incomplete
 	# @active (rotierende GAPLUG-Antenne aot-orbc-active.png): auf User-Wunsch wieder aktiv,
 	# per Sequenz-Offset nach rechts-unten unter das rote Blinklicht gesetzt.
 	WithIdleOverlay@active:
@@ -6139,14 +5972,6 @@ SLAB:
 		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
 		# PlayerColorShift verschiebt jeden Pixel im entsprechenden Farbton zur Spielerfarbe.
 		# Siehe silo-system.md / powerplant-system.md fuer das gleiche Muster.
-		Palette: effect
-		IsPlayerPalette: false
-	WithSpriteBody@tsremap:
-		Sequence: aot-ts-idle-remap
-		Name: body-tsremap
-		Palette: player
-		IsPlayerPalette: True
-		RequiresCondition: aot-age2-active && !build-incomplete
 	-WithMakeAnimation:
 	WithMakeAnimation@ra:
 		BodyNames: body
@@ -6166,13 +5991,6 @@ SLAB:
 		RequiresCondition: aot-age2-active && !build-incomplete
 	WithIdleOverlay@tstower:
 		Sequence: aot-ts-tower
-		Palette: effect
-		IsPlayerPalette: false
-		RequiresCondition: aot-age2-active && !build-incomplete
-	WithIdleOverlay@tstowerremap:
-		Sequence: aot-ts-tower-remap
-		Palette: player
-		IsPlayerPalette: True
 		RequiresCondition: aot-age2-active && !build-incomplete
 	# Flame-Overlay NACH den Tower-Overlays deklariert, damit es ueber ihnen
 	# rendert (Sprite-Add-Reihenfolge = Painter's-Algorithm-Schicht bei
@@ -6226,13 +6044,9 @@ aot-slab-age2:
 	-WithMakeAnimation@ra:
 	WithSpriteBody@ts:
 		RequiresCondition: aot-age2-active || !aot-age2-active
-	WithSpriteBody@tsremap:
-		RequiresCondition: !build-incomplete
 	WithIdleOverlay@tslights:
 		RequiresCondition: !build-incomplete
 	WithIdleOverlay@tstower:
-		RequiresCondition: !build-incomplete
-	WithIdleOverlay@tstowerremap:
 		RequiresCondition: !build-incomplete
 	WithIdleOverlay@fsflameready:
 		RequiresCondition: aot-fs-matrix-ready && !build-incomplete
@@ -6326,18 +6140,10 @@ aot-shrine:
 		Name: body
 		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
 		# PlayerColorShift verschiebt jeden Pixel im entsprechenden Farbton zur Spielerfarbe.
-		Palette: effect
-		IsPlayerPalette: false
-	WithIdleOverlay@remap:
-		Sequence: idle-remap
-		Palette: player
-		IsPlayerPalette: True
 	# Blaue Spitze: eigene pulsierende Player-Color-Sequenz (16 Helligkeitsstufen, Cosinus-
 	# Puls über 24 Frames) statt der bisherigen fixen blauen Farbe.
 	WithIdleOverlay@tippulse:
 		Sequence: tip-pulse
-		Palette: player
-		IsPlayerPalette: True
 		RequiresCondition: !build-incomplete
 	WithIdleOverlay@active:
 		Sequence: active
@@ -6444,8 +6250,6 @@ aot-sgen:
 		IsPlayerPalette: false
 	WithIdleOverlay@remap:
 		Sequence: idle-remap
-		Palette: player
-		IsPlayerPalette: True
 	# Elektro-Arc: nur sichtbar solange das Generatorfeld tatsaechlich laeuft (Strom + Health + nicht abgeschaltet).
 	WithIdleOverlay@active:
 		Sequence: active
