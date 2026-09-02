@@ -98,10 +98,13 @@ namespace OpenRA.Mods.Common.Traits
 
 	public class Cargo : ConditionalTrait<CargoInfo>, IIssueOrder, IResolveOrder, IOrderVoice,
 		INotifyOwnerChanged, INotifySold, INotifyActorDisposing, IIssueDeployOrder,
-		INotifyCreated, INotifyKilled, ITransformActorInitModifier, ITick
+		INotifyCreated, INotifyKilled, ITransformActorInitModifier, INotifyTransform, ITick
 	{
 		readonly Actor self;
 		readonly List<Actor> cargo = [];
+		// Passengers detached in INotifyTransform.OnTransform so they survive the transport's
+		// disposal and are handed to the transformed actor (see ModifyTransformActorInit).
+		Actor[] transformCargo;
 		readonly HashSet<Actor> reserves = [];
 		readonly Dictionary<string, Stack<int>> passengerTokens = [];
 		readonly Lazy<IFacing> facing;
@@ -398,6 +401,12 @@ namespace OpenRA.Mods.Common.Traits
 			if (facing.Value == null)
 				return;
 
+			// A passenger can be disposed while still listed in cargo — e.g. the transport transforms
+			// into another actor (AotTransformsOnTerrain: amphibious APC entering water) and its
+			// passengers are transferred/ejected mid-tick. Touching a destroyed actor throws, so skip.
+			if (passenger.IsDead)
+				return;
+
 			var passengerFacing = passenger.TraitOrDefault<IFacing>();
 			if (passengerFacing != null)
 				passengerFacing.Facing = facing.Value.Facing + Info.PassengerFacing;
@@ -481,6 +490,22 @@ namespace OpenRA.Mods.Common.Traits
 			cargo.Clear();
 		}
 
+		// Transform runs OnTransform BEFORE it disposes the old actor, but ModifyTransformActorInit
+		// AFTER. Without this, Disposing() above would dispose the passengers first, so the
+		// transformed actor would inherit already-destroyed passenger references (crash next tick in
+		// SetPassengerFacing). Detach them here so Disposing() leaves them alone, then hand the saved
+		// list to the new actor in ModifyTransformActorInit. Used by the amphibious APC transforming
+		// on water (AotTransformsOnTerrain) while ferrying infantry.
+		void INotifyTransform.BeforeTransform(Actor self) { }
+		void INotifyTransform.OnTransform(Actor self)
+		{
+			transformCargo = cargo.ToArray();
+			cargo.Clear();
+			totalWeight = 0;
+		}
+
+		void INotifyTransform.AfterTransform(Actor toActor) { }
+
 		void INotifySold.Selling(Actor self) { }
 		void INotifySold.Sold(Actor self)
 		{
@@ -513,7 +538,9 @@ namespace OpenRA.Mods.Common.Traits
 
 		void ITransformActorInitModifier.ModifyTransformActorInit(Actor self, TypeDictionary init)
 		{
-			init.Add(new RuntimeCargoInit(Info, Passengers.ToArray()));
+			// transformCargo is set in OnTransform (before the old actor was disposed); fall back to
+			// the live list for any caller that populates the init without going through a transform.
+			init.Add(new RuntimeCargoInit(Info, transformCargo ?? Passengers.ToArray()));
 		}
 	}
 

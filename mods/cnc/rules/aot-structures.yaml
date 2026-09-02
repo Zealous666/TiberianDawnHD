@@ -5282,28 +5282,29 @@ aot-upgrade-stnk-cargo:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Vessel Gun Upgrade (NOD-exklusiv) ===
-# Transport Vessel erhält Gunboat-MG-Turret (MGUN). Ab Age 1 + FIX + SubPen.
-# Ändert Unit-Name in "Armed Transport Vessel".
-aot-upgrade-transport-gun:
+# Transport Vessel erhält Tarnung wie ein Stealth Tank (STNK). NOD-exklusiv.
+# Sichtbar/baubar ab Age 2, benoetigt Sub Pen + NOD Forbidden Knowledge (das Wissen hinter
+# dem Shrine, NICHT das Shrine-Gebaeude selbst).
+aot-upgrade-transport-cloak:
 	Tooltip:
-		Name: actor-aot-upgrade-transport-gun.name
+		Name: actor-aot-upgrade-transport-cloak.name
 
 	Buildable:
 		BuildPaletteOrder: 120
-		Prerequisites: ~aot-age1, fix, aot-subpen
+		Prerequisites: ~aot-age2, aot-subpen, aot-nod-forbidden-upgrade
 		Queue: Upgrade.Nod
 		BuildLimit: 1
 		Icon: icon
-		Description: actor-aot-upgrade-transport-gun.description
+		Description: actor-aot-upgrade-transport-cloak.description
 
 	Valued:
-		Cost: 900
+		Cost: 2000
 
 	RenderSprites:
-		Image: aot-upgrade-transport-gun
+		Image: aot-upgrade-transport-cloak
 
 	ProvidesPrerequisite:
-		Prerequisite: aot-transport-gun-upgrade
+		Prerequisite: aot-transport-cloak-upgrade
 
 	Interactable:
 # === Ende aotmod ===

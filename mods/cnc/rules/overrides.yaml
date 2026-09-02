@@ -1484,6 +1484,10 @@ APC:
 		Queue: LightVehicle.GDI
 		Description: Armored Personnel Carrier. Can carry 5 soldiers.
 		BuildPaletteOrder: 4
+	# ALT (ForceMove) -> APC faehrt zum Ziel und entlaedt dort. Am Basis-Aktor -> der Amphibious APC
+	# (aot-apc-amphibious) erbt es. Der Minelayer (aot-minelayer) erbt zwar APC, entfernt aber Cargo
+	# -> dort per -AotMoveUnloadCargo wieder raus (sonst Requires<CargoInfo>-Fehler).
+	AotMoveUnloadCargo:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - MTNK Tier-0: reduzierte HP ===
@@ -1814,6 +1818,11 @@ TRAN:
 	AotParachuteDropCargo:
 		RequiresCondition: aot-tran-parachute-upgrade
 		DropSound: aot-chute1.aud
+	# ALT (ForceMove) -> Chinook fliegt zum Ziel, landet und entlaedt dort.
+	# NUR im normalen Cargo-Modus: der Parachute-Modus hat sein eigenes ForceMove-Abwurf-Verhalten
+	# (AotParachuteDropCargo, unveraendert), der Carryall-Modus seine Deliver-Order.
+	AotMoveUnloadCargo:
+		RequiresCondition: !aot-tran-parachute-upgrade && !aot-tran-carryall-upgrade
 	WithCargoPipsDecoration:
 		RequiresCondition: !aot-tran-carryall-upgrade
 		Position: BottomLeft
@@ -1962,6 +1971,9 @@ STNK:
 		Position: BottomLeft
 		Margin: 4, 3
 		RequiresSelection: true
+		RequiresCondition: aot-stnk-cargo-upgrade
+	# ALT (ForceMove) -> STNK faehrt zum Ziel und entlaedt dort. Nur mit Cargo-Upgrade aktiv.
+	AotMoveUnloadCargo:
 		RequiresCondition: aot-stnk-cargo-upgrade
 	Cloak:
 		UncloakOn: Attack, Unload, Dock, Damage, Heal, Load

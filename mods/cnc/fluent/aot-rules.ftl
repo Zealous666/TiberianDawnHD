@@ -105,13 +105,9 @@ actor-aot-transport =
     .name = Transport Vessel
     .description = Naval transport. Carries up to 5 infantry or 1 vehicle. Can beach on shore to deploy troops.
 
-actor-aot-transport-gun =
-    .name = Armed Transport Vessel
-    .description = Naval transport with machine gun turret. Carries up to 5 infantry or 1 vehicle.
-
-actor-aot-upgrade-transport-gun =
-    .name = Vessel Gun Upgrade
-    .description = Equips the Transport Vessel with a machine gun turret for self-defense.
+actor-aot-upgrade-transport-cloak =
+    .name = Vessel Cloaking Upgrade
+    .description = Cloaks the Transport Vessel like a Stealth Tank. Decloaks briefly while loading or unloading.
 
 actor-aot-transport-hover =
     .name = Hovercraft Transport

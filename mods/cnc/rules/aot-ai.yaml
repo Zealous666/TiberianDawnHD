@@ -564,7 +564,7 @@ Player:
 			aot-upgrade-stnk-cargo: 10
 			aot-upgrade-msub-mine: 12
 			aot-upgrade-msub-drone: 12
-			aot-upgrade-transport-gun: 8
+			aot-upgrade-transport-cloak: 8
 			aot-upgrade-v2-howitzer: 12
 			aot-upgrade-heavy-artillery: 10
 			aot-upgrade-tran-parachute: 8
@@ -845,7 +845,7 @@ Player:
 		# reuses 2 Transport Vessels once the Sub Pen exists, ferries itself across water in
 		# batches (1 vehicle per transport), regroups on the far shore, then continues the attack.
 		NavalProductionTypes: aot-subpen, aot-subpen-age2
-		FerryTypes: aot-transport-base, aot-transport-gun-proxy
+		FerryTypes: aot-transport-base, aot-transport-cloak-proxy
 		# 3 Vessels fahren als EIN Konvoi (laden -> gemeinsam ueberfahren -> gemeinsam anlanden).
 		FerryCount: 3
 		FerryMaxTotal: 3

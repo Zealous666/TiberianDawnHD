@@ -1574,6 +1574,8 @@ aot-minelayer:
 	# Kein Transport (RA MNLY hat keinen Cargo)
 	-Cargo:
 	-WithCargoPipsDecoration:
+	# Der von APC geerbte ALT-Entlade-Move braucht Cargo -> hier raus (Minelayer transportiert nichts).
+	-AotMoveUnloadCargo:
 	# Ohne Cargo grantet nichts mehr die notmobile-Condition (kam sonst aus Cargo.LoadingCondition),
 	# aber das geerbte Mobile.PauseOnCondition: notmobile konsumiert sie weiter. Ein leerer
 	# PauseOnCondition-Override greift nicht (MiniYaml merged leere Werte nicht). notmobile daher
@@ -3368,6 +3370,8 @@ aot-subapc:
 		MaxWeight: 5
 		UnloadVoice: Unload
 		EjectOnDeath: true
+	# ALT (ForceMove) -> subterranean APC graebt zum Ziel und entlaedt dort.
+	AotMoveUnloadCargo:
 	Targetable:
 		RequiresCondition: !submerged
 	Targetable@UNDERGROUND:
@@ -5192,13 +5196,14 @@ aot-transport-base:
 		LockedGroup: aot-grp-transport
 		Queue: Naval.Nod
 		BuildPaletteOrder: 20
-		Prerequisites: ~!aot-transport-gun-upgrade
+		Prerequisites: ~!aot-transport-cloak-upgrade
 		Icon: icon
 		Description: actor-aot-transport.description
 	Tooltip:
 		Name: actor-aot-transport.name
 
-aot-transport-gun-proxy:
+# Nach dem Cloaking Upgrade: gleicher Aktor, nur Baumenue-Icon wechselt auf die getarnte Version.
+aot-transport-cloak-proxy:
 	Inherits: aot-transport
 	RenderSprites:
 		Image: aot-transport
@@ -5206,11 +5211,11 @@ aot-transport-gun-proxy:
 		LockedGroup: aot-grp-transport
 		Queue: Naval.Nod
 		BuildPaletteOrder: 20
-		Prerequisites: ~aot-transport-gun-upgrade
-		Icon: icon-gun
-		Description: actor-aot-transport-gun.description
+		Prerequisites: ~aot-transport-cloak-upgrade
+		Icon: icon-cloak
+		Description: actor-aot-transport.description
 	Tooltip:
-		Name: actor-aot-transport-gun.name
+		Name: actor-aot-transport.name
 
 # Hovercraft — GDI Standalone-Unit. Kein Upgrade nötig.
 aot-transport-hover-proxy:
@@ -5280,6 +5285,8 @@ aot-transport-hover:
 		CustomPipSequences:
 			gray: pip-gray
 			green: pip-green
+	# ALT (ForceMove) -> Hovercraft faehrt zum Ziel und entlaedt dort (wie Carryall-Deliver).
+	AotMoveUnloadCargo:
 	RepairableNear:
 		RepairActors: aot-shipyard, aot-shipyard-age2
 	-AttackMove:
@@ -5293,15 +5300,13 @@ aot-transport:
 		Image: aot-transport
 	Valued:
 		Cost: 900
-	GrantConditionOnPrerequisite@gun:
-		Condition: aot-transport-armed
-		Prerequisites: aot-transport-gun-upgrade
+	# Cloaking Upgrade (aot-upgrade-transport-cloak): tarnt das Vessel wie einen Stealth Tank.
+	# Global via GrantConditionOnPrerequisite -> gilt sofort fuer alle bereits gebauten Vessel.
+	GrantConditionOnPrerequisite@cloak:
+		Condition: aot-transport-cloak-upgrade
+		Prerequisites: aot-transport-cloak-upgrade
 	Tooltip:
 		Name: actor-aot-transport.name
-		RequiresCondition: !aot-transport-armed
-	Tooltip@armed:
-		Name: actor-aot-transport-gun.name
-		RequiresCondition: aot-transport-armed
 	UpdatesPlayerStatistics:
 		AddToArmyValue: true
 	Health:
@@ -5334,25 +5339,25 @@ aot-transport:
 		Position: BottomLeft
 		Margin: 4, 3
 		RequiresSelection: true
+	# ALT (ForceMove) auf Wasser/Land -> Vessel faehrt hin und entlaedt dort (wie Carryall-Deliver).
+	AotMoveUnloadCargo:
 	RepairableNear:
 		RepairActors: aot-shipyard, aot-shipyard-age2, aot-subpen, aot-subpen-age2
-	Turreted@gun:
-		Turret: gun
-		TurnSpeed: 20
-		Offset: 0,0,256
-		RequiresCondition: aot-transport-armed
-	WithSpriteTurret@gun:
-		Turret: gun
-		Sequence: turret
-		RequiresCondition: aot-transport-armed
-	AttackTurreted:
-		Turrets: gun
-	Armament@gun:
-		Weapon: aot-GunboatGun
-		Turret: gun
-		RequiresCondition: aot-transport-armed
-	AutoTarget:
-		RequiresCondition: aot-transport-armed
+	# Tarnung wie Stealth Tank (STNK): nur aktiv nach dem Cloaking Upgrade.
+	# CloakStyle Alpha (Truecolor-Remaster-Sprites, NICHT Palette wie STNK -- Palette-Cloak
+	# wirkt in Cloak.cs nur auf indizierte Sprites). Sound = trans1.aud wie STNK.
+	# PauseOnCondition: notmobile -> beim BELADEN sichtbar (notmobile = Cargo.LoadingCondition);
+	# UncloakOn Unload/Load -> beim Ent-/Beladen kurz sichtbar, danach CloakDelay (85 ~ 3.4s) neu.
+	Cloak:
+		InitialDelay: 85
+		CloakDelay: 85
+		CloakStyle: Alpha
+		CloakedAlpha: 0.35
+		CloakSound: trans1.aud
+		UncloakSound: trans1.aud
+		UncloakOn: Attack, Unload, Dock, Damage, Heal, Load
+		RequiresCondition: aot-transport-cloak-upgrade
+		PauseOnCondition: notmobile
 	-AttackMove:
 	-Guard:
 	-Guardable:
@@ -5876,6 +5881,8 @@ aot-civ-pick:
 		Types: Infantry
 		MaxWeight: 2
 		EjectOnDeath: true
+	# ALT (ForceMove) -> Fahrzeug faehrt zum Ziel und entlaedt dort.
+	AotMoveUnloadCargo:
 	Valued:
 		Cost: 0
 
@@ -5919,6 +5926,8 @@ aot-civ-wini:
 		Types: Infantry
 		MaxWeight: 5
 		EjectOnDeath: true
+	# ALT (ForceMove) -> Fahrzeug faehrt zum Ziel und entlaedt dort.
+	AotMoveUnloadCargo:
 	Valued:
 		Cost: 0
 
@@ -5962,6 +5971,8 @@ aot-civ-bus:
 		Types: Infantry
 		MaxWeight: 20
 		EjectOnDeath: true
+	# ALT (ForceMove) -> Fahrzeug faehrt zum Ziel und entlaedt dort.
+	AotMoveUnloadCargo:
 	Valued:
 		Cost: 0
 
@@ -6067,6 +6078,8 @@ aot-civ-car:
 		Types: Infantry
 		MaxWeight: 4
 		EjectOnDeath: true
+	# ALT (ForceMove) -> Fahrzeug faehrt zum Ziel und entlaedt dort.
+	AotMoveUnloadCargo:
 	Valued:
 		Cost: 0
 

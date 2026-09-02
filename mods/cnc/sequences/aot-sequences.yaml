@@ -4328,25 +4328,20 @@ aot-transport:
 		Facings: 1
 		Start: 4
 		Length: 1
-	turret:
-		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\MGUN.ZIP
-		Facings: 32
-		UseClassicFacings: True
-		Scale: 1.8
 	icon:
 		Filename: aot-transport-icon.png
 		Length: 1
 		Facings: 1
-	icon-gun:
-		Filename: vesl_gun.png
+	icon-cloak:
+		Filename: vesl_cloak.png
 		Length: 1
 		Facings: 1
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - Vessel Gun Upgrade (aot-upgrade-transport-gun) ===
-aot-upgrade-transport-gun:
+# === Age of Tiberium (aotmod) - Vessel Cloaking Upgrade (aot-upgrade-transport-cloak) ===
+aot-upgrade-transport-cloak:
 	icon:
-		Filename: vesl_gun.png
+		Filename: vesl_cloak.png
 		Length: 1
 # === Ende aotmod ===
 
