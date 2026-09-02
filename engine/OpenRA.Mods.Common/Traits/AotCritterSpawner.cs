@@ -60,6 +60,10 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Ticks zwischen Spawn-Versuchen.")]
 		public readonly int SpawnInterval = 150;
 
+		[Desc("Critter unten aus dem Footprint entlassen (z.B. Hoehleneingang am unteren Rand).",
+			"Default: zufaellige freie Ring-Zelle. Faellt darauf zurueck, wenn unten alles blockiert ist.")]
+		public readonly bool PreferBottomExit = false;
+
 		[Desc("CHECKBOX \"Attack Wave\": gespawnte Critter patrouillieren NICHT, sondern suchen sich",
 			"ein zufaelliges Feindziel (bevorzugt eine Basis) und marschieren angreifend dorthin.",
 			"Siehe AotCritterAttackWave auf dem Critter.")]
@@ -167,7 +171,7 @@ namespace OpenRA.Mods.Common.Traits
 				// stirbt (Locomotor behandelt ein stationaeres Building als uncrushbaren Blocker).
 				// Beim unsichtbaren Editor-Marker (OccupiesSpace:false) faellt der Helper auf
 				// self.Location zurueck -> unveraendertes Verhalten.
-				var spawnCell = AotFootprintUtils.FindCellOutsideFootprint(self);
+				var spawnCell = AotFootprintUtils.FindCellOutsideFootprint(self, info.PreferBottomExit);
 
 				var inits = new TypeDictionary
 				{

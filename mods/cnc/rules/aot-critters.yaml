@@ -212,6 +212,80 @@ aot-ant-nest:
 	RequiresSpecificOwners:
 		ValidOwnerNames: Neutral, Creeps
 
+# === Age of Tiberium (aotmod) — Dino Cave (aot-dinocave), 2026-09-02 ===
+# "V2" des Critter-Spawners: ein SICHTBARER, zerstoerbarer Hoehleneingang (2x2), gebacken aus
+# der Klippe cliff_139_s05 (Template 139, s05.tem, 2x2) mit hineingemaltem dunklen Hoehleneingang
+# (linkes Tile aus cliffs_dinocave.jpg, Gras freigestellt). Silhouette deckungsgleich mit dem
+# Klippen-Tile -> laesst sich im Editor DECKUNGSGLEICH ueber eine platzierte cliff_139_s05 legen.
+# Wird er zerstoert, verschwindet er NICHT, sondern hinterlaesst per SpawnActorOnDeath den
+# verschuetteten Hoehleneingang aot-dinocave.husk (rechtes Tile: eingestuerzte Geroell-Variante),
+# analog zur Husk-Mechanik von Baeumen/Oil-Derrick.
+# Sprite: bits/aot-dinocave.zip, Frame 0 = offen, Frame 1 = verschuettet. Scale 0.75 wie das
+# Ant-Nest (~96 HD-px/Zelle), passt auf den 2x2-Footprint.
+aot-dinocave:
+	Tooltip:
+		Name: actor-aot-dinocave.name
+	Building:
+		Footprint: xx xx
+		Dimensions: 2, 2
+		TerrainTypes: Clear, Rough, Road, Sand, Beach, Clear.Snow, Rock
+	Selectable:
+		Bounds: 2048, 2048
+	SelectionDecorations:
+	RenderSprites:
+	WithSpriteBody:
+	BodyOrientation:
+		QuantizedFacings: 1
+	# Zerstoerbar (kein Selbstheil wie beim Ant-Nest): fokussiertes Feuer legt ihn um, dann
+	# bleibt der verschuettete Eingang stehen.
+	Health:
+		HP: 70000
+	HitShape:
+	Targetable:
+		TargetTypes: Ground, Structure
+	# Beim Tod bleibt der zugeschuettete Hoehleneingang zurueck (verschwindet nicht).
+	SpawnActorOnDeath:
+		Actor: aot-dinocave.husk
+	# Spawner wie das unsichtbare Editor-Objekt (voll konfigurierbar), aber Ausgang UNTEN
+	# (Hoehlenmaul sitzt am unteren Rand) und Default Dinosaurier.
+	AotCritterSpawner:
+		AntActors: aot-ant, aot-fireant, aot-scoutant
+		DinoActors: aot-steg, aot-trex, aot-tric, aot-rapt
+		DefaultCritterType: random-dinos
+		DefaultMaxCritters: 3
+		DefaultPatrolRadius: 5
+		SpawnInterval: 150
+		PreferBottomExit: true
+	HiddenUnderShroud:
+	MapEditorData:
+		Categories: Critter
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral, Creeps
+
+# Verschuetteter Hoehleneingang -- unzerstoerbarer Ruinen-Prop (kein Health-Trait -> kann nicht
+# beschossen/entfernt werden, bleibt liegen). Nutzt dieselbe Sprite-Sammlung, Frame 1 (collapsed).
+# Blockiert 2x2 wie die intakte Hoehle. Auch direkt im Editor platzierbar.
+aot-dinocave.husk:
+	Tooltip:
+		Name: actor-aot-dinocave-husk.name
+		ShowOwnerRow: false
+	Building:
+		Footprint: xx xx
+		Dimensions: 2, 2
+		TerrainTypes: Clear, Rough, Road, Sand, Beach, Clear.Snow, Rock
+	Interactable:
+	RenderSprites:
+		Image: aot-dinocave
+	WithSpriteBody:
+		Sequence: collapsed
+	BodyOrientation:
+		QuantizedFacings: 1
+	HiddenUnderShroud:
+	MapEditorData:
+		Categories: Critter
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral, Creeps
+
 # === Age of Tiberium (aotmod) — Visceroid (vanilla TD-Creep, VICE) ===
 # Echte vanilla-Einheit (siehe engine/mods/cnc/rules/civilian.yaml: VICE erbt ^Viceroid +
 # AttackWander) -- volle Original-Stats (HP 30000, Armor Light, Speed 68), keine eigene
@@ -235,6 +309,11 @@ aot-visceroid:
 		MaxMoveDelay: 90
 		RequiresCondition: aot-wander && !aot-attack-wave
 	AotCritterAttackWave:
+	# Fix (2026-09-02): ^Viceroid erbt ^AutoTargetGroundAssaultMove, dessen DEFAULT-Prioritaet KEINE
+	# Structure enthaelt -> in der Angriffswelle lief der Visceroid bis zum Gebaeude, blieb 1 Zelle
+	# davor stehen und feuerte nie. Structure ergaenzen (wie bei Ameisen/Dinos).
+	AutoTargetPriority@DEFAULT:
+		ValidTargets: Infantry, Vehicle, Creep, Structure, Water, Support, Mine
 	AotWanderAround:
 	RequiresSpecificOwners:
 		ValidOwnerNames: Neutral, Creeps
@@ -257,6 +336,12 @@ aot-steg:
 		MaxMoveDelay: 140
 		RequiresCondition: aot-wander && !aot-attack-wave
 	AotCritterAttackWave:
+	# Fix (2026-09-02): ^DINO erbt ^AutoTargetGroundAssaultMove, dessen DEFAULT-Prioritaet KEINE
+	# Structure enthaelt -> der Dino lief bis zum Gebaeude, blieb 1 Zelle davor stehen und feuerte
+	# nie. Hier Structure ergaenzen (Basis-Liste + Structure), damit er Gebaeude auch im
+	# Normal-Stance automatisch angreift.
+	AutoTargetPriority@DEFAULT:
+		ValidTargets: Infantry, Vehicle, Creep, Structure, Water, Support, Mine
 	AotWanderAround:
 	RequiresSpecificOwners:
 		ValidOwnerNames: Neutral, Creeps
@@ -273,6 +358,12 @@ aot-trex:
 		MaxMoveDelay: 140
 		RequiresCondition: aot-wander && !aot-attack-wave
 	AotCritterAttackWave:
+	# Fix (2026-09-02): ^DINO erbt ^AutoTargetGroundAssaultMove, dessen DEFAULT-Prioritaet KEINE
+	# Structure enthaelt -> der Dino lief bis zum Gebaeude, blieb 1 Zelle davor stehen und feuerte
+	# nie. Hier Structure ergaenzen (Basis-Liste + Structure), damit er Gebaeude auch im
+	# Normal-Stance automatisch angreift.
+	AutoTargetPriority@DEFAULT:
+		ValidTargets: Infantry, Vehicle, Creep, Structure, Water, Support, Mine
 	AotWanderAround:
 	RequiresSpecificOwners:
 		ValidOwnerNames: Neutral, Creeps
@@ -289,6 +380,12 @@ aot-tric:
 		MaxMoveDelay: 140
 		RequiresCondition: aot-wander && !aot-attack-wave
 	AotCritterAttackWave:
+	# Fix (2026-09-02): ^DINO erbt ^AutoTargetGroundAssaultMove, dessen DEFAULT-Prioritaet KEINE
+	# Structure enthaelt -> der Dino lief bis zum Gebaeude, blieb 1 Zelle davor stehen und feuerte
+	# nie. Hier Structure ergaenzen (Basis-Liste + Structure), damit er Gebaeude auch im
+	# Normal-Stance automatisch angreift.
+	AutoTargetPriority@DEFAULT:
+		ValidTargets: Infantry, Vehicle, Creep, Structure, Water, Support, Mine
 	AotWanderAround:
 	RequiresSpecificOwners:
 		ValidOwnerNames: Neutral, Creeps
@@ -305,6 +402,12 @@ aot-rapt:
 		MaxMoveDelay: 140
 		RequiresCondition: aot-wander && !aot-attack-wave
 	AotCritterAttackWave:
+	# Fix (2026-09-02): ^DINO erbt ^AutoTargetGroundAssaultMove, dessen DEFAULT-Prioritaet KEINE
+	# Structure enthaelt -> der Dino lief bis zum Gebaeude, blieb 1 Zelle davor stehen und feuerte
+	# nie. Hier Structure ergaenzen (Basis-Liste + Structure), damit er Gebaeude auch im
+	# Normal-Stance automatisch angreift.
+	AutoTargetPriority@DEFAULT:
+		ValidTargets: Infantry, Vehicle, Creep, Structure, Water, Support, Mine
 	AotWanderAround:
 	RequiresSpecificOwners:
 		ValidOwnerNames: Neutral, Creeps

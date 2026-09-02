@@ -6263,6 +6263,22 @@ aot-ant-nest:
 		Start: 0
 		Length: 1
 
+# === Age of Tiberium (aotmod) - Dino Cave (aot-dinocave), 2026-09-02 ===
+# Frame 0 = offener Hoehleneingang (intakt), Frame 1 = verschuettet (Husk). Aus cliff_139_s05
+# gebacken (bits/aot-dinocave.zip), Gras freigestellt. Scale 0.75 wie das Ant-Nest.
+aot-dinocave:
+	Defaults:
+		RemasteredFilename: aot-dinocave.zip
+		RemasteredPremultiplied: false
+		ZOffset: -1023
+		Scale: 0.75
+	idle:
+		Start: 0
+		Length: 1
+	collapsed:
+		Start: 1
+		Length: 1
+
 # === Age of Tiberium (aotmod) - Ion Storm Blitz-Grafik ===
 # TS besitzt KEINE Blitz-Sprite (der Bolt wird dort prozedural im Engine-Code gezeichnet,
 # siehe TSpp src/ionstorm.h - kein einziges "Bolt"-Symbol, und die [Animations]-Liste in

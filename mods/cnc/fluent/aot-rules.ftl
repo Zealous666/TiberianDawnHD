@@ -280,6 +280,12 @@ actor-aot-expansion-marker =
 actor-aot-ant-nest =
     .name = Ant Nest
 
+actor-aot-dinocave =
+    .name = Dino Cave
+
+actor-aot-dinocave-husk =
+    .name = Collapsed Cave
+
 actor-aot-light-system =
     .name = Light System (Day/Night Cycle)
 

@@ -18,7 +18,10 @@ namespace OpenRA.Mods.Common.Traits
 	{
 		// Findet eine freie Zelle direkt ausserhalb des Footprints von self (Ring um die
 		// Bounding-Box). Faellt auf self.Location zurueck, falls nichts frei ist.
-		public static CPos FindCellOutsideFootprint(Actor self)
+		// preferBottom: bevorzugt die untere Ring-Reihe (y = maxY+1) -- fuer Aktoren, deren
+		// Ausgang (z.B. Hoehleneingang) unten sitzt. Faellt auf den ganzen Ring zurueck, wenn
+		// unten keine Zelle frei ist.
+		public static CPos FindCellOutsideFootprint(Actor self, bool preferBottom = false)
 		{
 			var world = self.World;
 			var footprint = new HashSet<CPos>();
@@ -67,6 +70,14 @@ namespace OpenRA.Mods.Common.Traits
 
 			if (candidates.Count == 0)
 				return self.Location;
+
+			// Ausgang unten: nur die unterste freie Ring-Reihe zulassen, wenn dort etwas frei ist.
+			if (preferBottom)
+			{
+				var bottom = candidates.Where(c => c.Y == maxY + 1).ToList();
+				if (bottom.Count > 0)
+					return bottom[world.SharedRandom.Next(bottom.Count)];
+			}
 
 			return candidates[world.SharedRandom.Next(candidates.Count)];
 		}
