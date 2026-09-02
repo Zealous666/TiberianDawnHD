@@ -1681,7 +1681,7 @@ aot-oret-lite:
 		BuildPaletteOrder: 1
 		Prerequisites: lite
 		Queue: LightVehicle.GDI, LightVehicle.Nod
-		Description: Collects ore from mines and delivers it to the refinery.
+		Description: Collects ore from mines and delivers it to a resource silo.
 	Tooltip:
 		Name: actor-oret.name
 # === Ende aotmod ===

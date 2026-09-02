@@ -24,7 +24,7 @@ actor-aot-nod-radar =
 actor-oret =
     .name = Ore Transporter
     .generic-name = Ore Transporter
-    .description = Collects ore from mines and delivers it to the refinery.
+    .description = Collects ore from mines and delivers it to a resource silo.
 
 actor-atec =
     .name = Tech Centre
@@ -304,4 +304,4 @@ actor-t03-transformable-snow-name = (Snow tree that can transform into a Blossom
 actor-t03-transformableblue-snow-name = (Snow tree that can transform into a Blue Blossom Tree)
 
 actor-aot-flak =
-    .name = Allied Flak Cannon
+    .name = Flak Cannon

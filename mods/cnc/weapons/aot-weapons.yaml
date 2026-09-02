@@ -33,6 +33,13 @@
 		Radius: 0
 
 ^DinoWeapon:
+	# aotmod (2026-09-02): Reichweite 1c0 -> 2c0. 1c0 traf nur ORTHOGONAL benachbarte Ziele (1024);
+	# diagonal benachbart sind es 1448 > 1024 -> ausser Reichweite. Dadurch stand ein Critter (v.a.
+	# Saurier der Angriffswelle) oft direkt neben einem Gebaeude, ohne beissen zu koennen, wenn nur
+	# eine diagonale Nachbarzelle erreichbar war. 2c0 deckt jede Nachbarzelle sicher ab. Hier im
+	# Mod-Override (nicht in der Engine-Vanilla-Datei), damit es getrackt ist und einen Engine-
+	# Neubezug ueberlebt.
+	Range: 2c0
 	Warhead@BreakIce: AotBreakIce
 		Radius: 0
 

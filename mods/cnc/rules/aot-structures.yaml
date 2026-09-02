@@ -5533,7 +5533,10 @@ SILO:
 		LocalCenterOffset: 0,-412,0
 	DockHost:
 		Type: OreDeliver
-		DockAngle: 0
+		# aotmod: = OreTransporter.UnloadFacing (256 = Ost). Der ORET dockt damit gleich in der
+		# Entlade-Ausrichtung an; frueher (0=Nord) drehte er beim Anfahren erst auf Nord und OnDockTick
+		# musste dann noch auf Ost nachdrehen -> sichtbares doppeltes Eindrehen.
+		DockAngle: 256
 		# Dock muss auf der passierbaren Smudge-Reihe (Footprint-Zeile "==", Fussprint-lokal
 		# y=1024..2048) liegen, nicht dahinter. CenterPosition.Y liegt (nach LocalCenterOffset
 		# -412) bei 612 -- der alte Offset 1c512 (=1536) landete bei 2148, eine ganze Zelle
