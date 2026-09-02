@@ -560,14 +560,9 @@ sam:
 		Facings: 32
 		UseClassicFacings: True
 
-# Bau-Icons fuer die beiden SAM-Upgrades (2026-07-05) - dasselbe Icon wie SAM
+# Bau-Icon fuer das SAM-Bunkered-Upgrade (2026-07-05) - dasselbe Icon wie SAM
 # selbst (User-Wunsch: "verwende ueberall dasselbe Icon ohne Aenderung").
 aot-upgrade-sam-bunkered:
-	icon:
-		RemasteredFilename: aot-sam-icon.png
-		Length: 1
-
-aot-upgrade-sam-cloak:
 	icon:
 		RemasteredFilename: aot-sam-icon.png
 		Length: 1
