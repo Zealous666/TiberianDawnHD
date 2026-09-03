@@ -6547,6 +6547,12 @@ aot-sam-build-bunkered:
 		Prerequisites: hpad, aot-nod-radar, ~aot-sam-bunkered-upgrade
 		Icon: icon-bunkered
 		Description: Anti-Aircraft base defense that retracts underground between shots for increased armor protection. Strong vs Aircraft. Cannot target Ground units.
+		# Kein ewiger Platzhalter-Slot, solange das Bunkered-Upgrade nicht erforscht ist
+		# (dann ist dieser Proxy nie sichtbar gewesen -> ShowWhenLocked-Default=true erzeugt
+		# sonst ein leeres, nicht anklickbares Locked-Icon rund um PaletteOrder 110, neben
+		# dem echten SAM). Gleiches Muster wie andere branch-exklusive Aktoren, siehe
+		# locked-icon-system.md ("branch-exklusiv/dauerhaft-versteckbar -> ShowWhenLocked: False").
+		ShowWhenLocked: False
 
 aot-sam-build-cloak:
 	Inherits: SAM
@@ -6561,6 +6567,9 @@ aot-sam-build-cloak:
 		Prerequisites: hpad, aot-nod-radar, ~aot-sam-cloak-upgrade
 		Icon: icon-cloak
 		Description: Anti-Aircraft base defense with stealth technology. Cloaked while not firing, above 50% health, and not low on power. Strong vs Aircraft. Cannot target Ground units.
+		# Siehe aot-sam-build-bunkered: verhindert den leeren Locked-Placeholder-Slot,
+		# solange das Cloaked-Upgrade nicht erforscht ist (locked-icon-system.md).
+		ShowWhenLocked: False
 
 # === Age of Tiberium (aotmod) - SAM Editor-Platzierer fuer Bunkered/Cloak (2026-07-26) ===
 # SAM selbst zeigt im Editor korrekt den RA-Default-Look (Bunkered/Cloak sind Upgrades, die
