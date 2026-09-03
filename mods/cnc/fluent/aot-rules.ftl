@@ -279,6 +279,17 @@ actor-aot-fireant =
 actor-aot-scoutant =
     .name = Scout Ant
 
+meta-mutant-generic-name = Mutant
+
+actor-aot-mutant =
+    .name = Mutant
+
+actor-aot-mwmn =
+    .name = Mutant Woman
+
+actor-aot-mutant3 =
+    .name = Mutant Sergeant
+
 actor-aot-critter-spawner =
     .name = Critter Spawner
 
@@ -289,7 +300,7 @@ actor-aot-ant-nest =
     .name = Ant Nest
 
 actor-aot-dinocave =
-    .name = Dino Cave
+    .name = Hidden Cave
 
 actor-aot-dinocave-husk =
     .name = Collapsed Cave

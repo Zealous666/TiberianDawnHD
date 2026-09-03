@@ -2168,3 +2168,25 @@ aot-CorvetteOrcaLaunch:
 		Spread: 1
 		Damage: 0
 		ValidTargets: NoSuchTarget
+
+# === Age of Tiberium (aotmod) - Mutant Vulcan (TS-Import: MUTANT/MWMN/MUTANT3) ===
+# 1:1 aus TS "Vulcan" (smallguns.yaml, erbt ^MG): ReloadDelay 20, Range 4, Damage 2000,
+# Report chaingn1.aud. Basis MachineGun (CnC) wie beim Cyborg-ChainGun; nur die TS-Stats
+# ueberschrieben. Burst 1 (TS-Vulcan feuert einzeln, ^MG-Default).
+aot-MutantVulcan:
+	Inherits: MachineGun
+	Range: 4c0
+	ReloadDelay: 20
+	Burst: 1
+	Report: chaingn1.aud
+	Warhead@1Dam: SpreadDamage
+		Spread: 108
+		Damage: 2000
+		Versus:
+			None: 100
+			Wood: 60
+			Light: 40
+			Heavy: 25
+			Concrete: 10
+		DamageTypes: Prone70Percent, TriggerProne, BulletDeath
+# === Ende aotmod ===

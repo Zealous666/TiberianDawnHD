@@ -154,6 +154,7 @@ aot-critter-spawner:
 	AotCritterSpawner:
 		AntActors: aot-ant, aot-fireant, aot-scoutant
 		DinoActors: aot-steg, aot-trex, aot-tric, aot-rapt
+		MutantActors: aot-mutant, aot-mwmn, aot-mutant3
 		DefaultCritterType: random-ants
 		DefaultMaxCritters: 3
 		DefaultPatrolRadius: 5
@@ -251,6 +252,7 @@ aot-dinocave:
 	AotCritterSpawner:
 		AntActors: aot-ant, aot-fireant, aot-scoutant
 		DinoActors: aot-steg, aot-trex, aot-tric, aot-rapt
+		MutantActors: aot-mutant, aot-mwmn, aot-mutant3
 		DefaultCritterType: random-dinos
 		DefaultMaxCritters: 3
 		DefaultPatrolRadius: 5
@@ -411,6 +413,89 @@ aot-rapt:
 	AotWanderAround:
 	RequiresSpecificOwners:
 		ValidOwnerNames: Neutral, Creeps
+	MapEditorData:
+		Categories: Critter
+
+# === Age of Tiberium (aotmod) — TS Mutant-Critter (MUTANT/MWMN/MUTANT3), 2026-09-03 ===
+# Die "Forgotten"/Mutanten aus Tiberian Sun als neutrale Critter. Anders als die Ameisen
+# (Nahkampf, "bite") sind das humanoide Schuetzen mit der TS-Vulcan-Waffe (aot-MutantVulcan,
+# Report chaingn1.aud). Direkt-SHP-Workflow wie der Cyborg (61x61, aot-ts-player-Palette),
+# aber ueber ^AotAnt integriert -> erbt das komplette Critter-Verhalten (Wander/Attack-Wave/
+# AutoTarget, Tiberium-Immunitaet, leere DeathSounds) direkt. Nur ueberschrieben: Sprite,
+# Waffe, HP, Attack-Sequenz "attack" (statt "bite"), Player-Color-Palette, Schatten, Voice.
+# Drei Varianten: MUTANT (maennlich), MWMN (weiblich), MUTANT3 (Sergeant) -- alle 5000 HP,
+# Speed 56, Vulcan (Damage 2000), 1:1 aus TS civilian-infantry.yaml.
+^AotMutant:
+	Inherits: ^AotAnt
+	# Humanoide brauchen einen Schatten (die Ameisen-Vorlage bringt keinen mit).
+	WithShadow:
+		Offset: 0, 48, 0
+		ZOffset: -129
+	RenderSprites:
+		PlayerPalette: aot-ts-player
+	# "attack" statt "bite" (die Mutanten feuern), Idle-Anims + Player-Color-Palette wie Cyborg.
+	WithInfantryBody:
+		MoveSequence: run
+		StandSequences: stand
+		IdleSequences: idle1, idle2
+		DefaultAttackSequence: attack
+		Palette: aot-ts-player
+		IsPlayerPalette: true
+	# Echte TS-Death-Frames (die-twirling / die-crushed), in Spielerfarbe gerendert.
+	WithDeathAnimation:
+		DeathSequence: die
+		UseDeathTypeSuffix: false
+		DeathSequencePalette: aot-ts-player
+		DeathPaletteIsPlayerPalette: true
+		CrushedSequence: die-crushed
+		CrushedSequencePalette: aot-ts-player
+		CrushedPaletteIsPlayerPalette: true
+	Health:
+		HP: 5000
+	Mobile:
+		Speed: 56
+		Locomotor: foot
+	Armament:
+		Weapon: aot-MutantVulcan
+	# ^AotAnt setzt AntVoice (Ameisen-Gezirp) -- fuer Humanoide auf die generische Stimme
+	# zurueck. DeathSounds bleiben aus ^AotAnt leer -> kein Tiberium/Feuer-Tod-Crash.
+	Voiced:
+		VoiceSet: GenericVoice
+	Tooltip:
+		GenericName: meta-mutant-generic-name
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral, Creeps
+
+# --- Mutant (maennlich) ---
+aot-mutant:
+	Inherits: ^AotMutant
+	RenderSprites:
+		Image: mutant
+		PlayerPalette: aot-ts-player
+	Tooltip:
+		Name: actor-aot-mutant.name
+	MapEditorData:
+		Categories: Critter
+
+# --- Mutant Woman (weiblich) ---
+aot-mwmn:
+	Inherits: ^AotMutant
+	RenderSprites:
+		Image: mwmn
+		PlayerPalette: aot-ts-player
+	Tooltip:
+		Name: actor-aot-mwmn.name
+	MapEditorData:
+		Categories: Critter
+
+# --- Mutant Sergeant ---
+aot-mutant3:
+	Inherits: ^AotMutant
+	RenderSprites:
+		Image: mutant3
+		PlayerPalette: aot-ts-player
+	Tooltip:
+		Name: actor-aot-mutant3.name
 	MapEditorData:
 		Categories: Critter
 

@@ -6511,3 +6511,92 @@ aot-jng-t17:
 		RemasteredFilename: jng-tree-t17.dds
 		Length: 1
 		RemasteredPremultiplied: false
+
+# === Age of Tiberium (aotmod) - TS Mutant-Critter (MUTANT/MWMN/MUTANT3) ===
+# Direkt-SHP-Workflow wie Cyborg (61x61-Frames, Scale 0.5, aot-ts-player-Palette).
+# Layout = TS ^BasicInfantry + ^BasicInfantryAttack (engine/mods/ts/sequences/infantry.yaml):
+# stand 0, run 8-13, idle1 56-70, idle2 71-85, attack 164-169, die-twirling 134-148,
+# die-crushed 159-163. Anders als der Cyborg haben die Mutanten echte Death-Frames.
+mutant:
+	Defaults:
+		Filename: mutant.shp
+		Scale: 0.5
+		Tick: 80
+	stand:
+		Facings: 8
+	run:
+		Start: 8
+		Length: 6
+		Facings: 8
+	idle1:
+		Start: 56
+		Length: 15
+	idle2:
+		Start: 71
+		Length: 15
+	attack:
+		Start: 164
+		Length: 6
+		Facings: 8
+	die:
+		Start: 134
+		Length: 15
+	die-crushed:
+		Start: 159
+		Length: 5
+
+mwmn:
+	Defaults:
+		Filename: mwmn.shp
+		Scale: 0.5
+		Tick: 80
+	stand:
+		Facings: 8
+	run:
+		Start: 8
+		Length: 6
+		Facings: 8
+	idle1:
+		Start: 56
+		Length: 15
+	idle2:
+		Start: 71
+		Length: 15
+	attack:
+		Start: 164
+		Length: 6
+		Facings: 8
+	die:
+		Start: 134
+		Length: 15
+	die-crushed:
+		Start: 159
+		Length: 5
+
+mutant3:
+	Defaults:
+		Filename: mutant3.shp
+		Scale: 0.5
+		Tick: 80
+	stand:
+		Facings: 8
+	run:
+		Start: 8
+		Length: 6
+		Facings: 8
+	idle1:
+		Start: 56
+		Length: 15
+	idle2:
+		Start: 71
+		Length: 15
+	attack:
+		Start: 164
+		Length: 6
+		Facings: 8
+	die:
+		Start: 134
+		Length: 15
+	die-crushed:
+		Start: 159
+		Length: 5

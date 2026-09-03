@@ -48,7 +48,10 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Aktor-IDs fuer den Modus \"Random Dinosaurs\".")]
 		public readonly string[] DinoActors = ["aot-steg", "aot-trex", "aot-tric", "aot-rapt"];
 
-		[Desc("Standard-Crittertyp: eine Aktor-ID, \"random-ants\" oder \"random-dinos\".")]
+		[Desc("Aktor-IDs fuer den Modus \"Random Mutants\".")]
+		public readonly string[] MutantActors = ["aot-mutant", "aot-mwmn", "aot-mutant3"];
+
+		[Desc("Standard-Crittertyp: eine Aktor-ID, \"random-ants\", \"random-dinos\" oder \"random-mutants\".")]
 		public readonly string DefaultCritterType = "random-ants";
 
 		[Desc("Standard-Maximalanzahl gleichzeitig lebender Critter.")]
@@ -75,6 +78,7 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				{ "random-ants", "Random Ants" },
 				{ "random-dinos", "Random Dinosaurs" },
+				{ "random-mutants", "Random Mutants" },
 				{ "aot-ant", "Worker Ant" },
 				{ "aot-fireant", "Fire Ant" },
 				{ "aot-scoutant", "Scout Ant" },
@@ -83,6 +87,9 @@ namespace OpenRA.Mods.Common.Traits
 				{ "aot-trex", "Tyrannosaurus Rex" },
 				{ "aot-tric", "Triceratops" },
 				{ "aot-rapt", "Velociraptor" },
+				{ "aot-mutant", "Mutant" },
+				{ "aot-mwmn", "Mutant Woman" },
+				{ "aot-mutant3", "Mutant Sergeant" },
 			};
 
 			yield return new EditorActorDropdown("Critter Type", 0,
@@ -154,6 +161,7 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				"random-ants" => Pick(self, info.AntActors),
 				"random-dinos" => Pick(self, info.DinoActors),
+				"random-mutants" => Pick(self, info.MutantActors),
 				_ => critterType,
 			};
 
