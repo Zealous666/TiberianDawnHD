@@ -344,10 +344,14 @@ aot-ore-mine:
 		ResourceType: Tiberium
 	DockHost:
 		Type: OreLoad
-		# aotmod 2026-09-01: 512 = Sued (vorher 0 = Nord). ORET dockt noerdlich der Mine und soll
-		# beim Sammeln zur Mine zeigen (Schaufel Richtung Sued). Harvest-Anim ist richtungsabhaengig.
-		DockAngle: 512
-		DockOffset: 0,-1c512,0
+		# aotmod 2026-09-03: Andockpunkt an die SUEDKANTE (unten-mitte), ausserhalb des Footprints,
+		# damit der Sammler ihn ueberhaupt erreichen kann (vorher noerdlich/auf dem Footprint -> ORET
+		# blieb haengen, siehe User-Screenshot). DockAngle 0 = Nord -> ORET steht suedlich und zeigt zur
+		# Mine hoch (S->N, "nach oben ausgerichtet"); Harvest-Anim/Schaufel Richtung Norden.
+		# 1c512 = 1,5 Zellen sued vom 2x2-Zentrum = eine Zelle unter der Suedkante. Gilt fuer beide
+		# 2x2-Minen (aot-ore-mine + aot-ore-mine-rich); aot-ore-depot (3x3) ueberschreibt den Offset.
+		DockAngle: 0
+		DockOffset: 0,1c512,0
 	WithBuildingBib:
 	# Explosion beim Erschoepfen ohne Krater-Smudge (User-Wunsch 2026-08-28): ^Building feuert
 	# beim Tod BuildingExplode, dessen LeaveSmudge(Crater)-Warhead den Krater hinterliesse.
@@ -456,6 +460,67 @@ aot-ore-mine-rich:
 		SnowActor: aot-gem-scatter-snow
 	AotEditorBounds:
 		Color: A030E0A0
+# === Ende aotmod ===
+
+# Ore Depot: dritte Ore-Mine-Variante mit eigenem, groesserem Gemini-Sprite (RA-Kompound-Render)
+# statt der kleinen OREMINE-Kachel. KEIN verstreutes Erz/Gem rundherum -- nur das Sprite plus der
+# ORIGINAL-Smudge-Bib wie bei LITE (WithBuildingBib + bib2, nicht vorgebacken). Groesse grob wie
+# eine LITE (3x3-Footprint). Erbt alle Oekonomie-Traits (StoresResources/DockHost/OreMine-
+# Durability/No-Crater-Explosion/Keep-out) von aot-ore-mine.
+# Player-Color: das Gemini-Sprite ist truecolor und enthaelt gruene Tiberium-Haufen -> WithSpriteBody
+# explizit Palette: effect / IsPlayerPalette: false, sonst wuerde PlayerColorShift die gruenen Pixel
+# einfaerben (siehe gemini-building-import / silo-system). Neutrales Map-Gebaeude, kein Remap.
+aot-ore-depot:
+	Inherits: aot-ore-mine
+	Inherits@shape: ^3x2Shape
+	RenderSprites:
+		Image: aot-ore-depot
+	Tooltip:
+		Name: actor-aot-ore-depot.name
+		GenericName: actor-aot-ore-depot.generic-name
+	Building:
+		Footprint: xxx xxx ===
+		Dimensions: 3,3
+		# Body eine halbe Zelle nach Sueden verschoben (User 2026-09-03). LocalCenterOffset bewegt nur
+		# das Sprite: WithBuildingBib rechnet den CenterOffset wieder heraus, Bib+Footprint bleiben fix.
+		LocalCenterOffset: 0,0,0
+		TerrainTypes: Clear,Rough,Road,Rock,Clear.Snow
+	WithSpriteBody:
+		Palette: effect
+		IsPlayerPalette: false
+	WithBuildingBib:
+	# So ergiebig wie die Rich Ore Mine (User 2026-09-03): doppelter Inhalt = 70 Fuhren.
+	StoresResources:
+		Capacity: 70
+	# Kein verstreutes Erz/Gem (User-Wunsch): nur das Sprite.
+	-ScatterDecorationActors:
+	# ORET faehrt bis auf den Smudge an die Gebaeudekante (User 2026-09-03): Dockzelle = die BIB-Reihe
+	# direkt suedlich des massiven 3x3-Koerpers (passierbar, ORET darf drauf stehen). 3x3-Zentrum bei
+	# 1,5c -> +1c = Bib-Reihe (Zeile 2). Ausrichtung Nord.
+	DockHost:
+		Type: OreLoad
+		DockAngle: 0
+		DockOffset: 0,1c0,0
+	AotEditorBounds:
+		Color: E0A030A0
+# === Ende aotmod ===
+
+# Ore Depot (Pre-War): vierte Ore-Mine-Variante, identisches Prinzip wie aot-ore-depot (3x3-Footprint,
+# LITE-Bib, Suedkanten-Dock, 70 Fuhren, kein Scatter, Palette effect), nur ein anderes Gemini-Sprite
+# (intakte Vorkriegs-Version). Erbt alles von aot-ore-depot; nur Image/Tooltip/Editor-Farbe wechseln.
+aot-ore-depot-prewar:
+	Inherits: aot-ore-depot
+	RenderSprites:
+		Image: aot-ore-depot-prewar
+	Tooltip:
+		Name: actor-aot-ore-depot-prewar.name
+		GenericName: actor-aot-ore-depot-prewar.generic-name
+	# Nur so ergiebig wie die normale Ore Mine (User 2026-09-03): 35 Fuhren statt der von
+	# aot-ore-depot geerbten 70.
+	StoresResources:
+		Capacity: 35
+	AotEditorBounds:
+		Color: E0D040A0
 # === Ende aotmod ===
 
 

@@ -964,6 +964,60 @@ aot-ore-mine:
 		RemasteredPremultiplied: false
 # === Ende aotmod ===
 
+# === Ore Depot (aot-ore-depot): freigestellter Gemini-Kompound-Render + LITE-Bib (bib2) ===
+# Scale 0.058 = grob LITE-Groesse (getunt). RemasteredFilename leer -> das PNG rendert im
+# Remaster-Massstab (kein Klassik-Fallback). Bib exakt wie LITE (Original-Smudge, nicht vorgebacken).
+aot-ore-depot:
+	idle:
+		Filename: aot-ore-depot-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.058
+	bib:
+		TilesetFilenames:
+			DESERT: bib2.des
+			WINTER: bib2.win
+			SNOW: bib2.sno
+			TEMPERAT: bib2.tem
+			JUNGLE: bib2.jun
+		Length: *
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\TEMPERATE\BIB2\BIB2.TEM-{0:D4}.DDS
+			Count: 6
+		RemasteredTilesetFilenamesPattern:
+			WINTER: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\BIB2.WIN\BIB2.WIN-{0:D4}.DDS
+				Count: 6
+			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\BIB2.DES\BIB2.DES-{0:D4}.DDS
+				Count: 6
+		RemasteredPremultiplied: false
+# === Ende aotmod ===
+
+# === Ore Depot (Pre-War) (aot-ore-depot-prewar): intakter Vorkriegs-Kompound + LITE-Bib (bib2) ===
+# Quelle war bereits freigestellt (Alpha vorhanden). Scale 0.046 (an Content-Breite an aot-ore-depot
+# angeglichen, dann auf User-Wunsch -20 %).
+aot-ore-depot-prewar:
+	idle:
+		Filename: aot-ore-depot-prewar-idle.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.046
+	bib:
+		TilesetFilenames:
+			DESERT: bib2.des
+			WINTER: bib2.win
+			SNOW: bib2.sno
+			TEMPERAT: bib2.tem
+			JUNGLE: bib2.jun
+		Length: *
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\TEMPERATE\BIB2\BIB2.TEM-{0:D4}.DDS
+			Count: 6
+		RemasteredTilesetFilenamesPattern:
+			WINTER: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\BIB2.WIN\BIB2.WIN-{0:D4}.DDS
+				Count: 6
+			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\BIB2.DES\BIB2.DES-{0:D4}.DDS
+				Count: 6
+		RemasteredPremultiplied: false
+# === Ende aotmod ===
+
 # === Ore/Gem Scatter-Deko (aot-ore-scatter-temp): RA GOLD/GEM Terrain-Tiles ===
 aot-ore-scatter-temp:
 	idle:

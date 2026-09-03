@@ -16,6 +16,14 @@ actor-aot-ore-mine-rich =
     .name = Rich Ore Mine
     .generic-name = Rich Ore Mine
 
+actor-aot-ore-depot =
+    .name = Ore Depot (Rich)
+    .generic-name = Ore Depot (Rich)
+
+actor-aot-ore-depot-prewar =
+    .name = Ore Depot (Pre-War)
+    .generic-name = Ore Depot (Pre-War)
+
 actor-aot-nod-radar =
     .name = Radar Dome
     .description = Provides radar and map overview for NOD.
