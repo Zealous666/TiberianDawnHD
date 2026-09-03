@@ -111,7 +111,10 @@ Player:
 		AfldTypes: afld
 		FturTypes: aot-ftur-flame, aot-ftur-toxic
 		GunTypes: aot-gun-base, aot-gun-laser
-		SamTypes: sam
+		# Basis zuerst; nach dem Erforschen von Bunkered/Cloaked ist die Basis per ~!…-upgrade
+		# nicht mehr baubar und BuildableVariant nimmt automatisch die passende Proxy-Variante
+		# (zustandsabhaengiger Platzier-Ghost, siehe aot-sam-build-* in aot-structures.yaml).
+		SamTypes: sam, aot-sam-build-bunkered, aot-sam-build-cloak
 		ObeliskTypes: obli
 		WallTypes: aot-wall-nod
 		# Blossom-Tree-Actors (Tiberium-Wachstumsquellen, ^TibTree in defaults.yaml) — Plan hält
@@ -145,7 +148,7 @@ Player:
 		ExpansionPowerTypes: aot-nuke-age2-nod, aot-nuke-age1, aot-nuke-age0
 		ExpansionRefineryTypes: aot-proc-nod-age2, aot-proc-nod
 		ExpansionSiloTypes: aot-silo-age2, aot-silo-age1, aot-silo-age0
-		ExpansionSamTypes: sam
+		ExpansionSamTypes: sam, aot-sam-build-bunkered, aot-sam-build-cloak
 		ExpansionGateTypes: aot-gate-nod
 		MinimumExcessPower: 10
 		# On-demand naval production (User-Spec 2026-07-22): NICHT Teil des Rhythmus. Wird nur gebaut,
@@ -553,6 +556,7 @@ Player:
 			aot-upgrade-ttnk-subterrain: 50
 			aot-upgrade-ltnk-tick: 18
 			aot-upgrade-sam-bunkered: 15
+			aot-upgrade-sam-cloak: 12
 			aot-upgrade-harpy: 15
 			# Laser-Waffen-Upgrades (Age 3, 2026-08-05) -- setzen Laser Technologies voraus.
 			aot-upgrade-ltnk-laser: 15

@@ -522,6 +522,16 @@ sam:
 	icon:
 		RemasteredFilename: aot-sam-icon.png
 		Length: 1
+	# Variant-Bau-Icons fuer die Proxy-Bau-Aktoren aot-sam-build-bunkered/-cloak (2026-09-02):
+	# nach dem Erforschen des jeweiligen Upgrades wechselt der SAM-Baumenue-Eintrag auf diese
+	# Icons (via Buildable.Icon auf dem Proxy, siehe aot-structures.yaml). Dieselben PNGs wie die
+	# Upgrade-Icons.
+	icon-bunkered:
+		RemasteredFilename: aot-sam-bunkered-icon.png
+		Length: 1
+	icon-cloak:
+		RemasteredFilename: aot-sam-cloak-icon.png
+		Length: 1
 	# RA-Remastered-Sprite (2026-07-05, User-Wunsch): neuer Standard-Look, ersetzt
 	# die TD-Pop-up-Silo-Optik als Default (TD-Frames oben bleiben unveraendert -
 	# aktiv nur noch ueber das "Bunkered SAM"-Upgrade, siehe aot-structures.yaml).
@@ -559,12 +569,34 @@ sam:
 		Start: 34
 		Facings: 32
 		UseClassicFacings: True
+	# Cloaked-SAM-Turret (2026-09-02): dunkel-metallischer Gemini-Remaster auf dreieckiger
+	# Platte, 8 Facings. Gebacken aus asset wip/sam/sam_cloaked_interpolated.png via
+	# bake-sam-cloaked.py -> bits/aot-sam-cloaked.png (FrameSize 256,128 FrameAmount 8,
+	# gerade Alpha -> RemasteredPremultiplied False). Player-Color liegt in den Warnstreifen
+	# der Platte (Gruen ins PlayerColorShift-Fenster gehoben, Shader-Pfad). Die 8 Frames sind
+	# gleichmaessig 45deg-verteilt (jede 4. der 32 RA-Facings) -> LINEARE Facing-Zuordnung
+	# (kein UseClassicFacings; das gilt nur bei genau 32 Facings). Kein separates Schadensbild
+	# -> damaged- zeigt dasselbe Sprite (Turret nimmt keinen sichtbaren Kampfschaden;
+	# NormalizeSequence braucht den damaged-Namen aber, sonst Crash).
+	ra-cloaked-turret:
+		RemasteredFilename: aot-sam-cloaked.png
+		RemasteredPremultiplied: False
+		Facings: 8
+	damaged-ra-cloaked-turret:
+		RemasteredFilename: aot-sam-cloaked.png
+		RemasteredPremultiplied: False
+		Facings: 8
 
-# Bau-Icon fuer das SAM-Bunkered-Upgrade (2026-07-05) - dasselbe Icon wie SAM
-# selbst (User-Wunsch: "verwende ueberall dasselbe Icon ohne Aenderung").
+# Bau-Icons fuer die beiden SAM-Upgrades - dedizierte Icons (User 2026-09-02), je eigenes
+# 64x48-PNG in bits/. Loesen das frueher geteilte aot-sam-icon.png ab.
 aot-upgrade-sam-bunkered:
 	icon:
-		RemasteredFilename: aot-sam-icon.png
+		RemasteredFilename: aot-sam-bunkered-icon.png
+		Length: 1
+
+aot-upgrade-sam-cloak:
+	icon:
+		RemasteredFilename: aot-sam-cloak-icon.png
 		Length: 1
 
 gtwr:
