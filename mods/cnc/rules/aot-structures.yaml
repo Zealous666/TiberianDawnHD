@@ -5968,6 +5968,56 @@ ORBC:
 		BuildLimit: 1
 		Icon: icon
 		Description: GDI uplink facility. Unlocks advanced support powers as your tech level increases.
+
+# Age-2-Editor-Placer fuer ORBC (aotmod): setzt das fertig ausgebaute Gemini-Orbital-Command
+# (statt des Age-1-EYE-Sprites, das der Basis-Aktor ORBC im Editor zeigt) -- gedacht als
+# neutrales Tech-Gebaeude auf Maps. Traegt die drei Power-Checkboxen (Ion Cannon Strike / Zone
+# Trooper Drop / Orca Transport): angehakt granten sie beim Erstellen exakt dieselben Conditions
+# wie der Upgrade-Kauf im Spiel (aot-*-active) -> Power UND passendes Sockel-Overlay. Weil
+# Support-Powers am Aktor haengen und ORBC Capturable von ^BaseBuilding erbt, wandert die Power
+# beim Einnehmen mit -> der Eroberer bekommt die angehakten Powers temporaer (wie andere
+# neutrale Tech-Gebaeude). Body/Antenne per Tautologie bzw. !build-incomplete erzwungen, damit
+# die Editor-Vorschau (EnabledByDefault wertet alle Variablen=false aus) den Gemini-Body zeigt.
+aot-orbc-editor-age2:
+	Inherits: ORBC
+	-Buildable:
+	RenderSprites:
+		Image: orbc
+	Tooltip:
+		Name: Orbital Command
+	-WithSpriteBody@eye:
+	-WithMakeAnimation@eye:
+	WithSpriteBody@ts:
+		RequiresCondition: aot-age2-active || !aot-age2-active
+	WithIdleOverlay@active:
+		RequiresCondition: !build-incomplete
+	SequencePlaceBuildingPreview:
+		Sequence: place
+		SequenceAlpha: 0.65
+	# Satellite Surveillance liefert der Basis-ORBC unbedingt (Prerequisites: aot-orbc, das das
+	# Gebaeude selbst liefert). Auf dem Editor-Placer hinter eine Checkbox legen, damit ein
+	# neutrales/platziertes Orbital Command sie NICHT automatisch mitbringt -- erst wenn der
+	# Mapper es anhakt (grantet aot-satellite-active). Ladeleiste ebenso gaten.
+	AotSatellitePower:
+		RequiresCondition: !satellite-used && aot-satellite-active
+	SupportPowerChargeBar@satellite:
+		RequiresCondition: aot-satellite-active
+	AotEditorGrantConditions@satellite:
+		Label: Satellite Surveillance
+		Conditions: aot-satellite-active, aot-age2-active
+		EditorDisplayOrder: 9
+	AotEditorGrantConditions@ioncannon:
+		Label: Ion Cannon Strike
+		Conditions: aot-ion-cannon-active, aot-age2-active
+		EditorDisplayOrder: 10
+	AotEditorGrantConditions@zonetrooperdrop:
+		Label: Zone Trooper Drop
+		Conditions: aot-zonetrooper-drop-active, aot-age2-active
+		EditorDisplayOrder: 11
+	AotEditorGrantConditions@orcatransport:
+		Label: Orca Transport
+		Conditions: aot-orca-transport-active, aot-age2-active
+		EditorDisplayOrder: 12
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - SLAB: Science Lab (GDI, ab Age 1) ===

@@ -173,6 +173,8 @@ engine/**
 !engine/OpenRA.Mods.Common/Traits/World/TerrainLighting.cs
 # Power-Checkbox fuer editor-only Gebaeude (ATWR, aot-tesla), 2026-07-29
 !engine/OpenRA.Mods.Common/Traits/AotOptionalPower.cs
+# Editor-Checkboxen fuer ORBC-Support-Powers (Ion Cannon/Zone Trooper Drop/Orca Transport)
+!engine/OpenRA.Mods.Common/Traits/AotEditorGrantConditions.cs
 # Engine-Regel-Patches (AOT-Paletten, BuildPaletteOrder, HTNK, hover/mine-Loko, DroneExplode)
 !engine/mods/cnc/rules/
 !engine/mods/cnc/rules/defaults.yaml
