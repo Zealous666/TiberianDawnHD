@@ -8,6 +8,7 @@
 
 using System.Linq;
 using OpenRA.Mods.Common.Activities;
+using OpenRA.Mods.Common.Effects;
 using OpenRA.Mods.Common.Traits.Render;
 using OpenRA.Primitives;
 using OpenRA.Traits;
@@ -384,6 +385,18 @@ namespace OpenRA.Mods.Common.Traits
 					return false;
 
 				playerResources.GiveResources(Info.OreLoadAmount);
+
+				// Floating-Credit-Text ueber dem Silo, genau wie beim Harvester an der Refinery und
+				// am Oil Derrick (siehe Refinery.ITick.Tick / FloatingText.FormatCashTick). Nur fuer
+				// den lokal beobachtenden (verbuendeten) Spieler; am hostActor (Silo STOR), damit der
+				// Text dort erscheint, wo entladen wird -- nicht am Transporter.
+				if (self.Owner.IsAlliedWith(self.World.RenderPlayer))
+				{
+					var amount = Info.OreLoadAmount;
+					self.World.AddFrameEndTask(w => w.Add(new FloatingText(
+						hostActor.CenterPosition, self.OwnerColor(), FloatingText.FormatCashTick(amount), 30)));
+				}
+
 				state = TransportState.Empty;
 				storesResources?.RemoveResource(Info.OreResourceType, storesResources.Capacity);
 				unloading = false;
