@@ -175,6 +175,8 @@ engine/**
 !engine/OpenRA.Mods.Common/Traits/AotOptionalPower.cs
 # Editor-Checkboxen fuer ORBC-Support-Powers (Ion Cannon/Zone Trooper Drop/Orca Transport)
 !engine/OpenRA.Mods.Common/Traits/AotEditorGrantConditions.cs
+# Auto-Laser-Connector der Laser Gates zur angrenzenden Laser-Fence
+!engine/OpenRA.Mods.Common/Traits/AotGateLaserConnector.cs
 # Engine-Regel-Patches (AOT-Paletten, BuildPaletteOrder, HTNK, hover/mine-Loko, DroneExplode)
 !engine/mods/cnc/rules/
 !engine/mods/cnc/rules/defaults.yaml

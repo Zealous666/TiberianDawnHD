@@ -70,6 +70,20 @@
 		Type: Rectangle
 			TopLeft: -1536, -2560
 			BottomRight: 1536, 2560
+# Fuer die Laser Gates (2026-09-05): 3x1 (horizontal) / 1x3 (vertikal). Ohne diese blieben
+# beide auf ^1x1Shape -> Seitenangriffe auf die aeusseren Zellen trafen ins Leere.
+^3x1Shape:
+	HitShape:
+		UseTargetableCellsOffsets: true
+		Type: Rectangle
+			TopLeft: -1536, -512
+			BottomRight: 1536, 512
+^1x3Shape:
+	HitShape:
+		UseTargetableCellsOffsets: true
+		Type: Rectangle
+			TopLeft: -512, -1536
+			BottomRight: 512, 1536
 
 ^BaseBuilding:
 	SpawnActorsOnSell:
@@ -7790,6 +7804,8 @@ aot-gate-gdi:
 # ueber LockedCondition ohnehin fest zu, das Flackern ist rein optisch.
 aot-gate-nod:
 	Inherits: ^BaseBuilding
+	# 3-Zellen-Hitbox (sonst nur 1 Zelle -> Seitenangriffe verpuffen), 2026-09-05.
+	Inherits@shape: ^3x1Shape
 	-WithDeathAnimation:
 	# Kein Infanterie-Spawn beim Verkaufen (User-Wunsch: niemand soll rauskommen).
 	-SpawnActorsOnSell:
@@ -7847,7 +7863,7 @@ aot-gate-nod:
 		Condition: aot-gate-lowpower
 		ValidPowerStates: Low, Critical
 	Tooltip:
-		Name: NOD Gate
+		Name: Laser Gate (Horizontal)
 	Valued:
 		Cost: 750
 	Health:
@@ -7863,13 +7879,117 @@ aot-gate-nod:
 		Prerequisites: ~aot-age2, aot-laser-fence-upgrade
 		Queue: Building.Nod
 		Description: Fortified gate. Laser-Barriere statt Fluegel.
+	# 3-Zellen-Wandtor (User-Wunsch 2026-09-05): waagerechte Linie (O-W), 3 Zellen breit.
+	# Smudge steckt im Sprite -> keine WithBuildingBib. LocalCenterOffset/Scale erster
+	# Wurf, im Spiel nachjustieren (Sprite war fuer 2 Zellen skaliert -> Scale angehoben).
 	Building:
-		Footprint: xx ==
-		Dimensions: 2,2
+		Footprint: xxx
+		Dimensions: 3,1
 		LocalCenterOffset: 0,0,0
 	# Zone Trooper hovern hier drueber wie ueber Rock/River (kein echtes Crushen,
 	# kein Schaden/Zerstoerung) -- siehe AotHoverPassable.cs.
 	AotHoverPassable:
+	# Auto-Laser-Connector (2026-09-05): grantet Condition, wenn WEST (-1,0) bzw. OST (3,0)
+	# der Gate-Endzellen eine aktive Laser-Fence steht; das conditionale Overlay rendert
+	# dann den Laser-Stub von der End-Saeule zur Fence.
+	AotGateLaserConnector@w:
+		CheckCell: -1,0
+		Condition: aot-gate-conn-w
+	AotGateLaserConnector@e:
+		CheckCell: 3,0
+		Condition: aot-gate-conn-e
+	WithIdleOverlay@conn-w:
+		Sequence: conn-w
+		RequiresCondition: aot-gate-conn-w
+		Palette: effect
+		IsPlayerPalette: false
+	WithIdleOverlay@conn-e:
+		Sequence: conn-e
+		RequiresCondition: aot-gate-conn-e
+		Palette: effect
+		IsPlayerPalette: false
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - NOD Gate VERTIKAL (aot-gate-nod-b) ===
+# Vertikale Wandvariante (Wand laeuft N-S). Gleiche Gate-Mechanik wie das horizontale
+# aot-gate-nod, aber mit interpolierter 11-Frame-Laser-Fade-Animation (Sequenz
+# aot-gate-nod-b, Sprite aus ChatGPT-Vorlage) analog zum GDI-Gate. Eigenes Bau-Icon
+# (aot-gate-nod-b-icon = gate_nod_b). Footprint = senkrechte 3-Zellen-Linie.
+# Scale/LocalCenterOffset erster Wurf -> im Spiel nachjustieren.
+# OFFEN (naechster Schritt): automatische Laser-Verbindung zur angrenzenden Laser-Fence.
+aot-gate-nod-b:
+	Inherits: ^BaseBuilding
+	# 3-Zellen-Hitbox vertikal (sonst nur 1 Zelle -> Seitenangriffe verpuffen), 2026-09-05.
+	Inherits@shape: ^1x3Shape
+	-WithDeathAnimation:
+	-SpawnActorsOnSell:
+	-SpawnActorsOnSell@nod:
+	-WithSpriteBody:
+	WithGateSpriteBody:
+		# 11 Frames Laser-Fade: GetGateFrame() waehlt per Lerp(0,10,Position,OpenPosition)
+		# automatisch den passenden Frame aus "idle"; "open" (Start:10) = Ruhezustand offen.
+		OpenSequence: open
+		# Irregulaeres Flackern bei Heavy/Critical-Schaden (Tor bleibt via LockedCondition zu).
+		FlickerInterval: 5, 35
+		Palette: effect
+		IsPlayerPalette: false
+	Gate:
+		LockedCondition: aot-gate-locked || aot-gate-damage-lockout || aot-gate-lowpower
+		# Laser-Turret-Schuss lastur1.aud (wie horizontales Gate).
+		OpeningSound: lastur1.aud
+		ClosingSound: lastur1.aud
+		BlocksProjectilesHeight: 768
+		# Kein TransitionDelay:1 (anders als horizontal) - hier soll die 11-Frame-
+		# Laser-Fade-Animation ueber mehrere Ticks sichtbar durchlaufen.
+		CloseDelay: 20
+	GrantConditionOnDeploy:
+		DeployedCondition: aot-gate-locked
+		SkipMakeAnimation: true
+		Voice: Action
+		DeploySounds: text2.aud
+		UndeploySounds: text2.aud
+	GrantConditionOnDamageState:
+		Condition: aot-gate-damage-lockout
+		ValidDamageStates: Heavy, Critical
+	GrantConditionOnPowerState:
+		Condition: aot-gate-lowpower
+		ValidPowerStates: Low, Critical
+	Tooltip:
+		Name: Laser Gate (Vertical)
+	Valued:
+		Cost: 750
+	Health:
+		HP: 60000
+	Armor:
+		Type: Concrete
+	Buildable:
+		BuildPaletteOrder: 221
+		Prerequisites: ~aot-age2, aot-laser-fence-upgrade
+		Queue: Building.Nod
+		Description: Fortified gate (vertical). Laser-Barriere statt Fluegel.
+	# Senkrechte 3-Zellen-Linie (N-S). Smudge steckt im Sprite -> keine WithBuildingBib.
+	Building:
+		Footprint: x x x
+		Dimensions: 1,3
+		LocalCenterOffset: 0,0,0
+	AotHoverPassable:
+	# Auto-Laser-Connector (2026-09-05): NORD (0,-1) / SUED (0,3) der Endzellen.
+	AotGateLaserConnector@n:
+		CheckCell: 0,-1
+		Condition: aot-gate-conn-n
+	AotGateLaserConnector@s:
+		CheckCell: 0,3
+		Condition: aot-gate-conn-s
+	WithIdleOverlay@conn-n:
+		Sequence: conn-n
+		RequiresCondition: aot-gate-conn-n
+		Palette: effect
+		IsPlayerPalette: false
+	WithIdleOverlay@conn-s:
+		Sequence: conn-s
+		RequiresCondition: aot-gate-conn-s
+		Palette: effect
+		IsPlayerPalette: false
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - FTUR Flame Tower (RA-Import, NOD Age 0) ===

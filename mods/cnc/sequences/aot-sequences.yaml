@@ -5474,18 +5474,24 @@ aot-gate-nod:
 	# jeden Sequenz-Wert komplett (nur der Icon-Renderer liest ihn hier). Der
 	# eigentliche Fix ("Laser wird manchmal gruen/orange", User-Report 2026-07-04)
 	# sitzt dort (WithGateSpriteBody: Palette: effect), siehe ts-gates-system.md.
+	# Offset: 0,N verschiebt das Sprite N*Scale px nach unten (Screen-Y), damit die
+	# Gate-Pfosten buendig mit den angrenzenden Laser-Fence-Pfosten sitzen. Kein Bib
+	# an diesem Gate -> Sequenz-Offset unkritisch (Bib-Z-Order-Falle trifft nur mit Bib).
+	# Wert = erster Wurf, im Spiel feinjustieren.
 	idle:
 		Filename: aot-gate-nod-idle.png
 		RemasteredFilename:
 		Length: 2
 		Scale: 0.1
 		ZOffset: -2048
+		Offset: 0,40
 	damaged-idle:
 		Filename: aot-gate-nod-damaged-idle.png
 		RemasteredFilename:
 		Length: 2
 		Scale: 0.1
 		ZOffset: -2048
+		Offset: 0,40
 	# Ambientes Schimmern im Ruhezustand (geschlossen, unbeschaedigt) - 2 Frames
 	# (A=Basis, B=Helligkeits/Glow-Boost, 1:1 aus der echten Laser-Fence-Pulsphase
 	# gesampled), zyklisch getoggelt von WithGateSpriteBody.ShimmerInterval.
@@ -5495,14 +5501,86 @@ aot-gate-nod:
 		Length: 2
 		Scale: 0.1
 		ZOffset: -2048
+		Offset: 0,40
 	make:
 		Filename: aot-gate-nod-idle.png
 		RemasteredFilename:
 		Length: 1
 		Scale: 0.1
 		ZOffset: -2048
+		Offset: 0,40
 	icon:
 		Filename: aot-gate-nod-icon.png
+		RemasteredFilename:
+		Length: 1
+	# Laser-Connector-Stubs (2026-09-05): Strahl vom End-Emitter zur angrenzenden Laser-Fence.
+	# Gleicher Offset wie der Body, damit sie deckungsgleich sitzen.
+	conn-w:
+		Filename: aot-gate-conn-w.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.1
+		ZOffset: -2048
+		Offset: 0,40
+	conn-e:
+		Filename: aot-gate-conn-e.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.1
+		ZOffset: -2048
+		Offset: 0,40
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - NOD Gate VERTIKAL (aot-gate-nod-b) ===
+# Vertikale Wandvariante der Laser-Barriere (Wand laeuft N-S statt O-W). Anders als
+# das horizontale aot-gate-nod (2-Frame-Toggle) hat die vertikale Variante eine
+# interpolierte 11-Frame-Laser-Fade-Animation (0=zu/Laser voll an ... 10=offen/Laser
+# aus), analog zum GDI-Gate. WithGateSpriteBody waehlt den Frame per GetGateFrame()
+# aus "idle" (11 Frames) je nach Gate.Position; "open" (Start:10) = Ruhezustand offen.
+# Sprite aus ChatGPT-Vorlage (nod_vertical_interpoliert.png), am Platten-Schwerpunkt
+# registriert + gepackt (pack-nod-vertical.py). Scale/Offset = erster Wurf, im Spiel
+# nachjustieren. Kein idle-shimmer (keine Shimmer-Frames in der Vorlage).
+aot-gate-nod-b:
+	idle:
+		Filename: aot-gate-nod-b-open.png
+		RemasteredFilename:
+		Length: 11
+		Scale: 0.1
+		ZOffset: -2048
+	damaged-idle:
+		Filename: aot-gate-nod-b-damaged.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.1
+		ZOffset: -2048
+	make:
+		Filename: aot-gate-nod-b-open.png
+		RemasteredFilename:
+		Start: 0
+		Length: 1
+		Scale: 0.1
+		ZOffset: -2048
+	open:
+		Filename: aot-gate-nod-b-open.png
+		RemasteredFilename:
+		Start: 10
+		Length: 1
+		Scale: 0.1
+		ZOffset: -2048
+	conn-n:
+		Filename: aot-gate-conn-n.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.1
+		ZOffset: -2048
+	conn-s:
+		Filename: aot-gate-conn-s.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.1
+		ZOffset: -2048
+	icon:
+		Filename: aot-gate-nod-b-icon.png
 		RemasteredFilename:
 		Length: 1
 # === Ende aotmod ===
