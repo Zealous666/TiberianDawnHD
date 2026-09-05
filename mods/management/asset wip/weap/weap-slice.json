@@ -1,0 +1,58 @@
+{
+  "description": "WEAP (GDI Advanced War Factory) besteht aus 2 Remaster-Sprites, die auf einer gemeinsamen 384x384-Leinwand ueberlagert werden. Diese Datei beschreibt die Geometrie, um ein fertig neu gezeichnetes GESAMTBILD (weap_full.png, gleiche 384x384-Leinwand, gleiche Ausrichtung) wieder in die zwei Teile zu zerschneiden.",
+  "canvas": [
+    384,
+    384
+  ],
+  "recomposite_order": [
+    "base",
+    "top"
+  ],
+  "crop_format": "[left, top, right, bottom] in Leinwand-Pixeln (384x384)",
+  "note_overlap": "Die BBoxen ueberlappen vertikal (Zeilen 129-278). Beim Zerschneiden bekommt JEDER Teil seine eigene BBox aus dem Gesamtbild; beim Wiederzusammensetzen wird 'top' ueber 'base' gezeichnet, daher gewinnt der Turm/Dach-Teil in der Ueberlappung. Transparente Bereiche von 'top' lassen 'base' durch.",
+  "parts": [
+    {
+      "name": "base",
+      "role": "idle body / unterer Teil (immer sichtbar)",
+      "zip": "DATA\\ART\\TEXTURES\\SRGB\\TIBERIAN_DAWN\\STRUCTURES\\WEAP.ZIP",
+      "sequence": "weap Defaults/idle",
+      "frames": 3,
+      "crop": [
+        0,
+        129,
+        376,
+        356
+      ],
+      "orig_size": [
+        376,
+        227
+      ],
+      "paste_offset": [
+        0,
+        129
+      ]
+    },
+    {
+      "name": "top",
+      "role": "build-top / oberer Turm+Dach (Overlay)",
+      "zip": "DATA\\ART\\TEXTURES\\SRGB\\TIBERIAN_DAWN\\STRUCTURES\\WEAP2.ZIP",
+      "sequence": "build-top",
+      "frames": 20,
+      "crop": [
+        15,
+        1,
+        366,
+        278
+      ],
+      "orig_size": [
+        351,
+        277
+      ],
+      "paste_offset": [
+        15,
+        1
+      ]
+    }
+  ],
+  "reslice_recipe": "for p in parts: teil = weap_full.crop(p['crop']); speichere als neues Sprite; RemasteredOffset/Anchor beim Neu-Packen = p['paste_offset'] relativ zur 384-Leinwand (Original: RemasteredOffset 0,-64 fuer beide, siehe structures-overrides.yaml)."
+}

@@ -9,7 +9,9 @@
  */
 #endregion
 
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using OpenRA.GameRules;
 using OpenRA.Mods.Common.Effects;
 using OpenRA.Traits;
@@ -43,9 +45,14 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Ticks after activation before ExploreAll is called.")]
 		public readonly int RevealDelay = 50;
 
+		[Desc("Ticks the entire map stays revealed through fog-of-war (units visible) after ExploreAll. " +
+			"Once elapsed the fog returns; the shroud stays explored. 250 ticks = 10s at 25 ticks/s.")]
+		public readonly int FogRevealDuration = 250;
+
 		[PaletteReference]
 		public readonly string MissilePalette = "effect";
 
+		[GrantedConditionReference]
 		[Desc("Condition granted on the actor after the power fires. Use with RequiresCondition: !<this> to hide the power after use.")]
 		public readonly string FiredCondition = "satellite-used";
 
@@ -63,11 +70,14 @@ namespace OpenRA.Mods.Common.Traits
 		}
 	}
 
-	public class AotSatellitePower : SupportPower, ITick, INotifyKilled, INotifySold
+	public class AotSatellitePower : SupportPower, ITick, INotifyKilled, INotifySold, IGameSaveTraitData
 	{
 		readonly AotSatellitePowerInfo info;
 		int revealCountdown = -1;
+		int fogCountdown = -1;
+		bool fogRevealed;
 		bool satelliteUsed;
+		int firedToken = Actor.InvalidConditionToken;
 
 		public AotSatellitePower(Actor self, AotSatellitePowerInfo info)
 			: base(self, info)
@@ -119,25 +129,53 @@ namespace OpenRA.Mods.Common.Traits
 
 			// Grant condition to disable/hide the power on this actor instance.
 			// When ATEC is sold/destroyed and rebuilt, the new instance has no condition → power resets.
-			if (!string.IsNullOrEmpty(info.FiredCondition))
-				self.GrantCondition(info.FiredCondition);
+			if (!string.IsNullOrEmpty(info.FiredCondition) && firedToken == Actor.InvalidConditionToken)
+				firedToken = self.GrantCondition(info.FiredCondition);
 		}
 
 		void ITick.Tick(Actor self)
 		{
-			if (revealCountdown < 0)
-				return;
-
-			if (--revealCountdown == 0)
+			if (revealCountdown > 0 && --revealCountdown == 0)
 			{
 				revealCountdown = -1;
 				satelliteUsed = true;
+
+				// Permanently explore the shroud (stays revealed afterwards), then also lift the
+				// fog-of-war across the whole map for a limited time so enemy units become visible.
 				self.Owner.Shroud.ExploreAll();
+				RevealFog(self);
+				fogCountdown = info.FogRevealDuration;
 			}
+
+			if (fogCountdown > 0 && --fogCountdown == 0)
+			{
+				fogCountdown = -1;
+				HideFog(self);
+			}
+		}
+
+		void RevealFog(Actor self)
+		{
+			if (fogRevealed)
+				return;
+
+			var cells = self.World.Map.ProjectedCells.ToArray();
+			self.Owner.Shroud.AddSource(this, Shroud.SourceType.Visibility, cells);
+			fogRevealed = true;
+		}
+
+		void HideFog(Actor self)
+		{
+			if (!fogRevealed)
+				return;
+
+			self.Owner.Shroud.RemoveSource(this);
+			fogRevealed = false;
 		}
 
 		void ResetShroud(Actor self)
 		{
+			HideFog(self);
 			if (satelliteUsed)
 				self.Owner.Shroud.ResetExploration();
 		}
@@ -145,5 +183,48 @@ namespace OpenRA.Mods.Common.Traits
 		void INotifyKilled.Killed(Actor self, AttackInfo e) { ResetShroud(self); }
 		void INotifySold.Selling(Actor self) { }
 		void INotifySold.Sold(Actor self) { ResetShroud(self); }
+
+		// Snapshot save/load: the "already fired" state of this one-shot power lives ONLY in the
+		// satellite-used condition token (granted on this building) plus the pending reveal countdown --
+		// none of which SupportPowerInstance.SaveState captures. Without persisting it, a fresh actor on
+		// load has no condition, so RequiresCondition:!satellite-used re-enables the power (the user saw
+		// Satellite Surveillance come back "Ready" after loading a save where it was already used).
+		List<MiniYamlNode> IGameSaveTraitData.IssueTraitData(Actor self)
+		{
+			var fired = firedToken != Actor.InvalidConditionToken;
+			if (!fired && revealCountdown < 0 && fogCountdown < 0 && !satelliteUsed)
+				return null;
+
+			return
+			[
+				new MiniYamlNode("Fired", fired ? "true" : "false"),
+				new MiniYamlNode("RevealCountdown", revealCountdown.ToStringInvariant()),
+				new MiniYamlNode("FogCountdown", fogCountdown.ToStringInvariant()),
+				new MiniYamlNode("SatelliteUsed", satelliteUsed ? "true" : "false"),
+			];
+		}
+
+		void IGameSaveTraitData.ResolveTraitData(Actor self, MiniYaml data)
+		{
+			var d = data.ToDictionary();
+
+			if (d.TryGetValue("Fired", out var f) && f.Value == "true"
+				&& firedToken == Actor.InvalidConditionToken && !string.IsNullOrEmpty(info.FiredCondition))
+				firedToken = self.GrantCondition(info.FiredCondition);
+
+			if (d.TryGetValue("RevealCountdown", out var rc))
+				revealCountdown = Exts.ParseInt32Invariant(rc.Value);
+
+			if (d.TryGetValue("FogCountdown", out var fc))
+				fogCountdown = Exts.ParseInt32Invariant(fc.Value);
+
+			if (d.TryGetValue("SatelliteUsed", out var su))
+				satelliteUsed = su.Value == "true";
+
+			// If the fog was still lifted when the game was saved, re-establish the visibility source
+			// so the remaining reveal window continues after load.
+			if (fogCountdown > 0)
+				RevealFog(self);
+		}
 	}
 }

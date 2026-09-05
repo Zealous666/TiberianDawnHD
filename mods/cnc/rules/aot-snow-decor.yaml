@@ -1,0 +1,424 @@
+# === Age of Tiberium (aotmod) - Snow-Varianten fuer AOT_ARCTIC-Kombitileset ===
+# Eigenstaendige Aktoren (nicht Tileset-Override!): T0x/TC0x/V0x bleiben auf AOT_ARCTIC
+# unveraendert (TD-Winter-Optik). Die -Snow-Varianten sind separat platzierbar,
+# eigene Editor-Kategorie "... (Snow)", nur mit RA-Snow-Remaster-Kunst.
+
+T01-Snow:
+	Inherits: T01
+	SpawnActorOnDeath:
+		Actor: T01-Snow.Husk
+	MapEditorData:
+		Categories: Tree (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T01-Snow.Husk:
+	Inherits: T01.Husk
+	MapEditorData:
+		Categories: Husk (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T02-Snow:
+	Inherits: T02
+	SpawnActorOnDeath:
+		Actor: T02-Snow.Husk
+	MapEditorData:
+		Categories: Tree (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T02-Snow.Husk:
+	Inherits: T02.Husk
+	MapEditorData:
+		Categories: Husk (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T03-Snow:
+	Inherits: T03
+	SpawnActorOnDeath:
+		Actor: T03-Snow.Husk
+	MapEditorData:
+		Categories: Tree (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T03-Snow.Husk:
+	Inherits: T03.Husk
+	MapEditorData:
+		Categories: Husk (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T05-Snow:
+	Inherits: T05
+	SpawnActorOnDeath:
+		Actor: T05-Snow.Husk
+	MapEditorData:
+		Categories: Tree (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T05-Snow.Husk:
+	Inherits: T05.Husk
+	MapEditorData:
+		Categories: Husk (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T06-Snow:
+	Inherits: T06
+	SpawnActorOnDeath:
+		Actor: T06-Snow.Husk
+	MapEditorData:
+		Categories: Tree (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T06-Snow.Husk:
+	Inherits: T06.Husk
+	MapEditorData:
+		Categories: Husk (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T07-Snow:
+	Inherits: T07
+	SpawnActorOnDeath:
+		Actor: T07-Snow.Husk
+	MapEditorData:
+		Categories: Tree (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T07-Snow.Husk:
+	Inherits: T07.Husk
+	MapEditorData:
+		Categories: Husk (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T08-Snow:
+	Inherits: T08
+	SpawnActorOnDeath:
+		Actor: T08-Snow.Husk
+	MapEditorData:
+		Categories: Tree (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T08-Snow.Husk:
+	Inherits: T08.Husk
+	MapEditorData:
+		Categories: Husk (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T10-Snow:
+	Inherits: T10
+	SpawnActorOnDeath:
+		Actor: T10-Snow.Husk
+	MapEditorData:
+		Categories: Tree (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T10-Snow.Husk:
+	Inherits: T10.Husk
+	MapEditorData:
+		Categories: Husk (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T11-Snow:
+	Inherits: T11
+	SpawnActorOnDeath:
+		Actor: T11-Snow.Husk
+	MapEditorData:
+		Categories: Tree (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T11-Snow.Husk:
+	Inherits: T11.Husk
+	MapEditorData:
+		Categories: Husk (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T12-Snow:
+	Inherits: T12
+	SpawnActorOnDeath:
+		Actor: T12-Snow.Husk
+	MapEditorData:
+		Categories: Tree (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T12-Snow.Husk:
+	Inherits: T12.Husk
+	MapEditorData:
+		Categories: Husk (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T13-Snow:
+	Inherits: T13
+	SpawnActorOnDeath:
+		Actor: T13-Snow.Husk
+	MapEditorData:
+		Categories: Tree (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T13-Snow.Husk:
+	Inherits: T13.Husk
+	MapEditorData:
+		Categories: Husk (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T14-Snow:
+	Inherits: T14
+	SpawnActorOnDeath:
+		Actor: T14-Snow.Husk
+	MapEditorData:
+		Categories: Tree (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T14-Snow.Husk:
+	Inherits: T14.Husk
+	MapEditorData:
+		Categories: Husk (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T15-Snow:
+	Inherits: T15
+	SpawnActorOnDeath:
+		Actor: T15-Snow.Husk
+	MapEditorData:
+		Categories: Tree (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T15-Snow.Husk:
+	Inherits: T15.Husk
+	MapEditorData:
+		Categories: Husk (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T16-Snow:
+	Inherits: T16
+	SpawnActorOnDeath:
+		Actor: T16-Snow.Husk
+	MapEditorData:
+		Categories: Tree (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T16-Snow.Husk:
+	Inherits: T16.Husk
+	MapEditorData:
+		Categories: Husk (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T17-Snow:
+	Inherits: T17
+	SpawnActorOnDeath:
+		Actor: T17-Snow.Husk
+	MapEditorData:
+		Categories: Tree (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+T17-Snow.Husk:
+	Inherits: T17.Husk
+	MapEditorData:
+		Categories: Husk (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+TC01-Snow:
+	Inherits: TC01
+	MapEditorData:
+		Categories: Tree (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+TC02-Snow:
+	Inherits: TC02
+	MapEditorData:
+		Categories: Tree (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+TC03-Snow:
+	Inherits: TC03
+	MapEditorData:
+		Categories: Tree (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+TC04-Snow:
+	Inherits: TC04
+	MapEditorData:
+		Categories: Tree (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+TC05-Snow:
+	Inherits: TC05
+	MapEditorData:
+		Categories: Tree (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+V01-Snow:
+	Inherits: V01
+	MapEditorData:
+		Categories: Civilian building (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+V02-Snow:
+	Inherits: V02
+	MapEditorData:
+		Categories: Civilian building (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+V03-Snow:
+	Inherits: V03
+	MapEditorData:
+		Categories: Civilian building (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+V04-Snow:
+	Inherits: V04
+	SpawnActorOnDeath:
+		Actor: V04-Snow.Husk
+	MapEditorData:
+		Categories: Civilian building (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+V04-Snow.Husk:
+	Inherits: V04.Husk
+	MapEditorData:
+		Categories: Husk (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+V05-Snow:
+	Inherits: V05
+	SpawnActorOnDeath:
+		Actor: V05-Snow.Husk
+	MapEditorData:
+		Categories: Civilian building (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+V05-Snow.Husk:
+	Inherits: V05.Husk
+	MapEditorData:
+		Categories: Husk (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+V06-Snow:
+	Inherits: V06
+	MapEditorData:
+		Categories: Civilian building (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+V07-Snow:
+	Inherits: V07
+	SpawnActorOnDeath:
+		Actor: V07-Snow.Husk
+	MapEditorData:
+		Categories: Civilian building (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+V07-Snow.Husk:
+	Inherits: V07.Husk
+	MapEditorData:
+		Categories: Husk (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+V08-Snow:
+	Inherits: V08
+	MapEditorData:
+		Categories: Civilian building (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+V09-Snow:
+	Inherits: V09
+	MapEditorData:
+		Categories: Civilian building (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+V10-Snow:
+	Inherits: V10
+	MapEditorData:
+		Categories: Civilian building (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+V11-Snow:
+	Inherits: V11
+	MapEditorData:
+		Categories: Civilian building (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+V12-Snow:
+	Inherits: V12
+	MapEditorData:
+		Categories: Civilian building (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+V13-Snow:
+	Inherits: V13
+	MapEditorData:
+		Categories: Civilian building (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+V14-Snow:
+	Inherits: V14
+	MapEditorData:
+		Categories: Civilian building (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+V15-Snow:
+	Inherits: V15
+	MapEditorData:
+		Categories: Civilian building (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+V16-Snow:
+	Inherits: V16
+	MapEditorData:
+		Categories: Civilian building (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+V17-Snow:
+	Inherits: V17
+	MapEditorData:
+		Categories: Civilian building (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+V18-Snow:
+	Inherits: V18
+	MapEditorData:
+		Categories: Civilian building (Snow)
+		RequireTilesets: AOT_ARCTIC
+
+
+# === Age of Tiberium (aotmod 2026-08-29) - Snow-Varianten der Transformable-Baeume ===
+# Nur AOT_ARCTIC. RA-Snow-Optik via Image t03-snow (Sequenzen in decorations-overrides.yaml).
+# Transform-Verhalten identisch zu T03.Transformable / T03.TransformableBlue (aot-world.yaml):
+# neben Tiberium bzw. Blue Tiberium (>=1 Zelle) -> nach 15-20 Min, spaetestens bei Age 1,
+# Verwandlung in den (blauen) Blossom Tree. Eigene Editor-Kategorie zum schnellen Auffinden.
+T03.Transformable-Snow:
+	Inherits: ^Tree
+	RenderSprites:
+		Image: t05-snow
+	MapEditorData:
+		Categories: Resource spawn (Snow)
+		RequireTilesets: AOT_ARCTIC
+	SpawnActorOnDeath:
+		Actor: T05-Snow.Husk
+	TransformsNearResources:
+		Type: Tiberium
+		IntoActor: split2
+		Offset: 0,1
+		Adjacency: 1
+		Delay: 22500, 30000
+		ForcePrerequisite: aot-age1
+	Tooltip:
+		Name: meta-tiberium-infested-tree-name
+	EditorOnlyTooltip:
+		Name: actor-t03-transformable-snow-name
+
+T03.TransformableBlue-Snow:
+	Inherits: ^Tree
+	RenderSprites:
+		Image: t05-snow
+	MapEditorData:
+		Categories: Resource spawn (Snow)
+		RequireTilesets: AOT_ARCTIC
+	SpawnActorOnDeath:
+		Actor: T05-Snow.Husk
+	TransformsNearResources:
+		Type: BlueTiberium
+		IntoActor: splitblue
+		Offset: 0,1
+		Adjacency: 1
+		Delay: 22500, 30000
+		ForcePrerequisite: aot-age1
+	Tooltip:
+		Name: meta-tiberium-infested-tree-name
+	EditorOnlyTooltip:
+		Name: actor-t03-transformableblue-snow-name

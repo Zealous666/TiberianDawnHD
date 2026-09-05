@@ -1,0 +1,255 @@
+# === Age of Tiberium (aotmod) - Lighting-System (2026-07-26) ===
+# Tag/Nacht-Zyklus + lokale Lichtquellen, im Stil von Tiberian Sun, aber OHNE dessen Schwaechen:
+#   - Lichtquellen haengen am ECHTEN Aktor (TerrainLightSource, INotifyRemovedFromWorld) ->
+#     zerstoerter Lightpost/Gebaeude = Licht sofort weg. Kein TS-Zombie-Licht.
+#   - Uebergaenge laufen ueber 2 Spielstunden mit Smoothstep, terrain-Tint wird pro Vertex
+#     gesetzt und von der GPU ueber die Zelle interpoliert -> keine Treppen/Ruckler.
+#   - NICHTS ist in Sprites/Voxeln gebacken: Aktoren und Voxel sampeln TintAt live pro Frame.
+#
+# Der weltweite TerrainLighting-Trait haengt an ^BaseWorld (overrides.yaml), damit ihn auch die
+# EditorWorld hat -- ohne ihn crasht TerrainLightSource beim Platzieren im Karteneditor.
+
+# --- Der Zyklus-Marker (unsichtbar im Spiel, nur im Editor platzierbar) ---
+# Muster 1:1 wie aot-critter-spawner: RenderSpritesEditorOnly + OccupiesSpace: false.
+# OHNE diesen Aktor auf der Karte passiert GAR NICHTS -- TerrainLighting bleibt auf seinen
+# neutralen Defaults (Intensity 1, Tint 1/1/1), die Karte sieht aus wie vorher.
+aot-light-system:
+	Inherits@1: ^ExistsInWorld
+	Tooltip:
+		Name: actor-aot-light-system.name
+	Selectable:
+		Bounds: 512, 512
+	MapEditorData:
+		Categories: System
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral
+	Immobile:
+		OccupiesSpace: false
+	RenderSpritesEditorOnly:
+	WithSpriteBody:
+	BodyOrientation:
+		QuantizedFacings: 1
+	AotDayNightCycle:
+		# SLIDER 1: Uhrzeit bei Kartenstart (0-23).
+		StartHour: 12
+		# SLIDER 2: Echtzeit-Minuten fuer einen kompletten 24h-Durchlauf.
+		CycleMinutes: 60
+		# CHECKBOX "Zeit einfrieren": Uhr bleibt auf StartHour stehen (Beleuchtung dieser
+		# Stunde wird trotzdem einmal gesetzt) -> feste Tageszeit statt wanderndem Zyklus.
+		FreezeTime: False
+		# Daemmerung 18:00-20:00, Morgengrauen 06:00-08:00 (je 2 Spielstunden).
+		DuskHour: 18
+		DawnHour: 6
+		TransitionHours: 2
+		# PERFORMANCE (Uhrzeitwechsel): jeder Beleuchtungsschritt loest einen vollen Karten-Re-Tint aus
+		# (alle Terrain-Layer, 4 TintAt/Zelle + Vertex-Upload). Bei Epsilon 0.002 waren das ~225 volle
+		# Re-Tints je Uebergang -> spuerbarer, minutenlanger Einbruch waehrend Daemmerung/Morgen. Groesser
+		# = weniger, groebere Schritte (hier ~37 statt 225); ueber Minuten voellig unmerklich, da der
+		# Uebergang ohnehin langsam ist. SweepTicks verteilt jeden Re-Tint duenner ueber mehr Ticks.
+		Epsilon: 0.012
+		SweepTicks: 40
+		# Nacht: dunkler + leichter Blaustich (Mondlicht). Tag bleibt neutral.
+		DayIntensity: 1.0
+		NightIntensity: 0.55
+		NightRedTint: 0.85
+		NightGreenTint: 0.90
+		NightBlueTint: 1.15
+
+# --- Tiberium leuchtet ---
+# Tiberium ist eine Terrain-Ressource (ResourceLayer), KEIN Aktor -- TerrainLightSource kann also
+# nicht daran haengen. Dieser Trait aggregiert die Ressourcen-Zellen blockweise (6x6) zu je einer
+# Lichtquelle: ein grosses Feld leuchtet ueber mehrere Bloecke, ein kleiner Fleck ueber einen,
+# und die Zahl der Lichtquellen bleibt beschraenkt, egal wie viel Tiberium auf der Karte liegt.
+# Abgebautes Tiberium nimmt sein Licht mit (Block leer -> Lichtquelle weg).
+# NUR auf World: (nicht ^BaseWorld), der Editor nutzt einen eigenen EditorResourceLayer.
+World:
+	AotResourceLighting@AOTTIBERIUM:
+		ResourceType: Tiberium
+		BlockSize: 6
+		Range: 4c0
+		Intensity: 0.18
+		RedTint: 0.02
+		GreenTint: 0.22
+		BlueTint: 0.04
+	AotResourceLighting@AOTBLUETIBERIUM:
+		ResourceType: BlueTiberium
+		BlockSize: 6
+		Range: 4c0
+		Intensity: 0.20
+		RedTint: 0.02
+		GreenTint: 0.12
+		BlueTint: 0.30
+	# Tiberian Veins (Toxic Weed): roetlich-oranges Glimmen des Geflechts.
+	# Eigener Trait statt AotResourceLighting -- Veins sind KEINE ResourceLayer-Ressource, sondern
+	# je ein Aktor pro Zelle (aot-vein-cell), verwaltet vom World-Trait AotVeinLayer.
+	# Gleiche Block-Aggregation: ein Vein-Feld erreicht schnell mehrere hundert Zellen, einzelne
+	# Lichtquellen pro Zelle wuerden die Lighting-Partition zumuellen.
+	AotVeinLighting:
+		BlockSize: 6
+		Range: 4c0
+		Intensity: 0.18
+		RedTint: 0.30
+		GreenTint: 0.11
+		BlueTint: 0.01
+
+# --- Vein Heart: kraeftigeres roetlich-oranges Leuchten als das Geflecht ---
+# Einzelner Aktor -> TerrainLightSource direkt, keine Aggregation noetig.
+# Stirbt das Heart, verschwindet sein Licht mit ihm (INotifyRemovedFromWorld).
+aot-vein-heart:
+	TerrainLightSource:
+		Range: 6c0
+		Intensity: 0.34
+		RedTint: 0.36
+		GreenTint: 0.13
+		BlueTint: 0.01
+
+# --- Fraktions-Licht an ALLEN Spieler-Gebaeuden ---
+# GDI gelblich, NOD roetlich. Der Split MUSS ueber die Laufzeit-Fraktion laufen, nicht ueber den
+# Aktor-Typ: NUKE, SILO und FIX werden von BEIDEN Fraktionen gebaut (ein Aktor, zwei Besitzer).
+# Eigene Condition-Namen (nicht das bestehende aot-nod-faction von NUKE), damit sich Licht- und
+# Energie-Logik nicht gegenseitig ins Gehege kommen.
+# Auf ^BaseBuilding = alle spielergebauten Strukturen inkl. Verteidigung (^Support erbt davon);
+# neutrale Zivilgebaeude (^CivBuilding) bleiben bewusst aussen vor.
+^BaseBuilding:
+	GrantConditionOnFaction@AOTLIGHTGDI:
+		Condition: aot-light-faction-gdi
+		Factions: gdi
+	GrantConditionOnFaction@AOTLIGHTNOD:
+		Condition: aot-light-faction-nod
+		Factions: nod
+	TerrainLightSource@AOTLIGHTGDI:
+		RequiresCondition: aot-light-faction-gdi
+		Range: 4c0
+		Intensity: 0.20
+		RedTint: 0.20
+		GreenTint: 0.15
+		BlueTint: 0.02
+	TerrainLightSource@AOTLIGHTNOD:
+		RequiresCondition: aot-light-faction-nod
+		Range: 4c0
+		Intensity: 0.20
+		RedTint: 0.22
+		GreenTint: 0.05
+		BlueTint: 0.04
+
+# --- Light Posts: gebackener Sprite + Lichtfarbe exakt nach Namen ---
+# Sprite: alle 6 teilen sich EIN Bild -- das ist in TS genauso (REDLAMP/GRENLAMP/BLUELAMP/
+# YELWLAMP/PURPLAMP erben dort alle von GALITE und ueberschreiben NUR die TerrainLightSource).
+# Neu gebacken aus gtlite.shp (Temperate-Variante, siehe aot-ts-civilian-sequences.yaml).
+# Palette: das gebackene PNG ist RGBA -- die indizierte aot-ts-isotem-Palette darf hier NICHT
+# mehr drauf. "effect" ist neutral; ein explizit gesetztes Palette: schaltet den Owner-Remap
+# bereits selbst ab (RenderSprites: isPlayerPalette = Info.Palette == null), ein zusaetzliches
+# IsPlayerPalette gibt es auf RenderSprites NICHT (nur auf WithSpriteBody & Co).
+# Lichtwerte 1:1 aus engine/mods/ts/rules/civilian-structures.yaml uebernommen, damit jede Lampe
+# exakt die Farbe zeigt, die ihr Name sagt. Die Reichweiten sind gegenueber TS auf 75%
+# reduziert (User-Wunsch 2026-07-27, TS-Original war 11-19 Zellen und streute zu weit):
+# galite 19c544->14c664, farbige Lampen 15c640->11c736, lila 11c736->8c808.
+# GALITE (weiss) weicht bewusst von TS ab (User-Fund 2026-07-27: "war in-game praktisch nicht
+# wahrnehmbar, ganz anders als die anderen"). TS gab ihm Intensity 0.2 / Tint 0.05,0.05,0.01 --
+# rein von der Helligkeit war das mit 1.43x der Nacht-Baseline sogar STAERKER als die rote Lampe
+# (1.38x). Der Unterschied ist der Farbstich: die farbigen Lampen druecken einen Kanal weit ueber
+# 1.0 und stechen dadurch heraus, ein neutraler Tint von 0.05 macht die Nacht dagegen nur minimal
+# heller -> faellt schlicht nicht auf.
+# Neue Werte heben zusaetzlich den BLAUSTICH der Nacht auf: Baseline-Tint ist 0.85/0.90/1.15,
+# die ungleiche Zugabe 0.40/0.35/0.10 ergibt exakt 1.25/1.25/1.25 = neutral weiss.
+# Ergebnis im Zentrum: RGB 1.125 gleichmaessig = 2.25x Nacht-Luminanz -> klar sichtbarer,
+# neutral-weisser Lichtkegel im blauen Nachtbild, vergleichbar praesent wie die Farblampen.
+#
+# EditorConfigurable schaltet die beiden Karteneditor-Optionen frei (User-Wunsch 2026-07-28) und
+# wird von den fuenf Farblampen ueber "Inherits: aot-ts-galite" mitgeerbt:
+#   CHECKBOX "Always on" - Lampe ignoriert die Tag/Nacht-Abblendung und leuchtet rund um die Uhr.
+#     Einzige Ausnahme bleibt der Ion Storm, der ausnahmslos alle Lichtquellen loescht.
+#   SLIDER "Brightness (%)" - dimmt die Lampe zwischen 0% und dem hier gesetzten Intensity/Tint.
+#     Die Werte unten sind also Maximum UND Standardwert (Regler startet auf 100%).
+# Bewusst NICHT auf ^BaseBuilding: dort haengen zwei Condition-Instanzen (GDI/NOD) am selben
+# Aktor, jede wuerde ein eigenes gleichnamiges Widget auf denselben ActorInit anlegen.
+aot-ts-galite:
+	RenderSprites:
+		Palette: effect
+	TerrainLightSource:
+		EditorConfigurable: True
+		Range: 14c664
+		Intensity: 0.35
+		RedTint: 0.40
+		GreenTint: 0.35
+		BlueTint: 0.10
+
+aot-ts-redlamp:
+	TerrainLightSource:
+		Range: 11c736
+		Intensity: 0.01
+		RedTint: 1.5
+		GreenTint: 0.01
+		BlueTint: 0.01
+
+aot-ts-grenlamp:
+	TerrainLightSource:
+		Range: 11c736
+		Intensity: 0.01
+		RedTint: 0.01
+		GreenTint: 1.5
+		BlueTint: 0.01
+
+aot-ts-bluelamp:
+	TerrainLightSource:
+		Range: 11c736
+		Intensity: 0.01
+		RedTint: 0.01
+		GreenTint: 0.01
+		BlueTint: 0.7
+
+aot-ts-yelwlamp:
+	TerrainLightSource:
+		Range: 11c736
+		Intensity: 0.01
+		RedTint: 1.5
+		GreenTint: 1.5
+		BlueTint: 0.01
+
+aot-ts-purplamp:
+	TerrainLightSource:
+		Range: 8c808
+		Intensity: 0.01
+		RedTint: 2.0
+		GreenTint: 0.01
+		BlueTint: 2.0
+
+# --- Baubarer Lightpost (aot-lightpost, Age 3): Licht in SPIELERFARBE, schwaecher ---
+# Das SPRITE bleibt neutral wie bei den Editor-Posts (User 2026-07-28) -- die Spielerfarbe
+# steckt komplett im Licht.
+# UsePlayerColor (Engine-Patch 2026-07-28 in TerrainLightSource.cs): der Tint kommt aus der
+# Farbe des Besitzers statt aus Red/Green/BlueTint. Die Farbe wird normiert (hellster Kanal = 1)
+# und dann mit PlayerColorTintScale skaliert -- ohne die Normierung wuerde ein dunkles
+# Spielerblau bei identischen Rules-Werten kaum leuchten und ein helles Gelb ausbrennen.
+# Bei Uebernahme (Engineer/Carjacker) wird die Lichtquelle neu registriert -> Farbe folgt.
+# Der Tint ist ADDITIV auf den Welt-Tint (TerrainLighting.TintAt) und damit der Traeger der
+# FARBE; Intensity bestimmt, wie viel HELLER es wird. Die TS-Farblampen fahren Tint 1.5 bei
+# Intensity 0.01 -- 0.9/0.05 ist also klar die schwaechere Variante, wie gewuenscht.
+# Der Aktor erbt von ^BaseBuilding auch das Fraktions-Gebaeudelicht (@AOTLIGHTGDI/NOD) -- das
+# wird hier entfernt, sonst liegt ein gelb-/rotstichiger Schein UNTER dem weissen Lampenlicht
+# und verfaelscht es. Beide GrantConditionOnFaction fliegen mit raus, damit keine Condition
+# ohne Konsumenten uebrig bleibt.
+# RequiresCondition: TerrainLightSource ist im Mod ein ConditionalTrait (Engine-Patch) --
+# die Lampe geht komplett aus (nicht nur gedimmt), und zwar bei allen drei Anlaessen:
+#   !lowpower                 kein Strom
+#   !aot-ion-storm-blackout   Ion Storm (Condition kommt von ^Building, s. overrides.yaml).
+#                             Streng genommen redundant -- AotIonStormPower ruft beim Sturm
+#                             lighting.SetLightSourcesDisabled(true) und loescht damit ohnehin
+#                             ALLE Lichtquellen. Steht hier trotzdem, damit die Lampe nicht
+#                             von diesem globalen Seiteneffekt abhaengt und Licht+Sensor
+#                             nachweislich dieselbe Bedingung teilen.
+#   !aot-lightpost-off        von Hand per Deploy abgeschaltet (s. aot-structures.yaml)
+# Die Bedingung MUSS mit der von DetectCloaked identisch sein, damit Licht und Sensor immer
+# gemeinsam schalten.
+aot-lightpost:
+	-GrantConditionOnFaction@AOTLIGHTGDI:
+	-GrantConditionOnFaction@AOTLIGHTNOD:
+	-TerrainLightSource@AOTLIGHTGDI:
+	-TerrainLightSource@AOTLIGHTNOD:
+	TerrainLightSource:
+		RequiresCondition: !lowpower && !aot-ion-storm-blackout && !aot-lightpost-off && !build-incomplete
+		Range: 6c0
+		UsePlayerColor: true
+		PlayerColorTintScale: 0.9
+		Intensity: 0.05
+# === Ende aotmod ===

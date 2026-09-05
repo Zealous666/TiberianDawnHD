@@ -1,0 +1,161 @@
+World:
+	# === Age of Tiberium (aotmod) - Creeps-Player automatisch feindlich zu allen Spielern ===
+	AotCreepsSetup:
+		CreepsPlayerName: Creeps
+	# === Ende aotmod ===
+	StartingUnits@defaultgdia:
+		Class: light
+		ClassName: options-starting-units.light-support
+	# Latch: wahr, sobald der ERSTE Spieler Age 1 abgeschlossen hat (aot-age1-Marker existiert).
+	# Deckelt den Blossom-Tree-Transform-Timer (T03/T13.Transformable, siehe unten).
+	AotGlobalPrerequisiteFlag@age1:
+		Prerequisite: aot-age1
+		Factions: gdi
+		BaseActor: mcv
+		SupportActors: aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e3-gdi,aot-e3-gdi,aot-e2-gdi
+	StartingUnits@defaultnoda:
+		Class: light
+		ClassName: options-starting-units.light-support
+		Factions: nod
+		BaseActor: mcv
+		SupportActors: aot-e1-nod,aot-e1-nod,aot-e1-nod,aot-e1-nod,aot-e1-nod,aot-e3-nod,aot-e3-nod,aot-e4-nod
+	StartingUnits@heavynoda:
+		Class: heavy
+		ClassName: options-starting-units.heavy-support
+		Factions: nod
+		BaseActor: mcv
+		SupportActors: aot-e1-nod,aot-e1-nod,aot-e1-nod,aot-e1-nod,aot-e1-nod,aot-e3-nod,aot-e3-nod,aot-e4-nod,TTNK,TTNK
+	StartingUnits@heavynodb:
+		Class: heavy
+		ClassName: options-starting-units.heavy-support
+		Factions: nod
+		BaseActor: mcv
+		SupportActors: aot-e1-nod,aot-e1-nod,aot-e1-nod,aot-e1-nod,aot-e1-nod,aot-e3-nod,aot-e3-nod,aot-e4-nod,TTNK,aot-v2-base
+	StartingUnits@heavygdia:
+		Class: heavy
+		ClassName: options-starting-units.heavy-support
+		Factions: gdi
+		BaseActor: mcv
+		SupportActors: aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e3-gdi,aot-e3-gdi,aot-e2-gdi,MTNK,MTNK,MTNK
+	StartingUnits@heavygdib:
+		Class: heavy
+		ClassName: options-starting-units.heavy-support
+		Factions: gdi
+		BaseActor: mcv
+		SupportActors: aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e1-gdi,aot-e3-gdi,aot-e3-gdi,aot-e2-gdi,MTNK,MTNK,aot-jeep-base,aot-jeep-base
+
+# === Age of Tiberium (aotmod) - Baeume durch konventionelle Waffen faellbar ===
+# Baeume bekommen einen EIGENEN Ruestungstyp (Tree) statt Wood. Grund: Wood ist in
+# cnc der Standard-Ruestungstyp fuer Gebaeude (^Building), d.h. wuerde man den Wood-
+# Waffenschaden fuer Baeume anpassen, aendert man auch den Schaden gegen Gebaeude.
+# Mit eigenem Tree-Typ laesst sich der Baumschaden separat einstellen (siehe
+# aot-weapons.yaml: ^BallisticWeapon/^MissileWeapon -> Tree:50 = halbe Wirkung).
+# HP von 50000 auf 24000 gesenkt (User-Wunsch 2026-07-12): Baeume fallen schneller;
+# Flammen-/Superwaffen bleiben bei 100% (deren Wood-Werte greifen bei Tree-Ruestung
+# nicht mehr -> Default 100%), konventionelle Waffen brauchen ~doppelten Schaden.
+^Tree:
+	Health:
+		HP: 24000
+	Armor:
+		Type: Tree
+
+# Verbrannte Baumreste (Txx.Husk erben von ^TreeHusk) waren bisher unzerstoerbar
+# und blockierten dauerhaft den Bauplatz. Sie bekommen jetzt EXAKT dieselbe HP wie
+# der Baum (24000) + denselben Tree-Ruestungstyp + Targetable/HitShape, damit sie
+# von denselben konventionellen Waffen weggeraeumt werden koennen. ^TreeHusk hat
+# KEIN SpawnActorOnDeath und KEINE WithDeathAnimation -> der Rest verschwindet beim
+# Zerstoeren spurlos, die Zelle wird wieder bebaubar.
+^TreeHusk:
+	Health:
+		HP: 24000
+	Armor:
+		Type: Tree
+	Targetable:
+		TargetTypes: Trees
+	HitShape:
+	# Rodung Phase 2 (User-Wunsch 2026-08-04): die Tiberium-Missile macht mit ihrem
+	# baum-exklusiven Warhead (aot-weapons.yaml, aot-TiberiumStrike/Warhead@7Trees) alle
+	# Baeume im 5-Zellen-Umkreis zu Husks; den Rest erledigt sporadisch das freigesetzte Gas.
+	# Technisch dasselbe Muster wie bei Infanterie/Fahrzeugen/Gebaeuden (overrides.yaml): die
+	# Gaswolke grantet per ProximityExternalCondition "aot-tiberium-gassed", AotDamagedByCondition
+	# tickt daraufhin Schaden. Das Gas RAEUMT die Husks aber nicht weg (User-Korrektur nach Test
+	# 2026-08-04), es macht sie nur muerbe: gestreift = halbe HP, laengerer Kontakt = 5% Rest.
+	# Danach genuegt ein beliebiger Panzerschuss. Bewusst NUR am Husk, nicht an ^Tree: wie
+	# stehende Baeume sonst zerstoert werden, bleibt unangetastet.
+	ExternalCondition@AOTGAS:
+		Condition: aot-tiberium-gassed
+	AotDamagedByCondition:
+		RequiresCondition: aot-tiberium-gassed
+		# 12000 = 50% der 24000 HP pro Treffer (User 2026-08-04): ein Husk, den die Wolke nur
+		# streift, bekommt genau einen Tick ab und steht danach auf der Haelfte. Bei laengerem
+		# Kontakt kappt MinHealthPercentage den zweiten Tick auf 5% Rest.
+		Damage: 12000
+		DamageInterval: 25
+		DamageTypes: TiberiumDeath
+		# User-Korrektur 2026-08-04: das Gas soll die Husks NICHT wegraeumen, sondern nur zu 95%
+		# zerstehen -- sie bleiben als Splitter stehen und fallen erst durch einen beliebigen
+		# weiteren Treffer. MinHealthPercentage ist dafuer neu am Trait (AotDamagedByCondition.cs).
+		MinHealthPercentage: 5
+
+# T03.Transformable/T13.Transformable mutieren zu Blossom Trees (TransformsNearResources),
+# sobald Tiberium angrenzt. Default-Delay war 1000-3000 Ticks (= 40-120s bei Timestep 40ms) -
+# viel zu schnell. User-Wunsch (2026-08-29): 15-20 Min (15min=900s/0.04=22500, 20min=30000),
+# ABER spaetestens sobald der erste Spieler Age 1 abgeschlossen hat (ForcePrerequisite:
+# aot-age1, gedeckelt ueber den World-Latch AotGlobalPrerequisiteFlag@age1 oben).
+T03.Transformable:
+	TransformsNearResources:
+		Delay: 22500, 30000
+		ForcePrerequisite: aot-age1
+	# aotmod 2026-09-01: In-game Hover-Name statt "Tree".
+	Tooltip:
+		Name: meta-tiberium-infested-tree-name
+
+# aotmod 2026-08-29: eigener, separat platzierbarer Baum, der neben BLAUEM Tiberium (>=1 Zelle)
+# unter denselben Bedingungen wie T03/T13.Transformable zu einem Blue Blossom Tree (splitblue)
+# wird. Optik = t03 (normaler Baum) bis zur Verwandlung. IntoActor splitblue seedet BlueTiberium.
+T03.TransformableBlue:
+	Inherits: ^Tree
+	RenderSprites:
+		Image: t03
+	# Eigene Editor-Kategorie "Resource spawn" (wie splitblue/split2), damit der Baum nicht
+	# zwischen ~20 optisch identischen gruenen Baeumen der "Tree"-Kategorie untergeht. Er sieht
+	# bis zur Mutation aus wie ein normaler t03-Baum; Hover-Name macht ihn eindeutig.
+	MapEditorData:
+		Categories: Resource spawn
+		ExcludeTilesets: DESERT
+	SpawnActorOnDeath:
+		Actor: T03.Husk
+	TransformsNearResources:
+		Type: BlueTiberium
+		IntoActor: splitblue
+		Offset: 0,1
+		Adjacency: 1
+		Delay: 22500, 30000
+		ForcePrerequisite: aot-age1
+	Tooltip:
+		Name: meta-tiberium-infested-tree-name
+	EditorOnlyTooltip:
+		Name: actor-t03-transformableblue-name
+
+T13.Transformable:
+	TransformsNearResources:
+		Delay: 22500, 30000
+		ForcePrerequisite: aot-age1
+	Tooltip:
+		Name: meta-tiberium-infested-tree-name
+
+# Blossom-Tree-Wachstum (SeedsResource) von 55/55/110 auf 100 Ticks fuer alle drei
+# (User-Wunsch 2026-07-30). trees.yaml selbst ist Teil der Engine-Kopie und gitignored
+# (siehe .gitignore) -- ein direkter Edit dort ginge beim naechsten Engine-Neubezug
+# verloren, deshalb hier ueberschrieben, gleiches Muster wie T03/T13.Transformable oben.
+SPLIT2:
+	SeedsResource:
+		Interval: 100
+
+SPLIT3:
+	SeedsResource:
+		Interval: 100
+
+SPLITBLUE:
+	SeedsResource:
+		Interval: 100

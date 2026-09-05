@@ -1,3 +1,58 @@
+# === Age of Tiberium (aotmod) - GDI Spy Voice (RA Allied Spy sounds) ===
+SpyVoice:
+	Voices:
+		Select: syessir1, scomnd1
+		Move: sonway1, sindeed1
+		Action: sking1
+		Die: dedman1, dedman2, dedman3, dedman4, dedman5, dedman7, dedman8
+		Burned: dedman10
+		Zapped: dedman6
+		Poisoned: dedman1, dedman2, dedman3, dedman4, dedman5
+
+# === Age of Tiberium (aotmod) - NOD Chameleon Spy Voice (TS Spy series 21) ===
+ChameleonSpyVoice:
+	Voices:
+		Select: 21-i000, 21-i002, 21-i004
+		Move: 21-i010, 21-i012, 21-i016
+		Action: 21-i010, 21-i012, 21-i022
+		Die: dedman1, dedman3, dedman4, dedman5, dedman6
+		Burned: dedman10
+		Zapped: dedman6
+		Poisoned: dedman1, dedman3, dedman4, dedman5
+
+# === Age of Tiberium (aotmod) - NOD Dog Voice (RA sounds) ===
+DogVoice:
+	Voices:
+		Select: dogw3px
+		Move: dogy1
+		Attack: dogg5p
+		Action: dogy1
+		Die: dogw5, dogw7
+		Burned: dogw6
+		Zapped: dogw6
+		Poisoned: dogw5, dogw7
+
+# === Age of Tiberium (aotmod) - NOD Soviet Infantry Voice (RA russian.mix) ===
+NodRiflemanVoice:
+	Voices:
+		Select: nod-await1, nod-ready, nod-report1, nod-yessir1
+		Action: nod-ackno, nod-affirm1, nod-noprob, nod-overout, nod-ritaway, nod-roger, nod-ugotit
+		Die: dedman1, dedman2, dedman3, dedman4, dedman5, dedman7, dedman8
+		Burned: dedman10
+		Zapped: dedman6
+		Poisoned: dedman1, dedman2, dedman3, dedman4, dedman5
+
+# === Age of Tiberium (aotmod) - GDI Engineer Voice (TS speech, 19-er Serie) ===
+EngineerVoice:
+	Voices:
+		Select: 19-i000, 19-i002, 19-i006
+		Action: 19-i010, 19-i016
+		Attack: 19-i018, 19-i016
+		Die: dedman1, dedman2, dedman4, dedman5, dedman6
+		Burned: dedman1, dedman2, dedman4, dedman5, dedman6
+		Zapped: dedman1, dedman2, dedman4, dedman5, dedman6
+		Poisoned: dedman1, dedman2, dedman4, dedman5, dedman6
+
 GenericVoice:
 	DefaultVariant: .WAV
 	Voices:
@@ -67,3 +122,87 @@ DinoVoice:
 		Burned: TDR_SFX_DINODIE1
 		Zapped: TDR_SFX_DINODIE1
 		Poisoned: TDR_SFX_DINODIE1
+
+# === Age of Tiberium (aotmod) - NOD Cyborg ===
+# TS-Originalsounds aus speech02.mix (jetzt als optionales Package gemountet).
+# Dateinamen: 22-i000.aud = Select, 22-i008.aud = Move/Attack, 22-n104.aud = Die.
+CyborgVoice:
+	Voices:
+		Select: 22-i000, 22-i002, 22-i006
+		Action: 22-i008, 22-i010, 22-i014, 22-i016, 22-i020
+		Attack: 22-i008, 22-i010, 22-i012, 22-i018
+		Die: 22-n104, 22-n106, 22-n108
+		Burned: 22-n104, 22-n106, 22-n108
+		Zapped: 22-n104, 22-n106, 22-n108
+		Poisoned: 22-n104, 22-n106, 22-n108
+
+WolverineVoice:
+	Voices:
+		Select: 15-i000, 15-i040, 15-i042
+		Action: 15-i024, 15-i044
+		Attack: 15-i006, 15-i046
+
+CyborgCommandoVoice:
+	Voices:
+		Select: 23-i000, 23-i002, 23-i004, 23-i006
+		Action: 23-i008, 23-i010, 23-i012, 23-i016
+		Attack: 23-i014, 23-i018, 23-i020, 23-i022
+		Die: dedman1, dedman2, dedman4, dedman5, dedman6
+		Burned: dedman1, dedman2, dedman4, dedman5, dedman6
+		Zapped: dedman1, dedman2, dedman4, dedman5, dedman6
+		Poisoned: dedman1, dedman2, dedman4, dedman5, dedman6
+
+# === Age of Tiberium (aotmod) - Zone Trooper Voice (TS Ghost Stalker, 14-er Serie) ===
+ZoneTrooperVoice:
+	Voices:
+		Select: 14-i000, 14-i002, 14-i004
+		Action: 14-i008, 14-i010, 14-i012, 14-i014
+		Attack: 14-i008, 14-i010, 14-i014, 14-i016
+		Die: dedman1, dedman2, dedman4, dedman5, dedman6
+		Burned: dedman1, dedman2, dedman4, dedman5, dedman6
+		Zapped: dedman1, dedman2, dedman4, dedman5, dedman6
+		Poisoned: dedman1, dedman2, dedman4, dedman5, dedman6
+
+# === Age of Tiberium (aotmod) - GDI Combat Medic Voice (RA Allied Medic) ===
+MedicVoice:
+	Voices:
+		Select: mrespon1, myessir1
+		Action: maffirm1, mmovout1
+		Die: dedman1, dedman2, dedman3, dedman4, dedman5, dedman7, dedman8
+		Burned: dedman10
+		Zapped: dedman6
+		Poisoned: dedman5, dedman7
+
+# === Age of Tiberium (aotmod) - GDI Field Mechanic Voice (RA Allied Mechanic) ===
+MechanicVoice:
+	Voices:
+		Select: mhuh1, mhowdy1, mlaff1
+		Move: mboss1, mhear1, myes1, mrise1
+		Action: mhotdig1, mwrench1, myeehaw1
+		Die: dedman1, dedman2, dedman3, dedman4, dedman5, dedman7, dedman8
+		Burned: dedman10
+		Zapped: dedman6
+		Poisoned: dedman5, dedman7
+
+# === Age of Tiberium (aotmod) - NOD Carjacker Voice (TS Hijacker series 24) ===
+CarjackerVoice:
+	Voices:
+		Select: 24-i000, 24-i002, 24-i004, 24-i006
+		Move: 24-i008, 24-i010, 24-i012, 24-i014
+		Action: 24-i016, 24-i018, 24-i020, 24-i022, 24-i024
+		Die: dedman1, dedman3, dedman4, dedman5, dedman6
+		Burned: dedman10
+		Zapped: dedman6
+		Poisoned: dedman1, dedman3, dedman4, dedman5
+
+# === Age of Tiberium (aotmod) - Ant Voice ===
+# Select/Action sind Pflicht (Selectable/Mobile/AttackMove/AttackFrontal fordern sie an).
+# Ameisen gehoeren Creeps/Neutral und werden nie vom Spieler selektiert oder befehligt,
+# d.h. praktisch feuert nur Die. Alle drei nutzen die Ant-Sounds, nie Menschenstimmen.
+AntVoice:
+	DefaultVariant: .wav
+	Voices:
+		Select: aot-antbite
+		Action: aot-antbite
+		Attack: aot-antbite
+		Die: aot-antdie

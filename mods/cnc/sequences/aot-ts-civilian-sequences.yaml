@@ -1,0 +1,737 @@
+# === Age of Tiberium (aotmod) - TS Civilian Buildings Sequenzen ===
+# Scale initial per Formel (32 / getrimmte Content-Breite in px) geschaetzt,
+# analog gtpowr.shp-Referenz (2x2, Scale 0.4 final). Im Spiel feinjustieren.
+
+aot-ts-ct0001:
+	Defaults:
+		Filename: ct0001.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.283
+
+aot-ts-ca0001:
+	Defaults:
+		Filename: ca0001.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.333
+
+aot-ts-ct0002:
+	Defaults:
+		Filename: ct0002.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.438
+
+aot-ts-ca0002:
+	Defaults:
+		Filename: ca0002.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.416
+
+aot-ts-ct0003:
+	Defaults:
+		Filename: ct0003.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.444
+
+aot-ts-ca0003:
+	Defaults:
+		Filename: ca0003.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.444
+
+aot-ts-ct0004:
+	Defaults:
+		Filename: ct0004.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.376
+
+aot-ts-ca0004:
+	Defaults:
+		Filename: ca0004.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.376
+
+aot-ts-ct0005:
+	Defaults:
+		Filename: ct0005.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.5
+
+aot-ts-ca0005:
+	Defaults:
+		Filename: ca0005.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.5
+
+aot-ts-ct0006:
+	Defaults:
+		Filename: ct0006.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.5
+
+aot-ts-ca0006:
+	Defaults:
+		Filename: ca0006.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.5
+
+aot-ts-ct0007:
+	Defaults:
+		Filename: ct0007.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.5
+
+aot-ts-ca0007:
+	Defaults:
+		Filename: ca0007.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.5
+
+aot-ts-ct0008:
+	Defaults:
+		Filename: ct0008.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.327
+
+aot-ts-ca0008:
+	Defaults:
+		Filename: ca0008.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.34
+
+aot-ts-ct0009:
+	Defaults:
+		Filename: ct0009.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.356
+
+aot-ts-ca0009:
+	Defaults:
+		Filename: ca0009.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.395
+
+aot-ts-ct0010:
+	Defaults:
+		Filename: ct0010.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.333
+
+aot-ts-ca0010:
+	Defaults:
+		Filename: ca0010.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.333
+
+aot-ts-ct0011:
+	Defaults:
+		Filename: ct0011.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.571
+
+aot-ts-ca0011:
+	Defaults:
+		Filename: ca0011.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.571
+
+aot-ts-ct0012:
+	Defaults:
+		Filename: ct0012.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.516
+
+aot-ts-ca0012:
+	Defaults:
+		Filename: ca0012.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.516
+
+aot-ts-ct0013:
+	Defaults:
+		Filename: ct0013.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.571
+
+aot-ts-ca0013:
+	Defaults:
+		Filename: ca0013.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.571
+
+aot-ts-ct0014:
+	Defaults:
+		Filename: ct0014.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.667
+
+aot-ts-ca0014:
+	Defaults:
+		Filename: ca0014.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.667
+
+aot-ts-ct0015:
+	Defaults:
+		Filename: ct0015.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.667
+
+aot-ts-ca0015:
+	Defaults:
+		Filename: ca0015.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.667
+
+aot-ts-ct0016:
+	Defaults:
+		Filename: ct0016.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.667
+
+aot-ts-ca0016:
+	Defaults:
+		Filename: ca0016.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.667
+
+aot-ts-ct0017:
+	Defaults:
+		Filename: ct0017.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.727
+
+aot-ts-ca0017:
+	Defaults:
+		Filename: ca0017.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.727
+
+aot-ts-ct0018:
+	Defaults:
+		Filename: ct0018.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.457
+
+aot-ts-ca0018:
+	Defaults:
+		Filename: ca0018.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.457
+
+aot-ts-ct0019:
+	Defaults:
+		Filename: ct0019.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.457
+
+aot-ts-ca0019:
+	Defaults:
+		Filename: ca0019.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.457
+
+aot-ts-ct0020:
+	Defaults:
+		Filename: ct0020.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.508
+
+aot-ts-ca0020:
+	Defaults:
+		Filename: ca0020.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.508
+
+aot-ts-ct0021:
+	Defaults:
+		Filename: ct0021.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.542
+
+aot-ts-ca0021:
+	Defaults:
+		Filename: ca0021.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.508
+
+aot-ts-city01:
+	Defaults:
+		Filename: city01.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.26
+
+aot-ts-city02:
+	Defaults:
+		Filename: city02.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.372
+
+aot-ts-city03:
+	Defaults:
+		Filename: city03.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.32
+
+aot-ts-city04:
+	Defaults:
+		Filename: city04.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.286
+
+aot-ts-city05:
+	Defaults:
+		Filename: city05.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.305
+
+aot-ts-city06:
+	Defaults:
+		Filename: city06.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.258
+
+aot-ts-city07:
+	Defaults:
+		Filename: city07.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.302
+
+aot-ts-city08:
+	Defaults:
+		Filename: city08.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.464
+
+aot-ts-city09:
+	Defaults:
+		Filename: city09.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.39
+
+aot-ts-city10:
+	Defaults:
+		Filename: city10.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.333
+
+aot-ts-city11:
+	Defaults:
+		Filename: city11.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.314
+
+aot-ts-city12:
+	Defaults:
+		Filename: city12.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.508
+
+aot-ts-city13:
+	Defaults:
+		Filename: city13.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.372
+
+aot-ts-city14:
+	Defaults:
+		Filename: city14.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.727
+
+aot-ts-city15:
+	Defaults:
+		Filename: city15.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.232
+
+aot-ts-city16:
+	Defaults:
+		Filename: city16.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.286
+
+aot-ts-city17:
+	Defaults:
+		Filename: city17.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.201
+
+aot-ts-city18:
+	Defaults:
+		Filename: city18.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.18
+
+aot-ts-city19:
+	Defaults:
+		Filename: city19.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.372
+
+aot-ts-city20:
+	Defaults:
+		Filename: city20.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 1.103
+
+aot-ts-city21:
+	Defaults:
+		Filename: city21.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 1.067
+
+aot-ts-city22:
+	Defaults:
+		Filename: city22.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.4
+
+aot-ts-aban01:
+	Defaults:
+		Filename: aban01.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.195
+
+aot-ts-aban02:
+	Defaults:
+		Filename: aban02.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.182
+
+aot-ts-aban03:
+	Defaults:
+		Filename: aban03.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.211
+
+aot-ts-aban04:
+	Defaults:
+		Filename: aban04.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.26
+
+aot-ts-aban05:
+	Defaults:
+		Filename: aban05.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.281
+
+aot-ts-aban06:
+	Defaults:
+		Filename: aban06.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.405
+
+aot-ts-aban07:
+	Defaults:
+		Filename: aban07.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.395
+
+aot-ts-aban08:
+	Defaults:
+		Filename: aban08.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.364
+
+aot-ts-aban09:
+	Defaults:
+		Filename: aban09.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.416
+
+aot-ts-aban10:
+	Defaults:
+		Filename: aban10.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.427
+
+aot-ts-aban11:
+	Defaults:
+		Filename: aban11.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.416
+
+aot-ts-aban12:
+	Defaults:
+		Filename: aban12.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.395
+
+aot-ts-aban13:
+	Defaults:
+		Filename: aban13.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.762
+
+aot-ts-aban14:
+	Defaults:
+		Filename: aban14.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.78
+
+aot-ts-aban15:
+	Defaults:
+		Filename: aban15.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.762
+
+aot-ts-aban16:
+	Defaults:
+		Filename: aban16.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 0.372
+
+aot-ts-aban17:
+	Defaults:
+		Filename: aban17.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 1.103
+
+aot-ts-aban18:
+	Defaults:
+		Filename: aban18.shp
+	idle:
+		Length: 1
+		ShadowStart: 2
+		Scale: 1.067
+
+# Neu gebacken (2026-07-27): rohes ctaray.shp direkt referenziert sah bei groesserer Skalierung
+# extrem pixelig aus (identisches Problem wie beim Wolverine-Mech-Import, siehe
+# [[ts-shp-mech-import]] "Cyborg-Palette-Ansatz ... extrem pixelig/grobkoernig"). Fix: eigener
+# SHP-TS-Format-Decoder (Python, TS-Frame-Format aus ShpTSLoader.cs rekonstruiert) liest die
+# rohen Palette-Indizes von Frame 0 direkt (keine Hausfarben-Pixel 16-31 vorhanden -> kein
+# Player-Color-Layer noetig), Scale3x/EPX-Vorskalierung (indexed-erhaltend, scharfe Kanten,
+# kein LANCZOS-Blur) 84x80 -> 252x240, dann erst zu RGBA (unittem.pal) geflattet und als
+# statisches PNG gebacken (bits/aot-ts-ctaray.png) - analog zum aot-ts-galite-Rebake.
+# Scale kompensiert die 3x-Vorskalierung: alte Ziel-Groesse (Scale 1.0 auf Rohgroesse) / 3 = 0.333.
+# User-Wunsch 2026-07-27: nochmal 25% kleiner -> 0.333 * 0.75 = 0.25.
+aot-ts-ctaray:
+	idle:
+		Filename: aot-ts-ctaray.png
+		Length: 1
+		Scale: 0.25
+
+aot-ts-ctpyr01:
+	Defaults:
+		Filename: ctpyr01.shp
+	idle:
+		Length: 1
+		ShadowStart: 1
+		Scale: 1.0
+
+aot-ts-ctpyr02:
+	Defaults:
+		Filename: ctpyr02.shp
+	idle:
+		Length: 1
+		ShadowStart: 1
+		Scale: 1.0
+
+aot-ts-ctpyr03:
+	Defaults:
+		Filename: ctpyr03.shp
+	idle:
+		Length: 1
+		ShadowStart: 1
+		Scale: 1.0
+
+# Light Post: neu gebacken 2026-07-27 (siehe lighting-system.md).
+# Vorher: rohes galite.shp mit Scale 1.778 -- gleich ZWEI Fehler.
+#  1) galite.shp ist laut TS (sequences/civilian.yaml: TilesetFilenames TEMPERATE: gtlite.shp /
+#     SNOW: galite.shp) die SCHNEE-Variante; fuer den Temperate-Look gehoert gtlite.shp her.
+#  2) Scale 1.778 kam aus der 32/Content-Breite-Formel (32/18px) -- die gilt so nicht.
+#     Belastbar: classicUpscaleFactor = RemasteredTileSize/TileSize = 128/24 = 5.333 (fuer den
+#     klassischen Filename-Pfad). TS-Zelle 48px -> unsere 128px = Faktor 2.67 noetig
+#     -> Scale = 2.67/5.333 = 0.5. Deckt sich mit dem einzigen in-game bestaetigten Referenzwert
+#     des Mods (gtpowr.shp, 96px-Canvas, final 0.55). 1.778 war also gut 3x zu gross.
+# Jetzt gebackenes RGBA-PNG (Frame 0 intakt, Frame 1 beschaedigt) statt rohem SHP -> Farben sind
+# fest aus isotem.pal gebacken, immun gegen Palette-Rotation/Fehlfarben.
+# ⚠️ Scale/Offset sind Startwerte, brauchen In-Game-Feinjustierung (Mod-Konvention).
+aot-ts-galite:
+	idle:
+		Filename: aot-ts-galite.png
+		Length: 1
+		Scale: 0.55
+	damaged-idle:
+		Filename: aot-ts-galite-damaged.png
+		Length: 1
+		Scale: 0.55
+
+aot-ts-ctvega:
+	Defaults:
+		Filename: ctvega.shp
+	idle:
+		Length: 1
+		ShadowStart: 3
+		Scale: 1.0
+
+aot-ts-ctdam:
+	Defaults:
+		Filename: ctdam.shp
+	idle:
+		Length: 1
+		Scale: 0.195
+# === Ende aotmod ===

@@ -1,0 +1,3930 @@
+#region Copyright & License Information
+/*
+ * Age of Tiberium mod addition.
+ * This file is part of OpenRA, which is free software. It is made
+ * available to you under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of
+ * the License, or (at your option) any later version. For more
+ * information, see COPYING.
+ */
+#endregion
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using OpenRA.Traits;
+
+namespace OpenRA.Mods.Common.Traits
+{
+	public static class AotOpsUtils
+	{
+		public static IEnumerable<CPos> Ring(CPos centre, int r)
+		{
+			if (r == 0)
+			{
+				yield return centre;
+				yield break;
+			}
+
+			for (var x = -r; x <= r; x++)
+			{
+				yield return new CPos(centre.X + x, centre.Y - r);
+				yield return new CPos(centre.X + x, centre.Y + r);
+			}
+
+			for (var y = -r + 1; y <= r - 1; y++)
+			{
+				yield return new CPos(centre.X - r, centre.Y + y);
+				yield return new CPos(centre.X + r, centre.Y + y);
+			}
+		}
+
+		// includeAir=true is for self-defense threat detection (a Hind overhead is very much a threat to
+		// an AA-capable unit standing in the base) -- every other caller wants ground-only targeting
+		// (attack-move destinations, capture candidates, etc.), where "Air" was always excluded.
+		public static bool IsPreferredEnemyUnit(Player player, Actor a, bool includeAir = false)
+		{
+			if (a == null || a.IsDead || !a.IsInWorld
+				|| player.RelationshipWith(a.Owner) != PlayerRelationship.Enemy
+				|| a.Info.HasTraitInfo<HuskInfo>())
+				return false;
+
+			var targetTypes = a.GetEnabledTargetTypes();
+			if (targetTypes.IsEmpty || (!includeAir && targetTypes.Contains("Air")))
+				return false;
+
+			var hasModifier = false;
+			foreach (var v in a.TraitsImplementing<IVisibilityModifier>())
+			{
+				if (v.IsVisible(a, player))
+					return true;
+				hasModifier = true;
+			}
+
+			return !hasModifier;
+		}
+	}
+
+	public sealed class AotProductionRequest
+	{
+		public AotMission Mission;
+		public string Role;
+		public string[] Chain = [];
+		public int Remaining;
+		public int Ordered;
+		public int LastOrderTick;
+	}
+
+	// Reported by wave/air-raid missions on completion so AotOperationsBotModule can drive the
+	// escalation ladder (secondary route after N failures, air raid after more). Unknown = the
+	// mission never really got going (e.g. nothing buildable) and shouldn't move the streak either way.
+	public enum AotMissionOutcome { Unknown, Success, Failure }
+
+	public abstract class AotMission
+	{
+		protected readonly AotOperationsBotModule Ops;
+		public readonly HashSet<Actor> Units = [];
+		public readonly string Name;
+		public bool Done { get; protected set; }
+		public AotMissionOutcome Outcome { get; protected set; } = AotMissionOutcome.Unknown;
+
+		// aotmod (snapshot): infrastructure missions are recreated and wired up by the module/service
+		// itself on start (they hold live, non-serialisable references). They must NOT be saved or
+		// reconstructed from a snapshot -- the live instance created on load is the correct one, and a
+		// reconstructed shell would be missing those references and crash on its first tick.
+		public virtual bool IsInfrastructure => false;
+
+		protected AotMission(AotOperationsBotModule ops, string name)
+		{
+			Ops = ops;
+			Name = name;
+		}
+
+		// ---------------------------------------------------------------------------------------
+		// "NOTHING LEFT" -- defined ONCE, here, on purpose.
+		//
+		// Every mission used to spell out "no units and no open requests -> we were wiped out" in its
+		// own Tick. That reading is wrong for any mission that orders lazily: one still saving up for
+		// its squad has no units and no open requests BY DESIGN, so it killed itself on its very first
+		// tick. It cost the base expansion 15 silent false starts and hit the derrick squad and both
+		// engineer raids as well -- the trap was even documented in a comment, and was still walked
+		// into twice after that. A comment cannot enforce anything; this structure can.
+		//
+		// Missions no longer write the check at all. They override the two questions only they can
+		// answer, and cannot forget a guard they never author.
+		// ---------------------------------------------------------------------------------------
+
+		// Opt-in: only missions that are genuinely OVER once their squad is gone. Waves, base defense
+		// and starting units legitimately sit empty and must keep running -- switching this on globally
+		// would have traded one bug for five.
+		protected virtual bool EndsWhenEmpty => false;
+
+		// False while the mission has deliberately not placed its orders yet (saving up for a batch).
+		protected virtual bool OrdersPlaced => true;
+
+		// True while the mission still owns something that is not a unit -- an expansion's construction
+		// yard, for instance -- and must therefore stay alive with an empty squad.
+		protected virtual bool HasAssets => false;
+
+		// What to do when the mission really is empty. Default: end it.
+		protected virtual void OnNothingLeft(IBot bot) { Finish(); }
+
+		public int TicksAlive { get; private set; }
+
+		bool everActive;
+
+		public void Tick(IBot bot)
+		{
+			if (Done)
+				return;
+
+			TicksAlive++;
+
+			if (Units.Count > 0 || Ops.OpenRequests(this) > 0)
+				everActive = true;
+
+			if (EndsWhenEmpty && OrdersPlaced && !HasAssets && Units.Count == 0 && Ops.OpenRequests(this) == 0)
+			{
+				OnNothingLeft(bot);
+				if (Done)
+					return;
+			}
+
+			TickMission(bot);
+		}
+
+		protected abstract void TickMission(IBot bot);
+
+		// Short, human-readable state for the periodic [AotStatus] line (User-Wunsch 2026-08-04:
+		// "der muss simpel und kurz enthalten: status der heli engineer raids ... base expansion").
+		// Deliberately terse -- it is read at a glance while a test is running, not parsed.
+		public virtual string Status() => Done ? "done" : "active";
+
+		public virtual void OnUnitAssigned(Actor a) { Units.Add(a); }
+
+		// May this mission absorb spare units that have been sitting in the pool doing nothing?
+		// Fixed-composition missions (scouts, derrick squads, ferries) say no -- they would be thrown
+		// off by arbitrary extra units.
+		public virtual bool AcceptsReinforcements => false;
+
+		// Only AotTransitMission may hold ships. A transport or escort that turns up at any other
+		// mission (a production order that outlived a crossing, say) goes straight back to the shared
+		// pool, where the transit service picks it up. Filing it as an ordinary combat unit strands it
+		// with a mission that will never command it again -- and since the fleet is globally capped,
+		// that starves every later crossing (User 2026-07-27: three transports idling on different
+		// shores while waves and scouts waited in the base).
+		protected bool ReturnStrayNavalSupport(Actor a)
+		{
+			if (!Ops.IsNavalSupport(a))
+				return false;
+
+			Ops.ReleaseToPool(this, [a]);
+			return true;
+		}
+
+		int stallFingerprint;
+		int stallTicks;
+
+		// Progress watchdog. Every order this AI issues is gated on IsIdle -- deliberately, so it does
+		// not cancel running activities. The blind spot is a unit that is BUSY but getting nowhere
+		// (blocked path, target it cannot reach, a transport wedged against another): it never goes idle,
+		// so it is never re-ordered and the whole mission quietly stops. Callers pass a cheap fingerprint
+		// of "what should change if we were making progress"; when that stands still long enough this
+		// returns true once, so the caller can break the deadlock (usually a Stop, which makes everything
+		// idle again and lets the normal logic re-issue orders next tick).
+		protected bool NoProgress(int fingerprint, int limit)
+		{
+			if (fingerprint != stallFingerprint)
+			{
+				stallFingerprint = fingerprint;
+				stallTicks = 0;
+				return false;
+			}
+
+			stallTicks += Ops.Info.MissionInterval;
+			if (stallTicks < limit)
+				return false;
+
+			stallTicks = 0;
+			return true;
+		}
+
+		protected void Log(string message)
+		{
+			OpenRA.Log.Write("debug", $"[AotOps][{Ops.Player.InternalName}/{Ops.Player.PlayerName}][{Name}] {message}");
+		}
+
+		protected void Finish()
+		{
+			Done = true;
+
+			// STILLBORN WATCHDOG. A mission that ends without ever having held a unit or an open order
+			// did not fail -- it never started, and that is always a bug in its gating. This class of
+			// defect used to hide behind a perfectly plausible message ("convoy lost before reaching
+			// the site"), which is why it survived so many test runs. It is now impossible to miss.
+			if (!everActive)
+				OpenRA.Log.Write("debug", $"[AotOps][{Ops.Player.InternalName}/{Ops.Player.PlayerName}][{Name}] STILLBORN: ended after {TicksAlive} tick(s) without ever holding a unit or an order -- check this mission's ordering gate");
+
+			Ops.ReleaseToPool(this, Units.ToList());
+			Units.Clear();
+		}
+	}
+
+	[TraitLocation(SystemActors.Player)]
+	[Desc("Age of Tiberium: mission-based army operations framework. Owns all ground combat",
+		"units exclusively (replaces SquadManagerBotModule), produces mission compositions",
+		"itself and runs the operation types as data-driven missions with a shared lifecycle.",
+		"One instance per faction (Faction filter), like AotBaseBuilderBotModule.")]
+	public class AotOperationsBotModuleInfo : ConditionalTraitInfo
+	{
+		[Desc("Only act for players of this faction (internal name).")]
+		public readonly string Faction = null;
+
+		[ActorReference]
+		[Desc("Actor types that are considered construction yards.")]
+		public readonly HashSet<string> ConstructionYardTypes = [];
+
+		[ActorReference]
+		[Desc("Actor types never claimed for missions (economy, MCVs, special vehicles).")]
+		public readonly HashSet<string> ExcludeFromOpsTypes = [];
+
+		[Desc("Global self-defense (User 2026-07-30/31): staged units -- pooled/idle, Module 1's chokepoint/",
+			"secondary reserve while it's actually standing post, or a Derrick's permanent guard -- react",
+			"to threats INCLUDING aircraft (a Hind overhead is very much a threat to an AA-capable unit",
+			"standing in the base). Pooled and reserve units react to any threat within SelfDefenseRegion",
+			"Radius of BaseCentre() (AND still ground-reachable), not a tiny per-unit radius; a Derrick's",
+			"guard (often outside that region entirely) uses THIS radius around its own post instead.",
+			"Deliberately does NOT cover anything else mid-mission (forming/moving/executing/retreating",
+			"waves, scouts, air raids, a Derrick squad still in transit) -- interrupting a unit about to",
+			"depart for its own mission is exactly what must NOT happen. 0 disables the whole pass.")]
+		public readonly int SelfDefenseScanRadius = 8;
+
+		[Desc("Global self-defense region (User 2026-07-31 fix): Intel.IsReachable is NOT 'the base' -- it's",
+			"an UNCAPPED flood-fill of the entire walkable landmass, which on an open map can reach most of",
+			"the map, including near enemy bases. Using it alone as the self-defense threat scope made every",
+			"AI's reserve react to ANY enemy unit anywhere on that landmass, and in a multi-bot match every",
+			"bot doing that to every other bot's units turned into map-wide AI-vs-AI free-for-alls. The base",
+			"region is properly defined now: the base PLANNER's own Pocket (the actual packed base footprint",
+			"it already computed and used to place every building/chokepoint) dilated by this many cells --",
+			"the dilation covers the chokepoint/gate approaches just OUTSIDE the Pocket by design (defence",
+			"has to cover the point of actual contact, not just the buildings behind it). Only used when a",
+			"planner instance exists for this faction; see SelfDefenseRegionRadius for the fallback.")]
+		public readonly int SelfDefenseRegionMargin = 12;
+
+		[Desc("Global self-defense region FALLBACK radius (cells) around BaseCentre() -- only used for a",
+			"faction with no AotBasePlannerBotModule instance yet (GDI, for now; see SelfDefenseRegionMargin",
+			"for the preferred Pocket-based region once a planner exists).")]
+		public readonly int SelfDefenseRegionRadius = 40;
+
+		[Desc("Emergency defense production (User 2026-07-31): while the base is under attack, reinforce",
+			"with RocketInfantryTypes (cheap, fast, anti-everything) -- exempt from the cash reserve (an",
+			"active attack can't wait for cash to build back up), but queued through the normal, FAIR",
+			"requests pipeline like everything else. An earlier version fired a raw StartProduction order",
+			"that cut ahead of every other pending request on the same production queue -- confirmed to",
+			"permanently starve Module 4's Derrick mission (its mandatory Engineer request shares that",
+			"queue) for an entire match.",
+			"",
+			"This is the MAXIMUM per batch, not a fixed package: the batch is sized to the number of",
+			"attackers actually detected (1 enemy scout -> 1 defender), capped here. Originally a flat 5",
+			"per batch regardless of threat size, re-ordered indefinitely for as long as any single enemy",
+			"stood in the region -- 65 troopers in one observed match (User 2026-07-31: 'das scheint etwas",
+			"den rahmen zu sprengen'). 0 disables it; requires EnableBaseDefense.")]
+		public readonly int EmergencyDefenseBatchSize = 5;
+
+		[Desc("Emergency defense mixes cheap gunners (MgInfantryTypes) with rocket troopers",
+			"(RocketInfantryTypes) at a 2:1 ratio (User 2026-07-31), rather than troopers alone. These two",
+			"are the standing ceilings per type: once that many are alive, no more of THAT type are",
+			"produced (the other type can still be topped up). The 2:1 ratio and these caps are the same",
+			"statement -- 10 gunners to 5 troopers -- so the force converges on the intended mix as it",
+			"fills up. Counted player-wide, so units already committed elsewhere (a Derrick squad's",
+			"escort, say) count toward the ceiling too: deliberately conservative.",
+			"",
+			"The batch guard alone only prevents two batches being in flight simultaneously -- it does",
+			"nothing to stop batch after batch accumulating over a long siege, which is what let the count",
+			"run away in the first place. These ceilings are what actually bounds it.")]
+		public readonly int EmergencyDefenseMaxGunners = 10;
+
+		[Desc("See EmergencyDefenseMaxGunners -- the rocket-trooper half of the same 2:1 mix.")]
+		public readonly int EmergencyDefenseMaxTroopers = 5;
+
+		// ---- Feature flags (one per operation type, individually testable) ----
+		public readonly bool EnableStartingUnits = true;
+		public readonly bool EnableWaves = true;
+		public readonly bool EnableScouts = true;
+		public readonly bool EnableDerricks = true;
+		public readonly bool EnableOreBoost = true;
+
+		// ---- Module 0: OreT Boost (User 2026-07-22) ----
+		[ActorReference]
+		[Desc("Ore Transporter variant chain. A single SECOND one is ordered directly (bypasses the",
+			"Ops claim/production pipeline entirely -- ORET is excluded from Ops via ExcludeFromOpsTypes",
+			"and manages itself, same as the free-spawned starter). One-shot: fired once, early, purely",
+			"for extra cashflow at match start -- never repeated, and NOT replaced if later destroyed",
+			"(that would make it a standing rule, not a one-time boost).")]
+		public readonly string[] OreBoostTypes = [];
+
+		[Desc("Startup priority (User 2026-07-22): the OreT boost, the first Derrick scan, and every",
+			"Scout group (if scouting is even possible on this map) all get a head start before the",
+			"first Regular Attack Wave is allowed to fire -- cashflow and reconnaissance before the",
+			"first real offensive. Only gates the VERY FIRST wave; every later wave/air-raid is",
+			"unaffected. Safety net: if this many ticks have passed since the match started and the",
+			"gate still isn't satisfied (e.g. radar was never built), the first wave fires anyway.")]
+		public readonly int StartupPriorityTimeout = 6000;
+
+		// ---- Module 1: Starting Unit Operations (ported approved choke behaviour) ----
+		[Desc("Ground units held as stationary reserve at the chokepoint (approved behaviour).")]
+		public readonly int ChokepointReserveSize = 4;
+		public readonly int ChokepointHoldRadius = 4;
+		public readonly int ChokeClearRadius = 5;
+
+		[ActorReference]
+		[Desc("Actor types excluded from chokepoint obstacle clearing.")]
+		public readonly HashSet<string> ChokeClearExcludeTypes = [];
+
+		[Desc("Maximum ARCO raid targets after the choke is cleared.")]
+		// User 2026-08-05: 2 -> 1. The opening group cleared two oil pumps, each with its own crate
+		// wait, before finally heading for the enemy -- far too long a detour. One pump, then go.
+		public readonly int ArcoMaxTargets = 1;
+
+		// ---- Module 2: Regular Attack Waves ----
+		[ActorReference]
+		[Desc("Tank role variant chain. Must contain ALL exclusive upgrade branches;",
+			"the first currently buildable variant wins.")]
+		public readonly string[] WaveTankTypes = [];
+
+		[ActorReference]
+		[Desc("Light vehicle role variant chain (all exclusive branches).")]
+		public readonly string[] WaveLightTypes = [];
+
+		[ActorReference]
+		[Desc("Support/artillery role variant chain (all exclusive branches).")]
+		public readonly string[] WaveSupportTypes = [];
+
+		[Desc("Role shares in percent (tank, light, support). Ignored once any WaveSlotNTypes below is",
+			"configured -- see WaveSlot1-4 (User 2026-07-31).")]
+		public readonly int WaveTankShare = 60;
+		public readonly int WaveLightShare = 25;
+		public readonly int WaveSupportShare = 15;
+
+		// ---- Module 2b: Wave slots (User 2026-07-31) ----
+		// Replaces the tank/light/support share split above with up to 4 independent, SIMULTANEOUS unit
+		// slots per wave -- the old design picked exactly ONE winning variant per role via FirstBuildable,
+		// so two genuinely different vehicle lines sharing a role chain (e.g. NOD's Tank role mixing TTNK
+		// and LTNK) could never both appear: whichever line had an always-buildable base variant (TTNK,
+		// gated only by `lite`) permanently starved the other (LTNK, `~aot-age1`-gated) out, even long
+		// after the other unlocked. A slot is still an AGE-ORDERED chain internally (its own upgrade
+		// variants stay mutually exclusive, e.g. aot-bike-laser over aot-bike-base), but different slots
+		// are fully independent and all fill in the same wave together. Only used when at least one
+		// WaveSlotNTypes is non-empty; a faction with none configured keeps the legacy share behaviour
+		// above unchanged (GDI, for now).
+		[ActorReference]
+		[Desc("Slot 1 variant chain (age-ordered, first currently buildable wins within the slot).")]
+		public readonly string[] WaveSlot1Types = [];
+		[Desc("Slot 1 minimum count per age tier [0,1,2,3] -- always requested if the slot is buildable.")]
+		public readonly int[] WaveSlot1Min = [];
+		[Desc("Slot 1 maximum count per age tier [0,1,2,3] -- ceiling even with full budget escalation.",
+			"0 for a tier disables the slot entirely that tier (e.g. still tech-locked).")]
+		public readonly int[] WaveSlot1Max = [];
+
+		[ActorReference] public readonly string[] WaveSlot2Types = [];
+		public readonly int[] WaveSlot2Min = [];
+		public readonly int[] WaveSlot2Max = [];
+
+		[ActorReference] public readonly string[] WaveSlot3Types = [];
+		public readonly int[] WaveSlot3Min = [];
+		public readonly int[] WaveSlot3Max = [];
+
+		[ActorReference] public readonly string[] WaveSlot4Types = [];
+		public readonly int[] WaveSlot4Min = [];
+		public readonly int[] WaveSlot4Max = [];
+
+		[ActorReference] public readonly string[] WaveSlot5Types = [];
+		public readonly int[] WaveSlot5Min = [];
+		public readonly int[] WaveSlot5Max = [];
+
+		[Desc("Cash+ore threshold above which Age0 waves use the WEALTHY min/max below instead of the",
+			"normal WaveSlot3/5Min/Max[0] (User 2026-07-31: 'wenn in age 0 über 2000 credits: dann sollte",
+			"welle größer sein'). Checked once per wave composition, Age0 only -- Age1+ already scales via",
+			"budget escalation and doesn't need this.")]
+		public readonly int WaveWealthyCashThreshold = 2000;
+
+		[Desc("Age0 TTNK (WaveSlot3) min/max used instead of WaveSlot3Min/Max[0] once cash+ore exceeds",
+			"WaveWealthyCashThreshold. -1 = not configured, keeps the normal Age0 value.")]
+		public readonly int WaveSlot3MinWealthy = -1;
+		public readonly int WaveSlot3MaxWealthy = -1;
+
+		[Desc("Age0 V2 (WaveSlot5) min/max used instead of WaveSlot5Min/Max[0] once cash+ore exceeds",
+			"WaveWealthyCashThreshold. -1 = not configured, keeps the normal Age0 value.")]
+		public readonly int WaveSlot5MinWealthy = -1;
+		public readonly int WaveSlot5MaxWealthy = -1;
+
+		[Desc("Base vehicles per wave for age tier 0, 1, 2, 3. Still used for the adaptive share below;",
+			"the slot system's own Min/Max control the static composition directly instead.")]
+		public readonly int[] WaveVehiclesPerAge = [6, 8, 10, 12];
+
+		[Desc("Prerequisites that mark age tiers 1-3.")]
+		public readonly string[] AgePrerequisites = ["aot-age1", "aot-age2", "aot-age3"];
+
+		[Desc("Budget escalation per successive wave, percent.")]
+		public readonly int WaveBudgetEscalationPercent = 25;
+
+		[Desc("Budget cap as percent of the tier base budget.")]
+		public readonly int WaveBudgetCapPercent = 300;
+
+		[Desc("Hard cap on wave unit count.")]
+		public readonly int WaveMaxUnits = 20;
+
+		[Desc("Share of the wave chosen adaptively against the observed enemy army, percent.")]
+		public readonly int WaveAdaptiveSharePercent = 25;
+
+		[ActorReference]
+		[Desc("Adaptive counter chains. Fall back to the role chains when empty.")]
+		public readonly string[] AntiInfantryTypes = [];
+
+		[ActorReference]
+		public readonly string[] AntiTankTypes = [];
+
+		[ActorReference]
+		public readonly string[] AntiAirTypes = [];
+
+		[Desc("Percent of waves that target economy/outposts instead of the main base.")]
+		public readonly int WaveEcoTargetPercent = 25;
+
+		[Desc("Loss percent (by unit count) at which a wave retreats. 0 = fight to the death.")]
+		public readonly int WaveRetreatLossPercent = 0;
+
+		[Desc("Ticks between waves (after the previous wave ended).")]
+		public readonly int WaveCooldown = 1500;
+
+		[Desc("Delay before the first wave is formed.")]
+		public readonly int WaveInitialDelay = 3000;
+
+		[Desc("Fewest units a wave sets out with. Below this it keeps ORDERING (not merely waiting),",
+			"so the mass is built up rather than hoped for. Critical mass costs nothing extra: four",
+			"units every minute and twelve every three minutes are the same outlay, and only one of",
+			"them survives contact. Bounded by WaveFormingTimeout, so a bot that cannot afford the",
+			"floor still attacks instead of saving itself to death.")]
+		public readonly int WaveMinimumMass = 8;
+
+		[Desc("Added to WaveMinimumMass per Age tier -- six units is a lot in Age 0 and very little",
+			"by Age 2.")]
+		public readonly int WaveMinimumMassPerTier = 3;
+
+		[Desc("Cash that must be on hand before a wave tops itself up towards the mass floor. Ordering",
+			"the full shortfall regardless of funds is how three bots ended up at zero credits with",
+			"five to seven units queued and nothing else moving at all -- production drains the",
+			"account continuously, so an order placed without cover starves everything behind it.")]
+		public readonly int WaveTopUpMinimumCash = 400;
+
+		[Desc("Most units a wave adds per top-up. Ordering the whole shortfall at once buys a queue",
+			"nothing can pay for: one bot sat at zero credits with ELEVEN units outstanding, none of",
+			"them finishing, and with them went its defence, its next wave and its expansion savings.",
+			"Adding a couple at a time lets the wave grow as income actually arrives.")]
+		public readonly int WaveTopUpBatch = 2;
+
+		[Desc("Forming timeout; the wave launches with what it has (if at least half).")]
+		public readonly int WaveFormingTimeout = 4500;
+
+		[Desc("Executing-phase stall safety net: if a launched wave neither wipes out, retreats nor",
+			"reaches/loses its target within this many ticks (e.g. stuck on an unreachable waypoint",
+			"or unclearable obstacle), it is abandoned as a failure so the escalation ladder and the",
+			"wave scheduler are never blocked indefinitely by a single stuck wave (User 2026-07-22).")]
+		public readonly int WaveExecutingTimeout = 9000;
+
+		[Desc("Consecutive FAILED waves (wiped out, GDI retreat, or stall timeout) at the primary route",
+			"before the next wave routes via a secondary approach instead (User 2026-07-22, reduced",
+			"from 2). If no distinct secondary approach exists, the wave still launches via the",
+			"primary route.")]
+		public readonly int WaveSecondaryRouteAfterFailures = 1;
+
+		[Desc("Consecutive failed waves (primary + secondary route attempts) before switching to an",
+			"air raid instead of another ground wave (User 2026-07-22, reduced from 3). Only triggers",
+			"once HelipadTypes exists; while it doesn't, ground waves keep escalating on the same",
+			"counter. Once the first air raid has fired, every later escalation decision (4th attempt",
+			"onward) is instead chosen at random each time -- primary choke, secondary choke, or",
+			"another air raid -- rather than following this fixed ladder again (User 2026-07-22).")]
+		public readonly int WaveAirRaidAfterFailures = 2;
+
+		[Desc("Once the fixed ladder above has been abandoned for good (randomEscalationPhase, after the",
+			"first air raid), this is the chance PER ATTEMPT that it's an air raid instead of a ground",
+			"wave (User 2026-07-31: '1 hindwelle auf 3 bodenwellen', i.e. a 1:3 ratio -- 25% per attempt",
+			"converges to that average while keeping the actual sequence unpredictable, rather than a",
+			"rigid 'every 4th attempt' pattern the enemy could read). Was a flat 50/50 coin flip before.")]
+		public readonly int RandomAirRaidChancePercent = 25;
+
+		[ActorReference]
+		[Desc("Helipad actor types. The air-raid escalation tier only triggers once one is owned.")]
+		public readonly HashSet<string> HelipadTypes = [];
+
+		[ActorReference]
+		[Desc("Repair facility (FIX) actor types. A retreating wave sends damaged survivors here to",
+			"repair before releasing them back to the pool (User 2026-07-22). No effect if empty",
+			"or none owned/alive.")]
+		public readonly HashSet<string> RepairTypes = [];
+
+		[ActorReference]
+		[Desc("Attack helicopter variant chain (all exclusive branches) used for the air-raid",
+			"escalation tier.")]
+		public readonly string[] AirRaidHelicopterTypes = [];
+
+		[Desc("Number of helicopters built for an air raid, per age tier [0,1,2,3] (User 2026-07-31: the",
+			"first, Age-0 raid is smaller -- full strength only from Age 1). Indexed by AgeTier() at the",
+			"time the raid is composed; the last entry covers any tier beyond the array's length.")]
+		public readonly int[] AirRaidCountPerAge = [2, 4, 4, 4];
+
+		[Desc("Air raid forming timeout; launches short-handed if hit.")]
+		public readonly int AirRaidFormingTimeout = 9000;
+
+		[Desc("Fewest helicopters an air raid will set out with. Below this it is cancelled instead,",
+			"and the helicopters go back to the pool for the next attempt -- a single one dies to the",
+			"first SAM without achieving anything. Capped by how many were actually ordered, so a raid",
+			"that only ever wanted one is not blocked by it.")]
+		public readonly int AirRaidMinimumCount = 2;
+
+		[Desc("Air raid executing-phase stall safety net; same purpose as WaveExecutingTimeout.")]
+		public readonly int AirRaidExecutingTimeout = 9000;
+
+		[Desc("Enable the Subterranean Flame Raid (Devil's Tongue pack). Off leaves the AI's old",
+			"behaviour untouched.")]
+		public readonly bool EnableDevilRaids = true;
+
+		[ActorReference]
+		[Desc("Devil's Tongue variant chain (best first, first buildable wins). Only buildable once the",
+			"Subterranean upgrade is taken, which is exactly what gates the raid -- no separate",
+			"prerequisite bookkeeping (same honesty test as the ground engineer raid's transporter).")]
+		public readonly string[] DevilRaidTypes = [];
+
+		[Desc("Devils sent in one Subterranean Flame Raid (user spec 2026-08-13: five, alone).")]
+		public readonly int DevilRaidCount = 5;
+
+		[Desc("Fewest devils the raid will set out with; below this it is cancelled and they return to",
+			"the pool for the next attempt. Capped by how many were actually ordered.")]
+		public readonly int DevilRaidMinimumCount = 4;
+
+		[Desc("Devil raid forming timeout; launches short-handed if hit, cancels at twice this.")]
+		public readonly int DevilRaidFormingTimeout = 12000;
+
+		[Desc("Devil raid executing-phase stall safety net.")]
+		public readonly int DevilRaidExecutingTimeout = 9000;
+
+		[Desc("Age tier from which the Subterranean Flame Raid may be rolled (the Subterranean upgrade",
+			"is an Age-2 upgrade, so 2).")]
+		public readonly int DevilRaidAgeTier = 2;
+
+		[Desc("Per-scheduler-roll chance the offensive this cycle is a Devil's Tongue raid instead of a",
+			"ground wave or Hind air raid -- only considered once devils are actually buildable",
+			"(Age 2 + Subterranean upgrade) and a refinery stands to pay for them.")]
+		public readonly int DevilRaidChancePercent = 30;
+
+		[ActorReference]
+		[Desc("Shipyard/Sub Pen actor types. A wave only switches to naval ferrying once one of",
+			"these is owned and alive.")]
+		public readonly HashSet<string> NavalProductionTypes = [];
+
+		[ActorReference]
+		[Desc("Transport Vessel / Hovercraft variant chain (all exclusive branches) used to ferry",
+			"a wave across water when no ground route to the enemy exists.")]
+		public readonly string[] FerryTypes = [];
+
+		[Desc("Number of transports built (and reused across waves) to ferry a wave across water.")]
+		public readonly int FerryCount = 3;
+
+		[Desc("Ticks the convoy waits for a full load before departing with what it has. Prevents one",
+			"stuck unit from freezing the whole shuttle service.")]
+		public readonly int FerryLoadTimeout = 900;
+
+		[ActorReference]
+		[Desc("Escort chain: one per transport. These do NOT shadow the convoy -- they take station at",
+			"the landing point and hold it, securing the beachhead (user spec 2026-07-27).")]
+		public readonly string[] FerryEscortTypes = [];
+
+		[Desc("Escorts requested per transport.")]
+		public readonly int FerryEscortPerVessel = 1;
+
+		[ActorReference]
+		[Desc("Heavier escort chain, added once it becomes buildable (e.g. a missile sub from Age 1).")]
+		public readonly string[] FerryEscortSecondaryTypes = [];
+
+		[Desc("How many of the heavier escort to add once buildable.")]
+		public readonly int FerryEscortSecondaryCount = 1;
+
+		[Desc("Global cap on transports across ALL ferry missions at once. FerryCount is per mission,",
+			"so without this each concurrent ferrying mission builds its own fleet.")]
+		public readonly int FerryMaxTotal = 3;
+
+		// Was 14, independent of every other coastal-search radius in this AI (NavalSiteSearchRadius=20,
+		// MaxBridgeLength=24) -- confirmed root cause 2026-07-22 of a wave never requesting naval
+		// production despite a real, buildable coastal site existing: yard-to-approach distance on the
+		// test map was 19 cells, inside NavalSiteSearchRadius (so AotBaseBuilderBotModule found and
+		// logged a valid Sub Pen site) but outside FerrySearchRadius (so TryStartFerry's OWN coastal
+		// search failed first with "no coastal embark/landing cell found nearby" and never even reached
+		// the RequestNavalProduction() call). Raised to match MaxBridgeLength so the same coast is
+		// reachable by every coastal search in this AI, not just some of them.
+		[Desc("Radius in cells to search for a coastal embark/landing cell around the reference point.")]
+		public readonly int FerrySearchRadius = 24;
+
+		[Desc("Keep a scout observation post this far from any ALLIED building. Only relevant for the",
+			"last-resort bridge fallback -- the post is normally an enemy base outright.")]
+		public readonly int ScoutPostAllyClearance = 12;
+
+
+		[Desc("Radius searched for the EMBARK shore. Much wider than FerrySearchRadius on purpose: troops",
+			"walk to the coast, so the boarding beach need not be next door -- it only has to be on the",
+			"ships' water and reachable over land. With the old shared radius of 24 the search saw only",
+			"river banks near the base and missed the actual beach a few cells further out, reporting",
+			"'no embark cell' although the fleet could have sailed there easily (User 2026-07-27).")]
+		public readonly int FerryEmbarkSearchRadius = 48;
+
+		[Desc("Locomotor name of FerryTypes (e.g. \"aot-lst\") -- used to verify the chosen embark/landing",
+			"cell's adjacent water is actually ship-navigable, not just orthogonally Water-typed terrain",
+			"(a rock-enclosed inlet can satisfy the terrain check but be unreachable by a real ship, leaving",
+			"the ship parked a few cells short forever -- confirmed 2026-07-22: ship idle at",
+			"dist2ToEmbark=5 for 14+ ticks, nobody ever boarded). Leave empty to skip the check.")]
+		public readonly string FerryLocomotor = null;
+
+		[Desc("Ferry phase timeout; proceeds with whoever made it ashore, or cancels the wave if",
+			"nobody did.")]
+		public readonly int FerryTimeout = 9000;
+
+		// ---- Transit service ("oeffentlicher Nahverkehr") -- see memory/ai-transit-system.md ----
+		// Stage 1: the registry below is surveyed and logged only; no traffic runs off it yet.
+		[Desc("Ticks between transit stop surveys (quays, boarding lanes, staging grounds).")]
+		public readonly int TransitSurveyInterval = 500;
+
+		[Desc("Closest a staging ground (\"Verfuegungsraum\") may sit to its quay, in walking cells.",
+			"This lower bound is what actually decongests the beach: everyone who is not next in",
+			"line waits here instead of crowding the boarding lane.")]
+		public readonly int StagingMinDistance = 6;
+
+		[Desc("Furthest a staging ground may sit from its quay, in walking cells. Keeps calling a",
+			"group forward from being a journey of its own.")]
+		public readonly int StagingMaxDistance = 14;
+
+		[Desc("Minimum contiguous free cells for a staging ground to be usable.")]
+		public readonly int StagingMinCells = 12;
+
+		[Desc("Cap on the contiguous free area measured around a staging candidate. Bounds the cost",
+			"and stops one huge plain from making every candidate on it score identically.")]
+		public readonly int StagingMaxCells = 80;
+
+		[Desc("Radius in cells the staging free-area flood may spread from its centre.")]
+		public readonly int StagingRadius = 6;
+
+		[Desc("Minimum distance a HOME staging ground keeps from the base centre, so the waiting",
+			"army does not squat on the base builder's plots.")]
+		public readonly int StagingBaseClearance = 8;
+
+		[Desc("Squared distance within which a unit counts as having reached its staging/boarding cell.",
+			"4 == 2 cells of slack.")]
+		public readonly int TransitArriveRadius2 = 4;
+
+		[Desc("Squared distance within which a vessel counts as DOCKED at its berth. Deliberately",
+			"looser than TransitArriveRadius2: EnterTransport walks the passenger to the ship and",
+			"Unload puts them off wherever it lies, so exact cell precision is a demand the engine",
+			"never makes -- and in a tight bay three hulls cannot all satisfy it at once.")]
+		public readonly int TransitDockRadius2 = 16;
+
+		[Desc("Minimum distance between two berths at the same stop, so vessels do not wedge each",
+			"other in one corner of the bay. The spread runs ALONG the shore, never out to sea:",
+			"every berth must stay alongside walkable ground or nobody can board.")]
+		public readonly int TransitBerthSpacing = 3;
+
+		[Desc("How far along the coast a stop looks for quay cells (water alongside walkable land).")]
+		public readonly int TransitBerthSearchRadius = 10;
+
+		[Desc("Ticks of waiting after which a transit ticket's effective priority rises by one step",
+			"(nine steps max). Stops a scout booking starving behind a stream of attack waves.")]
+		public readonly int TicketAgeBoostTicks = 1500;
+
+		[Desc("Ticks a transit ticket may make NO progress at all before it is failed back to its",
+			"owner. Any boarding or landing resets it, so a long crossing never trips it.")]
+		public readonly int TicketTimeoutTicks = 9000;
+
+		[Desc("Squared distance from a berth within which a waiting unit counts as standing in the",
+			"boarding lane. The load timer only starts once somebody is actually there.")]
+		public readonly int TransitBoardingRadius2 = 36;
+
+		[Desc("Ticks with no vessel inbound before units called forward to a boarding lane are sent",
+			"back to the staging ground. The grace period stops them yo-yoing in the normal gap",
+			"between one vessel departing and the next being assigned.")]
+		public readonly int TransitRecallGraceTicks = 500;
+
+		[Desc("Failed approaches, counted across ALL vessels, after which a berth is struck off its",
+			"stop for good. The naval flood only proves a cell is water our ships can path through,",
+			"not that a hull can sit there -- a one-cell notch passes the flood and defeats every",
+			"ship in practice. A stop never drops its last berth.")]
+		public readonly int TransitBerthFailureLimit = 3;
+
+		[Desc("Berths a wedged vessel tries at its current stop before giving up on the leg. A blocked",
+			"ramp is usually a local problem -- another berth along the same coast works fine, and",
+			"sailing home with a full hold because one exit was crowded is a wild overreaction.")]
+		public readonly int TransitBerthSwapLimit = 2;
+
+		[Desc("Nudge radius used when unloading. Wider than for loading: the far ramp is where every",
+			"earlier landing gathered.")]
+		public readonly int TransitUnloadNudgeRadius = 2;
+
+		[Desc("Idle approach attempts a vessel makes at one berth before trying a different one.")]
+		public readonly int TransitApproachRetries = 3;
+
+		[Desc("Ticks a vessel is barred from re-taking a booking it just gave up on. Without this the",
+			"dispatcher hands the same one straight back and the vessel retries the same bad berth.")]
+		public readonly int TransitReassignBarTicks = 1000;
+
+		[Desc("Ticks a vessel may lie docked with an empty hold and nothing left to order aboard",
+			"before it gives its booking back and becomes free again. Two vessels serving one booking",
+			"is normal -- the first takes everyone who fits, and the second must not be mistaken for",
+			"a wedged ship and barred from further work.")]
+		public readonly int TransitEmptyLoadTicks = 300;
+
+		// ---- Module 3: Scout Expeditions ----
+		[ActorReference]
+		[Desc("Scout role A variant chain (all exclusive branches). When roles B/C are empty,",
+			"this role alone is duplicated ScoutGroupSize times (homogeneous vehicle group).",
+			"When B and/or C are set, ScoutRoleACount/B/C units of each defined role form the",
+			"group instead (mixed composition, e.g. an early-tier infantry scout squad).",
+			"All roles in a mixed squad MUST have the same move speed -- mixed speeds make the",
+			"group spread out badly, since they still path and move together as one unit.")]
+		public readonly string[] ScoutTypes = [];
+
+		[ActorReference]
+		[Desc("Scout role B variant chain. Leave empty for a homogeneous ScoutTypes group.")]
+		public readonly string[] ScoutRoleBTypes = [];
+
+		[ActorReference]
+		[Desc("Scout role C variant chain. Leave empty for a homogeneous ScoutTypes group.")]
+		public readonly string[] ScoutRoleCTypes = [];
+
+		[Desc("Group size for a homogeneous ScoutTypes group (Role B/C empty).")]
+		public readonly int ScoutGroupSize = 2;
+
+		[Desc("Role A unit count when Role B and/or C are set (mixed composition).")]
+		public readonly int ScoutRoleACount = 1;
+
+		[Desc("Role B unit count when set.")]
+		public readonly int ScoutRoleBCount = 1;
+
+		[Desc("Role C unit count when set.")]
+		public readonly int ScoutRoleCCount = 1;
+
+		[Desc("Waypoint ring radius around scouted spawns.")]
+		public readonly int ScoutRingRadius = 8;
+
+		[ActorReference]
+		[Desc("Radar/HQ actor types. Scout expeditions only start once one of these is owned",
+			"and alive (the scout mission's whole purpose is feeding the radar/minimap).")]
+		public readonly HashSet<string> RadarTypes = [];
+
+		[ActorReference]
+		[Desc("Infantry-producing building types (Barracks/Hand). Without a rally point these have",
+			"multiple Exit cells and the engine picks one at RANDOM per unit, scattering freshly",
+			"produced infantry across the base. A fixed rally point near the building keeps every",
+			"exit consistent and holds new units there until a mission claims them.")]
+		public readonly HashSet<string> InfantryRallyTypes = [];
+
+		[Desc("Ticks between checks for infantry-producing buildings that still need a rally point.")]
+		public readonly int RallyCheckInterval = 50;
+
+		// ---- Module 4: Derrick Engineer Squads ----
+		[ActorReference]
+		public readonly string[] EngineerTypes = [];
+
+		[ActorReference]
+		public readonly string[] RocketInfantryTypes = [];
+
+		[ActorReference]
+		public readonly string[] MgInfantryTypes = [];
+
+		[Desc("Ticks between scans for ADDITIONAL uncontrolled derricks, beyond the very first squad",
+			"(map-wide, 10 min default). The first squad is NOT gated by this -- it starts the instant",
+			"a barracks/hand exists (see DerrickSecondSquadAgeTier for why a second one waits longer).")]
+		public readonly int DerrickCheckInterval = 15000;
+
+		[Desc("Age tier (see AgePrerequisites) at which the AI starts looking for a SECOND (or further)",
+			"derrick target (User 2026-07-31: 'prüfung, ob weitere derrick squads gebaut werden in",
+			"age-2 verlagern'). The very first squad is exempt from this -- it always starts as soon as",
+			"a barracks/hand exists, regardless of age.")]
+		public readonly int DerrickSecondSquadAgeTier = 2;
+
+		[Desc("Maximum number of derricks to capture and hold at the same time.",
+			"This caps derrick TARGETS, not squads: a captured derrick keeps its slot",
+			"(permanent guard) until it is lost, so at most this many derricks are ever",
+			"pursued or held simultaneously.")]
+		public readonly int DerrickMaxTargets = 2;
+
+		[Desc("Guard leash radius around held positions (derricks, posts).")]
+		public readonly int GuardLeashRadius = 6;
+
+		[Desc("Last-resort timeout before a derrick squad departs short-handed. Kept generous:",
+			"EngineerTypes/RocketInfantryTypes/MgInfantryTypes can share an actor type with",
+			"other missions (e.g. Scout), which can genuinely delay production well past a",
+			"short timeout while the shared production queue works through other requests first.")]
+		public readonly int DerrickFormingTimeout = 9000;
+
+		// ---- Bridge Repair (User-Briefing 2026-08-03, Age 0) ----
+		[Desc("Send a lone engineer to repair damaged bridges (User 2026-08-03: 'scannt map alle 5min,",
+			"ob eine Bruecke kaputt ist. Schickt dann ein engineer los, sie zu reparieren').")]
+		public readonly bool EnableBridgeRepair = true;
+
+		[Desc("Ticks between map-wide scans for damaged bridge huts (5 min at 25 ticks/s).")]
+		public readonly int BridgeCheckInterval = 7500;
+
+		[ActorReference]
+		[Desc("Buildings that must exist before the FIRST bridge scan runs (User 2026-08-03: 'erster",
+			"bridge check sollte erst beginnen ab stec gebaut'). Repairing a bridge costs a whole",
+			"engineer, which early on is better spent on the base. Empty = no gate.")]
+		public readonly HashSet<string> BridgeRequiresTypes = [];
+
+		[Desc("Maximum number of bridges being repaired at the same time. One engineer each, and the",
+			"engineer is consumed by the repair, so this directly caps the cost per scan round.")]
+		public readonly int BridgeMaxTargets = 1;
+
+		[Desc("Timeout before a bridge repair mission gives up waiting for its engineer.")]
+		public readonly int BridgeFormingTimeout = 9000;
+
+		[Desc("Timeout for the walk to the bridge hut. A hut is often far outside the base and behind",
+			"contested ground, so this is deliberately generous -- but not unbounded, or a squad sent",
+			"at an unreachable hut would hold its engineer for the rest of the match.")]
+		public readonly int BridgeMovingTimeout = 9000;
+
+		[Desc("Squared cell distance at which the engineer is considered to have arrived at the hut",
+			"and switches to issuing the RepairBridge order (the order itself walks the last stretch).")]
+		public readonly int BridgeArriveRadius2 = 25;
+
+		// ---- Engineer Raids (User-Briefing 2026-08-03) ----
+		// Shared by both flavours: 3 engineers + 2 rocket troopers, delivered either by helicopter
+		// (Age 1) or by APC (Age 2). Rocket troopers shoot a fence cell open for the engineers.
+		[Desc("Number of passengers a full raid squad has (3 engineers + 2 rocket troopers).",
+			"Loading stops early once this many are aboard.")]
+		public readonly int RaidSquadSize = 5;
+
+		[Desc("Timeout for getting the squad aboard the transport.")]
+		public readonly int RaidLoadTimeout = 1500;
+
+		[Desc("Timeout for the unload order to actually empty the transport.")]
+		public readonly int RaidUnloadTimeout = 750;
+
+		[Desc("Timeout for the capture attempt once the squad is on the ground.")]
+		public readonly int RaidExecutingTimeout = 6000;
+
+		[Desc("Squared cell distance at which a transport counts as arrived at its drop cell.")]
+		public readonly int RaidArriveRadius2 = 16;
+
+		[Desc("Squared cell distance the transport keeps to the squad while loading. Beyond it, the",
+			"transport moves to the squad instead of making the squad walk to the transport.")]
+		public readonly int RaidBoardingRadius2 = 9;
+
+		[Desc("How often a boarding order is re-issued while loading. A passenger interrupted by a",
+			"threat response is never idle again afterwards, so an idle-only re-check left it standing.")]
+		public readonly int RaidBoardingReissueTicks = 100;
+
+		[ActorReference]
+		[Desc("Refinery actor types. Engineer raids only start once one of these is up (User 2026-08-03:",
+			"'ab age 1 nach refinery') -- a raid is a luxury paid for by a working economy.")]
+		public readonly HashSet<string> RefineryTypes = [];
+
+		[Desc("Send engineer raids by helicopter (Age 1, after the refinery).")]
+		public readonly bool EnableHeliRaids = true;
+
+		[ActorReference]
+		[Desc("Transport helicopter chain for heli raids (aot-tran-nod / aot-tran-gdi-base).")]
+		public readonly string[] HeliRaidTransportTypes = [];
+
+		[Desc("Age tier at which heli raids unlock.")]
+		public readonly int HeliRaidAgeTier = 1;
+
+		[Desc("Ticks between [AotStatus] lines: one compact per-player summary of what every operation",
+			"is currently doing (User-Wunsch 2026-08-04, same shape as [AotCash]). 250 = every 10s.")]
+		public readonly int StatusLogInterval = 250;
+
+		[Desc("How often the ground-raid availability latch is re-checked. Much shorter than the raid",
+			"interval on purpose: it only has to catch one moment in which the transport is buildable.")]
+		public readonly int GroundRaidLatchInterval = 50;
+
+		[Desc("Ticks between engineer raid attempts. ONE raid runs at a time and its flavour (heli or",
+			"APC) is drawn at random from whichever are currently possible, so the two never compete",
+			"for the same infantry queue (User 2026-08-03).")]
+		public readonly int EngineerRaidInterval = 15000;
+
+		[Desc("Cells BEHIND the enemy construction yard the squad is dropped at, on the first attempt.")]
+		public readonly int HeliRaidDropDistance = 6;
+
+		[Desc("Added to HeliRaidDropDistance per danger tier (User 2026-08-03: a raid whose transport",
+			"was lost before unloading comes down further out next time, which reads as the AI having",
+			"learned where the air defence is).")]
+		public readonly int HeliRaidDropDistanceStep = 5;
+
+		[Desc("Maximum danger tier, so repeated losses cannot push the drop zone off the map.")]
+		public readonly int HeliRaidMaxDropTier = 3;
+
+		[Desc("Timeout for the flight to the drop zone.")]
+		public readonly int HeliRaidDeliverTimeout = 4500;
+
+		[Desc("Timeout for assembling a heli raid squad. Generous on purpose: the chain is transport",
+			"first, then five infantry one after another, all sharing the base's queues with waves and",
+			"base defence (User 2026-08-03: squads repeatedly ran out of time at 9000).")]
+		public readonly int HeliRaidFormingTimeout = 12000;
+
+		[Desc("Send engineer raids by APC (Age 2).")]
+		public readonly bool EnableGroundRaids = true;
+
+		[ActorReference]
+		[Desc("Ground transport chain for engineer raids. First buildable wins, so listing the",
+			"subterranean APC ahead of the plain one automatically prefers tunnelling once available.")]
+		public readonly string[] GroundRaidTransportTypes = [];
+
+		[Desc("Age tier at which ground engineer raids unlock.")]
+		public readonly int GroundRaidAgeTier = 2;
+
+		[Desc("When BOTH a heli and a ground engineer raid are ready, the ground raid is chosen this",
+			"many times out of every (this+1) rolls -- i.e. a heli:ground ratio of 1:this. Default 4",
+			"(user 2026-08-14): by the time the ground raid unlocks (Age 2 + Subterranean upgrade) plenty",
+			"of heli raids have already been tried, so the ground flavour should dominate from then on.")]
+		public readonly int GroundRaidPreferenceRatio = 4;
+
+
+		[Desc("Cells behind the enemy construction yard the APC unloads at.")]
+		public readonly int GroundRaidDropDistance = 5;
+
+		[Desc("Timeout for the drive to the unload point. On expiry the squad unloads where it stands",
+			"rather than riding around in a can forever.")]
+		public readonly int GroundRaidDeliverTimeout = 6000;
+
+		[Desc("Timeout for assembling a ground raid squad. See HeliRaidFormingTimeout.")]
+		public readonly int GroundRaidFormingTimeout = 12000;
+
+		// ---- Base expansion (User-Briefing 2026-08-03) ----
+		[Desc("Found a second base at a remote tiberium field (User: 'Base expansion ist wichtig, damit",
+			"der AI mehr Ressourcen bekommt'). One per bot; a lost expansion is re-founded elsewhere.")]
+		public readonly bool EnableExpansion = true;
+
+		[Desc("Age tier at which the expansion unlocks. Also requires a refinery to be standing.")]
+		public readonly int ExpansionAgeTier = 1;
+
+		[Desc("Until the bot has BUILT its first expansion, founding one is existential for scaling and",
+			"outranks everything (user spec 2026-08-22): while forcing, an active expansion holds",
+			"priority no matter how long it takes -- money, base build, upgrades and attack waves all",
+			"stand down for it. After this many FAILED attempts the bot gives up forcing and plays",
+			"normally again, so a genuinely un-expandable map (or a lost cause) never freezes it forever.")]
+		public readonly int ExpansionForceMaxAttempts = 3;
+
+		[Desc("Cell radius around an expansion site within which an enemy building or unit counts as",
+			"having TAKEN the ground. While forcing (see ExpansionForceMaxAttempts), regular waves are",
+			"redirected to a taken site to clear it instead of hitting the enemy main base (user spec",
+			"2026-08-22).")]
+		public readonly int ExpansionContestRadius = 8;
+
+		[Desc("Ticks between expansion attempts (only while none is standing or under way).")]
+		public readonly int ExpansionInterval = 6000;
+
+		[Desc("Retry delay after an expansion attempt that never got off the ground (no refinery yet,",
+			"Age tier not reached, no site). Deliberately short: the full ExpansionInterval is a",
+			"cooldown BETWEEN expansions, and using it for failed attempts meant a bot that was merely",
+			"a few seconds short of its refinery had to wait four more minutes before it even looked",
+			"again -- which is why expansions kept starting far too late, if at all.")]
+		public readonly int ExpansionRetryInterval = 250;
+
+		[ActorReference]
+		[Desc("MCV chain for the expansion (age-ordered, first buildable wins).")]
+		public readonly string[] ExpansionMcvTypes = [];
+
+		[ActorReference]
+		[Desc("Escort chain for the expansion convoy. From Age 2 these dig in around the finished",
+			"expansion, which is what the six deployed tick tanks in the user's layout were.")]
+		public readonly string[] ExpansionEscortTypes = [];
+
+		[ActorReference]
+		[Desc("Ore transporter types. Losing the last one before any refinery or harvester exists stops",
+			"the economy dead, so Ops stands down entirely until a replacement is built (User 2026-08-04).")]
+		public readonly string[] EconomyTransporterTypes = [];
+
+		[ActorReference]
+		[Desc("Harvester types. Their presence (like a refinery's) ends the bootstrap phase in which the",
+			"economy hangs off a single ore transporter.")]
+		public readonly string[] EconomyHarvesterTypes = [];
+
+		[Desc("Attack waves that must go out between two engineer raids (User 2026-08-04: '2x regular",
+			"waves 1x heliraid später 1x heli/subterrain raid'). Raids punctuate the pressure rather",
+			"than competing with it, and further operations can hook into the same counter instead of",
+			"inventing their own cadence.")]
+		public readonly int RaidAfterWaves = 2;
+
+		[Desc("Credits the bot saves up before assembling an engineer raid squad. Same reasoning as",
+			"ExpansionOrderCashThreshold: without it the raid nibbles at the balance from the moment",
+			"it is scheduled and competes with the attack waves for every credit.")]
+		public readonly int EngineerRaidCashThreshold = 3000;
+
+		[Desc("Credits the bot saves up before ordering the expansion convoy AT ONCE (User 2026-08-04).",
+			"Ordering piecemeal as credits trickled in meant each unit ate the balance the next one",
+			"needed and the convoy never completed. Everything else is paused while the expansion holds",
+			"priority, so the balance genuinely accumulates.")]
+		public readonly int ExpansionOrderCashThreshold = 6000;
+
+		[Desc("Cash threshold when the convoy already has its MCV -- one collected from a failed earlier",
+			"attempt -- so only the escorts still need funding. Lower than ExpansionOrderCashThreshold by",
+			"the MCV's price, so a bot too poor to save the full 6000 can still finish a convoy around a",
+			"reused MCV instead of leaving it stranded (User 2026-08-22: 'neuer anlauf soll ihn",
+			"einsammeln').")]
+		public readonly int ExpansionEscortOnlyCashThreshold = 4000;
+
+		[Desc("Escort size. Four rather than the six of the original briefing (User 2026-08-04): at",
+			"1500 credits each, six tanks plus a 3000-credit MCV is 12000 for one convoy -- roughly",
+			"four minutes of an Age-1 bot's entire income, and in testing nothing ever finished. The",
+			"layout still has six guard posts; four tanks simply spread across them.")]
+		public readonly int ExpansionEscortCount = 4;
+
+		[Desc("Escorts the convoy refuses to leave without. Reaching ExpansionEscortCount is preferred,",
+			"but a lone MCV crossing the map is a donation to the enemy -- so below this it simply waits",
+			"(User 2026-08-03: the MCV kept departing with zero escorts because the light tanks are",
+			"Starport-routed and the Starport was producing nothing).")]
+		public readonly int ExpansionEscortMinimum = 2;
+
+		[Desc("How long an expansion convoy may hold back attack waves and engineer raids. THE SAFELOCK",
+			"(User 2026-08-04): the hold also drops the instant the yard is up, but this bounds the case",
+			"where the expansion simply never comes together -- no site, no escort, MCV lost -- so a",
+			"failing expansion can stall the army for a while but never permanently.")]
+		public readonly int ExpansionPriorityTimeout = 9000;
+
+		[Desc("Maximum construction yards the bot may own before it stops founding expansions. 1 = the",
+			"main base only plus the one expansion. Counted from the world, not from mission state.")]
+		public readonly int ExpansionMaxYards = 1;
+
+		[Desc("Score offset for a field that has at least one blossom tree. Large enough to act as a",
+			"TIER rather than a weight (User 2026-08-03: blossom fields always rank above plain ones,",
+			"however big the plain one is -- a regrowing field keeps paying out after a bigger dead one",
+			"is mined out). Size and distance then decide within each class.")]
+		public readonly int ExpansionBlossomTierBonus = 1000;
+
+		[Desc("Cell distance from a start position within which any construction yard makes that spawn",
+			"count as taken. Unclaimed start positions are the first choice for an expansion: flat,",
+			"pre-cleared and placed next to tiberium by the mapper.")]
+		public readonly int ExpansionSpawnClearance = 20;
+
+		[Desc("How long the convoy waits for the FULL escort before settling for ExpansionEscortMinimum.",
+			"Six light tanks take considerably longer than the old 4500 ticks while the same queue also",
+			"feeds attack waves -- confirmed from a log where escort production was still running",
+			"(5 of 6 outstanding) when the wait expired, so convoys left with 0 or 1 escorts.")]
+		public readonly int ExpansionEscortWaitTicks = 12000;
+
+		[Desc("Timeout for getting an MCV at all.")]
+		public readonly int ExpansionFormingTimeout = 18000;
+
+		[Desc("Timeout for the drive (or crossing) to the site.")]
+		public readonly int ExpansionMoveTimeout = 12000;
+
+		[Desc("Timeout for the MCV to actually turn into a construction yard.")]
+		public readonly int ExpansionDeployTimeout = 1500;
+
+		[Desc("Cell distance the escort may trail behind the MCV before the MCV waits for it.",
+			"The convoy had no cohesion at all: the MCV drove off on its own path and the escort was",
+			"only ever re-ordered while IDLE, so a tank that stopped to shoot at something was never",
+			"caught up again (User 2026-08-11: \"jetzt faehrt mcv weiter. aber ohne eskorte\"). An MCV",
+			"that reaches the site alone deploys an undefended compound, which is the one thing the",
+			"escort exists to prevent.")]
+		public readonly int ExpansionConvoyCohesion = 8;
+
+		[Desc("Mission ticks between two convoy diagnostics while the expansion is under way.")]
+		public readonly int ExpansionConvoyDiagInterval = 8;
+
+		[Desc("Squared cell distance at which the convoy counts as arrived at the site.")]
+		public readonly int ExpansionArriveRadius2 = 36;
+
+		[Desc("Squared cell distance within which an escort counts as being on its guard post.")]
+		public readonly int ExpansionPostRadius2 = 4;
+
+		[Desc("How many times an escort re-issues the walk to its guard post before giving up and",
+			"digging in where it stands. Without a bound, a post blocked by wreckage would leave that",
+			"tank un-entrenched for the rest of the match.")]
+		public readonly int ExpansionPostAttempts = 8;
+
+		[Desc("Age tier from which the escort digs in at its post (user spec: Age 2, after the tick",
+			"tank upgrade). A tank without the upgrade simply ignores the deploy order.")]
+		public readonly int ExpansionDigInAgeTier = 2;
+
+		[ActorReference]
+		[Desc("The dug-in form(s) an escort becomes when it entrenches. Digging in is a DeployTransform:",
+			"the mobile escort is destroyed and a new immobile actor (aot-ltnk-deployed) is created,",
+			"which is NOT one of ExpansionEscortTypes and no longer belongs to the mission -- so the",
+			"guard-strength check counted it as lost and ordered an endless stream of replacements while",
+			"the entrenched tanks sat right there (User 2026-08-15: 'baut auch neue ltnks bei der",
+			"expansion, selbst wenn alte noch nicht verloren'). These are counted toward the guard,",
+			"within ExpansionGuardRadius of the yard.")]
+		public readonly HashSet<string> ExpansionDeployedTypes = [];
+
+		[Desc("How far from the expansion yard a dug-in escort still counts toward guard strength. The",
+			"guard posts sit a handful of cells out, so this only needs to cover the perimeter.")]
+		public readonly int ExpansionGuardRadius = 12;
+
+		[Desc("Minimum resource cells an index must hold to be considered as an expansion site. The",
+			"resource map splits the world into fixed-stride indices, so one visible field can be cut",
+			"across several of them -- this is NOT the size of the field a player would see.")]
+		public readonly int ExpansionMinResourceCells = 12;
+
+		[Desc("Minimum cell distance from our own base -- an 'expansion' next door adds nothing.")]
+		public readonly int ExpansionMinDistance = 20;
+
+		[Desc("Cell distance around a candidate site that must be free of known enemy buildings",
+			"(user spec: 'frei und sicher ... keine gegnerische base in der nähe'). Deliberately modest:",
+			"on a crowded 6-player map almost every tiberium field is within sight of SOMEBODY, and at",
+			"25 cells this filter rejected every candidate on Forest Fire (User 2026-08-03). The",
+			"per-index EnemyBaseCount check above already keeps the expansion out of an enemy's own base.")]
+		public readonly int ExpansionEnemyClearance = 12;
+
+		[Desc("How many enemy buildings inside ExpansionEnemyClearance make a site count as somebody",
+			"else's BASE rather than a stray structure. A construction yard blocks on its own",
+			"regardless. Blanket-rejecting on a single building discarded both unused start positions",
+			"on the map and sent the convoy somewhere far worse.")]
+		public readonly int ExpansionEnemyClusterSize = 3;
+
+		[ActorReference]
+		[Desc("Actors that make ground unsafe to settle on even though nobody owns them -- ant and",
+			"visceroid nests and the like. They are UNITS, not buildings, so no other filter here sees",
+			"them, and a convoy was sent to build next to an ant colony (User 2026-08-10).")]
+		public readonly HashSet<string> ExpansionHazardTypes = [];
+
+		[Desc("Cells to keep clear of ExpansionHazardTypes.")]
+		public readonly int ExpansionHazardClearance = 12;
+
+		[Desc("Keep this many cells clear of a site an ALLY has already claimed. Must comfortably",
+			"exceed the expansion layout itself (x -4..+3, y -1..+8), or two allied compounds would be",
+			"planned overlapping and the second MCV would arrive with nowhere to deploy.")]
+		public readonly int ExpansionAllyClearance = 16;
+
+		[Desc("Percentage of the expansion's perimeter fence that may be unbuildable before the site",
+			"is rejected. The fence is cosmetic-ish protection, not a foundation: refusing a site with",
+			"plenty of room for every building because one wall cell sits on a rock is how the search",
+			"ended up returning nothing on maps full of usable ground.")]
+		public readonly int ExpansionFenceTolerance = 35;
+
+		[Desc("How far the compound may be slid away from a candidate anchor (spawn marker or field",
+			"centre) to find a spot the layout actually fits. Every shifted cell is re-checked against",
+			"the same safety filters as the anchor, so this cannot walk a site into an enemy base the",
+			"way the old unchecked ring search did.")]
+		public readonly int ExpansionFitRadius = 6;
+
+		[Desc("How far off the tiberium field itself the yard is planted. Building on top of the field",
+			"would bury the very resources the expansion came for.")]
+		public readonly int ExpansionSiteOffset = 6;
+
+		// ---- Module 5: Base Defense (User 2026-07-22) ----
+		public readonly bool EnableBaseDefense = true;
+
+		[Desc("Minimum garrison size guaranteed via dedicated production (the floor). The rest of",
+			"the garrison, up to ProtectionTargetIsWaveSize, is opportunistically filled from the",
+			"shared unit pool (idle survivors from finished missions) at no extra production cost.")]
+		public readonly int ProtectionMinProduced = 3;
+
+		[ActorReference]
+		[Desc("Variant chain used for the guaranteed production floor (fast, cheap responders).",
+			"Falls back to WaveLightTypes when empty.")]
+		public readonly string[] ProtectionFloorTypes = [];
+
+		[ActorReference]
+		[Desc("Buildings the garrison watches over. Empty = every owned building.")]
+		public readonly HashSet<string> ProtectionTypes = [];
+
+		[Desc("Radius (cells) around each protected building that is scanned for enemies.")]
+		public readonly int ProtectionScanRadius = 10;
+
+		[Desc("Ticks between threat scans. Kept short (User 2026-07-22: react immediately, even to a",
+			"single infantry attacker anywhere near the base) -- this runs a cheap circle query per",
+			"protected building, not per unit, so a short interval is not expensive.")]
+		public readonly int ProtectionScanInterval = 25;
+
+		[Desc("Responders sent per detected enemy (rounded up), so a lone scout doesn't empty the",
+			"whole garrison. Always at least ProtectionMinResponse, never more than available.")]
+		public readonly int ProtectionResponseRatio = 2;
+
+		[Desc("Minimum responders dispatched once any threat is detected at all.")]
+		public readonly int ProtectionMinResponse = 2;
+
+		// ---- Production ----
+		[Desc("Only order production above this cash level.")]
+		public readonly int ProductionMinCash = 300;
+
+		[Desc("Ticks between production pump runs.")]
+		public readonly int ProductionInterval = 30;
+
+		[Desc("Ticks between Starport bulk delivery flushes.")]
+		public readonly int StarportFlushInterval = 250;
+
+		[Desc("Ticks between mission ticks.")]
+		public readonly int MissionInterval = 25;
+
+		[Desc("A mission that shows no measurable progress for this long is nudged out of its stuck",
+			"activity (Stop), so the normal per-tick logic can re-issue its orders. Recovery, not",
+			"abandonment -- the separate timeouts still decide when to give up for good.")]
+		public readonly int StallRecoveryTicks = 750;
+
+		[Desc("Ticks a unit may sit unused in the shared pool before it is folded into an active",
+			"combat mission. Without this, any unit whose type no mission happens to ask for parks in",
+			"the base for the rest of the match.")]
+		public readonly int PoolIdleReinforceTicks = 1500;
+
+		public override object Create(ActorInitializer init) { return new AotOperationsBotModule(init.Self, this); }
+	}
+
+	public class AotOperationsBotModule : ConditionalTrait<AotOperationsBotModuleInfo>, IBotTick, INotifyActorDisposing, IGameSaveTraitData
+	{
+		public readonly World World;
+		public readonly Player Player;
+		public AotMapIntelBotModule Intel { get; private set; }
+		public IBotChokepointProvider ChokeProvider { get; private set; }
+		public IBotBaseApproachProvider ApproachProvider { get; private set; }
+		AotBaseBuilderBotModule builder;
+		AotBasePlannerBotModule planner;
+		HashSet<CPos> selfDefenseRegionCache;
+
+		// Stage 1 of the ferry rebuild: surveys quays/boarding lanes/staging grounds and logs them.
+		// Nothing consumes it yet -- see memory/ai-transit-system.md.
+		public AotTransitService Transit { get; private set; }
+
+		public readonly List<AotMission> Missions = [];
+		readonly Dictionary<Actor, AotMission> owned = [];
+		readonly List<Actor> pool = [];
+
+		// World tick each pooled unit entered the pool, so idlers can be spotted and put to use.
+		readonly Dictionary<Actor, int> pooledSince = [];
+		readonly List<AotProductionRequest> requests = [];
+		readonly HashSet<Actor> knownUnits = [];
+		readonly Predicate<Actor> unitCannotBeOrdered;
+		readonly ActorIndex.NamesAndTrait<BuildingInfo> constructionYards;
+
+		PlayerResources playerResources;
+		TechTree techTree;
+
+		bool initialClaimDone;
+		int waveIndex;
+		int waveCooldownTicks;
+		int waveFailureStreak;
+
+		// Module 0: OreT Boost + startup priority gate (see Info.OreBoostTypes/StartupPriorityTimeout).
+		bool oreBoostDone;
+		bool derrickFirstScanDone;
+		bool derrickFirstSquadTriggered;
+		int ticksSinceStart;
+		int selfDefenseDiagTicks;
+
+		// Once the fixed 3-attempt ladder (primary -> secondary -> air raid) has fired its first
+		// air raid, every later escalation decision is instead chosen at random each time (User
+		// 2026-07-22) -- this flips permanently and never reverts to the deterministic ladder.
+		bool randomEscalationPhase;
+
+		int derrickTicks;
+		int bridgeTicks;
+		IResourceLayer resourceLayer;
+		int raidTicks;
+		int groundLatchTicks;
+		int statusTicks;
+		int wavesSinceRaid;
+		int expansionTicks;
+		int expansionSiteLogTicks;
+		int raidGateLogTicks;
+		bool groundRaidUnlocked;
+
+		// Per-BOT danger memory for heli raids (User 2026-08-03), deliberately NOT per mission: the
+		// whole point is that the NEXT raid benefits from what happened to the last one.
+		public int HeliRaidDropTier { get; private set; }
+
+		public void RaiseHeliRaidDropTier()
+		{
+			if (HeliRaidDropTier < Info.HeliRaidMaxDropTier)
+				HeliRaidDropTier++;
+		}
+		int productionTicks;
+		int starportTicks;
+		int missionTicks;
+		int rallyCheckTicks;
+		readonly HashSet<int> scoutGroupsLaunched = [];
+		readonly Dictionary<int, List<CPos>> scoutAssignments = [];
+
+		// Every concurrent ferry mission (scouts + tank waves) independently searched for the
+		// nearest coastal cell to the SAME BaseCentre(), so they all converged on the exact same
+		// embark cell and dock -- crowding units from unrelated missions onto one tiny landing
+		// spot, blocking each other's approach to the ship (User 2026-07-23: "alle Küstenzellen
+		// sind von anderen Transport-Wartegästen belegt"). Missions claim an embark cell here once
+		// found and release it when their ferry finishes/fails, so FindCoastalCellNear can steer
+		// later callers to a different stretch of shore instead of piling onto the same one.
+		readonly HashSet<CPos> claimedEmbarkCells = [];
+		public IReadOnlyCollection<CPos> ClaimedEmbarkCells => claimedEmbarkCells;
+		public void ClaimEmbarkCell(CPos c) => claimedEmbarkCells.Add(c);
+		public void ReleaseEmbarkCell(CPos c) => claimedEmbarkCells.Remove(c);
+
+		public AotOperationsBotModule(Actor self, AotOperationsBotModuleInfo info)
+			: base(info)
+		{
+			World = self.World;
+			Player = self.Owner;
+			unitCannotBeOrdered = a => a == null || a.Owner != Player || a.IsDead || !a.IsInWorld;
+			constructionYards = new ActorIndex.NamesAndTrait<BuildingInfo>(World, info.ConstructionYardTypes);
+		}
+
+		protected override void Created(Actor self)
+		{
+			Intel = self.Owner.PlayerActor.TraitsImplementing<AotMapIntelBotModule>().FirstOrDefault();
+			ChokeProvider = self.Owner.PlayerActor.TraitsImplementing<IBotChokepointProvider>().FirstOrDefault();
+			ApproachProvider = self.Owner.PlayerActor.TraitsImplementing<IBotBaseApproachProvider>().FirstOrDefault();
+			playerResources = self.Owner.PlayerActor.Trait<PlayerResources>();
+
+			// Live resource state (grows/gets harvested); Map.Resources is only the initial data.
+			resourceLayer = self.World.WorldActor.TraitOrDefault<IResourceLayer>();
+			techTree = self.Owner.PlayerActor.Trait<TechTree>();
+
+			// Match by faction so the right builder is picked once multiple faction instances exist
+			// (same pattern AotBaseBuilderBotModule itself uses to resolve its planner).
+			var builders = self.Owner.PlayerActor.TraitsImplementing<AotBaseBuilderBotModule>().ToList();
+			builder = builders.FirstOrDefault(b => b.Info.Faction == Info.Faction) ?? builders.FirstOrDefault();
+
+			// Same resolution, for the self-defense region (User 2026-07-31: reuse the planner's own
+			// Pocket instead of a guessed radius). null for a faction with no planner instance yet (GDI,
+			// for now) -- GlobalUnitSelfDefense falls back to SelfDefenseRegionRadius in that case.
+			var planners = self.Owner.PlayerActor.TraitsImplementing<AotBasePlannerBotModule>().ToList();
+			planner = planners.FirstOrDefault(p => p.Info.Faction == Info.Faction) ?? planners.FirstOrDefault();
+
+			Transit = new AotTransitService(this);
+		}
+
+		// Any mission that needs ships/subs/vessels calls this once it knows it needs them (e.g. a wave
+		// switching to naval ferrying). Sticky on the builder side: guarantees naval production exists for
+		// the rest of the match, rebuilding it if lost.
+		public void RequestNavalProduction() => builder?.RequestNavalProduction();
+
+		// The expansion mission hands its finished yard to the builder, which then puts up the fixed
+		// mini-layout on that yard's OWN production queue (a second construction yard owns a second
+		// Building.* queue -- the queue trait sits on FACT, not on the player).
+		public AotBaseBuilderBotModule Builder => builder;
+
+		// Priority pause for AotBaseBuilderBotModule (User 2026-07-31, see AotDerrickMission.
+		// StillFormingWithinTimeout): true while the FIRST derrick squad ever started is still being
+		// assembled and within its forming timeout. Only ever the first Missions entry of this type
+		// matters here -- once it moves past Forming (or times out), building construction resumes at
+		// full priority regardless of any LATER (Age-2+) derrick squads still forming.
+		public bool FirstDerrickSquadPending() =>
+			Missions.OfType<AotDerrickMission>().FirstOrDefault()?.StillFormingWithinTimeout == true;
+
+		protected override void TraitEnabled(Actor self)
+		{
+			waveCooldownTicks = Info.WaveInitialDelay + World.LocalRandom.Next(0, 200);
+			derrickTicks = 1500 + World.LocalRandom.Next(0, 200);
+
+			// Staggered like every other periodic scan, so multiple bots don't all sweep the map on the
+			// exact same tick. Deliberately NOT delayed further than one full interval: a bridge can be
+			// down from minute one, and nothing else in the AI ever repairs it.
+			bridgeTicks = World.LocalRandom.Next(0, Info.BridgeCheckInterval);
+			raidTicks = Info.EngineerRaidInterval + World.LocalRandom.Next(0, 200);
+			expansionTicks = Info.ExpansionInterval + World.LocalRandom.Next(0, 200);
+			productionTicks = World.LocalRandom.Next(0, Info.ProductionInterval);
+			starportTicks = World.LocalRandom.Next(0, Info.StarportFlushInterval);
+			missionTicks = World.LocalRandom.Next(0, Info.MissionInterval);
+			rallyCheckTicks = World.LocalRandom.Next(0, Info.RallyCheckInterval);
+		}
+
+		public CPos BaseCentre()
+		{
+			var yard = constructionYards.Actors.FirstOrDefault(a => a.Owner == Player && !a.IsDead && a.IsInWorld);
+			return yard?.Location ?? (Intel?.Ready == true ? Intel.BaseCentre : CPos.Zero);
+		}
+
+		#region Snapshot save games
+
+		// Running operations survive a save. The user's requirement (2026-08-25) is explicit: which
+		// operations a bot has started and how far along they are must be restored -- only the BUILD
+		// cycle is allowed to restart. Field state is serialised generically by AotMissionState, so a
+		// mission added in a later session is covered automatically; see the notes there before adding
+		// exotic field types.
+		List<MiniYamlNode> IGameSaveTraitData.IssueTraitData(Actor self)
+		{
+			var missions = new List<MiniYamlNode>();
+			var index = 0;
+
+			foreach (var mission in Missions)
+			{
+				if (mission.Done || mission.IsInfrastructure)
+					continue;
+
+				missions.Add(new MiniYamlNode(index.ToStringInvariant(), new MiniYaml("", new List<MiniYamlNode>
+				{
+					new("Type", mission.GetType().Name),
+					new("Name", mission.Name ?? ""),
+					new("State", new MiniYaml("", AotMissionState.Save(mission)))
+				})));
+
+				index++;
+			}
+
+			return [new MiniYamlNode("Missions", new MiniYaml("", missions))];
+		}
+
+		void IGameSaveTraitData.ResolveTraitData(Actor self, MiniYaml data)
+		{
+			var root = data.ToDictionary();
+			if (!root.TryGetValue("Missions", out var missions))
+				return;
+
+			// Replace only the discrete operations; keep infrastructure missions (e.g. the transit
+			// service's own mission) that the module already created and wired up on this load.
+			Missions.RemoveAll(m => !m.IsInfrastructure);
+
+			var restored = 0;
+			foreach (var node in missions.Nodes)
+			{
+				var fields = node.Value.ToDictionary();
+				if (!fields.TryGetValue("Type", out var typeName))
+					continue;
+
+				try
+				{
+					var mission = AotMissionState.Reconstruct(typeName.Value, this,
+						fields.TryGetValue("Name", out var name) ? name.Value : null);
+
+					if (mission == null)
+					{
+						OpenRA.Log.Write("debug", $"[AotSnapshot] mission type '{typeName.Value}' could not be reconstructed -- operation lost");
+						continue;
+					}
+
+					if (fields.TryGetValue("State", out var state))
+						AotMissionState.Load(mission, state, World);
+
+					Missions.Add(mission);
+					restored++;
+				}
+				catch (Exception e)
+				{
+					// A single malformed operation must not abort the load or leave the bot with a
+					// half-built mission -- drop just this one and keep the rest.
+					OpenRA.Log.Write("debug", $"[AotSnapshot] operation '{typeName.Value}' failed to restore (dropped): {e.Message}");
+				}
+			}
+
+			OpenRA.Log.Write("debug", $"[AotSnapshot] restored {restored} running operation(s) for {Player.InternalName}");
+		}
+
+		#endregion
+
+		public int AvailableCash() => playerResources.GetCashAndResources();
+
+		public int AgeTier()
+		{
+			for (var i = Info.AgePrerequisites.Length - 1; i >= 0; i--)
+				if (techTree.HasPrerequisites([Info.AgePrerequisites[i]]))
+					return i + 1;
+
+			return 0;
+		}
+
+		public bool HasNavalProduction() =>
+			World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld && Info.NavalProductionTypes.Contains(a.Info.Name));
+
+		// See AotBaseBuilderBotModule.NavalSite -- the water our ships actually operate in.
+		public CPos? NavalSite() => builder?.NavalSite();
+
+		// See AotBasePlannerBotModule.IsInsideGateCluster -- the chokepoint garrison must never hold
+		// position on top of the planned gate-defence cluster's own footprint.
+		public bool IsInsideGateCluster(CPos c) => builder != null && builder.IsInsideGateCluster(c);
+
+		public bool HasRadar() =>
+			World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld && Info.RadarTypes.Contains(a.Info.Name));
+
+		public bool HasHelipad() =>
+			World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld && Info.HelipadTypes.Contains(a.Info.Name));
+
+		public Actor NearestOwnRepairFacility(CPos near) =>
+			World.Actors
+				.Where(a => a.Owner == Player && !a.IsDead && a.IsInWorld && Info.RepairTypes.Contains(a.Info.Name))
+				.MinByOrDefault(a => (a.Location - near).LengthSquared);
+
+		// Halfway between base and primary choke: out of the builders' way, on the way out. Shared
+		// (User 2026-07-22) by both regular wave staging and the base defense garrison muster point.
+		// WHERE AN ATTACK WAVE GATHERS. Deliberately NOT GarrisonMusterPoint: that sits halfway
+		// between base and choke, i.e. inside our own territory where the enemy never sees it. A wave
+		// forming there reads as a lull -- the bot looks like it stopped attacking while it is in fact
+		// building up (User 2026-08-05: "es fuehlt sich manchmal zu sehr so an, als wuerde er
+		// luftholen"). Gathering AT the choke keeps a visible force on the frontier the whole time,
+		// which is pressure in itself, without feeding units into defences piecemeal.
+		//
+		// The choke is the fortified point the bot already holds, so this is also the safest place on
+		// the way out to stand and wait.
+		public CPos WaveStagingPoint() => ChokeProvider?.Chokepoint ?? GarrisonMusterPoint();
+
+		public CPos GarrisonMusterPoint()
+		{
+			var baseCentre = BaseCentre();
+			var choke = ChokeProvider?.Chokepoint;
+			if (!choke.HasValue)
+				return baseCentre;
+
+			return new CPos((baseCentre.X + choke.Value.X) / 2, (baseCentre.Y + choke.Value.Y) / 2);
+		}
+
+		// User 2026-07-22: the base defense garrison holds back a full wave-composition reserve
+		// once wave 1 has been scheduled (i.e. "between wave 1 and wave 2") rather than at game
+		// start, since the very first wave slot already establishes that the tank chain is
+		// buildable -- see AotBaseDefenseMission.
+		public bool FirstWaveScheduled() => waveIndex >= 1;
+
+		// Enemies inside our own base perimeter. Shared so that any mission holding units at home can
+		// answer an attack, not just Module 5's garrison (User 2026-08-06: the starting group's
+		// secondary reserve sat at its choke and watched the base being shot up).
+		public List<Actor> BaseThreats()
+		{
+			var threats = new HashSet<Actor>();
+			foreach (var b in World.Actors.Where(a => a.Owner == Player && !a.IsDead && a.IsInWorld
+				&& a.Info.HasTraitInfo<BuildingInfo>()
+				&& (Info.ProtectionTypes.Count == 0 || Info.ProtectionTypes.Contains(a.Info.Name))))
+			{
+				foreach (var a in World.FindActorsInCircle(b.CenterPosition, WDist.FromCells(Info.ProtectionScanRadius)))
+					if (AotOpsUtils.IsPreferredEnemyUnit(Player, a, includeAir: true) && a.CanBeViewedByPlayer(Player))
+						threats.Add(a);
+			}
+
+			return threats.ToList();
+		}
+
+		// How many attack waves have been put on the board so far. The base builder uses it to slot
+		// buildings between waves (user spec 2026-08-06).
+		public int WavesScheduled => waveIndex;
+
+		// Own Repair Facility standing? The first wave waits for it (user spec 2026-08-06: after the
+		// Age upgrade comes the Repair Facility, THEN wave 1, then the Helipad). Repairing a damaged
+		// tank costs a fraction of replacing it, so having the building before the first units are
+		// committed is worth the short delay.
+		public bool HasRepairFacility() =>
+			World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld
+				&& Info.RepairTypes.Contains(a.Info.Name));
+
+		bool HasAntiAir() =>
+			Info.AntiAirTypes.Length == 0
+			|| World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld
+				&& Info.AntiAirTypes.Contains(a.Info.Name));
+
+		// The opening sequence, interleaving army and buildings (user spec 2026-08-06):
+		//   Age upgrade -> wave 1 -> Flame Turret -> Repair Facility -> wave 2 -> Helipad -> SAMs
+		//   -> wave 3
+		// Each wave waits for the building ahead of it, which is what stops the bot from spending its
+		// whole income on units and never finishing the base -- or the reverse.
+		//
+		// Every gate is bounded by AgeTier() > 0: once the Age has actually advanced, a building that
+		// never got finished (no room, destroyed, unaffordable) must not silence the army for good.
+		bool WaveUnlocked()
+		{
+			var reason = WaveHeldBy();
+			if (reason == null)
+				return true;
+
+			// Named in the log rather than left to be inferred: a wave that never comes is otherwise
+			// indistinguishable from a wave that is merely between cooldowns, and working out which
+			// gate was holding it meant reading source (User 2026-08-10: "ich sehe noch nicht, dass
+			// wave-1 gebaut wird obwohl bereits ein FIX gebaut wurde").
+			if (++waveHoldLog % 32 == 1)
+				Log($"wave {waveIndex + 1} held: waiting for {reason}");
+
+			return false;
+		}
+
+		int waveHoldLog;
+
+		string WaveHeldBy()
+		{
+			if (!StartupPriorityMet())
+				return "startup priority (ore transporter boost, first derrick scan, scout groups)";
+
+			if (!AgeUpgradeStarted())
+				return "the Age upgrade to be started";
+
+			// Past the first Age everything below has long since been answered.
+			if (AgeTier() > 0)
+				return null;
+
+			return waveIndex switch
+			{
+				0 => null,
+				1 => HasRepairFacility() ? null : "the Repair Facility",
+				_ => !HasHelipad() ? "the Helipad" : !HasAntiAir() ? "a SAM site" : null,
+			};
+		}
+
+		// ROOT CAUSE FOUND (debug.log evidence): stock BaseBuilderBotModule (still active on @aot for
+		// its PauseUnitProduction economy service) has its OWN rally-point assignment
+		// (AssignRallyPointsInterval) that re-validates every RallyPoint-trait actor the player owns
+		// via IsRallyPointValid -- which calls world.IsCellBuildable on the rally cell. A cell right
+		// at the production apron/smudge (exactly where we want it) essentially NEVER passes that
+		// check, so BaseBuilderBotModule perpetually considered our rally point "invalid" and
+		// overwrote it with its own (distant) ChooseRallyLocationNear location every cycle.
+		// Real fix: BaseBuilderBotModule.cs patched with a RallyPointExcludeTypes list
+		// (RallyPointExcludeTypes: InfantryRallyTypes in aot-ai.yaml) so it never touches HAND/PYLE
+		// at all. With that conflict gone, we set the engine RallyPoint ourselves (once per building)
+		// so fresh exits walk straight to the smudge -- and additionally cache the cell ourselves so
+		// TickForming's active gathering (pool-reused stragglers, multiple missions) doesn't depend
+		// on re-reading the (still generally reassignable-by-us-only) RallyPoint.Path.
+		readonly Dictionary<Actor, CPos> infantryRallyCells = [];
+		readonly HashSet<Actor> rallySet = [];
+
+		void EnsureInfantryRallyPoints(IBot bot)
+		{
+			if (Info.InfantryRallyTypes.Count == 0)
+				return;
+
+			foreach (var stale in infantryRallyCells.Keys.Where(a => unitCannotBeOrdered(a)).ToList())
+				infantryRallyCells.Remove(stale);
+			rallySet.RemoveWhere(a => unitCannotBeOrdered(a));
+
+			foreach (var building in World.Actors)
+			{
+				if (building.Owner != Player || building.IsDead || !building.IsInWorld
+					|| !Info.InfantryRallyTypes.Contains(building.Info.Name))
+					continue;
+
+				if (!infantryRallyCells.ContainsKey(building))
+				{
+					var cell = FindRallyCellNear(building);
+					if (cell != null)
+					{
+						infantryRallyCells[building] = cell.Value;
+						Log($"[AotRally] cell for {building.Info.Name}@{building.Location}#{building.ActorID} -> {cell.Value}");
+					}
+				}
+
+				if (infantryRallyCells.TryGetValue(building, out var rallyCell) && rallySet.Add(building))
+				{
+					bot.QueueOrder(new Order("SetRallyPoint", building, Target.FromCell(World, rallyCell), false));
+					Log($"[AotRally] QUEUED SetRallyPoint for {building.Info.Name}@{building.Location}#{building.ActorID} -> {rallyCell}");
+				}
+			}
+		}
+
+		// Use the building's own highest-priority Exit cell -- verified against the actually-loaded
+		// ruleset (engine/mods/cnc/rules/structures.yaml): HAND's Exit@1 has an EXPLICIT Priority:2,
+		// the inherited Exit@fallback1 has none (defaults to 1) -> NOT a tie, RandomExitOrDefault
+		// always picks Exit@1 deterministically even without any rally point. Reading the live
+		// Exit trait also automatically reflects the mod's aot-structures.yaml ExitCell override
+		// (which merges into the base Priority, not replacing it), landing exactly on the "=="
+		// (OccupiedPassable) footprint row -- the actual smudge -- without us having to duplicate
+		// that footprint-row math ourselves. Geometry (Dimensions.Y - 1 = the smudge row, NOT
+		// Dimensions.Y) is only a defensive fallback for a building with no Exit trait at all.
+		CPos? FindRallyCellNear(Actor building)
+		{
+			var exit = building.TraitsImplementing<Exit>()
+				.Where(e => !e.IsTraitDisabled)
+				.OrderByDescending(e => e.Info.Priority)
+				.FirstOrDefault();
+
+			CPos candidate;
+			if (exit != null)
+				candidate = building.Location + exit.Info.ExitCell;
+			else
+			{
+				var dims = building.Info.TraitInfoOrDefault<BuildingInfo>()?.Dimensions ?? new CVec(1, 1);
+				candidate = building.Location + new CVec(dims.X / 2, dims.Y - 1);
+			}
+
+			if (Intel.IsPassable(candidate))
+				return candidate;
+
+			return null;
+		}
+
+		// The rally cell of the first infantry-producing building found -- OUR OWN computed cell
+		// (infantryRallyCells), never the engine RallyPoint.Path (see EnsureInfantryRallyPoints for
+		// why: BaseBuilderBotModule fights over that). Missions use this to actively gather ALL their
+		// units there during Forming -- not just freshly produced ones, but also POOL-REUSED units,
+		// which can be standing anywhere on the map wherever an earlier mission left them.
+		public CPos? PrimaryInfantryRallyCell()
+		{
+			foreach (var building in World.Actors)
+			{
+				if (building.Owner != Player || building.IsDead || !building.IsInWorld
+					|| !Info.InfantryRallyTypes.Contains(building.Info.Name))
+					continue;
+
+				if (infantryRallyCells.TryGetValue(building, out var cell))
+					return cell;
+
+				return building.Location;
+			}
+
+			return null;
+		}
+
+		// Concurrent missions (e.g. 2 derrick squads + 2 scout groups at once) must NOT all target
+		// the exact same rally cell -- a cell only fits ~5 infantry via subcell stacking, so with
+		// more than that constantly waiting, the engine keeps bumping the overflow to a free
+		// neighbour, and our own active gathering (Forming) kept sending them straight back to the
+		// same single point every tick -- a permanent tug-of-war that looked like nobody ever
+		// settling. Each mission gets its OWN nearby staging cell instead, allocated once and cached
+		// by the mission, cycling through a small spiral so several missions stay close together
+		// without competing for one cell.
+		static readonly CVec[] StagingOffsets =
+		[
+			new(0, 0), new(1, 0), new(-1, 0), new(0, 1), new(0, -1),
+			new(1, 1), new(-1, 1), new(1, -1), new(-1, -1),
+			new(2, 0), new(-2, 0), new(0, 2), new(0, -2),
+		];
+
+		int stagingCellCursor;
+
+		public CPos? AllocateInfantryStagingCell()
+		{
+			var baseCell = PrimaryInfantryRallyCell();
+			if (baseCell == null)
+				return null;
+
+			var offset = StagingOffsets[stagingCellCursor % StagingOffsets.Length];
+			stagingCellCursor++;
+			var cell = baseCell.Value + offset;
+			return Intel.IsPassable(cell) ? cell : baseCell.Value;
+		}
+
+		public bool CannotOrder(Actor a) => unitCannotBeOrdered(a);
+
+		void IBotTick.BotTick(IBot bot)
+		{
+			if (Info.Faction != null && Player.Faction.InternalName != Info.Faction)
+				return;
+
+			if (Intel == null || !Intel.Ready)
+				return;
+
+			CleanDead();
+
+			if (!initialClaimDone)
+			{
+				InitialClaim(bot);
+				initialClaimDone = true;
+
+				if (Info.EnableBaseDefense)
+					Missions.Add(new AotBaseDefenseMission(this));
+			}
+
+			ClaimNewUnits(bot);
+
+			ticksSinceStart++;
+			TryOreBoost(bot);
+
+			if (--productionTicks <= 0)
+			{
+				productionTicks = Info.ProductionInterval;
+				PumpProduction(bot);
+			}
+
+			if (--starportTicks <= 0)
+			{
+				starportTicks = Info.StarportFlushInterval;
+				FlushStarport(bot);
+			}
+
+			if (--rallyCheckTicks <= 0)
+			{
+				rallyCheckTicks = Info.RallyCheckInterval;
+				EnsureInfantryRallyPoints(bot);
+			}
+
+			Transit?.Tick();
+
+			Schedule(bot);
+			SweepIdlePool(bot);
+
+			if (--missionTicks <= 0)
+			{
+				missionTicks = Info.MissionInterval;
+				foreach (var m in Missions.ToList())
+				{
+					if (!m.Done)
+					{
+						try
+						{
+							m.Tick(bot);
+						}
+						catch (Exception e)
+						{
+							// Self-healing safety net (snapshot restore hardening): a mission that throws
+							// -- e.g. a restored operation whose target actor did not survive into the save
+							// -- must never crash the whole game. Drop it and carry on. Bot code is
+							// unsynced, so this cannot affect multiplayer determinism. Logged so a genuine
+							// bug is still discoverable.
+							OpenRA.Log.Write("debug", $"[AotOps] mission {m.GetType().Name} threw and was dropped: {e}");
+							Missions.Remove(m);
+							continue;
+						}
+					}
+
+					if (m.Done)
+					{
+						// Drives the wave escalation ladder (secondary route, then air raid) --
+						// only wave/air-raid missions report an Outcome; other mission types stay
+						// Unknown and don't touch the streak.
+						if (m is AotAirRaidMission)
+						{
+							Log($"escalation: air raid finished ({m.Outcome}) -> streak reset, further attacks now random (secondary/primary/air raid)");
+							waveFailureStreak = 0;
+						}
+						else if (m.Outcome == AotMissionOutcome.Failure)
+						{
+							waveFailureStreak++;
+							Log($"escalation: {m.Name} failed -> streak={waveFailureStreak}");
+						}
+						else if (m.Outcome == AotMissionOutcome.Success)
+						{
+							if (waveFailureStreak > 0)
+								Log($"escalation: {m.Name} succeeded -> streak reset (was {waveFailureStreak})");
+							waveFailureStreak = 0;
+						}
+
+						// Expansion force/fallback bookkeeping (user spec 2026-08-22): a finished expansion
+						// that deployed a yard is the success we were forcing towards -- latch it, the force
+						// ends. One that never deployed is a failure; after ExpansionForceMaxAttempts of
+						// those the force gives up and the bot plays normally again.
+						if (m is AotExpansionMission em)
+						{
+							if (em.Succeeded)
+							{
+								expansionBuilt = true;
+								Log($"[expansion] built -> force ends (was {expansionFailures} failure(s))");
+							}
+							else if (em.SiteTaken)
+							{
+								// Ground claimed by somebody else -- explicitly NOT counted against the
+								// attempt budget (see AotExpansionMission.SiteTaken). The budget is there to
+								// stop a bot chasing an expansion it cannot pull off; losing a race for one
+								// particular plot says nothing about that, and on a map where several bots
+								// share the same prior markers it would otherwise eat all three attempts
+								// without the bot ever having marched anywhere.
+								Log($"[expansion] site was claimed by another player -- not counted as a " +
+									$"failed attempt (still at {expansionFailures}/{Info.ExpansionForceMaxAttempts})");
+							}
+							else
+							{
+								expansionFailures++;
+								Log($"[expansion] attempt failed ({expansionFailures}/{Info.ExpansionForceMaxAttempts}) " +
+									$"-- {(expansionFailures >= Info.ExpansionForceMaxAttempts ? "force GIVES UP, playing normally" : "still forcing")}");
+							}
+						}
+
+						CancelRequests(m);
+						Missions.Remove(m);
+					}
+				}
+
+				GlobalUnitSelfDefense(bot);
+			}
+		}
+
+		// Global self-defense (User 2026-07-30): "einheiten die irgendwo in der base stehen ... sollten
+		// nicht abbrechen [wenn mid-mission], ausser derrick escort" -- the shared POOL (idle survivors,
+		// units staged between missions) plus a Derrick's permanent guard get a reflex to fight back,
+		// regardless of what they're nominally about to do next. Deliberately excludes every other
+		// mission's own units (forming/moving/executing/retreating waves, scouts en route, air raids,
+		// a Derrick squad still in transit) -- interrupting a unit that is about to depart for its own
+		// mission is exactly what must NOT happen, per the user's follow-up. Runs right after
+		// Missions.Tick() each cycle, so a ForceAttack order here overrides whatever a mission just
+		// decided for that unit -- no "paused task" bookkeeping needed: the instant no threat remains,
+		// the owning system's normal order resumes on its own next cycle. Pool candidates are restricted
+		// to the flooded base region (Intel.IsReachable) per the user's own framing ("die gesamte
+		// geflutete base-region"); a Derrick's guard is exempt from that check since it stands watch
+		// somewhere else entirely by definition. includeAir=true on the threat scan is the actual fix for
+		// the reported symptom (Hinds raiding undisturbed despite AA units standing around) -- the normal
+		// IsPreferredEnemyUnit excludes aircraft everywhere else in this file, which would otherwise make
+		// this pass blind to the exact threat it exists to answer.
+		// The actual base region for global self-defense (User 2026-07-31: "der base-planner flutet doch
+		// am anfang den bau-bereich und entscheidet, wo chockepoint ist ... ich spreche von diesem
+		// gebiet"). Reuses the planner's own Pocket -- the exact packed base footprint it already
+		// computed -- dilated by SelfDefenseRegionMargin cells so the chokepoint/gate approaches just
+		// OUTSIDE the Pocket (DetectGates deliberately blocks a patch around every gate so the packer
+		// doesn't spill past it) are covered too; defence has to cover the point of actual contact, not
+		// just the buildings behind it. The dilated set is computed once and cached: the Pocket itself
+		// never changes after Plan() runs, so recomputing every tick would be pure waste. Falls back to a
+		// plain radius around BaseCentre() for a faction with no planner instance yet (GDI, for now).
+		bool InBaseRegion(CPos c)
+		{
+			if (!Intel.IsReachable(c))
+				return false;
+
+			if (planner == null || planner.Pocket.Count == 0)
+			{
+				var baseCentre = BaseCentre();
+				return (c - baseCentre).LengthSquared <= Info.SelfDefenseRegionRadius * Info.SelfDefenseRegionRadius;
+			}
+
+			selfDefenseRegionCache ??= DilateCells(planner.Pocket, Info.SelfDefenseRegionMargin);
+			return selfDefenseRegionCache.Contains(c);
+		}
+
+		// Multi-source BFS outward from every seed cell, `steps` rings deep -- cheap way to "grow" an
+		// arbitrary cell set by a fixed margin without checking every cell's distance to every seed.
+		static HashSet<CPos> DilateCells(HashSet<CPos> seeds, int steps)
+		{
+			var region = new HashSet<CPos>(seeds);
+			var frontier = new List<CPos>(seeds);
+			for (var i = 0; i < steps; i++)
+			{
+				var next = new List<CPos>();
+				foreach (var c in frontier)
+					foreach (var d in CVec.Directions)
+					{
+						var n = c + d;
+						if (region.Add(n))
+							next.Add(n);
+					}
+
+				frontier = next;
+			}
+
+			return region;
+		}
+
+		void GlobalUnitSelfDefense(IBot bot)
+		{
+			if (Info.SelfDefenseScanRadius <= 0)
+				return;
+
+			// Pool + Module 1's standing reserve: react to ANY threat within the base REGION (User
+			// 2026-07-30: "die gesamte geflutete base-region sollte immer ... als schützenswert gelten"),
+			// not just a small radius around each individual unit -- a per-unit radius meant an idle unit
+			// standing even a little way from the actual breach never reacted at all (User 2026-07-31
+			// report: infantry stood doing nothing while the base was under attack elsewhere). Confirmed
+			// via live log that the pool is essentially ALWAYS empty (every combat unit is permanently
+			// claimed by some mission) -- the chokepoint/secondary reserve, previously excluded as
+			// "mid-mission", turned out to BE the units standing idle in every report; the user explicitly
+			// asked to include it too. Reuses Module 5's own proportional-response knobs
+			// (ProtectionResponseRatio/MinResponse) so a single scout doesn't empty the whole reserve.
+			//
+			// IMPORTANT (User 2026-07-31 follow-up: "die defense logik scheint die ganze map zu flooten,
+			// alle gegner fangen direkt an übereinander herzufallen"): Intel.IsReachable is NOT "the base"
+			// -- it's an uncapped flood-fill of the ENTIRE walkable landmass (AotMapIntelBotModule.
+			// RefreshReachability has no distance/budget cap at all, unlike the base planner's own Pocket).
+			// Using it alone as the threat scope meant this reacted to any enemy anywhere on that landmass,
+			// and in a multi-bot match every bot's reserve doing that to every OTHER bot's units the same
+			// way turned into map-wide AI-vs-AI free-for-alls. Both candidates and threats are now also
+			// bounded to InBaseRegion (still reachability-gated on top, so nobody's ordered to swim).
+			var poolCandidates = pool.Where(a => !CannotOrder(a) && InBaseRegion(a.Location)).ToList();
+			foreach (var s in Missions.OfType<AotStartingUnitsMission>())
+				poolCandidates.AddRange(s.ReserveUnits().Where(a => InBaseRegion(a.Location)));
+
+			var threats = World.Actors
+				.Where(e => AotOpsUtils.IsPreferredEnemyUnit(Player, e, true) && e.CanBeViewedByPlayer(Player) && InBaseRegion(e.Location))
+				.ToList();
+
+			// Throttled diagnostic (User 2026-07-31 report: "infantry stand around doing nothing"):
+			// without this, the log gives no way to tell whether the candidate set is genuinely empty
+			// (units are all mid-mission in some OTHER way -- a wave forming, a scout en route) versus
+			// non-empty but somehow not reacting.
+			if (++selfDefenseDiagTicks % 8 == 0)
+				Log($"self-defense diag: pool={pool.Count} reachableCandidates={poolCandidates.Count} threats={threats.Count}");
+
+			if (poolCandidates.Count > 0 && threats.Count > 0)
+			{
+				// Math.Clamp(value, min, max) throws ArgumentException when min > max -- crashed in-game
+				// (User 2026-07-31) the moment poolCandidates.Count dropped below ProtectionMinResponse
+				// (e.g. only 1 candidate left but the configured floor is 2). Never valid to ask for more
+				// responders than actually exist, so cap with Min() first instead of trusting Clamp's own
+				// bounds to always be ordered.
+				var want = Math.Min(poolCandidates.Count, Math.Max(Info.ProtectionMinResponse, threats.Count * Info.ProtectionResponseRatio));
+				var responders = poolCandidates
+					.OrderBy(a => threats.Min(t => (a.Location - t.Location).LengthSquared))
+					.Take(want)
+					.ToList();
+
+				foreach (var a in responders)
+				{
+					var target = threats.OrderBy(t => (a.Location - t.Location).LengthSquared).First();
+					bot.QueueOrder(new Order("ForceAttack", a, Target.FromActor(target), false));
+				}
+
+				Log($"self-defense: {threats.Count} threat(s) in the base region -> dispatching {responders.Count}/{poolCandidates.Count} pooled unit(s)");
+			}
+
+			// Emergency defense production (User 2026-07-31: "wenn der gegner in eine base einfällt ...
+			// sollte er sofort anfangen rocket trooper zu bauen in 5er wellen solange gegner noch in base
+			// sind"). Checked against the SAME region-wide threat set as above, independent of whether any
+			// responder was actually available this cycle -- the base can be under attack with the
+			// reserve already fully committed, which is exactly when reinforcements matter most.
+			if (threats.Count > 0)
+				TryEmergencyDefenseProduction(bot, threats.Count);
+
+			// Derrick guard: local radius around its OWN post instead -- a captured derrick often sits
+			// far outside the base region entirely, so the region-wide check above would never cover it.
+			foreach (var d in Missions.OfType<AotDerrickMission>())
+			{
+				foreach (var a in d.HoldingEscorts())
+				{
+					var threat = World.FindActorsInCircle(a.CenterPosition, WDist.FromCells(Info.SelfDefenseScanRadius))
+						.Where(e => AotOpsUtils.IsPreferredEnemyUnit(Player, e, true) && e.CanBeViewedByPlayer(Player))
+						.OrderBy(e => (e.Location - a.Location).LengthSquared)
+						.FirstOrDefault();
+					if (threat == null)
+						continue;
+
+					bot.QueueOrder(new Order("ForceAttack", a, Target.FromActor(threat), false));
+					Log($"self-defense: derrick guard engaging {threat.Info.Name}@{threat.Location}");
+				}
+			}
+		}
+
+		// "Really gone", as opposed to CannotOrder's "cannot be given an order right now".
+		//
+		// A passenger riding a transport is alive but NOT in the world, so CannotOrder is true for it.
+		// Using that to prune mission rosters silently deleted every unit the moment it boarded a ferry:
+		// the mission then saw an empty roster, concluded the group had been wiped out and cancelled
+		// itself mid-crossing -- the "embark but never disembark" behaviour (User 2026-07-24), and the
+		// reason ferrying looked so erratic. Only death (or changing owner) removes a unit here.
+		public bool IsGone(Actor a) => a == null || a.Owner != Player || a.IsDead;
+
+		void CleanDead()
+		{
+			foreach (var m in Missions)
+				m.Units.RemoveWhere(IsGone);
+			pool.RemoveAll(a => IsGone(a));
+			foreach (var gone in pooledSince.Keys.Where(IsGone).ToList())
+				pooledSince.Remove(gone);
+			knownUnits.RemoveWhere(IsGone);
+			foreach (var dead in owned.Keys.Where(IsGone).ToList())
+				owned.Remove(dead);
+		}
+
+		bool IsEligibleCombatUnit(Actor a)
+		{
+			if (a.Owner != Player || a.IsDead || !a.IsInWorld)
+				return false;
+
+			// Excluded types are normally invisible to Ops -- harvesters, ore transporters, the MCV that
+			// McvExpansionManagerBotModule deploys at game start, and so on. But an excluded type that
+			// a mission has EXPLICITLY asked for is a different thing: the expansion mission orders its
+			// own MCV, and without this exception that unit would never be claimed and the mission would
+			// sit forever waiting for a unit standing right next to it. Exactly the failure aot-subapc
+			// had before it was taken off the list (2026-08-03) -- but the MCV cannot simply be removed
+			// the same way, because then Ops would also grab the STARTING MCV and it would never deploy.
+			if (Info.ExcludeFromOpsTypes.Contains(a.Info.Name)
+				&& !requests.Any(r => r.Remaining > 0 && r.Chain.Contains(a.Info.Name)))
+				return false;
+
+			// Ground/naval combat units: mobile, not a harvester. Aircraft (Mobile == null) are
+			// claimable too -- AotAirRaidMission requests helicopters -- but only via a genuine
+			// pending request; see the AircraftInfo branch below.
+			if (a.Info.HasTraitInfo<HarvesterInfo>())
+				return false;
+
+			if (a.TraitOrDefault<Mobile>() == null && !a.Info.HasTraitInfo<AircraftInfo>())
+				return false;
+
+			return true;
+		}
+
+		void InitialClaim(IBot bot)
+		{
+			var starting = Info.EnableStartingUnits ? new AotStartingUnitsMission(this) : null;
+			if (starting != null)
+				Missions.Add(starting);
+
+			foreach (var a in World.ActorsHavingTrait<IPositionable>().Where(IsEligibleCombatUnit).ToList())
+			{
+				knownUnits.Add(a);
+				if (starting != null)
+				{
+					owned[a] = starting;
+					starting.OnUnitAssigned(a);
+				}
+				else
+					PoolAdd(a);
+			}
+
+			Log($"initial claim: {(starting != null ? starting.Units.Count : pool.Count)} unit(s)");
+		}
+
+		void ClaimNewUnits(IBot bot)
+		{
+			// Zero-starting-unit spawn: the first units the base produces -- whatever mission originally
+			// ordered them -- are diverted here FIRST, ahead of every other mission's own claim, until a
+			// usable chokepoint-clearing crew exists (user spec 2026-08-01, see
+			// AotStartingUnitsMission.NeedsBootstrapCrew for the full reasoning). Deliberately steals
+			// ahead of the request-matching below: a request that "loses" a unit this way simply stays
+			// open and gets satisfied by the next matching unit produced, no cash wasted, no unit lost --
+			// only delayed by however long the bootstrap crew takes to assemble.
+			var bootstrap = Missions.OfType<AotStartingUnitsMission>().FirstOrDefault(m => m.NeedsBootstrapCrew);
+
+			foreach (var a in World.ActorsHavingTrait<IPositionable>()
+				.Where(a => a.Owner == Player && !knownUnits.Contains(a)).ToList())
+			{
+				knownUnits.Add(a);
+				if (!IsEligibleCombatUnit(a))
+					continue;
+
+				if (bootstrap != null && bootstrap.NeedsBootstrapCrew)
+				{
+					owned[a] = bootstrap;
+					bootstrap.OnUnitAssigned(a);
+					Log($"claim {a.Info.Name}@{a.Location} -> {bootstrap.Name} (bootstrap clearing crew, {bootstrap.Units.Count}/{Info.ChokepointReserveSize})");
+					continue;
+				}
+
+				// Multiple concurrent missions can share an actor type (e.g. Scout's Role A and
+				// Derrick's MG escort both use the same infantry). Prefer a request that actually
+				// has a production order in flight (Ordered > 0) over one that's merely stalled
+				// waiting its turn on a busy queue -- otherwise a stalled mission "steals" a unit
+				// another mission's order actually paid for, and the stolen unit immediately walks
+				// off toward the stalled mission's (unrelated) destination the moment it exits.
+				var request = requests
+					.Where(r => r.Remaining > 0 && r.Chain.Contains(a.Info.Name))
+					.OrderByDescending(r => r.Ordered > 0)
+					.FirstOrDefault();
+				if (request != null)
+				{
+					request.Remaining--;
+					if (request.Ordered > 0)
+						request.Ordered--;
+					owned[a] = request.Mission;
+					request.Mission.OnUnitAssigned(a);
+					Log($"claim {a.Info.Name}@{a.Location} -> {request.Mission.Name} ({request.Role}, {request.Remaining} open)");
+				}
+				else
+				{
+					PoolAdd(a);
+					Log($"claim {a.Info.Name}@{a.Location} -> pool ({pool.Count})");
+				}
+			}
+
+			requests.RemoveAll(r => r.Remaining <= 0);
+		}
+
+		// ---- Production -----------------------------------------------------
+
+		// Role tag for naval ferry transports -- exempt from the production cash reserve, see PumpProduction.
+		public const string FerryRole = "ferry";
+
+		// Escorts are a SEPARATE role on purpose. They used to share FerryRole, which meant they blocked
+		// the transports' request slot and inherited their cash-reserve exemption -- so a sub could be
+		// paid for before the transport that actually unblocks a crossing. Escorts are optional: they
+		// join over time when there is spare money (user spec 2026-07-27, "nicht auf den bau der uboote
+		// warten bis er los legt").
+		public const string FerryEscortRole = "ferry-escort";
+
+		// Role tag for emergency defense production (see TryEmergencyDefenseProduction) -- exempt from
+		// the cash reserve for the same reason as FerryRole (an active attack can't wait for cash to
+		// build back up), but goes through the normal requests queue instead of a raw StartProduction
+		// order like it originally did (User 2026-07-31: that bypassed EVERY other request's priority
+		// entirely, cutting to the front of the shared Infantry queue on every single attack and
+		// permanently starving longer-standing requests sharing that queue -- confirmed via log: 13
+		// batches of 5 fired this match alone, and the Derrick mission's mandatory Engineer request,
+		// stuck behind them the whole time, was claimed ZERO times all session).
+		public const string EmergencyDefenseRole = "emergency-defense";
+
+		public void QueueRequest(AotMission mission, string role, string[] chain, int count)
+		{
+			if (count <= 0 || chain.Length == 0)
+				return;
+
+			// Reuse before rebuilding (User 2026-08-03: "dadurch idleten manchmal mehrere helis in einer
+			// base"). A finished raid hands its transport back to the pool, and transports are kept out
+			// of the idle-pool sweep on purpose so they are not thrown at an attack wave -- but nothing
+			// ever picked them up again either, so the next raid simply built ANOTHER one while the old
+			// one sat in the base. Requests now satisfy themselves from the pool first, which also lets
+			// a squad form out of surviving infantry instead of always waiting on fresh production.
+			var reused = TakeFromPool(chain, count);
+			if (reused.Count > 0)
+			{
+				AssignFromPool(mission, reused);
+				Log($"request {role}: reused {reused.Count} pooled unit(s) for {mission.Name}");
+				count -= reused.Count;
+			}
+
+			if (count <= 0)
+				return;
+
+			requests.Add(new AotProductionRequest { Mission = mission, Role = role, Chain = chain, Remaining = count });
+		}
+
+		public void CancelRequests(AotMission mission)
+		{
+			requests.RemoveAll(r => r.Mission == mission);
+		}
+
+		// Drop a mission's OUTSTANDING transport/escort orders. A ferry is released as soon as its
+		// crossing is done, but its production requests kept running -- the ships then arrived at a
+		// mission that no longer had a ferry, were filed as ordinary combat units and never reached the
+		// pool again. With FerryMaxTotal exhausted, every later mission waited forever (confirmed
+		// 2026-07-27: a finished derrick squad held all three transports while a wave sat at ships=0).
+		public void CancelFerryRequests(AotMission mission)
+		{
+			requests.RemoveAll(r => r.Mission == mission && (r.Role == FerryRole || r.Role == FerryEscortRole));
+		}
+
+		// Every naval asset still booked to this mission, whether or not the mission still tracks it.
+		// A safety net against leaks: anything that slipped out of a convoy's own lists would otherwise
+		// stay owned forever and never reach the pool again.
+		public void ReleaseAllNavalSupport(AotMission mission)
+		{
+			var strays = owned.Where(kv => kv.Value == mission && IsNavalSupport(kv.Key))
+				.Select(kv => kv.Key)
+				.ToList();
+			if (strays.Count > 0)
+				ReleaseToPool(mission, strays);
+		}
+
+		// Is this a convoy asset (transport or escort) rather than a fighting unit?
+		public bool IsNavalSupport(Actor a) =>
+			Info.FerryTypes.Contains(a.Info.Name)
+			|| Info.FerryEscortTypes.Contains(a.Info.Name)
+			|| Info.FerryEscortSecondaryTypes.Contains(a.Info.Name);
+
+		public int OpenRequests(AotMission mission)
+		{
+			return requests.Where(r => r.Mission == mission).Sum(r => r.Remaining);
+		}
+
+		public int OpenRequests(AotMission mission, string role)
+		{
+			return requests.Where(r => r.Mission == mission && r.Role == role).Sum(r => r.Remaining);
+		}
+
+		// How many more transports may be produced right now, across the WHOLE AI.
+		//
+		// FerryCount is per mission, so with several ferry missions running at once (a derrick squad,
+		// an attack wave and two scout groups all needing to cross) each independently asked for its
+		// own FerryCount and the AI ended up building far more ships than intended -- confirmed
+		// 2026-07-24: FerryCount=2 but four transports produced, most of them idling. This caps the
+		// fleet globally; missions share the surplus through the pool instead of each building its own.
+		public int FerryBudget()
+		{
+			var queued = requests.Where(r => r.Role == FerryRole).Sum(r => r.Remaining);
+			return Math.Max(0, Info.FerryMaxTotal - OwnedFerryCount() - queued);
+		}
+
+		// Transports the AI owns right now, no matter which mission is using them. A mission that
+		// currently has none must NOT conclude that ferrying is impossible while these exist -- they
+		// are shared through the pool and become available again after each crossing.
+		public int OwnedFerryCount() =>
+			World.Actors.Count(a => a.Owner == Player && !a.IsDead && a.IsInWorld
+				&& Info.FerryTypes.Contains(a.Info.Name));
+
+		// Up to 5 independent wave slots (User 2026-07-31, see WaveSlot1-5 above). Empty ones (no Types
+		// configured) are skipped -- a faction with none defined falls back to the legacy tank/light/
+		// support share split in AotRegularWaveMission.Compose (GDI, for now).
+		public List<(string Name, string[] Chain, int[] Min, int[] Max)> WaveSlots()
+		{
+			var list = new List<(string, string[], int[], int[])>();
+			void Add(string name, string[] types, int[] min, int[] max)
+			{
+				if (types.Length > 0)
+					list.Add((name, types, min, max));
+			}
+
+			Add("slot1", Info.WaveSlot1Types, Info.WaveSlot1Min, Info.WaveSlot1Max);
+			Add("slot2", Info.WaveSlot2Types, Info.WaveSlot2Min, Info.WaveSlot2Max);
+			Add("slot3", Info.WaveSlot3Types, Info.WaveSlot3Min, Info.WaveSlot3Max);
+			Add("slot4", Info.WaveSlot4Types, Info.WaveSlot4Min, Info.WaveSlot4Max);
+			Add("slot5", Info.WaveSlot5Types, Info.WaveSlot5Min, Info.WaveSlot5Max);
+			return list;
+		}
+
+		public string FirstBuildable(string[] chain)
+		{
+			var queuesByCategory = AIUtils.FindQueuesByCategory(Player);
+			return FirstBuildable(chain, queuesByCategory).Name;
+		}
+
+		// Module 0: OreT Boost -- a single one-time extra Ore Transporter for early cashflow (User
+		// 2026-07-22). Fires a bare StartProduction order directly, bypassing the Ops claim/request
+		// pipeline entirely: ORET is excluded from Ops via ExcludeFromOpsTypes (it must never be
+		// commandeered as a combat unit) and manages itself once built, exactly like the free-spawned
+		// starter ORET. Retries every tick until buildable (e.g. waits for the Light Factory), then never
+		// fires again -- and if this bonus ORET is later destroyed, it is NOT replaced (that would make
+		// it a standing rule instead of a one-time boost).
+		void TryOreBoost(IBot bot)
+		{
+			if (oreBoostDone || !Info.EnableOreBoost || Info.OreBoostTypes.Length == 0)
+				return;
+
+			var queuesByCategory = AIUtils.FindQueuesByCategory(Player);
+			var (name, queue) = FirstBuildable(Info.OreBoostTypes, queuesByCategory);
+			if (name == null || queue == null)
+				return;
+
+			bot.QueueOrder(Order.StartProduction(queue.Actor, name, 1));
+			oreBoostDone = true;
+			Log($"ore boost: extra {name} ordered (one-time, early cashflow)");
+		}
+
+		// Emergency defense production (User 2026-07-31): the base is under attack, so rush a batch of
+		// RocketInfantryTypes.
+		//
+		// FIX (User 2026-07-31 follow-up, "seit wir die rocket für defense rein genommen haben ... tauchte
+		// er nicht auf"): this originally fired a bare StartProduction order directly (same pattern as
+		// TryOreBoost), bypassing PumpProduction's whole requests queue -- which meant it cut to the FRONT
+		// of the shared Infantry queue on every single attack, ahead of every already-pending request that
+		// happened to share it. Confirmed via log: 13 batches of 5 fired in one match, and Module 4's
+		// Derrick mission -- whose mandatory Engineer request (EngineerTypes) shares that exact queue --
+		// never got claimed even ONCE all session, permanently stuck in Forming as a direct result. Now
+		// goes through the normal QueueRequest/PumpProduction pipeline like everything else (still exempt
+		// from the cash reserve via EmergencyDefenseRole, since an active attack can't wait for cash to
+		// build back up), so it takes its turn in the SAME fair, insertion-order queue as any other
+		// mission's request instead of always winning outright. Owned by Module 5 (Base Defense) if
+		// enabled -- the natural home for "extra defenders"; its own ScanAndRespond/MaintainGarrison
+		// already knows how to use them. Only queues a fresh batch once its own emergency requests are
+		// fully spent (OpenRequests == 0), so it naturally repeats in batches for as long as
+		// GlobalUnitSelfDefense keeps calling it (i.e. for as long as the base stays under attack).
+		// Role tags for the two emergency defense request lines -- kept distinct from each other (rather
+		// than sharing EmergencyDefenseRole) so OpenRequests/QueueRequest track gunner and trooper batches
+		// independently: they have separate ceilings and can run out of headroom at different times.
+		const string EmergencyGunnerRole = EmergencyDefenseRole + "-gunner";
+		const string EmergencyTrooperRole = EmergencyDefenseRole + "-trooper";
+
+		void TryEmergencyDefenseProduction(IBot bot, int threatCount)
+		{
+			if (Info.EmergencyDefenseBatchSize <= 0)
+				return;
+
+			var garrison = Missions.OfType<AotBaseDefenseMission>().FirstOrDefault();
+			if (garrison == null)
+				return;
+
+			// Mixed 2:1 gunners-to-troopers (User 2026-07-31), each with its OWN standing ceiling and its
+			// OWN "one batch in flight" guard -- so e.g. gunners can keep topping up after hitting the
+			// trooper ceiling, instead of one shared count blocking both. threatCount is split at the same
+			// 2:1 ratio the ceilings themselves express (10:5), then each half is still capped by
+			// EmergencyDefenseBatchSize and by its own remaining headroom.
+			var wantGunners = threatCount * 2 / 3;
+			var wantTroopers = threatCount - wantGunners;
+
+			RequestEmergencyBatch(garrison, EmergencyGunnerRole, Info.MgInfantryTypes, wantGunners, Info.EmergencyDefenseMaxGunners, "gunner");
+			RequestEmergencyBatch(garrison, EmergencyTrooperRole, Info.RocketInfantryTypes, wantTroopers, Info.EmergencyDefenseMaxTroopers, "trooper");
+		}
+
+		void RequestEmergencyBatch(AotMission garrison, string role, string[] chain, int wanted, int ceiling, string label)
+		{
+			if (wanted <= 0 || chain.Length == 0)
+				return;
+
+			if (OpenRequests(garrison, role) > 0)
+				return;
+
+			// Standing ceiling: without this, a batch was re-ordered every time the previous one finished
+			// for as long as ANY enemy remained in the region, with no upper bound at all (User
+			// 2026-07-31: 65 troopers observed in a single match).
+			var alive = World.Actors.Count(a => a.Owner == Player && !a.IsDead && a.IsInWorld && chain.Contains(a.Info.Name));
+			var headroom = ceiling - alive;
+			if (headroom <= 0)
+				return;
+
+			var want = Math.Min(Math.Min(wanted, Info.EmergencyDefenseBatchSize), headroom);
+			if (want <= 0)
+				return;
+
+			QueueRequest(garrison, role, chain, want);
+			Log($"emergency defense: requesting {want}x {label} reinforcement(s) (alive={alive}/{ceiling})");
+		}
+
+		// Startup priority gate for the first Regular Attack Wave (User 2026-07-22): cashflow (OreT
+		// boost) and reconnaissance (first Derrick scan, every Scout group) get a head start. Vacuously
+		// satisfied for whichever of these is disabled or inapplicable (e.g. a single-spawn map has no
+		// scouting to wait for), so this can never gate on something that will never happen. The
+		// StartupPriorityTimeout safety net additionally guarantees this can never deadlock the whole
+		// offensive (e.g. radar destroyed before ever being built).
+		bool StartupPriorityMet()
+		{
+			if (ticksSinceStart >= Info.StartupPriorityTimeout)
+				return true;
+
+			var oreBoostSatisfied = !Info.EnableOreBoost || Info.OreBoostTypes.Length == 0 || oreBoostDone;
+			var derricksSatisfied = !Info.EnableDerricks || derrickFirstScanDone;
+			var scoutsSatisfied = !Info.EnableScouts || Intel.AllSpawns.Count <= 1
+				|| (scoutAssignments.Count > 0 && scoutGroupsLaunched.Count >= scoutAssignments.Count);
+
+			return oreBoostSatisfied && derricksSatisfied && scoutsSatisfied;
+		}
+
+		(string Name, ProductionQueue Queue) FirstBuildable(string[] chain, ILookup<string, ProductionQueue> queuesByCategory)
+		{
+			foreach (var name in chain)
+			{
+				if (!World.Map.Rules.Actors.TryGetValue(name, out var actorInfo))
+					continue;
+
+				var bi = actorInfo.TraitInfoOrDefault<BuildableInfo>();
+				if (bi == null)
+					continue;
+
+				foreach (var category in bi.Queue)
+				{
+					foreach (var queue in queuesByCategory[category])
+					{
+						if (queue.BuildableItems().Any(i => i.Name == name))
+							return (name, queue);
+					}
+				}
+			}
+
+			return (null, null);
+		}
+
+		void PumpProduction(IBot bot)
+		{
+			if (requests.Count == 0)
+				return;
+
+			// Army production PAUSES ENTIRELY while the Age-1 Refinery is still being built (user spec
+			// 2026-07-31): observed the AI put up its Age-1 Airfield but never the Refinery behind it,
+			// because unit production kept winning the cash race against the Rhythm builder tick after
+			// tick. Deliberately no FerryRole exemption here (unlike the reserve check below): that
+			// exemption exists because cash can sit under the reserve INDEFINITELY on a poor spawn,
+			// permanently stalling a mission -- this pause is bounded by "until the Refinery is built",
+			// which is the very thing it exists to speed up, so a mission's transport waiting through it
+			// is a short, deliberate delay, not a deadlock. `requests` keeps accumulating as normal;
+			// this only withholds the StartProduction orders that actually spend cash, so everything
+			// fires the instant the Refinery completes.
+			// Age 1 is the cashflow-optimisation phase (user spec 2026-08-02): the Refinery above, and
+			// the base expansion alongside it, are both what every later unit is paid for. Expanded from
+			// Age1RefineryPending() to EconomyPriorityPending(), which adds the expansion under its own
+			// hard tick budget -- the expansion half retires permanently once spent, so army production
+			// can never be starved by an expansion that drags on.
+			if (builder != null && builder.Info.Faction == Info.Faction && builder.EconomyPriorityPending())
+				return;
+
+			// The cash reserve keeps the AI from spending its last credits on ordinary units. It must
+			// NOT apply to a ferry transport: an entire mission is blocked waiting for that one ship,
+			// and on a poor spawn (no land route to the derricks) cash+ore can sit under the reserve
+			// indefinitely -- confirmed 2026-07-24: cash=0/ore~250 for the whole match, "transports
+			// requested" logged repeatedly, yet `produce aot-transport` never fired once and every
+			// ferry timed out. Everything else still respects the reserve (User spec).
+			var reserveMet = playerResources.GetCashAndResources() >= Info.ProductionMinCash;
+
+			var queuesByCategory = AIUtils.FindQueuesByCategory(Player);
+			var usedQueues = new HashSet<ProductionQueue>();
+
+			foreach (var request in requests)
+			{
+				if (!reserveMet && request.Role != FerryRole && request.Role != EmergencyDefenseRole)
+					continue;
+
+				// Reconcile leaked orders: nothing of this chain is anywhere in production anymore.
+				if (request.Ordered > 0 && World.WorldTick > request.LastOrderTick + 1500)
+				{
+					var stillProducing = queuesByCategory.SelectMany(g => g)
+						.Any(q => q.AllQueued().Any(i => request.Chain.Contains(i.Item)));
+					if (!stillProducing)
+						request.Ordered = 0;
+				}
+
+				while (request.Ordered < request.Remaining)
+				{
+					var (name, queue) = FirstBuildable(request.Chain, queuesByCategory);
+					if (name == null || queue == null || usedQueues.Contains(queue))
+						break;
+
+					// Keep regular queues at one outstanding item; bulk queues take a batch.
+					if (queue is not BulkProductionQueue && queue.AllQueued().Any())
+					{
+						usedQueues.Add(queue);
+						break;
+					}
+
+					bot.QueueOrder(Order.StartProduction(queue.Actor, name, 1));
+					request.Ordered++;
+					request.LastOrderTick = World.WorldTick;
+					Log($"produce {name} for {request.Mission.Name} ({request.Role})");
+
+					// Diagnostic (User 2026-08-01: "es ist ein einziger LTNK vorhanden, keiner je auf der
+					// world erschienen" -- StartProduction was ordered but ClaimNewUnits's "claim
+					// aot-ltnk-..." never fires even once, for either mission-claim OR the pool fallback,
+					// meaning the actor never actually gets created at all). PumpProduction only ever
+					// OPTIMISTICALLY increments Ordered after QueueOrder -- it never confirms the engine
+					// actually accepted it. BulkProductionQueue.ResolveOrder silently no-ops (no error,
+					// nothing queued) if PayUpFront's cost check fails at the exact tick the order
+					// resolves, which can be a few ticks after this FirstBuildable check ran, so cash
+					// spent by something else in between is invisible here otherwise. Logs cost vs. cash
+					// at the moment of ordering to test that directly.
+					if (queue is BulkProductionQueue bulk)
+					{
+						var cost = World.Map.Rules.Actors[name].TraitInfoOrDefault<ValuedInfo>()?.Cost ?? 0;
+						Log($"  starport order diag: {name} cost={cost} cashAndOre={playerResources.GetCashAndResources()} " +
+							$"cartBefore={bulk.GetActorsReadyForDelivery().Count} deliveryInProgress={bulk.HasDeliveryStarted()}");
+					}
+
+					if (queue is not BulkProductionQueue)
+					{
+						usedQueues.Add(queue);
+						break;
+					}
+				}
+			}
+		}
+
+		void FlushStarport(IBot bot)
+		{
+			foreach (var queue in Player.PlayerActor.TraitsImplementing<BulkProductionQueue>())
+			{
+				if (queue.GetActorsReadyForDelivery().Count > 0 && !queue.HasDeliveryStarted())
+				{
+					// TargetString MUST carry the queue type: BulkProductionQueue.ResolveOrder's
+					// PurchaseOrder case compares order.TargetString == info.Type and silently ignores
+					// the order otherwise. Without it the flush fired forever (281x in one match,
+					// User 2026-08-02: "es ist noch nichtmal ein Transportflugzeug gelandet") while
+					// deliveryInProgress stayed False and the full cart blocked the queue for good.
+					bot.QueueOrder(new Order("PurchaseOrder", queue.Actor, false) { TargetString = queue.Info.Type });
+					Log($"starport flush: delivery ordered ({queue.Info.Type}, cart={queue.GetActorsReadyForDelivery().Count})");
+				}
+			}
+		}
+
+		// ---- Pool -----------------------------------------------------------
+
+		void PoolAdd(Actor a)
+		{
+			pool.Add(a);
+			pooledSince[a] = World.WorldTick;
+		}
+
+		void PoolRemove(Actor a)
+		{
+			pool.Remove(a);
+			pooledSince.Remove(a);
+		}
+
+		// Units nobody asked for pile up in the pool and would otherwise stand around in the base for
+		// the rest of the match (User 2026-07-25: "zieht er parkende einheiten nicht nach"). TakeFromPool
+		// only matches a mission's own type chain, and base defense stops drawing once its garrison
+		// target is met -- so any leftover type never gets picked up again. Fold long-idle units into an
+		// active combat mission instead.
+		void SweepIdlePool(IBot bot)
+		{
+			if (Info.PoolIdleReinforceTicks <= 0 || pool.Count == 0)
+				return;
+
+			// Raid transports are NOT combat reinforcements (User 2026-08-03: "er hat sich einer
+			// normalen regular wave angeschlossen und fliegt den panzern hinterher, was ueberhaupt
+			// keinen sinn macht"). A raid that aborts hands its transport back to the pool, and from
+			// here it was handed straight to the next attack wave -- an unarmed Chinook attack-moving
+			// into the enemy base behind the tanks. Keep them out of the sweep so they stay available
+			// for the next raid instead.
+			var stale = pool.Where(a => !unitCannotBeOrdered(a)
+				&& !IsRaidTransport(a)
+
+				// AIRCRAFT never join a ground attack wave (User 2026-08-04: "er setzt plötzlich auch
+				// einen HIND mit boden einheiten in einer wave ein. wieso das denn?!"). A Hind is in no
+				// wave slot at all -- it can only get there as an air-raid survivor that was pooled and
+				// then swept up as reinforcement, whereupon it attack-moves at tank pace alongside the
+				// column. Same failure as the Chinook trailing an attack wave, which was only fixed for
+				// raid transports. Pooled helicopters are picked up again by the next air raid instead,
+				// since production requests now satisfy themselves from the pool first.
+				&& !a.Info.HasTraitInfo<AircraftInfo>()
+
+				// Belt-and-suspenders with the ReleaseToPool guard: an excluded-from-ops type (MCV,
+				// harvester, ore transporter, surveyor ...) must never be swept into an attack wave,
+				// however it reached the pool. Same class as the raid-transport and aircraft exclusions.
+				&& !Info.ExcludeFromOpsTypes.Contains(a.Info.Name)
+
+				// Devils are reserved for the Subterranean Flame Raid. The common way one reaches the
+				// pool is a transform: a flame TTNK the bot built BEFORE taking the Subterranean upgrade
+				// turns into a Devil's Tongue in place (a NEW actor, so ClaimNewUnits pools it), and the
+				// sweep would then fold it into a normal ground wave -- exactly what the raid exists to
+				// avoid (User 2026-08-13: "manchmal haben sie mehrere flame tanks gebaut und machen dann
+				// subterrain upgrade ... versuchen sie dennoch mit normalen waves in einsatz zu bringen").
+				// Left in the pool, the next devil raid's TakeFromPool claims it instead.
+				&& !Info.DevilRaidTypes.Contains(a.Info.Name)
+				&& pooledSince.TryGetValue(a, out var since)
+				&& World.WorldTick - since >= Info.PoolIdleReinforceTicks).ToList();
+			if (stale.Count == 0)
+				return;
+
+			// Prefer an actual attack mission (gets them into the fight); fall back to the garrison.
+			var target = Missions.FirstOrDefault(m => !m.Done && m.AcceptsReinforcements && m is AotRegularWaveMission)
+				?? Missions.FirstOrDefault(m => !m.Done && m.AcceptsReinforcements);
+			if (target == null)
+				return;
+
+			foreach (var a in stale)
+				PoolRemove(a);
+
+			AssignFromPool(target, stale);
+			Log($"pool sweep: {stale.Count} idle unit(s) reinforced {target.Name}");
+		}
+
+		public void ReleaseToPool(AotMission mission, List<Actor> units)
+		{
+			foreach (var a in units)
+			{
+				if (unitCannotBeOrdered(a))
+					continue;
+
+				owned.Remove(a);
+
+				// An excluded-from-ops type (MCV, harvester, ore transporter, surveyor ...) must NEVER
+				// enter the shared pool: the pool feeds attack waves and the base garrison, and an MCV a
+				// failed expansion released this way was swept straight into a frontal assault on an enemy
+				// main base (User 2026-08-13: "grün hat einen MCV gerade mit einer normalen wave in den
+				// frontalangriff ... verheizt"). Dropping it UNCLAIMED instead leaves it for FindUnclaimed,
+				// so the next expansion reuses it rather than paying for another one.
+				if (Info.ExcludeFromOpsTypes.Contains(a.Info.Name))
+					continue;
+
+				PoolAdd(a);
+			}
+		}
+
+		public List<Actor> TakeFromPool(string[] chain, int count)
+		{
+			var taken = pool.Where(a => chain.Contains(a.Info.Name)).Take(count).ToList();
+			foreach (var a in taken)
+				PoolRemove(a);
+			return taken;
+		}
+
+		// Base Defense (User 2026-07-22): opportunistically adopts ANY idle pool unit regardless of
+		// type, unlike TakeFromPool's chain filter -- the garrison isn't picky about composition,
+		// it just wants bodies that are otherwise sitting around doing nothing.
+		public List<Actor> TakeAnyFromPool(int count)
+		{
+			var taken = pool.Take(count).ToList();
+			foreach (var a in taken)
+				PoolRemove(a);
+			return taken;
+		}
+
+		// An own unit of one of these types that no mission has claimed. Used to pick up an MCV left
+		// behind by a failed expansion instead of paying for another one.
+		public Actor FindUnclaimed(IEnumerable<string> types) =>
+			World.Actors.FirstOrDefault(a => a.Owner == Player && !a.IsDead && a.IsInWorld
+				&& a.OccupiesSpace != null
+				&& types.Contains(a.Info.Name)
+				&& !owned.ContainsKey(a));
+
+		public void AssignFromPool(AotMission mission, List<Actor> units)
+		{
+			foreach (var a in units)
+			{
+				owned[a] = mission;
+				mission.OnUnitAssigned(a);
+			}
+		}
+
+		// ---- Scheduler ------------------------------------------------------
+
+		void Schedule(IBot bot)
+		{
+			// Module 2: regular attack waves, with an escalation ladder (User 2026-07-22, reduced):
+			// attempt 1 = primary choke; if it fails, attempt 2 = secondary choke (Wave-
+			// SecondaryRouteAfterFailures=1); if that also fails, attempt 3 = an air raid instead of
+			// a ground wave (WaveAirRaidAfterFailures=2, only once a helipad exists). From then on
+			// (attempt 4 onward) the fixed ladder is abandoned for good -- randomEscalationPhase picks,
+			// each time, at random (RandomAirRaidChancePercent, User 2026-07-31: ~1:3 air-raid-to-
+			// ground-wave ratio) between a ground wave via a random choke and another air raid, so the
+			// enemy stops being predictable once it has escalated once already.
+			// Startup priority (User 2026-07-22): only the very FIRST wave waits on this -- every later
+			// wave/air-raid (waveIndex > 0) is unaffected. OreT boost + first Derrick scan + every Scout
+			// group (cashflow and reconnaissance) get a head start before the first real offensive.
+			// AGE SPRINT (User 2026-08-05): once the bot is buying its next Age in earnest, offensive
+			// waves stand down and every credit goes to the upgrade -- the same call a human makes,
+			// "put the buildings up, build one wave's worth, then stop and save the rest". Base
+			// defence is untouched and still answers attacks; this only stops NEW offensives.
+			// The expansion hold normally silences new waves so the whole income goes into the convoy --
+			// UNLESS the expansion's own ground has been taken by an enemy, in which case a wave IS
+			// wanted, precisely to clear that spot (ContestedExpansionSite; user spec 2026-08-22). So the
+			// hold is bypassed exactly when there is contested ground to reclaim.
+			if (Info.EnableWaves && (!ExpansionHoldsPriority() || ContestedExpansionSite() != null)
+				&& !EconomyEmergency() && !AgeSprintActive()
+				&& !Missions.OfType<AotRegularWaveMission>().Any() && !Missions.OfType<AotAirRaidMission>().Any()
+				&& !Missions.OfType<AotDevilRaidMission>().Any()
+				&& WaveUnlocked())
+			{
+				if (--waveCooldownTicks <= 0)
+				{
+					waveCooldownTicks = Info.WaveCooldown;
+
+					// SUBTERRANEAN FLAME RAID (user spec 2026-08-13): from Age 2 with the Subterranean
+					// upgrade, this cycle's offensive is SOMETIMES a pack of five Devil's Tongues alone
+					// instead of a ground wave or a Hind air raid. Rolled first, as a random alternative to
+					// the whole wave/air-raid decision below. Gated on the devils actually being buildable
+					// (Age 2 + upgrade -- the honest test, no separate prerequisite bookkeeping) and on a
+					// refinery to pay for them. It reports no Outcome, so it never disturbs the
+					// wave/air-raid escalation ladder it sits beside.
+					var canDevilRaid = Info.EnableDevilRaids && AgeTier() >= Info.DevilRaidAgeTier
+						&& Info.DevilRaidTypes.Length > 0 && FirstBuildable(Info.DevilRaidTypes) != null;
+
+					if (canDevilRaid && HasRefinery()
+						&& World.LocalRandom.Next(100) < Info.DevilRaidChancePercent)
+					{
+						Missions.Add(new AotDevilRaidMission(this));
+						Log($"devil raid scheduled (tier {AgeTier()}, {Info.DevilRaidCount} devils alone)");
+					}
+					else
+					{
+						var canAirRaid = Info.AirRaidHelicopterTypes.Length > 0 && HasHelipad();
+						bool doAirRaid;
+						bool useSecondaryRoute;
+
+						if (randomEscalationPhase)
+						{
+							// The ONGOING 1:3 air-to-ground alternation needs a REFINERY behind it (user spec
+							// 2026-08-06). Helicopters are the expensive half of that rhythm, and before the
+							// refinery there is no income to sustain it -- the bot would trade its balance
+							// for a raid and then stand still.
+							//
+							// The one-off escalation raid below is deliberately NOT covered: that is the
+							// 2-helicopter mini-wave (AirRaidCountPerAge[0]), small enough to afford and
+							// the whole point of having a helipad that early.
+							doAirRaid = canAirRaid && HasRefinery()
+								&& World.LocalRandom.Next(100) < Info.RandomAirRaidChancePercent;
+							useSecondaryRoute = !doAirRaid && World.LocalRandom.Next(2) == 0;
+						}
+						else
+						{
+							doAirRaid = waveFailureStreak >= Info.WaveAirRaidAfterFailures && canAirRaid;
+							useSecondaryRoute = !doAirRaid && waveFailureStreak >= Info.WaveSecondaryRouteAfterFailures;
+						}
+
+						if (doAirRaid)
+						{
+							Missions.Add(new AotAirRaidMission(this));
+							randomEscalationPhase = true;
+							Log($"air raid scheduled (streak={waveFailureStreak}, random={randomEscalationPhase})");
+						}
+						else
+						{
+							waveIndex++;
+							var wave = new AotRegularWaveMission(this, waveIndex, useSecondaryRoute);
+							Missions.Add(wave);
+							wavesSinceRaid++;
+							Log($"wave {waveIndex} scheduled (tier {AgeTier()}, secondaryRoute={useSecondaryRoute}, streak={waveFailureStreak}, random={randomEscalationPhase})");
+						}
+					}
+				}
+			}
+
+			// Module 3: scout expeditions (50% spawn coverage). Gated on Radar/HQ: no point
+			// scouting before there's a radar/minimap to show the results on. One-shot per group
+			// (User 2026-07-22): each group launches exactly once and is never rebuilt, even if
+			// wiped out en route -- scouting is a single initial sweep, not a standing patrol.
+			if (Info.EnableScouts && Intel.AllSpawns.Count > 1 && HasRadar())
+			{
+				if (scoutAssignments.Count == 0)
+					BuildScoutAssignments();
+
+				foreach (var (index, spawns) in scoutAssignments)
+				{
+					if (scoutGroupsLaunched.Contains(index))
+						continue;
+
+					scoutGroupsLaunched.Add(index);
+					Missions.Add(new AotScoutMission(this, index, spawns));
+					Log($"scout group {index} scheduled ({spawns.Count} spawn(s))");
+				}
+			}
+
+			// Module 4: derrick engineer squads. The FIRST squad (User 2026-07-31: "sobald barracks
+			// steht, direkt bei engineer-squad sein") starts the instant a barracks/hand exists,
+			// completely independent of the periodic scan timer below -- previously even the first
+			// attempt waited out the initial ~60s derrickTicks delay for no reason. ADDITIONAL squads
+			// (2nd, 3rd...) stay on the periodic 10-minute scan, but now also gated behind Age 2 (User
+			// 2026-07-31: "prüfung, ob weitere derrick squads gebaut werden in age-2 verlagern") -- early
+			// game cash goes to the first squad and base development, not a second capture attempt.
+			if (Info.EnableDerricks)
+			{
+				if (!derrickFirstSquadTriggered && HasBarracks())
+				{
+					derrickFirstSquadTriggered = true;
+					derrickFirstScanDone = true;
+					StartDerrickPursuit(1);
+				}
+
+				if (--derrickTicks <= 0)
+				{
+					derrickTicks = Info.DerrickCheckInterval;
+					derrickFirstScanDone = true;
+
+					if (AgeTier() >= Info.DerrickSecondSquadAgeTier)
+						StartDerrickPursuit(Info.DerrickMaxTargets - Missions.OfType<AotDerrickMission>().Count());
+				}
+			}
+
+			// Bridge repair (Age 0): periodic map-wide scan, no age gate -- a broken bridge can cut the
+			// only land route to half the map from the very first minute.
+			if (Info.EnableBridgeRepair && --bridgeTicks <= 0)
+			{
+				bridgeTicks = Info.BridgeCheckInterval;
+				if (Info.BridgeRequiresTypes.Count == 0 || World.Actors.Any(a => a.Owner == Player
+					&& !a.IsDead && a.IsInWorld && Info.BridgeRequiresTypes.Contains(a.Info.Name)))
+					StartBridgeRepairs();
+			}
+
+			// Engineer raids: ONE at a time, flavour picked at random (User 2026-08-03: "ab age 2
+			// sollte heli engineer raid & apc raids random abwechseln sobald das subterrain apc
+			// upgrade durchgefuehrt wurde").
+			//
+			// Running both flavours concurrently was actively harmful, not just untidy: each wants
+			// 3 engineers + 2 rocket troopers out of the SAME single-slot infantry queue, alongside
+			// derrick squads and base defence. Confirmed from a 5-bot session -- every ground raid
+			// died on "squad never came together" and its transport was never even requested (the
+			// transport is asked for last, once the squad is complete), so not a single subterranean
+			// APC was ever built.
+			//
+			// Ground is only in the draw once its transport is ACTUALLY buildable, which is the
+			// honest test for "subterrain upgrade done" -- no separate prerequisite bookkeeping.
+			// Sampled far more often than raids are started. The latch below only needs to catch ONE
+			// moment in which the ground transport is buildable, but a BulkProductionQueue hides
+			// everything whenever its producer is disabled (a browned-out airfield, say), so checking
+			// once per 10-minute raid interval could easily miss every open window and the flavour
+			// would never unlock at all.
+			if (--statusTicks <= 0)
+			{
+				statusTicks = Info.StatusLogInterval;
+				LogStatus();
+			}
+
+			if (--groundLatchTicks <= 0)
+			{
+				groundLatchTicks = Info.GroundRaidLatchInterval;
+				if (!groundRaidUnlocked
+					&& Info.EnableGroundRaids
+					&& AgeTier() >= Info.GroundRaidAgeTier
+					&& Info.GroundRaidTransportTypes.Length > 0
+					&& FirstBuildable(Info.GroundRaidTransportTypes) != null)
+				{
+					groundRaidUnlocked = true;
+					Log("ground raids unlocked (transport became buildable)");
+				}
+			}
+
+			if (--raidTicks <= 0)
+			{
+				raidTicks = Info.EngineerRaidInterval;
+				TryStartEngineerRaid();
+			}
+
+			if (Info.EnableExpansion && --expansionTicks <= 0)
+				expansionTicks = TryStartExpansion() ? Info.ExpansionInterval : Info.ExpansionRetryInterval;
+		}
+
+		// One expansion per bot. The mission ends when its yard dies, and the builder's layout is
+		// cleared with it, so the next scan simply founds a new one somewhere else (user spec).
+		// Returns true when an expansion is running or was just founded, i.e. when the long
+		// ExpansionInterval cooldown is the right wait. Every "not yet" answer returns false and is
+		// retried within seconds instead.
+		bool TryStartExpansion()
+		{
+			if (AgeTier() < Info.ExpansionAgeTier || !HasRefinery() || Info.ExpansionMcvTypes.Length == 0)
+				return false;
+
+			if (EconomyEmergency())
+				return false;
+
+			if (Missions.OfType<AotExpansionMission>().Any() || (builder?.ExpansionPlanned ?? false))
+				return true;
+
+			// Hard ceiling on construction yards, checked against the WORLD rather than mission state
+			// (User 2026-08-03: "er baut pro AI teilweise mehrere"). A mission that died after its MCV
+			// deployed left a yard standing while both guards above went clear again, so the next scan
+			// happily founded another one. Counting actual yards cannot drift out of sync that way.
+			var yards = World.Actors.Count(a => a.Owner == Player && !a.IsDead && a.IsInWorld
+				&& Info.ConstructionYardTypes.Contains(a.Info.Name));
+			if (yards > Info.ExpansionMaxYards)
+				return true;
+
+			// An MCV that a live mission is driving counts as a pending expansion -- ordering a second
+			// is how a bot ended up with several. An UNCLAIMED one does not: it is the leftover of a
+			// failed attempt, and treating it as "an expansion is already under way" is what left it
+			// parked forever while no new mission was ever started to use it (User 2026-08-11:
+			// "untaetige MCVs sollten abgestellt werden und fuer eine neue base expansion zur
+			// verfuegung stehen"). The new mission picks it up below.
+			if (World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld
+					&& Info.ExpansionMcvTypes.Contains(a.Info.Name)
+					&& owned.ContainsKey(a)))
+				return true;
+
+			// No site anywhere on this map: report it and keep retrying quietly. Crucially NO mission
+			// is created, so nothing holds priority -- an expansion that cannot be placed must never
+			// become a gatekeeper that stalls waves, raids and the Age fund (User 2026-08-05).
+			var site = FindExpansionSite();
+			if (site == null)
+			{
+				if (++noSiteLog % 24 == 0)
+					Log($"[expansion] no usable site found -- expansion is not holding priority");
+
+				return false;
+			}
+
+			Missions.Add(new AotExpansionMission(this, site.Value));
+			return true;
+		}
+
+		int noSiteLog;
+
+		// Scores tiberium fields from the resource map: plenty of resources, far enough from home to
+		// actually be an expansion, and no enemy base sitting on it. A field with no land route is NOT
+		// excluded -- the user explicitly wants those prioritised, because an expansion nobody can
+		// easily contest is the valuable one; the mission books a crossing for it.
+		CPos? FindExpansionSite()
+		{
+			var resourceMap = Player.PlayerActor.TraitOrDefault<ResourceMapBotModule>();
+			if (resourceMap == null)
+				return null;
+
+			var home = BaseCentre();
+
+			// PRIORITY 0: a map-maker's Expansion Marker flagged "Prior Spawn Marker" outranks
+			// everything, even an empty spawn (user decision 2026-08-22): the AI always tries here first.
+			var priorMarker = FindMarkerSite(home, priorOnly: true);
+			if (priorMarker != null)
+			{
+				Log($"expansion site: PRIOR expansion marker at {priorMarker.Value}");
+				return priorMarker;
+			}
+
+			// PRIORITY 1: an unclaimed start position (User 2026-08-03). On a map with more spawn
+			// points than players these are the best real estate on the board -- flat, pre-cleared,
+			// and placed next to tiberium by the mapper. "Unused" means no construction yard of ANY
+			// player anywhere near it, which also rules out a spawn somebody already expanded onto.
+			var freeSpawn = FindFreeSpawnSite(home);
+			if (freeSpawn != null)
+			{
+				Log($"expansion site: unused spawn point at {freeSpawn.Value}");
+				return freeSpawn;
+			}
+
+			// PRIORITY 2: a non-prior Expansion Marker. Below empty spawns, above the tiberium fields
+			// (user decision 2026-08-28: prior-marker > empty spawn > non-prior marker > field).
+			var marker = FindMarkerSite(home, priorOnly: false);
+			if (marker != null)
+			{
+				Log($"expansion site: expansion marker at {marker.Value}");
+				return marker;
+			}
+			var enemyBuildings = World.Actors
+				.Where(a => !a.IsDead && a.IsInWorld
+					&& a.Owner != Player
+
+					// REAL enemies only. "not allied" also matches NEUTRAL, and an ore mine is a
+					// neutral actor carrying BuildingInfo -- so every start position next to a mine
+					// counted as standing in an enemy base and was thrown out, which is precisely the
+					// ground worth expanding onto (User 2026-08-10: "dort sind aber keine feindlichen
+					// gebaeude ... ggf. oremine oder blossom trees"). Civilian buildings, tech
+					// structures and blossom trees fell into the same trap.
+					&& Player.RelationshipWith(a.Owner) == PlayerRelationship.Enemy
+					&& !a.Owner.NonCombatant
+					&& a.Info.HasTraitInfo<BuildingInfo>())
+				.Select(a => a.Location)
+				.ToList();
+
+			CPos? best = null;
+			var bestScore = int.MinValue;
+
+			// Rejection counters: with no site found the whole mission is silently skipped, and there
+			// was no way to tell an empty map from an over-strict filter (User 2026-08-03: "nicht
+			// einmal wurde irgend etwas richtung base expansion gebaut ... gibt es andere gründe?").
+			int tooSmall = 0, tooClose = 0, enemyBase = 0, enemyNear = 0, allyClaimed = 0, hazardNear = 0, considered = 0;
+			var fieldHazards = Info.ExpansionHazardTypes.Count == 0
+				? []
+				: World.Actors
+					.Where(a => !a.IsDead && a.IsInWorld && a.OccupiesSpace != null
+						&& Info.ExpansionHazardTypes.Contains(a.Info.Name))
+					.Select(a => a.Location)
+					.ToList();
+			var fieldAllySites = AllyExpansionSites();
+
+			for (var i = 0; i < resourceMap.GetIndicesLength(); i++)
+			{
+				var indice = resourceMap.GetIndice(i);
+				if (indice == null || indice.ResourceCellsCount == 0)
+					continue;
+
+				if (indice.ResourceCellsCount < Info.ExpansionMinResourceCells)
+				{
+					tooSmall++;
+					continue;
+				}
+
+				var centre = indice.ResourceCellsCenter;
+				var distHome = (centre - home).Length;
+				if (distHome < Info.ExpansionMinDistance)
+				{
+					tooClose++;
+					continue;
+				}
+
+				if (indice.EnemyBaseCount > 0)
+				{
+					enemyBase++;
+					continue;
+				}
+
+				if (enemyBuildings.Any(b => (b - centre).Length < Info.ExpansionEnemyClearance))
+				{
+					enemyNear++;
+					continue;
+				}
+
+				if (fieldAllySites.Any(a => (a - centre).Length < Info.ExpansionAllyClearance))
+				{
+					allyClaimed++;
+					continue;
+				}
+
+				if (fieldHazards.Any(h => (h - centre).Length < Info.ExpansionHazardClearance))
+				{
+					hazardNear++;
+					continue;
+				}
+
+				considered++;
+
+				// NEAREST field wins (User 2026-08-28: "immer den naechsten waehlen, nicht am andern ende
+				// der map"). Size no longer competes with distance -- a huge far field used to beat a small
+				// near one, which is exactly the "far end" pick the user objected to; ExpansionMinResourceCells
+				// already rules out fields too small to be worth it, so among the qualifying ones proximity
+				// decides. BLOSSOM TREES still win as a class (User 2026-08-03: a regrowing field outranks a
+				// dead one regardless), implemented as a tier offset (1000 >> any map distance), so the pick
+				// is "the nearest blossom field, else the nearest plain field".
+				var score = -distHome
+					+ (indice.ResourceCreatorLocs.Length > 0 ? Info.ExpansionBlossomTierBonus : 0);
+
+				if (score > bestScore)
+				{
+					bestScore = score;
+					best = centre;
+				}
+			}
+
+			if (best == null)
+			{
+				if (--expansionSiteLogTicks <= 0)
+				{
+					expansionSiteLogTicks = 8;
+					Log($"no expansion site: rejected {tooSmall} too small (<{Info.ExpansionMinResourceCells} cells), " +
+						$"{tooClose} too close to home (<{Info.ExpansionMinDistance}), {enemyBase} with an enemy base, " +
+						$"{enemyNear} within {Info.ExpansionEnemyClearance} of an enemy building, " +
+						$"{allyClaimed} claimed by an ally, {hazardNear} beside a hazard");
+				}
+
+				return null;
+			}
+
+			Log($"expansion site chosen near {best.Value} (score {bestScore}, {considered} candidate(s))");
+
+			// Settle a few cells OFF the tiberium itself, on ground the WHOLE layout actually fits on
+			// (User 2026-08-03: "platziert MCV nicht so, dass er den expansion base-builder-plan
+			// umsetzen könnte"). Picking any single free cell was not enough -- the layout spans a
+			// block around the yard, so a cell with a cliff or the tiberium field one step away gives
+			// a yard that can never be built around. Checked against the real footprint the builder
+			// will use, so site selection and construction agree.
+			var site = best.Value;
+			for (var r = Info.ExpansionSiteOffset; r <= Info.ExpansionSiteOffset + 10; r++)
+				foreach (var c in AotOpsUtils.Ring(site, r))
+					if (LayoutFits(c))
+						return c;
+
+			LayoutFits(site, out var siteWhy);
+			Log($"expansion site near {site} rejected: no fitting cell around it (at the centre: {siteWhy})");
+			return null;
+		}
+
+		// A map-maker's Expansion Marker (aot-expansion-marker), if one qualifies. The marker cell IS
+		// the intended yard cell, validated exactly like a spawn -- safe from enemy bases, clear of
+		// hazards, layout fits -- except the min-distance-from-home rule is skipped: the mapper placed
+		// it deliberately and their intent wins. Prior/non-prior is chosen by the caller.
+		CPos? FindMarkerSite(CPos home, bool priorOnly)
+		{
+			var markers = World.ActorsWithTrait<AotExpansionMarker>()
+				.Where(m => !m.Actor.IsDead && m.Actor.IsInWorld && m.Trait.PriorSpawn == priorOnly)
+				.Select(m => m.Actor.Location)
+				.OrderBy(c => (c - home).LengthSquared)
+				.ToList();
+			if (markers.Count == 0)
+				return null;
+
+			var enemyYards = World.Actors
+				.Where(a => !a.IsDead && a.IsInWorld && a.Owner != Player
+					&& Player.RelationshipWith(a.Owner) == PlayerRelationship.Enemy
+					&& Info.ConstructionYardTypes.Contains(a.Info.Name))
+				.Select(a => a.Location)
+				.ToList();
+
+			var enemyBuildings = World.Actors
+				.Where(a => !a.IsDead && a.IsInWorld && a.Owner != Player
+					&& Player.RelationshipWith(a.Owner) == PlayerRelationship.Enemy
+					&& !a.Owner.NonCombatant && a.Info.HasTraitInfo<BuildingInfo>())
+				.Select(a => a.Location)
+				.ToList();
+
+			var hazards = Info.ExpansionHazardTypes.Count == 0
+				? []
+				: World.Actors
+					.Where(a => !a.IsDead && a.IsInWorld && a.OccupiesSpace != null
+						&& Info.ExpansionHazardTypes.Contains(a.Info.Name))
+					.Select(a => a.Location)
+					.ToList();
+
+			var allySites = AllyExpansionSites();
+
+			foreach (var mk in markers)
+			{
+				bool SafeNear(CPos c) =>
+					World.Map.Contains(c)
+					&& !enemyYards.Any(y => (y - c).Length < Info.ExpansionEnemyClearance)
+					&& enemyBuildings.Count(b => (b - c).Length < Info.ExpansionEnemyClearance) < Info.ExpansionEnemyClusterSize
+					&& !hazards.Any(h => (h - c).Length < Info.ExpansionHazardClearance)
+					&& !allySites.Any(a => (a - c).Length < Info.ExpansionAllyClearance);
+
+				var fit = FitNear(mk, Info.ExpansionFitRadius, SafeNear, out var why);
+				if (fit != null)
+					return fit;
+
+				Log($"expansion marker {mk} skipped: {why}");
+			}
+
+			return null;
+		}
+
+		// An unclaimed start position, if there is one: no construction yard of ANY player within
+		// ExpansionSpawnClearance, and far enough from our own base to count as an expansion. The
+		// layout has to fit there too -- a spawn is flat by construction, but it may sit right on the
+		// tiberium the mapper put next to it, so the same footprint test decides.
+		CPos? FindFreeSpawnSite(CPos home)
+		{
+			if (Intel == null || !Intel.Ready)
+				return null;
+
+			var yards = World.Actors
+				.Where(a => !a.IsDead && a.IsInWorld && a.OccupiesSpace != null
+					&& Info.ConstructionYardTypes.Contains(a.Info.Name))
+				.Select(a => a.Location)
+				.ToList();
+
+			// Any ENEMY building, not just a construction yard (User-Fund 2026-08-04: "der goldene
+			// spieler hat seinen MCV zum spawn einer der feindlichen basen geschickt"). A yard-only
+			// test passed a spawn whose owner had deployed further along or whose base had simply
+			// sprawled past the clearance, so the marker looked free while sitting in enemy territory.
+			var enemyBuildings = World.Actors
+				.Where(a => !a.IsDead && a.IsInWorld
+					&& a.Owner != Player
+
+					// REAL enemies only. "not allied" also matches NEUTRAL, and an ore mine is a
+					// neutral actor carrying BuildingInfo -- so every start position next to a mine
+					// counted as standing in an enemy base and was thrown out, which is precisely the
+					// ground worth expanding onto (User 2026-08-10: "dort sind aber keine feindlichen
+					// gebaeude ... ggf. oremine oder blossom trees"). Civilian buildings, tech
+					// structures and blossom trees fell into the same trap.
+					&& Player.RelationshipWith(a.Owner) == PlayerRelationship.Enemy
+					&& !a.Owner.NonCombatant
+					&& a.Info.HasTraitInfo<BuildingInfo>())
+				.Select(a => a.Location)
+				.ToList();
+
+			var hazards = Info.ExpansionHazardTypes.Count == 0
+				? []
+				: World.Actors
+					.Where(a => !a.IsDead && a.IsInWorld && a.OccupiesSpace != null
+						&& Info.ExpansionHazardTypes.Contains(a.Info.Name))
+					.Select(a => a.Location)
+					.ToList();
+
+			var enemyYards = World.Actors
+				.Where(a => !a.IsDead && a.IsInWorld
+					&& a.Owner != Player
+					&& Player.RelationshipWith(a.Owner) == PlayerRelationship.Enemy
+					&& Info.ConstructionYardTypes.Contains(a.Info.Name))
+				.Select(a => a.Location)
+				.ToList();
+
+			// Safety is judged on the CELL WE ACTUALLY RETURN, not on the spawn marker (User-Fund
+			// 2026-08-04: "der goldene spieler hat seinen MCV zum spawn einer der feindlichen basen
+			// geschickt"). The old code filtered the marker and then, when the layout did not fit
+			// there because an enemy base was standing on it, let an unfiltered ring search hand back
+			// a neighbouring cell -- chosen site 150,93 for spawn 151,94, one cell diagonally into
+			// the enemy base. Relying on Intel.EnemySpawns alone is not enough either: it only lists
+			// players this bot is actually at war with and came back short in testing.
+			var allySites = AllyExpansionSites();
+
+			// A spawn either works as-is or is dropped entirely, and the next one is tried (User
+			// 2026-08-04: "wenn ein spawn nicht geeignet ist, soll er den ganz verwerfen und den
+			// nächsten spawn prüfen ... eine ringsuche bringt hier nicht viel"). The ring search that
+			// used to run here is exactly what put a site one cell diagonally into an enemy base:
+			// once the marker itself is unusable, anything near it is suspect too. If no spawn
+			// qualifies, the caller falls through to the tiberium-field tiers.
+			// Rejection counters, exactly like the tiberium-field tier already has. Without them this
+			// tier failed SILENTLY: not one "spawn skipped" line was written all run, because every
+			// candidate was dropped by a pre-filter before the layout test could log anything -- so a
+			// map with two genuinely unused spawns looked identical to a map with none (User
+			// 2026-08-05: "wenige meter daneben wäre ein freier spawn-base gewesen ... stelle ich das
+			// weiterhin in frage"). An unexplained rejection is how the last three site arguments
+			// started.
+			int spawnTooClose = 0, spawnTaken = 0, spawnYardNear = 0, spawnEnemyNear = 0, spawnHazard = 0, spawnNoFit = 0;
+
+			// Every OTHER player's starting position, proximity-matched. EnemySpawns is built from each
+			// hostile player's HomeLocation and was compared to the spawn marker with an EXACT cell match
+			// -- but HomeLocation and the mpspawn marker are not guaranteed to be the same cell (map- and
+			// lobby-dependent), so on some maps an enemy's own start read as a free spawn and the bot
+			// expanded straight onto it (User 2026-08-15: "auf wasser-maps hat der AI als base-expansion
+			// spawn manchmal basen gewählt, bei denen gegner waren"). Matching any non-self player's home
+			// within ExpansionSpawnClearance closes that gap for enemies AND allies, regardless of the
+			// exact-cell mismatch, and does not depend on the enemy having built anything visible yet.
+			var otherHomes = World.Players
+				.Where(p => p != Player && !p.NonCombatant && !p.Spectating
+					&& World.Map.Contains(p.HomeLocation))
+				.Select(p => p.HomeLocation)
+				.ToList();
+
+			foreach (var spawn in Intel.AllSpawns.OrderBy(s => (s - home).LengthSquared))
+			{
+				if ((spawn - home).Length < Info.ExpansionMinDistance)
+				{
+					spawnTooClose++;
+					continue;
+				}
+
+				if (spawn == Intel.OwnSpawn
+					|| Intel.EnemySpawns.Contains(spawn)
+					|| otherHomes.Any(h => (h - spawn).Length < Info.ExpansionSpawnClearance))
+				{
+					spawnTaken++;
+					continue;
+				}
+
+				// Only somebody ELSE'S yard blocks a spawn. Ours does not: an unused start position a
+				// short walk from home is a perfectly good expansion, and counting our own yard here
+				// rejected one outright (log: "1 within 20 of a construction yard").
+				if (yards.Any(y => y != BaseCentre() && (y - spawn).Length < Info.ExpansionSpawnClearance))
+				{
+					spawnYardNear++;
+					continue;
+				}
+
+				// A BASE nearby disqualifies a spawn -- a single stray building does not. The blanket
+				// test threw away both genuinely unused start positions on the map because one enemy
+				// structure stood within twelve cells (User 2026-08-10: "eine komplett ungenutzte
+				// spawn-base ganz in der Nähe"), and the search then settled for far worse ground.
+				//
+				// The property that matters is unchanged: an MCV must never be walked into an enemy
+				// base. A construction yard at any range inside the clearance still blocks, and so
+				// does a cluster of buildings; one wall or turret no longer does.
+				var enemyNearby = enemyBuildings.Count(b => (b - spawn).Length < Info.ExpansionEnemyClearance);
+				var enemyYardNearby = enemyYards.Any(y => (y - spawn).Length < Info.ExpansionEnemyClearance);
+				if (enemyYardNearby || enemyNearby >= Info.ExpansionEnemyClusterSize)
+				{
+					spawnEnemyNear++;
+					continue;
+				}
+
+				if (hazards.Any(h => (h - spawn).Length < Info.ExpansionHazardClearance))
+				{
+					spawnHazard++;
+					continue;
+				}
+
+				if (allySites.Any(a => (a - spawn).Length < Info.ExpansionAllyClearance))
+				{
+					spawnTaken++;
+					continue;
+				}
+
+				// Slide the compound around the marker rather than demanding it land exactly on it. The
+				// safety predicate travels with it, so a shifted site is filtered as hard as the
+				// marker was.
+				bool SafeNear(CPos c) =>
+					World.Map.Contains(c)
+					&& (c - home).Length >= Info.ExpansionMinDistance
+					&& !yards.Any(y => y != BaseCentre() && (y - c).Length < Info.ExpansionSpawnClearance)
+					&& !enemyYards.Any(y => (y - c).Length < Info.ExpansionEnemyClearance)
+					&& enemyBuildings.Count(b => (b - c).Length < Info.ExpansionEnemyClearance) < Info.ExpansionEnemyClusterSize
+					&& !allySites.Any(a => (a - c).Length < Info.ExpansionAllyClearance);
+
+				var fit = FitNear(spawn, Info.ExpansionFitRadius, SafeNear, out var why);
+				if (fit != null)
+				{
+					if (fit.Value != spawn)
+						Log($"spawn {spawn}: layout shifted to {fit.Value} ({why} at the marker)");
+
+					return fit;
+				}
+
+				spawnNoFit++;
+				Log($"spawn {spawn} skipped: {why} (no fit within {Info.ExpansionFitRadius} cells)");
+			}
+
+			Log($"no free spawn: {Intel.AllSpawns.Count} spawn(s) checked -- {spawnTooClose} too close " +
+				$"(<{Info.ExpansionMinDistance}), {spawnTaken} taken or claimed, " +
+				$"{spawnYardNear} within {Info.ExpansionSpawnClearance} of a construction yard, " +
+				$"{spawnEnemyNear} beside an enemy base, {spawnHazard} beside a hazard, " +
+				$"{spawnNoFit} where the layout does not fit");
+
+			return null;
+		}
+
+		bool LayoutFits(CPos yard) => LayoutFits(yard, out _);
+
+		// The walled compound -- buildings AND fence -- must be on clear ground: x -4..+3, y -1..+8
+		// relative to the yard's top-left cell (see memory/ai-base-expansion-layout.md). Every cell of
+		// it has to be on the map, passable, free of existing structures and free of resources: the
+		// fence belongs BESIDE the tiberium, not in it (User 2026-08-04).
+		//
+		// The six guard posts at x -5 and +4 are deliberately NOT part of the test. They are where the
+		// escort digs in, and a tank may perfectly well sit in tiberium -- gating the whole site on them
+		// is what rejected two entirely unused spawns and several usable fields in testing.
+		// Validates the site against the layout that will ACTUALLY be built -- the cells come from
+		// AotBaseBuilderBotModule.ExpansionLayout, the same source the construction reads, so the two
+		// can no longer disagree. The previous version tested a hand-maintained 8x10 rectangle and
+		// required every one of its 80 cells to be clear, including a courtyard nothing is ever built
+		// on and cells the compound does not touch at all. On real maps that vetoed sites with ample
+		// room (User 2026-08-05).
+		//
+		// Foundations are strict: off-map, impassable, already built on, or standing on resources all
+		// disqualify. The FENCE is not -- a perimeter with a few gaps still works, and one awkward
+		// wall cell must never cost the whole expansion. ExpansionFenceTolerance caps how much of the
+		// rim may be missing before the site is genuinely too cramped.
+		// Slides the compound around an anchor until it fits, instead of vetoing the anchor outright.
+		// A single rock never blocks an area a human would build on without a second thought -- you
+		// just put the rectangle down a few cells over (User 2026-08-05: "ist er nicht in der lage,
+		// wenn ein stein im weg ist, das rechteck um offset daneben zu schieben?").
+		//
+		// The ring search that used to exist was removed for a good reason: it handed back a cell one
+		// step diagonally inside an enemy base, because it re-tested only the LAYOUT at the shifted
+		// cell and never the SAFETY that had qualified the anchor. Every offset is therefore put
+		// through the same safety predicate as the anchor itself -- shifting is safe, shifting blind
+		// is not.
+		CPos? FitNear(CPos anchor, int radius, Func<CPos, bool> safe, out string reason)
+		{
+			if (safe(anchor) && LayoutFits(anchor, out reason))
+				return anchor;
+
+			LayoutFits(anchor, out reason);
+
+			for (var r = 1; r <= radius; r++)
+			{
+				for (var dx = -r; dx <= r; dx++)
+				{
+					for (var dy = -r; dy <= r; dy++)
+					{
+						// Ring only: the interior was covered by the smaller radii.
+						if (Math.Max(Math.Abs(dx), Math.Abs(dy)) != r)
+							continue;
+
+						var c = anchor + new CVec(dx, dy);
+						if (safe(c) && LayoutFits(c, out _))
+							return c;
+					}
+				}
+			}
+
+			return null;
+		}
+
+		bool LayoutFits(CPos yard, out string reason)
+		{
+			if (builder == null)
+			{
+				reason = "no base builder to read the layout from";
+				return false;
+			}
+
+			// A route the convoy would have to SHOOT open is not a route (User 2026-08-11: "es gibt
+			// kein landweg hin, bei dem nicht bäume zerstört werden müssten ... nur erreichbare
+			// orte"). Intel.IsReachable is terrain-only -- MovementCostForCell knows nothing about
+			// actors -- so a site behind a tree line reads as perfectly reachable, and the MCV, which
+			// has no weapon at all, grinds against the trees until the move timeout ends the mission.
+			//
+			// Sites on ANOTHER LANDMASS are exempt: not being reachable by land at all is the ferry's
+			// job, and the mission books a crossing for exactly that case. What is rejected here is
+			// the in-between -- same landmass on paper, blocked by scenery in practice.
+			if (Intel.ClearReachableCount > 0 && Intel.IsReachable(yard) && !Intel.IsClearReachable(yard))
+			{
+				reason = "no land route that does not go through trees or other scenery";
+				return false;
+			}
+
+			var fenceBlocked = 0;
+			var fenceTotal = 0;
+
+			foreach (var (c, role, critical) in builder.ExpansionLayout(yard, Info.ConstructionYardTypes))
+			{
+				if (!critical)
+					fenceTotal++;
+
+				string why = null;
+				if (!World.Map.Contains(c))
+					why = "off map";
+				else if (!Intel.IsPassable(c))
+					why = "impassable";
+				else if (World.ActorMap.GetActorsAt(c).Any(a => a.Info.HasTraitInfo<BuildingInfo>()))
+					why = "occupied by a building";
+				else if (resourceLayer != null && resourceLayer.GetResource(c).Type != null)
+					why = "would bury resources";
+
+				if (why == null)
+					continue;
+
+				if (!critical)
+				{
+					fenceBlocked++;
+					continue;
+				}
+
+				reason = $"{role} at {c} {why}";
+				return false;
+			}
+
+			if (fenceTotal > 0 && fenceBlocked * 100 > fenceTotal * Info.ExpansionFenceTolerance)
+			{
+				reason = $"{fenceBlocked}/{fenceTotal} fence cells blocked";
+				return false;
+			}
+
+			reason = null;
+			return true;
+		}
+
+		// ECONOMY EMERGENCY (User 2026-08-04: "es sollte eine prio geben, wenn er 0 hat, dass zumindest
+		// einer gebaut wird"). Early on the whole economy hangs off ore transporters -- there is no
+		// refinery and no harvester yet -- so losing the last one is fatal: no income, no cash, and the
+		// replacement the ORET module duly requests loses every contest for the vehicle queue against
+		// attack waves. Multi1 sat at 0 cash and 500/min for over five minutes that way, unable to
+		// climb out.
+		//
+		// While that state holds, Ops stops asking for anything at all so the replacement can actually
+		// be paid for. Deliberately bounded to the bootstrap phase (user spec): once a refinery or a
+		// harvester exists the economy no longer stands on a single unit and the rule lapses.
+		public bool EconomyEmergency()
+		{
+			if (Info.EconomyTransporterTypes.Length == 0)
+				return false;
+
+			var haveTransporter = World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld
+				&& Info.EconomyTransporterTypes.Contains(a.Info.Name));
+			if (haveTransporter)
+				return false;
+
+			// End condition per user spec 2026-08-04: "alle prio in oreT bis mind. eine refinery inkl.
+			// harvester steht". A refinery ALONE is not an economy -- it needs something delivering to
+			// it -- so both must exist before the emergency lifts. Rebuilding the transporter ends it
+			// just as well, whichever comes first.
+			var haveHarvester = Info.EconomyHarvesterTypes.Length > 0
+				&& World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld
+					&& Info.EconomyHarvesterTypes.Contains(a.Info.Name));
+
+			return !(haveHarvester && HasRefinery());
+		}
+
+		// True while an expansion convoy is being assembled or delivered. Attack waves and engineer
+		// raids stand down for that window so the whole income goes into the expansion -- and it is
+		// bounded by the mission's own ExpansionPriorityTimeout, so a failing expansion can never
+		// silence the army permanently (User 2026-08-04: "es braucht ein safelock").
+		// True while the Age fund has committed to its final sprint. Asked of every Age module on the
+		// player actor -- TraitsImplementing, not TraitOrDefault, since the player carries one per
+		// faction and TraitOrDefault throws on the second (crash 2026-08-04).
+		// The FIRST wave waits for the Age upgrade to be under way (User 2026-08-05). Age 0 then pays
+		// for scouts, the derrick squad and the buildings up to the Tech Centre, and nothing else --
+		// which is what lets the bot reach the 3000 the sprint needs in the first place. Later waves
+		// are not affected.
+		//
+		// Returns TRUE when there is no Age module at all, so a faction or ruleset without Age powers
+		// can never be locked out of attacking entirely.
+		public bool AgeUpgradeStarted()
+		{
+			var modules = Player.PlayerActor.TraitsImplementing<AotAgePowerBotModule>()
+				.Where(m => !m.IsTraitDisabled)
+				.ToList();
+
+			return modules.Count == 0 || modules.Any(m => m.AnyAgeStarted);
+		}
+
+		// Asked by the Age fund: is a build step that the sprint deliberately allows still waiting to
+		// be paid for?
+		public bool ExemptBuildPending() => builder != null && builder.SiloPending();
+
+		// "+saving 3200/5000" or "+SPRINT 3200/5000" appended to cash, so the status line distinguishes
+		// a bot hoarding for its next Age from one that is simply broke -- both read cash=0, because
+		// the fund takes its savings off the account.
+		string AgeSavingLabel()
+		{
+			foreach (var m in Player.PlayerActor.TraitsImplementing<AotAgePowerBotModule>())
+			{
+				if (m.IsTraitDisabled)
+					continue;
+
+				var (saved, cost, sprinting) = m.AgeSavingProgress();
+				if (cost <= 0 || saved <= 0)
+					continue;
+
+				return $" +{(sprinting ? "SPRINT" : "saving")} {saved}/{cost}";
+			}
+
+			return string.Empty;
+		}
+
+		public bool AgeSprintActive() =>
+			Player.PlayerActor.TraitsImplementing<AotAgePowerBotModule>().Any(m => !m.IsTraitDisabled && m.HardSaving);
+
+		// How many expansion attempts have failed without ever deploying a yard, and whether one has
+		// finally succeeded. Drive the "force the expansion" state (user spec 2026-08-22).
+		int expansionFailures;
+		bool expansionBuilt;
+
+		// While TRUE the expansion is existential and its priority never expires: an active expansion
+		// mission holds priority regardless of its own ExpansionPriorityTimeout, so the whole economy
+		// keeps pouring into it. Ends the moment an expansion is built, or after ExpansionForceMaxAttempts
+		// failures (the fallback -- so an un-expandable map never freezes the bot), or if the economy
+		// itself is collapsing (EconomyEmergency owns that hole first).
+		public bool ExpansionForceActive() =>
+			Info.EnableExpansion
+			&& !expansionBuilt
+			// A successful expansion stays alive in its Holding phase and is never removed, so the
+			// expansionBuilt latch (which fires on removal) would never set for it -- the force would then
+			// hold priority forever and the bot would never resume normal play after building its
+			// expansion. Treat a live mission that has deployed its yard as "built" too.
+			&& !Missions.OfType<AotExpansionMission>().Any(m => !m.Done && m.Succeeded)
+			&& expansionFailures < Info.ExpansionForceMaxAttempts
+			&& !EconomyEmergency();
+
+		public bool ExpansionHoldsPriority() =>
+			Missions.OfType<AotExpansionMission>().Any(m => !m.Done && (m.HoldsPriority || ExpansionForceActive()));
+
+		// The site of an active expansion that an enemy has moved onto -- while forcing, a regular wave
+		// goes there to clear it rather than attack the enemy's base (user spec 2026-08-22: "regular
+		// waves stattdessen richtung expansion ort schicken, falls dieser besetzt war um ihn
+		// einzunehmen"). Null unless forcing, so once the expansion is built or the force gives up the
+		// waves attack normally again. Read by AotRegularWaveMission.ChooseTarget.
+		public CPos? ContestedExpansionSite()
+		{
+			if (!ExpansionForceActive())
+				return null;
+
+			foreach (var m in Missions.OfType<AotExpansionMission>().Where(m => !m.Done))
+			{
+				var centre = World.Map.CenterOfCell(m.Site);
+				var taken = World.FindActorsInCircle(centre, WDist.FromCells(Info.ExpansionContestRadius))
+					.Any(a => !a.IsDead && a.IsInWorld && a.Owner != Player
+						&& Player.RelationshipWith(a.Owner) == PlayerRelationship.Enemy
+						&& !a.Owner.NonCombatant
+						&& (a.Info.HasTraitInfo<BuildingInfo>() || a.Info.HasTraitInfo<MobileInfo>()));
+				if (taken)
+					return m.Site;
+			}
+
+			return null;
+		}
+
+		void TryStartEngineerRaid()
+		{
+			if (!HasRefinery() || Missions.OfType<AotEngineerRaidMission>().Any())
+				return;
+
+			if (ExpansionHoldsPriority() || EconomyEmergency())
+				return;
+
+			// Attack rhythm (User 2026-08-04): "2x regular waves 1x heliraid später 1x
+			// heli/subterrain raid". A raid only goes out once RaidAfterWaves attack waves have been
+			// launched since the last one, so raids punctuate the pressure instead of competing with
+			// it -- and the pattern still holds once further operations are added, because each of
+			// them can hook into the same counter rather than inventing its own cadence.
+			if (wavesSinceRaid < Info.RaidAfterWaves)
+				return;
+
+			var heliReady = Info.EnableHeliRaids
+				&& AgeTier() >= Info.HeliRaidAgeTier
+				&& Info.HeliRaidTransportTypes.Length > 0
+				&& FirstBuildable(Info.HeliRaidTransportTypes) != null;
+
+			// LATCHED, not sampled here -- the latch is maintained on its own frequent cadence in
+			// Schedule(), because a BulkProductionQueue hides everything while its producer is
+			// disabled and a single sample per raid interval would miss every open window.
+			var groundReady = groundRaidUnlocked;
+
+			if (--raidGateLogTicks <= 0)
+			{
+				raidGateLogTicks = 4;
+				LogRaidGate(heliReady, groundReady);
+			}
+
+			if (!heliReady && !groundReady)
+				return;
+
+			// 1:GroundRaidPreferenceRatio in favour of the ground raid when both are ready (user
+			// 2026-08-14). Next(ratio+1) == 0 is the 1-in-(ratio+1) heli case; everything else is ground.
+			var ground = groundReady
+				&& (!heliReady || World.LocalRandom.Next(Info.GroundRaidPreferenceRatio + 1) != 0);
+			StartEngineerRaid(ground);
+		}
+
+		// Analysis tool for the raid gate (User 2026-08-03: "bau auch ein analysetool für ground
+		// engineer apc raid ein ... subterrain apc's oder entsprechende raids gabs keine").
+		//
+		// A flavour that never comes up is invisible from outside: TryStartEngineerRaid just returns.
+		// This spells out, per chain entry, whether the actor exists, which queue it belongs to,
+		// whether that queue is even enabled, and -- for the Starport, which is a BulkProductionQueue
+		// and reports NOTHING buildable while its cart is full or a delivery is running -- the cart
+		// state as well, so a transient block can be told apart from a missing prerequisite.
+		// One compact line per player and interval (User-Wunsch 2026-08-04), same shape as [AotCash]
+		// so both can be grepped and lined up by timestamp. Colour label included because every bot
+		// logs under the same PlayerName -- the colour is what lets an observation on screen be tied
+		// to a specific bot.
+		string colorLabel;
+
+		string ColorLabel()
+		{
+			if (colorLabel != null)
+				return colorLabel;
+
+			var c = Player.Color;
+			var best = "?";
+			var bestDist = int.MaxValue;
+			foreach (var (_, label, candidate) in Render.RenderSpritesInfo.AotEditorColors)
+			{
+				var dr = c.R - candidate.R;
+				var dg = c.G - candidate.G;
+				var db = c.B - candidate.B;
+				var dist = (dr * dr) + (dg * dg) + (db * db);
+				if (dist < bestDist)
+				{
+					bestDist = dist;
+					best = label;
+				}
+			}
+
+			return colorLabel = $"{best}/{c.R:X2}{c.G:X2}{c.B:X2}";
+		}
+
+		void LogStatus()
+		{
+			string One<T>(string label, string idle) where T : AotMission
+			{
+				var m = Missions.OfType<T>().FirstOrDefault(x => !x.Done);
+				return $"{label}={(m == null ? idle : m.Status())}";
+			}
+
+			var waves = Missions.OfType<AotRegularWaveMission>().Where(m => !m.Done).ToList();
+			var waveState = waves.Count == 0
+				? $"none(next~{Math.Max(0, waveCooldownTicks) / 25}s)"
+				: string.Join(",", waves.Select(w => w.Status()));
+
+			var seconds = World.WorldTick * World.Timestep / 1000;
+			OpenRA.Log.Write("debug",
+				$"[AotStatus] {seconds / 60:D2}:{seconds % 60:D2} {Player.InternalName} '{Player.InternalName}/{Player.PlayerName}' " +
+				$"[{ColorLabel()}] ({Player.Faction.InternalName}{(Player.IsBot ? ", bot" : "")}) " +
+				$"age={AgeTier()} cash={playerResources.GetCashAndResources()}{AgeSavingLabel()} " +
+				$"{(EconomyEmergency() ? "ECONOMY-EMERGENCY " : "")}waves={waveState} " +
+				$"{One<AotHeliRaidMission>("heli", $"none(next~{Math.Max(0, raidTicks) / 25}s)")} " +
+				$"{One<AotGroundRaidMission>("ground", groundRaidUnlocked ? "none" : "locked")} " +
+				$"{One<AotExpansionMission>("expansion", (builder?.ExpansionPlanned ?? false) ? "built" : "none")} " +
+				$"{One<AotBridgeRepairMission>("bridge", "none")} " +
+				$"pool={pool.Count}");
+		}
+
+		void LogRaidGate(bool heliReady, bool groundReady)
+		{
+			string Describe(string label, string[] chain)
+			{
+				if (chain.Length == 0)
+					return $"{label}=<no chain configured>";
+
+				var parts = new List<string>();
+				foreach (var name in chain)
+				{
+					if (!World.Map.Rules.Actors.TryGetValue(name, out var ai))
+					{
+						parts.Add($"{name}: UNKNOWN ACTOR");
+						continue;
+					}
+
+					var bi = ai.TraitInfoOrDefault<BuildableInfo>();
+					if (bi == null)
+					{
+						parts.Add($"{name}: not buildable at all");
+						continue;
+					}
+
+					var categories = string.Join("/", bi.Queue);
+					var queues = AIUtils.FindQueuesByCategory(Player)
+						.Where(g => bi.Queue.Contains(g.Key))
+						.SelectMany(q => q)
+						.ToList();
+
+					if (queues.Count == 0)
+					{
+						parts.Add($"{name}: no queue owned for [{categories}]");
+						continue;
+					}
+
+					foreach (var q in queues)
+					{
+						// AllItems vs BuildableItems is the decisive distinction: AllItems lists what
+						// the queue offers at all, BuildableItems only what currently passes its
+						// prerequisites AND (for a bulk queue) its cart/delivery state. An item present
+						// in AllItems but not in BuildableItems is a PREREQUISITE problem; an item
+						// missing from both while queueEnabled=False means the queue itself is dark --
+						// a BulkProductionQueue reports Enabled=false whenever no non-disabled producer
+						// exists, e.g. while the airfield is browned out, and then hides EVERYTHING.
+						var offered = q.AllItems().Any(b => b.Name == name);
+						var buildable = q.BuildableItems().Any(b => b.Name == name);
+						var extra = "";
+						if (q is BulkProductionQueue bulk)
+							extra = $" cart={bulk.GetActorsReadyForDelivery().Count} " +
+								$"delivering={bulk.HasDeliveryStarted()} queueBuildableTotal={bulk.BuildableItems().Count()}";
+
+						parts.Add($"{name}@{q.Info.Type}: offered={offered} buildable={buildable} " +
+							$"queueEnabled={q.Enabled}{extra}");
+					}
+				}
+
+				return $"{label}=[{string.Join(" | ", parts)}]";
+			}
+
+			Log($"raid gate: age={AgeTier()} refinery={HasRefinery()} heliReady={heliReady} groundReady={groundReady} " +
+				$"{Describe("heli", Info.HeliRaidTransportTypes)} {Describe("ground", Info.GroundRaidTransportTypes)}");
+		}
+
+		public bool IsRaidTransport(Actor a) =>
+			Info.HeliRaidTransportTypes.Contains(a.Info.Name) || Info.GroundRaidTransportTypes.Contains(a.Info.Name);
+
+		bool HasRefinery() =>
+			World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld && Info.RefineryTypes.Contains(a.Info.Name));
+
+		// One raid of each flavour at a time. The enemy construction yard is only the ANCHOR for
+		// picking a drop zone behind the base -- the actual capture target is chosen on arrival from
+		// whatever capturable building is nearest, so a yard that dies mid-flight doesn't abort it.
+		void StartEngineerRaid(bool ground)
+		{
+			if (Info.EngineerTypes.Length == 0)
+				return;
+
+			if (ground ? Missions.OfType<AotGroundRaidMission>().Any() : Missions.OfType<AotHeliRaidMission>().Any())
+				return;
+
+			var yard = Intel.NearestEnemyYard(BaseCentre(), requireReachable: ground);
+			if (yard == null)
+				return;
+
+			if (ground)
+			{
+				wavesSinceRaid = 0;
+				Missions.Add(new AotGroundRaidMission(this, yard));
+				Log($"ground engineer raid -> {yard.Info.Name}@{yard.Location}");
+			}
+			else
+			{
+				wavesSinceRaid = 0;
+				Missions.Add(new AotHeliRaidMission(this, yard));
+				Log($"heli engineer raid -> {yard.Info.Name}@{yard.Location} (danger tier {HeliRaidDropTier})");
+			}
+		}
+
+		// Huts this bot is currently repairing -- read by ALLIED bots so they do not send a second
+		// engineer to the same bridge (only one repair per hut can run, and the engineer is consumed).
+		// What this bot has laid claim to, readable by allies. First come, first served: a site is
+		// claimed the moment the mission is founded and released when it ends, exactly like a bridge
+		// hut. Deliberately NOT visible to enemies -- an opponent's plans are not ours to read.
+		public IEnumerable<CPos> ActiveExpansionSites =>
+			Missions.OfType<AotExpansionMission>().Where(m => !m.Done).Select(m => m.Site);
+
+		// Sites allies have already spoken for. Two bots picking the same spot is not a crash, but it
+		// wastes the more expensive convoy of the two: both save 6000, both march an MCV across the
+		// map, and only one can deploy (User 2026-08-05: "innerhalb von allieds sollte es da
+		// absprachen geben").
+		// TraitsImplementing, NOT TraitOrDefault -- the player actor carries one module PER FACTION
+		// and TraitOrDefault throws on the second (crash 2026-08-04).
+		HashSet<CPos> AllyExpansionSites() => World.Players
+			.Where(p => p != Player && Player.RelationshipWith(p) == PlayerRelationship.Ally)
+			.SelectMany(p => p.PlayerActor.TraitsImplementing<AotOperationsBotModule>())
+			.SelectMany(o => o.ActiveExpansionSites)
+			.ToHashSet();
+
+		public IEnumerable<Actor> ActiveBridgeTargets =>
+			Missions.OfType<AotBridgeRepairMission>().Where(m => !m.Done).Select(m => m.Hut);
+
+		void StartBridgeRepairs()
+		{
+			if (Info.EngineerTypes.Length == 0)
+				return;
+
+			var active = Missions.OfType<AotBridgeRepairMission>().ToList();
+			var freeSlots = Info.BridgeMaxTargets - active.Count;
+			if (freeSlots <= 0)
+				return;
+
+			// Coordinate with ALLIES (User 2026-08-04): three bots each sent an engineer to the very
+			// same hut, and since the engineer is consumed by the repair, two of the three were spent
+			// for nothing. Only one repair per hut can ever run, so a hut an ally is already handling
+			// is simply skipped. Deliberately limited to allies -- an enemy's plans are not ours to
+			// read, and the engine's own Repairing flag only goes up once someone actually enters,
+			// far too late to prevent the duplicate journey.
+			// TraitsImplementing, NOT TraitOrDefault: the player actor carries ONE AotOperationsBotModule
+			// PER FACTION (@gdi and @nod are both declared on Player and only filtered at runtime), and
+			// TraitOrDefault throws outright on a second instance -- "Actor player has multiple traits of
+			// type AotOperationsBotModule", crash 2026-08-04. Every instance is asked; the inactive one
+			// simply has no missions.
+			var allyTargets = World.Players
+				.Where(p => p != Player && Player.RelationshipWith(p) == PlayerRelationship.Ally)
+				.SelectMany(p => p.PlayerActor.TraitsImplementing<AotOperationsBotModule>())
+				.SelectMany(o => o.ActiveBridgeTargets)
+				.ToHashSet();
+
+			var baseCentre = BaseCentre();
+
+			// Reachability is checked against the hut cell itself: an engineer walks there on foot and
+			// this mission owns no transport (unlike the derrick squad, which can book a crossing).
+			// A hut on the far side of the very gap it would repair is therefore skipped, which is the
+			// intended behaviour -- there is no way to get anyone there until the span is back.
+			var candidates = World.Actors
+				.Where(a => AotBridgeRepairMission.NeedsRepair(a))
+				.Where(a => !active.Any(m => m.Hut == a) && !allyTargets.Contains(a))
+				.Where(a => Intel.IsReachable(a.Location))
+				.OrderBy(a => (a.Location - baseCentre).LengthSquared)
+				.Take(freeSlots)
+				.ToList();
+
+			foreach (var hut in candidates)
+			{
+				Missions.Add(new AotBridgeRepairMission(this, hut));
+				Log($"damaged bridge found -> {hut.Info.Name}@{hut.Location} " +
+					$"({active.Count + 1}/{Info.BridgeMaxTargets} repairs running)");
+			}
+		}
+
+		bool HasBarracks() =>
+			World.Actors.Any(a => a.Owner == Player && !a.IsDead && a.IsInWorld && Info.InfantryRallyTypes.Contains(a.Info.Name));
+
+		// A captured derrick's mission never finishes (permanent guard), so it keeps occupying its slot
+		// -- freeSlots therefore caps derrick TARGETS, not squads.
+		void StartDerrickPursuit(int freeSlots)
+		{
+			if (freeSlots <= 0)
+				return;
+
+			var baseCentre = BaseCentre();
+			var pursued = Missions.OfType<AotDerrickMission>().ToList();
+
+			// A derrick with no land route used to be filtered out here entirely, so a squad was
+			// never even formed for it. The capture squad can now cross with a transport
+			// (User 2026-07-24), so those count as candidates too -- still ranked behind every
+			// walkable derrick, and only when a ferry chain is configured at all.
+			var candidates = Intel.UncontrolledDerricksAnywhere()
+				.Where(d => !pursued.Any(m => m.Derrick == d))
+				.Where(d => Intel.IsReachable(d.Location) || Info.FerryTypes.Length > 0)
+				.OrderBy(d => Intel.IsReachable(d.Location) ? 0 : 1)
+				.ThenBy(d => (d.Location - baseCentre).LengthSquared)
+				.Take(freeSlots);
+
+			foreach (var derrick in candidates)
+			{
+				Missions.Add(new AotDerrickMission(this, derrick));
+				Log($"derrick target acquired -> {derrick.Info.Name}@{derrick.Location} " +
+					$"({pursued.Count + 1}/{Info.DerrickMaxTargets} derricks held/pursued)");
+			}
+		}
+
+		// EVERY spawn marker gets visited, unused ones FIRST (User 2026-08-06). Two reasons, and the
+		// second is the one that matters: an unused spawn is prime expansion ground, so seeing it early
+		// is worth something in itself -- and by the time a group has worked through those it arrives
+		// at the occupied ones, where it will run into something. Scouts tour on AttackMove, so contact
+		// means a fight rather than a drive-by.
+		//
+		// The number of GROUPS is deliberately unchanged: each group simply tours longer. More groups
+		// would mean more units, and Age 0 is exactly where the money has to go to the Tech Centre
+		// instead.
+		//
+		// Spawn markers are static map data the bot already holds -- nothing is being revealed here
+		// that a player could not read off the lobby.
+		void BuildScoutAssignments()
+		{
+			var groups = Math.Max(1, Intel.AllSpawns.Count / 2);
+
+			int Near(CPos c) => (c - Intel.OwnSpawn).LengthSquared;
+
+			// An ALLY's spawn is neither our own nor an enemy's, so it fell through into "unused" and
+			// got a scouting visit of its own (User 2026-08-06). There is nothing to learn there and
+			// nothing to fight, only a detour on the way to somewhere that matters.
+			var allied = World.Players
+				.Where(p => p != Player && !p.NonCombatant
+					&& Player.RelationshipWith(p) == PlayerRelationship.Ally)
+				.Select(p => p.HomeLocation)
+				.ToHashSet();
+
+			var unused = Intel.AllSpawns
+				.Where(s => s != Intel.OwnSpawn && !Intel.EnemySpawns.Contains(s) && !allied.Contains(s))
+				.OrderBy(Near)
+				.ToList();
+
+			var occupied = Intel.EnemySpawns.OrderBy(Near).ToList();
+
+			// Dealt round-robin so every group gets a share of each kind, then ordered unused-first
+			// WITHIN the group. Chunking the combined list instead would hand one group nothing but
+			// empty spawns and another nothing but enemies, which is not what was asked for.
+			for (var i = 0; i < groups; i++)
+				scoutAssignments[i] = [];
+
+			for (var i = 0; i < unused.Count; i++)
+				scoutAssignments[i % groups].Add(unused[i]);
+
+			for (var i = 0; i < occupied.Count; i++)
+				scoutAssignments[i % groups].Add(occupied[i]);
+
+			foreach (var i in scoutAssignments.Keys.ToList())
+				if (scoutAssignments[i].Count == 0)
+					scoutAssignments.Remove(i);
+		}
+
+		void Log(string message)
+		{
+			OpenRA.Log.Write("debug", $"[AotOps][{Player.InternalName}/{Player.PlayerName}] {message}");
+		}
+
+		void INotifyActorDisposing.Disposing(Actor self)
+		{
+			constructionYards.Dispose();
+		}
+	}
+}

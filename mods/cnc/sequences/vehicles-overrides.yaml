@@ -1,8 +1,28 @@
+aot-hind:
+	aot-harpy-test-idle:
+		RemasteredFilename: aot-harpy-test.zip
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 0.9
+	aot-harpy-test-remap:
+		RemasteredFilename: aot-harpy-test-remap.png
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 0.9
+
 mcv:
 	Defaults:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\MCV.ZIP
 	icon:
 		RemasteredFilename:
+	aot-age2-idle:
+		RemasteredFilename: aot-mcv-test.zip
+		Facings: 32
+		UseClassicFacings: True
+	aot-age2-remap:
+		RemasteredFilename: aot-mcv-test-remap.png
+		Facings: 32
+		UseClassicFacings: True
 
 mcv.destroyed:
 	Defaults:
@@ -38,6 +58,10 @@ bggy:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\COMMON\VFX\MINIGUN.ZIP
 	icon:
 		RemasteredFilename:
+	aot-bggy-icon:
+		RemasteredFilename: bggy_base.png
+	aot-bggy-laser-icon:
+		RemasteredFilename: bggy_laser.png
 
 bggy.destroyed:
 	Defaults:
@@ -54,10 +78,158 @@ mtnk:
 		RemasteredFilename: mtnk_2_pred.png
 	aot-mtnk-rail-icon:
 		RemasteredFilename: mtnk_3_rail.png
+	aot-mtnk-turret-predator:
+		RemasteredFilename: aot-mtnk-turret-predator.zip
+		Facings: 32
+		UseClassicFacings: True
+	aot-mtnk-turret-railgun:
+		RemasteredFilename: aot-mtnk-turret-railgun.zip
+		Facings: 32
+		UseClassicFacings: True
+	aot-mtnk-titn-icon:
+		RemasteredFilename: mtnk_2_titn.png
+	aot-mtnk-titn-rail-icon:
+		RemasteredFilename: mtnk_3_titnrail.png
+	# Titan body: 8 Facings × 15 Walk-Frames (Scale3x Bake aus mmch.shp, Frames 0-119)
+	aot-titan-stand:
+		RemasteredFilename: aot-titan-body.zip
+		Start: 0
+		Facings: -8
+		Stride: 15
+		Scale: 1.0
+	aot-titan-stand-remap:
+		RemasteredFilename: aot-titan-body-remap.png
+		Start: 0
+		Facings: -8
+		Stride: 15
+		Scale: 1.0
+	aot-titan-run:
+		RemasteredFilename: aot-titan-body.zip
+		Start: 0
+		Length: 15
+		Facings: -8
+		Tick: 60
+		Scale: 1.0
+	aot-titan-run-remap:
+		RemasteredFilename: aot-titan-body-remap.png
+		Start: 0
+		Length: 15
+		Facings: -8
+		Tick: 60
+		Scale: 1.0
+	# Titan turret: 32 Facings (Scale3x Bake aus mmch.shp, Frames 120-151)
+	aot-titan-turret:
+		RemasteredFilename: aot-titan-turret.zip
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 1.0
+	aot-titan-turret-remap:
+		RemasteredFilename: aot-titan-turret-remap.png
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 1.0
+	aot-titan-turret-railgun:
+		RemasteredFilename: aot-titan-turret-railgun.zip
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 1.0
+	aot-titan-turret-railgun-remap:
+		RemasteredFilename: aot-titan-turret-railgun-remap.png
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 1.0
+	# Titan barrel: mmchbarl.vxl, 32 Facings, 260px (78px bottom-padding für Höhen-Alignment)
+	aot-titan-barrel-black:
+		RemasteredFilename: aot-titan-barrel-black.zip
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 1.0
+	aot-titan-barrel-white:
+		RemasteredFilename: aot-titan-barrel-white.zip
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 1.0
+
+	# Juggernaut barrel: aot-titan-barrel-black.zip Placeholder (kein VXL vorhanden)
+	# Deployed turret: djugg_a.shp, 32 Facings reversed (UseClassicFacings: True)
+
+aot-jugg:
+	# idle: Pflicht für BodyOrientation/QuantizeFacingsFromSequence (Facings: -8 = 8 Facings)
+	idle:
+		RemasteredFilename: aot-jugg-body.zip
+		Start: 0
+		Facings: -8
+		Stride: 15
+		Scale: 1.05
+	# Walk body: 8 Facings × 15 Walk-Frames (Scale3x Bake aus jugger.shp, Frames 0-119)
+	aot-jugg-stand:
+		RemasteredFilename: aot-jugg-body.zip
+		Start: 0
+		Facings: -8
+		Stride: 15
+		Scale: 1.05
+	aot-jugg-stand-remap:
+		RemasteredFilename: aot-jugg-body-remap.png
+		Start: 0
+		Facings: -8
+		Stride: 15
+		Scale: 1.05
+	aot-jugg-run:
+		RemasteredFilename: aot-jugg-body.zip
+		Start: 0
+		Length: 15
+		Facings: -8
+		Tick: 60
+		Scale: 1.05
+	aot-jugg-run-remap:
+		RemasteredFilename: aot-jugg-body-remap.png
+		Start: 0
+		Length: 15
+		Facings: -8
+		Tick: 60
+		Scale: 1.05
+	# Deployed body: 3 Frames (normal, damaged, dead) aus djugg.shp
+	aot-jugg-deployed:
+		RemasteredFilename: aot-jugg-deployed.zip
+		Facings: 1
+		Scale: 1.05
+	aot-jugg-deployed-remap:
+		RemasteredFilename: aot-jugg-deployed-remap.png
+		Facings: 1
+		Scale: 1.05
+	# Deployed turret: 32 Facings reversed aus djugg_a.shp (Gehäuse)
+	aot-jugg-turret:
+		RemasteredFilename: aot-jugg-turret.zip
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 1.05
+	aot-jugg-turret-remap:
+		RemasteredFilename: aot-jugg-turret-remap.png
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 1.05
+	# Deploy-Animation: 18 Frames aus djuggmk.shp
+	aot-jugg-make:
+		RemasteredFilename: aot-jugg-make.zip
+		Length: 18
+		Facings: 1
+		Scale: 1.05
+	aot-jugg-make-remap:
+		RemasteredFilename: aot-jugg-make-remap.png
+		Length: 18
+		Facings: 1
+		Scale: 1.05
+	# Icon
+	aot-jugg-icon:
+		RemasteredFilename: jugg_base.png
+	muzzle:
+		Filename: gunfire2.shp
+		Length: *
 
 mtnk.destroyed:
 	Defaults:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\MTNK.ZIP
+
 
 ltnk:
 	Defaults:
@@ -75,21 +247,66 @@ ltnk:
 		RemasteredFilename: aot-ltnk-turret.zip
 		Facings: 32
 		UseClassicFacings: True
-	aot-icon-upgrade:
-		RemasteredFilename: aot-ltnk-upgrade-icon.png
+	aot-turret-dark:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\LTNK.ZIP
+		Start: 32
+		Facings: 32
+		UseClassicFacings: True
+	aot-turret-laser:
+		RemasteredFilename: aot-ltnk-laser-turret-v9.zip
+		Start: 32
+		Facings: 32
+		UseClassicFacings: True
+	aot-tick-idle:
+		RemasteredFilename: aot-ttnk-tick-test.zip
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 1.0
+	aot-tick-remap:
+		RemasteredFilename: aot-ttnk-tick-test-remap.png
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 1.0
+	aot-tick-deploy:
+		Filename: gatickmk.shp
+		Length: 24
+		Palette: aot-ts-player
+	aot-tick-buried:
+		Filename: gatickmk.shp
+		Start: 24
+		Length: 1
+		Palette: aot-ts-player
 	muzzle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\GUNFIRE.ZIP
 	icon:
-		RemasteredFilename: ltnk_1_base.png
+		RemasteredFilename: ltnk_base.png
+	ltnk-tick-icon:
+		RemasteredFilename: ltnk_tick.png
+	ltnk-laser-icon:
+		RemasteredFilename: ltnk_laser.png
 
 
-aot-upgrade-ltnk:
+aot-upgrade-ttnk:
 	icon:
-		RemasteredFilename: ltnk_2_ttnk.png
+		Filename: ttnk_flame.png
+		RemasteredFilename:
 
-aot-upgrade-ltnk2:
+# aot-upgrade-ttnk-toxin/aot-upgrade-ttnk-cloak Icons entfernt (2026-07-04) -
+# beide Aktoren geloescht, Toxin kommt jetzt ueber das konsolidierte
+# aot-upgrade-e4-toxic, Stealth-Tank-Upgrade komplett entfernt.
+
+aot-upgrade-ttnk-subterrain:
 	icon:
-		RemasteredFilename: ltnk_3_lsr.png
+		Filename: ttnk_devil.png
+		RemasteredFilename:
+
+aot-upgrade-ltnk-tick:
+	icon:
+		RemasteredFilename: ltnk_tick.png
+
+# aot-upgrade-ltnk Icon entfernt (2026-07-05) - Aktor geloescht, Laser-Switch
+# laeuft jetzt ueber das konsolidierte aot-upgrade-laser-fence ("Laser
+# Technologies").
 
 # === Age of Tiberium (aotmod) - Recon Jeep / HUMVEE / APC Icons ===
 jeep:
@@ -97,10 +314,76 @@ jeep:
 		RemasteredFilename: jeep_1_base.png
 	aot-humvee-icon:
 		RemasteredFilename: jeep_2_humvee.png
+	aot-wolverine-icon:
+		RemasteredFilename: jeep_3_wolv.png
+	# Zwei-Layer-Bake (APC-Muster): Body-ZIP (schwarze Details) + Remap-PNG (ganzer Körper
+	# in Player-Color-Rampe 176-191). LANCZOS-geglättet, Remap über aot-vxl-player Palette.
+	aot-wolverine-stand:
+		RemasteredFilename: aot-wolverine.zip
+		Start: 96
+		Facings: -8
+		Scale: 1.13
+	aot-wolverine-stand-remap:
+		RemasteredFilename: aot-wolverine-remap.png
+		Start: 96
+		Facings: -8
+		Scale: 1.13
+	aot-wolverine-run:
+		RemasteredFilename: aot-wolverine.zip
+		Start: 0
+		Length: 12
+		Facings: -8
+		Tick: 48
+		Scale: 1.13
+	aot-wolverine-run-remap:
+		RemasteredFilename: aot-wolverine-remap.png
+		Start: 0
+		Length: 12
+		Facings: -8
+		Tick: 48
+		Scale: 1.13
+	aot-wolverine-shoot:
+		RemasteredFilename: aot-wolverine.zip
+		Start: 104
+		Length: 4
+		Facings: -8
+		Tick: 80
+		Scale: 1.13
+	aot-wolverine-shoot-remap:
+		RemasteredFilename: aot-wolverine-remap.png
+		Start: 104
+		Length: 4
+		Facings: -8
+		Tick: 80
+		Scale: 1.13
 
 apc:
 	icon:
 		RemasteredFilename: jeep_3_apc.png
+	aot-amphibious-idle:
+		RemasteredFilename: aot-apc2-test.zip
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 0.504
+	aot-amphibious-remap:
+		RemasteredFilename: aot-apc2-test-remap.png
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 0.504
+	aot-amphibious-idle-water:
+		RemasteredFilename: aot-apc2-water.zip
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 0.504
+	aot-amphibious-water-remap:
+		RemasteredFilename: aot-apc2-water-remap.png
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 0.504
+	aot-amphibious-icon:
+		RemasteredFilename: jeep_4_apc2.png
+		Length: 1
+		Facings: 1
 
 aot-upgrade-humvee:
 	icon:
@@ -109,6 +392,28 @@ aot-upgrade-humvee:
 aot-upgrade-apc:
 	icon:
 		RemasteredFilename: jeep_3_apc.png
+
+aot-upgrade-apc2:
+	icon:
+		RemasteredFilename: jeep_4_apc2.png
+
+aot-apc2:
+	aot-apc2-icon:
+		RemasteredFilename: jeep_4_apc2.png
+		Length: 1
+		Facings: 1
+
+aot-upgrade-wolverine:
+	icon:
+		RemasteredFilename: jeep_3_wolv.png
+
+aot-upgrade-minelayer:
+	icon:
+		RemasteredFilename: jeep_4_mine.png
+
+aot-minelayer:
+	icon:
+		RemasteredFilename: jeep_4_mine.png
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - Ion Cannon Upgrade Icon (Platzhalter: LTNK-Icon) ===
@@ -125,10 +430,42 @@ aot-upgrade-mtnk-railgun:
 	icon:
 		RemasteredFilename: aot-upgrade-mtnk-railgun.png
 
-# === Age of Tiberium (aotmod) - HTNK Laser Upgrade Icons (Platzhalter) ===
+aot-upgrade-mtnk-titan:
+	icon:
+		RemasteredFilename: aot-upgrade-mtnk-titan.png
+
+aot-upgrade-mtnk-titan-railgun:
+	icon:
+		RemasteredFilename: aot-upgrade-mtnk-titan-railgun.png
+
+aot-upgrade-e4-toxic:
+	icon:
+		RemasteredFilename: nod_toxic.png
+
 htnk:
+	aot-htnk-rocket-icon:
+		RemasteredFilename: htnk_rocket.png
 	aot-htnk-laser-icon:
 		RemasteredFilename: htnk_rail.png
+	aot-htnk-norocket-turret:
+		RemasteredFilename: aot-htnk-norocket.zip
+		Start: 32
+		Facings: 32
+		UseClassicFacings: True
+	aot-htnk-railgun-turret:
+		RemasteredFilename: aot-htnk-railgun-turret.zip
+		Start: 32
+		Facings: 32
+		UseClassicFacings: True
+	aot-htnk-railgun-norocket-turret:
+		RemasteredFilename: aot-htnk-railgun-norocket-turret.zip
+		Start: 32
+		Facings: 32
+		UseClassicFacings: True
+
+aot-upgrade-htnk-rocket:
+	icon:
+		RemasteredFilename: htnk_rocket.png
 
 aot-upgrade-htnk-railgun:
 	icon:
@@ -168,6 +505,18 @@ bike:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\BIKE.ZIP
 	icon:
 		RemasteredFilename:
+	aot-bike-icon:
+		Filename: bike_base.png
+		RemasteredFilename:
+		Length: 1
+	aot-bike-laser-icon:
+		Filename: bike_lsr.png
+		RemasteredFilename:
+		Length: 1
+	aot-bike-laser-pods:
+		RemasteredFilename: aot-bike-laser-pods.zip
+		Facings: 32
+		UseClassicFacings: True
 
 bike.destroyed:
 	idle:
@@ -240,10 +589,45 @@ stnk:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\STNK.ZIP
 	icon:
 		RemasteredFilename:
+	aot-stnk-icon:
+		RemasteredFilename: stlh_base.png
+	aot-stnk-cargo-icon:
+		RemasteredFilename: stlh_cargo.png
 
 stnk.destroyed:
 	idle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\STNK.ZIP
+
+v2rl:
+	Defaults:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\UNITS\V2RL.ZIP
+	idle:
+		Facings: 32
+		UseClassicFacings: True
+	empty-idle:
+		Start: 32
+		Facings: 32
+		UseClassicFacings: True
+	icon:
+		RemasteredFilename: v2_base.png
+		Length: 1
+	aot-v2-napalm-icon:
+		RemasteredFilename: v2_mlrs.png
+		Length: 1
+	aot-v2-toxic-icon:
+		RemasteredFilename: v2_toxic.png
+		Length: 1
+	napalm-idle:
+		Filename: shadow.shp
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\MLRS.ZIP
+		Facings: 32
+		UseClassicFacings: True
+	napalm-turret:
+		Filename: shadow.shp
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\MLRS.ZIP
+		Start: 32
+		Facings: 32
+		UseClassicFacings: True
 
 arty:
 	idle:
@@ -252,6 +636,122 @@ arty:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\GUNFIRE.ZIP
 	icon:
 		RemasteredFilename:
+	aot-arty-howitzer-icon:
+		RemasteredFilename: arty_howitzer_base.png
+		Length: 1
+	aot-arty-heavy-adv-icon:
+		RemasteredFilename: arty_heavy_adv.png
+		Length: 1
+	# Howitzer-Upgrade Sprite-Wechsel: TS-Voxel-Sequenzen im arty-Block für on-the-fly Switch
+	aot-arty-howitzer-heavy-idle:
+		RemasteredFilename: aot-arty-heavy-test.zip
+		Facings: 32
+		UseClassicFacings: True
+	aot-arty-howitzer-heavy-idle-remap:
+		RemasteredFilename: aot-arty-heavy-test-remap.png
+		RemasteredPremultiplied: False
+		Facings: 32
+		UseClassicFacings: True
+	# Barrel-Sequenzen für deployed + undeployed Rendering (beide Moden)
+	aot-arty-barrel:
+		RemasteredFilename: aot-arty-barrel-test.zip
+		Facings: 32
+		UseClassicFacings: True
+	aot-arty-barrel-remap:
+		RemasteredFilename: aot-arty-barrel-test-remap.png
+		RemasteredPremultiplied: False
+		Facings: 32
+		UseClassicFacings: True
+	# TS-Deploy-Zustand: Standbein-Plattform (gtarty.shp) + Ausfahr-Animation (gtartymk.shp,
+	# 16 Frames). 4x hochskaliert auf unsere Voxel-Groesse, Canvas 191px = gleicher Anker wie
+	# der Fahr-Body, damit kein Sequence-Offset noetig ist.
+	aot-arty-deployed:
+		RemasteredFilename: aot-arty-deployed.png
+		Length: 1
+	aot-arty-deployed-remap:
+		RemasteredFilename: aot-arty-deployed-remap.png
+		RemasteredPremultiplied: False
+		Length: 1
+	aot-arty-deploy-make:
+		RemasteredFilename: aot-arty-deploy-anim.png
+		Length: 16
+	aot-arty-deploy-make-remap:
+		RemasteredFilename: aot-arty-deploy-anim-remap.png
+		RemasteredPremultiplied: False
+		Length: 16
+	# Turret (art2tur) — nur im Deploy-Zustand sichtbar
+	aot-arty-turret:
+		RemasteredFilename: aot-arty-turret-test.zip
+		Facings: 32
+		UseClassicFacings: True
+	aot-arty-turret-remap:
+		RemasteredFilename: aot-arty-turret-test-remap.png
+		RemasteredPremultiplied: False
+		Facings: 32
+		UseClassicFacings: True
+
+aot-arty-heavy:
+	idle:
+		RemasteredFilename: aot-arty-heavy-test.zip
+		Facings: 32
+		UseClassicFacings: True
+	idle-remap:
+		RemasteredFilename: aot-arty-heavy-test-remap.png
+		RemasteredPremultiplied: False
+		Facings: 32
+		UseClassicFacings: True
+	aot-arty-heavy-deployed:
+		RemasteredFilename: aot-arty-heavy-test.zip
+		Start: 0
+		Length: 1
+		Facings: 1
+	aot-arty-heavy-deployed-remap:
+		RemasteredFilename: aot-arty-heavy-test-remap.png
+		Start: 0
+		Length: 1
+		Facings: 1
+	aot-arty-barrel:
+		RemasteredFilename: aot-arty-barrel-test.zip
+		Facings: 32
+		UseClassicFacings: True
+	aot-arty-barrel-remap:
+		RemasteredFilename: aot-arty-barrel-test-remap.png
+		RemasteredPremultiplied: False
+		Facings: 32
+		UseClassicFacings: True
+	# TS-Deploy-Zustand: Standbein-Plattform (gtarty.shp) + Ausfahr-Animation (gtartymk.shp,
+	# 16 Frames). 4x hochskaliert auf unsere Voxel-Groesse, Canvas 191px = gleicher Anker wie
+	# der Fahr-Body, damit kein Sequence-Offset noetig ist.
+	aot-arty-deployed:
+		RemasteredFilename: aot-arty-deployed.png
+		Length: 1
+	aot-arty-deployed-remap:
+		RemasteredFilename: aot-arty-deployed-remap.png
+		RemasteredPremultiplied: False
+		Length: 1
+	aot-arty-deploy-make:
+		RemasteredFilename: aot-arty-deploy-anim.png
+		Length: 16
+	aot-arty-deploy-make-remap:
+		RemasteredFilename: aot-arty-deploy-anim-remap.png
+		RemasteredPremultiplied: False
+		Length: 16
+	# Turret (art2tur) — nur im Deploy-Zustand sichtbar
+	aot-arty-turret:
+		RemasteredFilename: aot-arty-turret-test.zip
+		Facings: 32
+		UseClassicFacings: True
+	aot-arty-turret-remap:
+		RemasteredFilename: aot-arty-turret-test-remap.png
+		RemasteredPremultiplied: False
+		Facings: 32
+		UseClassicFacings: True
+	aot-arty-heavy-adv-icon:
+		RemasteredFilename: arty_heavy_adv.png
+		Length: 1
+	muzzle:
+		Filename: gunfire2.shp
+		Length: *
 
 arty.destroyed:
 	idle:
@@ -284,3 +784,93 @@ truck:
 truck.destroyed:
 	idle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\TRUK.ZIP
+
+msam:
+	aot-hvr-idle:
+		RemasteredFilename: aot-hvr-test.zip
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 0.9
+	aot-hvr-remap:
+		RemasteredFilename: aot-hvr-test-remap.png
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 0.9
+	aot-hvr-turret:
+		RemasteredFilename: aot-hvrtur-test.zip
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 0.9
+	aot-hvr-mlrs-icon:
+		Filename: msam_hover.png
+		RemasteredFilename:
+		Length: 1
+	aot-hvr-aa-icon:
+		Filename: msam_aa.png
+		RemasteredFilename:
+		Length: 1
+	aot-apc-turret:
+		Filename: apctur.shp
+		RemasteredFilename: apctur.png
+		Facings: 32
+	aot-apc-turret-air:
+		Filename: apctur.shp
+		RemasteredFilename: apctur.png
+		Start: 32
+		Facings: 32
+	aot-apc-muzzle:
+		Filename: minigun.shp
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\COMMON\VFX\MINIGUN.ZIP
+		Length: 6
+		Facings: 8
+	aot-apc-muzzle-air:
+		Filename: apcmuz.shp
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\COMMON\VFX\MINIGUN.ZIP
+		Length: 3
+		Stride: 6
+		Facings: 8
+
+aot-gatick:
+	Defaults:
+		RemasteredFilename: aot-gatick-body.zip
+		Scale: 3.0
+	idle:
+		Start: 24
+		Length: 1
+	buried:
+		Start: 24
+		Length: 1
+	deploy:
+		Length: 24
+	idle-remap:
+		RemasteredFilename: aot-gatick-body-remap.png
+		Start: 24
+		Length: 1
+		Scale: 3.0
+	buried-remap:
+		RemasteredFilename: aot-gatick-body-remap.png
+		Start: 24
+		Length: 1
+		Scale: 3.0
+	deploy-remap:
+		RemasteredFilename: aot-gatick-body-remap.png
+		Length: 24
+		Scale: 3.0
+	undeploy-remap:
+		RemasteredFilename: aot-gatick-body-undeploy.png
+		Length: 24
+		Scale: 3.0
+	turret:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\UNITS\LTNK.ZIP
+		Start: 32
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 1.0
+	turret-laser:
+		RemasteredFilename: aot-ltnk-laser-turret-v9.zip
+		Start: 32
+		Facings: 32
+		UseClassicFacings: True
+		Scale: 1.0
+	muzzle:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\GUNFIRE.ZIP

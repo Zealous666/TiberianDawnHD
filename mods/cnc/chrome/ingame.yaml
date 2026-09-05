@@ -274,7 +274,7 @@ Container@OBSERVER_WIDGETS:
 					Y: 4
 					Width: 32
 					Height: 16
-				Label@LABEL:
+				LabelWithTooltip@LABEL:
 					X: 40
 					Width: PARENT_WIDTH
 					Height: 25
@@ -1119,7 +1119,7 @@ Container@OBSERVER_WIDGETS:
 							Width: PARENT_WIDTH
 							Height: PARENT_HEIGHT
 							Color: 00000090
-						LineGraph@INCOME_GRAPH:
+						ScrollableLineGraph@INCOME_GRAPH:
 							X: 0
 							Y: 0
 							Width: PARENT_WIDTH - 5
@@ -1145,7 +1145,7 @@ Container@OBSERVER_WIDGETS:
 							Width: PARENT_WIDTH
 							Height: PARENT_HEIGHT
 							Color: 00000090
-						LineGraph@ARMY_VALUE_GRAPH:
+						ScrollableLineGraph@ARMY_VALUE_GRAPH:
 							X: 0
 							Y: 0
 							Width: PARENT_WIDTH - 5
@@ -1220,6 +1220,28 @@ Container@PLAYER_WIDGETS:
 					HoldText: supportpowers-support-powers-palette.hold
 					HotkeyPrefix: SupportPower
 					HotkeyCount: 6
+		# === Age of Tiberium (aotmod) - Superwaffen-Timer (User-Wunsch 2026-08-01) ===
+		# Klassisches C&C-Feature: laufende Superwaffen-Timer ALLER Spieler, links unten,
+		# jeweils in der Spielerfarbe (blinkt weiss sobald bereit). Das Widget bringt die
+		# Engine bereits mit (SupportPowerTimerWidget), es war im cnc-Mod nur nie eingebunden.
+		# WELCHE Powers hier auftauchen, entscheidet NICHT dieses Widget, sondern
+		# SupportPowerInfo.DisplayTimerRelationships pro Power (Default: None = unsichtbar).
+		# Gesetzt ist es bewusst NUR auf Ion Cannon Strike (ORBC) und Atom Bomb (MSLO) --
+		# siehe aot-structures.yaml.
+		# Position (User-Wunsch 2026-08-04): oben RECHTS neben der Minimap, dort wo vorher die
+		# Age-Buttons sassen -- rechtsbuendig, nach unten wachsend. Die Sidebar beginnt bei
+		# WINDOW_WIDTH - 235, der Block endet also buendig 4px davor. Width ist bei
+		# Align: Right nicht kosmetisch, sondern die BEZUGSKANTE: das Widget rueckt jede
+		# Zeile um (Width - Textbreite) ein, ohne Width klebte alles bei X.
+		# Order: Descending -> Zeilen wachsen nach unten (frueher Ascending, weil sie unten
+		# links sonst in die Command Bar gelaufen waeren).
+		SupportPowerTimer@SUPPORT_POWER_TIMER:
+			X: WINDOW_WIDTH - 439
+			Y: 44
+			Width: 200
+			Order: Descending
+			Align: Right
+			ShowPlayerName: False
 		Image@COMMAND_BAR_BACKGROUND:
 			X: 5
 			Y: WINDOW_HEIGHT - HEIGHT - 5
@@ -1755,7 +1777,7 @@ Container@PLAYER_WIDGETS:
 						ProductionTypeButton@BUILDING:
 							Logic: AddFactionSuffixLogic
 							X: 0
-							Width: 32
+							Width: 26
 							Height: 26
 							Background: chrome-button-background
 							TooltipText: button-production-types-building-tooltip
@@ -1765,41 +1787,19 @@ Container@PLAYER_WIDGETS:
 							Key: ProductionTypeBuilding
 							Children:
 								Image@ICON:
-									X: 8
+									X: 5
 									Y: 5
 									ImageCollection: production-icons
 								Image@SEPARATOR:
 									Logic: AddFactionSuffixLogic
-									X: 32
-									Y: 2
-									ImageCollection: chrome-button
-									ImageName: separator
-						ProductionTypeButton@SUPPORT:
-							Logic: AddFactionSuffixLogic
-							X: 33
-							Width: 32
-							Height: 26
-							Background: chrome-button-background
-							TooltipText: button-production-types-support-tooltip
-							TooltipContainer: TOOLTIP_CONTAINER
-							TooltipTemplate: BUTTON_TOOLTIP_FACTIONSUFFIX
-							ProductionGroup: Support
-							Key: ProductionTypeDefense
-							Children:
-								Image@ICON:
-									X: 8
-									Y: 5
-									ImageCollection: production-icons
-								Image@SEPARATOR:
-									Logic: AddFactionSuffixLogic
-									X: 32
+									X: 26
 									Y: 2
 									ImageCollection: chrome-button
 									ImageName: separator
 						ProductionTypeButton@INFANTRY:
 							Logic: AddFactionSuffixLogic
-							X: 66
-							Width: 32
+							X: 28
+							Width: 26
 							Height: 26
 							Background: chrome-button-background
 							TooltipText: button-production-types-infantry-tooltip
@@ -1809,19 +1809,19 @@ Container@PLAYER_WIDGETS:
 							Key: ProductionTypeInfantry
 							Children:
 								Image@ICON:
-									X: 8
+									X: 5
 									Y: 5
 									ImageCollection: production-icons
 								Image@SEPARATOR:
 									Logic: AddFactionSuffixLogic
-									X: 32
+									X: 26
 									Y: 2
 									ImageCollection: chrome-button
 									ImageName: separator
 						ProductionTypeButton@VEHICLE:
 							Logic: AddFactionSuffixLogic
-							X: 99
-							Width: 32
+							X: 56
+							Width: 26
 							Height: 26
 							Background: chrome-button-background
 							TooltipText: button-production-types-vehicle-tooltip
@@ -1831,19 +1831,41 @@ Container@PLAYER_WIDGETS:
 							Key: ProductionTypeVehicle
 							Children:
 								Image@ICON:
-									X: 8
+									X: 5
 									Y: 5
 									ImageCollection: production-icons
 								Image@SEPARATOR:
 									Logic: AddFactionSuffixLogic
-									X: 32
+									X: 26
+									Y: 2
+									ImageCollection: chrome-button
+									ImageName: separator
+						ProductionTypeButton@SUPPORT:
+							Logic: AddFactionSuffixLogic
+							X: 84
+							Width: 26
+							Height: 26
+							Background: chrome-button-background
+							TooltipText: button-production-types-support-tooltip
+							TooltipContainer: TOOLTIP_CONTAINER
+							TooltipTemplate: BUTTON_TOOLTIP_FACTIONSUFFIX
+							ProductionGroup: Support
+							Key: ProductionTypeDefense
+							Children:
+								Image@ICON:
+									X: 5
+									Y: 5
+									ImageCollection: aot-production-special
+								Image@SEPARATOR:
+									Logic: AddFactionSuffixLogic
+									X: 26
 									Y: 2
 									ImageCollection: chrome-button
 									ImageName: separator
 						ProductionTypeButton@AIRCRAFT:
 							Logic: AddFactionSuffixLogic
-							X: 132
-							Width: 32
+							X: 112
+							Width: 26
 							Height: 26
 							Background: chrome-button-background
 							TooltipText: button-production-types-aircraft-tooltip
@@ -1853,19 +1875,40 @@ Container@PLAYER_WIDGETS:
 							Key: ProductionTypeAircraft
 							Children:
 								Image@ICON:
-									X: 8
+									X: 5
 									Y: 5
 									ImageCollection: production-icons
 								Image@SEPARATOR:
 									Logic: AddFactionSuffixLogic
-									X: 32
+									X: 26
+									Y: 2
+									ImageCollection: chrome-button
+									ImageName: separator
+						ProductionTypeButton@NAVY:
+							Logic: AddFactionSuffixLogic
+							X: 140
+							Width: 26
+							Height: 26
+							Background: chrome-button-background
+							TooltipText: button-production-types-navy-tooltip
+							TooltipContainer: TOOLTIP_CONTAINER
+							TooltipTemplate: BUTTON_TOOLTIP_FACTIONSUFFIX
+							ProductionGroup: Naval
+							Children:
+								Image@ICON:
+									X: 5
+									Y: 5
+									ImageCollection: production-icons
+								Image@SEPARATOR:
+									Logic: AddFactionSuffixLogic
+									X: 26
 									Y: 2
 									ImageCollection: chrome-button
 									ImageName: separator
 						ProductionTypeButton@UPGRADE:
 							Logic: AddFactionSuffixLogic
-							X: 165
-							Width: 32
+							X: 168
+							Width: 26
 							Height: 26
 							Background: chrome-button-background
 							TooltipText: button-production-types-upgrade-tooltip
@@ -1875,7 +1918,7 @@ Container@PLAYER_WIDGETS:
 							Key: ProductionTypeUpgrade
 							Children:
 								Image@ICON:
-									X: 8
+									X: 5
 									Y: 5
 									ImageCollection: production-icons
 # === Ende aotmod ===        
@@ -1900,6 +1943,8 @@ Container@PLAYER_WIDGETS:
 			HotkeyPrefix: Production
 			HotkeyCount: 24
 			SelectProductionBuildingHotkey: SelectProductionBuilding
+			LockedIconCollection: aot-locked-icon
+			LockedIconRegion: locked
 		ProductionTabs@PRODUCTION_TABS:
 			Logic: AddFactionSuffixLogic, ProductionTabsLogic
 			PaletteWidget: PRODUCTION_PALETTE
@@ -1911,6 +1956,42 @@ Container@PLAYER_WIDGETS:
 			Y: 299
 			Width: 194
 			Height: 20
+		# === Age of Tiberium (aotmod) - NOD Airstrip Starport: Purchase/Deliver-Button ===
+		# Sichtbar nur wenn die BulkProductionQueue@Starport (NOD) selektiert ist und >=1 Einheit
+		# im Liefer-Slot wartet. Loesst den "PurchaseOrder"-Order aus -> Frachtflieger liefert alle.
+		# Logik: PurchaseWidgetLogic (portiert nach OpenRA.Mods.Mobius).
+		Container@PURCHASE_PANEL:
+			Logic: PurchaseWidgetLogic
+			X: WINDOW_WIDTH - 5 - 18 - 194
+			Y: WINDOW_HEIGHT - 34
+			Width: 194
+			Height: 30
+			Children:
+				Button@PURCHASE_BUTTON:
+					X: 0
+					Y: 0
+					Width: 118
+					Height: 28
+					Font: Bold
+					Background: button-nod-highlighted
+					TextColor: FFD091
+					Text: button-purchase-label
+					TooltipText: purchase-panel-button-tooltip
+					TooltipContainer: TOOLTIP_CONTAINER
+				Label@DELIVERY_IN:
+					X: 0
+					Y: 0
+					Width: 194
+					Height: 28
+					Align: Center
+					Font: Bold
+					Visible: false
+					TextColor: FFD091
+					Text: purchase-panel-label-delivery
+		# === Age of Tiberium (aotmod) - Age-Upgrade-Widget ENTFALLEN (2026-08-04) ===
+		# Das Standalone-ProductionPalette links neben der Minimap ist weg: der Tier-Aufstieg
+		# laeuft wieder ueber die Super Powers links oben (AotAge1/2/3Power auf dem FACT).
+		# AotAgeProductionLogic.cs bleibt als Engine-Datei liegen, wird aber nicht mehr geladen.
 
 Background@FMVPLAYER:
 	Width: WINDOW_WIDTH

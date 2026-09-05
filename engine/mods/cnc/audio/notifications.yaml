@@ -1,0 +1,129 @@
+Speech:
+	Prefixes:
+		gdi: gdi
+		nod: nod
+	Notifications:
+		# === Age of Tiberium (aotmod) - Spy-Plane-Ansage (RA-Remastered EVA, bits/aot-eva-spyplane.aud) ===
+		# In DisablePrefixes gelistet -> kein gdi/nod-Prefix; DefaultVariant .aud -> aot-eva-spyplane.aud.
+		# Sound-Loader erkennt den WAV-Inhalt am RIFF-Header. Auch in notifications-base.yaml (Remaster).
+		SpyPlaneReady: aot-eva-spyplane
+		# === Age of Tiberium (aotmod) - Bridge Repair Hut EVA (TS 00-i118 "Bridge repaired.") ===
+		# In DisablePrefixes -> kein gdi/nod-Prefix; lädt direkt bits/aot-bridge-repaired.aud.
+		BridgeRepaired: aot-bridge-repaired
+		# === Age of Tiberium (aotmod) - Sensor Array / Stealth Detection (aot-eva-cloaked-detected.aud) ===
+		# In DisablePrefixes -> kein gdi/nod-Prefix; GDI-Variante nutzt RA-EVA-Stimme.
+		CloakedUnitDetected: aot-eva-cloaked-detected
+		CloakedUnitDetectedGdi: aot-eva-cloaked-detected-gdi
+		# === Age of Tiberium (aotmod) - Subterranean Detection (TS 00-i174 "Subterranean unit detected.") ===
+		# In DisablePrefixes -> kein gdi/nod-Prefix; GDI und NOD/neutral nutzen dieselbe TS-EVA-Ansage.
+		SubterraneanUnitDetected: aot-eva-subterranean-detected
+		# === Age of Tiberium (aotmod) - Missile Launch Warning (TS 00-i150) ===
+		# "Missile launch detected." -- Vorwarnung fuer ALLE Spieler, sobald irgendeine Rakete
+		# vom Missile Silo startet (Mine Cluster, Tiberium, Atom). Gibt dem Gegner die Zeit, die
+		# Firestorm Defense zu aktivieren. TD/RA haben keine vergleichbare Ansage, daher TS.
+		# Dateiname aus engine/mods/ts/audio/speech-generic.yaml (MissileLaunchDetected: 00-i150).
+		# In DisablePrefixes -> kein gdi/nod-Prefix, beide Fraktionen hoeren dieselbe Ansage.
+		MissileLaunchDetected: aot-eva-missile-launch
+		SubterraneanUnitDetectedGdi: aot-eva-subterranean-detected
+		AirstrikeReady: airredy1
+		BaseAttack: baseatk1
+		Building: bldging1
+		BuildingCannotPlaceAudio: deploy1
+		BuildingCaptured: capt1
+		BuildingInProgress: bldg1
+		BuildingLost: strclost
+		Cancelled: cancel1
+		CivilianBuildingCaptured: civcapt1
+		CivilianKilled: civdead1
+		ConstructionComplete: constru1
+		EnemyUnitsApproaching: enmyunit
+		EnemyStructureDestroyed: estrucx
+		EnemyPlanesApproaching: enemya
+		HarvesterAttack:
+		HarvesterLost: harvlost
+		# === Age of Tiberium (aotmod) - Absturzfix 2026-08-05 ===
+		# AutoActivateSpawnActorPower (Age-Aufstieg) spielt beim Klick ohne genug Geld
+		# "InsufficientFunds" ab. Der Eintrag fehlte im Pool, und PlayNotification WIRFT bei einem
+		# unbekannten Namen (Sound.cs:391) -- das Spiel stuerzte also ab, sobald man ein fertig
+		# geladenes Age-Upgrade ohne Deckung anklickte. Tiberian Dawn hat keine passende EVA-Ansage
+		# (weder nofunds noch aehnliches liegt in bits/), daher bewusst LEER: ein leerer Eintrag
+		# liefert stillschweigend false (Sound.cs:397) statt zu werfen. Kein erfundener Sound.
+		InsufficientFunds:
+		# Gleiche Fehlerklasse, von check-yaml selbst gemeldet: 1094 Verweise auf
+		# Speech.BuildingInfiltrated (InfiltrateForCash/-PowerOutage/-Exploration an praktisch
+		# jedem AoT-Gebaeude) zeigten auf einen Eintrag, den es nie gab -- jede Spion-Infiltration
+		# waere in denselben Absturz gelaufen. Ebenfalls leer: Tiberian Dawn hat keine EVA-Ansage
+		# dafuer.
+		BuildingInfiltrated:
+		InsufficientPower: nopower1
+		IonCannonCharging: ionchrg1
+		IonCannonReady: ionredy1
+		Leave: batlcon1
+		Lose: fail1
+		LowPower: lopower1
+		MissionAccomplished: accom1
+		MissionFailed: fail1
+		NewOptions: newopt1
+		NoBuild: nobuild1
+		NodStructureDestroyed: nstruc1
+		NotReady: noredy1
+		NuclearWarheadApproaching: nuke1
+		NuclearWeaponAvailable: nukavail
+		NuclearWeaponLaunched: nuklnch1
+		OnHold: onhold1
+		PrimaryBuildingSelected: pribldg1
+		Reinforce: reinfor1
+		Repairing: repair1
+		SelectTarget: select1
+		SilosNeeded: silos1
+		StartGame:
+		GameLoaded:
+		GameSaved:
+		StructureSold:
+		Training: bldging1
+		UnitDestroyed: dead1
+		UnitLost: unitlost
+		UnitReady: unitredy
+		Win: accom1
+	DisablePrefixes: SpyPlaneReady, BridgeRepaired, CloakedUnitDetected, CloakedUnitDetectedGdi, SubterraneanUnitDetected, SubterraneanUnitDetectedGdi, MissileLaunchDetected, AirstrikeReady, BaseAttack, Building, BuildingCannotPlaceAudio, BuildingInProgress, BuildingLost, Cancelled, CivilianBuildingCaptured, CivilianKilled, ConstructionComplete, EnemyUnitsApproaching, EnemyStructureDestroyed, EnemyPlanesApproaching, HarvesterAttack, HarvesterLost, InsufficientPower, IonCannonCharging, IonCannonReady, Leave, Lose, LowPower, MissionAccomplished, MissionFailed, NewOptions, NoBuild, NodStructureDestroyed, NotReady, NuclearWarheadApproaching, NuclearWeaponAvailable, NuclearWeaponLaunched, OnHold, PrimaryBuildingSelected, Reinforce, Repairing, SelectTarget, SilosNeeded, Training, UnitLost, UnitReady, Win
+
+Sounds:
+	Notifications:
+		Appear: appear1
+		Beacon: bleep2
+			InterruptType: Interrupt
+		Beepy2: beepy2
+		Beepy3: beepy3
+		Beepy6: beepy6
+		CashTickDown: tone16
+			InterruptType: Overlap
+		CashTickUp: tone15
+			VolumeModifier: 0.33
+			InterruptType: Overlap
+		ChatLine: scold1
+			InterruptType: Interrupt
+		LobbyOptionChanged: beepy3
+			InterruptType: Interrupt
+		PlayerLeft: country1
+			InterruptType: Interrupt
+		ClickDisabledSound: scold2
+			InterruptType: Overlap
+		ClickSound: button
+			InterruptType: Overlap
+		Cloak: trans1
+		Clock: clock1
+		Construction: constru2
+		Country1: country1
+		Country4: country4
+		HeavyDoor: hvydoor1
+		Keystroke: keystrok
+		LevelUp: text2
+		NewTarget: newtarg1
+		RadarDown: powrdn1
+		RadarUp: comcntr1
+		Sell: cashturn
+		Target1: target1
+		Target2: target2
+		Target3: target3
+		Text: text2
+		World: world2

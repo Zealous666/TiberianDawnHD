@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AoT – AI Operations</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --col-bg: #1a1d27;
+    --card-bg: #252938;
+    --card-bg-hover: #2d3142;
+    --accent: #d9a82e;
+    --text: #e6e8ee;
+    --text-dim: #9aa0ad;
+    --border: #2f3340;
+    --nod-accent: #d9542e;
+    --nod-border: #4a2a20;
+    --nod-bg: #1f1613;
+    --gdi-accent: #4a90d9;
+    --gdi-border: #203a4a;
+    --gdi-bg: #131c1f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding-top: 42px;
+  }
+  .top-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; gap: 2px; padding: 6px 16px; background: rgba(15,17,23,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
+  .top-nav a { padding: 5px 14px; border-radius: 5px; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; color: var(--text-dim); text-decoration: none; transition: color .15s, background .15s; }
+  .top-nav a:hover { color: var(--text); background: var(--card-bg); }
+  .top-nav a.active { color: var(--text); background: var(--card-bg); }
+  header {
+    padding: 24px 32px 8px;
+  }
+  header h1 {
+    font-size: 20px;
+    margin: 0 0 4px;
+    font-weight: 600;
+  }
+  header p {
+    color: var(--text-dim);
+    font-size: 13px;
+    margin: 0;
+    max-width: 900px;
+    line-height: 1.5;
+  }
+  .status-line {
+    padding: 8px 32px 0;
+    font-size: 11.5px;
+    color: var(--text-dim);
+  }
+  .status-line strong { color: var(--accent); }
+
+  .split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    margin-top: 20px;
+    min-height: calc(100vh - 160px);
+  }
+  .side {
+    padding: 0 24px 40px;
+    border-top: 3px solid transparent;
+  }
+  .side.nod { border-top-color: var(--nod-accent); border-right: 1px solid var(--border); }
+  .side.gdi { border-top-color: var(--gdi-accent); }
+
+  .side-header {
+    position: sticky;
+    top: 42px;
+    z-index: 50;
+    background: var(--bg);
+    padding: 16px 8px 12px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .side-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+  }
+  .side.nod .side-header h2 { color: var(--nod-accent); }
+  .side.gdi .side-header h2 { color: var(--gdi-accent); }
+  .side-header .sub { font-size: 11.5px; color: var(--text-dim); }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin: 0 8px 16px;
+  }
+  .side.nod .card { background: var(--nod-bg); border-color: var(--nod-border); }
+  .side.gdi .card { background: var(--gdi-bg); border-color: var(--gdi-border); }
+
+  .card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+  .card-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 2px 8px;
+    border-radius: 10px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    white-space: nowrap;
+  }
+  .side.nod .badge { background: rgba(217,84,46,0.15); color: var(--nod-accent); border: 1px solid rgba(217,84,46,0.3); }
+  .side.gdi .badge { background: rgba(74,144,217,0.15); color: var(--gdi-accent); border: 1px solid rgba(74,144,217,0.3); }
+
+  .card-desc {
+    font-size: 12.5px;
+    color: var(--text-dim);
+    line-height: 1.55;
+    margin: 6px 0 14px;
+  }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px 16px;
+    font-size: 11.5px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 0;
+    margin-bottom: 14px;
+  }
+  .side.nod .meta-grid { border-color: var(--nod-border); }
+  .side.gdi .meta-grid { border-color: var(--gdi-border); }
+  .meta-row { display: flex; gap: 8px; line-height: 1.5; }
+  .meta-row .label {
+    flex: 0 0 118px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-size: 10px;
+    color: var(--text-dim);
+    padding-top: 1px;
+  }
+  .meta-row .value { color: var(--text); }
+  .meta-row .value.dim { color: var(--text-dim); }
+
+  .routine-header {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+  .routine-list {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .routine-list li { margin-bottom: 3px; }
+  .routine-list li::marker {
+    font-weight: 700;
+  }
+  .side.nod .routine-list li::marker { color: var(--nod-accent); }
+  .side.gdi .routine-list li::marker { color: var(--gdi-accent); }
+
+  .caveat {
+    margin-top: 12px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    line-height: 1.5;
+    background: rgba(217,168,46,0.1);
+    border: 1px solid rgba(217,168,46,0.25);
+    color: #e0c37a;
+  }
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <a href="kanban-board.html">Planning</a>
+  <a href="techtree.html">Techtree</a>
+  <a href="buildorder.html">Build Order</a>
+  <a href="tilesets.html">Tilesets</a>
+  <a href="operations.html" class="active">Operation</a>
+  <a href="building-economy.html">Building &amp; Economy</a>
+</nav>
+
+<header>
+  <h1>AoT – AI Operations Framework</h1>
+  <p>Combat AI built from the "OpenRA AoT AI Operations Framework v2" briefing. Fully replaces the stock
+    SquadManager (2026-07-21). Modules 1–4 implemented and built (0 errors), still untested in-game.
+    Faction-split instances of <code>AotOperationsBotModule</code> (@nod / @gdi) produce their own mission
+    units; <code>AotMapIntelBotModule</code> provides the shared map analysis. A fixed rally point is set on
+    every Barracks/Hand (which otherwise pick a random Exit cell per unit) so fresh infantry converge and
+    hold at one spot near the building instead of scattering across the base while a mission fills up.</p>
+</header>
+
+<div class="status-line">Source: <strong>mods/cnc/rules/aot-ai.yaml</strong> · <strong>engine/OpenRA.Mods.Common/Traits/BotModules/AotOperationsBotModule.cs</strong> · <strong>AotOpsMissions.cs</strong> · Normal speed = 40 ms/tick.</div>
+
+<div class="split">
+  <div class="side nod">
+    <div class="side-header"><h2>NOD</h2><span class="sub">AotOperationsBotModule@nod</span></div>
+    <div id="nod-cards"></div>
+  </div>
+  <div class="side gdi">
+    <div class="side-header"><h2>GDI</h2><span class="sub">AotOperationsBotModule@gdi</span></div>
+    <div id="gdi-cards"></div>
+  </div>
+</div>
+
+<script>
+const nodOps = [
+  {
+    badge: "Module 1",
+    title: "Starting Unit Operations",
+    desc: "The starting units from the match setup first hold the chokepoint as before (1:1 port of the approved choke-reserve behaviour), clear it, then move on to a follow-up mission instead of sitting idle.",
+    meta: [
+      { label: "Cost", value: "0 credits — uses only the starting units from the map setup, no production." },
+      { label: "Timing", value: "Immediately from match start, once the own construction yard is registered in MapIntel." },
+      { label: "Prerequisite", value: "AotBasePlannerBotModule@nod provides the chokepoint (IBotChokepointProvider) + approaches (IBotBaseApproachProvider)." },
+      { label: "Why / Frequency", value: "One-off per match — no recurring trigger. Stops the starting units from standing around uselessly after clearing the choke." },
+    ],
+    routine: [
+      "Stronger units (vehicles/tanks) fill the choke reserve (4 slots), the rest hold the secondary beach/side approach",
+      "In position: force-attack destructible civilian buildings/trees within a 5-cell radius to clear them",
+      "After 3 clean clearing checks: the choke reserve pulls out entirely — the choke stays EMPTY afterwards (only turrets/fences keep defending it)",
+      "Attack up to 2 reachable ARCO Oil Pumps; after each destroyed pump, one unit collects the dropped 1000-credit crate",
+      "Blacklist an unreachable target after ~12 idle ticks instead of endlessly re-routing",
+      "Then attack the nearest reachable enemy construction yard, falling back to the enemy spawn",
+      "No target reachable: the group holds the reachable map centre (MapCentreFallback)",
+    ],
+  },
+  {
+    badge: "Module 2",
+    title: "Regular Attack Waves",
+    desc: "Autonomous standard offensive: 50% tank core, 30% light vehicles, 20% artillery — a fixed faction identity plus a 25% adaptive share against the observed enemy army. Nod fights to complete annihilation. If no ground route to the enemy exists, the wave ferries itself across water instead of giving up.",
+    meta: [
+      { label: "Cost", value: "Base budget for n=6/8/10/12 vehicles (Age 0–3) × role costs (TTNK/LTNK ~750–900, BGGY/BIKE ~300–500, artillery ~600–1200), +25% per wave (capped at 300% of base), max. 20 units. Naval ferry: 2 Transport Vessels (~900 each), built once and reused across waves." },
+      { label: "Timing", value: "First wave ~3000 ticks (≈2 min) after activation; then a 1500-tick (≈1 min) cooldown after each wave ends. Ferry phase timeout ~9000 ticks (≈6 min) before giving up on stragglers." },
+      { label: "Prerequisite", value: "At least one role (tank/light/support) currently buildable; chains contain all exclusive branches (e.g. LTNK-laser OR LTNK-tick), first buildable variant wins. Naval ferry additionally needs an owned Sub Pen and a coastal cell near both the own base and the enemy." },
+      { label: "Why / Frequency", value: "Backbone of the offensive, runs independently of scouts/engineers/superweapons. Exactly one active wave at a time; the next wave only starts once the previous one is done." },
+    ],
+    routine: [
+      "Roll composition: tank/light/support per age-tier target strength, remainder adaptive (anti-infantry/anti-tank/anti-air depending on what's been spotted)",
+      "Fill missing units from the mission pool first (leftovers from earlier waves), otherwise produce them",
+      "Forming phase: rally point halfway between base and chokepoint, until production is complete or timeout (≈3 min) with at least half strength assembled",
+      "Choose a target: 75% main base (construction yard, falling back to enemy spawn), 25% visible enemy harvester (economic pressure)",
+      "No ground route found: walk the wave to the nearest own coastal cell and stage there. If no Sub Pen exists yet, hold and wait (no timeout) until one is built",
+      "Once a Sub Pen exists: build/reuse 2 Transport Vessels, ferry the wave across water in batches of 1 vehicle per transport, regroup on the far shore, then choose a target there and continue",
+      "AttackMove to the target; stragglers regroup on the unit closest to the group's centroid",
+      "0% loss threshold: no retreat — the wave fights until wiped out",
+      "Wave ends (wiped out or target destroyed): survivors return to the pool, transports return to the pool for reuse, next wave launches with a higher budget",
+    ],
+  },
+  {
+    badge: "Module 3",
+    title: "Scout Expeditions",
+    desc: "A 5-man infantry mix — Bike/Buggy need Age 1 and aren't buildable in Age 0, so the scout squad substitutes 3 gunners + 2 flame troopers instead (same move speed, so the group doesn't spread out — Rocket Infantry was dropped for being slower). Systematically covers half of all map spawns, sweeps map edges as one grouped formation, then holds an observation post.",
+    meta: [
+      { label: "Cost", value: "3× gunner (~100 each) + 2× flame trooper (~?) ≈ low-cost Age-0 squad, no vehicle production required." },
+      { label: "Timing", value: "As soon as AotMapIntel is ready; number of groups = ceil(spawn count / 2)." },
+      { label: "Prerequisite", value: "Radar/HQ built (scouting only starts once there's a minimap to show the results on); map has more than one spawn point; Barracks (Role A: gunner) and anyhq (Role B: flame trooper) built." },
+      { label: "Why / Frequency", value: "Constant reconnaissance coverage of 50% of all spawns. Destroyed groups are automatically rebuilt after a ~1500-tick (≈1 min) cooldown and sent out again." },
+    ],
+    caveat: "Role B (Flame Trooper) needs anyhq, same as the Regular Waves' V2 support role — if anyhq isn't built yet when the group forms, it launches short-handed with just the 3 gunners after the forming timeout.",
+    routine: [
+      "Visit up to 2 assigned spawn points per group, one after another",
+      "Per spawn: ring waypoints at radius 8 around the spawn (map/cliff edges), reachable cells only, sorted angularly for maximum fog-of-war reveal",
+      "Move to each waypoint as one grouped order (not per-unit chains) so the squad stays together; advance once the group's centroid arrives",
+      "After at most 2 spawn areas: take up an observation post (nearest bridge hut, otherwise map centre)",
+      "Hold the post permanently (leash radius 6); no active flee behaviour in v1 — reacts only via standard AutoTarget",
+    ],
+  },
+  {
+    badge: "Module 4",
+    title: "Derrick Engineer Squads",
+    desc: "Build a full squad for uncontrolled Oil Derricks (V19), force-fire through blockades, and permanently guard the derrick once captured. Searches the whole map, capped at 2 derricks held/pursued at once.",
+    meta: [
+      { label: "Cost", value: "1 engineer (~500) + 2 rocket infantry (~2×300) + 2 MG infantry (~2×100) ≈ 1300 credits per squad." },
+      { label: "Timing", value: "First scan ~1500–1700 ticks (≈1 min) after activation, then every 15000 ticks (≈10 min)." },
+      { label: "Prerequisite", value: "Not owned by the AI, reachable by ground (Locomotor BFS). Searched map-wide, not limited to the own map quarter." },
+      { label: "Why / Frequency", value: "Secures ongoing income (V19 = capturable + cash trickler) without overcommitting: at most 2 derricks are ever pursued or held at the same time — this caps derrick TARGETS, not squads. A captured derrick keeps its slot (permanent guard) until it is lost, at which point the periodic 10-minute scan can pick a replacement." },
+    ],
+    routine: [
+      "Build the full squad (engineer mandatory, escort may launch short-handed after a ~3 min timeout)",
+      "March together to the derrick, escort screens ahead via AttackMove",
+      "Force-fire blocking fences/walls (foreign/neutral LineBuild) within a 3-cell radius",
+      "Engineer captures the derrick via CaptureActor (consumed in the process)",
+      "After capture: the 4 escort units stay as a permanent guard at the derrick (leash radius 6), occupying one of the 2 derrick slots",
+      "Derrick destroyed → mission ends, freeing a slot; recaptured by the enemy → next 10-minute scan can retarget it automatically",
+    ],
+  },
+];
+
+const gdiOps = [
+  {
+    badge: "Module 1",
+    title: "Starting Unit Operations",
+    desc: "Same mechanism as Nod, but without its own chokepoint planner: GDI currently has no AotBasePlannerBotModule instance, so a fallback runs instead of the choke phase.",
+    meta: [
+      { label: "Cost", value: "0 credits — uses only the starting units from the map setup, no production." },
+      { label: "Timing", value: "Immediately from match start, once the own construction yard is registered in MapIntel." },
+      { label: "Prerequisite", value: "None — runs even without a chokepoint provider (fallback)." },
+      { label: "Why / Frequency", value: "One-off per match. Stops the starting units from standing idle even without GDI base-building." },
+    ],
+    routine: [
+      "No chokepoint provider: after ~10 check cycles without a choke, skip straight to the ARCO raid phase (no clearing, no reserve distribution)",
+      "Attack up to 2 reachable ARCO Oil Pumps; after each destroyed pump, collect the dropped 1000-credit crate",
+      "Blacklist an unreachable target after ~12 idle ticks instead of endlessly re-routing",
+      "Then attack the nearest reachable enemy construction yard, falling back to the enemy spawn",
+      "No target reachable: the group holds the reachable map centre (MapCentreFallback)",
+    ],
+  },
+  {
+    badge: "Module 2",
+    title: "Regular Attack Waves",
+    desc: "60% battle tanks, 25% light vehicles, 15% support/AA plus a 25% adaptive share. GDI retreats once it has lost 75% of the wave's original unit count, instead of fighting to the last unit. If no ground route to the enemy exists, the wave ferries itself across water instead of giving up.",
+    meta: [
+      { label: "Cost", value: "Base budget for n=6/8/10/12 vehicles (Age 0–3) × role costs (MTNK ~900, Jeep variants ~400–600, Juggernaut/MSAM higher), +25% per wave (capped at 300% of base), max. 20 units. Naval ferry: 2 Hovercraft (~900 each), built once and reused across waves." },
+      { label: "Timing", value: "First wave ~3000 ticks (≈2 min) after activation; then a 1500-tick (≈1 min) cooldown after each wave ends. Ferry phase timeout ~9000 ticks (≈6 min) before giving up on stragglers." },
+      { label: "Prerequisite", value: "At least one role currently buildable; chains contain all exclusive branches (Jeep→HUMVEE OR Wolverine OR APC→AAPC), first buildable variant wins. Naval ferry additionally needs an owned Shipyard and a coastal cell near both the own base and the enemy." },
+      { label: "Why / Frequency", value: "Backbone of the offensive. Exactly one active wave at a time; the next only starts after the previous one ends (victory, retreat, or wipe)." },
+    ],
+    routine: [
+      "Roll composition: tank/light/support per age-tier target strength, remainder adaptive (anti-infantry/anti-tank/anti-air depending on what's been spotted)",
+      "Fill missing units from the mission pool first, otherwise produce them",
+      "Forming phase: rally point halfway between base and chokepoint, until production is complete or timeout (≈3 min)",
+      "Choose a target: 75% main base, 25% visible enemy harvester",
+      "No ground route found: walk the wave to the nearest own coastal cell and stage there. If no Shipyard exists yet, hold and wait (no timeout) until one is built",
+      "Once a Shipyard exists: build/reuse 2 Hovercraft, ferry the wave across water in batches of 1 vehicle per transport, regroup on the far shore, then choose a target there and continue",
+      "AttackMove to the target; stragglers regroup on the unit closest to the group's centroid",
+      "75% loss (by unit count) reached: retreat to the own construction yard, survivors return to the pool",
+      "Otherwise wave ends (wiped out or target destroyed): survivors return to the pool, transports return to the pool for reuse, next wave launches with a higher budget",
+    ],
+  },
+  {
+    badge: "Module 3",
+    title: "Scout Expeditions",
+    desc: "Two-jeep teams systematically cover half of all map spawns, sweep map edges, then hold an observation post.",
+    meta: [
+      { label: "Cost", value: "2× jeep role (~400 credits each, ≈800 credits per group)." },
+      { label: "Timing", value: "As soon as AotMapIntel is ready; number of groups = ceil(spawn count / 2)." },
+      { label: "Prerequisite", value: "Radar/HQ built (scouting only starts once there's a minimap to show the results on); map has more than one spawn point; scout variant chain currently buildable." },
+      { label: "Why / Frequency", value: "Constant reconnaissance coverage of 50% of all spawns. Destroyed groups are automatically rebuilt after a ~1500-tick (≈1 min) cooldown." },
+    ],
+    routine: [
+      "Visit up to 2 assigned spawn points per group, one after another",
+      "Per spawn: ring waypoints at radius 8 around the spawn, reachable cells only, sorted angularly for maximum fog-of-war reveal",
+      "Move to the next spawn only once every group member is idle again",
+      "After at most 2 spawn areas: take up an observation post (nearest bridge hut, otherwise map centre)",
+      "Hold the post permanently (leash radius 6); no active flee behaviour in v1",
+    ],
+  },
+  {
+    badge: "Module 4",
+    title: "Derrick Engineer Squads",
+    desc: "Build a full squad for uncontrolled Oil Derricks (V19), force-fire through blockades, and permanently guard the derrick once captured. Searches the whole map, capped at 2 derricks held/pursued at once.",
+    meta: [
+      { label: "Cost", value: "1 engineer (~500) + 2 rocket infantry (~2×300) + 2 MG infantry (~2×100) ≈ 1300 credits per squad." },
+      { label: "Timing", value: "First scan ~1500–1700 ticks (≈1 min) after activation, then every 15000 ticks (≈10 min)." },
+      { label: "Prerequisite", value: "Not owned by the AI, reachable by ground. Searched map-wide, not limited to the own map quarter." },
+      { label: "Why / Frequency", value: "Secures ongoing income without overcommitting: at most 2 derricks are ever pursued or held at the same time — this caps derrick TARGETS, not squads. A captured derrick keeps its slot (permanent guard) until it is lost, at which point the periodic 10-minute scan can pick a replacement." },
+    ],
+    routine: [
+      "Build the full squad (engineer mandatory, escort may launch short-handed after a ~3 min timeout)",
+      "March together to the derrick, escort screens ahead via AttackMove",
+      "Force-fire blocking fences/walls within a 3-cell radius",
+      "Engineer captures the derrick via CaptureActor (consumed in the process)",
+      "After capture: the 4 escort units stay as a permanent guard at the derrick (leash radius 6), occupying one of the 2 derrick slots",
+      "Derrick destroyed → mission ends, freeing a slot; recaptured by the enemy → next 10-minute scan can retarget it automatically",
+    ],
+  },
+];
+
+function buildCard(op) {
+  const card = document.createElement("div");
+  card.className = "card";
+
+  const head = document.createElement("div");
+  head.className = "card-head";
+  const title = document.createElement("h3");
+  title.className = "card-title";
+  title.textContent = op.title;
+  head.appendChild(title);
+  const badge = document.createElement("span");
+  badge.className = "badge";
+  badge.textContent = op.badge;
+  head.appendChild(badge);
+  card.appendChild(head);
+
+  const desc = document.createElement("div");
+  desc.className = "card-desc";
+  desc.textContent = op.desc;
+  card.appendChild(desc);
+
+  const metaGrid = document.createElement("div");
+  metaGrid.className = "meta-grid";
+  op.meta.forEach(m => {
+    const row = document.createElement("div");
+    row.className = "meta-row";
+    const label = document.createElement("div");
+    label.className = "label";
+    label.textContent = m.label;
+    const value = document.createElement("div");
+    value.className = "value";
+    value.textContent = m.value;
+    row.appendChild(label);
+    row.appendChild(value);
+    metaGrid.appendChild(row);
+  });
+  card.appendChild(metaGrid);
+
+  if (op.caveat) {
+    const cav = document.createElement("div");
+    cav.className = "caveat";
+    cav.textContent = op.caveat;
+    card.appendChild(cav);
+  }
+
+  const routineHeader = document.createElement("div");
+  routineHeader.className = "routine-header";
+  routineHeader.style.marginTop = op.caveat ? "12px" : "0";
+  routineHeader.textContent = "Routine — what the AI actually does";
+  card.appendChild(routineHeader);
+
+  const list = document.createElement("ol");
+  list.className = "routine-list";
+  op.routine.forEach(step => {
+    const li = document.createElement("li");
+    li.textContent = step;
+    list.appendChild(li);
+  });
+  card.appendChild(list);
+
+  return card;
+}
+
+const nodContainer = document.getElementById("nod-cards");
+nodOps.forEach(op => nodContainer.appendChild(buildCard(op)));
+
+const gdiContainer = document.getElementById("gdi-cards");
+gdiOps.forEach(op => gdiContainer.appendChild(buildCard(op)));
+</script>
+</body>
+</html>

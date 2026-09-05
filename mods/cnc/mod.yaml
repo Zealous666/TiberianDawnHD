@@ -1,6 +1,6 @@
 Metadata:
 	Title: mod-title
-	Version: {DEV_VERSION}
+	Version: AoT-Alpha-1.0
 	Website: https://www.openra.net
 	WebIcon32: https://www.openra.net/images/icons/cnc_32x32.png
 	WindowTitle: mod-windowtitle
@@ -19,6 +19,7 @@ FileSystem: RemasterFileSystem
 	OverridePackages:
 		cnc|bits/snow.mix
 		cnc|bits
+		cnchd|bits/jungle
 		cnchd|bits
 		cnc|bits/desert
 		cnc|bits/ss
@@ -79,6 +80,10 @@ FileSystem: RemasterFileSystem
 				~^SupportDir|Content/ra/v2/allies.mix
 				~^SupportDir|Content/ra/v2/russian.mix
 				~^SupportDir|Content/ra/v2/snow.mix
+				# TS audio: local.mix (Einheiten-SFX inkl. cygun1.aud) + speech02.mix (NOD-Stimmen).
+				# sounds.mix = Umgebungs-SFX, nicht nötig. Optionale Packages.
+				~^SupportDir|Content/ts/local.mix
+				~^SupportDir|Content/ts/speech02.mix
 		tuc:
 			Origins:
 				steam-en: Steam
@@ -226,7 +231,8 @@ FileSystem: RemasterFileSystem
 
 MapFolders:
 	cnc|maps: System
-	~^SupportDir|maps/cnc/{DEV_VERSION}: User
+	cnchd|maps: System
+	~^SupportDir|maps/cnc/AoT-Alpha-1.0: User
 
 Rules:
 	cnc|rules/misc.yaml
@@ -252,6 +258,13 @@ Rules:
 	cnchd|rules/aot-factions.yaml
 	cnchd|rules/aot-structures.yaml
 	cnchd|rules/aot-units.yaml
+	cnchd|rules/aot-critters.yaml
+	cnchd|rules/aot-world.yaml
+	cnchd|rules/aot-ai.yaml
+	cnchd|rules/aot-snow-decor.yaml
+	cnchd|rules/aot-jungle.yaml
+	cnchd|rules/aot-ts-civilian.yaml
+	cnchd|rules/aot-lighting.yaml
 	# === Ende aotmod ===
 
 Sequences:
@@ -275,6 +288,7 @@ Sequences:
 	cnchd|sequences/campaign-overrides.yaml
 	# === Age of Tiberium (aotmod) sequences ===
 	cnchd|sequences/aot-sequences.yaml
+	cnchd|sequences/aot-ts-civilian-sequences.yaml
 	# === Ende aotmod ===
 
 TileSets:
@@ -282,6 +296,9 @@ TileSets:
 	cnchd|tilesets/winter.yaml
 	cnchd|tilesets/snow.yaml
 	cnchd|tilesets/temperat.yaml
+	cnchd|tilesets/aot-temperat.yaml
+	cnchd|tilesets/aot-arctic.yaml
+	cnchd|tilesets/aot-desert.yaml
 
 Weapons:
 	cnc|weapons/explosions.yaml
@@ -375,12 +392,14 @@ AllowUnusedFluentMessagesInExternalPackages: false
 
 Voices:
 	cnc|audio/voices.yaml
+	cnchd|audio/voices-base.yaml
 
 Notifications:
 	cnc|audio/notifications.yaml
 
 Music:
 	cnc|audio/music.yaml
+	cnchd|audio/music-remastered.yaml
 
 Hotkeys:
 	common|hotkeys/game.yaml
@@ -459,15 +478,26 @@ SupportsMapsFrom: cnc
 
 SoundFormats: Aud, Wav
 
-SpriteFormats: Tga, ShpTD, TmpTD, ShpTS, TmpRA, ShpRemastered, Dds, PngSheet
+SpriteFormats: Tga, ShpTD, TmpTD, ShpTS, TmpRA, TmpTS, ShpRemastered, Dds, PngSheet
 
 VideoFormats: Vqa, Wsa
 
 TerrainFormat: RemasterTerrain
 
 SpriteSequenceFormat: RemasterSpriteSequence
-	BgraSheetSize: 8192
-	IndexedSheetSize: 512
+
+# Sheet-Groesse fuer die Sprite-Atlanten. Lag frueher (falsch benannt + falsch platziert) unter
+# SpriteSequenceFormat und war damit TOT -> der Motor nutzte den 2048-Default, was ~230 BGRA-Sheets
+# fuer die ~33k Remaster-Sprites erzeugte (viele GPU-Texturbindungen pro Frame -> FPS-Kosten).
+# Korrekte Keys sind SequenceBgraSheetSize/SequenceIndexedSheetSize unter RendererConstants.
+# 4096 packt dieselben Sprites in ~57 statt ~230 Sheets (deutlich weniger Draw-Batches) OHNE
+# VRAM-Zuwachs -- 8192 waere zwar ~23 Sheets, aber halbleer (~6 GB statt ~3,8 GB VRAM). Betrifft
+# die Laufzeit-FPS, NICHT die Ladezeit (der Sheet-Bau haengt am Gesamt-Pixelvolumen, nicht an der
+# Sheet-Zahl -- gemessen 2026-08-22: 229->23 Sheets liess sheetBuild bei ~11 s unveraendert).
+# Indexed bleibt auf dem 2048-Default (die alte 512 war nie aktiv).
+RendererConstants:
+	SequenceBgraSheetSize: 4096
+	SequenceIndexedSheetSize: 2048
 
 AssetBrowser:
 	SpriteExtensions: .shp, .tem, .win, .sno, .des, .jun, .ZIP, .DDS, .TGA

@@ -1,0 +1,5062 @@
+{
+  "generated": "2026-07-01T08:18:23.640286+00:00",
+  "actors": [
+    {
+      "id": "AFLD",
+      "displayName": "Airstrip",
+      "file": "overrides.yaml",
+      "queue": "Building.Nod",
+      "faction": "nod",
+      "category": "main-buildings",
+      "tier": 1,
+      "bpo": 90,
+      "prereqs": [
+        "aot-age1",
+        "lite"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age1"
+      ],
+      "provides": [
+        "vehicleproduction"
+      ],
+      "stats": {
+        "cost": 2000,
+        "hp": 110000,
+        "power": -40
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "afld_icon.png",
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "AFLT",
+      "displayName": "Air Field",
+      "file": "aot-structures.yaml",
+      "queue": "Building.GDI",
+      "faction": "gdi",
+      "category": "main-buildings",
+      "tier": 1,
+      "bpo": 70,
+      "prereqs": [
+        "anyhq"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age1"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 1500,
+        "hp": 60000,
+        "power": -20
+      },
+      "sprite": "ra",
+      "customIcon": true,
+      "iconFile": "aflt_blue.png",
+      "idleFile": "aflt_blue.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "AJET",
+      "displayName": "GDI Fighter",
+      "file": "aot-units.yaml",
+      "queue": "Aircraft.GDI.AFLT",
+      "faction": "gdi",
+      "category": "aircraft",
+      "tier": 1,
+      "bpo": 20,
+      "prereqs": [
+        "aflt"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age1"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 1200,
+        "hp": 10000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "ajet_icon.png",
+      "idleFile": "ajet_icon.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": [
+        "HeliExplode",
+        "aot-AjetNapalm",
+        "aot-AjetVulcan"
+      ]
+    },
+    {
+      "id": "APC",
+      "displayName": "APC",
+      "file": "overrides.yaml",
+      "queue": "LightVehicle.GDI",
+      "faction": "gdi",
+      "category": "vehicles",
+      "tier": 1,
+      "bpo": 4,
+      "prereqs": [
+        "lite"
+      ],
+      "visibilityPrereqs": [
+        "~aot-apc-upgrade",
+        "~!aot-humvee-upgrade",
+        "~!aot-amphibious-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 600,
+        "hp": 19000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": [
+        "APCGun",
+        "APCGun.AA",
+        "UnitExplodeBig",
+        "aot-JeepHumvee"
+      ]
+    },
+    {
+      "id": "BGGY",
+      "displayName": "Nod Buggy",
+      "file": "overrides.yaml",
+      "queue": "Vehicle.Nod",
+      "faction": "nod",
+      "category": "vehicles",
+      "tier": 0,
+      "bpo": 20,
+      "prereqs": [
+        "afld"
+      ],
+      "visibilityPrereqs": [],
+      "provides": [],
+      "stats": {
+        "cost": 300,
+        "hp": 12000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": [
+        "MachineGun"
+      ]
+    },
+    {
+      "id": "BIKE",
+      "displayName": "Recon Bike",
+      "file": "overrides.yaml",
+      "queue": "Vehicle.Nod",
+      "faction": "nod",
+      "category": "vehicles",
+      "tier": 0,
+      "bpo": 30,
+      "prereqs": [
+        "afld"
+      ],
+      "visibilityPrereqs": [],
+      "provides": [],
+      "stats": {
+        "cost": 500,
+        "hp": 11000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": [
+        "BikeRockets"
+      ]
+    },
+    {
+      "id": "E1",
+      "displayName": "Minigunner",
+      "file": "overrides.yaml",
+      "queue": "Infantry.GDI, Infantry.Nod",
+      "faction": "both",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 10,
+      "prereqs": [],
+      "visibilityPrereqs": [
+        "~disabled"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 100,
+        "hp": 5000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": [
+        "M16"
+      ]
+    },
+    {
+      "id": "E2",
+      "displayName": "Grenadier",
+      "file": "overrides.yaml",
+      "queue": "Infantry.GDI",
+      "faction": "gdi",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 40,
+      "prereqs": [],
+      "visibilityPrereqs": [
+        "~disabled"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 160,
+        "hp": 5000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": [
+        "Grenade",
+        "GrenadierExplode"
+      ]
+    },
+    {
+      "id": "E3",
+      "displayName": "Rocket Soldier",
+      "file": "overrides.yaml",
+      "queue": "Infantry.GDI, Infantry.Nod",
+      "faction": "both",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 20,
+      "prereqs": [],
+      "visibilityPrereqs": [
+        "~disabled"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 300,
+        "hp": 4500,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": [
+        "Rockets"
+      ]
+    },
+    {
+      "id": "E4",
+      "displayName": "Flamethrower",
+      "file": "overrides.yaml",
+      "queue": "Infantry.Nod",
+      "faction": "nod",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 40,
+      "prereqs": [],
+      "visibilityPrereqs": [
+        "~disabled"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 200,
+        "hp": 9000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": [
+        "Flamethrower"
+      ]
+    },
+    {
+      "id": "E5",
+      "displayName": "Chemical Warrior",
+      "file": "overrides.yaml",
+      "queue": "Infantry.Nod",
+      "faction": "nod",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 50,
+      "prereqs": [],
+      "visibilityPrereqs": [
+        "~disabled"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 300,
+        "hp": 9000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": [
+        "Chemspray"
+      ]
+    },
+    {
+      "id": "E6",
+      "displayName": "Engineer",
+      "file": "overrides.yaml",
+      "queue": "Infantry.GDI, Infantry.Nod",
+      "faction": "both",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 30,
+      "prereqs": [],
+      "visibilityPrereqs": [
+        "~disabled"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 500,
+        "hp": 3000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "FACT",
+      "displayName": "Construction Yard",
+      "file": "overrides.yaml",
+      "queue": "Building.GDI, Building.Nod",
+      "faction": "both",
+      "category": "main-buildings",
+      "tier": 0,
+      "bpo": 1000,
+      "prereqs": [],
+      "visibilityPrereqs": [
+        "~disabled"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 3000,
+        "hp": 210000,
+        "power": 0
+      },
+      "sprite": "ra",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "GTWR",
+      "displayName": "Guard Tower",
+      "file": "aot-structures.yaml",
+      "queue": "Support.GDI",
+      "faction": "gdi",
+      "category": "defense",
+      "tier": 0,
+      "bpo": 40,
+      "prereqs": [
+        "barracks"
+      ],
+      "visibilityPrereqs": [],
+      "provides": [],
+      "stats": {
+        "cost": 600,
+        "hp": 40000,
+        "power": -10
+      },
+      "sprite": "td",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": [
+        "HighV"
+      ]
+    },
+    {
+      "id": "GUN",
+      "displayName": "Turret",
+      "file": "aot-structures.yaml",
+      "queue": "Support.GDI",
+      "faction": "gdi",
+      "category": "defense",
+      "tier": 0,
+      "bpo": 45,
+      "prereqs": [
+        "barracks"
+      ],
+      "visibilityPrereqs": [],
+      "provides": [],
+      "stats": {
+        "cost": 600,
+        "hp": 41000,
+        "power": -20
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "gun_base.png",
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": [
+        "TurretGun"
+      ]
+    },
+    {
+      "id": "HQ",
+      "displayName": "Communications Center",
+      "file": "overrides.yaml",
+      "queue": "Building.GDI",
+      "faction": "gdi",
+      "category": "main-buildings",
+      "tier": 0,
+      "bpo": 50,
+      "prereqs": [
+        "vehicleproduction",
+        "barracks"
+      ],
+      "visibilityPrereqs": [
+        "~techlevel.medium",
+        "~aot-hq-never"
+      ],
+      "provides": [
+        "gdi-hq",
+        "anyhq",
+        "anyhq"
+      ],
+      "stats": {
+        "cost": 1000,
+        "hp": 80000,
+        "power": -50
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "hq_base.png",
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "LITE",
+      "displayName": "Vehicle Factory",
+      "file": "aot-structures.yaml",
+      "queue": "Building.GDI, Building.Nod",
+      "faction": "both",
+      "category": "main-buildings",
+      "tier": 0,
+      "bpo": 30,
+      "prereqs": [
+        "anypower"
+      ],
+      "visibilityPrereqs": [],
+      "provides": [
+        "vehicleproduction",
+        "lite"
+      ],
+      "stats": {
+        "cost": 500,
+        "hp": 60000,
+        "power": -20
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "lite_base.png",
+      "idleFile": "lite-idle.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "MSAM",
+      "displayName": "Rocket Launcher",
+      "file": "overrides.yaml",
+      "queue": "Vehicle.GDI",
+      "faction": "gdi",
+      "category": "vehicles",
+      "tier": 1,
+      "bpo": 4,
+      "prereqs": [
+        "anyhq",
+        "aot-age1",
+        "weap"
+      ],
+      "visibilityPrereqs": [
+        "~techlevel.medium",
+        "~aot-age1",
+        "~!aot-hover-mlrs-upgrade",
+        "~!aot-hover-aa-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 900,
+        "hp": 12000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "msam_base.png",
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": [
+        "227mm",
+        "UnitExplodeMech"
+      ]
+    },
+    {
+      "id": "PROC",
+      "displayName": "Tiberium Refinery",
+      "file": "overrides.yaml",
+      "queue": "Building.GDI, Building.Nod",
+      "faction": "both",
+      "category": "main-buildings",
+      "tier": 1,
+      "bpo": 80,
+      "prereqs": [],
+      "visibilityPrereqs": [
+        "~aot-age1"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 1500,
+        "hp": 100000,
+        "power": -40
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "proc_base.png",
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "RMBO",
+      "displayName": "Commando",
+      "file": "overrides.yaml",
+      "queue": "Infantry.GDI",
+      "faction": "gdi",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 50,
+      "prereqs": [],
+      "visibilityPrereqs": [
+        "~disabled"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 1500,
+        "hp": 15000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": [
+        "Sniper"
+      ]
+    },
+    {
+      "id": "STNK",
+      "displayName": "Stealth Tank",
+      "file": "overrides.yaml",
+      "queue": "Vehicle.Nod",
+      "faction": "nod",
+      "category": "vehicles",
+      "tier": 0,
+      "bpo": 90,
+      "prereqs": [
+        "tmpl"
+      ],
+      "visibilityPrereqs": [
+        "~techlevel.high"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 900,
+        "hp": 15000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": [
+        "227mm.stnk",
+        "227mm.stnkAA",
+        "UnitExplodeStealthTank"
+      ]
+    },
+    {
+      "id": "TMPL",
+      "displayName": "Temple of Nod",
+      "file": "overrides.yaml",
+      "queue": "Building.Nod",
+      "faction": "nod",
+      "category": "main-buildings",
+      "tier": 1,
+      "bpo": 110,
+      "prereqs": [
+        "anyhq"
+      ],
+      "visibilityPrereqs": [
+        "~techlevel.high",
+        "~aot-age1"
+      ],
+      "provides": [
+        "anyhq"
+      ],
+      "stats": {
+        "cost": 2000,
+        "hp": 210000,
+        "power": -150
+      },
+      "sprite": "td",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "WEAP",
+      "displayName": "Advanced Factory",
+      "file": "overrides.yaml",
+      "queue": "Building.GDI",
+      "faction": "gdi",
+      "category": "main-buildings",
+      "tier": 1,
+      "bpo": 90,
+      "prereqs": [
+        "aot-age1",
+        "lite"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age1"
+      ],
+      "provides": [
+        "aot-weap",
+        "vehicleproduction"
+      ],
+      "stats": {
+        "cost": 2000,
+        "hp": 110000,
+        "power": -40
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "weap_base.png",
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-age1-upgrade-gdi",
+      "displayName": "1st Tiberium Age",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.GDI",
+      "faction": "gdi",
+      "category": "upgrades",
+      "tier": 0,
+      "bpo": 5,
+      "prereqs": [],
+      "visibilityPrereqs": [
+        "~atec",
+        "~!aot-age1-purchased"
+      ],
+      "provides": [
+        "aot-age1-purchased"
+      ],
+      "stats": {
+        "cost": 1000,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "aot-age1-icon.png",
+      "idleFile": "aot-age1-icon.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-age1-upgrade-nod",
+      "displayName": "1st Tiberium Age",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.Nod",
+      "faction": "nod",
+      "category": "upgrades",
+      "tier": 0,
+      "bpo": 5,
+      "prereqs": [],
+      "visibilityPrereqs": [
+        "~stec",
+        "~!aot-age1-purchased"
+      ],
+      "provides": [
+        "aot-age1-purchased"
+      ],
+      "stats": {
+        "cost": 1000,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "aot-age1-icon.png",
+      "idleFile": "aot-age1-icon.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-age2-upgrade-gdi",
+      "displayName": "2nd Tiberium Age",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.GDI",
+      "faction": "gdi",
+      "category": "upgrades",
+      "tier": 1,
+      "bpo": 6,
+      "prereqs": [
+        "aot-age1-purchased",
+        "proc",
+        "weap"
+      ],
+      "visibilityPrereqs": [
+        "~atec",
+        "~aot-age1-purchased",
+        "~!aot-age2-purchased"
+      ],
+      "provides": [
+        "aot-age2-purchased"
+      ],
+      "stats": {
+        "cost": 1000,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "aot-age2-icon.png",
+      "idleFile": "aot-age2-icon.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-age2-upgrade-nod",
+      "displayName": "2nd Tiberium Age",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.Nod",
+      "faction": "nod",
+      "category": "upgrades",
+      "tier": 1,
+      "bpo": 6,
+      "prereqs": [
+        "aot-age1-purchased",
+        "proc",
+        "afld"
+      ],
+      "visibilityPrereqs": [
+        "~stec",
+        "~aot-age1-purchased",
+        "~!aot-age2-purchased"
+      ],
+      "provides": [
+        "aot-age2-purchased"
+      ],
+      "stats": {
+        "cost": 1000,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "aot-age2-icon.png",
+      "idleFile": "aot-age2-icon.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-age3-upgrade-gdi",
+      "displayName": "3rd Tiberium Age",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.GDI",
+      "faction": "gdi",
+      "category": "upgrades",
+      "tier": 2,
+      "bpo": 7,
+      "prereqs": [
+        "aot-age2-purchased"
+      ],
+      "visibilityPrereqs": [
+        "~atec",
+        "~aot-age2-purchased",
+        "~!aot-age3-purchased"
+      ],
+      "provides": [
+        "aot-age3-purchased"
+      ],
+      "stats": {
+        "cost": 1000,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "aot-age3-icon.png",
+      "idleFile": "aot-age3-icon.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-age3-upgrade-nod",
+      "displayName": "3rd Tiberium Age",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.Nod",
+      "faction": "nod",
+      "category": "upgrades",
+      "tier": 2,
+      "bpo": 7,
+      "prereqs": [
+        "aot-age2-purchased",
+        "tmpl"
+      ],
+      "visibilityPrereqs": [
+        "~stec",
+        "~aot-age2-purchased",
+        "~!aot-age3-purchased"
+      ],
+      "provides": [
+        "aot-age3-purchased"
+      ],
+      "stats": {
+        "cost": 1000,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "aot-age3-icon.png",
+      "idleFile": "aot-age3-icon.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-apache-base",
+      "displayName": "Apache",
+      "file": "aot-units.yaml",
+      "queue": "Aircraft.GDI",
+      "faction": "gdi",
+      "category": "aircraft",
+      "tier": 0,
+      "bpo": 20,
+      "prereqs": [
+        "anyhq"
+      ],
+      "visibilityPrereqs": [
+        "~!aot-orca-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 1200,
+        "hp": 10000,
+        "power": 0
+      },
+      "sprite": "ra",
+      "customIcon": true,
+      "iconFile": "helo_base.png",
+      "idleFile": "helo_base.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "OrcaAAMissiles",
+        "OrcaAGMissiles",
+        "aot-ApacheAGMissiles"
+      ]
+    },
+    {
+      "id": "aot-apc-amphibious",
+      "displayName": "Amphibious APC",
+      "file": "aot-units.yaml",
+      "queue": "LightVehicle.GDI",
+      "faction": "gdi",
+      "category": "vehicles",
+      "tier": 2,
+      "bpo": 4,
+      "prereqs": [
+        "lite"
+      ],
+      "visibilityPrereqs": [
+        "~aot-apc-upgrade",
+        "~aot-amphibious-upgrade",
+        "~!aot-humvee-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 600,
+        "hp": 19000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "APCGun",
+        "APCGun.AA",
+        "UnitExplodeBig",
+        "aot-JeepHumvee"
+      ]
+    },
+    {
+      "id": "aot-atec-age0",
+      "displayName": "Tech Center",
+      "file": "aot-structures.yaml",
+      "queue": "Building.GDI",
+      "faction": "gdi",
+      "category": "main-buildings",
+      "tier": 0,
+      "bpo": 100,
+      "prereqs": [
+        "anypower",
+        "gdi-hq"
+      ],
+      "visibilityPrereqs": [
+        "~!aot-age1"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 1500,
+        "hp": 60000,
+        "power": -200
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "atec_base.png",
+      "idleFile": "atec-idle.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-atec-age1",
+      "displayName": "Tech Center",
+      "file": "aot-structures.yaml",
+      "queue": "Building.GDI",
+      "faction": "gdi",
+      "category": "main-buildings",
+      "tier": 1,
+      "bpo": 100,
+      "prereqs": [
+        "anypower",
+        "gdi-hq",
+        "!aot-atec"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age1"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 1500,
+        "hp": 60000,
+        "power": -200
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "atec_age_1.png",
+      "idleFile": "atec-td-idle.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-cruiser",
+      "displayName": "Battle Cruiser",
+      "file": "aot-units.yaml",
+      "queue": "Naval.GDI",
+      "faction": "gdi",
+      "category": "navy",
+      "tier": 2,
+      "bpo": 20,
+      "prereqs": [
+        "aot-age2",
+        "aot-shipyard",
+        "atec"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age2",
+        "~!aot-cruiser-railgun-upgrade",
+        "~!aot-cruiser-carrier-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 2400,
+        "hp": 80000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "crus_base.png",
+      "idleFile": "crus_base.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "aot-8Inch",
+        "aot-CruiserRailgun"
+      ]
+    },
+    {
+      "id": "aot-cruiser-carrier-proxy",
+      "displayName": "Battle Cruiser (Carrier)",
+      "file": "aot-units.yaml",
+      "queue": "Naval.GDI",
+      "faction": "gdi",
+      "category": "navy",
+      "tier": 3,
+      "bpo": 20,
+      "prereqs": [
+        "aot-age2",
+        "aot-shipyard",
+        "atec"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age2",
+        "~aot-cruiser-carrier-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 2400,
+        "hp": 80000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "crus_carrier.png",
+      "idleFile": "crus_carrier.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "aot-8Inch",
+        "aot-CruiserRailgun"
+      ]
+    },
+    {
+      "id": "aot-cruiser-railgun-proxy",
+      "displayName": "Battle Cruiser (Railgun)",
+      "file": "aot-units.yaml",
+      "queue": "Naval.GDI",
+      "faction": "gdi",
+      "category": "navy",
+      "tier": 3,
+      "bpo": 20,
+      "prereqs": [
+        "aot-age2",
+        "aot-shipyard",
+        "atec"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age2",
+        "~aot-cruiser-railgun-upgrade",
+        "~!aot-cruiser-carrier-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 2400,
+        "hp": 80000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "aot-8Inch",
+        "aot-CruiserRailgun"
+      ]
+    },
+    {
+      "id": "aot-cyborg",
+      "displayName": "NOD Cyborg",
+      "file": "aot-units.yaml",
+      "queue": "Infantry.Nod",
+      "faction": "nod",
+      "category": "infantry",
+      "tier": 2,
+      "bpo": 70,
+      "prereqs": [],
+      "visibilityPrereqs": [
+        "~hand",
+        "~aot-age2"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 300,
+        "hp": 30000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "inf_cyborg.png",
+      "idleFile": "inf_cyborg.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "aot-CyborgChainGun",
+        "aot-CyborgCrippleEffect"
+      ]
+    },
+    {
+      "id": "aot-cyc2",
+      "displayName": "Cyborg Commando",
+      "file": "aot-units.yaml",
+      "queue": "Infantry.Nod",
+      "faction": "nod",
+      "category": "infantry",
+      "tier": 3,
+      "bpo": 71,
+      "prereqs": [],
+      "visibilityPrereqs": [
+        "~hand",
+        "~aot-age3"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 2000,
+        "hp": 50000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "nod_commando.png",
+      "idleFile": "nod_commando.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "aot-CyCannon"
+      ]
+    },
+    {
+      "id": "aot-dog-nod",
+      "displayName": "Dog",
+      "file": "aot-units.yaml",
+      "queue": "Infantry.Nod",
+      "faction": "nod",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 60,
+      "prereqs": [
+        "barracks"
+      ],
+      "visibilityPrereqs": [],
+      "provides": [],
+      "stats": {
+        "cost": 200,
+        "hp": 1800,
+        "power": 0
+      },
+      "sprite": "ra",
+      "customIcon": true,
+      "iconFile": "nod_dog.png",
+      "idleFile": "nod_dog.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "aot-DogJaw"
+      ]
+    },
+    {
+      "id": "aot-e1-gdi",
+      "displayName": "Minigunner",
+      "file": "aot-units.yaml",
+      "queue": "Infantry.GDI",
+      "faction": "gdi",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 10,
+      "prereqs": [
+        "barracks"
+      ],
+      "visibilityPrereqs": [],
+      "provides": [],
+      "stats": {
+        "cost": 100,
+        "hp": 5000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "gdi_inf.png",
+      "idleFile": "gdi_inf.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "M16"
+      ]
+    },
+    {
+      "id": "aot-e1-nod",
+      "displayName": "Minigunner",
+      "file": "aot-units.yaml",
+      "queue": "Infantry.Nod",
+      "faction": "nod",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 10,
+      "prereqs": [
+        "barracks"
+      ],
+      "visibilityPrereqs": [],
+      "provides": [],
+      "stats": {
+        "cost": 100,
+        "hp": 5000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "nod_inf.png",
+      "idleFile": "nod_inf.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "M16"
+      ]
+    },
+    {
+      "id": "aot-e2-gdi",
+      "displayName": "Grenadier",
+      "file": "aot-units.yaml",
+      "queue": "Infantry.GDI",
+      "faction": "gdi",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 40,
+      "prereqs": [
+        "anyhq"
+      ],
+      "visibilityPrereqs": [
+        "~techlevel.medium"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 160,
+        "hp": 5000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "gdi_gren.png",
+      "idleFile": "gdi_gren.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "Grenade",
+        "GrenadierExplode"
+      ]
+    },
+    {
+      "id": "aot-e3-nod",
+      "displayName": "Rocket Soldier",
+      "file": "aot-units.yaml",
+      "queue": "Infantry.Nod",
+      "faction": "nod",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 20,
+      "prereqs": [
+        "barracks"
+      ],
+      "visibilityPrereqs": [],
+      "provides": [],
+      "stats": {
+        "cost": 300,
+        "hp": 4500,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "nod_bazooka.png",
+      "idleFile": "nod_bazooka.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "Rockets"
+      ]
+    },
+    {
+      "id": "aot-e4-nod-flame",
+      "displayName": "Flamethrower",
+      "file": "aot-units.yaml",
+      "queue": "Infantry.Nod",
+      "faction": "nod",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 40,
+      "prereqs": [
+        "anyhq"
+      ],
+      "visibilityPrereqs": [
+        "~techlevel.medium",
+        "~!aot-age3"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 200,
+        "hp": 9000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "nod_flame.png",
+      "idleFile": "nod_flame.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "Chemspray",
+        "Flamethrower"
+      ]
+    },
+    {
+      "id": "aot-e4-nod-toxic",
+      "displayName": "Toxic Trooper",
+      "file": "aot-units.yaml",
+      "queue": "Infantry.Nod",
+      "faction": "nod",
+      "category": "infantry",
+      "tier": 3,
+      "bpo": 40,
+      "prereqs": [
+        "anyhq"
+      ],
+      "visibilityPrereqs": [
+        "~techlevel.medium",
+        "~aot-age3"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 200,
+        "hp": 9000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "nod_toxic.png",
+      "idleFile": "nod_toxic.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "Chemspray",
+        "Flamethrower"
+      ]
+    },
+    {
+      "id": "aot-e6-gdi",
+      "displayName": "Engineer",
+      "file": "aot-units.yaml",
+      "queue": "Infantry.GDI",
+      "faction": "gdi",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 30,
+      "prereqs": [
+        "barracks"
+      ],
+      "visibilityPrereqs": [],
+      "provides": [],
+      "stats": {
+        "cost": 500,
+        "hp": 3000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "gdi_engineer.png",
+      "idleFile": "gdi_engineer.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-e6-nod",
+      "displayName": "Saboteur",
+      "file": "aot-units.yaml",
+      "queue": "Infantry.Nod",
+      "faction": "nod",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 30,
+      "prereqs": [
+        "barracks"
+      ],
+      "visibilityPrereqs": [],
+      "provides": [],
+      "stats": {
+        "cost": 500,
+        "hp": 3000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "nod_sabot.png",
+      "idleFile": "nod_sabot.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-fix-age0",
+      "displayName": "Repair Facility",
+      "file": "aot-structures.yaml",
+      "queue": "Building.GDI, Building.Nod",
+      "faction": "both",
+      "category": "main-buildings",
+      "tier": 0,
+      "bpo": 40,
+      "prereqs": [
+        "vehicleproduction"
+      ],
+      "visibilityPrereqs": [
+        "~!aot-age1"
+      ],
+      "provides": [
+        "fix"
+      ],
+      "stats": {
+        "cost": 500,
+        "hp": 80000,
+        "power": -20
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "fix_base.png",
+      "idleFile": "fix_base.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-fix-age1",
+      "displayName": "Repair Facility",
+      "file": "aot-structures.yaml",
+      "queue": "Building.GDI, Building.Nod",
+      "faction": "both",
+      "category": "main-buildings",
+      "tier": 1,
+      "bpo": 40,
+      "prereqs": [
+        "vehicleproduction"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age1"
+      ],
+      "provides": [
+        "fix"
+      ],
+      "stats": {
+        "cost": 500,
+        "hp": 80000,
+        "power": -20
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "fix_ages.png",
+      "idleFile": "fix_ages.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-gunboat-base",
+      "displayName": "Gunboat Base",
+      "file": "aot-units.yaml",
+      "queue": "Naval.GDI",
+      "faction": "gdi",
+      "category": "navy",
+      "tier": 0,
+      "bpo": 10,
+      "prereqs": [
+        "lite",
+        "aot-shipyard"
+      ],
+      "visibilityPrereqs": [
+        "~!aot-gunboat-frigate-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 500,
+        "hp": 30000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "gun_base.png",
+      "idleFile": "gun_base.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "aot-DepthCharge",
+        "aot-DestroyerRockets",
+        "aot-FrigateMissiles",
+        "aot-GunboatGun"
+      ]
+    },
+    {
+      "id": "aot-gunboat-destroyer",
+      "displayName": "Gunboat Destroyer",
+      "file": "aot-units.yaml",
+      "queue": "Naval.GDI",
+      "faction": "gdi",
+      "category": "navy",
+      "tier": 2,
+      "bpo": 10,
+      "prereqs": [
+        "lite",
+        "aot-shipyard"
+      ],
+      "visibilityPrereqs": [
+        "~aot-gunboat-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 500,
+        "hp": 30000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "gun_destroyer.png",
+      "idleFile": "gun_destroyer.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "aot-DepthCharge",
+        "aot-DestroyerRockets",
+        "aot-FrigateMissiles",
+        "aot-GunboatGun"
+      ]
+    },
+    {
+      "id": "aot-gunboat-frigate",
+      "displayName": "Gunboat Frigate",
+      "file": "aot-units.yaml",
+      "queue": "Naval.GDI",
+      "faction": "gdi",
+      "category": "navy",
+      "tier": 1,
+      "bpo": 10,
+      "prereqs": [
+        "lite",
+        "aot-shipyard"
+      ],
+      "visibilityPrereqs": [
+        "~aot-gunboat-frigate-upgrade",
+        "~!aot-gunboat-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 500,
+        "hp": 30000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "gun_frigate.png",
+      "idleFile": "gun_frigate.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "aot-DepthCharge",
+        "aot-DestroyerRockets",
+        "aot-FrigateMissiles",
+        "aot-GunboatGun"
+      ]
+    },
+    {
+      "id": "aot-hand-age0",
+      "displayName": "Hand of Nod",
+      "file": "aot-structures.yaml",
+      "queue": "Building.Nod",
+      "faction": "nod",
+      "category": "main-buildings",
+      "tier": 0,
+      "bpo": 20,
+      "prereqs": [
+        "anypower"
+      ],
+      "visibilityPrereqs": [
+        "~!aot-age1"
+      ],
+      "provides": [
+        "hand"
+      ],
+      "stats": {
+        "cost": 500,
+        "hp": 60000,
+        "power": -15
+      },
+      "sprite": "ra",
+      "customIcon": true,
+      "iconFile": "hand_base.png",
+      "idleFile": "hand_base.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-hand-age1",
+      "displayName": "Hand of Nod",
+      "file": "aot-structures.yaml",
+      "queue": "Building.Nod",
+      "faction": "nod",
+      "category": "main-buildings",
+      "tier": 1,
+      "bpo": 20,
+      "prereqs": [
+        "anypower"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age1"
+      ],
+      "provides": [
+        "hand"
+      ],
+      "stats": {
+        "cost": 500,
+        "hp": 60000,
+        "power": -15
+      },
+      "sprite": "ra",
+      "customIcon": true,
+      "iconFile": "hand_ages.png",
+      "idleFile": "hand_ages.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-harpy-upgraded",
+      "displayName": "Harpy",
+      "file": "aot-units.yaml",
+      "queue": "Aircraft.Nod",
+      "faction": "nod",
+      "category": "aircraft",
+      "tier": 2,
+      "bpo": 20,
+      "prereqs": [
+        "anyhq"
+      ],
+      "visibilityPrereqs": [
+        "~aot-harpy-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 1200,
+        "hp": 12500,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "hind_hrpy.png",
+      "idleFile": "hind_hrpy.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "HeliAAGun",
+        "HeliAGGun",
+        "aot-HarpyAGGun",
+        "aot-HindAGGun"
+      ]
+    },
+    {
+      "id": "aot-harv",
+      "displayName": "Harvester",
+      "file": "aot-units.yaml",
+      "queue": "Vehicle.GDI, Vehicle.Nod",
+      "faction": "both",
+      "category": "vehicles",
+      "tier": 1,
+      "bpo": 2,
+      "prereqs": [
+        "proc"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age1"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 1100,
+        "hp": 62500,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "harv_base.png",
+      "idleFile": "harv_base.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "TiberiumExplosion",
+        "UnitExplodeHarvEmpty"
+      ]
+    },
+    {
+      "id": "aot-hind-base",
+      "displayName": "HIND",
+      "file": "aot-units.yaml",
+      "queue": "Aircraft.Nod",
+      "faction": "nod",
+      "category": "aircraft",
+      "tier": 0,
+      "bpo": 20,
+      "prereqs": [
+        "anyhq"
+      ],
+      "visibilityPrereqs": [
+        "~!aot-harpy-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 1200,
+        "hp": 12500,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "hind_base.png",
+      "idleFile": "hind_base.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "HeliAAGun",
+        "HeliAGGun",
+        "aot-HarpyAGGun",
+        "aot-HindAGGun"
+      ]
+    },
+    {
+      "id": "aot-hpad-gdi",
+      "displayName": "Helipad",
+      "file": "aot-structures.yaml",
+      "queue": "Building.GDI",
+      "faction": "gdi",
+      "category": "main-buildings",
+      "tier": 0,
+      "bpo": 60,
+      "prereqs": [
+        "anyhq"
+      ],
+      "visibilityPrereqs": [],
+      "provides": [
+        "hpad"
+      ],
+      "stats": {
+        "cost": 1000,
+        "hp": 60000,
+        "power": -20
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "hpad_blue.png",
+      "idleFile": "hpad_blue.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-hpad-nod",
+      "displayName": "Helipad",
+      "file": "aot-structures.yaml",
+      "queue": "Building.Nod",
+      "faction": "nod",
+      "category": "main-buildings",
+      "tier": 0,
+      "bpo": 60,
+      "prereqs": [
+        "anyhq"
+      ],
+      "visibilityPrereqs": [],
+      "provides": [
+        "hpad"
+      ],
+      "stats": {
+        "cost": 1000,
+        "hp": 60000,
+        "power": -20
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "hpad_red.png",
+      "idleFile": "hpad_red.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-hq-base",
+      "displayName": "Communications Center",
+      "file": "aot-structures.yaml",
+      "queue": "Building.GDI",
+      "faction": "gdi",
+      "category": "main-buildings",
+      "tier": 0,
+      "bpo": 50,
+      "prereqs": [
+        "vehicleproduction"
+      ],
+      "visibilityPrereqs": [
+        "~techlevel.medium",
+        "~!aot-ion-cannon-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 1000,
+        "hp": 80000,
+        "power": -50
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "hq_base.png",
+      "idleFile": "hq_base.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-hq-ion",
+      "displayName": "Communications Center",
+      "file": "aot-structures.yaml",
+      "queue": "Building.GDI",
+      "faction": "gdi",
+      "category": "main-buildings",
+      "tier": 3,
+      "bpo": 50,
+      "prereqs": [
+        "vehicleproduction"
+      ],
+      "visibilityPrereqs": [
+        "~techlevel.medium",
+        "~aot-ion-cannon-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 1000,
+        "hp": 80000,
+        "power": -50
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "hq_ion.png",
+      "idleFile": "hq_ion.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-htnk-base",
+      "displayName": "Mammoth Tank",
+      "file": "aot-units.yaml",
+      "queue": "Vehicle.GDI",
+      "faction": "gdi",
+      "category": "vehicles",
+      "tier": 1,
+      "bpo": 60,
+      "prereqs": [
+        "aot-age1",
+        "weap",
+        "atec"
+      ],
+      "visibilityPrereqs": [
+        "~aot-weap",
+        "~aot-age1",
+        "~!aot-htnk-rocket-upgrade",
+        "~!aot-htnk-railgun-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 1800,
+        "hp": 87000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "htnk_base.png",
+      "idleFile": "htnk_base.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "120mmDual",
+        "MammothMissiles",
+        "UnitExplodeMech",
+        "aot-HtnkLaser"
+      ]
+    },
+    {
+      "id": "aot-htnk-laser",
+      "displayName": "Mammoth Tank (Railgun)",
+      "file": "aot-units.yaml",
+      "queue": "Vehicle.GDI",
+      "faction": "gdi",
+      "category": "vehicles",
+      "tier": 3,
+      "bpo": 60,
+      "prereqs": [
+        "aot-age1"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age1",
+        "~aot-htnk-railgun-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 1800,
+        "hp": 87000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "htnk_base.png",
+      "idleFile": "htnk_base.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "120mmDual",
+        "MammothMissiles",
+        "UnitExplodeMech",
+        "aot-HtnkLaser"
+      ]
+    },
+    {
+      "id": "aot-htnk-rocket",
+      "displayName": "Mammoth Tank (Rocket)",
+      "file": "aot-units.yaml",
+      "queue": "Vehicle.GDI",
+      "faction": "gdi",
+      "category": "vehicles",
+      "tier": 2,
+      "bpo": 60,
+      "prereqs": [
+        "aot-age1"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age1",
+        "~aot-htnk-rocket-upgrade",
+        "~!aot-htnk-railgun-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 1800,
+        "hp": 87000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "htnk_base.png",
+      "idleFile": "htnk_base.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "120mmDual",
+        "MammothMissiles",
+        "UnitExplodeMech",
+        "aot-HtnkLaser"
+      ]
+    },
+    {
+      "id": "aot-jeep-base",
+      "displayName": "Recon Jeep",
+      "file": "aot-units.yaml",
+      "queue": "LightVehicle.GDI",
+      "faction": "gdi",
+      "category": "vehicles",
+      "tier": 0,
+      "bpo": 3,
+      "prereqs": [
+        "lite",
+        "pyle"
+      ],
+      "visibilityPrereqs": [
+        "~!aot-humvee-upgrade",
+        "~!aot-apc-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 400,
+        "hp": 16000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "jeep_1_base.png",
+      "idleFile": "jeep_1_base.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "MachineGunH",
+        "aot-JeepHumvee"
+      ]
+    },
+    {
+      "id": "aot-jeep-humvee",
+      "displayName": "GDI HUMVEE",
+      "file": "aot-units.yaml",
+      "queue": "LightVehicle.GDI",
+      "faction": "gdi",
+      "category": "vehicles",
+      "tier": 1,
+      "bpo": 3,
+      "prereqs": [
+        "lite",
+        "pyle"
+      ],
+      "visibilityPrereqs": [
+        "~aot-humvee-upgrade",
+        "~!aot-apc-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 400,
+        "hp": 16000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "jeep_1_base.png",
+      "idleFile": "jeep_1_base.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "MachineGunH",
+        "aot-JeepHumvee"
+      ]
+    },
+    {
+      "id": "aot-ltnk-base",
+      "displayName": "Light Tank",
+      "file": "aot-units.yaml",
+      "queue": "Vehicle.Nod",
+      "faction": "nod",
+      "category": "vehicles",
+      "tier": 1,
+      "bpo": 40,
+      "prereqs": [
+        "aot-age1",
+        "afld"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age1",
+        "~!aot-ltnk-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 750,
+        "hp": 32000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "ltnk_base.png",
+      "idleFile": "ltnk_base.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "70mm",
+        "aot-LtnkLaser"
+      ]
+    },
+    {
+      "id": "aot-ltnk-laser",
+      "displayName": "Light Tank (Laser)",
+      "file": "aot-units.yaml",
+      "queue": "Vehicle.Nod",
+      "faction": "nod",
+      "category": "vehicles",
+      "tier": 3,
+      "bpo": 40,
+      "prereqs": [
+        "aot-age1",
+        "afld"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age1",
+        "~aot-ltnk-upgrade2"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 750,
+        "hp": 32000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "ltnk_1_base.png",
+      "idleFile": "ltnk_1_base.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "70mm",
+        "aot-LtnkLaser"
+      ]
+    },
+    {
+      "id": "aot-ltnk-tick",
+      "displayName": "Light Tank (Tick Chassis)",
+      "file": "aot-units.yaml",
+      "queue": "Vehicle.Nod",
+      "faction": "nod",
+      "category": "vehicles",
+      "tier": 2,
+      "bpo": 40,
+      "prereqs": [
+        "aot-age1",
+        "afld"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age1",
+        "~aot-ltnk-upgrade",
+        "~!aot-ltnk-upgrade2"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 750,
+        "hp": 32000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "ltnk_base.png",
+      "idleFile": "ltnk_base.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "70mm",
+        "aot-LtnkLaser"
+      ]
+    },
+    {
+      "id": "aot-mcv-age0",
+      "displayName": "Mobile Construction Vehicle",
+      "file": "aot-units.yaml",
+      "queue": "LightVehicle.GDI, LightVehicle.Nod",
+      "faction": "both",
+      "category": "vehicles",
+      "tier": 0,
+      "bpo": 6,
+      "prereqs": [
+        "lite",
+        "fix"
+      ],
+      "visibilityPrereqs": [
+        "~!aot-age1"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 3000,
+        "hp": 120000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "mcv_base.png",
+      "idleFile": "mcv_base.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-mcv-age1",
+      "displayName": "Mobile Construction Vehicle",
+      "file": "aot-units.yaml",
+      "queue": "LightVehicle.GDI, LightVehicle.Nod",
+      "faction": "both",
+      "category": "vehicles",
+      "tier": 1,
+      "bpo": 6,
+      "prereqs": [
+        "lite",
+        "fix"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age1"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 3000,
+        "hp": 120000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "mcv_ages.png",
+      "idleFile": "mcv_ages.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-msam-hover-aa",
+      "displayName": "Hover AA",
+      "file": "aot-units.yaml",
+      "queue": "Vehicle.GDI",
+      "faction": "gdi",
+      "category": "vehicles",
+      "tier": 2,
+      "bpo": 4,
+      "prereqs": [
+        "anyhq"
+      ],
+      "visibilityPrereqs": [
+        "~aot-hover-aa-upgrade",
+        "~!aot-hover-mlrs-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 900,
+        "hp": 12000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "msam_aa.png",
+      "idleFile": "msam_aa.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "aot-HoverAAGun",
+        "aot-HoverAAGun.AA"
+      ]
+    },
+    {
+      "id": "aot-msam-hover-mlrs",
+      "displayName": "Hover MLRS",
+      "file": "aot-units.yaml",
+      "queue": "Vehicle.GDI",
+      "faction": "gdi",
+      "category": "vehicles",
+      "tier": 2,
+      "bpo": 4,
+      "prereqs": [
+        "anyhq"
+      ],
+      "visibilityPrereqs": [
+        "~aot-hover-mlrs-upgrade",
+        "~!aot-hover-aa-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 900,
+        "hp": 12000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "msam_hover.png",
+      "idleFile": "msam_hover.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "aot-DestroyerRockets"
+      ]
+    },
+    {
+      "id": "aot-msub-base",
+      "displayName": "Missile Sub",
+      "file": "aot-units.yaml",
+      "queue": "Naval.Nod",
+      "faction": "nod",
+      "category": "navy",
+      "tier": 1,
+      "bpo": 20,
+      "prereqs": [
+        "aot-subpen",
+        "stec"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age1",
+        "~!aot-msub-mine-upgrade",
+        "~!aot-msub-drone-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 2000,
+        "hp": 40000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "sub_missile.png",
+      "idleFile": "sub_missile.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "aot-SubMissile",
+        "aot-SubMissileSingle"
+      ]
+    },
+    {
+      "id": "aot-msub-drone-proxy",
+      "displayName": "Drone Attack Sub",
+      "file": "aot-units.yaml",
+      "queue": "Naval.Nod",
+      "faction": "nod",
+      "category": "navy",
+      "tier": 3,
+      "bpo": 20,
+      "prereqs": [
+        "aot-subpen",
+        "stec",
+        "fix",
+        "anyhq"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age3",
+        "~aot-msub-drone-upgrade",
+        "~!aot-msub-mine-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 2000,
+        "hp": 40000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "sub_drone.png",
+      "idleFile": "sub_drone.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "aot-SubMissile",
+        "aot-SubMissileSingle"
+      ]
+    },
+    {
+      "id": "aot-msub-mine-proxy",
+      "displayName": "Mine Layer Sub",
+      "file": "aot-units.yaml",
+      "queue": "Naval.Nod",
+      "faction": "nod",
+      "category": "navy",
+      "tier": 3,
+      "bpo": 20,
+      "prereqs": [
+        "aot-subpen",
+        "stec",
+        "fix",
+        "anyhq"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age3",
+        "~aot-msub-mine-upgrade",
+        "~!aot-msub-drone-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 2000,
+        "hp": 40000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "sub_mine.png",
+      "idleFile": "sub_mine.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "aot-SubMissile",
+        "aot-SubMissileSingle"
+      ]
+    },
+    {
+      "id": "aot-mtnk-base",
+      "displayName": "Medium Tank",
+      "file": "aot-units.yaml",
+      "queue": "LightVehicle.GDI",
+      "faction": "gdi",
+      "category": "vehicles",
+      "tier": 0,
+      "bpo": 5,
+      "prereqs": [
+        "gdi-hq"
+      ],
+      "visibilityPrereqs": [
+        "~lite",
+        "~!aot-mtnk-predator-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 900,
+        "hp": 33750,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "mtnk_1_base.png",
+      "idleFile": "mtnk_1_base.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "120mm",
+        "UnitExplodeBig",
+        "aot-MtnkPredator",
+        "aot-MtnkRailgun"
+      ]
+    },
+    {
+      "id": "aot-mtnk-pred",
+      "displayName": "Medium Tank (Predator)",
+      "file": "aot-units.yaml",
+      "queue": "LightVehicle.GDI",
+      "faction": "gdi",
+      "category": "vehicles",
+      "tier": 2,
+      "bpo": 5,
+      "prereqs": [
+        "gdi-hq"
+      ],
+      "visibilityPrereqs": [
+        "~lite",
+        "~aot-mtnk-predator-upgrade",
+        "~!aot-mtnk-railgun-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 900,
+        "hp": 33750,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "mtnk_1_base.png",
+      "idleFile": "mtnk_1_base.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "120mm",
+        "UnitExplodeBig",
+        "aot-MtnkPredator",
+        "aot-MtnkRailgun"
+      ]
+    },
+    {
+      "id": "aot-mtnk-rail",
+      "displayName": "Medium Tank (Railgun)",
+      "file": "aot-units.yaml",
+      "queue": "LightVehicle.GDI",
+      "faction": "gdi",
+      "category": "vehicles",
+      "tier": 3,
+      "bpo": 5,
+      "prereqs": [
+        "gdi-hq"
+      ],
+      "visibilityPrereqs": [
+        "~lite",
+        "~aot-mtnk-railgun-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 900,
+        "hp": 33750,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "mtnk_1_base.png",
+      "idleFile": "mtnk_1_base.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "120mm",
+        "UnitExplodeBig",
+        "aot-MtnkPredator",
+        "aot-MtnkRailgun"
+      ]
+    },
+    {
+      "id": "aot-nod-radar-age0",
+      "displayName": "Radar Dome",
+      "file": "aot-structures.yaml",
+      "queue": "Building.Nod",
+      "faction": "nod",
+      "category": "main-buildings",
+      "tier": 0,
+      "bpo": 50,
+      "prereqs": [
+        "vehicleproduction"
+      ],
+      "visibilityPrereqs": [
+        "~techlevel.medium",
+        "~!aot-age1"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 1000,
+        "hp": 80000,
+        "power": -50
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "aot-nod-radar-icon.png",
+      "idleFile": "aot-nod-radar-age0-idle.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-nod-radar-age1",
+      "displayName": "Radar Dome",
+      "file": "aot-structures.yaml",
+      "queue": "Building.Nod",
+      "faction": "nod",
+      "category": "main-buildings",
+      "tier": 1,
+      "bpo": 50,
+      "prereqs": [
+        "vehicleproduction"
+      ],
+      "visibilityPrereqs": [
+        "~techlevel.medium",
+        "~aot-age1",
+        "~!aot-age2"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 1000,
+        "hp": 80000,
+        "power": -50
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "aot-nod-radar-icon.png",
+      "idleFile": "aot-nod-radar-age1-idle.png",
+      "idleLength": 12,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-nod-radar-age2",
+      "displayName": "Radar Dome",
+      "file": "aot-structures.yaml",
+      "queue": "Building.Nod",
+      "faction": "nod",
+      "category": "main-buildings",
+      "tier": 2,
+      "bpo": 50,
+      "prereqs": [
+        "vehicleproduction"
+      ],
+      "visibilityPrereqs": [
+        "~techlevel.medium",
+        "~aot-age2"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 1000,
+        "hp": 80000,
+        "power": -50
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "aot-nod-radar-age2-icon.png",
+      "idleFile": "aot-nod-radar-age0-idle.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-nuk2-age0",
+      "displayName": "Advanced Power Plant",
+      "file": "aot-structures.yaml",
+      "queue": "Building.Nod",
+      "faction": "nod",
+      "category": "main-buildings",
+      "tier": 0,
+      "bpo": 70,
+      "prereqs": [
+        "nuke"
+      ],
+      "visibilityPrereqs": [
+        "~!aot-age1"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 800,
+        "hp": 70000,
+        "power": 200
+      },
+      "sprite": "ra",
+      "customIcon": true,
+      "iconFile": "nuk2_base.png",
+      "idleFile": "nuk2-ra-idle.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-nuk2-age1",
+      "displayName": "Advanced Power Plant",
+      "file": "aot-structures.yaml",
+      "queue": "Building.Nod",
+      "faction": "nod",
+      "category": "main-buildings",
+      "tier": 1,
+      "bpo": 70,
+      "prereqs": [
+        "nuke",
+        "anyhq"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age1"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 800,
+        "hp": 70000,
+        "power": 200
+      },
+      "sprite": "ra",
+      "customIcon": true,
+      "iconFile": "nuk2_ages.png",
+      "idleFile": "nuk2-ra-idle.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-nuke-age0",
+      "displayName": "Power Plant",
+      "file": "aot-structures.yaml",
+      "queue": "Building.GDI, Building.Nod",
+      "faction": "both",
+      "category": "main-buildings",
+      "tier": 0,
+      "bpo": 10,
+      "prereqs": [
+        "fact"
+      ],
+      "visibilityPrereqs": [
+        "~!aot-age1"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 500,
+        "hp": 55000,
+        "power": 200
+      },
+      "sprite": "ra",
+      "customIcon": true,
+      "iconFile": "nuke_base.png",
+      "idleFile": "nuke-ra-idle.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-nuke-age1",
+      "displayName": "Power Plant",
+      "file": "aot-structures.yaml",
+      "queue": "Building.GDI, Building.Nod",
+      "faction": "both",
+      "category": "main-buildings",
+      "tier": 1,
+      "bpo": 10,
+      "prereqs": [
+        "fact"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age1",
+        "~!aot-nuke-turbine-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 500,
+        "hp": 55000,
+        "power": 200
+      },
+      "sprite": "ra",
+      "customIcon": true,
+      "iconFile": "nuke_ages.png",
+      "idleFile": "nuke-ra-idle.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-nuke-turbine",
+      "displayName": "Power Plant",
+      "file": "aot-structures.yaml",
+      "queue": "Building.GDI",
+      "faction": "gdi",
+      "category": "main-buildings",
+      "tier": 2,
+      "bpo": 10,
+      "prereqs": [
+        "fact"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age1",
+        "~aot-nuke-turbine-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 500,
+        "hp": 55000,
+        "power": 200
+      },
+      "sprite": "ra",
+      "customIcon": true,
+      "iconFile": "nuke_turbine.png",
+      "idleFile": "nuke-turbine-idle.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-orca-upgraded",
+      "displayName": "ORCA",
+      "file": "aot-units.yaml",
+      "queue": "Aircraft.GDI",
+      "faction": "gdi",
+      "category": "aircraft",
+      "tier": 1,
+      "bpo": 20,
+      "prereqs": [
+        "anyhq"
+      ],
+      "visibilityPrereqs": [
+        "~aot-orca-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 1200,
+        "hp": 10000,
+        "power": 0
+      },
+      "sprite": "ra",
+      "customIcon": true,
+      "iconFile": "helo_orca.png",
+      "idleFile": "helo_orca.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "OrcaAAMissiles",
+        "OrcaAGMissiles",
+        "aot-ApacheAGMissiles"
+      ]
+    },
+    {
+      "id": "aot-oret-lite",
+      "displayName": "Ore Transporter",
+      "file": "aot-units.yaml",
+      "queue": "LightVehicle.GDI, LightVehicle.Nod",
+      "faction": "both",
+      "category": "vehicles",
+      "tier": 0,
+      "bpo": 1,
+      "prereqs": [
+        "lite"
+      ],
+      "visibilityPrereqs": [],
+      "provides": [],
+      "stats": {
+        "cost": 500,
+        "hp": 50000,
+        "power": 0
+      },
+      "sprite": "ra",
+      "customIcon": true,
+      "iconFile": "oret_base.png",
+      "idleFile": "oret_base.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-pyle-age0",
+      "displayName": "Barracks",
+      "file": "aot-structures.yaml",
+      "queue": "Building.GDI",
+      "faction": "gdi",
+      "category": "main-buildings",
+      "tier": 0,
+      "bpo": 20,
+      "prereqs": [
+        "anypower"
+      ],
+      "visibilityPrereqs": [
+        "~!aot-age1"
+      ],
+      "provides": [
+        "pyle"
+      ],
+      "stats": {
+        "cost": 500,
+        "hp": 60000,
+        "power": -15
+      },
+      "sprite": "ra",
+      "customIcon": true,
+      "iconFile": "pyle_base.png",
+      "idleFile": "pyle_base.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-pyle-age1",
+      "displayName": "Barracks",
+      "file": "aot-structures.yaml",
+      "queue": "Building.GDI",
+      "faction": "gdi",
+      "category": "main-buildings",
+      "tier": 1,
+      "bpo": 20,
+      "prereqs": [
+        "anypower"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age1"
+      ],
+      "provides": [
+        "pyle"
+      ],
+      "stats": {
+        "cost": 500,
+        "hp": 60000,
+        "power": -15
+      },
+      "sprite": "ra",
+      "customIcon": true,
+      "iconFile": "pyle_ages.png",
+      "idleFile": "pyle_ages.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-rmbo-gdi",
+      "displayName": "Commando",
+      "file": "aot-units.yaml",
+      "queue": "Infantry.GDI",
+      "faction": "gdi",
+      "category": "infantry",
+      "tier": 3,
+      "bpo": 50,
+      "prereqs": [
+        "barracks"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age3"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 1500,
+        "hp": 15000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "gdi_commando.png",
+      "idleFile": "gdi_commando.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "Sniper"
+      ]
+    },
+    {
+      "id": "aot-shipyard",
+      "displayName": "Shipyard",
+      "file": "aot-structures.yaml",
+      "queue": "Building.GDI",
+      "faction": "gdi",
+      "category": "main-buildings",
+      "tier": 0,
+      "bpo": 35,
+      "prereqs": [
+        "lite"
+      ],
+      "visibilityPrereqs": [],
+      "provides": [],
+      "stats": {
+        "cost": 1000,
+        "hp": 80000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "aot-shipyard.png",
+      "idleFile": "aot-shipyard.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-spy-gdi",
+      "displayName": "Undercover Spy",
+      "file": "aot-units.yaml",
+      "queue": "Infantry.GDI",
+      "faction": "gdi",
+      "category": "infantry",
+      "tier": 0,
+      "bpo": 55,
+      "prereqs": [
+        "barracks",
+        "anyhq"
+      ],
+      "visibilityPrereqs": [],
+      "provides": [],
+      "stats": {
+        "cost": 500,
+        "hp": 3000,
+        "power": 0
+      },
+      "sprite": "ra",
+      "customIcon": true,
+      "iconFile": "gdi_spy.png",
+      "idleFile": "gdi_spy.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-spy-nod",
+      "displayName": "Chameleon Spy",
+      "file": "aot-units.yaml",
+      "queue": "Infantry.Nod",
+      "faction": "nod",
+      "category": "infantry",
+      "tier": 1,
+      "bpo": 55,
+      "prereqs": [
+        "hand",
+        "anyhq"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age1"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 700,
+        "hp": 3000,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "nod_spy.png",
+      "idleFile": "nod_spy.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-stec-age0",
+      "displayName": "Tech Center",
+      "file": "aot-structures.yaml",
+      "queue": "Building.Nod",
+      "faction": "nod",
+      "category": "main-buildings",
+      "tier": 0,
+      "bpo": 101,
+      "prereqs": [
+        "anypower",
+        "anyhq"
+      ],
+      "visibilityPrereqs": [
+        "~!aot-age1"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 1500,
+        "hp": 60000,
+        "power": -200
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "stec_base.png",
+      "idleFile": "stec-idle.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-stec-age1",
+      "displayName": "Tech Center",
+      "file": "aot-structures.yaml",
+      "queue": "Building.Nod",
+      "faction": "nod",
+      "category": "main-buildings",
+      "tier": 1,
+      "bpo": 101,
+      "prereqs": [
+        "anypower",
+        "anyhq",
+        "!aot-stec"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age1"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 1500,
+        "hp": 60000,
+        "power": -200
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "stec_age_1.png",
+      "idleFile": "stec-td-idle.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-sub-base",
+      "displayName": "Attack Submarine",
+      "file": "aot-units.yaml",
+      "queue": "Naval.Nod",
+      "faction": "nod",
+      "category": "navy",
+      "tier": 0,
+      "bpo": 10,
+      "prereqs": [
+        "aot-subpen"
+      ],
+      "visibilityPrereqs": [
+        "~!aot-sub-cargo-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 800,
+        "hp": 20000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "sub_base.png",
+      "idleFile": "sub_base.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "aot-SubTorpedo"
+      ]
+    },
+    {
+      "id": "aot-sub-cargo-proxy",
+      "displayName": "Attack Submarine (Pax)",
+      "file": "aot-units.yaml",
+      "queue": "Naval.Nod",
+      "faction": "nod",
+      "category": "navy",
+      "tier": 2,
+      "bpo": 10,
+      "prereqs": [
+        "aot-subpen"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age2",
+        "~aot-sub-cargo-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 800,
+        "hp": 20000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "sub_cargo.png",
+      "idleFile": "sub_cargo.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "aot-SubTorpedo"
+      ]
+    },
+    {
+      "id": "aot-subpen",
+      "displayName": "Submarine Pen",
+      "file": "aot-structures.yaml",
+      "queue": "Building.Nod",
+      "faction": "nod",
+      "category": "main-buildings",
+      "tier": 0,
+      "bpo": 35,
+      "prereqs": [
+        "lite"
+      ],
+      "visibilityPrereqs": [],
+      "provides": [
+        "aot-subpen"
+      ],
+      "stats": {
+        "cost": 1000,
+        "hp": 80000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "aot-subpen.png",
+      "idleFile": "aot-subpen.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-transport-base",
+      "displayName": "Transport Vessel",
+      "file": "aot-units.yaml",
+      "queue": "Naval.Nod",
+      "faction": "nod",
+      "category": "navy",
+      "tier": 0,
+      "bpo": 20,
+      "prereqs": [],
+      "visibilityPrereqs": [
+        "~!aot-transport-gun-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 900,
+        "hp": 40000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "aot-transport-icon.png",
+      "idleFile": "aot-transport-icon.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "aot-GunboatGun"
+      ]
+    },
+    {
+      "id": "aot-transport-gun-proxy",
+      "displayName": "Armed Transport Vessel",
+      "file": "aot-units.yaml",
+      "queue": "Naval.Nod",
+      "faction": "nod",
+      "category": "navy",
+      "tier": 1,
+      "bpo": 20,
+      "prereqs": [],
+      "visibilityPrereqs": [
+        "~aot-transport-gun-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 900,
+        "hp": 40000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "vesl_gun.png",
+      "idleFile": "vesl_gun.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "aot-GunboatGun"
+      ]
+    },
+    {
+      "id": "aot-transport-hover-proxy",
+      "displayName": "Hovercraft Transport",
+      "file": "aot-units.yaml",
+      "queue": "Naval.GDI",
+      "faction": "gdi",
+      "category": "navy",
+      "tier": 0,
+      "bpo": 20,
+      "prereqs": [
+        "aot-shipyard",
+        "fix"
+      ],
+      "visibilityPrereqs": [
+        "~aot-shipyard"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 1200,
+        "hp": 40000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "vesl_hover.png",
+      "idleFile": "vesl_hover.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": []
+    },
+    {
+      "id": "aot-ttnk-base",
+      "displayName": "Ttnk Base",
+      "file": "aot-units.yaml",
+      "queue": "LightVehicle.Nod",
+      "faction": "nod",
+      "category": "vehicles",
+      "tier": 0,
+      "bpo": 2,
+      "prereqs": [
+        "lite"
+      ],
+      "visibilityPrereqs": [
+        "~!aot-ttnk-flame-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 600,
+        "hp": 28000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "ttnk_base.png",
+      "idleFile": "ttnk_base.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "BigFlamer",
+        "FlametankExplode",
+        "aot-TtnkChemspray",
+        "aot-TtnkDual"
+      ]
+    },
+    {
+      "id": "aot-ttnk-cloak",
+      "displayName": "Ttnk Cloak",
+      "file": "aot-units.yaml",
+      "queue": "LightVehicle.Nod",
+      "faction": "nod",
+      "category": "vehicles",
+      "tier": 2,
+      "bpo": 2,
+      "prereqs": [
+        "lite"
+      ],
+      "visibilityPrereqs": [
+        "~aot-ttnk-cloak-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 600,
+        "hp": 28000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "ttnk_cloak.png",
+      "idleFile": "ttnk_cloak.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "BigFlamer",
+        "FlametankExplode",
+        "aot-TtnkChemspray",
+        "aot-TtnkDual"
+      ]
+    },
+    {
+      "id": "aot-ttnk-flame",
+      "displayName": "Ttnk Flame",
+      "file": "aot-units.yaml",
+      "queue": "LightVehicle.Nod",
+      "faction": "nod",
+      "category": "vehicles",
+      "tier": 1,
+      "bpo": 2,
+      "prereqs": [
+        "lite"
+      ],
+      "visibilityPrereqs": [
+        "~aot-ttnk-flame-upgrade",
+        "~!aot-ttnk-toxin-upgrade",
+        "~!aot-ttnk-cloak-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 600,
+        "hp": 28000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "ttnk_flame.png",
+      "idleFile": "ttnk_flame.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "BigFlamer",
+        "FlametankExplode",
+        "aot-TtnkChemspray",
+        "aot-TtnkDual"
+      ]
+    },
+    {
+      "id": "aot-ttnk-toxin",
+      "displayName": "Ttnk Toxin",
+      "file": "aot-units.yaml",
+      "queue": "LightVehicle.Nod",
+      "faction": "nod",
+      "category": "vehicles",
+      "tier": 2,
+      "bpo": 2,
+      "prereqs": [
+        "lite"
+      ],
+      "visibilityPrereqs": [
+        "~aot-ttnk-toxin-upgrade"
+      ],
+      "provides": [],
+      "stats": {
+        "cost": 600,
+        "hp": 28000,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": true,
+      "iconFile": "ttnk_gas.png",
+      "idleFile": "ttnk_gas.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": true,
+      "weapons": [
+        "BigFlamer",
+        "FlametankExplode",
+        "aot-TtnkChemspray",
+        "aot-TtnkDual"
+      ]
+    },
+    {
+      "id": "aot-upgrade-apc",
+      "displayName": "APC Upgrade",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.GDI",
+      "faction": "gdi",
+      "category": "upgrades",
+      "tier": 1,
+      "bpo": 31,
+      "prereqs": [
+        "lite",
+        "aot-age1",
+        "fix"
+      ],
+      "visibilityPrereqs": [
+        "~atec",
+        "~pyle",
+        "~aot-age1",
+        "~!aot-humvee-upgrade"
+      ],
+      "provides": [
+        "aot-apc-upgrade"
+      ],
+      "stats": {
+        "cost": 200,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-upgrade-apc2",
+      "displayName": "Amphibious APC Upgrade",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.GDI",
+      "faction": "gdi",
+      "category": "upgrades",
+      "tier": 2,
+      "bpo": 32,
+      "prereqs": [
+        "lite",
+        "aot-age2",
+        "aot-apc-upgrade"
+      ],
+      "visibilityPrereqs": [
+        "~atec",
+        "~pyle",
+        "~aot-age2",
+        "~!aot-humvee-upgrade"
+      ],
+      "provides": [
+        "aot-amphibious-upgrade"
+      ],
+      "stats": {
+        "cost": 300,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-upgrade-cruiser-carrier",
+      "displayName": "Heli Carrier",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.GDI",
+      "faction": "gdi",
+      "category": "upgrades",
+      "tier": 3,
+      "bpo": 22,
+      "prereqs": [
+        "aot-age3",
+        "aot-shipyard",
+        "atec"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age3",
+        "~!aot-cruiser-railgun-upgrade"
+      ],
+      "provides": [
+        "aot-cruiser-carrier-upgrade"
+      ],
+      "stats": {
+        "cost": 2000,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "crus_carrier.png",
+      "idleFile": "crus_carrier.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-upgrade-cruiser-railgun",
+      "displayName": "Cruiser Railguns",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.GDI",
+      "faction": "gdi",
+      "category": "upgrades",
+      "tier": 3,
+      "bpo": 21,
+      "prereqs": [
+        "aot-age3",
+        "aot-shipyard",
+        "atec"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age3",
+        "~!aot-cruiser-carrier-upgrade"
+      ],
+      "provides": [
+        "aot-cruiser-railgun-upgrade"
+      ],
+      "stats": {
+        "cost": 2000,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "crus_railgun.png",
+      "idleFile": "crus_railgun.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-upgrade-e4-toxic",
+      "displayName": "Toxic Trooper",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.Nod",
+      "faction": "nod",
+      "category": "upgrades",
+      "tier": 3,
+      "bpo": 12,
+      "prereqs": [
+        "aot-age3"
+      ],
+      "visibilityPrereqs": [
+        "~stec",
+        "~aot-age3"
+      ],
+      "provides": [
+        "aot-e4-toxic-upgrade"
+      ],
+      "stats": {
+        "cost": 400,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-upgrade-gunboat-destroyer",
+      "displayName": "Destroyer Enhancement",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.GDI",
+      "faction": "gdi",
+      "category": "upgrades",
+      "tier": 2,
+      "bpo": 32,
+      "prereqs": [
+        "aot-age2",
+        "aot-shipyard",
+        "fix",
+        "aot-gunboat-frigate-upgrade"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age2",
+        "~!aot-gunboat-upgrade"
+      ],
+      "provides": [
+        "aot-gunboat-upgrade"
+      ],
+      "stats": {
+        "cost": 1500,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "gun_destroyer.png",
+      "idleFile": "gun_destroyer.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-upgrade-gunboat-frigate",
+      "displayName": "Frigate Enhancement",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.GDI",
+      "faction": "gdi",
+      "category": "upgrades",
+      "tier": 1,
+      "bpo": 31,
+      "prereqs": [
+        "aot-age1",
+        "aot-shipyard",
+        "fix"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age1",
+        "~!aot-gunboat-frigate-upgrade"
+      ],
+      "provides": [
+        "aot-gunboat-frigate-upgrade"
+      ],
+      "stats": {
+        "cost": 800,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "gun_frigate.png",
+      "idleFile": "gun_frigate.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-upgrade-harpy",
+      "displayName": "Harpy Upgrade",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.Nod",
+      "faction": "nod",
+      "category": "upgrades",
+      "tier": 2,
+      "bpo": 40,
+      "prereqs": [
+        "anyhq",
+        "hpad",
+        "aot-age2"
+      ],
+      "visibilityPrereqs": [
+        "~stec",
+        "~hpad",
+        "~aot-age2"
+      ],
+      "provides": [
+        "aot-harpy-upgrade"
+      ],
+      "stats": {
+        "cost": 300,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "ra",
+      "customIcon": true,
+      "iconFile": "hind_hrpy.png",
+      "idleFile": "hind_hrpy.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-upgrade-hover-aa",
+      "displayName": "Hover AA Upgrade",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.GDI",
+      "faction": "gdi",
+      "category": "upgrades",
+      "tier": 2,
+      "bpo": 52,
+      "prereqs": [
+        "anyhq",
+        "aot-age2"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age2",
+        "~!aot-hover-mlrs-upgrade"
+      ],
+      "provides": [
+        "aot-hover-aa-upgrade"
+      ],
+      "stats": {
+        "cost": 400,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "msam_aa.png",
+      "idleFile": "msam_aa.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-upgrade-hover-mlrs",
+      "displayName": "Hover MLRS Upgrade",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.GDI",
+      "faction": "gdi",
+      "category": "upgrades",
+      "tier": 2,
+      "bpo": 51,
+      "prereqs": [
+        "anyhq",
+        "aot-age2"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age2",
+        "~!aot-hover-aa-upgrade"
+      ],
+      "provides": [
+        "aot-hover-mlrs-upgrade"
+      ],
+      "stats": {
+        "cost": 400,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "msam_hover.png",
+      "idleFile": "msam_hover.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-upgrade-htnk-railgun",
+      "displayName": "Dual-Railgun Upgrade",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.GDI",
+      "faction": "gdi",
+      "category": "upgrades",
+      "tier": 3,
+      "bpo": 25,
+      "prereqs": [
+        "aot-age3",
+        "atec"
+      ],
+      "visibilityPrereqs": [
+        "~aot-weap",
+        "~aot-age3"
+      ],
+      "provides": [
+        "aot-htnk-railgun-upgrade"
+      ],
+      "stats": {
+        "cost": 1500,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-upgrade-htnk-rocket",
+      "displayName": "Rocket Upgrade",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.GDI",
+      "faction": "gdi",
+      "category": "upgrades",
+      "tier": 2,
+      "bpo": 7,
+      "prereqs": [
+        "aot-age2",
+        "atec"
+      ],
+      "visibilityPrereqs": [
+        "~aot-weap",
+        "~aot-age2"
+      ],
+      "provides": [
+        "aot-htnk-rocket-upgrade"
+      ],
+      "stats": {
+        "cost": 750,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-upgrade-humvee",
+      "displayName": "HUMVEE Upgrade",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.GDI",
+      "faction": "gdi",
+      "category": "upgrades",
+      "tier": 1,
+      "bpo": 30,
+      "prereqs": [
+        "lite",
+        "aot-age1",
+        "fix"
+      ],
+      "visibilityPrereqs": [
+        "~atec",
+        "~pyle",
+        "~aot-age1",
+        "~!aot-apc-upgrade"
+      ],
+      "provides": [
+        "aot-humvee-upgrade"
+      ],
+      "stats": {
+        "cost": 100,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-upgrade-ion-cannon",
+      "displayName": "Ion Cannon Uplink",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.GDI",
+      "faction": "gdi",
+      "category": "upgrades",
+      "tier": 3,
+      "bpo": 5,
+      "prereqs": [
+        "aot-age3"
+      ],
+      "visibilityPrereqs": [
+        "~atec",
+        "~gdi-hq",
+        "~aot-age3"
+      ],
+      "provides": [
+        "aot-ion-cannon-upgrade"
+      ],
+      "stats": {
+        "cost": 1500,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-upgrade-ltnk",
+      "displayName": "Light Tank Laser Upgrade",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.Nod",
+      "faction": "nod",
+      "category": "upgrades",
+      "tier": 3,
+      "bpo": 11,
+      "prereqs": [
+        "aot-age3"
+      ],
+      "visibilityPrereqs": [
+        "~stec",
+        "~aot-age3",
+        "~afld"
+      ],
+      "provides": [
+        "aot-ltnk-upgrade2"
+      ],
+      "stats": {
+        "cost": 200,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-upgrade-ltnk-tick",
+      "displayName": "Tick Tank Chassis",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.Nod",
+      "faction": "nod",
+      "category": "upgrades",
+      "tier": 2,
+      "bpo": 10,
+      "prereqs": [
+        "aot-age2",
+        "fix"
+      ],
+      "visibilityPrereqs": [
+        "~stec",
+        "~aot-age2",
+        "~afld"
+      ],
+      "provides": [
+        "aot-ltnk-upgrade"
+      ],
+      "stats": {
+        "cost": 300,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-upgrade-msub-drone",
+      "displayName": "Drone Attack Upgrade",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.Nod",
+      "faction": "nod",
+      "category": "upgrades",
+      "tier": 3,
+      "bpo": 55,
+      "prereqs": [
+        "aot-subpen",
+        "stec",
+        "fix",
+        "anyhq"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age3",
+        "~!aot-msub-mine-upgrade"
+      ],
+      "provides": [
+        "aot-msub-drone-upgrade"
+      ],
+      "stats": {
+        "cost": 700,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "sub_drone.png",
+      "idleFile": "sub_drone.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-upgrade-msub-mine",
+      "displayName": "Mine Layer Upgrade",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.Nod",
+      "faction": "nod",
+      "category": "upgrades",
+      "tier": 3,
+      "bpo": 50,
+      "prereqs": [
+        "aot-subpen",
+        "stec",
+        "fix",
+        "anyhq"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age3",
+        "~!aot-msub-drone-upgrade"
+      ],
+      "provides": [
+        "aot-msub-mine-upgrade"
+      ],
+      "stats": {
+        "cost": 500,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "sub_mine.png",
+      "idleFile": "sub_mine.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-upgrade-mtnk-predator",
+      "displayName": "Predator Upgrade",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.GDI",
+      "faction": "gdi",
+      "category": "upgrades",
+      "tier": 2,
+      "bpo": 20,
+      "prereqs": [
+        "aot-age2"
+      ],
+      "visibilityPrereqs": [
+        "~atec",
+        "~lite",
+        "~techlevel.medium",
+        "~aot-age2"
+      ],
+      "provides": [
+        "aot-mtnk-predator-upgrade"
+      ],
+      "stats": {
+        "cost": 500,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-upgrade-mtnk-railgun",
+      "displayName": "Railgun Upgrade",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.GDI",
+      "faction": "gdi",
+      "category": "upgrades",
+      "tier": 3,
+      "bpo": 21,
+      "prereqs": [
+        "aot-mtnk-predator-upgrade",
+        "aot-age3"
+      ],
+      "visibilityPrereqs": [
+        "~atec",
+        "~lite",
+        "~techlevel.medium",
+        "~aot-mtnk-predator-upgrade",
+        "~aot-age3"
+      ],
+      "provides": [
+        "aot-mtnk-railgun-upgrade"
+      ],
+      "stats": {
+        "cost": 1000,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "ts",
+      "customIcon": false,
+      "iconFile": null,
+      "idleFile": null,
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-upgrade-nuke-turbine",
+      "displayName": "Turbine Technology Upgrade",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.GDI",
+      "faction": "gdi",
+      "category": "upgrades",
+      "tier": 2,
+      "bpo": 15,
+      "prereqs": [
+        "anypower",
+        "aot-age2"
+      ],
+      "visibilityPrereqs": [
+        "~atec",
+        "~anypower",
+        "~aot-age2"
+      ],
+      "provides": [
+        "aot-nuke-turbine-upgrade"
+      ],
+      "stats": {
+        "cost": 600,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "nuke_turbine.png",
+      "idleFile": "nuke_turbine.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-upgrade-orca",
+      "displayName": "ORCA Upgrade",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.GDI",
+      "faction": "gdi",
+      "category": "upgrades",
+      "tier": 1,
+      "bpo": 40,
+      "prereqs": [
+        "anyhq",
+        "hpad",
+        "aot-age1"
+      ],
+      "visibilityPrereqs": [
+        "~atec",
+        "~hpad",
+        "~aot-age1"
+      ],
+      "provides": [
+        "aot-orca-upgrade"
+      ],
+      "stats": {
+        "cost": 300,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "helo_orca.png",
+      "idleFile": "helo_orca.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-upgrade-sub-cargo",
+      "displayName": "Passenger Upgrade",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.Nod",
+      "faction": "nod",
+      "category": "upgrades",
+      "tier": 2,
+      "bpo": 45,
+      "prereqs": [
+        "aot-subpen",
+        "hand"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age2",
+        "~!aot-sub-cargo-upgrade"
+      ],
+      "provides": [
+        "aot-sub-cargo-upgrade"
+      ],
+      "stats": {
+        "cost": 400,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "sub_cargo.png",
+      "idleFile": "sub_cargo.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-upgrade-transport-gun",
+      "displayName": "Vessel Gun Upgrade",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.Nod",
+      "faction": "nod",
+      "category": "upgrades",
+      "tier": 1,
+      "bpo": 46,
+      "prereqs": [
+        "aot-age1",
+        "fix",
+        "aot-subpen"
+      ],
+      "visibilityPrereqs": [
+        "~aot-age1",
+        "~aot-subpen",
+        "~!aot-transport-gun-upgrade"
+      ],
+      "provides": [
+        "aot-transport-gun-upgrade"
+      ],
+      "stats": {
+        "cost": 600,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "vesl_gun.png",
+      "idleFile": "vesl_gun.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-upgrade-ttnk",
+      "displayName": "Flame Tank Upgrade",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.Nod",
+      "faction": "nod",
+      "category": "upgrades",
+      "tier": 1,
+      "bpo": 10,
+      "prereqs": [
+        "aot-age1",
+        "stec"
+      ],
+      "visibilityPrereqs": [
+        "~stec",
+        "~aot-age1"
+      ],
+      "provides": [
+        "aot-ttnk-flame-upgrade"
+      ],
+      "stats": {
+        "cost": 500,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "ttnk_flame.png",
+      "idleFile": "ttnk_flame.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-upgrade-ttnk-cloak",
+      "displayName": "Stealth Upgrade",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.Nod",
+      "faction": "nod",
+      "category": "upgrades",
+      "tier": 2,
+      "bpo": 12,
+      "prereqs": [
+        "aot-age2",
+        "stec",
+        "aot-ttnk-flame-upgrade"
+      ],
+      "visibilityPrereqs": [
+        "~stec",
+        "~aot-age2",
+        "~!aot-ttnk-toxin-upgrade"
+      ],
+      "provides": [
+        "aot-ttnk-cloak-upgrade"
+      ],
+      "stats": {
+        "cost": 500,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "ttnk_cloak.png",
+      "idleFile": "ttnk_cloak.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    },
+    {
+      "id": "aot-upgrade-ttnk-toxin",
+      "displayName": "Toxin Tank Upgrade",
+      "file": "aot-structures.yaml",
+      "queue": "Upgrade.Nod",
+      "faction": "nod",
+      "category": "upgrades",
+      "tier": 2,
+      "bpo": 11,
+      "prereqs": [
+        "aot-age2",
+        "stec",
+        "aot-ttnk-flame-upgrade"
+      ],
+      "visibilityPrereqs": [
+        "~stec",
+        "~aot-age2",
+        "~!aot-ttnk-cloak-upgrade"
+      ],
+      "provides": [
+        "aot-ttnk-toxin-upgrade"
+      ],
+      "stats": {
+        "cost": 600,
+        "hp": null,
+        "power": 0
+      },
+      "sprite": "td",
+      "customIcon": true,
+      "iconFile": "ttnk_gas.png",
+      "idleFile": "ttnk_gas.png",
+      "idleLength": 1,
+      "notBuildable": false,
+      "isProxy": false,
+      "weapons": []
+    }
+  ],
+  "weapons": [
+    {
+      "id": "aot-satellite-launch",
+      "displayName": "aot-satellite-launch",
+      "category": "weapons",
+      "faction": "gdi",
+      "inherits": "",
+      "usedBy": [],
+      "stats": {
+        "damage": null,
+        "range": null,
+        "burst": 1,
+        "burstDelays": "",
+        "reloadDelay": null
+      }
+    },
+    {
+      "id": "aot-JeepHumvee",
+      "displayName": "aot-JeepHumvee",
+      "category": "weapons",
+      "faction": "gdi",
+      "inherits": "MachineGunH",
+      "usedBy": [
+        "APC",
+        "aot-apc-amphibious",
+        "aot-jeep-base",
+        "aot-jeep-humvee"
+      ],
+      "stats": {
+        "damage": 1500,
+        "range": null,
+        "burst": 1,
+        "burstDelays": "",
+        "reloadDelay": null
+      }
+    },
+    {
+      "id": "aot-MtnkPredator",
+      "displayName": "aot-MtnkPredator",
+      "category": "weapons",
+      "faction": "gdi",
+      "inherits": "^BallisticWeapon",
+      "usedBy": [
+        "aot-mtnk-base",
+        "aot-mtnk-pred",
+        "aot-mtnk-rail"
+      ],
+      "stats": {
+        "damage": null,
+        "range": null,
+        "burst": 1,
+        "burstDelays": "",
+        "reloadDelay": 25
+      }
+    },
+    {
+      "id": "aot-MtnkRailgun",
+      "displayName": "aot-MtnkRailgun",
+      "category": "weapons",
+      "faction": "gdi",
+      "inherits": "",
+      "usedBy": [
+        "aot-mtnk-base",
+        "aot-mtnk-pred",
+        "aot-mtnk-rail"
+      ],
+      "stats": {
+        "damage": 6000,
+        "range": 6.0,
+        "burst": 1,
+        "burstDelays": "",
+        "reloadDelay": 50
+      }
+    },
+    {
+      "id": "aot-HtnkLaser",
+      "displayName": "aot-HtnkLaser",
+      "category": "weapons",
+      "faction": "gdi",
+      "inherits": "",
+      "usedBy": [
+        "aot-htnk-base",
+        "aot-htnk-laser",
+        "aot-htnk-rocket"
+      ],
+      "stats": {
+        "damage": 8000,
+        "range": 6.0,
+        "burst": 2,
+        "burstDelays": "8",
+        "reloadDelay": 50
+      }
+    },
+    {
+      "id": "aot-LtnkLaser",
+      "displayName": "aot-LtnkLaser",
+      "category": "weapons",
+      "faction": "nod",
+      "inherits": "",
+      "usedBy": [
+        "aot-ltnk-base",
+        "aot-ltnk-laser",
+        "aot-ltnk-tick"
+      ],
+      "stats": {
+        "damage": 4000,
+        "range": 6.0,
+        "burst": 3,
+        "burstDelays": "",
+        "reloadDelay": 60
+      }
+    },
+    {
+      "id": "OrcaAGMissiles",
+      "displayName": "OrcaAGMissiles",
+      "category": "weapons",
+      "faction": "gdi",
+      "inherits": "",
+      "usedBy": [
+        "aot-apache-base",
+        "aot-orca-upgraded"
+      ],
+      "stats": {
+        "damage": 2000,
+        "range": null,
+        "burst": 1,
+        "burstDelays": "",
+        "reloadDelay": null
+      }
+    },
+    {
+      "id": "aot-ApacheAGMissiles",
+      "displayName": "aot-ApacheAGMissiles",
+      "category": "weapons",
+      "faction": "both",
+      "inherits": "OrcaAGMissiles",
+      "usedBy": [
+        "aot-apache-base",
+        "aot-orca-upgraded"
+      ],
+      "stats": {
+        "damage": 2000,
+        "range": null,
+        "burst": 1,
+        "burstDelays": "",
+        "reloadDelay": null
+      }
+    },
+    {
+      "id": "aot-HindAGGun",
+      "displayName": "aot-HindAGGun",
+      "category": "weapons",
+      "faction": "nod",
+      "inherits": "HeliAGGun",
+      "usedBy": [
+        "aot-harpy-upgraded",
+        "aot-hind-base"
+      ],
+      "stats": {
+        "damage": 1500,
+        "range": null,
+        "burst": 2,
+        "burstDelays": "0",
+        "reloadDelay": 40
+      }
+    },
+    {
+      "id": "aot-HarpyAGGun",
+      "displayName": "aot-HarpyAGGun",
+      "category": "weapons",
+      "faction": "nod",
+      "inherits": "HeliAGGun",
+      "usedBy": [
+        "aot-harpy-upgraded",
+        "aot-hind-base"
+      ],
+      "stats": {
+        "damage": 2000,
+        "range": null,
+        "burst": 2,
+        "burstDelays": "0",
+        "reloadDelay": 20
+      }
+    },
+    {
+      "id": "aot-AjetVulcan",
+      "displayName": "aot-AjetVulcan",
+      "category": "weapons",
+      "faction": "gdi",
+      "inherits": "Vulcan",
+      "usedBy": [
+        "AJET"
+      ],
+      "stats": {
+        "damage": null,
+        "range": 5.0,
+        "burst": 1,
+        "burstDelays": "",
+        "reloadDelay": null
+      }
+    },
+    {
+      "id": "aot-AjetNapalm",
+      "displayName": "aot-AjetNapalm",
+      "category": "weapons",
+      "faction": "gdi",
+      "inherits": "^FlameWeapon",
+      "usedBy": [
+        "AJET"
+      ],
+      "stats": {
+        "damage": 2250,
+        "range": 5.0,
+        "burst": 5,
+        "burstDelays": "1",
+        "reloadDelay": 4
+      }
+    },
+    {
+      "id": "aot-TtnkDual",
+      "displayName": "aot-TtnkDual",
+      "category": "weapons",
+      "faction": "nod",
+      "inherits": "^BallisticWeapon",
+      "usedBy": [
+        "aot-ttnk-base",
+        "aot-ttnk-cloak",
+        "aot-ttnk-flame",
+        "aot-ttnk-toxin"
+      ],
+      "stats": {
+        "damage": 2000,
+        "range": null,
+        "burst": 2,
+        "burstDelays": "8",
+        "reloadDelay": null
+      }
+    },
+    {
+      "id": "aot-TtnkChemspray",
+      "displayName": "aot-TtnkChemspray",
+      "category": "weapons",
+      "faction": "nod",
+      "inherits": "Chemspray",
+      "usedBy": [
+        "aot-ttnk-base",
+        "aot-ttnk-cloak",
+        "aot-ttnk-flame",
+        "aot-ttnk-toxin"
+      ],
+      "stats": {
+        "damage": null,
+        "range": null,
+        "burst": 2,
+        "burstDelays": "10",
+        "reloadDelay": null
+      }
+    },
+    {
+      "id": "aot-TtnkTick",
+      "displayName": "aot-TtnkTick",
+      "category": "weapons",
+      "faction": "nod",
+      "inherits": "^BallisticWeapon",
+      "usedBy": [],
+      "stats": {
+        "damage": 5000,
+        "range": null,
+        "burst": 1,
+        "burstDelays": "",
+        "reloadDelay": null
+      }
+    },
+    {
+      "id": "aot-CyborgChainGun",
+      "displayName": "aot-CyborgChainGun",
+      "category": "weapons",
+      "faction": "both",
+      "inherits": "MachineGun",
+      "usedBy": [
+        "aot-cyborg"
+      ],
+      "stats": {
+        "damage": 1000,
+        "range": 5.0,
+        "burst": 3,
+        "burstDelays": "4",
+        "reloadDelay": 30
+      }
+    },
+    {
+      "id": "aot-CyCannon",
+      "displayName": "aot-CyCannon",
+      "category": "weapons",
+      "faction": "both",
+      "inherits": "",
+      "usedBy": [
+        "aot-cyc2"
+      ],
+      "stats": {
+        "damage": 6000,
+        "range": 7.0,
+        "burst": 1,
+        "burstDelays": "",
+        "reloadDelay": 50
+      }
+    },
+    {
+      "id": "aot-CyborgCrippleEffect",
+      "displayName": "aot-CyborgCrippleEffect",
+      "category": "weapons",
+      "faction": "both",
+      "inherits": "",
+      "usedBy": [
+        "aot-cyborg"
+      ],
+      "stats": {
+        "damage": null,
+        "range": null,
+        "burst": 1,
+        "burstDelays": "",
+        "reloadDelay": null
+      }
+    },
+    {
+      "id": "aot-GunboatGun",
+      "displayName": "aot-GunboatGun",
+      "category": "weapons",
+      "faction": "gdi",
+      "inherits": "^BallisticWeapon",
+      "usedBy": [
+        "aot-gunboat-base",
+        "aot-gunboat-destroyer",
+        "aot-gunboat-frigate",
+        "aot-transport-base",
+        "aot-transport-gun-proxy"
+      ],
+      "stats": {
+        "damage": 2500,
+        "range": 7.0,
+        "burst": 1,
+        "burstDelays": "",
+        "reloadDelay": 60
+      }
+    },
+    {
+      "id": "aot-FrigateMissiles",
+      "displayName": "aot-FrigateMissiles",
+      "category": "weapons",
+      "faction": "both",
+      "inherits": "BoatMissile",
+      "usedBy": [
+        "aot-gunboat-base",
+        "aot-gunboat-destroyer",
+        "aot-gunboat-frigate"
+      ],
+      "stats": {
+        "damage": 4000,
+        "range": 8.0,
+        "burst": 3,
+        "burstDelays": "12",
+        "reloadDelay": 50
+      }
+    },
+    {
+      "id": "aot-DestroyerRockets",
+      "displayName": "aot-DestroyerRockets",
+      "category": "weapons",
+      "faction": "both",
+      "inherits": "BoatMissile",
+      "usedBy": [
+        "aot-gunboat-base",
+        "aot-gunboat-destroyer",
+        "aot-gunboat-frigate",
+        "aot-msam-hover-mlrs"
+      ],
+      "stats": {
+        "damage": 9000,
+        "range": 9.0,
+        "burst": 2,
+        "burstDelays": "8",
+        "reloadDelay": 30
+      }
+    },
+    {
+      "id": "aot-DepthCharge",
+      "displayName": "aot-DepthCharge",
+      "category": "weapons",
+      "faction": "both",
+      "inherits": "^BallisticWeapon",
+      "usedBy": [
+        "aot-gunboat-base",
+        "aot-gunboat-destroyer",
+        "aot-gunboat-frigate"
+      ],
+      "stats": {
+        "damage": 6000,
+        "range": 5.0,
+        "burst": 1,
+        "burstDelays": "",
+        "reloadDelay": 60
+      }
+    },
+    {
+      "id": "aot-SubTorpedo",
+      "displayName": "aot-SubTorpedo",
+      "category": "weapons",
+      "faction": "nod",
+      "inherits": "^BallisticWeapon",
+      "usedBy": [
+        "aot-sub-base",
+        "aot-sub-cargo-proxy"
+      ],
+      "stats": {
+        "damage": 12000,
+        "range": 9.0,
+        "burst": 2,
+        "burstDelays": "15",
+        "reloadDelay": 100
+      }
+    },
+    {
+      "id": "aot-SubMissile",
+      "displayName": "aot-SubMissile",
+      "category": "weapons",
+      "faction": "nod",
+      "inherits": "^BallisticWeapon",
+      "usedBy": [
+        "aot-msub-base",
+        "aot-msub-drone-proxy",
+        "aot-msub-mine-proxy"
+      ],
+      "stats": {
+        "damage": 2500,
+        "range": 20.0,
+        "burst": 2,
+        "burstDelays": "15",
+        "reloadDelay": 300
+      }
+    },
+    {
+      "id": "aot-SubMissileSingle",
+      "displayName": "aot-SubMissileSingle",
+      "category": "weapons",
+      "faction": "nod",
+      "inherits": "aot-SubMissile",
+      "usedBy": [
+        "aot-msub-base",
+        "aot-msub-drone-proxy",
+        "aot-msub-mine-proxy"
+      ],
+      "stats": {
+        "damage": null,
+        "range": null,
+        "burst": 1,
+        "burstDelays": "",
+        "reloadDelay": null
+      }
+    },
+    {
+      "id": "aot-SeaMineExplosion",
+      "displayName": "aot-SeaMineExplosion",
+      "category": "weapons",
+      "faction": "gdi",
+      "inherits": "^BallisticWeapon",
+      "usedBy": [],
+      "stats": {
+        "damage": 60000,
+        "range": 1.0,
+        "burst": 1,
+        "burstDelays": "",
+        "reloadDelay": null
+      }
+    },
+    {
+      "id": "aot-CruiserRailgun",
+      "displayName": "aot-CruiserRailgun",
+      "category": "weapons",
+      "faction": "gdi",
+      "inherits": "",
+      "usedBy": [
+        "aot-cruiser",
+        "aot-cruiser-carrier-proxy",
+        "aot-cruiser-railgun-proxy"
+      ],
+      "stats": {
+        "damage": 4000,
+        "range": 15.0,
+        "burst": 2,
+        "burstDelays": "8",
+        "reloadDelay": 80
+      }
+    },
+    {
+      "id": "aot-8Inch",
+      "displayName": "aot-8Inch",
+      "category": "weapons",
+      "faction": "both",
+      "inherits": "^BallisticWeapon",
+      "usedBy": [
+        "aot-cruiser",
+        "aot-cruiser-carrier-proxy",
+        "aot-cruiser-railgun-proxy"
+      ],
+      "stats": {
+        "damage": 2500,
+        "range": 20.0,
+        "burst": 2,
+        "burstDelays": "5",
+        "reloadDelay": 250
+      }
+    },
+    {
+      "id": "aot-DroneLaser",
+      "displayName": "aot-DroneLaser",
+      "category": "weapons",
+      "faction": "both",
+      "inherits": "",
+      "usedBy": [],
+      "stats": {
+        "damage": 4000,
+        "range": 3.0,
+        "burst": 1,
+        "burstDelays": "",
+        "reloadDelay": 35
+      }
+    },
+    {
+      "id": "aot-MsamHoverAA",
+      "displayName": "aot-MsamHoverAA",
+      "category": "weapons",
+      "faction": "both",
+      "inherits": "Patriot",
+      "usedBy": [],
+      "stats": {
+        "damage": 10500,
+        "range": 10.0,
+        "burst": 1,
+        "burstDelays": "",
+        "reloadDelay": 15
+      }
+    },
+    {
+      "id": "aot-HoverAAGun",
+      "displayName": "aot-HoverAAGun",
+      "category": "weapons",
+      "faction": "both",
+      "inherits": "APCGun",
+      "usedBy": [
+        "aot-msam-hover-aa"
+      ],
+      "stats": {
+        "damage": 2800,
+        "range": null,
+        "burst": 2,
+        "burstDelays": "",
+        "reloadDelay": 13
+      }
+    },
+    {
+      "id": "aot-HoverAAGun.AA",
+      "displayName": "aot-HoverAAGun.AA",
+      "category": "weapons",
+      "faction": "both",
+      "inherits": "APCGun.AA",
+      "usedBy": [
+        "aot-msam-hover-aa"
+      ],
+      "stats": {
+        "damage": 1600,
+        "range": null,
+        "burst": 2,
+        "burstDelays": "",
+        "reloadDelay": 13
+      }
+    },
+    {
+      "id": "aot-SilencedPPK",
+      "displayName": "aot-SilencedPPK",
+      "category": "weapons",
+      "faction": "both",
+      "inherits": "",
+      "usedBy": [],
+      "stats": {
+        "damage": 15000,
+        "range": 4.0,
+        "burst": 1,
+        "burstDelays": "",
+        "reloadDelay": 80
+      }
+    },
+    {
+      "id": "aot-DogJaw",
+      "displayName": "aot-DogJaw",
+      "category": "weapons",
+      "faction": "both",
+      "inherits": "",
+      "usedBy": [
+        "aot-dog-nod"
+      ],
+      "stats": {
+        "damage": 100000,
+        "range": 3.0,
+        "burst": 1,
+        "burstDelays": "",
+        "reloadDelay": 10
+      }
+    }
+  ]
+}

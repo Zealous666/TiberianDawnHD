@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>OpenRA Mod – Kanban Board</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --col-bg: #1a1d27;
+    --card-bg: #252938;
+    --card-bg-hover: #2d3142;
+    --accent: #d9a82e;
+    --text: #e6e8ee;
+    --text-dim: #9aa0ad;
+    --border: #2f3340;
+    --warn-bg: #3a2a12;
+    --warn-border: #8a5a1f;
+    --warn-text: #f0c479;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  .browser-banner {
+    background: var(--warn-bg);
+    border-bottom: 1px solid var(--warn-border);
+    color: var(--warn-text);
+    padding: 10px 28px;
+    font-size: 13px;
+    display: none;
+  }
+  .browser-banner.show { display: block; }
+  header {
+    padding: 20px 28px 12px;
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+  }
+  header h1 {
+    font-size: 20px;
+    margin: 0;
+    font-weight: 600;
+  }
+  header span {
+    color: var(--text-dim);
+    font-size: 13px;
+  }
+  .toolbar {
+    padding: 0 28px 16px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .toolbar button {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .toolbar button:hover { background: var(--card-bg-hover); }
+  .toolbar button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .toolbar button.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #0f1117;
+    font-weight: 600;
+  }
+  .toolbar button.primary:hover { background: #b8901f; }
+  #board {
+    display: flex;
+    gap: 16px;
+    padding: 0 28px 28px;
+    overflow-x: auto;
+    align-items: flex-start;
+  }
+  .column {
+    background: var(--col-bg);
+    border-radius: 10px;
+    width: 270px;
+    min-width: 270px;
+    flex-shrink: 0;
+    padding: 12px;
+    border: 1px solid var(--border);
+  }
+  .column-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .column-title {
+    font-weight: 600;
+    font-size: 14px;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    width: 100%;
+    padding: 2px 4px;
+    border-radius: 4px;
+  }
+  .column-title:focus { background: var(--card-bg); outline: none; }
+  .count {
+    font-size: 11px;
+    color: var(--text-dim);
+    background: var(--card-bg);
+    border-radius: 10px;
+    padding: 2px 8px;
+    margin-left: 6px;
+  }
+  .col-actions button {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 4px;
+  }
+  .col-actions button:hover { color: var(--text); }
+  .cards {
+    min-height: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .card {
+    background: var(--card-bg);
+    border-radius: 7px;
+    padding: 10px 12px;
+    font-size: 13.5px;
+    line-height: 1.4;
+    border: 1px solid var(--border);
+    white-space: pre-wrap;
+    word-break: break-word;
+    position: relative;
+  }
+  .card:hover { background: var(--card-bg-hover); }
+  .card.dragging { opacity: 0.4; }
+  .card .del {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    display: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .card:hover .del { display: inline; }
+  .card .del:hover { color: #e26060; }
+  /* Eigener Griff statt der ganzen Karte -- Text soll normal markierbar bleiben. */
+  .card .drag-handle {
+    position: absolute;
+    top: 4px;
+    left: 6px;
+    display: none;
+    color: var(--text-dim);
+    cursor: grab;
+    font-size: 13px;
+    line-height: 1;
+    user-select: none;
+  }
+  .card:hover .drag-handle { display: inline; }
+  .card .drag-handle:hover { color: var(--text); }
+  .card .drag-handle:active { cursor: grabbing; }
+  .card-title {
+    font-weight: 500;
+  }
+  .card-desc-preview {
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--text-dim);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .card.editing { cursor: default; }
+  .card-edit-title {
+    width: 100%;
+    background: var(--col-bg);
+    border: 1px solid var(--accent);
+    color: var(--text);
+    border-radius: 5px;
+    padding: 6px 8px;
+    font-size: 13.5px;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .card-edit-desc {
+    width: 100%;
+    background: var(--col-bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 5px;
+    padding: 6px 8px;
+    font-size: 12.5px;
+    resize: vertical;
+    min-height: 50px;
+  }
+  .card-edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .card-edit-actions button {
+    background: var(--card-bg-hover);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 5px;
+    padding: 4px 10px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .card-edit-actions button.save {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #0f1117;
+    font-weight: 600;
+  }
+  .checklist {
+    margin-top: 8px;
+  }
+  .checklist-header {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+  .checklist-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 2px 0;
+    position: relative;
+  }
+  .checklist-item input[type="checkbox"] {
+    margin-top: 2px;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .checklist-text {
+    font-size: 12.5px;
+    line-height: 1.35;
+    flex: 1;
+    word-break: break-word;
+    cursor: text;
+  }
+  .checklist-text.done {
+    color: var(--text-dim);
+    text-decoration: line-through;
+  }
+  .checklist-text-input {
+    flex: 1;
+    background: var(--col-bg);
+    border: 1px solid var(--accent);
+    color: var(--text);
+    border-radius: 4px;
+    padding: 2px 5px;
+    font-size: 12.5px;
+  }
+  .checklist-item .del-item {
+    display: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+  .checklist-item:hover .del-item { display: inline; }
+  .checklist-item .del-item:hover { color: #e26060; }
+  /* --- Drag & Drop der Checklisten-Punkte (Reihenfolge innerhalb einer Karte) --- */
+  .checklist-item .grip {
+    visibility: hidden;
+    flex-shrink: 0;
+    color: var(--text-dim);
+    font-size: 11px;
+    line-height: 1.35;
+    cursor: grab;
+    user-select: none;
+    /* Negativer Rand: der Griff schiebt Checkbox und Text nicht zur Seite, sondern
+       erscheint links im vorhandenen Karten-Innenabstand. Sonst wuerde die ganze
+       Liste beim Hovern springen. */
+    margin-left: -9px;
+    width: 9px;
+  }
+  .checklist-item:hover .grip { visibility: visible; }
+  .checklist-item .grip:active { cursor: grabbing; }
+  .checklist-item.dragging-item { opacity: 0.4; }
+  /* Einfuegemarke ober-/unterhalb der Zeile, unter der der Zeiger gerade steht. */
+  .checklist-item.drop-above { box-shadow: inset 0 2px 0 0 var(--accent); }
+  .checklist-item.drop-below { box-shadow: inset 0 -2px 0 0 var(--accent); }
+  .checklist-add-btn {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    text-align: left;
+    padding: 3px 0;
+    font-size: 12px;
+    cursor: pointer;
+    width: 100%;
+  }
+  .checklist-add-btn:hover { color: var(--text); }
+  .checklist-add-input {
+    width: 100%;
+    background: var(--col-bg);
+    border: 1px solid var(--accent);
+    color: var(--text);
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-size: 12.5px;
+    margin-top: 2px;
+  }
+  .cards.drag-over { background: rgba(91,141,239,0.08); border-radius: 6px; }
+  .add-card-btn {
+    margin-top: 8px;
+    width: 100%;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    text-align: left;
+    padding: 6px 4px;
+    font-size: 13px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  .add-card-btn:hover { background: var(--card-bg); color: var(--text); }
+  .add-card-input {
+    width: 100%;
+    background: var(--card-bg);
+    border: 1px solid var(--accent);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 13.5px;
+    margin-top: 8px;
+    resize: none;
+  }
+  .add-column {
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    width: 270px;
+    min-width: 270px;
+    flex-shrink: 0;
+    padding: 12px;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 13.5px;
+    height: 44px;
+  }
+  .add-column:hover { color: var(--text); border-color: var(--text-dim); }
+  .link-status {
+    font-size: 12px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 4px;
+  }
+  .link-status .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #555;
+    flex-shrink: 0;
+  }
+  .link-status.linked .dot { background: #4caf6a; }
+  .top-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; align-items: center; gap: 2px; padding: 6px 16px; background: rgba(15,17,23,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
+  .top-nav a { padding: 5px 14px; border-radius: 5px; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; color: var(--text-dim); text-decoration: none; transition: color .15s, background .15s; }
+  .top-nav a:hover { color: var(--text); background: var(--card-bg); }
+  .top-nav a.active { color: var(--text); background: var(--card-bg); }
+  .top-nav-spacer { flex: 1; }
+  .top-nav-link-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: color .15s, border-color .15s;
+    white-space: nowrap;
+  }
+  .top-nav-link-btn:hover { color: var(--text); border-color: var(--text-dim); }
+  .top-nav-link-btn:disabled { opacity: .4; cursor: not-allowed; }
+  .top-nav-link-status {
+    font-size: 11px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    margin: 0 4px;
+  }
+  .top-nav-link-status .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #555;
+    flex-shrink: 0;
+  }
+  .top-nav-link-status.linked .dot { background: #4caf6a; }
+  .top-nav-primary-btn {
+    background: #f5c518;
+    border: 1px solid #f5c518;
+    color: #1a1500;
+    font-weight: 700;
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: filter .15s;
+  }
+  .top-nav-primary-btn:hover { filter: brightness(1.08); }
+  .top-nav-primary-btn:disabled { opacity: .4; cursor: not-allowed; filter: none; }
+</style>
+</head>
+<body style="padding-top:42px">
+
+<nav class="top-nav">
+  <a href="kanban-board.html" class="active">Planning</a>
+  <a href="techtree.html">Techtree</a>
+  <a href="buildorder.html">Build Order</a>
+  <a href="tilesets.html">Tilesets</a>
+  <a href="operations.html">Operation</a>
+  <a href="building-economy.html">Building &amp; Economy</a>
+  <div class="top-nav-spacer"></div>
+  <span class="top-nav-link-status" id="linkStatus"><span class="dot"></span><span id="linkStatusText">nicht verknüpft</span></span>
+  <button onclick="linkFile()" id="linkBtn" class="top-nav-link-btn">Mit KANBAN.md verknüpfen…</button>
+  <button onclick="manualSave()" id="saveBtn" class="top-nav-primary-btn" disabled>Manuell speichern</button>
+</nav>
+
+<div class="browser-banner" id="browserBanner">
+  ⚠️ Dieses Board funktioniert nur in <strong>Chrome oder Edge</strong> mit automatischem Speichern. Dein aktueller Browser unterstützt die dafür nötige File-System-API nicht (Safari und Firefox können das nicht). Bitte diese Datei in Chrome oder Edge öffnen, sonst lässt sich KANBAN.md nicht automatisch aktualisieren.
+</div>
+
+<header>
+  <h1>OpenRA Mod – Projektplan</h1>
+  <span>Kanban-Board · nur in Chrome/Edge mit automatischem Speichern nach KANBAN.md</span>
+</header>
+<div class="toolbar">
+  <button onclick="resetBoard()">Zurücksetzen auf Standardstruktur</button>
+</div>
+<div id="board"></div>
+
+<script>
+const STORAGE_KEY = "openra-kanban-data";
+
+const defaultData = {
+  columns: [
+    { id: "backlog", title: "Backlog", cards: [
+      { id: c(), text: "Mod-Konzept festlegen (Setting, Fraktionen, USP)" },
+      { id: c(), text: "Referenz-Mods / Inspiration sichten" },
+      { id: c(), text: "Zielplattformen / Engine-Version festlegen" },
+    ]},
+    { id: "design", title: "Design / Konzept", cards: [
+      { id: c(), text: "Fraktionen & ihre Identität definieren" },
+      { id: c(), text: "Tech-Tree / Unit-Baum skizzieren" },
+      { id: c(), text: "Wirtschaftssystem festlegen" },
+    ]},
+    { id: "assets", title: "Assets / Art", cards: [
+      { id: c(), text: "Sprite-Pipeline klären" },
+      { id: c(), text: "Platzhalter-Sprites für erste Units" },
+      { id: c(), text: "UI-Assets (Sidebar, Cursor, Icons)" },
+    ]},
+    { id: "rules", title: "Rules / Balancing", cards: [
+      { id: c(), text: "rules.yaml Grundstruktur anlegen" },
+      { id: c(), text: "Erste Unit definieren und ins Spiel bringen" },
+      { id: c(), text: "Balancing-Pass für Kosten/Build-Time/Stats" },
+    ]},
+    { id: "maps", title: "Maps", cards: [
+      { id: c(), text: "Erste Testmap (klein, 2 Spieler) bauen" },
+      { id: c(), text: "Map-Pool für Releases definieren" },
+    ]},
+    { id: "programming", title: "Programmierung", cards: [
+      { id: c(), text: "Mod-Ordnerstruktur aufsetzen (mod.yaml, manifest)" },
+      { id: c(), text: "Custom Traits/Logik identifizieren" },
+      { id: c(), text: "Build- und Test-Workflow einrichten" },
+    ]},
+    { id: "testing", title: "Testing / Bugs", cards: [
+      { id: c(), text: "Smoke-Test: Mod lädt ohne Fehler" },
+      { id: c(), text: "Multiplayer-Test (Lobby, Sync)" },
+    ]},
+    { id: "done", title: "Done", cards: [] },
+  ]
+};
+
+function c() { return Math.random().toString(36).slice(2, 10); }
+
+function load() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return JSON.parse(JSON.stringify(defaultData));
+  try { return JSON.parse(raw); } catch { return JSON.parse(JSON.stringify(defaultData)); }
+}
+
+let data = load();
+
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  autoSaveToFile(); // schreibt automatisch nach KANBAN.md, falls verknüpft (nur Chrome/Edge)
+}
+
+function render() {
+  const board = document.getElementById("board");
+  board.innerHTML = "";
+  data.columns.forEach(col => board.appendChild(renderColumn(col)));
+  const addCol = document.createElement("button");
+  addCol.className = "add-column";
+  addCol.textContent = "+ Spalte hinzufügen";
+  addCol.onclick = () => {
+    const title = prompt("Name der neuen Spalte:");
+    if (title && title.trim()) {
+      data.columns.push({ id: c(), title: title.trim(), cards: [] });
+      save(); render();
+    }
+  };
+  board.appendChild(addCol);
+}
+
+function renderColumn(col) {
+  const wrap = document.createElement("div");
+  wrap.className = "column";
+
+  const header = document.createElement("div");
+  header.className = "column-header";
+
+  const titleWrap = document.createElement("div");
+  titleWrap.style.display = "flex";
+  titleWrap.style.alignItems = "center";
+  titleWrap.style.flex = "1";
+
+  const title = document.createElement("input");
+  title.className = "column-title";
+  title.value = col.title;
+  title.onchange = () => { col.title = title.value; save(); };
+
+  const count = document.createElement("span");
+  count.className = "count";
+  count.textContent = col.cards.length;
+
+  titleWrap.appendChild(title);
+  titleWrap.appendChild(count);
+
+  const actions = document.createElement("div");
+  actions.className = "col-actions";
+  const delBtn = document.createElement("button");
+  delBtn.textContent = "✕";
+  delBtn.title = "Spalte löschen";
+  delBtn.onclick = () => {
+    if (confirm(`Spalte "${col.title}" inkl. aller Karten löschen?`)) {
+      data.columns = data.columns.filter(x => x.id !== col.id);
+      save(); render();
+    }
+  };
+  actions.appendChild(delBtn);
+
+  header.appendChild(titleWrap);
+  header.appendChild(actions);
+  wrap.appendChild(header);
+
+  const cardsWrap = document.createElement("div");
+  cardsWrap.className = "cards";
+  cardsWrap.dataset.colId = col.id;
+  cardsWrap.ondragover = (e) => {
+    // Beim Sortieren innerhalb einer Checkliste darf die Spalte nicht als Dropziel
+    // aufleuchten -- sonst sieht es aus, als wuerde die ganze Karte verschoben.
+    if (dragChecklistItem) return;
+    e.preventDefault();
+    cardsWrap.classList.add("drag-over");
+  };
+  cardsWrap.ondragleave = () => cardsWrap.classList.remove("drag-over");
+  cardsWrap.ondrop = (e) => {
+    cardsWrap.classList.remove("drag-over");
+    // Checklisten-Punkt ausserhalb seiner Liste fallengelassen: nichts tun. Ohne diese
+    // Sperre kaeme unten die Item-ID als Karten-ID an.
+    if (dragChecklistItem) { dragChecklistItem = null; clearChecklistDropMarks(); return; }
+    e.preventDefault();
+    const cardId = e.dataTransfer.getData("text/plain");
+    moveCard(cardId, col.id);
+  };
+
+  col.cards.forEach(card => cardsWrap.appendChild(renderCard(card, col.id)));
+  wrap.appendChild(cardsWrap);
+
+  const addBtn = document.createElement("button");
+  addBtn.className = "add-card-btn";
+  addBtn.textContent = "+ Karte hinzufügen";
+  addBtn.onclick = () => {
+    addBtn.style.display = "none";
+    const input = document.createElement("textarea");
+    input.className = "add-card-input";
+    input.rows = 2;
+    input.placeholder = "Task beschreiben…";
+    input.onkeydown = (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        commit();
+      } else if (e.key === "Escape") {
+        cancel();
+      }
+    };
+    input.onblur = () => commit();
+    function commit() {
+      const text = input.value.trim();
+      if (text) {
+        col.cards.push({ id: c(), text });
+        save();
+      }
+      render();
+    }
+    function cancel() { render(); }
+    wrap.insertBefore(input, addBtn);
+    input.focus();
+  };
+  wrap.appendChild(addBtn);
+
+  return wrap;
+}
+
+function renderCard(card, colId) {
+  if (!card.checklist) card.checklist = [];
+
+  const el = document.createElement("div");
+  el.className = "card";
+  // Nur ueber den Griff ziehbar (siehe unten), nicht mehr die ganze Karte -- sonst laesst
+  // sich der Kartentext nicht mehr per Maus markieren/selektieren.
+  el.draggable = false;
+  el.dataset.cardId = card.id;
+
+  const handle = document.createElement("span");
+  handle.className = "drag-handle";
+  handle.textContent = "⠿";
+  handle.title = "Zum Verschieben ziehen";
+  // Waehrend des Griffs gedrueckt gehalten wird, ist die Karte ziehbar; bei einem reinen
+  // Klick (mousedown+mouseup ohne Drag) wird das im mouseup-Handler wieder zurueckgesetzt,
+  // sonst bliebe die Karte danach ueberall ziehbar haengen. { once: true } auf document,
+  // damit sich der Listener nach jedem Griff selbst entfernt -- ohne das wuerde bei jedem
+  // render() (das den Kartenbaum komplett neu aufbaut) ein weiterer Listener anwachsen.
+  handle.onmousedown = (e) => {
+    e.stopPropagation();
+    el.draggable = true;
+    document.addEventListener("mouseup", () => {
+      // Erst nach diesem Tick pruefen: ein tatsaechlich gestarteter Drag setzt "dragging"
+      // synchron in dragstart, aber die dragend-Bereinigung laeuft nicht immer vor diesem
+      // mouseup. Ohne den setTimeout wuerde ein echter Drag hier faelschlich abgebrochen.
+      setTimeout(() => { if (!el.classList.contains("dragging")) el.draggable = false; }, 0);
+    }, { once: true });
+  };
+  el.appendChild(handle);
+
+  const view = document.createElement("div");
+  view.className = "card-view";
+
+  const title = document.createElement("div");
+  title.className = "card-title";
+  title.textContent = card.text;
+  view.appendChild(title);
+
+  if (card.desc && card.desc.trim()) {
+    const preview = document.createElement("div");
+    preview.className = "card-desc-preview";
+    preview.textContent = card.desc;
+    view.appendChild(preview);
+  }
+
+  view.onclick = () => enterCardEditMode(el, view, card, colId);
+  el.appendChild(view);
+
+  el.appendChild(renderChecklist(card, colId));
+
+  const del = document.createElement("span");
+  del.className = "del";
+  del.textContent = "✕";
+  del.onclick = (e) => {
+    e.stopPropagation();
+    const col = data.columns.find(x => x.id === colId);
+    col.cards = col.cards.filter(x => x.id !== card.id);
+    save(); render();
+  };
+  el.appendChild(del);
+
+  el.ondragstart = (e) => {
+    e.dataTransfer.setData("text/plain", card.id);
+    setTimeout(() => el.classList.add("dragging"), 0);
+  };
+  el.ondragend = () => {
+    el.classList.remove("dragging");
+    el.draggable = false; // Griff losgelassen -> Karte wieder unziehbar, bis erneut gepackt wird.
+  };
+
+  return el;
+}
+
+// Laufender Checklisten-Drag: { cardId, itemId }. Bewusst eine Variable statt dataTransfer --
+// dessen Inhalt ist waehrend dragover aus Sicherheitsgruenden nicht lesbar, wir muessen aber
+// schon dort unterscheiden koennen, ob gerade eine Karte oder ein Checklisten-Punkt gezogen
+// wird (nur dann darf die Spalte den Drop NICHT als Kartenverschiebung behandeln).
+let dragChecklistItem = null;
+
+function moveChecklistItem(card, fromId, toId, placeAfter) {
+  const from = card.checklist.findIndex(i => i.id === fromId);
+  if (from < 0 || fromId === toId) return false;
+
+  const [moved] = card.checklist.splice(from, 1);
+  // Zielindex NACH dem Entfernen neu suchen: durch das splice oben verschieben sich
+  // alle Positionen hinter der Ursprungsposition um eins.
+  const to = card.checklist.findIndex(i => i.id === toId);
+  if (to < 0) {
+    card.checklist.splice(from, 0, moved); // Ziel weg -> Ausgangszustand wiederherstellen
+    return false;
+  }
+
+  card.checklist.splice(placeAfter ? to + 1 : to, 0, moved);
+  return true;
+}
+
+function clearChecklistDropMarks() {
+  document.querySelectorAll(".checklist-item.drop-above, .checklist-item.drop-below")
+    .forEach(n => n.classList.remove("drop-above", "drop-below"));
+}
+
+function renderChecklist(card, colId) {
+  const wrap = document.createElement("div");
+  wrap.className = "checklist";
+  wrap.onclick = (e) => e.stopPropagation(); // nie das Karten-Edit-Mode triggern
+
+  if (card.checklist.length > 0) {
+    const done = card.checklist.filter(i => i.done).length;
+    const header = document.createElement("div");
+    header.className = "checklist-header";
+    header.textContent = `Checkliste · ${done}/${card.checklist.length}`;
+    wrap.appendChild(header);
+
+    card.checklist.forEach(item => {
+      const row = document.createElement("div");
+      row.className = "checklist-item";
+      row.draggable = true;
+      row.dataset.itemId = item.id;
+
+      const grip = document.createElement("span");
+      grip.className = "grip";
+      grip.textContent = "⠿";
+      grip.title = "Zum Sortieren ziehen";
+      row.appendChild(grip);
+
+      row.ondragstart = (e) => {
+        // PFLICHT: die Karte selbst ist draggable. Ohne stopPropagation wuerde ihr
+        // ondragstart mitfeuern, die Karten-ID in dataTransfer schreiben und der
+        // Spalten-Drop die ganze Karte verschieben.
+        e.stopPropagation();
+        dragChecklistItem = { cardId: card.id, itemId: item.id };
+        // Firefox startet einen Drag nur, wenn dataTransfer befuellt ist.
+        e.dataTransfer.setData("text/plain", item.id);
+        e.dataTransfer.effectAllowed = "move";
+        setTimeout(() => row.classList.add("dragging-item"), 0);
+      };
+
+      row.ondragend = () => {
+        dragChecklistItem = null;
+        row.classList.remove("dragging-item");
+        clearChecklistDropMarks();
+      };
+
+      row.ondragover = (e) => {
+        if (!dragChecklistItem || dragChecklistItem.cardId !== card.id) return;
+        e.preventDefault();
+        e.stopPropagation(); // sonst markiert sich die Spalte als Karten-Dropziel
+        e.dataTransfer.dropEffect = "move";
+
+        clearChecklistDropMarks();
+        if (item.id === dragChecklistItem.itemId) return;
+
+        // Obere/untere Haelfte der Zeile entscheidet, ob davor oder dahinter einsortiert wird.
+        const r = row.getBoundingClientRect();
+        const after = e.clientY > r.top + r.height / 2;
+        row.classList.add(after ? "drop-below" : "drop-above");
+      };
+
+      row.ondrop = (e) => {
+        if (!dragChecklistItem || dragChecklistItem.cardId !== card.id) return;
+        e.preventDefault();
+        e.stopPropagation();
+
+        const r = row.getBoundingClientRect();
+        const after = e.clientY > r.top + r.height / 2;
+        const changed = moveChecklistItem(card, dragChecklistItem.itemId, item.id, after);
+
+        dragChecklistItem = null;
+        clearChecklistDropMarks();
+        if (changed) { save(); render(); }
+      };
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = !!item.done;
+      checkbox.onchange = () => {
+        item.done = checkbox.checked;
+        save(); render();
+      };
+      row.appendChild(checkbox);
+
+      const label = document.createElement("span");
+      label.className = "checklist-text" + (item.done ? " done" : "");
+      label.textContent = item.text;
+      label.onclick = () => {
+        // Solange das Textfeld offen ist, darf die Zeile nicht ziehbar sein: sonst faengt
+        // der Drag das Markieren von Text im Eingabefeld ab. render() baut die Zeile
+        // danach ohnehin neu auf, der Wert wird also nicht dauerhaft zurueckgesetzt.
+        row.draggable = false;
+        const input = document.createElement("input");
+        input.type = "text";
+        input.className = "checklist-text-input";
+        input.value = item.text;
+        function commit() {
+          const v = input.value.trim();
+          if (v) item.text = v;
+          save(); render();
+        }
+        input.onkeydown = (e) => {
+          if (e.key === "Enter") { e.preventDefault(); commit(); }
+          if (e.key === "Escape") { e.preventDefault(); render(); }
+        };
+        input.onblur = commit;
+        row.replaceChild(input, label);
+        input.focus();
+        input.select();
+      };
+      row.appendChild(label);
+
+      const delItem = document.createElement("span");
+      delItem.className = "del-item";
+      delItem.textContent = "✕";
+      delItem.onclick = () => {
+        card.checklist = card.checklist.filter(i => i.id !== item.id);
+        save(); render();
+      };
+      row.appendChild(delItem);
+
+      wrap.appendChild(row);
+    });
+  }
+
+  const addBtn = document.createElement("button");
+  addBtn.className = "checklist-add-btn";
+  addBtn.textContent = "+ Punkt hinzufügen";
+  addBtn.onclick = () => {
+    addBtn.style.display = "none";
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "checklist-add-input";
+    input.placeholder = "Checklisten-Punkt…";
+    function commit() {
+      const v = input.value.trim();
+      if (v) {
+        card.checklist.push({ id: c(), text: v, done: false });
+        save();
+      }
+      render();
+    }
+    input.onkeydown = (e) => {
+      if (e.key === "Enter") { e.preventDefault(); commit(); }
+      if (e.key === "Escape") { e.preventDefault(); render(); }
+    };
+    input.onblur = commit;
+    wrap.insertBefore(input, addBtn);
+    input.focus();
+  };
+  wrap.appendChild(addBtn);
+
+  return wrap;
+}
+
+function enterCardEditMode(cardEl, view, card, colId) {
+  cardEl.classList.add("editing");
+  cardEl.draggable = false;
+  view.innerHTML = "";
+
+  const titleInput = document.createElement("input");
+  titleInput.type = "text";
+  titleInput.className = "card-edit-title";
+  titleInput.value = card.text;
+
+  const descInput = document.createElement("textarea");
+  descInput.className = "card-edit-desc";
+  descInput.placeholder = "Beschreibung (optional)…";
+  descInput.value = card.desc || "";
+
+  const actions = document.createElement("div");
+  actions.className = "card-edit-actions";
+
+  const cancelBtn = document.createElement("button");
+  cancelBtn.textContent = "Abbrechen";
+  cancelBtn.onclick = (e) => { e.stopPropagation(); render(); };
+
+  const saveBtn = document.createElement("button");
+  saveBtn.className = "save";
+  saveBtn.textContent = "Fertig";
+  saveBtn.onclick = (e) => { e.stopPropagation(); commit(); };
+
+  actions.appendChild(cancelBtn);
+  actions.appendChild(saveBtn);
+
+  function commit() {
+    const newTitle = titleInput.value.trim();
+    if (newTitle) card.text = newTitle;
+    card.desc = descInput.value.trim();
+    save();
+    render();
+  }
+
+  titleInput.onkeydown = (e) => {
+    if (e.key === "Enter") { e.preventDefault(); commit(); }
+    if (e.key === "Escape") { e.preventDefault(); render(); }
+  };
+  descInput.onkeydown = (e) => {
+    if (e.key === "Escape") { e.preventDefault(); render(); }
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); commit(); }
+  };
+  view.onclick = (e) => e.stopPropagation();
+
+  view.appendChild(titleInput);
+  view.appendChild(descInput);
+  view.appendChild(actions);
+  titleInput.focus();
+  titleInput.select();
+}
+
+function moveCard(cardId, targetColId) {
+  let card;
+  for (const col of data.columns) {
+    const idx = col.cards.findIndex(x => x.id === cardId);
+    if (idx !== -1) {
+      card = col.cards[idx];
+      col.cards.splice(idx, 1);
+      break;
+    }
+  }
+  if (!card) return;
+  const targetCol = data.columns.find(x => x.id === targetColId);
+  targetCol.cards.push(card);
+  save();
+  render();
+}
+
+function resetBoard() {
+  if (confirm("Board auf die Standardstruktur zurücksetzen? Eigene Änderungen gehen verloren.")) {
+    data = JSON.parse(JSON.stringify(defaultData));
+    save(); render();
+  }
+}
+
+function buildMarkdown() {
+  let md = "# OpenRA Mod – Projektplan (Kanban)\n\n";
+  data.columns.forEach(col => {
+    md += `## ${col.title}\n\n`;
+    if (col.cards.length === 0) {
+      md += "_(noch leer)_\n\n";
+    } else {
+      col.cards.forEach(card => {
+        md += `- [ ] ${card.text}\n`;
+        if (card.desc && card.desc.trim()) {
+          card.desc.trim().split("\n").forEach(line => { md += `  ${line}\n`; });
+        }
+        if (card.checklist && card.checklist.length > 0) {
+          card.checklist.forEach(item => {
+            md += `  - [${item.done ? "x" : " "}] ${item.text}\n`;
+          });
+        }
+      });
+      md += "\n";
+    }
+  });
+  return md;
+}
+
+// --- Direkter Dateizugriff über die File System Access API ---
+// Nur in Chrome/Edge/Opera verfügbar. Safari und Firefox unterstützen
+// showSaveFilePicker nicht - dort funktioniert dieses Board nicht (siehe Banner oben).
+const FS_SUPPORTED = "showSaveFilePicker" in window;
+let fileHandle = null;
+
+function idbOpen() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open("kanban-fs", 1);
+    req.onupgradeneeded = () => req.result.createObjectStore("handles");
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbGetHandle() {
+  const db = await idbOpen();
+  return new Promise((resolve) => {
+    const tx = db.transaction("handles", "readonly");
+    const req = tx.objectStore("handles").get("mdFile");
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => resolve(null);
+  });
+}
+
+async function idbSetHandle(handle) {
+  const db = await idbOpen();
+  return new Promise((resolve) => {
+    const tx = db.transaction("handles", "readwrite");
+    tx.objectStore("handles").put(handle, "mdFile");
+    tx.oncomplete = () => resolve();
+  });
+}
+
+let fileDirty = false;
+
+function setSaveBtnState() {
+  const saveBtn = document.getElementById("saveBtn");
+  if (!saveBtn) return;
+  saveBtn.disabled = !FS_SUPPORTED || !fileHandle || !fileDirty;
+}
+
+function markDirty() {
+  fileDirty = true;
+  setSaveBtnState();
+}
+
+function markClean() {
+  fileDirty = false;
+  setSaveBtnState();
+}
+
+function setLinkStatus(ok, message) {
+  const wrap = document.getElementById("linkStatus");
+  const text = document.getElementById("linkStatusText");
+  wrap.classList.toggle("linked", ok);
+  text.textContent = message;
+  const linkBtn = document.getElementById("linkBtn");
+  if (linkBtn) linkBtn.textContent = ok ? "Verknüpfung ändern…" : "Mit KANBAN.md verknüpfen…";
+  setSaveBtnState();
+}
+
+function applyBrowserSupport() {
+  if (!FS_SUPPORTED) {
+    document.getElementById("browserBanner").classList.add("show");
+    document.getElementById("linkBtn").disabled = true;
+    document.getElementById("saveBtn").disabled = true;
+    setLinkStatus(false, "Browser nicht unterstützt – in Chrome/Edge öffnen");
+  }
+}
+
+async function restoreHandle() {
+  if (!FS_SUPPORTED) return;
+  const handle = await idbGetHandle();
+  if (!handle) {
+    setLinkStatus(false, "nicht verknüpft – auf \"Mit KANBAN.md verknüpfen…\" klicken");
+    return;
+  }
+  fileHandle = handle;
+  try {
+    const perm = await handle.queryPermission({ mode: "readwrite" });
+    setLinkStatus(true, perm === "granted"
+      ? `verknüpft: ${handle.name}`
+      : `verknüpft: ${handle.name} (Berechtigung bestätigen: einmal "Jetzt speichern" klicken)`);
+  } catch {
+    setLinkStatus(false, "nicht verknüpft – auf \"Mit KANBAN.md verknüpfen…\" klicken");
+  }
+}
+
+function loadMarkdown(text) {
+  const columns = [];
+  let currentCol = null;
+  let currentCard = null;
+  for (const rawLine of text.split('\n')) {
+    const line = rawLine.trimEnd();
+    if (line.startsWith('## ')) {
+      currentCard = null;
+      currentCol = { id: c(), title: line.slice(3).trim(), cards: [] };
+      columns.push(currentCol);
+    } else if (currentCol && /^- \[[ x]\] /.test(line)) {
+      currentCard = { id: c(), text: line.replace(/^- \[[ x]\] /, '').trim(), desc: '', checklist: [] };
+      currentCol.cards.push(currentCard);
+    } else if (currentCard && /^  - \[[ x]\] /.test(line)) {
+      const done = line[5] === 'x';
+      const text2 = line.replace(/^  - \[[ x]\] /, '').trim();
+      currentCard.checklist.push({ id: c(), text: text2, done });
+    } else if (currentCard && line.startsWith('  ') && line.trim()) {
+      currentCard.desc += (currentCard.desc ? '\n' : '') + line.trim();
+    }
+  }
+  if (columns.length > 0) {
+    data = { columns };
+    save();
+    render();
+  }
+}
+
+async function linkFile() {
+  if (!FS_SUPPORTED) return;
+  try {
+    const [handle] = await window.showOpenFilePicker({
+      suggestedName: "KANBAN.md",
+      types: [{ description: "Markdown", accept: { "text/markdown": [".md"] } }],
+      multiple: false,
+    });
+    fileHandle = handle;
+    await idbSetHandle(handle);
+    const file = await handle.getFile();
+    const text = await file.text();
+    if (text.trim()) loadMarkdown(text);
+    setLinkStatus(true, `verknüpft: ${handle.name}`);
+  } catch (err) {
+    if (err.name !== "AbortError") console.error(err);
+  }
+}
+
+async function writeToFile(md) {
+  if (!fileHandle) return false;
+  try {
+    const perm = await fileHandle.requestPermission({ mode: "readwrite" });
+    if (perm !== "granted") throw new Error("Berechtigung verweigert");
+    const writable = await fileHandle.createWritable();
+    await writable.write(md);
+    await writable.close();
+    setLinkStatus(true, `verknüpft: ${fileHandle.name} · gespeichert ` + new Date().toLocaleTimeString());
+    markClean();
+    return true;
+  } catch (err) {
+    console.error(err);
+    setLinkStatus(false, `verknüpft: ${fileHandle.name} (Speichern fehlgeschlagen – "Jetzt speichern" erneut klicken)`);
+    return false;
+  }
+}
+
+// Automatischer Schreibversuch bei jeder Änderung. Schlägt er fehl (z.B. weil die
+// Berechtigung noch nicht in dieser Sitzung bestätigt wurde), bleibt die Änderung
+// trotzdem lokal gespeichert - ein Klick auf "Jetzt speichern" holt das nach.
+async function autoSaveToFile() {
+  if (!FS_SUPPORTED || !fileHandle) { markDirty(); return; }
+  const ok = await writeToFile(buildMarkdown());
+  if (!ok) markDirty();
+}
+
+async function manualSave() {
+  if (!FS_SUPPORTED) return;
+  if (!fileHandle) {
+    await linkFile();
+    return;
+  }
+  await writeToFile(buildMarkdown());
+}
+
+applyBrowserSupport();
+render();
+restoreHandle();
+</script>
+</body>
+</html>

@@ -2,9 +2,744 @@
 # Diese Datei überschreibt Basis-Aktoren des cnc-Hauptspiels.
 # Alle Age-of-Tiberium-Ergänzungen sind mit # === Age of Tiberium (aotmod) === markiert.
 
+# === Age of Tiberium (aotmod) - JumpjetActorLayer: PFLICHT-World-Trait fuer JumpjetLocomotor ===
+# Analog zu AirborneActorLayer/SubterraneanActorLayer. Ohne diesen World-Trait wird der Jumpjet-
+# Movement-Layer nie betreten -> GrantConditionOnJumpjetLayer feuert nie -> Hover-Anim fehlt.
+# NUR auf World (nicht EditorWorld) erlaubt, deshalb eigener Block statt ^BaseWorld.
+World:
+	# === Age of Tiberium (aotmod) - Shroud-Generator Nebel-Feld, gemeinsamer Renderer ===
+	# Zeichnet die UNION aller aktiven AotFogField-Felder (aot-gap / aot-mgap) als EIN
+	# durchgehendes Nebel-Meer statt vieler ueberlappender Scheiben (kein Doppel-Alpha im
+	# Ueberlappungsbereich, keine internen Kanten-Naehte). Siehe AotFogField.cs.
+	# Alpha < 1 macht das EIGENE/verbuendete Generator-Feld transparenter als echten Fog-of-War,
+	# damit man auf einen Blick unterscheidet, was man selbst per Generator verbirgt und was echter
+	# Schleier ist (Feinde sehen davon nichts -- die bekommen den echten schwarzen CreatesShroud).
+	# 1.0 = so stark wie echter Fog (eff. 0.5), 0.6 = deutlich leichter. Frei justierbar.
+	AotFogFieldManager:
+		Alpha: 0.6
+	# === Age of Tiberium (aotmod) - Tiberium/BlueTiberium auch auf Clear.Snow platzierbar ===
+	# AOT_ARCTIC hat fuer die aus AOT_ARCTIC uebernommenen Zellen einen eigenen Terrain-Typ
+	# "Clear.Snow" (siehe aot-winter.yaml, Minimap-Farbtrennung). Ohne diese Ergaenzung würde
+	# die Engine-Basis (AllowedTerrainTypes: Clear, Road) Tiberium dort nicht mehr zulassen.
+	ResourceLayer:
+		ResourceTypes:
+			Tiberium:
+				AllowedTerrainTypes: Clear, Road, Clear.Snow
+			BlueTiberium:
+				AllowedTerrainTypes: Clear, Road, Clear.Snow
+	JumpjetActorLayer:
+	# === Age of Tiberium (aotmod) - SubterraneanActorLayer: PFLICHT-World-Trait fuer SubterraneanLocomotor ===
+	# Analog zu JumpjetActorLayer. Ohne diesen World-Trait wird der Subterranean-Movement-Layer nie
+	# betreten -> GrantConditionOnSubterraneanLayer feuert nie -> Ein-/Ausgraben funktioniert nicht.
+	# NUR auf World (nicht EditorWorld) erlaubt, deshalb eigener Block statt ^BaseWorld.
+	SubterraneanActorLayer:
+	# Eis-System (aotmod: Zell-LAYER statt 1 Actor/Zelle): AotIceLayer haelt die Zellmenge + das
+	# Ice-Terrain, AotIceRenderer zeichnet alle Zellen in EINEM Batch (ersetzt die per-Zelle
+	# AotIceCellBody), AotIceBreakLayer laesst Fahrzeuge einbrechen (ersetzt per-Zelle AotIceBreaks).
+	AotIceLayer:
+	AotIceRenderer:
+	AotIceBreakLayer:
+	# Tiberian-Veins-System (Klon des Eis-Systems): haelt alle vom Geflecht bedeckten Zellen.
+	AotVeinLayer:
+	# Foundation-System: haelt die Menge aller platzierten BIB-Boden-Zellen.
+	# Die Zellen fragen ihre 4 Nachbarn ab -> stetiger Kantenübergang (face-adjacency).
+	AotFoundationLayer:
+	LegacyBridgeLayer:
+		# Originalaktoren (bridge1-4) + AoT-TEMPERAT-Varianten mit korrekten Template-IDs
+		# + zerstörbare Fluss-Brücken (aot-br1/br2/br3, Templates 235-246, AOT_TEMPERAT & AOT_ARCTIC)
+		Bridges: bridge1, bridge2, bridge3, bridge4, aot-tem-bridge1, aot-tem-bridge2, aot-br1, aot-br2, aot-br3, aot-arc-bridge1, aot-arc-bridge2, aot-arc-br1, aot-arc-br2, aot-arc-br3
+
+# === Age of Tiberium (aotmod) - Editor-Pendant zur Clear.Snow-Ressourcenfreischaltung oben ===
+EditorWorld:
+	EditorResourceLayer:
+		ResourceTypes:
+			Tiberium:
+				AllowedTerrainTypes: Clear, Road, Clear.Snow
+			BlueTiberium:
+				AllowedTerrainTypes: Clear, Road, Clear.Snow
+	BuildableTerrainOverlay:
+		AllowedTerrainTypes: Clear, Road, Clear.Snow
+	# Zeichnet im Editor um jeden Aktor mit AotEditorBounds ein Rechteck (Expansion-Marker cyan,
+	# Ore-Mine rote Bau-Sperrzone).
+	AotEditorBoundsOverlay:
+
+# === Age of Tiberium (aotmod) - EdibleByLeap + Heal-TargetType für alle Infanterie ===
+^Infantry:
+	Parachutable:
+		FallRate: 26
+		KilledOnImpassableTerrain: true
+		ParachutingCondition: parachute
+		GroundImpactSound: squishy2.aud
+		WaterImpactSound: splash9.aud
+	WithParachute:
+		RequiresCondition: parachute
+		ShadowImage: parach-shadow
+		ShadowSequence: idle
+		Image: parach
+		Sequence: idle
+		OpeningSequence: open
+		Offset: 0,0,200
+		Palette: effect
+		IsPlayerPalette: false
+	EdibleByLeap:
+	GrantConditionOnDamageState@AOTHEAL:
+		Condition: aot-infantry-damaged
+		ValidDamageStates: Light, Medium, Heavy, Critical
+	Targetable@AOTHEAL:
+		RequiresCondition: aot-infantry-damaged
+		TargetTypes: Heal
+	ExternalCondition@AOTGAS:
+		Condition: aot-tiberium-gassed
+	AotDamagedByCondition:
+		RequiresCondition: aot-tiberium-gassed
+		Damage: 600
+		DamageInterval: 25
+		DamageTypes: Prone50Percent, TiberiumDeath
+	# === Nod Stealth Generator (aot-sgen) - Stealth Field auch fuer Infanterie ===
+	ExternalCondition@AOTSTEALTH:
+		Condition: aot-stealth-field
+	# Mobile Stealth Generator (aot-mstealth): eigenes Feld, tarnt NUR Einheiten (nicht ^Building).
+	ExternalCondition@AOTSTEALTHMOBILE:
+		Condition: aot-stealth-field-mobile
+	Cloak@AOTSTEALTH:
+		RequiresCondition: aot-stealth-field || aot-stealth-field-mobile
+		CloakType: aot-stealth-field
+		InitialDelay: 0
+		CloakDelay: 50
+		CloakStyle: Alpha
+		CloakedAlpha: 0.35
+		UncloakOn: Attack
+		# Cloak-/Decloak-Sound pro Einheit (wie Stealth Tank STNK): trans1.aud.
+		CloakSound: trans1.aud
+		UncloakSound: trans1.aud
+	# === aotmod - Shroud Generator: Sicht im Gap-Feld auf 2c0 kappen (siehe ^Vehicle) ===
+	ExternalCondition@GAPSUPPRESS:
+		Condition: aot-gap-suppressed
+	RevealsShroud:
+		RequiresCondition: !aot-gap-suppressed
+	RevealsShroud@GAPSUPPRESS:
+		Range: 2c0
+		RequiresCondition: aot-gap-suppressed
+	# === Iron Dome - Unzerstoerbarkeit fuer Infanterie ===
+	ExternalCondition@AOTIRONDOME:
+		Condition: aot-iron-dome
+	WithColoredOverlay@AOTIRONDOME:
+		RequiresCondition: aot-iron-dome
+	DamageMultiplier@AOTIRONDOME:
+		RequiresCondition: aot-iron-dome
+		Modifier: 0
+	TimedConditionBar@AOTIRONDOME:
+		Condition: aot-iron-dome
+	
+# === Age of Tiberium (aotmod) - AOT_DESERT Desert-Deko-Freischaltung ===
+# Desert-Baeume/Zivilgebaeude sind im Original-Rules per RequireTilesets: DESERT
+# gesperrt (nur klassisches DESERT-Tileset). AOT_DESERT ergaenzt, damit sie auch
+# im neuen Kombitileset platzierbar sind. Kunst ist bereits tileset-unabhaengig
+# (feste DES-DDS-Pfade), keine weiteren Sequenz-Aenderungen noetig.
+T03.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+T04:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+T04.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+T09:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+T09.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+T17.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+T18:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+T18.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V20:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V20.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V21:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V21.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V22:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V22.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V23:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V23.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V24:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V24.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V25:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V25.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V26:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V26.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V27:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V27.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V28:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V28.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V29:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V29.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V30:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V30.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V31:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V31.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V32:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V32.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V33:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V33.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V34:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V34.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V35:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V35.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V36:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V36.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V37:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+V37.Husk:
+	MapEditorData:
+		RequireTilesets: DESERT, AOT_DESERT
+
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - SpyInfiltrate TargetType auf allen Gebäuden ===
+^Building:
+	# === Ion Storm (aot-ts-ctaray) - Blackout ===
+	# Waehrend eines Ion Storms faellt bei ALLEN Spielern die Stromproduktion auf 0.
+	# PowerMultiplier greift nur dort, wo ueberhaupt ein Power-Trait sitzt (Kraftwerke),
+	# an allen anderen Gebaeuden ist er wirkungslos - deshalb reicht der Eintrag auf ^Building.
+	# Die Condition verteilt AotIonStormPower beim Sturmbeginn an alle Gebaeude im Spiel.
+	ExternalCondition@AOTIONSTORM:
+		Condition: aot-ion-storm-blackout
+	PowerMultiplier@AOTIONSTORM:
+		RequiresCondition: aot-ion-storm-blackout
+		Modifier: 0
+	# Fortified Foundation: wird ein Gebaeude direkt an bestehende Foundation gebaut, schiebt sich
+	# die Foundation unter sein Footprint -> schliesst die Luecke, Kanten werden buendig.
+	AotFoundationUnderfill:
+	Targetable:
+		TargetTypes: Ground, C4, Structure, SpyInfiltrate
+	ExternalCondition@AOTGAS:
+		Condition: aot-tiberium-gassed
+	AotDamagedByCondition:
+		RequiresCondition: aot-tiberium-gassed
+		Damage: 40
+		DamageInterval: 25
+		DamageTypes: TiberiumDeath
+	# === Tiberian Veins: Gebaeude nehmen Schaden, wenn Geflecht angrenzt (wie in TS) ===
+	# TS-Original (firestrm.ini): `ImmuneToVeins=yes` existiert nur bei einzelnen Einheiten
+	# (REAPER, JFISH, DEFENDER, HUEY, Zivilisten, DOGGIE) -> impliziert, dass in TS grundsaetzlich
+	# ALLES (auch Gebaeude) Vein-Schaden nimmt, sofern nicht explizit ausgenommen. Vorher hatten
+	# NUR Fahrzeuge (^Vehicle) einen Vein-DoT, Gebaeude gar keinen. Anders als beim Fahrzeug-DoT
+	# (der auf der EIGENEN Zelle prueft) hier PROXIMITY-basiert: Footprint-Zellen + deren direkte
+	# Nachbarn, damit auch angrenzendes (nicht ueberwachsenes) Geflecht zaehlt.
+	# ⚠️ Kein TS-Originalwert auffindbar (firestrm.ini = nur Firestorm-Overrides, keine
+	# Basis-Werte) -> an die bestehende Gas-Ambient-Schaden-Kalibrierung angelehnt (Damage:40/1s).
+	AotDamagedByAdjacentVeins@VEINS:
+		Damage: 180
+		DamageInterval: 25
+		DamageTypes: TiberiumDeath
+	# === Nod Stealth Generator (aot-sgen) - Stealth Field ===
+	# Jedes Gebaeude kann getarnt werden, solange es im Feld eines aktiven Stealth Generators
+	# steht (der die External-Condition aot-stealth-field gewaehrt). Ausserhalb des Feldes ist
+	# der Cloak-Trait per RequiresCondition deaktiviert -> keinerlei Effekt im Normalbetrieb.
+	# CloakType/UncloakOn: nur beim Feuern (Verteidigungsanlagen) kurz sichtbar, sonst dauerhaft
+	# getarnt.
+	# WICHTIG: CloakStyle=Alpha (NICHT Palette). Palette-Cloak (wie STNK) wirkt in Cloak.cs NUR auf
+	# IPalettedRenderable = indizierte Sprites. STNK nutzt die klassische indizierte stnk.shp -> dort
+	# klappt Palette. Gebaeude sind aber Truecolor-Remaster-Sprites (+ mein Two-Layer-Body) -> Palette
+	# wuerde NUR das indizierte Player-Color-Overlay tarnen, der Rest bliebe sichtbar. Alpha wirkt via
+	# WithAlpha auf ALLE Renderables (Truecolor + indiziert) -> ganzes Gebaeude wird transparent.
+	ExternalCondition@AOTSTEALTH:
+		Condition: aot-stealth-field
+	Cloak@AOTSTEALTH:
+		RequiresCondition: aot-stealth-field
+		CloakType: aot-stealth-field
+		InitialDelay: 0
+		CloakDelay: 50
+		CloakStyle: Alpha
+		CloakedAlpha: 0.35
+		UncloakOn: Attack
+		# Cloak-/Decloak-Sound pro Einheit (wie Stealth Tank STNK): trans1.aud.
+		CloakSound: trans1.aud
+		UncloakSound: trans1.aud
+	# === Iron Dome - Unzerstoerbarkeit fuer Gebaeude ===
+	ExternalCondition@AOTIRONDOME:
+		Condition: aot-iron-dome
+	WithColoredOverlay@AOTIRONDOME:
+		RequiresCondition: aot-iron-dome
+	DamageMultiplier@AOTIRONDOME:
+		RequiresCondition: aot-iron-dome
+		Modifier: 0
+	TimedConditionBar@AOTIRONDOME:
+		Condition: aot-iron-dome
+
+# NUKE + NUK2: Spy sabotiert Kraftwerk → Stromausfall beim Gegner
+NUKE:
+	InfiltrateForPowerOutage:
+		Types: SpyInfiltrate
+		Duration: 1500
+		PlayerExperience: 5
+		InfiltratedNotification: BuildingInfiltrated
+		InfiltratedTextNotification: notification-building-infiltrated
+
+NUK2:
+	InfiltrateForPowerOutage:
+		Types: SpyInfiltrate
+		Duration: 1500
+		PlayerExperience: 5
+		InfiltratedNotification: BuildingInfiltrated
+		InfiltratedTextNotification: notification-building-infiltrated
+
+# HQ + EYE: Spy enthüllt die gesamte Karte (NOD Radar = aot-nod-radar, separat in aot-structures.yaml)
+HQ:
+	AotInfiltrateForScan:
+		Types: SpyInfiltrate
+		Duration: 250
+		PlayerExperience: 10
+		InfiltratedNotification: BuildingInfiltrated
+		InfiltratedTextNotification: notification-building-infiltrated
+	# HITSHAPE-FIX (2026-08-03): Engine-Footprint "X_ xx ==" hatte die obere Antennen-Eckzelle als
+	# X (untargetbar) -> nahm reduzierten Schaden. x_ macht sie treffbar. Gilt fuer alle
+	# aot-hq-* (base/ion/age2), die von HQ erben.
+	Building:
+		Footprint: x_ xx ==
+
+EYE:
+	AotInfiltrateForScan:
+		Types: SpyInfiltrate
+		Duration: 250
+		PlayerExperience: 10
+		InfiltratedNotification: BuildingInfiltrated
+		InfiltratedTextNotification: notification-building-infiltrated
+
+# === Age of Tiberium (aotmod) - E1 Split: GDI + NOD erhalten eigene Aktoren mit eigenen Icons ===
+E1:
+	Buildable:
+		ShowWhenLocked: False
+		Prerequisites: ~disabled
+
+# === Age of Tiberium (aotmod) - E6 Split: GDI Engineer + NOD Saboteur erhalten eigene Aktoren mit eigenen Icons ===
+E6:
+	Buildable:
+		ShowWhenLocked: False
+		Prerequisites: ~disabled
+	# Bridge Repair Hut: TS-EVA "Bridge repaired." beim Reparieren (aot-e6-gdi/nod erben E6).
+	RepairsBridges:
+		RepairNotification: BridgeRepaired
+
+# === Age of Tiberium (aotmod) - E2 Grenadier: nur noch GDI, eigenes Icon ===
+E2:
+	Buildable:
+		ShowWhenLocked: False
+		Prerequisites: ~disabled
+
+# === Age of Tiberium (aotmod) - E3 Rocket Soldier (Bazooka): nur noch NOD, eigenes Icon ===
+E3:
+	Buildable:
+		ShowWhenLocked: False
+		Prerequisites: ~disabled
+
+# === Age of Tiberium (aotmod) - E4 Flamethrower → Toxic Trooper Upgrade (NOD only, Age 3) ===
+E4:
+	Buildable:
+		ShowWhenLocked: False
+		Prerequisites: ~disabled
+
+# === Age of Tiberium (aotmod) - E5 Chemical Warrior: via E4-Upgrade ersetzt, nicht mehr direkt baubar ===
+E5:
+	Buildable:
+		ShowWhenLocked: False
+		Prerequisites: ~disabled
+
+# === Age of Tiberium (aotmod) - RMBO Commando: GDI-exklusiv ab Age 3 ===
+RMBO:
+	Buildable:
+		ShowWhenLocked: False
+		Prerequisites: ~disabled
+
 ^BaseWorld:
 	-TerrainRenderer:
 	RemasterTerrainRenderer:
+	# === Age of Tiberium (aotmod) - Lighting-System (2026-07-26) ===
+	# Weltweiter Beleuchtungs-Trait: liefert den globalen Tint (vom Tag/Nacht-Zyklus
+	# aot-light-system gesteuert) UND nimmt lokale Lichtquellen (TerrainLightSource) auf.
+	# Defaults hier = voll neutral (1/1/1, Intensity 1) -> ohne platziertes aot-light-system
+	# sieht eine Karte exakt aus wie vorher, es gibt KEINE stille Verdunkelung.
+	# Auf ^BaseWorld (statt World:), damit auch die EditorWorld ihn hat -- TerrainLightSource
+	# ruft beim Platzieren im Editor WorldActor.Trait<TerrainLighting>() auf und crasht sonst.
+	# Gerendert wird ohne gebackene Assets: RemasterTerrainRenderer schreibt seine Kacheln
+	# durch TerrainSpriteLayer (Tint pro Vertex, GPU interpoliert weich ueber die Zelle),
+	# Aktoren/Voxel sampeln TintAt live pro Frame (SpriteRenderable/ModelRenderable).
+	TerrainLighting:
+		Intensity: 1.0
+		RedTint: 1.0
+		GreenTint: 1.0
+		BlueTint: 1.0
+		# Bin-Groesse der Lichtquellen-Partitionierung in Zellen (Nachbarschaftssuche).
+		BinSize: 10
+	# === Age of Tiberium (aotmod) - Mine Cluster Missile: "mine" CrushClass für alle Boden-Loko ===
+	# Ohne das kann in diesem (TD-basierten) Mod NIEMAND über eine Mine laufen — die cnc-Loko-Vorlagen
+	# kannten "mine" als CrushClass bisher gar nicht (nur RA's eigene Loko-Vorlagen hatten das).
+	# Folge: Einheiten wichen Minen als unpassierbares Hindernis aus, statt ahnungslos drüberzulaufen.
+	# === Age of Tiberium (aotmod) - Eis (aot-ice-cell, ChangesTerrain: Ice) begehbar/befahrbar ===
+	# Wie in TS: dort sind alle Eis-Templates Terrain "Clear" -> automatisch befahrbar. Hier eigener
+	# TerrainType "Ice" (aot-snow.yaml), damit spaeter Einbrechen/Rutschen daran haengen kann.
+	# Etwas langsamer als Clear (glatt). Ohne diese Eintraege ist Eis fuer alle unpassierbar.
+	Locomotor@FOOT:
+		Crushes: crate, mine
+		TerrainSpeeds:
+			Ice: 85
+			Veins: 100
+			Clear.Snow: 100
+			ClearNoSmudges: 100
+	Locomotor@CHEM:
+		Crushes: crate, mine
+		TerrainSpeeds:
+			Ice: 85
+			Veins: 100
+			Clear.Snow: 100
+			ClearNoSmudges: 100
+	Locomotor@WHEELED:
+		Crushes: crate, mine
+		TerrainSpeeds:
+			Ice: 90
+			Veins: 100
+			Clear.Snow: 100
+			ClearNoSmudges: 100
+			# User-Wunsch 2026-07-30: Strassenbonus von vanilla 125 auf 150 angehoben.
+			Road: 150
+	Locomotor@HEAVYWHEELED:
+		Crushes: crate, infantry, mine
+		TerrainSpeeds:
+			Ice: 90
+			Veins: 100
+			Clear.Snow: 100
+			ClearNoSmudges: 100
+			Road: 150
+	Locomotor@TRACKED:
+		Crushes: wall, crate, infantry, mine
+		TerrainSpeeds:
+			Ice: 95
+			Veins: 100
+			Clear.Snow: 100
+			ClearNoSmudges: 100
+			Road: 150
+	Locomotor@HEAVYTRACKED:
+		Crushes: wall, heavywall, crate, infantry, mine
+		TerrainSpeeds:
+			Ice: 95
+			Veins: 100
+			Clear.Snow: 100
+			ClearNoSmudges: 100
+			Road: 150
+	Locomotor@LANDINGCRAFT:
+		TerrainSpeeds:
+			Clear.Snow: 100
+			ClearNoSmudges: 100
+	Locomotor@CRITTER:
+		TerrainSpeeds:
+			Clear.Snow: 100
+			ClearNoSmudges: 100
+	Locomotor@VISC:
+		TerrainSpeeds:
+			Clear.Snow: 100
+			ClearNoSmudges: 100
+			Veins: 100
+	# Hover gleitet ueber Eis wie ueber Wasser.
+	# Land-Malus abgeschwaecht: Engine-Original hat 33 auf Clear/Rough/Road/Tiberium/
+	# BlueTiberium/River -> hier auf 75 angehoben (aot-transport-hover, Speed 115:
+	# 37 -> 86). Water/Beach/Ice bleiben bei 100 (= 115). Einziger Nutzer des
+	# hover-Locomotors ist aot-transport-hover. Siehe [[hover-transport-system]].
+	# Giftwolke (aot-gascloud): darf praktisch ueberall hindriften (Wasser, Veins, Tiberium),
+	# teilt sich die Zelle mit allen (SharesCell) -- blockiert/kollidiert nicht mit echten
+	# Einheiten, ist rein optisch+DoT-Aura. Siehe [[vein-system]].
+	Locomotor@AOT_GAS:
+		Name: aot-gas
+		SharesCell: true
+		TerrainSpeeds:
+			Clear: 60
+			Rough: 60
+			Road: 60
+			Sand: 60
+			Beach: 60
+			Water: 60
+			Tiberium: 60
+			BlueTiberium: 60
+			Veins: 60
+			Ice: 60
+	Locomotor@HOVER:
+		Crushes: crate
+		TerrainSpeeds:
+			Ice: 100
+			Veins: 100
+			Clear: 75
+			Clear.Snow: 75
+			ClearNoSmudges: 75
+			Rough: 75
+			Road: 75
+			Tiberium: 75
+			BlueTiberium: 75
+			River: 75
+	# === Age of Tiberium (aotmod) - HVR Locomotor (schnell Land + Wasser) ===
+	Locomotor@AOT_HVR:
+		Name: aot-hvr
+		Crushes: crate, mine
+		TerrainSpeeds:
+			Clear: 100
+			Clear.Snow: 100
+			ClearNoSmudges: 100
+			Rough: 88
+			Road: 125
+			Bridge: 125
+			Tiberium: 88
+			BlueTiberium: 88
+			Beach: 100
+			Water: 100
+			River: 100
+			Ice: 100
+			Veins: 100
+	# === Age of Tiberium (aotmod) - Amphibious APC Locomotor ===
+	Locomotor@AOT_AMPHIBIOUS:
+		Name: aot-amphibious
+		Crushes: crate, mine
+		TerrainSpeeds:
+			Clear: 100
+			Clear.Snow: 100
+			ClearNoSmudges: 100
+			Rough: 88
+			Road: 125
+			Bridge: 125
+			Tiberium: 88
+			BlueTiberium: 88
+			Beach: 100
+			Water: 80
+			# Amphibisch -> darf aufs Eis (wie Hover/LST). Reine Schiffe duerfen das NICHT.
+			Ice: 90
+			Veins: 100
+	# === Age of Tiberium (aotmod) - U-Boot-Locomotor: naval + Eis (durchfahren) ===
+	# U-Boote (aot-sub, aot-msub) sollen unter zugefrorenen Flaechen DURCHFAHREN koennen.
+	# Reine Schiffe (naval) duerfen das nicht -- deswegen eigener Locomotor. Attackieren/Auftauchen
+	# unter Eis wird ueber die aot-under-ice-Condition auf dem Sub gesperrt (siehe aot-units.yaml).
+	# Ortbarkeit unter Eis: der Sub schaltet dort auf einen zweiten Cloak mit anderem CloakType,
+	# den kein DetectCloaked-Sensor sucht -- so bleibt er ungetarnt sichtbar/ortbar erst wieder
+	# nach Verlassen der Eisflaeche.
+	Locomotor@AOT_SUBMARINE:
+		Name: aot-submarine
+		Crushes: crate, mine
+		TerrainSpeeds:
+			Water: 100
+			Ice: 100
+	# === Age of Tiberium (aotmod) - Zone Trooper Jumpjet-Locomotor ===
+	# Kann Rock (unpassierbare Klippen/Berge) und River kurz überspringen (JumpjetTransitionTerrainTypes),
+	# aber NICHT Water (Ozean) — bewusst kein Hovercraft-Ersatz, siehe [[orbc-system]].
+	# Rock/River bleiben WALKABLE in TerrainSpeeds (siehe [[orbc-system]] fuer Pathing-Deadlock-Historie).
+	# Hover-Animation via AotGrantConditionOnTerrain@HOVER auf dem Aktor (aot-units.yaml), unabhängig
+	# vom Jumpjet-Layer. Geschwindigkeit dabei bewusst leicht ÜBER normaler Lauf-Geschwindigkeit
+	# (Clear: 100) — der Jetpack-Hover ist minimal schneller als Laufen.
+	JumpjetLocomotor@AOT_ZONETROOPER:
+		Name: aot-zonetrooper
+		# "aothover" ist KEIN echtes Crushen (kein Schaden/Zerstoerung/Sound) -- reine
+		# Wiederverwendung des Passierbarkeits-Hooks, damit Zone Trooper ueber Mauern/
+		# Tore hovern kann, genau wie ueber Rock/River. Siehe AotHoverPassable.cs.
+		Crushes: crate, mine, aothover
+		SharesCell: true
+		JumpjetTransitionCost: 100
+		JumpjetTransitionTerrainTypes: Rock, River
+		TerrainSpeeds:
+			Clear: 100
+			Clear.Snow: 100
+			ClearNoSmudges: 100
+			Rough: 89
+			Road: 111
+			Bridge: 111
+			Tiberium: 78
+				PathingCost: 300
+			BlueTiberium: 78
+				PathingCost: 300
+			Beach: 89
+			Rock: 106
+			River: 106
+	# === Age of Tiberium (aotmod) - Subterranean Locomotor (Devil's Tongue + Sub APC) ===
+	# SubterraneanTransitionTerrainTypes: nur Clear, Road, Rough, Tiberium, BlueTiberium erlaubt.
+	# Beach, Rock (Klippen), Water, River, Bridge geblockt -> kein Ein-/Ausgraben dort.
+	# Gebaeude-Footprints/Bibs geblockt via Engine-Patch (SubterraneanActorLayer.ValidTransitionCell
+	# + BuildingInfluence-Check). SubterraneanTransitionOnRamps: false (TS-Default).
+	# Crasht ohne TerrainType@Subterranean in allen Tilesets.
+	SubterraneanLocomotor@AOT_SUBTERRANEAN:
+		Name: aot-subterranean
+		Crushes: crate, mine
+		TerrainSpeeds:
+			Clear: 80
+			Clear.Snow: 80
+			ClearNoSmudges: 80
+			Road: 100
+			Rough: 65
+			Tiberium: 70
+			BlueTiberium: 70
+			Subterranean: 120
+		SubterraneanTransitionTerrainTypes: Clear, Road, Rough, Tiberium, BlueTiberium, Clear.Snow
+		SubterraneanTransitionCost: 100
+		SubterraneanTransitionOnRamps: false
+		# ~3x schnellere Unsichtbarkeit vs Default -1024 (setzt submerged-Condition früher).
+		SubterraneanTransitionDepth: -341
+	# === Age of Tiberium (aotmod) - TS-Infanterie-Palette ===
+	# unittem.pal (TS Unit-Palette) als Basis + Player-Color-Remap auf House-Color-Indizes 16-31.
+	# Für direkt referenzierte TS-Infanterie-SHPs (z.B. cyborg.shp). Wiederverwendbar.
+	PaletteFromFile@aot-unittem:
+		Name: aot-unittem
+		Filename: unittem.pal
+	PlayerColorPalette@aot-ts:
+		BaseName: aot-ts-player
+		BasePalette: aot-unittem
+		RemapIndex: 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
+	# Nod Avatar-Palette: eigene abgedunkelte unittem-Variante (Chrome-Highlights
+	# gecrusht) + Face-Glow (urspruenglich Idx 2/9, cyan) auf House-Color-Idx
+	# 17/23 ummgemappt, siehe [[nod-avatar-system]].
+	PaletteFromFile@aot-avatar-base:
+		Name: aot-avatar-base
+		Filename: aot-avatar-base.pal
+	PlayerColorPalette@aot-avatar:
+		BaseName: aot-avatar-player
+		BasePalette: aot-avatar-base
+		RemapIndex: 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
+	# Saboteur-Palette: unittem mit dunkelgrauen Indizes 176-191 (statt gelb)
+	PaletteFromFile@aot-saboteur-unittem:
+		Name: aot-saboteur-unittem
+		Filename: unittem-saboteur.pal
+	PlayerColorPalette@aot-saboteur:
+		BaseName: aot-saboteur-player
+		BasePalette: aot-saboteur-unittem
+		RemapIndex: 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
+	# TS-Voxel-Remap-Palette: eigene Graustufen-Rampe 255→0 an Indizes 176-191 (VxlToPng RemapRampStart=176, Count=16).
+	PaletteFromFile@aot-vxl-ramp:
+		Name: aot-vxl-ramp
+		Filename: aot-vxl-ramp.pal
+	PlayerColorPalette@aot-vxl:
+		BaseName: aot-vxl-player
+		BasePalette: aot-vxl-ramp
+		RemapIndex: 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191
+	# Wolverine-Palette: unittem mit dunkelgrau entsättigten Nicht-House-Indizes,
+	# House-Color 16-31 bleibt für PlayerColorPalette-Remap (Cyborg-Muster, siehe [[recon-jeep-system]]).
+	PaletteFromFile@aot-wolverine-base:
+		Name: aot-wolverine-base
+		Filename: aot-wolverine-base.pal
+	PlayerColorPalette@aot-wolverine:
+		BaseName: aot-wolverine-player
+		BasePalette: aot-wolverine-base
+		RemapIndex: 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
 
 STNK:
 	Cloak:
@@ -14,58 +749,83 @@ C17:
 	Cloak:
 		CloakStyle: Alpha
 
+# === Age of Tiberium (aotmod) - c17.bulk: Frachtflieger fuer NOD Airstrip Starport ===
+# Klon des C17. Kein VTOL/Hover — Fixed-Wing-Landeanflug (Deceleration wie AJET/Firehawk).
+# LandableTerrainTypes noetig damit Land-Activity greift.
+# Cargo-Trait pflicht fuer DeliverBulkOrder (Ctor-Crash ohne ihn); Einheiten werden per DoProduction gespawnt.
+c17.bulk:
+	Inherits: C17
+	RenderSprites:
+		Image: c17
+	Tooltip:
+		Name: actor-c17-name
+	Aircraft:
+		# TurnSpeed 20: kleinere Werte (engerer Kreis) getestet (User 2026-08-05) -- der Flieger
+		# hat dann zu wenig Strecke, um sich vor dem Aufsetzen wieder auf die Ost-West-Achse
+		# auszurichten und landet schraeg. 20 + OverflyDistance 6 ist die kleinste saubere Schleife.
+		TurnSpeed: 20
+		Speed: 700
+		Repulsable: False
+		MaximumPitch: 36
+		LandableTerrainTypes: Clear, Rough, Road, Beach, Tiberium, BlueTiberium, Clear.Snow
+	Cargo:
+		MaxWeight: 20
+		BeforeUnloadDelay: 12
+		BetweenUnloadDelay: 15
+		AfterUnloadDelay: 8
+	# Frachtflieger deckt auf seiner Route den Schleier auf (User-Wunsch 2026-08-05). C17 erbt
+	# keine RevealsShroud -- hier eigenstaendig. Type: CenterPosition deckt rund um die aktuelle
+	# Flugposition auf (inkl. Ueberflug und Landeschleife).
+	RevealsShroud:
+		Range: 8c0
+		Type: CenterPosition
+
 # === Age of Tiberium (aotmod) - HQ: nur GDI + EYE-Sprite nach Ion Cannon Upgrade ===
 # HQ ist jetzt GDI-exklusiv. NOD bekommt eigenen Radar (aot-nod-radar).
 # Age-Powers liegen auf FACT. Ion Cannon Upgrade schaltet EYE-Sprites frei.
 HQ:
 	Buildable:
+		ShowWhenLocked: False
 		Queue: Building.GDI
-		Prerequisites: vehicleproduction, barracks, ~techlevel.medium
+		Prerequisites: vehicleproduction, barracks, ~techlevel.medium, ~disabled
 	-AirstrikePower:
 	-SupportPowerChargeBar:
 	ProvidesPrerequisite@gdihq:
 		Prerequisite: gdi-hq
 	ProvidesPrerequisite@anyhq:
 		Prerequisite: anyhq
-	GrantConditionOnPrerequisite@ionupgrade:
-		Condition: aot-ion-cannon-active
-		Prerequisites: aot-ion-cannon-upgrade
+	AotGrantConditionOnPrerequisiteLatched@aotage2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
 	-WithSpriteBody:
+	# ORBC/SLAB-Tier-Tausch (2026-08-28): das Radar behaelt in Age 1 das Age-0-Sprite
+	# (hq.shp). Der fruehere EYE-Wechsel bei aot-age1 (@eye + aot-hq-advanced) ist
+	# entfernt -- das EYE-Sprite wandert ans Orbital Command (Age-1-Sprite). Age 2
+	# schaltet weiterhin auf das TS-Sprite (@ts) um.
 	WithSpriteBody@hq:
 		Sequence: idle
 		Name: body
-		RequiresCondition: !aot-ion-cannon-active
-	WithSpriteBody@eye:
-		Sequence: aot-eye-idle
-		Name: body-eye
-		RequiresCondition: aot-ion-cannon-active
+		RequiresCondition: !aot-age2-active
+	WithSpriteBody@ts:
+		Sequence: aot-age2-idle
+		Name: body-ts
+		RequiresCondition: aot-age2-active
+		# KRITISCH: ohne expliziten Wert faellt RenderSprites.Add() auf "player" zurueck ->
+		# PlayerColorShift verschiebt jeden Pixel im Gruen-Hue-Fenster zur Spielerfarbe
+		# (siehe silo-system.md). Body ist RGBA/truecolor -> explizit absichern.
+	WithIdleOverlay@lights:
+		Sequence: aot-age2-lights
+		Palette: effect
+		IsPlayerPalette: false
+		RequiresCondition: aot-age2-active && !build-incomplete
 	-WithMakeAnimation:
 	WithMakeAnimation@aot:
-		BodyNames: body, body-eye
+		BodyNames: body
 		Condition: build-incomplete
-	IonCannonPower:
-		RequiresCondition: aot-ion-cannon-active
-		PauseOnCondition: lowpower
-		Prerequisites: ~techlevel.superweapons
-		Icon: ioncannon
-		Cursor: ioncannon
-		ChargeInterval: 9000
-		Name: actor-eye.ioncannonpower-name
-		Description: actor-eye.ioncannonpower-description
-		BeginChargeSpeechNotification: IonCannonCharging
-		EndChargeSpeechNotification: IonCannonReady
-		SelectTargetSpeechNotification: SelectTarget
-		InsufficientPowerSpeechNotification: InsufficientPower
-		BeginChargeTextNotification: notification-ion-cannon-charging
-		EndChargeTextNotification: notification-ion-cannon-ready
-		SelectTargetTextNotification: notification-select-target
-		InsufficientPowerTextNotification: notification-insufficient-power
-		OnFireSound: ion1.aud
-		DisplayRadarPing: True
-		CameraActor: camera.small
-		SupportPowerPaletteOrder: 20
-	SupportPowerChargeBar@ion:
-		RequiresCondition: aot-ion-cannon-active
+	WithMakeAnimation@ts:
+		BodyNames: body-ts
+		Condition: build-incomplete
+		Sequence: aot-age2-make
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - EYE: nicht baubar (wird durch HQ+Ion Cannon Upgrade ersetzt) ===
@@ -76,87 +836,387 @@ EYE:
 
 # === Age of Tiberium (aotmod) - TMPL: erfordert Age 1 ===
 # Buildable: erst baubar nach aot-age1.
+# Atombombe (NukePower) ist von TMPL entfernt — hängt jetzt am MSLO Nuke Silo
+# als Age-3-Upgrade ("Atom Bomb"), siehe aot-structures.yaml (MSLO NukePower@atombomb).
+# -Buildable: Bau-Queue wandert auf zwei Proxy-Aktoren (Doppel-Aktor-Pattern für Icon-Wechsel
+# Age 1 -> Age 2+), siehe aot-tmpl-age1/aot-tmpl-age2 + Sprite-Switch in aot-structures.yaml.
 TMPL:
-	Buildable:
-		Prerequisites: anyhq, ~techlevel.high, ~aot-age1
-		Queue: Building.Nod
+	-Buildable:
+	-NukePower:
+	-WithSupportPowerActivationAnimation:
+	-WithSupportPowerActivationOverlay:
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - Upgrade-Queue + Age Super Powers auf FACT ===
-# Upgrade-Queue: normale Upgrades (Age 1/2/3 kaufbar hier).
-# Super Powers: sichtbar sobald FACT steht, HOLD bis Upgrade gekauft,
-#   dann 10 Sek Auto-Countdown, danach auto-fire → spawnt Marker → aot-age1/2/3 aktiv.
-FACT:
-	Production@UPGRADEGDI:
-		Produces: Upgrade.GDI
-		MoveIntoWorld: false
-	Production@UPGRADENOD:
-		Produces: Upgrade.Nod
-		MoveIntoWorld: false
-	ProductionQueue@UpgradeGDI:
-		Type: Upgrade.GDI
+# === Age of Tiberium (aotmod) - Age-Tier-Aufstieg als Super Power AM SPIELER (2026-08-04) ===
+# Vorgeschichte: Age-Queue (Age.GDI/Age.Nod) + Standalone-Widget -> ENTFALLEN. Der Aufstieg laeuft
+# wieder ueber das normale Super-Power-Menue links oben. Die Powers haengen am SPIELER-Aktor und
+# nicht am Bauhof, damit ein eingepackter MCV das Icon nicht mitnimmt (User-Wunsch).
+#
+# Dafuer noetige Engine-Patches (der Spieler-Aktor wird nie ueber World.Add() eingehaengt):
+#   - SupportPowerManager: INotifyCreated registriert die Powers des eigenen Spieler-Aktors
+#   - AutoActivateSpawnActorPower.SpawnLocation(): der Spieler-Aktor hat kein IOccupySpace,
+#     der Marker landet deshalb auf Player.HomeLocation statt auf self.Location
+#   - PowerManager.UpdatePowerRequiringActors(): benachrichtigt jetzt auch die Traits des
+#     Spieler-Aktors, sonst blieb GrantConditionOnPowerState dort auf seinem Startwert stehen
+#
+# Ablauf wie bei einer typischen Super Power:
+#   1. Icon sichtbar, Ladebalken PAUSIERT, solange Voraussetzungen fehlen ODER der Strom knapp ist
+#   2. Voraussetzungen erfuellt -> Ladezeit laeuft von selbst ab (22500 Ticks = 15 min, exakt die
+#      bisherige Bauzeit: 37500 x BuildDurationModifier 60% = 22500)
+#   3. fertig geladen -> der Spieler muss KLICKEN (AotAgeNPower = Click-to-fire-Variante, nicht
+#      die alte AotAgeNSuperPower, die von selbst ausloeste)
+#   4. beim Klick werden die Kosten EINMALIG abgebucht (Cost). Kein Abtickern ueber die Ladezeit
+#      wie in einer Produktionsqueue -- reicht das Geld nicht, bleibt die Power geladen stehen
+#      und meldet "Insufficient funds".
+# SupportPowerPaletteOrder 0/1/2 -> immer ganz oben, vor allen anderen Powers (die liegen bei 10
+# und hoeher). Sichtbarkeit wie in der Queue-Fassung: Age 1 sofort, Age 2/3 erst nach dem
+# Vorgaenger (RequiresCondition), nach Kauf weg (OneShot).
+Player:
+	# === Cash-Logger (User-Wunsch 2026-08-04) ===
+	# Schreibt alle 10 s eine Zeile pro Spieler ins debug.log, Praefix [AotCash]. Dient der
+	# Balance-Beobachtung waehrend eines Tests ("ab spaeterem Age 1 ist zu viel Cash im Umlauf") --
+	# die Ingame-Anzeige zeigt nur den eigenen Stand und nur den Moment, nicht den Verlauf und
+	# nicht die KI. Rein diagnostisch, greift nirgends ins Spiel ein.
+	AotCashLog:
+		Interval: 250
+
+	# Fraktions-Conditions fuer die fraktionsspezifischen Age-Power-Varianten (User 2026-08-05).
+	GrantConditionOnFaction@AOTGDI:
+		Condition: aot-faction-gdi
 		Factions: gdi
-		Group: Upgrade
-		ReadyAudio: ConstructionComplete
-		ReadyTextNotification: notification-construction-complete
-		BlockedAudio: NoBuild
-		BlockedTextNotification: notification-unable-to-build-more
-		QueuedAudio: Building
-		OnHoldAudio: OnHold
-		CancelledAudio: Cancelled
-	ProductionQueue@UpgradeNod:
-		Type: Upgrade.Nod
+	GrantConditionOnFaction@AOTNOD:
+		Condition: aot-faction-nod
 		Factions: nod
-		Group: Upgrade
-		ReadyAudio: ConstructionComplete
-		ReadyTextNotification: notification-construction-complete
+	# Low Power pausiert den Ladebalken wie bei jeder anderen Super Power. Auf Gebaeuden kommt
+	# diese Condition aus ^DisabledOverlay (engine defaults.yaml); der Spieler-Aktor erbt davon
+	# nichts, deshalb hier eigenstaendig.
+	GrantConditionOnPowerState@LOWPOWER:
+		Condition: lowpower
+		ValidPowerStates: Low, Critical
+	# Freischalt-Bedingungen. Je zwei Traits pro Age, die DIESELBE Condition granten: eine
+	# GrantConditionOnPrerequisite-Liste ist ein UND, fuer das faction-abhaengige ODER braucht es
+	# deshalb einen GDI- und einen NOD-Zweig. SupportPowerInfo hat kein Factions-Feld, der Split
+	# ergibt sich ueber faction-exklusive Gebaeude: ATEC/STEC bei Age 1, Refinery bei Age 2,
+	# Orbital Command bzw. Shrine bei Age 3.
+	# ATEC/STEC stehen bewusst NUR bei Age 1 (User 2026-08-04): bei Age 2/3 waren sie redundant,
+	# weil die Age-Kette sie schon impliziert. Nebeneffekt der Streichung: ein begonnener Aufstieg
+	# laeuft jetzt weiter, auch wenn das Tech Centre zwischendurch faellt oder verkauft wird.
+	GrantConditionOnPrerequisite@age1gdi:
+		Condition: aot-age1-unlocked
+		Prerequisites: atec
+	GrantConditionOnPrerequisite@age1nod:
+		Condition: aot-age1-unlocked
+		Prerequisites: stec
+	GrantConditionOnPrerequisite@age2gdi:
+		Condition: aot-age2-unlocked
+		# GDI-Age-2-Gatekeeper: seit dem ORBC/SLAB-Tier-Tausch (2026-08-28) schaltet das
+		# Orbital Command (Age 1) den Age-2-Aufstieg frei -- vormals aot-slab (Science Lab).
+		Prerequisites: aot-age1, aot-orbc
+	GrantConditionOnPrerequisite@age2nod:
+		Condition: aot-age2-unlocked
+		Prerequisites: aot-age1, aot-tmpl
+	GrantConditionOnPrerequisite@age3gdi:
+		Condition: aot-age3-unlocked
+		# GDI-Age-3-Gatekeeper: seit dem ORBC/SLAB-Tier-Tausch (2026-08-28) schaltet das
+		# Science Lab (jetzt Age-2/3-Gebaeude) den Age-3-Aufstieg frei -- vormals aot-orbc.
+		# Zwingend: aot-orbc gibt es jetzt schon ab Age 1, wuerde Age 3 sofort mit Age 2 oeffnen.
+		Prerequisites: aot-age2, aot-slab
+	GrantConditionOnPrerequisite@age3nod:
+		Condition: aot-age3-unlocked
+		Prerequisites: aot-age2, aot-shrine
+	# Sichtbarkeitsketten-Conditions (auf Gebaeuden liefert das der FACT-Block, hier eigenstaendig).
+	GrantConditionOnPrerequisite@ageactive1:
+		Condition: aot-age1-active
+		Prerequisites: aot-age1
+	GrantConditionOnPrerequisite@ageactive2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
+	AotAge1Power@gdi:
+		# Fraktionsspezifische Variante (User 2026-08-05). Beide Traits teilen sich denselben
+		# OrderName und landen daher in EINER SupportPowerInstance -- die Leiste zeigt weiter
+		# genau ein Icon. Welche Konfiguration gilt, entscheidet SupportPowerInstance.Info:
+		# das nimmt seit 2026-08-05 die erste NICHT deaktivierte Instanz, hier also die der
+		# eigenen Fraktion. Icons sind vorerst fuer beide dieselben (kommen spaeter neu).
+		InsufficientFundsTextNotification: notification-insufficient-funds
+		# Age-of-Empires-Modell (User 2026-08-05): sobald die Voraussetzungen stehen, ist der
+		# Knopf klickbar. Der Klick bucht den vollen Betrag EINMALIG ab, danach laeuft
+		# ChargeInterval als FORSCHUNGSZEIT, und nach Ablauf steigt das Age von selbst auf --
+		# kein zweiter Klick. Gilt ausschliesslich fuer die Age-Stufen; Ion Cannon, Atombombe
+		# usw. laden weiterhin zuerst und feuern auf Klick.
+		ResearchModel: True
+		Actor: aot-age1-marker
+		# Countdown oben rechts fuer ALLE Spieler, wie bei Ion Cannon und Atom Bomb
+		# (User-Wunsch 2026-08-04). Es taucht immer nur die gerade relevante Age-Stufe auf:
+		# das Timer-Widget filtert auf !Disabled, und Age 2/3 sind bis zum Vorgaenger per
+		# RequiresCondition deaktiviert, eine gekaufte Stufe per OneShot.
+		DisplayTimerRelationships: Ally, Neutral, Enemy
+		LifeTime: -1
+		OneShot: true
+		Cost: 5000
+		ChargeInterval: 22500
+		RequiresCondition: aot-faction-gdi
+		PauseOnCondition: !aot-age1-unlocked || lowpower
+		IconImage: aot-age1-upgrade
+		Icon: icon
+		Name: 1st Tiberium Age
+		Description: Unlocks the Tiberium era with new units, buildings and the capability to harvest Tiberium.
+		# Preis und Voraussetzungen als EIGENE Tooltip-Felder (SupportPowerInfo.Cost /
+		# .TooltipRequirements, 2026-08-04). Als Fliesstext in der Description ging es nicht:
+		# Tooltips brechen keine Zeilen um.
+		TooltipRequirements: Tech Center
+		# Nur fuer die Einfaerbung: fehlt die Voraussetzung, faerbt der Tooltip die
+		# Zeile rot. Gatet die Power NICHT -- das macht PauseOnCondition.
+		TooltipRequirementsPrerequisites: atec
+		SupportPowerPaletteOrder: 0
+	AotAge1Power@nod:
+		# Fraktionsspezifische Variante (User 2026-08-05). Beide Traits teilen sich denselben
+		# OrderName und landen daher in EINER SupportPowerInstance -- die Leiste zeigt weiter
+		# genau ein Icon. Welche Konfiguration gilt, entscheidet SupportPowerInstance.Info:
+		# das nimmt seit 2026-08-05 die erste NICHT deaktivierte Instanz, hier also die der
+		# eigenen Fraktion. Icons sind vorerst fuer beide dieselben (kommen spaeter neu).
+		InsufficientFundsTextNotification: notification-insufficient-funds
+		# Age-of-Empires-Modell (User 2026-08-05): sobald die Voraussetzungen stehen, ist der
+		# Knopf klickbar. Der Klick bucht den vollen Betrag EINMALIG ab, danach laeuft
+		# ChargeInterval als FORSCHUNGSZEIT, und nach Ablauf steigt das Age von selbst auf --
+		# kein zweiter Klick. Gilt ausschliesslich fuer die Age-Stufen; Ion Cannon, Atombombe
+		# usw. laden weiterhin zuerst und feuern auf Klick.
+		ResearchModel: True
+		Actor: aot-age1-marker
+		# Countdown oben rechts fuer ALLE Spieler, wie bei Ion Cannon und Atom Bomb
+		# (User-Wunsch 2026-08-04). Es taucht immer nur die gerade relevante Age-Stufe auf:
+		# das Timer-Widget filtert auf !Disabled, und Age 2/3 sind bis zum Vorgaenger per
+		# RequiresCondition deaktiviert, eine gekaufte Stufe per OneShot.
+		DisplayTimerRelationships: Ally, Neutral, Enemy
+		LifeTime: -1
+		OneShot: true
+		Cost: 5000
+		ChargeInterval: 22500
+		RequiresCondition: aot-faction-nod
+		PauseOnCondition: !aot-age1-unlocked || lowpower
+		IconImage: aot-age1-upgrade
+		Icon: icon
+		Name: 1st Tiberium Age
+		Description: Unlocks the Tiberium era with new units, buildings and the capability to harvest Tiberium.
+		# Preis und Voraussetzungen als EIGENE Tooltip-Felder (SupportPowerInfo.Cost /
+		# .TooltipRequirements, 2026-08-04). Als Fliesstext in der Description ging es nicht:
+		# Tooltips brechen keine Zeilen um.
+		TooltipRequirements: Tech Center
+		# Nur fuer die Einfaerbung: fehlt die Voraussetzung, faerbt der Tooltip die
+		# Zeile rot. Gatet die Power NICHT -- das macht PauseOnCondition.
+		TooltipRequirementsPrerequisites: stec
+		SupportPowerPaletteOrder: 0
+	AotAge2Power@gdi:
+		# Fraktionsspezifische Variante (User 2026-08-05). Beide Traits teilen sich denselben
+		# OrderName und landen daher in EINER SupportPowerInstance -- die Leiste zeigt weiter
+		# genau ein Icon. Welche Konfiguration gilt, entscheidet SupportPowerInstance.Info:
+		# das nimmt seit 2026-08-05 die erste NICHT deaktivierte Instanz, hier also die der
+		# eigenen Fraktion. Icons sind vorerst fuer beide dieselben (kommen spaeter neu).
+		InsufficientFundsTextNotification: notification-insufficient-funds
+		# Age-of-Empires-Modell (User 2026-08-05): sobald die Voraussetzungen stehen, ist der
+		# Knopf klickbar. Der Klick bucht den vollen Betrag EINMALIG ab, danach laeuft
+		# ChargeInterval als FORSCHUNGSZEIT, und nach Ablauf steigt das Age von selbst auf --
+		# kein zweiter Klick. Gilt ausschliesslich fuer die Age-Stufen; Ion Cannon, Atombombe
+		# usw. laden weiterhin zuerst und feuern auf Klick.
+		ResearchModel: True
+		Actor: aot-age2-marker
+		# Countdown oben rechts fuer ALLE Spieler, wie bei Ion Cannon und Atom Bomb
+		# (User-Wunsch 2026-08-04). Es taucht immer nur die gerade relevante Age-Stufe auf:
+		# das Timer-Widget filtert auf !Disabled, und Age 2/3 sind bis zum Vorgaenger per
+		# RequiresCondition deaktiviert, eine gekaufte Stufe per OneShot.
+		DisplayTimerRelationships: Ally, Neutral, Enemy
+		LifeTime: -1
+		OneShot: true
+		Cost: 7500
+		# Forschungszeit sinkt mit jeder Stufe (User 2026-08-05): 15:00 / 12:00 / 10:00.
+		# Roher Tickwert bei 25 Ticks/s -- Super Powers kennen keinen BuildDurationModifier,
+		# Preis und Dauer sind hier also ohnehin entkoppelt.
+		ChargeInterval: 18000
+		RequiresCondition: aot-age1-active && aot-faction-gdi
+		PauseOnCondition: !aot-age2-unlocked || lowpower
+		IconImage: aot-age2-upgrade
+		Icon: icon
+		Name: 2nd Tiberium Age
+		Description: Moves forward in the Tiberium technologies with new upgrades and additional equipment.
+		TooltipRequirements: Orbital Command
+		# Nur fuer die Einfaerbung: fehlt die Voraussetzung, faerbt der Tooltip die
+		# Zeile rot. Gatet die Power NICHT -- das macht PauseOnCondition.
+		# Seit ORBC/SLAB-Tier-Tausch (2026-08-28): Age 2 gatet jetzt das Orbital Command.
+		TooltipRequirementsPrerequisites: aot-orbc
+		SupportPowerPaletteOrder: 1
+	AotAge2Power@nod:
+		# Fraktionsspezifische Variante (User 2026-08-05). Beide Traits teilen sich denselben
+		# OrderName und landen daher in EINER SupportPowerInstance -- die Leiste zeigt weiter
+		# genau ein Icon. Welche Konfiguration gilt, entscheidet SupportPowerInstance.Info:
+		# das nimmt seit 2026-08-05 die erste NICHT deaktivierte Instanz, hier also die der
+		# eigenen Fraktion. Icons sind vorerst fuer beide dieselben (kommen spaeter neu).
+		InsufficientFundsTextNotification: notification-insufficient-funds
+		# Age-of-Empires-Modell (User 2026-08-05): sobald die Voraussetzungen stehen, ist der
+		# Knopf klickbar. Der Klick bucht den vollen Betrag EINMALIG ab, danach laeuft
+		# ChargeInterval als FORSCHUNGSZEIT, und nach Ablauf steigt das Age von selbst auf --
+		# kein zweiter Klick. Gilt ausschliesslich fuer die Age-Stufen; Ion Cannon, Atombombe
+		# usw. laden weiterhin zuerst und feuern auf Klick.
+		ResearchModel: True
+		Actor: aot-age2-marker
+		# Countdown oben rechts fuer ALLE Spieler, wie bei Ion Cannon und Atom Bomb
+		# (User-Wunsch 2026-08-04). Es taucht immer nur die gerade relevante Age-Stufe auf:
+		# das Timer-Widget filtert auf !Disabled, und Age 2/3 sind bis zum Vorgaenger per
+		# RequiresCondition deaktiviert, eine gekaufte Stufe per OneShot.
+		DisplayTimerRelationships: Ally, Neutral, Enemy
+		LifeTime: -1
+		OneShot: true
+		Cost: 7500
+		# Forschungszeit sinkt mit jeder Stufe (User 2026-08-05): 15:00 / 12:00 / 10:00.
+		# Roher Tickwert bei 25 Ticks/s -- Super Powers kennen keinen BuildDurationModifier,
+		# Preis und Dauer sind hier also ohnehin entkoppelt.
+		ChargeInterval: 18000
+		RequiresCondition: aot-age1-active && aot-faction-nod
+		PauseOnCondition: !aot-age2-unlocked || lowpower
+		IconImage: aot-age2-upgrade
+		Icon: icon
+		Name: 2nd Tiberium Age
+		Description: Moves forward in the Tiberium technologies with new upgrades and additional equipment.
+		TooltipRequirements: Temple of Nod
+		# Nur fuer die Einfaerbung: fehlt die Voraussetzung, faerbt der Tooltip die
+		# Zeile rot. Gatet die Power NICHT -- das macht PauseOnCondition.
+		TooltipRequirementsPrerequisites: aot-tmpl
+		SupportPowerPaletteOrder: 1
+	AotAge3Power@gdi:
+		# Fraktionsspezifische Variante (User 2026-08-05). Beide Traits teilen sich denselben
+		# OrderName und landen daher in EINER SupportPowerInstance -- die Leiste zeigt weiter
+		# genau ein Icon. Welche Konfiguration gilt, entscheidet SupportPowerInstance.Info:
+		# das nimmt seit 2026-08-05 die erste NICHT deaktivierte Instanz, hier also die der
+		# eigenen Fraktion. Icons sind vorerst fuer beide dieselben (kommen spaeter neu).
+		InsufficientFundsTextNotification: notification-insufficient-funds
+		# Age-of-Empires-Modell (User 2026-08-05): sobald die Voraussetzungen stehen, ist der
+		# Knopf klickbar. Der Klick bucht den vollen Betrag EINMALIG ab, danach laeuft
+		# ChargeInterval als FORSCHUNGSZEIT, und nach Ablauf steigt das Age von selbst auf --
+		# kein zweiter Klick. Gilt ausschliesslich fuer die Age-Stufen; Ion Cannon, Atombombe
+		# usw. laden weiterhin zuerst und feuern auf Klick.
+		ResearchModel: True
+		Actor: aot-age3-marker
+		# Countdown oben rechts fuer ALLE Spieler, wie bei Ion Cannon und Atom Bomb
+		# (User-Wunsch 2026-08-04). Es taucht immer nur die gerade relevante Age-Stufe auf:
+		# das Timer-Widget filtert auf !Disabled, und Age 2/3 sind bis zum Vorgaenger per
+		# RequiresCondition deaktiviert, eine gekaufte Stufe per OneShot.
+		DisplayTimerRelationships: Ally, Neutral, Enemy
+		LifeTime: -1
+		OneShot: true
+		Cost: 10000
+		# Forschungszeit sinkt mit jeder Stufe (User 2026-08-05): 15:00 / 12:00 / 10:00.
+		# Roher Tickwert bei 25 Ticks/s -- Super Powers kennen keinen BuildDurationModifier,
+		# Preis und Dauer sind hier also ohnehin entkoppelt.
+		ChargeInterval: 15000
+		RequiresCondition: aot-age2-active && aot-faction-gdi
+		PauseOnCondition: !aot-age3-unlocked || lowpower
+		IconImage: aot-age3-upgrade
+		Icon: icon
+		Name: 3rd Tiberium Age
+		Description: Upgrades to the most advanced Tiberium units, buildings and upgrades.
+		TooltipRequirements: Science Lab
+		# Nur fuer die Einfaerbung: fehlt die Voraussetzung, faerbt der Tooltip die
+		# Zeile rot. Gatet die Power NICHT -- das macht PauseOnCondition.
+		# Seit ORBC/SLAB-Tier-Tausch (2026-08-28): Age 3 gatet jetzt das Science Lab.
+		TooltipRequirementsPrerequisites: aot-slab
+		SupportPowerPaletteOrder: 2
+	AotAge3Power@nod:
+		# Fraktionsspezifische Variante (User 2026-08-05). Beide Traits teilen sich denselben
+		# OrderName und landen daher in EINER SupportPowerInstance -- die Leiste zeigt weiter
+		# genau ein Icon. Welche Konfiguration gilt, entscheidet SupportPowerInstance.Info:
+		# das nimmt seit 2026-08-05 die erste NICHT deaktivierte Instanz, hier also die der
+		# eigenen Fraktion. Icons sind vorerst fuer beide dieselben (kommen spaeter neu).
+		InsufficientFundsTextNotification: notification-insufficient-funds
+		# Age-of-Empires-Modell (User 2026-08-05): sobald die Voraussetzungen stehen, ist der
+		# Knopf klickbar. Der Klick bucht den vollen Betrag EINMALIG ab, danach laeuft
+		# ChargeInterval als FORSCHUNGSZEIT, und nach Ablauf steigt das Age von selbst auf --
+		# kein zweiter Klick. Gilt ausschliesslich fuer die Age-Stufen; Ion Cannon, Atombombe
+		# usw. laden weiterhin zuerst und feuern auf Klick.
+		ResearchModel: True
+		Actor: aot-age3-marker
+		# Countdown oben rechts fuer ALLE Spieler, wie bei Ion Cannon und Atom Bomb
+		# (User-Wunsch 2026-08-04). Es taucht immer nur die gerade relevante Age-Stufe auf:
+		# das Timer-Widget filtert auf !Disabled, und Age 2/3 sind bis zum Vorgaenger per
+		# RequiresCondition deaktiviert, eine gekaufte Stufe per OneShot.
+		DisplayTimerRelationships: Ally, Neutral, Enemy
+		LifeTime: -1
+		OneShot: true
+		Cost: 10000
+		# Forschungszeit sinkt mit jeder Stufe (User 2026-08-05): 15:00 / 12:00 / 10:00.
+		# Roher Tickwert bei 25 Ticks/s -- Super Powers kennen keinen BuildDurationModifier,
+		# Preis und Dauer sind hier also ohnehin entkoppelt.
+		ChargeInterval: 15000
+		RequiresCondition: aot-age2-active && aot-faction-nod
+		PauseOnCondition: !aot-age3-unlocked || lowpower
+		IconImage: aot-age3-upgrade
+		Icon: icon
+		Name: 3rd Tiberium Age
+		Description: Upgrades to the most advanced Tiberium units, buildings and upgrades.
+		TooltipRequirements: Secret Shrine
+		# Nur fuer die Einfaerbung: fehlt die Voraussetzung, faerbt der Tooltip die
+		# Zeile rot. Gatet die Power NICHT -- das macht PauseOnCondition.
+		TooltipRequirementsPrerequisites: aot-shrine
+		SupportPowerPaletteOrder: 2
+	# === Age of Tiberium (aotmod) - NOD Airstrip Starport (Dune 2000 / TS style bulk delivery) ===
+	# Instant-Kauf bis MaxCapacity, dann Purchase-Button -> Frachtflieger liefert alle auf einmal.
+	# Player-Level-Queue (Pflicht: BulkProductionQueue ist [TraitLocation(Player)]).
+	# Group: Support -> erscheint unter dem SPECIAL VEHICLES-Tab.
+	BulkProductionQueue@Starport:
+		Type: Starport
+		Group: Support
+		Factions: nod
+		ShowLockedItems: True
+		MaxCapacity: 5
+		QueueLimit: 5
+		PayUpFront: true
+		# 500 -> 200 (2026-08-01, gegen LTNK-Queue-Kollisionen) -> 500 zurueck (User 2026-08-04):
+		# 200 Ticks sind nur ~8 Sekunden, der Airstrip lieferte damit praktisch im Dauerbetrieb.
+		# Die urspruengliche Begruendung ist ausserdem entfallen: TTNK-Flame und die V2-Varianten
+		# laufen inzwischen ueber LightVehicle.Nod statt ueber diese Queue, der 5-Slot-Karren
+		# fuellt sich also gar nicht mehr so schnell.
+		DeliveryDelay: 500
+		LowPowerModifier: 150
 		BlockedAudio: NoBuild
 		BlockedTextNotification: notification-unable-to-build-more
-		QueuedAudio: Building
+		QueuedAudio: Training
 		OnHoldAudio: OnHold
 		CancelledAudio: Cancelled
-	SupportPowerChargeBar:
-	GrantConditionOnPrerequisite@age1purchased:
-		Condition: aot-age1-purchased-cond
-		Prerequisites: aot-age1-purchased
-	GrantConditionOnPrerequisite@age2purchased:
-		Condition: aot-age2-purchased-cond
-		Prerequisites: aot-age2-purchased
-	GrantConditionOnPrerequisite@age3purchased:
-		Condition: aot-age3-purchased-cond
-		Prerequisites: aot-age3-purchased
-	AotAge1SuperPower:
-		Actor: aot-age1-marker
-		LifeTime: -1
-		OneShot: true
-		PauseOnCondition: !aot-age1-purchased-cond
-		ChargeInterval: 250
-		Icon: aot-age1
-		Name: 1st Tiberium Age
-		Description: Requires: 1st Tiberium Age Upgrade. The Tiberium era is emerging. New units and buildings are becoming available.
-		SupportPowerPaletteOrder: 50
-	AotAge2SuperPower:
-		Actor: aot-age2-marker
-		LifeTime: -1
-		OneShot: true
-		RequiresCondition: aot-age1-active
-		PauseOnCondition: !aot-age2-purchased-cond
-		ChargeInterval: 250
-		Icon: aot-age2
-		Name: 2nd Tiberium Age
-		Description: Requires: 2nd Tiberium Age Upgrade. Advanced Tiberium technologies are emerging. New upgrades and equipment becoming available.
-		SupportPowerPaletteOrder: 51
-	AotAge3SuperPower:
-		Actor: aot-age3-marker
-		LifeTime: -1
-		OneShot: true
-		RequiresCondition: aot-age2-active
-		PauseOnCondition: !aot-age3-purchased-cond
-		ChargeInterval: 250
-		Icon: aot-age3
-		Name: 3rd Tiberium Age
-		Description: Requires: 3rd Tiberium Age Upgrade. Peak Tiberium technology is emerging. The most advanced units and buildings are becoming available.
-		SupportPowerPaletteOrder: 52
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - FACT: Support.GDI/Nod-Queue entfernen ===
+# Kein AOT-Gebaeude nutzt Queue: Support.GDI/Nod mehr (alle nutzen Building.GDI/Nod).
+# Ohne diesen Remove erscheint die leere Support-Queue immer als Sub-Tab #1 im
+# Special-Vehicles-Tab und blockiert die Auto-Selektion der Vehicle.GDI-Queue.
+FACT:
+	# Engine-Default ist RepairActors:fix - diesen Aktor gibt es durch das
+	# FIX-Proxy-Pattern nicht mehr, daher konnte der undeployte MCV nicht
+	# zur Reparatur geschickt werden (analog ^Vehicle weiter oben).
+	TransformsIntoRepairable:
+		RepairActors: aot-fix-age0, aot-fix-age1, aot-fix-age2, aot-fix-age1-nod, aot-fix-age2-nod
+	ProductionQueue@GDIBuilding:
+		ShowLockedItems: True
+	ProductionQueue@NodBuilding:
+		ShowLockedItems: True
+	ProductionQueue@GDISupport:
+		Group: Hidden
+	ProductionQueue@NodSupport:
+		Group: Hidden
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - PYLE/HAND: ShowLockedItems fuer Infantry-Queues ===
+PYLE:
+	ProductionQueue:
+		ShowLockedItems: True
+
+HAND:
+	ProductionQueue:
+		ShowLockedItems: True
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - HPAD: ShowLockedItems fuer Aircraft-Queues ===
+HPAD:
+	ProductionQueue@GDI:
+		ShowLockedItems: True
+	ProductionQueue@Nod:
+		ShowLockedItems: True
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - WEAP: Prerequisite + eigener aot-weap-String ===
@@ -165,37 +1225,269 @@ FACT:
 # ProvidesPrerequisite@buildingname: → stellt "weap" bereit (für Tooltip-Lookup in age2-upgrade-gdi).
 WEAP:
 	Buildable:
-		Prerequisites: lite
+		BuildPaletteOrder: 150
+		# Umkehrung 2026-08-04 (User): frueher schaltete WEAP den Gatekeeper frei, jetzt
+		# schaltet der Gatekeeper WEAP frei. Damit haengt die Age-Kette nicht mehr an einem
+		# einzelnen Gebaeude, sondern an einem gekauften Upgrade.
+		Prerequisites: ~aot-age1, aot-age1, lite, aot-gdi-advtech-upgrade
 		Queue: Building.GDI
+		BuildLimit: 1
 	ProvidesPrerequisite@aot:
 		Prerequisite: aot-weap
 	ProvidesPrerequisite@buildingname:
+	ProductionQueue:
+		Group: Support
+		ShowLockedItems: True
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - AFLD: Prerequisite auf lite ===
+# === Age of Tiberium (aotmod) - AFLD: Starport-Umbau + Prerequisite ===
 # ProvidesPrerequisite@buildingname: → stellt "afld" bereit (für Tooltip-Lookup in age2-upgrade-nod).
+# -ProductionAirdrop / -ProductionQueue entfernen Engine-Traits (Vehicle.Nod queue entfällt).
+# BulkProductionQueue@Starport (Player-Level in overrides.yaml) wird durch ProductionBulkAirdrop aktiviert.
 AFLD:
+	# === Age-2-Sprite-Wechsel (Gemini-Import) ===
+	# Lichter laufen DAUERHAFT als eigenes Overlay (WithIdleOverlay), nicht ueber die
+	# "active"-Sequenz: die haengt an der Produktion und stand im Ruhezustand still.
+	AotGrantConditionOnPrerequisiteLatched@aotage2:
+		Condition: aot-age2-active
+		Prerequisites: aot-age2
+	-WithSpriteBody:
+	WithSpriteBody@base:
+		Sequence: idle
+		Name: body
+		RequiresCondition: !aot-age2-active
+	WithSpriteBody@ts:
+		Sequence: aot-age2-idle
+		Name: body-ts
+		RequiresCondition: aot-age2-active
+	# Die rotierende Schuessel gehoert zum Age-1-Sprite; im Gemini-Koerper ist sie enthalten.
+	WithIdleOverlay@DISH:
+		RequiresCondition: !aot-age2-active
+	WithIdleOverlay@tslights:
+		Sequence: aot-age2-lights
+		RequiresCondition: aot-age2-active && !build-incomplete
+	# Age 1 bekommt dieselbe Lichtanimation (im Original nur in der nie laufenden
+	# "active"-Sequenz enthalten).
+	WithIdleOverlay@tdlights:
+		Sequence: aot-td-lights
+		RequiresCondition: !aot-age2-active && !build-incomplete
+	-WithMakeAnimation:
+	WithMakeAnimation@base:
+		BodyNames: body
+		Condition: build-incomplete
+		Sequence: make
+	WithMakeAnimation@ts:
+		BodyNames: body-ts
+		Condition: build-incomplete
+		Sequence: aot-age2-make
 	Buildable:
-		Prerequisites: lite
+		BuildPaletteOrder: 150
+		# Umkehrung 2026-08-04 (User), siehe WEAP: Gatekeeper schaltet das Airfield frei.
+		Prerequisites: ~aot-age1, aot-age1, lite, aot-nod-secrettech-upgrade
 		Queue: Building.Nod
+		BuildLimit: 1
 	ProvidesPrerequisite@buildingname:
+	-ProductionAirdrop:
+	-ProductionQueue:
+	RallyPoint:
+		ForceSetType: Starport
+	ProductionBulkAirdrop:
+		Produces: Starport
+		ActorType: c17.bulk
+		LandOffset: -1024,0,0
+		Facing: 768
+		ReadyTextNotification: notification-reinforcements-have-arrived
+		# Ueberflug-Strecke vor dem Einkreisen. 6 = kleinste Strecke, bei der die Landung noch
+		# sauber Ost-West ausgerichtet ist (kuerzer -> Flieger richtet sich nicht mehr aus).
+		OverflyDistance: 6
+	PrimaryBuilding:
+		ProductionQueues: Starport
+	ProductionBar:
+		ProductionType: Starport
 # === Ende aotmod ===
 
-# === Age of Tiberium (aotmod) - PROC: erst nach Age-1-Upgrade baubar ===
+# === Age of Tiberium (aotmod) - PROC: GDI braucht WEAP, NOD braucht AFLD ===
+# Gemeinsame Queue-Definition funktioniert nicht mit unterschiedlichen Fraktions-Prerequisites.
+# Daher: PROC selbst bekommt keine Queue, zwei Proxy-Aktoren steuern die Sichtbarkeit.
 PROC:
+	-Buildable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Advanced Guard Tower: fuer alle Fraktionen nicht baubar (User-Wunsch 2026-07-12) ===
+# === Age of Tiberium (aotmod) - Ion Storm: Radar faellt aus ===
+# Waehrend eines Ion Storms ist bei ALLEN Spielern das Radar tot (User-Wunsch 2026-07-28).
+# ProvidesRadar ist ein ConditionalTrait -> RequiresCondition reicht. Der Eintrag kann NICHT
+# auf ^Building stehen: dort wuerde er den Trait jedem Gebaeude erst hinzufuegen und damit
+# allen Gebaeuden Radar geben. Deshalb einzeln auf den vier Basis-Aktoren, die ihn wirklich
+# haben - ihre Proxy-Varianten (aot-hq-base/-ion, aot-nod-radar-age0/-age2, ...) erben das.
+# Die Condition verteilt AotIonStormPower an alle Aktoren mit ProvidesRadar.
+# !lowpower gehoert IMMER mit in die Bedingung: RequiresCondition ersetzt den geerbten Wert,
+# ein blosses "!aot-ion-storm-blackout" wuerde die Stromabhaengigkeit also stillschweigend
+# entfernen (genau dieser Bug 2026-07-28).
+HQ:
+	ProvidesRadar:
+		RequiresCondition: !lowpower && !aot-ion-storm-blackout
+
+EYE:
+	ProvidesRadar:
+		RequiresCondition: !lowpower && !aot-ion-storm-blackout
+
+ATEC:
+	ProvidesRadar:
+		RequiresCondition: !lowpower && !aot-ion-storm-blackout
+
+aot-nod-radar:
+	ProvidesRadar:
+		RequiresCondition: !lowpower && !aot-ion-storm-blackout
+
+ATWR:
+	-Buildable:
+	# Nur noch im Karteneditor platzierbar (MapEditorData.Categories: Support bleibt erhalten).
+	# User-Wunsch 2026-07-29: statt fest stromunabhaengig, jetzt eine Karteneditor-Checkbox
+	# "Requires power" (Standard: an = normales Verhalten wie vor diesem Patch). AotOptionalPower
+	# gewaehrt die Condition "aot-power-required" einmalig bei Erzeugung, exakt nach dem Wert der
+	# Checkbox. Power und GrantConditionOnPowerState@LOWPOWER haengen beide daran - alles danach
+	# (WithColoredOverlay@IDISABLE, AttackTurreted.PauseOnCondition, DetectCloaked !lowpower)
+	# bleibt unveraendert auf der PER-AKTOR-Condition "lowpower", die bei deaktivierter Checkbox
+	# einfach nie gewaehrt wird. Kein einziger Konsument muss dafuer angefasst werden.
+	AotOptionalPower:
+		Condition: aot-power-required
+	Power:
+		RequiresCondition: aot-power-required
+	GrantConditionOnPowerState@LOWPOWER:
+		RequiresCondition: aot-power-required
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - aot-proc-gdi: PROC für GDI (braucht Advanced Factory) ===
+aot-proc-gdi:
+	Inherits: PROC
+	RenderSprites:
+		Image: proc
+	ProvidesPrerequisite@buildingname:
+		Prerequisite: proc
+	ProvidesPrerequisite@aotid:
+		Prerequisite: aot-proc-gdi
 	Buildable:
-		Prerequisites: ~aot-age1
-		Queue: Building.GDI, Building.Nod
+		BuildPaletteOrder: 160
+		LockedGroup: aot-grp-proc
+		# aot-weap 2026-08-04 entfernt: die Refinery kommt jetzt VOR der Waffenfabrik.
+		Prerequisites: ~aot-age1, aot-age1, ~!aot-age2, silo, aot-gdi-advtech-upgrade
+		Queue: Building.GDI
+	WithSpriteBody@ts:
+		Sequence: aot-age2-nod-idle
+		Name: body-ts
+		RequiresCondition: aot-age2-active
+	WithIdleOverlay@tsanim:
+		Sequence: aot-age2-nod-anim
+		RequiresCondition: aot-age2-active && !build-incomplete
+
+aot-proc-gdi-age2:
+	Inherits: PROC
+	RenderSprites:
+		Image: proc
+	ProvidesPrerequisite@buildingname:
+		Prerequisite: proc
+	ProvidesPrerequisite@aotid:
+		Prerequisite: aot-proc-gdi
+	Buildable:
+		BuildPaletteOrder: 160
+		LockedGroup: aot-grp-proc
+		Prerequisites: ~aot-age2, aot-age2, aot-weap, silo, aot-gdi-advtech-upgrade
+		Queue: Building.GDI
+	-WithSpriteBody@base:
+	-WithMakeAnimation@base:
+	WithSpriteBody@ts:
+		Sequence: aot-age2-nod-idle
+		Name: body-ts
+		RequiresCondition: aot-age2-active || !aot-age2-active
+	WithIdleOverlay@tsanim:
+		Sequence: aot-age2-nod-anim
+		RequiresCondition: !build-incomplete
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: aot-age2-nod-idle
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - aot-proc-nod: PROC für NOD (braucht Airfield) ===
+aot-proc-nod:
+	Inherits: PROC
+	# Fraktionsrichtiger Gratis-Harvester (siehe PROC in aot-structures.yaml): NOD baut
+	# aot-harv-nod, nicht aot-harv.
+	FreeActor:
+		Actor: aot-harv-nod
+	RenderSprites:
+		Image: proc
+	ProvidesPrerequisite@buildingname:
+		Prerequisite: proc
+	ProvidesPrerequisite@aotid:
+		Prerequisite: aot-proc-nod
+	Buildable:
+		BuildPaletteOrder: 160
+		LockedGroup: aot-grp-proc
+		# afld 2026-08-04 entfernt: die Refinery kommt jetzt VOR dem Airfield.
+		Prerequisites: ~aot-age1, aot-age1, ~!aot-age2, silo, aot-nod-secrettech-upgrade
+		Queue: Building.Nod
+	WithSpriteBody@ts:
+		Sequence: aot-age2-nod-idle
+		Name: body-ts
+		RequiresCondition: aot-age2-active
+	WithIdleOverlay@tsanim:
+		Sequence: aot-age2-nod-anim
+		RequiresCondition: aot-age2-active && !build-incomplete
+
+aot-proc-nod-age2:
+	Inherits: PROC
+	# Fraktionsrichtiger Gratis-Harvester (siehe PROC in aot-structures.yaml): NOD baut
+	# aot-harv-nod, nicht aot-harv.
+	FreeActor:
+		Actor: aot-harv-nod
+	RenderSprites:
+		Image: proc
+	ProvidesPrerequisite@buildingname:
+		Prerequisite: proc
+	ProvidesPrerequisite@aotid:
+		Prerequisite: aot-proc-nod
+	Buildable:
+		BuildPaletteOrder: 160
+		LockedGroup: aot-grp-proc
+		Prerequisites: ~aot-age2, aot-age2, afld, silo, aot-nod-secrettech-upgrade
+		Queue: Building.Nod
+	-WithSpriteBody@base:
+	-WithMakeAnimation@base:
+	WithSpriteBody@ts:
+		Sequence: aot-age2-nod-idle
+		Name: body-ts
+		RequiresCondition: aot-age2-active || !aot-age2-active
+	WithIdleOverlay@tsanim:
+		Sequence: aot-age2-nod-anim
+		RequiresCondition: !build-incomplete
+	-ActorPreviewPlaceBuildingPreview:
+	SequencePlaceBuildingPreview:
+		Sequence: aot-age2-nod-idle
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - APC: erst nach APC Upgrade baubar ===
 # Verhindert APC-Produktion bis der Spieler das APC Upgrade (Entweder/Oder) kauft.
 APC:
+	# Eis: bricht NICHT ein (leicht genug). Am Basis-Aktor -> alle Proxies (aot-jeep-humvee,
+	# aot-jeep-wolverine, aot-bggy/bike-laser, aot-apc-*) erben es automatisch. Siehe [[ice-growth-system]].
+	AotIceUnbreakable:
+	# Veins: kein DoT (leicht genug), analog zum Eis-AotIceUnbreakable. Proxies erben es.
+	-DamagedByTerrain@VEINS:
+	# User-Briefing 2026-08-01: kein eigenes Kauf-Upgrade mehr (aot-upgrade-apc entfernt) -- sicht-
+	# und baubar ab Age 1 (unabhaengig von GDI Advanced Technologies), sofern eigene Infantry-
+	# Produktion (barracks, von PYLE/HAND automatisch bereitgestellt) vorhanden ist. Kein
+	# Ausschluss mehr mit HUMVEE.
 	Buildable:
-		Prerequisites: lite, ~aot-apc-upgrade, ~!aot-humvee-upgrade
+		ShowWhenLocked: False
+		Prerequisites: lite, barracks, ~aot-age1, aot-age1, ~!aot-amphibious-upgrade, ~!aot-minelayer-upgrade
 		Queue: LightVehicle.GDI
 		Description: Armored Personnel Carrier. Can carry 5 soldiers.
-		BuildPaletteOrder: 3
+		BuildPaletteOrder: 4
+	# ALT (ForceMove) -> APC faehrt zum Ziel und entlaedt dort. Am Basis-Aktor -> der Amphibious APC
+	# (aot-apc-amphibious) erbt es. Der Minelayer (aot-minelayer) erbt zwar APC, entfernt aber Cargo
+	# -> dort per -AotMoveUnloadCargo wieder raus (sonst Requires<CargoInfo>-Fehler).
+	AotMoveUnloadCargo:
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - MTNK Tier-0: reduzierte HP ===
@@ -207,12 +1499,951 @@ MTNK:
 	-Buildable:
 
 
-HTNK:
-	-Buildable:
 
 MSAM:
+	# User-Briefing 2026-08-01: MSAM-Freischaltung jetzt an aot-gdi-advtech-upgrade gebunden
+	# (statt nur an WEAP-Gebaeude). Hover-MLRS/-AA sind keine eigenen Kauf-Upgrades mehr, beide
+	# haengen an aot-heavy-ordonance-upgrade (GDI Heavy Ordonance) -- der Retrofit auf bereits
+	# gebaute MSAM transformiert unbedingt auf Hover-MLRS (Standard); Hover-AA ist NUR ein
+	# Baumenue-Zusatzoption (kein Retrofit-Ziel), zusaetzlich an aot-orbc gebunden.
 	Buildable:
-		Prerequisites: anyhq, ~techlevel.medium, ~aot-age1, aot-age1, weap
+		LockedGroup: aot-grp-msam
+		Prerequisites: anyhq, ~techlevel.medium, ~aot-age1, aot-age1, weap, aot-gdi-advtech-upgrade, ~!aot-heavy-ordonance-upgrade, ~!aot-mtnk-titan-upgrade
 		Queue: Vehicle.GDI
-		BuildPaletteOrder: 4
+		BuildPaletteOrder: 20
+		Description: Multiple Rocket Launcher. Long-range rocket artillery. Strong vs ground. Can engage aircraft in a pinch.
+	# GrantConditionOnPrerequisite noetig: AotTransformsOnTerrain.RequiresCondition liest eine
+	# RUNTIME-Condition (vom Trait-System), keinen TechTree-Prerequisite-String -- ohne diesen
+	# Trait waere aot-heavy-ordonance-upgrade auf MSAM nie gegrantet ("consumes conditions that
+	# are not granted").
+	AutoTargetPriority@Air:
+		ValidTargets: Air
+		Priority: 2
+	# Boden: unveraenderte ballistische 227mm-Doppelsalve (Original-Feel).
+	# Luft: eigene air-only Sekundaerwaffe (aot-MSAM-AA, zielsuchend, schwach).
+	Armament@AA:
+		Name: aa
+		Weapon: aot-MSAM-AA
+		# Offsets alternieren pro Burst-Schuss -> die 4 gleichzeitigen Raketen starten
+		# aus beiden Pods (gleiche Y-Offsets wie die ballistische Bodenwaffe).
+		LocalOffset: 213,128,96, 213,-128,96
+	# AttackFrontal (FacingTolerance 0) zwang das ganze Chassis, sich exakt zum Ziel zu drehen
+	# -- gegen fliegende Ziele praktisch nie feuerbar. Der MSAM-Turret hat 32 Facings (voll
+	# rotierbar), daher wie beim funktionierenden Hover MLRS auf AttackTurreted umgestellt:
+	# der Raketenwerfer zielt unabhaengig, Boden UND Luft. Die ballistische Boden-Salve bleibt
+	# davon unberuehrt (nur die Turret-Ausrichtung wird unabhaengig).
+	-AttackFrontal:
+	AttackTurreted:
+		Voice: Attack
+		# PFLICHT: AttackBase.Armaments ist per Default NUR ["primary", "secondary"]
+		# (AttackBase.cs:28 + :129 filtert per Name). Ohne "aa" hier wird Armament@AA
+		# schlicht ignoriert -> MSAM sieht Lufteinheiten gar nicht als gueltiges Ziel,
+		# Force-Fire faellt auf die Boden-Zelle zurueck (User-Fund: kein Aufblinken,
+		# kein Verfolgen, nur Boden-Salve).
+		Armaments: primary, secondary, aa
+	GrantConditionOnPrerequisite@HEAVYORD:
+		Condition: aot-heavy-ordonance-upgrade
+		Prerequisites: aot-heavy-ordonance-upgrade
+	AotTransformsOnTerrain@HOVER_MLRS:
+		IntoActor: aot-msam-hover-mlrs
+		TerrainTypes: Clear, Rough, Road, Bridge, Tiberium, BlueTiberium, Beach, Water, Rock, Clear.Snow
+		RequiresCondition: aot-heavy-ordonance-upgrade
+	# Fire Position (Phase 3) Garrison-Waffe. 227mm ist bereits Blockable:false,
+	# daher keine eigene Garrison-Waffenvariante noetig (direkte Wiederverwendung).
+	Armament@garrisoned:
+		Name: garrisoned
+		Weapon: 227mm
+	# Garrison-Flugabwehr (2026-08-29): die Feld-AA (aot-MSAM-AA) laeuft nur ueber das
+	# "aa"-Armament, das AttackGarrisoned (Filter "garrisoned") ignoriert -> garnisonierter
+	# MSAM konnte keine Luftziele bekaempfen. Zweites Garrison-Armament mit Name "garrisoned"
+	# fuer die AA-Waffe (1:1 Hover-AA-Muster @garrisonedair). AttackGarrisoned filtert per
+	# Name, nicht per Instanz -> zwei "garrisoned"-Armaments (Boden+Luft) sind zulaessig.
+	Armament@garrisonedair:
+		Name: garrisoned
+		Weapon: aot-MSAM-AA
+		LocalOffset: 213,128,96, 213,-128,96
+# === Ende aotmod ===
+
+# MLRS (NOD Anti-Air): aus Bauliste entfernen
+MLRS:
+	-Buildable:
+
+# === Age of Tiberium (aotmod) - HPAD: kein direktes Buildable, Proxy-Aktoren übernehmen ===
+HPAD:
+	-Buildable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - ORCA/HELI: RA-Nachladeroutine (manuell zum Helipad) ===
+# ReloadAmmoPool entfernt → kein automatisches Nachladen in der Luft.
+# Rearmable → Einheit fliegt selbstständig zu HPAD zurück wenn Ammo = 0.
+ORCA:
+	-Buildable:
+	-ReloadAmmoPool:
+	-SpawnActorOnDeath:
+	SpawnActorOnDeath@apache:
+		Actor: aot-apache-husk
+		RequiresCondition: !aot-orca-upgraded
+	SpawnActorOnDeath@orca:
+		Actor: ORCA.Husk
+		RequiresCondition: aot-orca-upgraded
+	RenderSprites:
+		Image: aot-heli
+	Aircraft:
+		IdleBehavior: None
+		TakeOffOnResupply: false
+		TakeOffOnCreation: true
+		# aotmod 2026-08-21: TS-Orca-Start/Lande-Sounds (aus TS extrahiert, s. [[aot-orcatran-system]]).
+		TakeoffSounds: orcaup1.aud
+		LandingSounds: orcadwn1.aud
+	# aot-cruiser-carrier-proxy MUSS mit gelistet sein: der aus dem Naval-Tab (nach Carrier-Upgrade)
+	# gebaute Carrier ist dieser separate Aktorname, waehrend ein hochgeruesteter Basis-aot-cruiser
+	# denselben Deploy-Carrier-Modus hat. Rearmable/Repairable matchen per Aktorname -> ohne den Proxy
+	# konnten ORCAs auf einem gebauten (statt hochgeruesteten) deployten Carrier nicht landen/aufladen.
+	Rearmable:
+		RearmActors: aot-hpad-gdi, aot-cruiser, aot-cruiser-carrier-proxy
+	Repairable:
+		RepairActors: aot-hpad-gdi, aot-cruiser, aot-cruiser-carrier-proxy
+	AotReturnWhenEmpty:
+	# Guard-Leash (aotmod 2026-08-27): Apache/ORCA hovern im Idle und griffen ueber ^AutoTargetAllAssaultMove
+	# mit ScanOnIdle=True ungeleasht an -> liessen sich (z.B. von vorbeifliegenden MiGs) ueber die ganze
+	# Karte ziehen und kehrten nie zurueck. Fix: ScanOnIdle False + AotAirGuard uebernimmt Angriff+Rueckkehr
+	# mit LeashRadius. AutoTargetPriority wird aus ^AutoTargetAllAssaultMove geerbt (enthaelt Air).
+	AutoTarget:
+		ScanRadius: 6
+		ScanOnIdle: False
+	AotAirGuard:
+		LeashRadius: 10c0
+	# TakeOffOnCreation:false landet an der Exit-Zelle direkt auf dem Helipad-Footprint -
+	# CanLand() prueft dort aber Terrain+blockierende Aktoren OHNE dockingActor-Ausnahme
+	# und scheitert am eigenen Gebaeude, daher sofortiges Hovern (Bug). Fix: normal
+	# abheben lassen (TakeOffOnCreation:true), dann beim ersten Idle-Werden per
+	# AotLandOnCreation einmalig ein echtes ReturnToBase/Dock erzwingen - das nutzt
+	# dieselbe funktionierende dockingActor-bewusste Landepruefung wie normales Rearmen.
+	AotLandOnCreation:
+	GrantConditionOnPrerequisite@orcaupgrade:
+		Condition: aot-orca-upgraded
+		Prerequisites: aot-orca-upgrade
+	-WithFacingSpriteBody:
+	WithFacingSpriteBody@apache:
+		Sequence: aot-apache-idle
+		Name: body
+		RequiresCondition: !aot-orca-upgraded
+	WithFacingSpriteBody@orca:
+		Sequence: idle
+		Name: body-orca
+		RequiresCondition: aot-orca-upgraded
+	-WithMoveAnimation:
+	WithIdleOverlay@ROTORAIR:
+		Offset: 0,0,85
+		Sequence: aot-apache-rotor
+		RequiresCondition: airborne && !aot-orca-upgraded
+	WithIdleOverlay@ROTORGROUND:
+		Offset: 0,0,85
+		Sequence: aot-apache-slow-rotor
+		RequiresCondition: !airborne && !aot-orca-upgraded
+	-Armament@PRIMARY:
+	Armament@PRIMARY:
+		Weapon: aot-ApacheAGMissiles
+		LocalOffset: 427,-171,-213, 427,171,-213
+		PauseOnCondition: !ammo || aot-orca-upgraded
+	Armament@PRIMARY_orca:
+		Weapon: OrcaAGMissiles
+		LocalOffset: 427,-171,-213, 427,171,-213
+		PauseOnCondition: !ammo || !aot-orca-upgraded
+	Armament@SECONDARY:
+		PauseOnCondition: !ammo || !aot-orca-upgraded
+
+HELI:
+	-Buildable:
+	# aotmod 2026-08-29: WithMuzzleOverlay wieder aktiv – der aot-hind-Image-Block hat jetzt eine
+	# muzzle-Sequenz (aot-sequences.yaml). HIND/Harpy zeigen dadurch das Chaingun-Muendungsfeuer.
+	Repairable:
+		RepairActors: aot-hpad-nod
+	RenderSprites:
+		Image: aot-hind
+	Aircraft:
+		IdleBehavior: None
+		TakeOffOnResupply: true
+		TakeOffOnCreation: true
+		# aotmod 2026-08-21: TS-Orca-Start/Lande-Sounds (Hind/Harpy), s. [[aot-orcatran-system]].
+		TakeoffSounds: orcaup1.aud
+		LandingSounds: orcadwn1.aud
+	# Guard-Leash (aotmod 2026-08-27): analog ORCA - Hind/Harpy nicht mehr ungeleasht ueber die
+	# ganze Karte ziehbar. ScanOnIdle False + AotAirGuard (Angriff+Rueckkehr, LeashRadius).
+	AutoTarget:
+		ScanRadius: 6
+		ScanOnIdle: False
+	AotAirGuard:
+		LeashRadius: 10c0
+	GrantConditionOnPrerequisite@harpyupgrade:
+		Condition: aot-harpy-upgraded
+		Prerequisites: aot-harpy-upgrade
+	GrantConditionOnPrerequisite@harpylaser:
+		Condition: aot-harpy-laser
+		# Laser-Waffe jetzt eigenes Age-3-Upgrade (User 2026-08-05). aot-harpy-laser-upgrade
+		# = aot-upgrade-harpy-laser; Harpy-Upgrade bleibt zusaetzlich Voraussetzung.
+		Prerequisites: aot-harpy-upgrade, aot-harpy-laser-upgrade
+	-WithFacingSpriteBody:
+	WithFacingSpriteBody@hind:
+		Sequence: aot-hind-idle
+		Name: body
+		RequiresCondition: !aot-harpy-upgraded
+	WithFacingSpriteBody@harpy:
+		Sequence: aot-harpy-test-idle
+		Name: body-harpy
+		RequiresCondition: aot-harpy-upgraded
+	# Player-Color-Overlay-Layer für den Harpy-Voxel-Body (Indizes 176-191 → player-Palette).
+	WithFacingSpriteBody@harpyremap:
+		Sequence: aot-harpy-test-remap
+		Name: body-harpy-remap
+		RequiresCondition: aot-harpy-upgraded
+	WithIdleOverlay@ROTORAIR:
+		Offset: 0,0,85
+		Sequence: aot-hind-rotor
+		RequiresCondition: airborne && !aot-harpy-upgraded
+	WithIdleOverlay@ROTORGROUND:
+		Offset: 0,0,85
+		Sequence: aot-hind-slow-rotor
+		RequiresCondition: !airborne && !aot-harpy-upgraded
+	WithIdleOverlay@ROTORAIR_harpy:
+		Offset: 0,0,85
+		Sequence: rotor
+		RequiresCondition: airborne && aot-harpy-upgraded
+	WithIdleOverlay@ROTORGROUND_harpy:
+		Offset: 0,0,85
+		Sequence: slow-rotor
+		RequiresCondition: !airborne && aot-harpy-upgraded
+	-Armament@PRIMARY:
+	Armament@PRIMARY:
+		Weapon: aot-HindAGGun
+		LocalOffset: 128,-213,-85, 128,213,-85
+		PauseOnCondition: !ammo || aot-harpy-upgraded
+		# aotmod 2026-08-29: MuzzleSequence war beim -Armament@PRIMARY/Neu-Definieren verlorengegangen
+		# (Engine-HELI setzt es). Ohne dieses Feld filtert WithMuzzleOverlay das Armament komplett raus
+		# -> gar kein Muendungsfeuer. Referenziert die neue muzzle-Sequenz im aot-hind-Image.
+		MuzzleSequence: muzzle
+	Armament@PRIMARY_harpy:
+		Weapon: aot-HarpyAGGun
+		LocalOffset: 128,-213,-85, 128,213,-85
+		PauseOnCondition: !ammo || !aot-harpy-upgraded || aot-harpy-laser
+		MuzzleSequence: muzzle
+	Armament@PRIMARY_harpy_laser:
+		Weapon: aot-HarpyLaser
+		LocalOffset: 128,-213,-85, 128,213,-85
+		PauseOnCondition: !ammo || !aot-harpy-upgraded || !aot-harpy-laser
+	Armament@SECONDARY:
+		PauseOnCondition: true
+	Cloak:
+		InitialDelay: 150
+		CloakDelay: 150
+		CloakSound: trans1.aud
+		UncloakSound: trans1.aud
+		CloakStyle: Alpha
+		CloakedAlpha: 0.35
+		UncloakOn: Attack, Unload, Dock, Damage, Heal
+		PauseOnCondition: !aot-harpy-upgraded || harpy-cloak-disabled
+	GrantConditionOnDamageState@HARPYCLOAK:
+		Condition: harpy-cloak-disabled
+		ValidDamageStates: Critical
+	SpawnActorOnDeath:
+		Actor: aot-harpy-husk
+
+# === Age of Tiberium (aotmod) - BGGY Laser Technologies Upgrade ===
+# Sobald "Laser Technologies" (aot-laser-fence-upgrade) aktiv ist, wechselt JEDER
+# Buggy (bereits gebaute wie neu gebaute) automatisch die Waffe auf denselben
+# Laser wie der Harpy (aot-HarpyLaser). Kein eigener Upgrade-Aktor noetig -
+# die Condition greift direkt auf das globale Prerequisite zu (analog HELI/Harpy).
+BGGY:
+	# Eis: bricht NICHT ein (leicht genug). Am Basis-Aktor -> alle Proxies (aot-jeep-humvee,
+	# aot-jeep-wolverine, aot-bggy/bike-laser, aot-apc-*) erben es automatisch. Siehe [[ice-growth-system]].
+	AotIceUnbreakable:
+	# Veins: kein DoT (leicht genug), analog zum Eis-AotIceUnbreakable. Proxies erben es.
+	-DamagedByTerrain@VEINS:
+	-Buildable:
+	GrantConditionOnPrerequisite@laserupgrade:
+		Condition: aot-bggy-laser
+		# Laser-Waffe jetzt eigenes Age-3-Upgrade (User 2026-08-05). aot-buggy-laser-upgrade
+		# = aot-upgrade-buggy-laser.
+		Prerequisites: aot-buggy-laser-upgrade
+	-Armament:
+	Armament:
+		Weapon: MachineGun
+		LocalOffset: 171,0,43
+		MuzzleSequence: muzzle
+		RequiresCondition: !aot-bggy-laser
+	Armament@laser:
+		Weapon: aot-HarpyLaser
+		LocalOffset: 171,0,43
+		RequiresCondition: aot-bggy-laser
+	# Fire Position (Phase 3) Garrison-Waffen, gleiche Conditions wie oben.
+	Armament@garrisoned:
+		Name: garrisoned
+		Weapon: aot-MachineGunGarrisoned
+		RequiresCondition: !aot-bggy-laser
+	Armament@garrisonedlaser:
+		Name: garrisoned
+		Weapon: aot-HarpyLaser
+		RequiresCondition: aot-bggy-laser
+
+# === Age of Tiberium (aotmod) - TRAN Transport Helo: beide Fraktionen, ab Age 0, 5 Infanteristen ===
+# GDI-exklusive Age-2-Upgrades (gegenseitig exklusiv):
+#   aot-upgrade-tran-doorgunner: Infanterie schießt durch Türen (AttackGarrisoned)
+#   aot-upgrade-tran-carryall:  Wandelt TRAN in Carryall um (1 Fahrzeug drunter hängend, TS-Sprites Platzhalter)
+# Beide Upgrades erteilen eine Condition via GrantConditionOnPrerequisite; TRAN reagiert darauf.
+TRAN:
+	-Buildable:
+	# aotmod 2026-08-21: TS-Orca-Start/Lande-Sounds (Chinook), s. [[aot-orcatran-system]].
+	# Partieller Aircraft-Override -> nur die Sound-Felder, alles andere erbt vom Engine-TRAN.
+	Aircraft:
+		TakeoffSounds: orcaup1.aud
+		LandingSounds: orcadwn1.aud
+	# Cargo: MaxWeight auf 5 reduziert (Engine-Default: 10). Trait komplett deaktiviert wenn Carryall aktiv
+	# (Cargo ist ConditionalTrait → CanLoad() prüft IsTraitDisabled → kein Boarding mehr möglich).
+	Cargo:
+		Types: Infantry
+		MaxWeight: 5
+		UnloadVoice: Unload
+		AfterUnloadDelay: 40
+		RequiresCondition: !aot-tran-carryall-upgrade
+		# Parachute Bay: Unload-Button ausblenden wenn Parachute-Upgrade aktiv (AotParachuteDropCargo übernimmt)
+		BlockDeployCondition: aot-tran-parachute-upgrade
+	# Eject bereits geladene Passagiere sofort wenn Carryall-Upgrade greift.
+	# Cargo.Unload() prüft NICHT IsTraitDisabled → funktioniert auch wenn Cargo gleichzeitig disabled wird.
+	AotEjectCargoOnCondition:
+		Condition: aot-tran-carryall-upgrade
+	# NOD Parachute Bay Upgrade: Passagiere springen mit Fallschirmen raus statt normaler Entladung
+	GrantConditionOnPrerequisite@parachute:
+		Condition: aot-tran-parachute-upgrade
+		Prerequisites: aot-tran-parachute-upgrade
+	AotParachuteDropCargo:
+		RequiresCondition: aot-tran-parachute-upgrade
+		DropSound: aot-chute1.aud
+	# ALT (ForceMove) -> Chinook fliegt zum Ziel, landet und entlaedt dort.
+	# NUR im normalen Cargo-Modus: der Parachute-Modus hat sein eigenes ForceMove-Abwurf-Verhalten
+	# (AotParachuteDropCargo, unveraendert), der Carryall-Modus seine Deliver-Order.
+	AotMoveUnloadCargo:
+		RequiresCondition: !aot-tran-parachute-upgrade && !aot-tran-carryall-upgrade
+	WithCargoPipsDecoration:
+		RequiresCondition: !aot-tran-carryall-upgrade
+		Position: BottomLeft
+		Margin: 4, 3
+		RequiresSelection: true
+		CustomPipSequences:
+			gray: pip-gray
+			yellow: pip-yellow
+			red: pip-red
+	Repairable:
+		RepairActors: aot-hpad-gdi, aot-hpad-nod
+	# GDI-Upgrade-Conditions
+	GrantConditionOnPrerequisite@doorgunner:
+		Condition: aot-tran-doorgunner-upgrade
+		Prerequisites: aot-tran-doorgunner-upgrade
+	GrantConditionOnPrerequisite@carryall:
+		Condition: aot-tran-carryall-upgrade
+		Prerequisites: aot-tran-carryall-upgrade
+	# Carryall-Trait: inaktiv bis Carryall-Upgrade. Fahrzeug hängt mit LocalOffset Z=-512 unter dem Heli.
+	# AutoCarryall statt Carryall (User-Wunsch 2026-08-01, "Carryall Harvester Transport"):
+	# AutoCarryallInfo ERBT von CarryallInfo, das manuelle PickupUnit bleibt also unveraendert --
+	# dazu kommt die fertige Dune-2000-Faehrlogik. AutoCarryCondition schaltet sie NUR ein, wenn
+	# der Spieler die Routine per Enter-Cursor auf einer Refinery scharf gestellt hat
+	# (aot-carryall-ferry-armed, siehe AotCarryallHarvestFerry unten).
+	# Kein "-Carryall:" noetig -- TRAN erbt keinen, der Trait wurde hier erst definiert und ist
+	# jetzt durch AutoCarryall ERSETZT (beide nebeneinander ginge nicht, AutoCarryall IST ein Carryall).
+	AutoCarryall:
+		RequiresCondition: aot-tran-carryall-upgrade
+		LocalOffset: 0, 0, -512
+		AllowDropOff: true
+		AutoCarryCondition: aot-carryall-ferry-armed
+	# Aktivierung + Kreisen am letzten Absetzort. Braucht zusaetzlich das gekaufte Upgrade --
+	# ohne das taucht der Enter-Cursor auf Refineries gar nicht erst auf.
+	AotCarryallHarvestFerry:
+		RequiresCondition: aot-tran-carryall-upgrade && aot-carryall-harvest-upgrade
+		ArmedCondition: aot-carryall-ferry-armed
+		RefineryActors: proc, aot-proc-gdi, aot-proc-gdi-age2, aot-proc-nod, aot-proc-nod-age2
+	GrantConditionOnPrerequisite@carryallharvest:
+		Condition: aot-carryall-harvest-upgrade
+		Prerequisites: aot-carryall-harvest-upgrade
+	# Rotoren nur im Chinook-Modus sichtbar (nicht beim TS-Carryall VXL, das hat Rotoren eingebakt)
+	WithIdleOverlay@ROTOR1AIR:
+		RequiresCondition: airborne && !aot-tran-carryall-upgrade
+	WithIdleOverlay@ROTOR1GROUND:
+		RequiresCondition: !airborne && !aot-tran-carryall-upgrade
+	WithIdleOverlay@ROTOR2AIR:
+		RequiresCondition: airborne && !aot-tran-carryall-upgrade
+	WithIdleOverlay@ROTOR2GROUND:
+		RequiresCondition: !airborne && !aot-tran-carryall-upgrade
+	# Sprite-Switch: Chinook-Sprites (Default) ↔ TS-Carryall VXL
+	RenderSprites:
+		Image: aot-tran-cary
+	-WithFacingSpriteBody:
+	WithFacingSpriteBody@tran:
+		Sequence: idle
+		Name: body
+		RequiresCondition: !aot-tran-carryall-upgrade
+	WithFacingSpriteBody@cary:
+		Sequence: idle-cary
+		Name: body-cary
+		RequiresCondition: aot-tran-carryall-upgrade
+	WithFacingSpriteBody@caryremap:
+		Sequence: idle-cary-remap
+		Name: body-cary-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-tran-carryall-upgrade
+	# Doorgunner: 2 Fire-Ports (links + rechts), Infanterie schießt durch Türen
+	AttackGarrisoned:
+		RequiresCondition: aot-tran-doorgunner-upgrade
+		Armaments: garrisoned
+		PortOffsets: 0,512,128, 0,-512,128
+		PortYaws: 256, 768
+		PortCones: 256, 256
+		Cursor: attack
+		OutsideRangeCursor: attackoutsiderange
+	Armament@garrisoned:
+		Name: garrisoned
+		Weapon: aot-MachineGunGarrisoned
+		RequiresCondition: aot-tran-doorgunner-upgrade
+	AutoTarget:
+		RequiresCondition: aot-tran-doorgunner-upgrade
+		ScanRadius: 3
+		ScanOnIdle: False
+	# Ohne AutoTargetPriority waehlt AutoTarget NIE ein Ziel (activePriorities leer) -- das war der
+	# Grund, warum das Gunship selbst direkt ueber einem Gegner nicht angriff.
+	AutoTargetPriority@GUNSHIP:
+		RequiresCondition: aot-tran-doorgunner-upgrade
+		ValidTargets: Infantry, Vehicle, Creep, Water, Air
+		InvalidTargets: NoAutoTarget
+	# Guard-Leash (aotmod 2026-08-20): das Gunship-Chinook geht aus dem Idle-Hover in den Angriff, wenn
+	# ein Gegner im Umkreis von 3 Zellen ist (auch direkt darunter), und kehrt danach zum Hover-Platz
+	# zurueck. Leash = Guard (3c0): keine echte Verfolgung darueber hinaus -> kein "Zergen" ueber die
+	# halbe Map. AutoTarget liefert nur die Zielauswahl; AotAirGuard steuert Angriff + Rueckkehr.
+	AotAirGuard:
+		RequiresCondition: aot-tran-doorgunner-upgrade
+		LeashRadius: 3c0
+
+# === Age of Tiberium (aotmod) - NOD Stealth Tank: Age-Gate + Cargo Upgrade ===
+# Baubar/sichtbar ab Age 1 statt techlevel.high (siehe Proxy-Aktoren aot-stnk-base/aot-stnk-cargo
+# in aot-units.yaml). Cargo Upgrade gibt 5 Infanterie-Slots, gilt sofort fuer bereits gebaute
+# Stealth Tanks (GrantConditionOnPrerequisite reagiert auf alle existierenden Aktoren).
+TRAN.Husk:
+	# Im Carryall-Modus muss der Husk (fallender Heli) den Carryall-Sprite zeigen.
+	# GrantConditionOnPrerequisite reagiert auf alle existierenden Aktoren im World.
+	GrantConditionOnPrerequisite@carryall:
+		Condition: aot-tran-carryall-upgrade
+		Prerequisites: aot-tran-carryall-upgrade
+	RenderSprites:
+		Image: aot-tran-cary
+	-WithFacingSpriteBody:
+	WithFacingSpriteBody@tran:
+		Sequence: idle
+		Name: body
+		RequiresCondition: !aot-tran-carryall-upgrade
+	WithFacingSpriteBody@cary:
+		Sequence: idle-cary
+		Name: body-cary
+		RequiresCondition: aot-tran-carryall-upgrade
+	WithFacingSpriteBody@caryremap:
+		Sequence: idle-cary-remap
+		Name: body-cary-remap
+		Palette: player
+		IsPlayerPalette: True
+		RequiresCondition: aot-tran-carryall-upgrade
+	WithIdleOverlay@ROTOR1:
+		RequiresCondition: !aot-tran-carryall-upgrade
+	WithIdleOverlay@ROTOR2:
+		RequiresCondition: !aot-tran-carryall-upgrade
+
+# Enttarnen beim Ein-/Aussteigen mit Delay, analog aot-sub (siehe sub-cargo-system): "Load" zu
+# UncloakOn ergaenzt, Cargo.LoadingCondition pausiert das Cloak waehrend des Ladevorgangs selbst,
+# CloakDelay (85 = ~3.4s, aus Engine-Default uebernommen) startet danach ueber UncloakOn neu.
+STNK:
+	-Buildable:
+	GrantConditionOnPrerequisite@cargo:
+		Condition: aot-stnk-cargo-upgrade
+		Prerequisites: aot-stnk-cargo-upgrade
+	Cargo:
+		Types: Infantry
+		MaxWeight: 5
+		UnloadVoice: Unload
+		LoadingCondition: aot-stnk-loading
+		RequiresCondition: aot-stnk-cargo-upgrade
+	WithCargoPipsDecoration@cargo:
+		Position: BottomLeft
+		Margin: 4, 3
+		RequiresSelection: true
+		RequiresCondition: aot-stnk-cargo-upgrade
+	# ALT (ForceMove) -> STNK faehrt zum Ziel und entlaedt dort. Nur mit Cargo-Upgrade aktiv.
+	AotMoveUnloadCargo:
+		RequiresCondition: aot-stnk-cargo-upgrade
+	Cloak:
+		UncloakOn: Attack, Unload, Dock, Damage, Heal, Load
+		PauseOnCondition: cloak-force-disabled || aot-stnk-loading
+
+# === Age of Tiberium (aotmod) - Garrison-faehige Fahrzeuge (Fire Position) ===
+# CargoType ist ein EINZELNER String, kein Set. "transportierbar" und "garnisonsfaehig"
+# lassen sich daher nur ueber zwei verschiedene Typen trennen:
+#   GroundVehicle   = ^Vehicle-Default, gilt fuer ALLE Bodenfahrzeuge -> Transporter
+#   GarrisonVehicle = nur diese Aktoren hier      -> zusaetzlich Fire Position
+# Die Transporter (Vessel/Hovercraft/Orca) akzeptieren BEIDE Typen, aot-fireposition NUR
+# GarrisonVehicle. Ohne diese Trennung koennte jeder Harvester/V2/Surveyor die Fire Position
+# belegen, ohne feuern zu koennen (kein Armament@garrisoned) -> Stellung blockiert.
+# Wer hier eintraegt, braucht auch ein Armament@garrisoned.
+# Siehe [[vehicle-cargotype-system]] (Architektur) und [[pillbox-garrison-system]] (Fire Position).
+JEEP:
+	Passenger:
+		CargoType: GarrisonVehicle
+		Weight: 5
+		CustomPipType: green
+	# Eis: bricht NICHT ein (leicht genug). Am Basis-Aktor -> alle Proxies (aot-jeep-humvee,
+	# aot-jeep-wolverine, aot-bggy/bike-laser, aot-apc-*) erben es automatisch. Siehe [[ice-growth-system]].
+	AotIceUnbreakable:
+	# Veins: kein DoT (leicht genug), analog zum Eis-AotIceUnbreakable. Proxies erben es.
+	-DamagedByTerrain@VEINS:
+BGGY:
+	Passenger:
+		CargoType: GarrisonVehicle
+		Weight: 5
+		CustomPipType: green
+MSAM:
+	Passenger:
+		CargoType: GarrisonVehicle
+		Weight: 5
+		CustomPipType: green
+TRUCK:
+	Passenger:
+		CargoType: GarrisonVehicle
+		Weight: 5
+		CustomPipType: green
+LTNK:
+	Passenger:
+		CargoType: GarrisonVehicle
+		Weight: 5
+		CustomPipType: green
+TTNK:
+	Passenger:
+		CargoType: GarrisonVehicle
+		Weight: 5
+		CustomPipType: green
+MTNK:
+	Passenger:
+		CargoType: GarrisonVehicle
+		Weight: 5
+		CustomPipType: green
+HTNK:
+	Passenger:
+		CargoType: GarrisonVehicle
+		Weight: 5
+		CustomPipType: green
+APC:
+	Passenger:
+		CargoType: GarrisonVehicle
+		Weight: 5
+		CustomPipType: green
+MCV:
+	Passenger:
+		CargoType: GarrisonVehicle
+		Weight: 5
+		CustomPipType: green
+FTNK:
+	Passenger:
+		CargoType: GarrisonVehicle
+		Weight: 5
+		CustomPipType: green
+
+# === Age of Tiberium (aotmod) - BIKE Laser Technologies Upgrade ===
+# Waffe auf Ground/Water beschränkt (^MissileWeapon erbt ValidTargets: Ground,Water,Air).
+# Laser-Switch analog BGGY: GrantConditionOnPrerequisite greift auf aot-laser-fence-upgrade.
+# Zwei Laser-Armaments (links/rechts, gleiche Offsets wie Original-Raketen).
+BIKE:
+	# Eis: bricht NICHT ein (leicht genug). Am Basis-Aktor -> alle Proxies (aot-jeep-humvee,
+	# aot-jeep-wolverine, aot-bggy/bike-laser, aot-apc-*) erben es automatisch. Siehe [[ice-growth-system]].
+	AotIceUnbreakable:
+	# Veins: kein DoT (leicht genug), analog zum Eis-AotIceUnbreakable. Proxies erben es.
+	-DamagedByTerrain@VEINS:
+	-Buildable:
+	# Garrison-faehig (Armament@garrisoned unten) -> GarrisonVehicle statt ^Vehicle-Default.
+	Passenger:
+		CargoType: GarrisonVehicle
+		Weight: 5
+		CustomPipType: green
+	# User-Wunsch 2026-08-01: Laser-Upgrade fuer die Bike ERSATZLOS entfernt (Condition,
+	# Laser-Armaments und der Laser-Pod-Sprite-Switch). Es gibt nur noch die eine Raketen-Waffe,
+	# die jetzt dauerhaft Boden UND Luft beschiesst (siehe aot-BikeRockets in aot-weapons.yaml).
+	# Damit entfaellt auch der Proxy-Split aot-bike-base/aot-bike-laser (aot-units.yaml).
+	-Armament:
+	Armament:
+		Weapon: aot-BikeRockets
+		LocalOffset: -128, -170, 170, -128, 170, 170
+		LocalYaw: 100, -100
+	Armament@garrisoned:
+		Name: garrisoned
+		Weapon: aot-BikeRockets
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Fahrzeuge capturable für Carjacker ===
+# === Age of Tiberium (aotmod) - Tarn-Kiste: Darstellung (User-Fund 2026-08-01) ===
+# "Nicht getarnt/halb-transparent, sondern gruen gefaerbt." Ursache identisch zum Stealth
+# Harvester: CloakStyle: Palette ruft WithPalette und greift NUR bei IPalettedRenderable. Die
+# HD-/Remaster-Sprites sind echte RGBA-Grafiken ohne Palette -- der Aufruf laeuft ins Leere, die
+# Einheit bleibt voll eingefaerbt und man sieht die Spielerfarbe (bei NOD gruen).
+# Alpha nutzt WithAlpha und wirkt unabhaengig vom Sprite-Format (so macht es auch das Cloaked SAM).
+# CloakedPalette wird dadurch nicht mehr gebraucht.
+^AcceptsCloakCrate:
+	Cloak:
+		CloakStyle: Alpha
+
+^Vehicle:
+	# === Age of Tiberium (aotmod) - Fahrzeug am Repair Depot verkaufen (User-Wunsch 2026-08-01) ===
+	# Verhalten wie in RA1/TS: ein Fahrzeug, das auf dem Depot steht, kann per Sell-Button fuer
+	# 50% verkauft werden. OpenRA kann das NICHT von Haus aus -- Issue #3798 wurde 2013 als
+	# "not planned" geschlossen, Sellable sitzt normalerweise nur auf Gebaeuden.
+	# Es braucht aber KEINEN eigenen C#-Trait, alle Bausteine existieren bereits:
+	#   - SellableInfo ist ein ConditionalTraitInfo -> RequiresCondition gated den Verkauf
+	#   - AotGrantConditionOnActor setzt genau diese Condition, solange das Fahrzeug auf dem Depot steht
+	#   - RefundPercent ist ohnehin 50 (Default) -- der halbe Preis, den du willst
+	#   - "sell-vehicle" ist ein FERTIGER, kleinerer Verkaufs-Cursor in engine/mods/cnc/cursors.yaml
+	#     (Start 154) -- exakt der aus dem Original, bisher im Mod nirgends benutzt
+	# Praesenz-basiert statt dock-basiert (User-Fund 2026-08-01: "Sell-Cursor wieder weg, ich
+	# verkaufe jedesmal das FIX", getestet mit 100%-HP-Fahrzeug). GrantConditionOnClientDock haengt
+	# an INotifyDockClient.Docked -- und das feuert in Resupply nur hinter "activeResupplyTypes > 0",
+	# also NIE fuer ein unbeschaedigtes Fahrzeug. Ausserdem widerruft Undocked die Condition, sobald
+	# die Activity endet, das geparkte Fahrzeug waere nach der Verweildauer wieder unverkaeuflich.
+	# AotGrantConditionOnActor prueft stattdessen schlicht, ob das Fahrzeug auf einer Zelle des
+	# Depots steht -- unabhaengig von Reparaturbedarf und Activity-Zustand.
+	AotGrantConditionOnActor@DEPOT:
+		Condition: aot-docked-at-depot
+		ActorTypes: aot-fix-age0, aot-fix-age1, aot-fix-age2, aot-fix-age1-nod, aot-fix-age2-nod
+	Sellable:
+		RequiresCondition: aot-docked-at-depot
+		RefundPercent: 50
+		Cursor: sell-vehicle
+		SellSounds: cashturn.aud
+	# === Tiberian Veins: langsamer DoT auf dem Geflecht (wie Tiberium bei Infanterie) ===
+	# Analog zum Eis-Einbrechen, aber nicht abrupt: solange das Fahrzeug auf Terrain "Veins"
+	# steht, alle 16 Ticks etwas Schaden. Die leichten Fahrzeuge (JEEP/BGGY/BIKE/APC + Proxies)
+	# entfernen diesen Trait wieder (-DamagedByTerrain@VEINS) -- dieselbe Ausnahme wie beim Eis.
+	DamagedByTerrain@VEINS:
+		Terrain: Veins
+		Damage: 900
+		DamageInterval: 16
+		DamageTypes: TiberiumDeath
+	# === Age of Tiberium (aotmod) - Cargo: ALLE Bodenfahrzeuge sind transportierbar ===
+	# Zentral hier statt pro Aktor: der Engine-Default (^Vehicle in cnc|rules/defaults.yaml)
+	# ist CargoType: Vehicle / Weight: 1. Diesen Typ akzeptiert KEIN Cargo im Mod
+	# (alle Types sind Infantry / GroundVehicle) -> ein Fahrzeug ohne Override kann in gar
+	# nichts einsteigen, und es fehlt kommentarlos der Enter-Cursor. Genau so ist es dem V2
+	# passiert. Weight: 5 = MaxWeight von Vessel/Hovercraft -> exakt 1 Fahrzeug pro Transport.
+	# NICHT pro Aktor duplizieren - sonst faellt jedes neue Fahrzeug wieder auf den Default
+	# zurueck. Ausnahme braucht ein explizites Override am Aktor.
+	# VOLLSTAENDIGE ARCHITEKTUR + Diagnose: [[vehicle-cargotype-system]] (PFLICHT vor Cargo-Aenderungen).
+	Passenger:
+		CargoType: GroundVehicle
+		Weight: 5
+		CustomPipType: green
+	Repairable:
+		RepairActors: aot-fix-age0, aot-fix-age1, aot-fix-age2, aot-fix-age1-nod, aot-fix-age2-nod
+		# Ohne das kaeme man mit einem UNBESCHAEDIGTEN Fahrzeug gar nicht erst aufs Depot (Vanilla
+		# laesst den Repair-Befehl nur zu, wenn es etwas zu reparieren/aufzumunitionieren gibt) --
+		# und damit auch nie zum Verkauf (siehe Sellable weiter oben). Ist nichts zu tun, parkt
+		# das Fahrzeug dort, statt sofort wieder abzufahren.
+		AllowUndamagedDocking: true
+	GrantConditionOnDamageState@AOTREPAIR:
+		Condition: aot-vehicle-damaged
+		ValidDamageStates: Light, Medium, Heavy, Critical
+	Targetable@AOTREPAIR:
+		RequiresCondition: aot-vehicle-damaged
+		TargetTypes: Repair
+	CaptureManager:
+	Capturable@CARJACK:
+		Types: vehicle
+	AotSpawnCarjackerOnCaptureDeath:
+		Actor: aot-cark-nod
+		CaptureTypes: vehicle
+	ExternalCondition@AOTGAS:
+		Condition: aot-tiberium-gassed
+	# === Nod Stealth Generator (aot-sgen) - Stealth Field auch fuer Fahrzeuge ===
+	# Analog zu ^Building: Fahrzeuge im Feld eines aktiven Stealth Generators werden getarnt.
+	# Ausserhalb des Feldes per RequiresCondition deaktiviert. CloakStyle Alpha (Truecolor-Sprites,
+	# wie ^Building — Palette wuerde nur indizierte Teile tarnen). UncloakOn nur Attack -> bleibt
+	# beim Fahren getarnt, taucht nur beim Feuern kurz auf. Eigener CloakType, kollidiert nicht mit
+	# STNK-Eigen-Cloak oder Crate-Cloak.
+	ExternalCondition@AOTSTEALTH:
+		Condition: aot-stealth-field
+	# Mobile Stealth Generator (aot-mstealth): eigenes Feld, tarnt NUR Einheiten (nicht ^Building).
+	ExternalCondition@AOTSTEALTHMOBILE:
+		Condition: aot-stealth-field-mobile
+	Cloak@AOTSTEALTH:
+		RequiresCondition: aot-stealth-field || aot-stealth-field-mobile
+		CloakType: aot-stealth-field
+		InitialDelay: 0
+		CloakDelay: 50
+		CloakStyle: Alpha
+		CloakedAlpha: 0.35
+		UncloakOn: Attack
+		# Cloak-/Decloak-Sound pro Einheit (wie Stealth Tank STNK): trans1.aud.
+		CloakSound: trans1.aud
+		UncloakSound: trans1.aud
+	# === aotmod - Shroud Generator: Sicht im Gap-Feld auf 2c0 kappen ===
+	# Solange die externe Condition aktiv ist (im CreatesShroud-Radius eines feindlichen
+	# Shroud Generators), wird die normale RevealsShroud abgeschaltet und durch eine
+	# 2c0-Instanz ersetzt. Merge: die per-Aktor RevealsShroud erbt RequiresCondition.
+	ExternalCondition@GAPSUPPRESS:
+		Condition: aot-gap-suppressed
+	RevealsShroud:
+		RequiresCondition: !aot-gap-suppressed
+	RevealsShroud@GAPSUPPRESS:
+		Range: 2c0
+		RequiresCondition: aot-gap-suppressed
+	# === Iron Dome - Unzerstoerbarkeit fuer Fahrzeuge ===
+	ExternalCondition@AOTIRONDOME:
+		Condition: aot-iron-dome
+	WithColoredOverlay@AOTIRONDOME:
+		RequiresCondition: aot-iron-dome
+	DamageMultiplier@AOTIRONDOME:
+		RequiresCondition: aot-iron-dome
+		Modifier: 0
+	TimedConditionBar@AOTIRONDOME:
+		Condition: aot-iron-dome
+	# Carryable: Fahrzeuge können vom GDI Carryall-TRAN aufgenommen werden (manuelle PickupUnit-Order)
+	Carryable:
+	# Ohne dies zeigt der Carryall die getragene Einheit als Actor-Preview, die nur den
+	# EnabledByDefault-Body kennt -> condition-gesteuerte Varianten (z.B. MCV age0/age1/age2) fallen
+	# beim Tragen auf den age0-Body zurueck. Der Forwarder reicht die Live-Conditions in die Preview.
+	AotForwardConditionsToPreview:
+	# === Ende aotmod ===
+	AotDamagedByCondition:
+		RequiresCondition: aot-tiberium-gassed
+		Damage: 50
+		DamageInterval: 25
+		DamageTypes: TiberiumDeath
+
+# === Age of Tiberium (aotmod) - Mauern ersetzt durch aot-wall-gdi / aot-wall-nod ===
+# GDI baut die Fortified Wall, NOD die Barbwire Fence (beide aot-structures.yaml).
+# Alle Vanilla-Mauern (BRIK/SBAG/CYCL) sind aus den Bau-Paletten entfernt.
+BRIK:
+	-Buildable:
+
+SBAG:
+	-Buildable:
+
+CYCL:
+	-Buildable:
+
+# === Age of Tiberium (aotmod) - ARTY Howitzer Gate ===
+# ARTY hat Buildable in der Engine (Vehicle.Nod) — hier entfernen, Proxy aot-arty-howitzer
+# (aot-units.yaml) stellt es nur frei wenn Howitzer-Upgrade gekauft.
+ARTY:
+	-Buildable:
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Shroud Generator: Sicht-Kappung für Schiffe/Flieger ===
+# Wie bei ^Vehicle/^Infantry: im Gap-Feld eines feindlichen Shroud Generators wird
+# die RevealsShroud abgeschaltet und durch eine 2c0-Instanz ersetzt.
+# === Age of Tiberium (aotmod) - Muendungsfeuer deckt auf (Vanilla-C&C-Verhalten) ===
+# Feuert eine Einheit, wird sie dem Beschossenen kurz im Fog/Shroud sichtbar. Sitzt an
+# ^ExistsInWorld, der gemeinsamen Wurzel von ^Vehicle/^Tank/^Infantry/^Helicopter/^Plane/
+# ^Ship/^Building -- damit gilt es einheitlich fuer ALLES, was schiesst.
+# ⚠️ ArmamentNames filtert: nur gelistete Armament-Namen loesen das Aufdecken aus. Die Liste
+# enthaelt alle im Mod vergebenen Namen (aus den Rules extrahiert) -- bei NEUEN Armament-Namen
+# hier ergaenzen, sonst deckt die Waffe lautlos nicht auf.
+^ExistsInWorld:
+	RevealOnFire:
+		ArmamentNames: primary, secondary, aa, bombs, garrisoned, gun, laser, orca, rockets, toxic
+		Duration: 25
+		Radius: 2c0
+
+^Ship:
+	ExternalCondition@GAPSUPPRESS:
+		Condition: aot-gap-suppressed
+	RevealsShroud:
+		RequiresCondition: !aot-gap-suppressed
+	RevealsShroud@GAPSUPPRESS:
+		Range: 2c0
+		RequiresCondition: aot-gap-suppressed
+	# === Iron Dome - Unzerstoerbarkeit fuer Schiffe ===
+	ExternalCondition@AOTIRONDOME:
+		Condition: aot-iron-dome
+	WithColoredOverlay@AOTIRONDOME:
+		RequiresCondition: aot-iron-dome
+	DamageMultiplier@AOTIRONDOME:
+		RequiresCondition: aot-iron-dome
+		Modifier: 0
+	TimedConditionBar@AOTIRONDOME:
+		Condition: aot-iron-dome
+	# === Nod Stealth Generator (aot-sgen) - Stealth Field auch fuer Schiffe ===
+	ExternalCondition@AOTSTEALTH:
+		Condition: aot-stealth-field
+	# Mobile Stealth Generator (aot-mstealth): eigenes Feld, tarnt NUR Einheiten (nicht ^Building).
+	ExternalCondition@AOTSTEALTHMOBILE:
+		Condition: aot-stealth-field-mobile
+	Cloak@AOTSTEALTH:
+		RequiresCondition: aot-stealth-field || aot-stealth-field-mobile
+		CloakType: aot-stealth-field
+		InitialDelay: 0
+		CloakDelay: 50
+		CloakStyle: Alpha
+		CloakedAlpha: 0.35
+		UncloakOn: Attack
+		# Cloak-/Decloak-Sound pro Einheit (wie Stealth Tank STNK): trans1.aud.
+		CloakSound: trans1.aud
+		UncloakSound: trans1.aud
+
+^Plane:
+	ExternalCondition@GAPSUPPRESS:
+		Condition: aot-gap-suppressed
+	# Type explizit: Flieger haben keine Footprint-Zellen; ohne Type würde die (ggf. neu
+	# angelegte) RevealsShroud auf den Footprint-Default fallen und beim Laden crashen.
+	RevealsShroud:
+		Type: GroundPosition
+		RequiresCondition: !aot-gap-suppressed
+	RevealsShroud@GAPSUPPRESS:
+		Range: 2c0
+		Type: GroundPosition
+		RequiresCondition: aot-gap-suppressed
+	# === Iron Dome - Unzerstoerbarkeit fuer Flieger ===
+	ExternalCondition@AOTIRONDOME:
+		Condition: aot-iron-dome
+	WithColoredOverlay@AOTIRONDOME:
+		RequiresCondition: aot-iron-dome
+	DamageMultiplier@AOTIRONDOME:
+		RequiresCondition: aot-iron-dome
+		Modifier: 0
+	TimedConditionBar@AOTIRONDOME:
+		Condition: aot-iron-dome
+	# === Nod Stealth Generator (aot-sgen) - Stealth Field auch fuer Flieger ===
+	ExternalCondition@AOTSTEALTH:
+		Condition: aot-stealth-field
+	# Mobile Stealth Generator (aot-mstealth): eigenes Feld, tarnt NUR Einheiten (nicht ^Building).
+	ExternalCondition@AOTSTEALTHMOBILE:
+		Condition: aot-stealth-field-mobile
+	Cloak@AOTSTEALTH:
+		RequiresCondition: aot-stealth-field || aot-stealth-field-mobile
+		CloakType: aot-stealth-field
+		InitialDelay: 0
+		CloakDelay: 50
+		CloakStyle: Alpha
+		CloakedAlpha: 0.35
+		UncloakOn: Attack
+		# Cloak-/Decloak-Sound pro Einheit (wie Stealth Tank STNK): trans1.aud.
+		CloakSound: trans1.aud
+		UncloakSound: trans1.aud
+
+^Helicopter:
+	# === Ion Storm (aot-ts-ctaray) - Zwangslandung statt Absturz ===
+	# Helikopter werden im Sturm NICHT zerstoert (nur Flugzeuge), sondern zur Landung gezwungen
+	# und bleiben bis Sturmende am Boden. Das nutzt die eingebaute Engine-Mechanik: ein
+	# PAUSIERTER Aircraft-Trait queued automatisch eine Land-Aktivitaet (Aircraft.cs Tick:
+	# "Add land activity if Aircraft trait is paused") und startet nach dem Entpausen wieder.
+	ExternalCondition@AOTIONSTORM:
+		Condition: aot-ion-storm-grounded
+	Aircraft:
+		PauseOnCondition: aot-ion-storm-grounded
+	ExternalCondition@GAPSUPPRESS:
+		Condition: aot-gap-suppressed
+	RevealsShroud:
+		Type: GroundPosition
+		RequiresCondition: !aot-gap-suppressed
+	RevealsShroud@GAPSUPPRESS:
+		Range: 2c0
+		Type: GroundPosition
+		RequiresCondition: aot-gap-suppressed
+	# === Iron Dome - Unzerstoerbarkeit fuer Helikopter ===
+	ExternalCondition@AOTIRONDOME:
+		Condition: aot-iron-dome
+	WithColoredOverlay@AOTIRONDOME:
+		RequiresCondition: aot-iron-dome
+	DamageMultiplier@AOTIRONDOME:
+		RequiresCondition: aot-iron-dome
+		Modifier: 0
+	TimedConditionBar@AOTIRONDOME:
+		Condition: aot-iron-dome
+	# === Nod Stealth Generator (aot-sgen) - Stealth Field auch fuer Helikopter ===
+	ExternalCondition@AOTSTEALTH:
+		Condition: aot-stealth-field
+	# Mobile Stealth Generator (aot-mstealth): eigenes Feld, tarnt NUR Einheiten (nicht ^Building).
+	ExternalCondition@AOTSTEALTHMOBILE:
+		Condition: aot-stealth-field-mobile
+	Cloak@AOTSTEALTH:
+		RequiresCondition: aot-stealth-field || aot-stealth-field-mobile
+		CloakType: aot-stealth-field
+		InitialDelay: 0
+		CloakDelay: 50
+		CloakStyle: Alpha
+		CloakedAlpha: 0.35
+		UncloakOn: Attack
+		# Cloak-/Decloak-Sound pro Einheit (wie Stealth Tank STNK): trans1.aud.
+		CloakSound: trans1.aud
+		UncloakSound: trans1.aud
+
+# Brücken: Force-Fire angreifbar + Explosionseffekte bei Schaden/Zerstörung.
+^Bridge:
+	Targetable:
+		TargetTypes: Ground, Water, Bridge
+
+^ExplosiveBridge:
+	ExplosionOnDamageTransition@DAMAGED:
+		DamageState: Heavy
+		Weapon: BridgeExplode
+	ExplosionOnDamageTransition@COLLAPSED:
+		DamageState: Dead
+		Weapon: BridgeExplode
+	SoundOnDamageTransition:
+		DestroyedSounds: crumble.aud
+
+BRIDGE1:
+	Inherits@EXPLOSIVE: ^ExplosiveBridge
+	# Auto-Hütten entfernt: Reparatur NUR über eine im Editor platzierte aot-bridgehut.
+	-FreeActor@north:
+	-FreeActor@south:
+	MapEditorData:
+		RequireTilesets: AOT_ARCTIC, WINTER
+		Categories: Terrain
+
+BRIDGE2:
+	Inherits@EXPLOSIVE: ^ExplosiveBridge
+	-FreeActor@north:
+	-FreeActor@south:
+	MapEditorData:
+		RequireTilesets: AOT_ARCTIC, WINTER
+		Categories: Terrain
+
+BRIDGE3:
+	Inherits@EXPLOSIVE: ^ExplosiveBridge
+	-FreeActor@north:
+	-FreeActor@south:
+	MapEditorData:
+		RequireTilesets: DESERT
+		Categories: Terrain
+
+BRIDGE4:
+	Inherits@EXPLOSIVE: ^ExplosiveBridge
+	-FreeActor@north:
+	-FreeActor@south:
+	MapEditorData:
+		RequireTilesets: DESERT
+		Categories: Terrain
+# aot-tem-bridge1/2 erben ^ExplosiveBridge transitiv über BRIDGE1/2.
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Permanent versteckte Engine-Aktoren (~disabled):
+# nie als Locked-Platzhalter zeigen. ^DINO deckt STEG/TREX/TRIC/RAPT per Vererbung ab.
+FACT.GDI:
+	Buildable:
+		ShowWhenLocked: False
+
+FACT.NOD:
+	Buildable:
+		ShowWhenLocked: False
+
+^DINO:
+	Buildable:
+		ShowWhenLocked: False
+
+PVICE:
+	Buildable:
+		ShowWhenLocked: False
+
+MISS:
+	Buildable:
+		ShowWhenLocked: False
 # === Ende aotmod ===

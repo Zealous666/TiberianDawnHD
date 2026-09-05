@@ -243,6 +243,64 @@ beacon:
 		RemasteredPremultiplied: false
 	circles:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\FPLS.ZIP
+	# === Age of Tiberium (aotmod) - Super-Power-Beacon-Poster ===
+	# Ziel-Marker jeder Superpower zeigt das EIGENE Power-Icon (statt des generischen
+	# "airstrike"/"atomic"-Platzhalters). Es sind exakt dieselben opaken Sidebar-Cameos (Image
+	# "icon", mit schwarzem Hintergrund) -- bewusst als gerahmtes Kaestchen, kein Freistellen.
+	# Sie liegen auf dem "beacon"-Image (BeaconImage-Default), damit ArrowSequence/CircleSequence/
+	# ClockSequence weiter greifen. Scale 0.5 (im Remaster-Weltraum wird der klassische 64px-Sprite
+	# sonst zu gross); Offset 0,-84 = -42 wirksame Pixel bei Scale 0.5 (Offset wird mit Scale
+	# multipliziert), wie die Stock-Poster. RGBA -> Palette (beaconposter) nur zum Blenden, faerbt nicht.
+	aot-poster-airstrike:
+		Filename: mig_base.png
+		Length: 1
+		Scale: 0.5
+		Offset: 0,-84
+	aot-poster-banshee:
+		Filename: mig_banshee.png
+		Length: 1
+		Scale: 0.5
+		Offset: 0,-84
+	aot-poster-spyplane:
+		Filename: mig_yak.png
+		Length: 1
+		Scale: 0.5
+		Offset: 0,-84
+	aot-poster-parabombs:
+		Filename: mig_parabomb.png
+		Length: 1
+		Scale: 0.5
+		Offset: 0,-84
+	aot-poster-minecluster:
+		Filename: aot-minecluster-icon.png
+		Length: 1
+		Scale: 0.5
+		Offset: 0,-84
+	aot-poster-tiberiummissile:
+		Filename: aot-tiberiummissile-icon.png
+		Length: 1
+		Scale: 0.5
+		Offset: 0,-84
+	aot-poster-atombomb:
+		Filename: aot-atombomb-icon.png
+		Length: 1
+		Scale: 0.5
+		Offset: 0,-84
+	aot-poster-orcatransport:
+		Filename: aot-orcatransport-icon.png
+		Length: 1
+		Scale: 0.5
+		Offset: 0,-84
+	aot-poster-zone-drop:
+		Filename: aot-zone-drop-icon.png
+		Length: 1
+		Scale: 0.5
+		Offset: 0,-84
+	aot-poster-forward-hq:
+		Filename: aot-forward-hq-icon.png
+		Length: 1
+		Scale: 0.5
+		Offset: 0,-84
 
 scrate:
 	idle:
@@ -493,3 +551,14 @@ waypoint:
 camera:
 	idle:
 		RemasteredFilename: camera.png
+
+# === Age of Tiberium (aotmod) - Spy: piff-Effekt + tag-spy-Pip ===
+piff:
+	Defaults:
+		Filename: piff.shp
+	idle:
+		Length: *
+
+pips:
+	tag-spy:
+		Filename: tag-spy.shp

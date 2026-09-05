@@ -1,0 +1,532 @@
+# === Age of Tiberium (aotmod) — Counter-Strike Ants ===
+# Drei Varianten: Worker Ant (aot-ant), Fire Ant (aot-fireant), Scout Ant (aot-scoutant).
+# Sprites: ant1.shp / ant2.shp / ant3.shp aus dem RA-Content-Package.
+# Spawner: aot-critter-spawner (unsichtbar, im Editor konfigurierbar).
+
+^AotAnt:
+	Inherits: ^Infantry
+	-Passenger:
+	Tooltip:
+		GenericName: meta-ant-generic-name
+	# AttackMove wird von AotAntWander gebraucht (AttackMoveActivity greift unterwegs an).
+	AttackMove:
+	# Patrouille im Spawner-Umkreis. Radius kommt vom Editor-Regler (AotCritterSpawner) beim Spawn.
+	# Laeuft NUR im Idle -> unterbricht keinen Angriff (das tat die alte Spawner-Patrouille).
+	AotAntWander:
+		DefaultPatrolRadius: 5
+		MinMoveDelay: 25
+		MaxMoveDelay: 100
+		AvoidTerrainTypes: Water
+		# Wandern ist OPT-IN: laeuft nur mit Condition aot-wander (Editor-Checkbox "Wander Around"
+		# ODER vom Spawner automatisch gesetzt). Ohne sie bleibt ein einzeln platzierter Critter
+		# stehen (natives Verhalten) und greift nur Feinde in Reichweite an (AutoTarget). Die
+		# Angriffswelle (aot-attack-wave) schaltet das Wandern zusaetzlich ab.
+		RequiresCondition: aot-wander && !aot-attack-wave
+	AotCritterAttackWave:
+	AotWanderAround:
+	AutoTarget:
+		InitialStance: AttackAnything
+		InitialStanceAI: AttackAnything
+		ScanOnIdle: true
+		# PFLICHT: ohne ScanRadius nimmt AutoTarget die Waffenreichweite (aot-*AntBite = 1c256,
+		# also 1.25 Zellen) als Suchradius -> die Ameise ist praktisch blind und reagiert nur auf
+		# etwas, das direkt in sie hineinlaeuft. 8 Zellen = Aggro-Radius, in dem sie jagt.
+		ScanRadius: 8
+	# ValidTargets: echte TD-TargetTypes (^Infantry=Ground,Infantry / ^Vehicle=Ground,Vehicle /
+	# ^Building=Ground,C4,Structure). RA's "GroundActor" gibt es hier nicht.
+	AutoTargetPriority@DEFAULT:
+		ValidTargets: Infantry, Vehicle, Structure
+		InvalidTargets: NoAutoTarget
+	AttackFrontal:
+		FacingTolerance: 0
+	WithInfantryBody:
+		MoveSequence: run
+		StandSequences: stand
+		DefaultAttackSequence: bite
+	WithDeathAnimation:
+		UseDeathTypeSuffix: false
+		DeathSequence: die
+		CrushedSequence: die-crushed
+	Voiced:
+		VoiceSet: AntVoice
+	-DeathSounds@NORMAL:
+	-DeathSounds@BURNED:
+	-DeathSounds@POISONED:
+	DeathSounds:
+	# Tiberium-Immunitaet. ACHTUNG: es gibt ZWEI Schadensquellen, beide muessen weg.
+	# 1) DamagedByTerrain (^Infantry, defaults.yaml): Schaden beim Laufen auf Tiberium-Feldern.
+	#    Das ist die eigentliche Quelle - sie zu vergessen war der Grund, warum Tiberium
+	#    den Ameisen trotz der Entfernung von (2) weiter geschadet hat.
+	-DamagedByTerrain:
+	# 2) Tiberium-Gaswolke (aot-gascloud, z.B. Atomschlag) via ExternalCondition + DoT.
+	-ExternalCondition@AOTGAS:
+	-AotDamagedByCondition:
+
+# --- Worker Ant ---
+aot-ant:
+	Inherits: ^AotAnt
+	RenderSprites:
+		Image: ant
+	Health:
+		HP: 10000
+	Mobile:
+		Speed: 50
+		Locomotor: foot
+		AlwaysTurnInPlace: true
+	Armament:
+		Weapon: aot-AntBite
+	Tooltip:
+		Name: actor-aot-ant.name
+	MapEditorData:
+		Categories: Critter
+
+# --- Fire Ant ---
+aot-fireant:
+	Inherits: ^AotAnt
+	RenderSprites:
+		Image: fireant
+	Health:
+		HP: 32000
+	# aotmod 2026-08-21: Heavy -> Light. Heavy (25% Schaden) machte die Fire Ant gegen Luft
+	# praktisch immun (HIND ~32s pro Kill = "fast kein Schaden", User-Fund). Light (~75%) bringt
+	# BODEN und LUFT auf moderaten Schaden, waehrend die hohen 32000 HP die Tank-Identitaet
+	# erhalten (HIND jetzt ~10s statt ~32s). Reine Balance-Wahl, leicht revertierbar.
+	Armor:
+		Type: Light
+	Mobile:
+		Speed: 40
+		Locomotor: foot
+		AlwaysTurnInPlace: true
+	Armament:
+		Weapon: aot-FireAntBite
+	# aotmod 2026-08-21: Fire Ant ist Anti-Air. AutoTarget muss auch Luftziele (TargetType Air)
+	# aufnehmen duerfen -- ^AotAnt-Default kennt nur Infantry/Vehicle/Structure. Ohne "Air" wuerde
+	# die Ameise Flugzeuge nie von sich aus beschiessen, obwohl die Waffe sie treffen kann.
+	AutoTargetPriority@DEFAULT:
+		ValidTargets: Infantry, Vehicle, Structure, Air
+		InvalidTargets: NoAutoTarget
+	Tooltip:
+		Name: actor-aot-fireant.name
+	MapEditorData:
+		Categories: Critter
+
+# --- Scout Ant ---
+aot-scoutant:
+	Inherits: ^AotAnt
+	RenderSprites:
+		Image: scoutant
+	Health:
+		HP: 16000
+	Armor:
+		Type: Light
+	Mobile:
+		Speed: 85
+		Locomotor: foot
+		AlwaysTurnInPlace: true
+	Armament:
+		Weapon: aot-ScoutAntBite
+	Tooltip:
+		Name: actor-aot-scoutant.name
+	MapEditorData:
+		Categories: Critter
+
+# --- Critter Spawner (Editor-Marker, nur im Editor sichtbar) ---
+# Frueher "aot-ant-spawner", deckt jetzt alle Critter ab: Ameisen, Visceroid und Dinosaurier.
+# Zwei Random-Gruppen im Editor-Dropdown ("Random Ants" / "Random Dinosaurs") statt einem
+# gemeinsamen "random" -- gemischt waere kaum sinnvoll steuerbar.
+# ⚠️ Beim Umbenennen des Aktors muessen bestehende Karten mitgezogen werden (aot_forestfires).
+aot-critter-spawner:
+	Inherits@1: ^ExistsInWorld
+	Tooltip:
+		Name: actor-aot-critter-spawner.name
+	Selectable:
+		Bounds: 512, 512
+	MapEditorData:
+		Categories: Critter
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral, Creeps
+	Immobile:
+		OccupiesSpace: false
+	RenderSpritesEditorOnly:
+	WithSpriteBody:
+	BodyOrientation:
+		QuantizedFacings: 1
+	AotCritterSpawner:
+		AntActors: aot-ant, aot-fireant, aot-scoutant
+		DinoActors: aot-steg, aot-trex, aot-tric, aot-rapt
+		MutantActors: aot-mutant, aot-mwmn, aot-mutant3
+		DefaultCritterType: random-ants
+		DefaultMaxCritters: 3
+		DefaultPatrolRadius: 5
+		SpawnInterval: 150
+
+# === Age of Tiberium (aotmod) — Ant Nest (aot-ant-nest), 2026-08-21 ===
+# Sichtbares, zerstoerbares Ameisen-Nest-GEBAEUDE (Gegenstueck zum Vein-Heart): spawnt selbst
+# Ameisen (AotCritterSpawner direkt am Gebaeude, zusaetzlich zum unsichtbaren Editor-Marker)
+# und ist genauso stabil wie das Toxic Vine Heart (HP 250000 + 70% Schadensreduktion +
+# aggressive Selbstheilung + HP-Bar). Sprite: hill01.tem-Felshuegel (Template 400), Loch = Eingang.
+# Aufbau exakt analog aot-vein-heart (bare Building, kein ^Building, damit keine Buildable/
+# Sellable/Huntable-Traits mitkommen).
+aot-ant-nest:
+	# Tooltip fuer den Maus-Hover ingame (ohne diesen erscheint gar nichts, weil das bare
+	# Building keinen geerbten Tooltip hat -- anders als ^Building-basierte Aktoren).
+	Tooltip:
+		Name: actor-aot-ant-nest.name
+	Building:
+		Footprint: xxxx xxxx xxxx
+		Dimensions: 4, 3
+		TerrainTypes: Clear, Rough, Road, Sand, Beach, Clear.Snow
+	# Selectable (nicht bloss Interactable) fuer Healthbar/Selection-Ring via SelectionDecorations.
+	Selectable:
+		Bounds: 4096, 3072
+	SelectionDecorations:
+	RenderSprites:
+	WithSpriteBody:
+	BodyOrientation:
+		QuantizedFacings: 1
+	# HP/Panzerung/Heilung 1:1 wie das Vein-Heart (User: "so stabil wie das Toxic Vine Heart").
+	# DamageMultiplier statt Armor:Concrete, weil Armor-Typen ohne Versus-Eintrag der Waffe voll
+	# durchschlagen (siehe Kommentar am aot-vein-heart).
+	Health:
+		HP: 250000
+	DamageMultiplier@AOTANTNEST:
+		Modifier: 30
+	HitShape:
+	Targetable:
+		TargetTypes: Ground, Structure
+	# Aggressive Selbstheilung: heilt auch WAEHREND es beschossen wird (DamageCooldown: 0).
+	ChangesHealth:
+		StartIfBelow: 100
+		PercentageStep: 1
+		Delay: 125
+		DamageCooldown: 0
+	# Spawner direkt am Nest (gleiche Default-Settings wie das Editor-Objekt, aber fest Ameisen).
+	# Footprint-Escape sorgt dafuer, dass die Ameisen ausserhalb des 4x3-Bereichs erscheinen.
+	AotCritterSpawner:
+		DefaultCritterType: random-ants
+		DefaultMaxCritters: 3
+		DefaultPatrolRadius: 5
+		SpawnInterval: 150
+	HiddenUnderShroud:
+	MapEditorData:
+		Categories: Critter
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral, Creeps
+
+# === Age of Tiberium (aotmod) — Dino Cave (aot-dinocave), 2026-09-02 ===
+# "V2" des Critter-Spawners: ein SICHTBARER, zerstoerbarer Hoehleneingang (2x2), gebacken aus
+# der Klippe cliff_139_s05 (Template 139, s05.tem, 2x2) mit hineingemaltem dunklen Hoehleneingang
+# (linkes Tile aus cliffs_dinocave.jpg, Gras freigestellt). Silhouette deckungsgleich mit dem
+# Klippen-Tile -> laesst sich im Editor DECKUNGSGLEICH ueber eine platzierte cliff_139_s05 legen.
+# Wird er zerstoert, verschwindet er NICHT, sondern hinterlaesst per SpawnActorOnDeath den
+# verschuetteten Hoehleneingang aot-dinocave.husk (rechtes Tile: eingestuerzte Geroell-Variante),
+# analog zur Husk-Mechanik von Baeumen/Oil-Derrick.
+# Sprite: bits/aot-dinocave.zip, Frame 0 = offen, Frame 1 = verschuettet. Scale 0.75 wie das
+# Ant-Nest (~96 HD-px/Zelle), passt auf den 2x2-Footprint.
+aot-dinocave:
+	Tooltip:
+		Name: actor-aot-dinocave.name
+	Building:
+		Footprint: xx xx
+		Dimensions: 2, 2
+		TerrainTypes: Clear, Rough, Road, Sand, Beach, Clear.Snow, Rock
+	Selectable:
+		Bounds: 2048, 2048
+	SelectionDecorations:
+	RenderSprites:
+	WithSpriteBody:
+	BodyOrientation:
+		QuantizedFacings: 1
+	# Zerstoerbar (kein Selbstheil wie beim Ant-Nest): fokussiertes Feuer legt ihn um, dann
+	# bleibt der verschuettete Eingang stehen.
+	Health:
+		HP: 70000
+	HitShape:
+	Targetable:
+		TargetTypes: Ground, Structure
+	# Beim Tod bleibt der zugeschuettete Hoehleneingang zurueck (verschwindet nicht).
+	SpawnActorOnDeath:
+		Actor: aot-dinocave.husk
+	# Spawner wie das unsichtbare Editor-Objekt (voll konfigurierbar), aber Ausgang UNTEN
+	# (Hoehlenmaul sitzt am unteren Rand) und Default Dinosaurier.
+	AotCritterSpawner:
+		AntActors: aot-ant, aot-fireant, aot-scoutant
+		DinoActors: aot-steg, aot-trex, aot-tric, aot-rapt
+		MutantActors: aot-mutant, aot-mwmn, aot-mutant3
+		DefaultCritterType: random-dinos
+		DefaultMaxCritters: 3
+		DefaultPatrolRadius: 5
+		SpawnInterval: 150
+		PreferBottomExit: true
+	HiddenUnderShroud:
+	MapEditorData:
+		Categories: Critter
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral, Creeps
+
+# Verschuetteter Hoehleneingang -- unzerstoerbarer Ruinen-Prop (kein Health-Trait -> kann nicht
+# beschossen/entfernt werden, bleibt liegen). Nutzt dieselbe Sprite-Sammlung, Frame 1 (collapsed).
+# Blockiert 2x2 wie die intakte Hoehle. Auch direkt im Editor platzierbar.
+aot-dinocave.husk:
+	Tooltip:
+		Name: actor-aot-dinocave-husk.name
+		ShowOwnerRow: false
+	Building:
+		Footprint: xx xx
+		Dimensions: 2, 2
+		TerrainTypes: Clear, Rough, Road, Sand, Beach, Clear.Snow, Rock
+	Interactable:
+	RenderSprites:
+		Image: aot-dinocave
+	WithSpriteBody:
+		Sequence: collapsed
+	BodyOrientation:
+		QuantizedFacings: 1
+	HiddenUnderShroud:
+	MapEditorData:
+		Categories: Critter
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral, Creeps
+
+# === Age of Tiberium (aotmod) — Visceroid (vanilla TD-Creep, VICE) ===
+# Echte vanilla-Einheit (siehe engine/mods/cnc/rules/civilian.yaml: VICE erbt ^Viceroid +
+# AttackWander) -- volle Original-Stats (HP 30000, Armor Light, Speed 68), keine eigene
+# Balance-Aenderung. Wird ueber den aot-critter-spawner platziert (frueher zusaetzlich vom
+# Vein-Heart -- diese Spawn-Faehigkeit wurde 2026-07-29 entfernt, alles laeuft jetzt zentral
+# ueber den Spawner).
+aot-visceroid:
+	Inherits: VICE
+	# RenderSprites.Image defaultet auf den Aktornamen ("aot-visceroid"), aber die Sequenz
+	# heisst "vice" -- ohne diesen Override sucht die Engine nach nicht existenten
+	# aot-visceroid-Sequenzen ("Image does not have any sequences defined").
+	RenderSprites:
+		Image: vice
+	# VICE's eingebautes AttackWander nutzt bare WandersInfo-Defaults (Radius 1, Delay 0/0) --
+	# praktisch unsichtbares Wandern. Ersetzt durch AotVisceroidWander (Radius kommt vom
+	# Spawner-Editor-Regler), gleiches Pattern wie AotAntWander.
+	-AttackWander:
+	AotVisceroidWander:
+		DefaultWanderRadius: 8
+		MinMoveDelay: 25
+		MaxMoveDelay: 90
+		RequiresCondition: aot-wander && !aot-attack-wave
+	AotCritterAttackWave:
+	# Fix (2026-09-02): ^Viceroid erbt ^AutoTargetGroundAssaultMove, dessen DEFAULT-Prioritaet KEINE
+	# Structure enthaelt -> in der Angriffswelle lief der Visceroid bis zum Gebaeude, blieb 1 Zelle
+	# davor stehen und feuerte nie. Structure ergaenzen (wie bei Ameisen/Dinos).
+	AutoTargetPriority@DEFAULT:
+		ValidTargets: Infantry, Vehicle, Creep, Structure, Water, Support, Mine
+	AotWanderAround:
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral, Creeps
+	MapEditorData:
+		Categories: Critter
+
+# === Age of Tiberium (aotmod) — Dinosaurier-Critter (vanilla TD, STEG/TREX/TRIC/RAPT) ===
+# Wrapper statt Override der Vanilla-Aktoren: die Originale erscheinen unveraendert in den
+# TD-Kampagnenkarten (Dinosaurier-Missionen), wo sie NICHT herumlaufen sollen. Gleiches
+# Muster wie aot-visceroid fuer VICE.
+# Einzige Ergaenzung ist AotAntWander -- ^DINO bringt Mobile + AttackMove mit, die der Trait
+# voraussetzt, hat aber selbst kein Wander. Der Radius kommt vom Spawner-Regler.
+aot-steg:
+	Inherits: STEG
+	RenderSprites:
+		Image: steg
+	AotAntWander:
+		DefaultPatrolRadius: 6
+		MinMoveDelay: 40
+		MaxMoveDelay: 140
+		RequiresCondition: aot-wander && !aot-attack-wave
+	AotCritterAttackWave:
+	# Fix (2026-09-02): ^DINO erbt ^AutoTargetGroundAssaultMove, dessen DEFAULT-Prioritaet KEINE
+	# Structure enthaelt -> der Dino lief bis zum Gebaeude, blieb 1 Zelle davor stehen und feuerte
+	# nie. Hier Structure ergaenzen (Basis-Liste + Structure), damit er Gebaeude auch im
+	# Normal-Stance automatisch angreift.
+	AutoTargetPriority@DEFAULT:
+		ValidTargets: Infantry, Vehicle, Creep, Structure, Water, Support, Mine
+	AotWanderAround:
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral, Creeps
+	MapEditorData:
+		Categories: Critter
+
+aot-trex:
+	Inherits: TREX
+	RenderSprites:
+		Image: trex
+	AotAntWander:
+		DefaultPatrolRadius: 6
+		MinMoveDelay: 40
+		MaxMoveDelay: 140
+		RequiresCondition: aot-wander && !aot-attack-wave
+	AotCritterAttackWave:
+	# Fix (2026-09-02): ^DINO erbt ^AutoTargetGroundAssaultMove, dessen DEFAULT-Prioritaet KEINE
+	# Structure enthaelt -> der Dino lief bis zum Gebaeude, blieb 1 Zelle davor stehen und feuerte
+	# nie. Hier Structure ergaenzen (Basis-Liste + Structure), damit er Gebaeude auch im
+	# Normal-Stance automatisch angreift.
+	AutoTargetPriority@DEFAULT:
+		ValidTargets: Infantry, Vehicle, Creep, Structure, Water, Support, Mine
+	AotWanderAround:
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral, Creeps
+	MapEditorData:
+		Categories: Critter
+
+aot-tric:
+	Inherits: TRIC
+	RenderSprites:
+		Image: tric
+	AotAntWander:
+		DefaultPatrolRadius: 6
+		MinMoveDelay: 40
+		MaxMoveDelay: 140
+		RequiresCondition: aot-wander && !aot-attack-wave
+	AotCritterAttackWave:
+	# Fix (2026-09-02): ^DINO erbt ^AutoTargetGroundAssaultMove, dessen DEFAULT-Prioritaet KEINE
+	# Structure enthaelt -> der Dino lief bis zum Gebaeude, blieb 1 Zelle davor stehen und feuerte
+	# nie. Hier Structure ergaenzen (Basis-Liste + Structure), damit er Gebaeude auch im
+	# Normal-Stance automatisch angreift.
+	AutoTargetPriority@DEFAULT:
+		ValidTargets: Infantry, Vehicle, Creep, Structure, Water, Support, Mine
+	AotWanderAround:
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral, Creeps
+	MapEditorData:
+		Categories: Critter
+
+aot-rapt:
+	Inherits: RAPT
+	RenderSprites:
+		Image: rapt
+	AotAntWander:
+		DefaultPatrolRadius: 6
+		MinMoveDelay: 40
+		MaxMoveDelay: 140
+		RequiresCondition: aot-wander && !aot-attack-wave
+	AotCritterAttackWave:
+	# Fix (2026-09-02): ^DINO erbt ^AutoTargetGroundAssaultMove, dessen DEFAULT-Prioritaet KEINE
+	# Structure enthaelt -> der Dino lief bis zum Gebaeude, blieb 1 Zelle davor stehen und feuerte
+	# nie. Hier Structure ergaenzen (Basis-Liste + Structure), damit er Gebaeude auch im
+	# Normal-Stance automatisch angreift.
+	AutoTargetPriority@DEFAULT:
+		ValidTargets: Infantry, Vehicle, Creep, Structure, Water, Support, Mine
+	AotWanderAround:
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral, Creeps
+	MapEditorData:
+		Categories: Critter
+
+# === Age of Tiberium (aotmod) — TS Mutant-Critter (MUTANT/MWMN/MUTANT3), 2026-09-03 ===
+# Die "Forgotten"/Mutanten aus Tiberian Sun als neutrale Critter. Anders als die Ameisen
+# (Nahkampf, "bite") sind das humanoide Schuetzen mit der TS-Vulcan-Waffe (aot-MutantVulcan,
+# Report chaingn1.aud). Direkt-SHP-Workflow wie der Cyborg (61x61, aot-ts-player-Palette),
+# aber ueber ^AotAnt integriert -> erbt das komplette Critter-Verhalten (Wander/Attack-Wave/
+# AutoTarget, Tiberium-Immunitaet, leere DeathSounds) direkt. Nur ueberschrieben: Sprite,
+# Waffe, HP, Attack-Sequenz "attack" (statt "bite"), Player-Color-Palette, Schatten, Voice.
+# Drei Varianten: MUTANT (maennlich), MWMN (weiblich), MUTANT3 (Sergeant) -- alle 5000 HP,
+# Speed 56, Vulcan (Damage 2000), 1:1 aus TS civilian-infantry.yaml.
+^AotMutant:
+	Inherits: ^AotAnt
+	# Humanoide brauchen einen Schatten (die Ameisen-Vorlage bringt keinen mit).
+	WithShadow:
+		Offset: 0, 48, 0
+		ZOffset: -129
+	RenderSprites:
+		PlayerPalette: aot-ts-player
+	# "attack" statt "bite" (die Mutanten feuern), Idle-Anims + Player-Color-Palette wie Cyborg.
+	WithInfantryBody:
+		MoveSequence: run
+		StandSequences: stand
+		IdleSequences: idle1, idle2
+		DefaultAttackSequence: attack
+		Palette: aot-ts-player
+		IsPlayerPalette: true
+	# Echte TS-Death-Frames (die-twirling / die-crushed), in Spielerfarbe gerendert.
+	WithDeathAnimation:
+		DeathSequence: die
+		UseDeathTypeSuffix: false
+		DeathSequencePalette: aot-ts-player
+		DeathPaletteIsPlayerPalette: true
+		CrushedSequence: die-crushed
+		CrushedSequencePalette: aot-ts-player
+		CrushedPaletteIsPlayerPalette: true
+	Health:
+		HP: 5000
+	Mobile:
+		Speed: 56
+		Locomotor: foot
+	Armament:
+		Weapon: aot-MutantVulcan
+	# ^AotAnt setzt AntVoice (Ameisen-Gezirp) -- fuer Humanoide auf die generische Stimme
+	# zurueck. DeathSounds bleiben aus ^AotAnt leer -> kein Tiberium/Feuer-Tod-Crash.
+	Voiced:
+		VoiceSet: GenericVoice
+	Tooltip:
+		GenericName: meta-mutant-generic-name
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral, Creeps
+
+# --- Mutant (maennlich) ---
+aot-mutant:
+	Inherits: ^AotMutant
+	RenderSprites:
+		Image: mutant
+		PlayerPalette: aot-ts-player
+	Tooltip:
+		Name: actor-aot-mutant.name
+	MapEditorData:
+		Categories: Critter
+
+# --- Mutant Woman (weiblich) ---
+aot-mwmn:
+	Inherits: ^AotMutant
+	RenderSprites:
+		Image: mwmn
+		PlayerPalette: aot-ts-player
+	Tooltip:
+		Name: actor-aot-mwmn.name
+	MapEditorData:
+		Categories: Critter
+
+# --- Mutant Sergeant ---
+aot-mutant3:
+	Inherits: ^AotMutant
+	RenderSprites:
+		Image: mutant3
+		PlayerPalette: aot-ts-player
+	Tooltip:
+		Name: actor-aot-mutant3.name
+	MapEditorData:
+		Categories: Critter
+
+# === Age of Tiberium (aotmod) — AI Expansion Marker (2026-08-22) ===
+# Optionaler, im Spiel unsichtbarer Editor-Marker. Der Map-Maker platziert ihn dort, wo die
+# NOD-KI bevorzugt ihre Base-Expansion gruenden soll. Muster 1:1 wie aot-critter-spawner /
+# aot-light-system. Die KI liest ihn ueber World.ActorsWithTrait<AotExpansionMarker>() in
+# FindExpansionSite (siehe ai-base-expansion-layout.md). Checkbox "Prior Spawn Marker" hebt ihn
+# ueber einen leeren Spawn-Punkt. Das cyanfarbene Rechteck zeigt die Compound-Groesse (8x9 Zellen).
+aot-expansion-marker:
+	Inherits@1: ^ExistsInWorld
+	Tooltip:
+		Name: actor-aot-expansion-marker.name
+	Selectable:
+		Bounds: 512, 512
+	MapEditorData:
+		Categories: System
+	RequiresSpecificOwners:
+		ValidOwnerNames: Neutral
+	Immobile:
+		OccupiesSpace: false
+	RenderSpritesEditorOnly:
+	WithSpriteBody:
+	BodyOrientation:
+		QuantizedFacings: 1
+	AotExpansionMarker:
+		DefaultPriorSpawn: false
+	# Cyan Compound-Rechteck (8x9, zentriert um den Marker) im Editor.
+	AotEditorBounds:
+		MinX: -4
+		MinY: -4
+		MaxX: 3
+		MaxY: 4
+		Color: 5ADCEBA0

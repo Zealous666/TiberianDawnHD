@@ -27,32 +27,9 @@ Container@PRODUCTION_TYPES:
 					Y: 2
 					ImageCollection: chrome-button
 					ImageName: separator
-		ProductionTypeButton@SUPPORT:
-			Logic: AddFactionSuffixLogic
-			X: 65
-			Y: 0
-			Width: 64
-			Height: 26
-			Background: chrome-button-background
-			TooltipText: button-production-types-support-tooltip
-			TooltipContainer: TOOLTIP_CONTAINER
-			TooltipTemplate: BUTTON_TOOLTIP_FACTIONSUFFIX
-			ProductionGroup: Support
-			Key: ProductionTypeDefense
-			Children:
-				Image@ICON:
-					X: 11
-					Y: 5
-					ImageCollection: production-icons
-				Image@SEPARATOR:
-					Logic: AddFactionSuffixLogic
-					X: 64
-					Y: 2
-					ImageCollection: chrome-button
-					ImageName: separator
 		ProductionTypeButton@INFANTRY:
 			Logic: AddFactionSuffixLogic
-			X: 130
+			X: 65
 			Y: 0
 			Width: 64
 			Height: 26
@@ -75,8 +52,8 @@ Container@PRODUCTION_TYPES:
 					ImageName: separator
 		ProductionTypeButton@VEHICLE:
 			Logic: AddFactionSuffixLogic
-			X: 0
-			Y: 26
+			X: 130
+			Y: 0
 			Width: 64
 			Height: 26
 			Background: chrome-button-background
@@ -90,6 +67,29 @@ Container@PRODUCTION_TYPES:
 					X: 11
 					Y: 5
 					ImageCollection: production-icons
+				Image@SEPARATOR:
+					Logic: AddFactionSuffixLogic
+					X: 64
+					Y: 2
+					ImageCollection: chrome-button
+					ImageName: separator
+		ProductionTypeButton@SUPPORT:
+			Logic: AddFactionSuffixLogic
+			X: 0
+			Y: 26
+			Width: 64
+			Height: 26
+			Background: chrome-button-background
+			TooltipText: button-production-types-support-tooltip
+			TooltipContainer: TOOLTIP_CONTAINER
+			TooltipTemplate: BUTTON_TOOLTIP_FACTIONSUFFIX
+			ProductionGroup: Support
+			Key: ProductionTypeDefense
+			Children:
+				Image@ICON:
+					X: 11
+					Y: 5
+					ImageCollection: aot-production-special
 				Image@SEPARATOR:
 					Logic: AddFactionSuffixLogic
 					X: 64
@@ -144,6 +144,8 @@ Container@PRODUCTION_BACKGROUND:
 ProductionPalette@PRODUCTION_PALETTE:
 	X: WINDOW_WIDTH - 5 - 17 - 194
 	Y: 346
+	LockedIconCollection: aot-locked-icon
+	LockedIconRegion: locked
 
 ProductionTabs@PRODUCTION_TABS:
 	X: WINDOW_WIDTH - 5 - 18 - 194

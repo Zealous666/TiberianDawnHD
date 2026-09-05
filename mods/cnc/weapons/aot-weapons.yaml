@@ -1,3 +1,121 @@
+# === Age of Tiberium (aotmod) - Eis wegschiessen ===
+# Analog zum Einbrechen: wo eine Waffe einschlaegt, bricht auch das Eis darunter auf.
+# AotBreakIceWarhead entfernt Eiszellen aus AotIceLayer im Radius. Angehaengt an die geteilten
+# VANILLA-Waffen-Basen, die einen Einschlags-Warhead tragen (aot-weapons.yaml laedt NACH den
+# cnc|weapons/*.yaml -> YAML-Merge fuegt den Warhead hinzu, ohne die Vanilla-Datei zu editieren):
+# ^BallisticWeapon (Panzer, ~11 Erben), ^HeavyMG (^LightMG erbt davon), ^MissileWeapon (Raketen),
+# ^DamagingExplosion(HE) (Explosionsprojektile/Superwaffen), ^FlameWeapon (Flamme/Toxin),
+# ^DinoWeapon (Kampagne).
+# Radius: 0 = nur die Impact-Zelle (Default fuer alle Waffen); 1 = 3x3 Umkreis, reserviert fuer
+# HE + Superwaffen (Parabomb, TiberiumStrike/GasBurst, DropshipExplode, 227mm/-stnk).
+^BallisticWeapon:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+
+^HeavyMG:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+
+^MissileWeapon:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+
+^DamagingExplosion:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+
+^DamagingExplosionHE:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 1
+
+^FlameWeapon:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+
+^DinoWeapon:
+	# aotmod (2026-09-02): Reichweite 1c0 -> 2c0. 1c0 traf nur ORTHOGONAL benachbarte Ziele (1024);
+	# diagonal benachbart sind es 1448 > 1024 -> ausser Reichweite. Dadurch stand ein Critter (v.a.
+	# Saurier der Angriffswelle) oft direkt neben einem Gebaeude, ohne beissen zu koennen, wenn nur
+	# eine diagonale Nachbarzelle erreichbar war. 2c0 deckt jede Nachbarzelle sicher ab. Hier im
+	# Mod-Override (nicht in der Engine-Vanilla-Datei), damit es getrackt ist und einen Engine-
+	# Neubezug ueberlebt.
+	Range: 2c0
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+
+# AOT-Waffen ohne Vanilla-Basis (eigene Warheads) -- die Merge-Sektion pro Waffe fuegt nur diesen
+# einen zusaetzlichen Warhead hinzu, aendert nichts anderes. Radius nach Waffentyp:
+# 0 = gerichteter Strahl/Laser/MG/PPK, 1 = HE/Rakete/Flamme, 2 = Superwaffen/Cluster.
+aot-CommandoRailgun:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-MtnkRailgun:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-HtnkLaser:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-LtnkLaser:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-HarpyLaser:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-CruiserRailgun:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-DroneLaser:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-CyCannon:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-SilencedPPK:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-FturFlame:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-BansheeMissile:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-ATMine:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-MineClusterMissile:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-ZoneTrooperDropMissile:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-Parabomb:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 1
+aot-TiberiumStrike:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 1
+aot-TiberiumGasBurst:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 1
+aot-VeinGas:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+aot-DropshipExplode:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 1
+aot-dropship-machinegun:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+OrcaAGMissiles:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 0
+227mm:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 1
+227mm.stnk:
+	Warhead@BreakIce: AotBreakIce
+		Radius: 1# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - Satellite Launch: Dummy-Waffe ohne Schaden ===
 # Wird von AotSatellitePower genutzt um NukeLaunch-Effekt zu spawnen.
 # Kein Warhead = keine Wirkung. Target-Position ist weit oberhalb der Karte.
@@ -5,14 +123,64 @@ aot-satellite-launch:
 	ValidTargets: Air
 # === Ende aotmod ===
 
+# === Age of Tiberium (aotmod) - HeliAGGun (HIND/Harpy): Zielpunkt-Fix ===
+# User-Fund 2026-07-30: HIND traf Werften/Sub Pens ueberhaupt nicht (Einschlag sichtbar direkt
+# auf dem Gebaeude, aber 0 Schaden), gegen Landgebaeude (WEAP) dagegen schon -- nur der
+# Explosions-Einschlag erschien dort sichtbar ~3 Zellen neben dem Ziel.
+# Ursache: ohne TargetActorCenter zielt Armament.cs (Zeile ~305) auf
+# "target.Positions.ClosestToIgnoringPath(MuzzlePosition())" -- den zur MUENDUNG naechsten
+# Punkt der registrierten Trefferzonen. Bei einem schwebenden Helikopter liegt die Muendung
+# weit ueber dem Ziel; bei dicht bebauten Landzielen (WEAP) landet der "naechste Punkt" noch
+# irgendwo auf dem Gebaeude selbst, bei einer isolierten Werft im offenen Wasser verfehlt er
+# sie komplett -> Warhead findet dort keinen Akteur, Schaden bleibt aus (Notification "Building
+# under attack" feuert trotzdem, die reagiert nur auf den Treffer-Versuch, nicht auf > 0 Schaden).
+# Gleicher Fix wie bei ArtilleryShell/aot-8Inch (siehe dort): immer auf die echte Aktor-Mitte
+# zielen statt auf einen variablen, muendungsabhaengigen Punkt.
+HeliAGGun:
+	TargetActorCenter: true
+# === Ende aotmod ===
+
 # === Age of Tiberium (aotmod) - Recon Jeep HUMVEE: stärkeres MG ===
 # Tier 1: MachineGunH-Basis, Damage 1150→1500 (~30% mehr), gleiche Versus-Werte.
 aot-JeepHumvee:
 	Inherits: MachineGunH
+	# AA-faehig (User-Wunsch 2026-08-05): eigene HUMVEE-Waffe, der Basis-Jeep nutzt MachineGunH und
+	# bleibt reine Bodenwaffe. ValidTargets muss Air enthalten -- und ZWINGEND auch am Warhead,
+	# sonst zielt/feuert das MG zwar auf Luft, macht aber 0 Schaden (User-Fund 2026-08-05). Gleiches
+	# Muster wie aot-FirehawkMissile/OrcaAGMissiles: Air auf Waffen- UND Warhead-Ebene.
+	ValidTargets: Ground, Water, Air
 	Warhead@1Dam: SpreadDamage
+		ValidTargets: Ground, Water, Air
 		Damage: 1500
 		Versus:
 			Light: 70
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - GDI Commando Railgun ===
+# Identischer Infanterie-Schaden wie Sniper (10000, None:100%), deutlich mehr vs Fahrzeuge.
+# Range wie Sniper (8c0), LaserZap-Projektil, leicht längere ReloadDelay (50 statt 40).
+aot-CommandoRailgun:
+	ReloadDelay: 50
+	Range: 8c0
+	Report: bigggun1.aud
+	Projectile: LaserZap
+		Width: 50
+		Color: A0C8FF
+		HitAnim: laserfire
+		ZOffset: 2047
+	Warhead@1Dam: SpreadDamage
+		Spread: 42
+		Damage: 10000
+		Versus:
+			None: 100
+			Wood: 50
+			Light: 150
+			Heavy: 80
+			Concrete: 0
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+	Warhead@2Smu: LeaveSmudge
+		SmudgeType: Scorch
+		InvalidTargets: Infantry, Structure, Wall, Husk, Trees, Creep
 # === Ende aotmod ===
 
 # === Age of Tiberium (aotmod) - MTNK Predator: schnelleres 120mm ===
@@ -23,11 +191,11 @@ aot-MtnkPredator:
 	Report: tnkfire4.aud
 
 # === Age of Tiberium (aotmod) - MTNK Railgun: Hochschaden-Laser ===
-# Tier 3: LaserZap-Projektil, ~50% mehr Schaden (6000 statt 4000), kein Spread.
+# Tier 3: LaserZap-Projektil, kein Spread. Balancing 2026-08-11: Damage 6000→4000.
 aot-MtnkRailgun:
 	ReloadDelay: 50
 	Range: 6c0
-	Report: obelray1.aud
+	Report: bigggun1.aud
 	Projectile: LaserZap
 		Width: 50
 		Color: A0C8FF
@@ -35,7 +203,7 @@ aot-MtnkRailgun:
 		ZOffset: 2047
 	Warhead@1Dam: SpreadDamage
 		Spread: 42
-		Damage: 6000
+		Damage: 4000
 		Versus:
 			None: 25
 			Wood: 100
@@ -47,12 +215,13 @@ aot-MtnkRailgun:
 		InvalidTargets: Vehicle, Structure, Wall, Husk, Trees, Creep
 
 # === Age of Tiberium (aotmod) - HTNK Laser: weißer LaserZap wie MTNK Railgun ===
+# Balancing 2026-08-11: Damage 8000→5000.
 aot-HtnkLaser:
 	ReloadDelay: 50
 	Burst: 2
 	BurstDelays: 8
 	Range: 6c0
-	Report: obelray1.aud
+	Report: bigggun1.aud
 	Projectile: LaserZap
 		Width: 50
 		Color: A0C8FF
@@ -60,7 +229,7 @@ aot-HtnkLaser:
 		ZOffset: 2047
 	Warhead@1Dam: SpreadDamage
 		Spread: 42
-		Damage: 8000
+		Damage: 5000
 		Versus:
 			None: 25
 			Wood: 100
@@ -71,22 +240,1953 @@ aot-HtnkLaser:
 		SmudgeType: Scorch
 		InvalidTargets: Vehicle, Structure, Wall, Husk, Trees, Creep
 
+# Balancing 2026-08-11: Burst 3→1 (langsame Kadenz wie vorher), ReloadDelay 60→45,
+# Damage 4000→3000. HarpyLaser entkoppelt (eigene Stats für schnelles Feuer).
 aot-LtnkLaser:
-	ReloadDelay: 60
+	ReloadDelay: 45
 	Range: 6c0
 	Report: obelray1.aud
-	Burst: 3
-	BurstDelay: 8
 	Projectile: LaserZap
 		Width: 40
 		HitAnim: laserfire
 		ZOffset: 2047
 	Warhead@1Dam: SpreadDamage
 		Spread: 42
-		Damage: 4000
+		Damage: 3000
 		Versus:
 			Wood: 50
 		DamageTypes: Prone50Percent, TriggerProne, FireDeath
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: Scorch
 		InvalidTargets: Vehicle, Structure, Wall, Husk, Trees, Creep
+
+# === Age of Tiberium (aotmod) - GUN Turret Laser Defense Systems Upgrade ===
+# Eigener Eintrag (statt aot-LtnkLaser direkt zu teilen) fuer unabhaengiges Balancing,
+# Werte vorerst 1:1 vom LTNK-Laser uebernommen (roter LaserZap-Default, kein Color:).
+aot-GunLaser:
+	Inherits: aot-LtnkLaser
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - FTUR Flame Tower (RA-Import, NOD Age 0) ===
+# Stats 1:1 von RA's FireballLauncher + ^FireWeapon uebernommen (engine/mods/ra/
+# weapons/other.yaml), da diese Basis-Traits im cnc-Mod nicht existieren. Projektil
+# JETZT ebenfalls authentisch (User-Korrektur 2026-07-04): Image/TrailImage auf die
+# importierten FB1/FB2-Sequenzen (aot-ftur-fb1/aot-ftur-fb2, siehe aot-sequences.yaml)
+# umgebogen, Speed 1:1 RA-Wert. Sound bleibt bewusst vom cnc-eigenen ^FlameWeapon
+# (flamer2.aud) - RA's FireballLauncher hat GAR KEINEN Report (in vanilla RA stumm).
+# Explosions-Effekt auf med_napalm umgebogen (RA's "napalm" existiert im cnc-Mod nicht).
+# KRITISCHER Bugfix (2026-07-04, User-Report "macht gar keinen Schaden"): ValidTargets
+# nutzte RA's eigene Tag-Konvention ("GroundActor"/"WaterActor") 1:1 aus RA's
+# ^FireWeapon uebernommen - dieser CNC-Mod nutzt aber die cnc-eigene Konvention OHNE
+# "Actor"-Suffix (siehe ^FlameWeapon: "ValidTargets: Ground, Water, Trees"). Da echte
+# Einheiten hier nie als "GroundActor"/"WaterActor" getaggt sind, traf der Warhead
+# NIE ein gueltiges Ziel -> 0 Schaden gegen alles ausser (theoretisch) Trees. Auf die
+# cnc-Konvention umgestellt.
+aot-FturFlame:
+	ValidTargets: Ground, Water, Trees
+	ReloadDelay: 70
+	Range: 5c0
+	InvalidTargets: Wall
+	Report: flamer2.aud
+	Burst: 2
+	BurstDelays: 20
+	Projectile: Bullet
+		Speed: 250
+		Image: aot-ftur-fb1
+		TrailImage: aot-ftur-fb2
+		# Blockable defaultet auf true (Bullet.cs) - ein Verteidigungsturm hinter
+		# der eigenen Mauer/dem Zaun konnte dadurch nicht ueber diese hinweg
+		# feuern (Fence/Wall haben BlocksProjectiles, siehe aot-structures.yaml).
+		# User-Fund 2026-07-05: "muss ueber Zaeune feuern - kommt gerade nicht
+		# durch". Fix: Projektil ignoriert eigene BlocksProjectiles-Hindernisse.
+		Blockable: false
+	Warhead@1Dam: SpreadDamage
+		Spread: 213
+		Damage: 15000
+		ValidTargets: Ground, Water, Trees
+		Versus:
+			None: 90
+			Wood: 50
+			Tree: 50
+			Light: 60
+			Heavy: 25
+			Concrete: 20
+		DamageTypes: Prone50Percent, TriggerProne, FireDeath, Incendiary
+	Warhead@2Smu: LeaveSmudge
+		SmudgeType: Scorch
+		InvalidTargets: Structure, Wall
+	Warhead@3Eff: CreateEffect
+		Explosions: med_napalm
+
+# === Age of Tiberium (aotmod) - FTUR Toxic Tower Upgrade-Waffe ===
+# "Toxic projectile" + "toxic impact" (User-Wunsch 2026-07-04, Toxic-Upgrade-
+# Konsolidierung): Inherits Chemspray (dieselbe Basis wie E4 Toxic Trooper und
+# TTNK aot-TtnkChemspray), nur ReloadDelay/Range/Burst an FTUR angepasst.
+# KRITISCHER Bugfix (2026-07-05, User-Fund "kein Projektil"): Chemsprays
+# geerbtes Bullet-Projektil hat KEIN Image (bewusst unsichtbar bei E4/TTNK,
+# dort kurze Reichweite/schnelle Ziel-Treffer kaum auffaellig) - beim Turm mit
+# 5c0 Reichweite wirkte das Fehlen sichtbarer Flugbahn wie ein Bug. Eigenes
+# sichtbares Projektil ergaenzt: aot-plasma-green (bereits im Mod vorhanden,
+# genutzt vom Cyborg Commando CyCannon, siehe aot-CyCannon oben). Zusaetzlich
+# Blockable: false (identischer Grund wie bei aot-FturFlame oben: "muss ueber
+# Zaeune feuern").
+aot-FturToxic:
+	Inherits: Chemspray
+	ReloadDelay: 70
+	Range: 5c0
+	Burst: 2
+	BurstDelays: 20
+	Projectile: Bullet
+		Speed: 250
+		Image: aot-toxic-fb1
+		TrailImage: aot-toxic-fb2
+		Blockable: false
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Nod Avatar Flame/Toxic (FTUR-Fireball-Projektil) ===
+# User-Wunsch 2026-07-06: sichtbares Feuerball-Projektil statt Muzzle-Overlay
+# (das war im Avatar-Body kaum sichtbar). Wiederverwendet aot-ftur-fb1/fb2
+# (Feuerball+Rauchschweif) 1:1 von aot-FturFlame. Toxic-Variante nutzt das neue
+# gruen eingefaerbte aot-toxic-fb1/fb2 (siehe aot-sequences.yaml), dasselbe
+# Projektil wie aot-FturToxic (oben) - ein gemeinsames Toxic-Sprite fuer beide.
+aot-AvatarFlame:
+	Inherits: Flamethrower
+	Projectile: Bullet
+		Speed: 250
+		Image: aot-ftur-fb1
+		TrailImage: aot-ftur-fb2
+		Blockable: false
+
+aot-AvatarToxic:
+	Inherits: Chemspray
+	Projectile: Bullet
+		Speed: 250
+		Image: aot-toxic-fb1
+		TrailImage: aot-toxic-fb2
+		Blockable: false
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Apache AG Missiles ===
+OrcaAGMissiles:
+	Warhead@1Dam: SpreadDamage
+		Damage: 2000
+
+# Apache: gleicher Schaden wie ORCA (2000), aber kein AA.
+aot-ApacheAGMissiles:
+	Inherits: OrcaAGMissiles
+	Warhead@1Dam: SpreadDamage
+		Damage: 2000
+
+# === Age of Tiberium (aotmod) - MiG Airstrike-Raketen ===
+# Waffe der NOD-Airstrike-Superpower (aot-mig). Nach der RA-MiG (Maverick) modelliert:
+# 2-Raketen-Burst mit hohem Schaden gegen Fahrzeuge/Gebäude. Erbt die luftgestützte
+# OrcaAGMissiles-Basis (funktioniert vom Flugzeug), aber Maverick-Stats.
+# MinRange 0, damit die Rakete auch beim Überflug direkt über dem Ziel abgefeuert wird.
+aot-MigMissile:
+	Inherits: OrcaAGMissiles
+	ReloadDelay: 50
+	Range: 9c0
+	MinRange: 0
+	Report: rocket1.aud
+	Burst: 2
+	BurstDelays: 7
+	Projectile: Missile
+		Arm: 1
+		HorizontalRateOfTurn: 80
+		Speed: 256
+		Inaccuracy: 316
+		RangeLimit: 14c410
+	Warhead@1Dam: SpreadDamage
+		Damage: 7000
+		Versus:
+			None: 30
+			Wood: 90
+			Light: 90
+			Heavy: 115
+			Concrete: 100
+
+# === Age of Tiberium (aotmod) - Firehawk-Rakete (Firehawk-Upgrade des AJET) ===
+# Wie aot-MigMissile (Maverick), aber 3x Doppel-Burst = 6 Raketen pro Salve.
+# Anti-Air: ValidTargets auf Waffen- UND Warhead-Ebene um Air erweitert (OrcaAGMissiles
+# setzt beide auf Ground) -> Firehawk greift feindliche Luft-Einheiten automatisch an.
+aot-FirehawkMissile:
+	Inherits: aot-MigMissile
+	Burst: 6
+	BurstDelays: 4, 4, 4, 4, 4
+	Report: rocket1.aud
+	# aotmod 2026-08-29: Underwater/Submarine ergaenzt -> die Rakete trifft auch GETAUCHTE
+	# U-Boote (aufgetauchte sind bereits ueber Water/Ground abgedeckt). Ortung liefert der
+	# DetectCloaked@firehawk am AJET.
+	ValidTargets: Ground, Water, Air, Underwater, Submarine
+	Warhead@1Dam: SpreadDamage
+		ValidTargets: Ground, Water, Air, Underwater, Submarine
+		# aotmod 2026-08-29: 7500 statt geerbter 7000, damit eine volle Raketen-Ladung
+		# (6 Ammo x Burst 6 = alle 6 Raketen pro Anflug) in der Summe mind. so viel Schaden
+		# macht wie eine volle Napalm-Ladung (20 Ammo x 2250 = 45.000): 6 x 7500 = 45.000.
+		Damage: 7500
+
+# === Age of Tiberium (aotmod) - HIND / Harpy Waffen ===
+# HIND: 1500 Schaden, Burst 2, kein AA.
+# Harpy: 2000 Schaden, Burst 3, kein AA.
+aot-HindAGGun:
+	Inherits: HeliAGGun
+	Burst: 2
+	BurstDelays: 0
+	ReloadDelay: 40
+	Report: aot-hind-mg.aud
+	Warhead@1Dam: SpreadDamage
+		Damage: 1500
+
+aot-HarpyAGGun:
+	Inherits: HeliAGGun
+	Burst: 2
+	BurstDelays: 0
+	ReloadDelay: 20
+	Report: aot-hind-mg.aud
+	Warhead@1Dam: SpreadDamage
+		Damage: 2000
+
+# Balancing 2026-08-11: entkoppelt von aot-LtnkLaser. Schnelles Burst-Feuer (Burst 3)
+# für Harpy + Buggy, aber Damage 1800 (vorher 4000).
+aot-HarpyLaser:
+	ReloadDelay: 60
+	Range: 6c0
+	Report: obelray1.aud
+	Burst: 3
+	BurstDelays: 8
+	Projectile: LaserZap
+		Width: 40
+		HitAnim: laserfire
+		ZOffset: 2047
+	Warhead@1Dam: SpreadDamage
+		Spread: 42
+		Damage: 1800
+		Versus:
+			Wood: 50
+		DamageTypes: Prone50Percent, TriggerProne, FireDeath
+	Warhead@2Smu: LeaveSmudge
+		SmudgeType: Scorch
+		InvalidTargets: Vehicle, Structure, Wall, Husk, Trees, Creep
+
+# === Age of Tiberium (aotmod) - BIKE Laser (Laser Technologies Upgrade) ===
+# Dual-Laser für NOD Recon Bike: je ein Schuss aus linker und rechter Kanone.
+# Erbt aot-LtnkLaser (Balancing), ValidTargets auf Ground/Water beschränkt
+# wie die ursprünglichen BikeRockets.
+# User-Wunsch 2026-08-01: Recon Bike kann ab jetzt IMMER Boden UND Luft beschiessen
+# (Air/Air ergaenzt). Das Laser-Upgrade fuer die Bike wurde ersatzlos entfernt, es gibt nur
+# noch diese eine Waffe -- aot-BikeLaser ist damit weggefallen.
+aot-BikeRockets:
+	Inherits: BikeRockets
+	ValidTargets: Ground, Water, Air
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - AJET Waffen ===
+# Basieren auf A10-Waffen (Vulcan/Napalm), aber ohne Burst-Offsets die für den
+# stationären A10-Überflug ausgelegt sind. AJET greift per AttackAircraft an.
+
+# Vulcan-Kanone ohne FirstBurst/FollowingBurst-Offsets — trifft direkt das Ziel
+aot-AjetVulcan:
+	Inherits: Vulcan
+	Range: 5c0
+	FirstBurstTargetOffset: 0,0,0
+	FollowingBurstTargetOffset: 0,0,0
+
+# Napalm-Kette: 5 Bomben mit Fallverzögerung (GravityBomb Delay)
+aot-AjetNapalm:
+	Inherits: ^FlameWeapon
+	ReloadDelay: 4
+	Range: 5c0
+	Burst: 5
+	BurstDelays: 1
+	-Projectile:
+	Projectile: GravityBomb
+		Image: BOMBLET
+		Shadow: true
+	Warhead@1Dam: SpreadDamage
+		Spread: 341
+		Damage: 2250
+		Falloff: 1000, 368, 135, 50, 18, 7, 0
+		Versus:
+			Wood: 35
+			Heavy: 80
+			Concrete: 80
+	Warhead@3Eff: CreateEffect
+		Explosions: med_napalm
+
+# === Age of Tiberium (aotmod) - TTNK Battle Tank: Dual-Kanone ===
+# Tier 0 NOD: Burst:2 wie 120mmDual, aber Damage 2000 statt 4000 (50% weniger als HTNK).
+# Einzelner LocalOffset (2TNK-Sprite hat nur eine Kanone), trotzdem zweimal feuern.
+aot-TtnkDual:
+	Inherits: ^BallisticWeapon
+	Burst: 2
+	BurstDelays: 12
+	ReloadDelay: 75
+	Report: tnkfire4.aud
+	Warhead@1Dam: SpreadDamage
+		Damage: 2000
+
+aot-TtnkChemspray:
+	Inherits: Chemspray
+	Burst: 2
+	BurstDelays: 10
+
+aot-TtnkTick:
+	Inherits: ^BallisticWeapon
+	Report: tnkfire4.aud
+	Warhead@1Dam: SpreadDamage
+		Damage: 5000
+
+# === Age of Tiberium (aotmod) - NOD Cyborg: Chain Gun ===
+# Repliziert TS Vulcan3 (Burst 3, ReloadDelay 30, Damage 1000/Schuss).
+# cygun1.aud aus TS sounds.mix (optionales Package in mod.yaml).
+aot-CyborgChainGun:
+	Inherits: MachineGun
+	Range: 5c0
+	Burst: 3
+	BurstDelays: 4
+	ReloadDelay: 30
+	Report: cygun1.aud
+	Warhead@1Dam: SpreadDamage
+		Spread: 108
+		Damage: 1000
+		Versus:
+			None: 100
+			Wood: 60
+			Light: 40
+			Heavy: 25
+			Concrete: 10
+		DamageTypes: Prone70Percent, TriggerProne, BulletDeath
+
+# === Age of Tiberium (aotmod) - NOD Cyborg Commando: CyCannon (Plasma-Projektil) ===
+# TS: CyCannon — Damage 120 × PlasmaWH (350%/260%/205%/150%/80%), Range 7, ProtonBlast Projektil
+aot-CyCannon:
+	Range: 7c0
+	ReloadDelay: 50
+	Report: scrin5b.aud
+	Projectile: Bullet
+		Image: aot-plasma-green
+		Speed: 300
+		Shadow: false
+	Warhead@1Dam: SpreadDamage
+		Spread: 512
+		Damage: 6000
+		Versus:
+			None: 200
+			Wood: 150
+			Light: 150
+			Heavy: 120
+			Concrete: 50
+		DamageTypes: BulletDeath
+	Warhead@2Eff: CreateEffect
+		Explosions: chemball
+		ImpactSounds: xplobig4.aud
+
+# === Age of Tiberium (aotmod) - NOD Cyborg: Cripple-Effekt ===
+# Feuert auf sich selbst wenn Critical-HP erreicht (ExplosionOnDamageTransition).
+# Size: 1,0 = nur die unmittelbare Zelle + 1er-Ring = 2-3 Tiberium-Blüten.
+aot-CyborgCrippleEffect:
+	Warhead@1Res: CreateResource
+		AddsResourceType: Tiberium
+		Size: 0,0
+	Warhead@2Eff: CreateEffect
+		Explosions: chemball
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Tiberium Strike: MSLO-Superpower-Warhead (TESTWERT) ===
+# Kein Nuke-Warhead — verheerende toxische Explosion. Stark gegen Infanterie (None),
+# schwach gegen Gebäude/Panzerung (Wood/Concrete) — umgekehrte Balance zur Atomic-Waffe.
+# Platzhalter: MissileImage/-Sound bleiben vorerst die Nuke-Assets (kein eigenes Toxin-Sprite importiert).
+aot-TiberiumStrike:
+	ValidTargets: Ground, Water, Air, Trees
+	Report: nukemisl.aud
+	Warhead@1Dam: SpreadDamage
+		Spread: 1c512
+		Damage: 6000
+		Falloff: 1000, 700, 400, 200, 80, 30, 0
+		ValidTargets: Ground, Air, Trees
+		AffectsParent: True
+		Versus:
+			None: 200
+			Wood: 25
+			Light: 50
+			Heavy: 35
+			Concrete: 15
+		DamageTypes: Prone50Percent, TriggerProne, TiberiumDeath
+	Warhead@2Eff: CreateEffect
+		Explosions: chemball
+		ImpactSounds: xplos.aud
+		ImpactActors: false
+	Warhead@3Shake: ShakeScreen
+		Duration: 20
+		Intensity: 5
+		Multiplier: 1,1
+	Warhead@4FlashEffect: FlashEffect
+		Duration: 20
+	Warhead@5Cluster: FireCluster
+		Weapon: aot-TiberiumGasBurst
+		RandomClusterCount: 3
+		Dimensions: 11,11
+		Footprint: _____x_____ __xxxxxxx__ _xxxxxxxxx_ _xxxxxxxxx_ _xxxxXxxxx_ xxxxXxXxxxx _xxxxXxxxx_ _xxxxxxxxx_ _xxxxxxxxx_ __xxxxxxx__ _____x_____
+	Warhead@6Cluster2: FireCluster
+		Weapon: aot-TiberiumGasBurst2
+		RandomClusterCount: 3
+		Dimensions: 11,11
+		Footprint: _____x_____ __xxxxxxx__ _xxxxxxxxx_ _xxxxxxxxx_ _xxxxxxxxx_ xxxxxxxxxxx _xxxxxxxxx_ _xxxxxxxxx_ _xxxxxxxxx_ __xxxxxxx__ _____x_____
+	# === Rodung Phase 1 (User-Wunsch 2026-08-04) ===
+	# Baeume haben zwei Phasen: Baum (24000 HP) -> Husk (24000 HP). Der Haupt-Warhead oben
+	# schafft ueber die Falloff-Kurve nicht einmal Phase 1 zuverlaessig. Statt seine Werte
+	# anzuheben (das wuerde die austarierte Wirkung gegen Einheiten/Gebaeude mitziehen)
+	# haengt hier ein ZWEITER, baum-exklusiver Warhead dran: "Trees" ist der einzige
+	# TargetType von ^Tree/^TreeHusk, dieser Warhead kann also nichts anderes treffen.
+	#
+	# Trifft NUR die noch stehenden Baeume, nicht deren Husks: SpawnActorOnDeath erzeugt den
+	# Husk in einem AddFrameEndTask (SpawnActorOnDeath.cs:143), also erst NACH der kompletten
+	# Warhead-Abarbeitung dieses Einschlags. Phase 2 bleibt damit automatisch stehen und wird
+	# vom nachziehenden Gas erledigt (siehe ^TreeHusk in aot-world.yaml).
+	#
+	# Falloff: 11 Stuetzstellen a 512 (= 0,5 Zellen) auf 100%, danach auf 0 -- volle Wirkung
+	# exakt bis 5,0 Zellen, ab 5,5 Zellen gar keine. Schadenswert bewusst ueber den 24000 HP
+	# (Sicherheitsmarge, falls ^Tree spaeter mehr HP bekommt).
+	Warhead@7Trees: SpreadDamage
+		Spread: 512
+		Damage: 30000
+		Falloff: 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 0
+		ValidTargets: Trees
+		DamageTypes: TiberiumDeath
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Tiberium Gas Burst: Sekundär-Explosion + Gaswolken-Spawn ===
+# Von aot-TiberiumStrikes FireCluster ausgelöst: 4 garantiert nah am Zentrum (aot-TiberiumGasBurst) + 3 zufällig
+# (aot-TiberiumGasBurst) + 3 zufällig (aot-TiberiumGasBurst2) im 5-Zellen-Radius, macht 10 Sekundär-Explosionen
+# insgesamt (wie TS' ChemMissile Cluster=8) — aufgeteilt auf zwei Sub-Waffen für Wolken-Optik-Varianz (cloud1/cloud2).
+# Deutlich schwächer als der Haupteinschlag. Hinterlässt eine Gaswolke (60s DoT + Fadeout, aot-structures.yaml/overrides.yaml).
+aot-TiberiumGasBurst:
+	ValidTargets: Ground, Water, Air, Trees
+	Projectile: Bullet
+		Speed: 800
+	Warhead@1Dam: SpreadDamage
+		Spread: 512
+		Damage: 500
+		ValidTargets: Ground, Air, Trees
+		Versus:
+			None: 150
+			Wood: 15
+			Light: 35
+			Heavy: 25
+			Concrete: 8
+		DamageTypes: Prone50Percent, TriggerProne, TiberiumDeath
+	Warhead@2Eff: CreateEffect
+		Image: aot-gascloud-formation
+		Explosions: idle
+		ImpactSounds: xplos.aud
+		ImpactActors: false
+	Warhead@3Spawn: AotSpawnActor
+		Actor: aot-gascloud
+
+# === Age of Tiberium (aotmod) - Tiberium Gas Burst 2: wie aot-TiberiumGasBurst, spawnt cloud2-Variante ===
+aot-TiberiumGasBurst2:
+	Inherits: aot-TiberiumGasBurst
+	Warhead@3Spawn: AotSpawnActor
+		Actor: aot-gascloud2
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Gunboat / Destroyer Waffen ===
+# Basis BoatMissile (Engine-CnC Naval-Waffe). PT-Gunboat: leichter Einzelschuss.
+# Destroyer (nach "Destroyer Enhancement"): stärkere Doppel-Raketensalve.
+# PT-Gunboat: originalgetreuer Nachbau der RA-PT-Waffe "2Inch" (Schiffskanone).
+# RA: Inherits ^Cannon (= CnC ^BallisticWeapon, Bullet/120MM), ReloadDelay 60,
+# Range 5c512, Damage 2500, Report cannon2. Sound aus SFX3D.MEG (RAC_SFX_CANNON2.WAV)
+# extrahiert nach bits/aot-cannon2.wav (MS-ADPCM, von OpenRA unterstützt).
+aot-GunboatGun:
+	Inherits: ^BallisticWeapon
+	ReloadDelay: 60
+	# Reichweite auf U-Boot-Niveau (Sub-Torpedo 9c0): vorher 5c512 -> die Gunboat konnte sich gegen
+	# aus 9 Zellen feuernde U-Boote nicht wehren. Submarine als ValidTarget, damit sie U-Boote auch
+	# geortet-getaucht anvisieren kann.
+	Range: 9c0
+	ValidTargets: Ground, Water, Submarine
+	Report: aot-cannon2.wav
+	Warhead@1Dam: SpreadDamage
+		Spread: 256
+		Damage: 2500
+		Versus:
+			None: 28
+			Wood: 72
+			Light: 72
+			Concrete: 48
+	# EXKLUSIVER Anti-U-Boot-Zusatzschaden: trifft nur Aktoren mit Ziel-Typ "Submarine" (den nur
+	# U-Boote/Missile-U-Boote dauerhaft tragen, siehe Targetable@antisub) -- also KEINE anderen
+	# Schiffe. Macht die Gunboat zum Sub-Jaeger, ohne Transporter/Warships mitzubuffen.
+	Warhead@2Sub: SpreadDamage
+		Spread: 256
+		Damage: 3000
+		ValidTargets: Submarine
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+# Frigate: 3 Raketen, längere Pause als Destroyer (2 Raketen). Kein Luftangriff.
+aot-FrigateMissiles:
+	Inherits: BoatMissile
+	ReloadDelay: 50
+	# Reichweite auf U-Boot-Niveau (9c0) wie die Gunboat-Kanone.
+	Range: 9c0
+	Burst: 3
+	BurstDelays: 12
+	ValidTargets: Ground, Water, Submarine
+	# Exklusiver Anti-U-Boot-Zusatzschaden (nur Ziel-Typ Submarine), analog Gunboat-Kanone.
+	# Kleiner als bei der Gunboat (1500 statt 3000), weil die Frigate Burst 3 feuert -> 3x pro Salve.
+	Warhead@2Sub: SpreadDamage
+		Spread: 256
+		Damage: 1500
+		ValidTargets: Submarine
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+	Warhead@1Dam: SpreadDamage
+		Damage: 4000
+aot-DestroyerRockets:
+	Inherits: BoatMissile
+	ReloadDelay: 30
+	Range: 9c0
+	Burst: 2
+	BurstDelays: 8
+	# NUR Boden/Wasser -- Luft laeuft ueber die separate, schwache aot-HoverMLRS-AA
+	# (Armament@AA am aot-msam-hover-mlrs), gleiches Muster wie beim MSAM.
+	# ACHTUNG: "Versus: Air" waere ein NO-OP -- Versus-Schluessel sind RUESTUNGSTYPEN
+	# (Heavy/Light/Wood/Concrete/None/Tree), und Flugzeuge tragen Armor Type: Light.
+	# Ein Versus-Eintrag kann Luft also NIE getrennt von Boden-Light-Fahrzeugen schwaechen.
+	ValidTargets: Ground, Water
+	Warhead@1Dam: SpreadDamage
+		Damage: 9000
+
+# === Age of Tiberium (aotmod) - Hover MLRS Flugabwehr (schwach) ===
+# Eigene air-only Rakete, damit der Hover MLRS Luft bekaempfen kann, aber deutlich
+# schwaecher als die Hover AA bleibt (User-Vorgabe). Salvenbild wie seine Bodenwaffe:
+# Burst 2, aber gleichzeitig (BurstDelays 0).
+aot-HoverMLRS-AA:
+	Inherits: ^MissileWeapon
+	ReloadDelay: 30
+	Range: 9c0
+	MinRange: 0
+	ValidTargets: Air
+	Report: missile6.wav
+	Burst: 2
+	BurstDelays: 0
+	Projectile: Missile
+		Image: DRAGON
+		Speed: 384
+		Arm: 2
+		Blockable: false
+		Shadow: true
+		TrailImage: smokey
+		ContrailLength: 8
+		Inaccuracy: 256
+		HorizontalRateOfTurn: 50
+		RangeLimit: 11c0
+	Warhead@1Dam: SpreadDamage
+		Spread: 256
+		Damage: 900
+		ValidTargets: Air
+		Versus:
+			Light: 100
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+
+# === Age of Tiberium (aotmod) - Destroyer Lenkraketen (RA-Stinger) ===
+# RA-Stinger-IDENTITAET (engine/mods/ra/weapons/missiles.yaml): Schaden 2500, RA-Versus
+# (stark vs Heavy 120 / schwach vs Concrete 60 -- Panzerbrecher, kein Basiskiller), kurze
+# Reichweite 7c512 (vs 20c0 des Subs). Nur ab Destroyer-Upgrade aktiv.
+#
+# ZUSTELLUNG von der bewaehrten Sub-Rakete uebernommen, weil die ROHEN RA-Werte in diesem
+# Mod gegen Gebaeude quasi 0 Schaden machten (User-Test): RAs Gebaeude sind winzig, hier
+# haben sie 55k-80k HP mit grossen HitShapes. Zwei Ursachen behoben:
+#  1. Spread 128 + Default-Falloff [100,37,14,5,0] = viel zu enger Radius -> der Grossteil
+#     der Gebaeude-HitShape lag ausserhalb. Jetzt Spread 426 + sanfter Falloff wie beim Sub.
+#  2. CloseEnough 149 < Speed 170 -> die Rakete uebersprang das Detonationsfenster jeden
+#     Tick, kreiste und detonierte weit vom Ziel. CloseEnough entfernt = Default 298 (> Speed).
+aot-DestroyerStinger:
+	Inherits: ^MissileWeapon
+	ReloadDelay: 60
+	Range: 10c0
+	Burst: 2
+	# Gestaffelter Burst wie beim Missile Sub (nicht beide Raketen gleichzeitig, User-Wunsch).
+	BurstDelays: 15
+	Report: missile6.wav
+	ValidTargets: Ground, Water
+	# Submarine MUSS mit rein: ein AUFGETAUCHTES U-Boot traegt Ground/Water wie ein Schiff,
+	# nur der bedingungslose Typ "Submarine" (Targetable@antisub) verraet es. Gegen U-Boote
+	# ist ausschliesslich die Wasserbombe zustaendig.
+	InvalidTargets: Underwater, Submarine
+	Projectile: Missile
+		Arm: 3
+		Inaccuracy: 0
+		HorizontalRateOfTurn: 80
+		# RangeLimit > Range (10c0) noetig, sonst geht der Rakete vor dem Ziel der Sprit aus.
+		RangeLimit: 12c0
+		Speed: 170
+	Warhead@1Dam: SpreadDamage
+		Spread: 426
+		Falloff: 1000, 368, 135, 50, 18, 7, 0
+		Damage: 2500
+		ValidTargets: Ground, Water
+		InvalidTargets: Underwater, Submarine
+		Versus:
+			None: 36
+			Wood: 88
+			Light: 66
+			Heavy: 120
+			Concrete: 60
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+
+# Flugabwehr-Lenkrakete: RA StingerAA (erbt Stinger, nur Luft, schneller, RA-Luftschaden).
+aot-DestroyerStingerAA:
+	Inherits: aot-DestroyerStinger
+	ValidTargets: Air
+	InvalidTargets: Ground, Water
+	Projectile: Missile
+		Arm: 3
+		Inaccuracy: 0
+		HorizontalRateOfTurn: 80
+		RangeLimit: 12c0
+		Speed: 255
+		CloseEnough: 298
+	Warhead@1Dam: SpreadDamage
+		Spread: 128
+		Damage: 1650
+		ValidTargets: Air
+		Versus:
+			Light: 100
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+
+# RA DepthCharge-Nachbau: Bogenprojektil (bomb.shp), feuert seitlich vom Schiff.
+# RA original: ValidTargets Underwater (U-Boote) -- in CnC kein Underwater, daher Water
+# (trifft Schiffe auf Wasser). LaunchAngle 62 + Speed 125 = sichtbarer Bogenflug wie
+# beim RA-Original. Beide Schiffszustände (PT + DD) nutzen dieselbe Waffe.
+aot-DepthCharge:
+	Inherits: ^BallisticWeapon
+	# Originaler RA-Wasserbomben-Sound (h2obomb2.aud aus sounds.mix extrahiert). Das RA-Original
+	# hat bewusst KEINEN eigenen Abschuss-Report -- dieser Sound IST der Wasserbomben-Sound.
+	Report: h2obomb2.aud
+	-Warhead@2Smu:
+	ReloadDelay: 60
+	# Immer Doppelabwurf: zwei Ladungen backbord + steuerbord (LocalOffset/LocalYaw am
+	# Armament@depthdd des Destroyers) -> zusammen doppelter Schaden.
+	Burst: 2
+	BurstDelays: 3
+	# Immer gegen U-Boote (Ziel-Typ Submarine, den U-Boote dauerhaft tragen) statt nur getaucht
+	# (Underwater); Reichweite auf U-Boot-Niveau (9c0).
+	Range: 9c0
+	ValidTargets: Submarine
+	Projectile: Bullet
+		Image: bomb
+		Speed: 125
+		LaunchAngle: 62
+		Shadow: true
+		Inaccuracy: 128
+	# Die Ladung sinkt erst und detoniert dann in der Tiefe: Schaden 1 Sekunde (25 Ticks)
+	# verzoegert, damit er zur spaeten Explosion passt (Warhead.Delay).
+	Warhead@1Dam: SpreadDamage
+		Delay: 25
+		Spread: 128
+		Damage: 6000
+		ValidTargets: Submarine
+		Versus:
+			None: 30
+			Wood: 70
+			Light: 80
+			Heavy: 40
+			Concrete: 20
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+	# SOFORT beim Aufschlag: Wasserflatschen + Fontaene (RA H2O_EXP-VFX).
+	Warhead@2EffSplash: CreateEffect
+		Explosions: aot-h2o-splash, aot-h2o-splash2, aot-h2o-splash3
+		ImpactSounds: splash9.aud
+		ValidTargets: Submarine, Water, Underwater
+	# 1 Sekunde spaeter die eigentliche Detonation unter Wasser.
+	# ⚠️ "Water" MUSS mit rein: CreateEffect spawnt nur, wenn am Aufschlagpunkt ein gueltiger
+	# AKTOR liegt ODER das TERRAIN gueltig ist. Mit nur "Submarine" greift beides nicht (die
+	# HitShape des getauchten U-Boots zaehlt dort nicht) -> es gab Schaden, aber keine Explosion.
+	Warhead@3Eff: CreateEffect
+		Delay: 25
+		Explosions: med_frag
+		ImpactSounds: kaboom15.aud
+		ValidTargets: Submarine, Water, Underwater
+
+# RA Torpedo-Nachbau: schnelles Unterwasser-Projektil, trifft Schiffe + Küsten-Gebäude.
+# Sub feuert von Bug (LocalOffset +X). UncloakOn: None → Sub bleibt getarnt beim Feuern.
+aot-SubTorpedo:
+	Inherits: ^BallisticWeapon
+	-Warhead@2Smu:
+	ReloadDelay: 100
+	Range: 9c0
+	Report: torpedo1.wav
+	Burst: 2
+	BurstDelays: 15
+	ValidTargets: Water, Underwater
+	Projectile: Missile
+		Image: torpedo
+		Arm: 3
+		Speed: 85
+		TrailImage: bubbles
+		HorizontalRateOfTurn: 4
+		RangeLimit: 10c819
+		BoundToTerrainType: Water
+		Palette: cloak
+		Shadow: false
+		MaximumLaunchAngle: 0
+		CruiseAltitude: 0
+	Warhead@1Dam: SpreadDamage
+		Spread: 426
+		Damage: 12000
+		ValidTargets: Water, Underwater
+		Versus:
+			None: 50
+			Light: 75
+			Heavy: 100
+			Concrete: 50
+		DamageTypes: TriggerProne, ExplosionDeath
+	Warhead@2Eff: CreateEffect
+		Explosions: poof
+		ImpactSounds: kaboom15.wav
+		ValidTargets: Water, Underwater
+	Warhead@3EffSplash: CreateEffect
+		Explosions: poof
+		ImpactSounds: splash9.wav
+		ValidTargets: Water
+
+# Missile Sub Rakete: ECHTE Lenkrakete mit Suchmodus (Projectile: Missile), 1:1 die
+# RA-Werte aus ^SubMissileDefault (engine/mods/ra/weapons/missiles.yaml): Speed 234,
+# HorizontalRateOfTurn 60 = homt aufs Ziel. Ersetzt die frueher ballistische Bahn
+# (Bullet LaunchAngle 120), die nur dorthin schlug wo das Ziel WAR, statt ihm zu folgen.
+# RangeLimit bewusst > Range (22c0 > 20c0), sonst geht der Rakete vor Reichweiten-Ende
+# der Sprit aus. Sprite (missile) + Sound (missile6) unveraendert = RA-korrekt.
+aot-SubMissile:
+	Inherits: ^BallisticWeapon
+	-Warhead@2Smu:
+	-Projectile:
+	ReloadDelay: 300
+	# Reichweite 20c0->16c0: klar mehr als der Destroyer (10c0), aber unter Cruiser (20c0)
+	# -- der Sub ist "etwas besser als der Destroyer", nicht gleichauf mit dem Cruiser (User-Ziel).
+	Range: 16c0
+	Report: missile6.wav
+	Burst: 2
+	BurstDelays: 15
+	# Underwater/Submarine zusaetzlich (User 2026-08-04): die RAKETEN sollen auch aufgeklaerte
+	# getauchte U-Boote treffen koennen. Ohne diese Zieltypen feuerte die Missile Sub zwar, machte
+	# aber 0 Schaden (getauchtes Sub = Underwater/Submarine, Warhead traf nur Ground/Water).
+	ValidTargets: Ground, Water, Underwater, Submarine
+	Projectile: Missile
+		Speed: 234
+		Blockable: false
+		Inaccuracy: 614
+		HorizontalRateOfTurn: 60
+		RangeLimit: 22c0
+		Image: missile
+		Shadow: True
+		TrailImage: smokey
+		ContrailLength: 30
+	Warhead@1Dam: SpreadDamage
+		Spread: 426
+		# Schaden 2500->3000: der Sub liegt damit ueber dem Destroyer (2500) -- "etwas besser
+		# als der Destroyer" bei Reichweite UND Schaden (User-Ziel).
+		Damage: 3000
+		Falloff: 1000, 368, 135, 50, 18, 7, 0
+		ValidTargets: Ground, Water, Underwater, Submarine
+		Versus:
+			None: 80
+			Wood: 50
+			Light: 48
+			Heavy: 30
+			Concrete: 100
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+	Warhead@2Eff: CreateEffect
+		Explosions: poof
+		ImpactSounds: xplosml2.wav
+		ValidTargets: Ground, Water, Underwater, Submarine
+
+# === Age of Tiberium (aotmod) - Mine Layer Upgrade: Rakete + See-Mine ===
+# Nach Mine Layer Upgrade: Missile Sub feuert nur noch 1 Rakete (statt 2).
+aot-SubMissileSingle:
+	Inherits: aot-SubMissile
+	# Cruise-Modus (nach Mine-Upgrade): NUR die Salve halbiert (1 statt 2 Raketen) als Preis fuer
+	# die Minen -- Reichweite (16c0) und Schaden (3000) bleiben identisch zum Basis-Sub (User-Korrektur).
+	Burst: 1
+
+# Missile Sub Flugabwehr: 1:1 RA SubMissileAA (engine/mods/ra/weapons/missiles.yaml).
+# Erbt die Lenkrakete oben, zielt aber NUR auf Luft und mit RA-Luftschaden (450, Light 100).
+# Reichweite auf RA-Wert 8c0 gekuerzt (RA SubMissileAA erbt Range aus ^SubMissileDefault,
+# NICHT die 20c0-Ueberschreibung der Bodenrakete).
+aot-SubMissileAA:
+	Inherits: aot-SubMissile
+	Range: 8c0
+	ValidTargets: Air
+	Warhead@1Dam: SpreadDamage
+		Damage: 450
+		ValidTargets: Air
+		Versus:
+			Light: 100
+	Warhead@2Eff: CreateEffect
+		Explosions: poof
+		ImpactSounds: xplosml2.wav
+		ValidTargets: Air
+
+# Flugabwehr-Variante nach Mine Layer Upgrade: nur 1 Rakete (analog aot-SubMissileSingle).
+aot-SubMissileAASingle:
+	Inherits: aot-SubMissileAA
+	Burst: 1
+
+# See-Mine Explosion: hoher Schaden, kurzer Radius, nur Wasser/Submarine.
+aot-SeaMineExplosion:
+	Inherits: ^BallisticWeapon
+	-Warhead@2Smu:
+	Range: 1c0
+	Warhead@1Dam: SpreadDamage
+		Spread: 512
+		Damage: 60000
+		ValidTargets: Water, Underwater
+		Versus:
+			None: 80
+			Light: 100
+			Heavy: 80
+			Concrete: 50
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+	Warhead@2Eff: CreateEffect
+		Explosions: poof
+		ImpactSounds: xplosml2.wav
+		ValidTargets: Water, Underwater
+
+# === Age of Tiberium (aotmod) - Battle Cruiser: Railgun Upgrade ===
+# 4 Railguns gesamt (2 pro Turm). LaserZap A0C8FF wie HTNK/MTNK.
+# Range 15c0, sehr präzise (hitscan), Damage 1500 pro Schuss.
+# Burst 2 + 2 LocalOffsets = beide Läufe feuern abwechselnd pro Turm.
+aot-CruiserRailgun:
+	ReloadDelay: 80
+	Range: 15c0
+	Burst: 2
+	BurstDelays: 8
+	Report: bigggun1.aud
+	Projectile: LaserZap
+		Width: 50
+		Color: A0C8FF
+		HitAnim: laserfire
+		ZOffset: 2047
+	Warhead@1Dam: SpreadDamage
+		Spread: 42
+		Damage: 4000
+		Versus:
+			None: 25
+			Wood: 100
+			Light: 100
+			Heavy: 100
+			Concrete: 100
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+	Warhead@2Smu: LeaveSmudge
+		SmudgeType: Scorch
+		InvalidTargets: Vehicle, Structure, Wall, Husk, Trees, Creep
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Battle Cruiser: 8-Inch Naval Gun ===
+# RA 8Inch-Nachbau: Bogenflug (Speed 204, LaunchAngle 62), ContrailLength 30.
+# Burst 2 = zwei Kanonen feuern pro Salve (Primär + Sekundär-Turm).
+# ReloadDelay 250 = ~7 Sekunden zwischen Salven (RA-Original).
+aot-8Inch:
+	Inherits: ^BallisticWeapon
+	-Warhead@2Smu:
+	MinRange: 3c0
+	ReloadDelay: 250
+	Range: 20c0
+	Burst: 2
+	BurstDelays: 5
+	Report: aot-turret1.wav
+	TargetActorCenter: true
+	Projectile: Bullet
+		Speed: 204
+		Blockable: false
+		LaunchAngle: 62
+		Inaccuracy: 4c0
+		ContrailLength: 30
+	Warhead@1Dam: SpreadDamage
+		# Cruiser = groesster Schaden + groesste Streuung (User-Ziel): Damage 2500->4500,
+		# Spread 213->512. Zusammen mit Inaccuracy 4c0 der Flaechenbombarder der Flotte.
+		Spread: 512
+		Damage: 4500
+		Falloff: 1000, 368, 135, 50, 18, 7, 0
+		Versus:
+			None: 60
+			Wood: 35
+			Light: 60
+			Heavy: 25
+			Concrete: 100
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+	Warhead@3Eff: CreateEffect
+		Explosions: poof
+		ImpactSounds: xplobig4.aud
+# === Ende aotmod ===
+
+# Drone laser — schwächere Version des HTNK-Lasers für Drohnen des Drone Attack Sub.
+aot-DroneLaser:
+	ReloadDelay: 35
+	Range: 3c0
+	Report: obelray1.aud
+	Projectile: LaserZap
+		Width: 30
+		Color: FF6040
+		HitAnim: laserfire
+		ZOffset: 2047
+	Warhead@1Dam: SpreadDamage
+		Spread: 42
+		Damage: 4000
+		Versus:
+			None: 25
+			Wood: 80
+			Light: 80
+			Heavy: 60
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+
+# === Age of Tiberium (aotmod) - Hover AA (MSAM Upgrade) ===
+aot-MsamHoverAA:
+	Inherits: Patriot
+	ReloadDelay: 15
+	Range: 10c0
+	ValidTargets: Ground, Air
+	Warhead@1Dam:
+		Spread: 682
+		Damage: 10500
+		ValidTargets: Air
+		Versus:
+			Light: 100
+	Warhead@Ground: SpreadDamage
+		Spread: 682
+		Damage: 7000
+		ValidTargets: Ground
+		Versus:
+			None: 100
+			Wood: 70
+			Light: 30
+			Heavy: 15
+			Concrete: 5
+
+# === Age of Tiberium (aotmod) - MSAM Flugabwehr-Rakete (NUR Luft, schwach) ===
+# Der MSAM behaelt gegen Boden seine ballistische 227mm-Salve (Original-Feel). Fuer Luft
+# reicht das nicht: der 227mm ist ein BALLISTISCHER Lob (LaunchAngle 62), arct zu Boden und
+# trifft fliegende Ziele nie. Daher eine EIGENE, air-only zielsuchende Rakete als
+# Sekundaerwaffe -- deutlich schwaecher als die Hover AA (User: "MSAM viel weniger effizient
+# gegen Air als Hover AA"). DRAGON-Optik wie die Boden-Rakete.
+aot-MSAM-AA:
+	Inherits: ^MissileWeapon
+	ReloadDelay: 90
+	Range: 9c0
+	MinRange: 0
+	ValidTargets: Air
+	Report: rocket1.aud
+	# Salven-Bild wie die ballistische Bodenwaffe: dort feuern 2 Armaments (primary+secondary)
+	# mit je Burst 4 / BurstDelays 0,4,0 -> 4 Raketen GLEICHZEITIG, kurze Pause, nochmal 4.
+	# Die AA ist nur EIN Armament, daher Burst 4 mit BurstDelays 0 = alle 4 auf einmal
+	# (kein gestaffelter Burst, User-Wunsch). LocalOffset alterniert ueber beide Raketenpods.
+	Burst: 4
+	BurstDelays: 0
+	Projectile: Missile
+		Image: DRAGON
+		Speed: 384
+		Arm: 2
+		Blockable: false
+		Shadow: true
+		TrailImage: smokey
+		ContrailLength: 8
+		Inaccuracy: 256
+		HorizontalRateOfTurn: 50
+		RangeLimit: 11c0
+	Warhead@1Dam: SpreadDamage
+		Spread: 256
+		# 4 statt 2 Raketen pro Salve bei unveraendertem Einzelschaden -> doppelte
+		# Salvenwirkung (2800 statt 1400), User-Wunsch.
+		Damage: 700
+		ValidTargets: Air
+		Versus:
+			Light: 100
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+
+aot-HoverAAGun:
+	Inherits: APCGun
+	Burst: 2
+	BurstDelays: 4
+	ReloadDelay: 13
+	Warhead@1Dam: SpreadDamage
+		Spread: 128
+		Damage: 2800
+		Versus:
+			None: 100
+			Wood: 100
+			Light: 50
+			Heavy: 35
+			Concrete: 30
+		DamageTypes: Prone50Percent, TriggerProne, DefaultDeath
+
+# Mammoth-Kanone: Blockable defaultet auf true (Bullet.cs) - ein Mammoth in Fire Position
+# hinter eigener Pillbox/GuardTower/CamoPillbox/Wall konnte dadurch nicht ueber sie hinweg
+# feuern und detonierte stattdessen an der eigenen Verteidigung. Gleicher Fund/Fix wie bei
+# FTUR (siehe aot-FturFlame oben, 2026-07-05: "muss ueber Zaeune feuern - kommt nicht durch").
+120mmDual:
+	Projectile: Bullet
+		Blockable: false
+
+aot-HoverAAGun.AA:
+	Inherits: APCGun.AA
+	Burst: 2
+	BurstDelays: 4
+	ReloadDelay: 13
+	Warhead@1Dam: SpreadDamage
+		ValidTargets: Air
+		Damage: 1600
+		Versus:
+			Light: 100
+
+# === Age of Tiberium (aotmod) - NOD Dog Bite ===
+aot-SilencedPPK:
+	ReloadDelay: 80
+	Range: 2c512
+	Report: silppk.aud
+	ValidTargets: Ground, Infantry, Barrel
+	Projectile: InstantHit
+		Blockable: true
+	Warhead@1Dam: SpreadDamage
+		Spread: 42
+		Damage: 15000
+		ValidTargets: Barrel, Infantry
+		DamageTypes: Prone50Percent, TriggerProne, DefaultDeath
+	Warhead@2Eff: CreateEffect
+		Explosions: piff
+		ValidTargets: Ground, GroundActor, Air, AirborneActor, WaterActor, Trees
+
+aot-DogJaw:
+	ValidTargets: Infantry
+	ReloadDelay: 10
+	Range: 3c0
+	Report: dogg5p.aud
+	TargetActorCenter: true
+	Projectile: InstantHit
+	Warhead@1Dam: TargetDamage
+		Damage: 100000
+		ValidTargets: Infantry
+		DamageTypes: DefaultDeath
+
+# === Medic Heal Weapon ===
+aot-Heal:
+	ReloadDelay: 80
+	Range: 4c0
+	Report: heal2.aud
+	ValidTargets: Heal
+	Projectile: Bullet
+		Speed: 1c682
+	Warhead@1Eff: FlashTargetsInRadius
+		Radius: 1065
+		ValidRelationships: Ally
+		ValidTargets: Heal
+	Warhead@2Dam: SpreadDamage
+		Spread: 213
+		Damage: -5000
+		ValidRelationships: Ally
+		ValidTargets: Heal
+
+# === Mechanic Repair Weapon ===
+aot-Repair:
+	ReloadDelay: 80
+	Range: 4c0
+	Report: fixit1.aud
+	ValidTargets: Repair
+	Projectile: Bullet
+		Speed: 1c682
+	Warhead@1Eff: FlashTargetsInRadius
+		Radius: 1065
+		ValidRelationships: Ally
+		ValidTargets: Repair
+	Warhead@2Dam: SpreadDamage
+		Spread: 213
+		Damage: -2000
+		ValidRelationships: Ally
+		ValidTargets: Repair
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Mine Cluster Missile: RA ATMine/APMine Stats importiert ===
+# 1:1 aus engine/mods/ra/weapons/explosions.yaml übernommen, ABER ValidTargets korrigiert:
+# RA nutzt "GroundActor"/"WaterActor" als TargetType — in diesem TD-basierten Mod heißen Infanterie/
+# Fahrzeuge "Infantry"/"Vehicle" (^Infantry/^Vehicle TargetTypes), "GroundActor" existiert hier gar
+# nicht. Dadurch traf die Mine praktisch niemanden (Bugfix, User-Report "praktisch kein Schaden").
+# Versus neu gesetzt: ATMine (Fahrzeug-Mine) tödlich ggü. Fahrzeugen, schwach ggü. Infanterie.
+aot-ATMine:
+	ValidTargets: Ground, Water
+	Warhead@1Dam: SpreadDamage
+		Spread: 256
+		Damage: 40000
+		AffectsParent: true
+		ValidTargets: Ground, Water
+		InvalidTargets: Mine
+		Versus:
+			None: 20
+			Wood: 100
+			Light: 100
+			Heavy: 80
+			Concrete: 50
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+	Warhead@2Eff: CreateEffect
+		Explosions: med_frag
+		ImpactSounds: mineblo1.aud
+		ImpactActors: false
+	Warhead@3Smu: LeaveSmudge
+		SmudgeType: Crater
+		ValidTargets: Ground
+		InvalidTargets: Structure, Wall
+
+# Anti-Personen-Mine: Versus umgedreht — 100% tödlich ggü. Infanterie, fast wirkungslos ggü. Fahrzeugen.
+aot-APMine:
+	Inherits: aot-ATMine
+	Warhead@1Dam: SpreadDamage
+		Versus:
+			None: 100
+			Wood: 20
+			Light: 5
+			Heavy: 2
+			Concrete: 0
+		DamageTypes: Prone50Percent, TriggerProne, SmallExplosionDeath
+	Warhead@2Eff: CreateEffect
+		Explosions: small_frag
+		ImpactSounds: mine1.aud
+	Warhead@3Smu: LeaveSmudge
+		SmudgeType: Scorch
+
+# === Age of Tiberium (aotmod) - Mine Cluster Missile: Waffe der MSLO-Superpower ===
+# Selber Streukreis wie aot-TiberiumStrike (11x11, 4 garantiert + 6 zufällig = 10 Minen).
+# Kein Sofortschaden — reine Minenverteilung, kein NukeWarhead-Duplikat.
+aot-MineClusterMissile:
+	ValidTargets: Ground, Water, Air, Trees
+	Report: nukemisl.aud
+	Warhead@1Eff: CreateEffect
+		Explosions: small_frag
+		ImpactSounds: mine1.aud
+		ImpactActors: false
+	Warhead@2Cluster: FireCluster
+		Weapon: aot-MineDeploy
+		RandomClusterCount: 6
+		Dimensions: 11,11
+		Footprint: _____x_____ __xxxxxxx__ _xxxxxxxxx_ _xxxxxxxxx_ _xxxxXxxxx_ xxxxXxXxxxx _xxxxXxxxx_ _xxxxxxxxx_ _xxxxxxxxx_ __xxxxxxx__ _____x_____
+
+aot-MineDeploy:
+	ValidTargets: Ground, Water, Air, Trees
+	Projectile: Bullet
+		Speed: 800
+	# RequirePlaceable: landet die Mine auf Fels/Klippe oder einem Gebaeude/Mauer, erscheint sie NICHT
+	# dort, sondern detoniert sofort bei Kontakt (FallbackWeapon = ihre eigene Minenexplosion).
+	Warhead@1Spawn: AotSpawnActor
+		Actor: aot-minp
+		RequirePlaceable: true
+		FallbackWeapon: aot-APMine
+
+aot-MineDeployAntiPersonnel:
+	Inherits: aot-MineDeploy
+
+aot-MineDeployAntiVehicle:
+	ValidTargets: Ground, Water, Air, Trees
+	Projectile: Bullet
+		Speed: 800
+	Warhead@1Spawn: AotSpawnActor
+		Actor: aot-minv
+		RequirePlaceable: true
+		FallbackWeapon: aot-ATMine
+
+aot-MineClusterMissileEnhanced:
+	Inherits: aot-MineClusterMissile
+	Warhead@2Cluster: FireCluster
+		Weapon: aot-MineDeployAntiPersonnel
+		RandomClusterCount: 10
+		Dimensions: 11,11
+		Footprint: _____x_____ __xxxxxxx__ _xxxxxxxxx_ _xxxxxxxxx_ _xxxxXxxxx_ xxxxXxXxxxx _xxxxXxxxx_ _xxxxxxxxx_ _xxxxxxxxx_ __xxxxxxx__ _____x_____
+	Warhead@3ClusterAV: FireCluster
+		Weapon: aot-MineDeployAntiVehicle
+		RandomClusterCount: 5
+		Dimensions: 11,11
+		Footprint: _____x_____ __xxxxxxx__ _xxxxxxxxx_ _xxxxxxxxx_ _xxxxXxxxx_ xxxxXxXxxxx _xxxxXxxxx_ _xxxxxxxxx_ _xxxxxxxxx_ __xxxxxxx__ _____x_____
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Zone Trooper Drop: Waffe der ORBC-Superpower ===
+# 5x5-Streukreis, 1 garantiert (Zentrum) + 4 zufällig = 5 Zone Trooper pro Einsatz (wie TS DPOD Passengers=5).
+aot-ZoneTrooperDropMissile:
+	ValidTargets: Ground, Water, Air, Trees
+	Report: nukemisl.aud
+	Warhead@1Eff: CreateEffect
+		Explosions: small_frag
+		ImpactSounds: mine1.aud
+		ImpactActors: false
+	Warhead@2Cluster: FireCluster
+		Weapon: aot-ZoneTrooperPodDeploy
+		RandomClusterCount: 4
+		Dimensions: 5,5
+		Footprint: xxxxx xxxxx xxXxx xxxxx xxxxx
+
+aot-ZoneTrooperPodDeploy:
+	ValidTargets: Ground, Water, Air, Trees
+	Projectile: Bullet
+		Speed: 800
+	Warhead@1Spawn: AotSpawnActor
+		Actor: aot-zonetrooper
+
+# === Age of Tiberium (aotmod) - Dropship Machinegun: visueller Effekt während Anflug/Landung ===
+aot-dropship-machinegun:
+	ValidTargets: Ground, Water, Air, Trees
+	ReloadDelay: 40
+	Range: 6c0
+	Report: gunmg1.aud
+	Projectile: Bullet
+		Speed: 800
+	Warhead@1Eff: CreateEffect
+		Explosions: piff
+		ImpactSounds: gunhit.aud
+
+# === Age of Tiberium (aotmod) - Dropship Mid-Air-Explosion: HeliExplode-Kopie mit Air-Target ===
+# HeliExplode hat ValidTargets: Ground, Water (Default) — die Explosion findet aber auf
+# Cruise-Altitude statt (Air-Klassifikation), sonst feuert CreateEffect nicht (siehe
+# CreateEffectWarhead.IsValidAgainstTerrain: dat > AirThreshold -> TargetTypeAir).
+aot-DropshipExplode:
+	ValidTargets: Ground, Water, Air
+	Warhead@1Eff: CreateEffect
+		Explosions: small_building
+		ImpactSounds: xplos.aud
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Garrison-Waffen fuer Pillbox (2026-07-05) ===
+# AttackGarrisoned-Fire-Ports duerfen nicht durch Mauern blockiert werden
+# (User-Wunsch: "Pillbox muss ueber Mauern schiessen koennen"). Bullet-
+# Projektile sind per Default Blockable:true - E2 (Grenade) und E3 (Rockets)
+# haben das schon selbst auf false (^BallisticWeapon bzw. ^MissileWeapon), E1
+# (M16), E4 (Flamethrower/Chemspray) NICHT - dafuer diese Varianten mit
+# Blockable:false. Nur fuer die Armament@GARRISONED-Instanz genutzt, das
+# normale Feld-Verhalten der Einheiten bleibt unveraendert.
+aot-M16Garrisoned:
+	Inherits: M16
+	Projectile: Bullet
+		Blockable: false
+	# Damage-Multiplier vs. Infanterie (User-Wunsch 2026-07-05): macht die
+	# Pillbox zur effizienten Infanterie-Abwehr. Nur die Garrison-Variante
+	# betroffen - E1s normale Feld-Waffe (M16) bleibt unveraendert.
+	Warhead@1Dam: SpreadDamage
+		Versus:
+			None: 300
+
+aot-FlamethrowerGarrisoned:
+	Inherits: Flamethrower
+	Projectile: Bullet
+		Blockable: false
+
+aot-ChemsprayGarrisoned:
+	Inherits: Chemspray
+	Projectile: Bullet
+		Blockable: false
+
+# === Age of Tiberium (aotmod) - Garrison-Waffen fuer Fire Position (Phase 3) ===
+# Vehicle-Garrison-Waffen: gleiche Logik wie bei Pillbox - Blockable:false auf
+# der geliehenen Garrison-Variante, damit das Fire-Position-Gebaeude ueber Mauern
+# schiessen kann. Normale Feldwaffe der Fahrzeuge bleibt unveraendert (Blockable: true).
+aot-120mmGarrisoned:
+	Inherits: 120mm
+	Projectile: Bullet
+		Blockable: false
+
+aot-MtnkPredatorGarrisoned:
+	Inherits: aot-MtnkPredator
+	Projectile: Bullet
+		Blockable: false
+
+aot-DestroyerRocketsGarrisoned:
+	Inherits: aot-DestroyerRockets
+	Projectile: Missile
+		Blockable: false
+
+aot-HoverAAGunGarrisoned:
+	Inherits: aot-HoverAAGun
+	Projectile: Bullet
+		Blockable: false
+
+# Restliche Fire-Position-faehige Fahrzeuge (2026-07-06): JEEP/BGGY/HTNK/LTNK/TTNK/APC.
+# BIKE (BikeRockets) und die Laser-Waffen (aot-HarpyLaser/aot-HtnkLaser/aot-LtnkLaser,
+# alle LaserZap) sind bereits Blockable:false per Engine-/Waffen-Default - direkte
+# Wiederverwendung ohne eigene Garrisoned-Kopie (wie 227mm bei MSAM oben).
+aot-MachineGunHGarrisoned:
+	Inherits: MachineGunH
+	Projectile: Bullet
+		Blockable: false
+
+# GDI Wolverine Mech — AssaultCannon (TS: tsgun4.aud, Range 5, anti-infantry)
+aot-WolverineCannon:
+	Inherits: MachineGunH
+	# AA-faehig (User-Wunsch 2026-08-05): der Wolverine (Mech-Armaments-Pfad) ist die einzige mobile
+	# GDI-Boden-AA auf diesem Gatekeeper -- Hover AA haengt am anderen (Heavy Ordonance). Air auf
+	# Waffen- UND Warhead-Ebene, sonst kein Schaden auf Flugziele.
+	ValidTargets: Ground, Water, Air
+	Range: 5c0
+	ReloadDelay: 50
+	Report: tsgun4.aud
+	Warhead@1Dam:
+		ValidTargets: Ground, Water, Air
+		Damage: 2000
+
+aot-JeepHumveeGarrisoned:
+	Inherits: aot-JeepHumvee
+	Projectile: Bullet
+		Blockable: false
+
+aot-MachineGunGarrisoned:
+	Inherits: MachineGun
+	Range: 8c0
+	Projectile: Bullet
+		Blockable: false
+
+aot-120mmDualGarrisoned:
+	Inherits: 120mmDual
+	Projectile: Bullet
+		Blockable: false
+
+aot-70mmGarrisoned:
+	Inherits: 70mm
+	Projectile: Bullet
+		Blockable: false
+
+aot-TtnkDualGarrisoned:
+	Inherits: aot-TtnkDual
+	Projectile: Bullet
+		Blockable: false
+
+aot-BigFlamerGarrisoned:
+	Inherits: BigFlamer
+	Projectile: Bullet
+		Blockable: false
+
+aot-TtnkChemsprayGarrisoned:
+	Inherits: aot-TtnkChemspray
+	Projectile: Bullet
+		Blockable: false
+
+aot-JuggCannon:
+	Inherits: ^BallisticWeapon
+	ReloadDelay: 175
+	Range: 18c0
+	MinRange: 5c0
+	Burst: 6
+	BurstDelays: 5, 5, 25, 5, 5
+	Report: jugger1-single.aud
+	TargetActorCenter: true
+	Projectile: Bullet
+		Speed: 204
+		Blockable: false
+		LaunchAngle: 56
+		Inaccuracy: 1c0
+		ContrailLength: 30
+	Warhead@1Dam: SpreadDamage
+		Damage: 3300
+		Versus:
+			None: 35
+			Wood: 70
+			Light: 85
+			Heavy: 80
+			Concrete: 80
+
+# === Age of Tiberium (aotmod) - V2 Rocket Launcher Waffen ===
+# aot-V2Rocket: Basis-Waffe Age 0 (SCUD-artig, einzel, vertikal).
+# aot-V2Napalm: Age-1-Napalm-Upgrade, Burst:2, Incendiary-Warhead.
+# aot-V2Toxic:  Age-3 via aot-toxic-upgrade, gleiche Stats, Tiberium-Warhead statt Napalm.
+aot-V2Rocket:
+	Inherits: ^BallisticWeapon
+	ReloadDelay: 200
+	Range: 9c0
+	MinRange: 3c0
+	Report: missile1.wav
+	Projectile: Bullet
+		Speed: 170
+		Blockable: false
+		TrailImage: smokey
+		TrailDelay: 5
+		Inaccuracy: 213
+		Image: V2
+		Shadow: True
+		LaunchAngle: 62
+	Warhead@1Dam: SpreadDamage
+		Spread: 341
+		Damage: 3000
+		Falloff: 1000, 368, 135, 50, 18, 7, 0
+		ValidTargets: Ground, Water, Trees
+		Versus:
+			None: 70
+			Wood: 40
+			Tree: 40
+			Light: 15
+			Heavy: 8
+			Concrete: 10
+		DamageTypes: Prone50Percent, TriggerProne, SmallExplosionDeath
+	Warhead@3Eff: CreateEffect
+		Explosions: big_napalm
+
+aot-V2Napalm:
+	Inherits: aot-V2Rocket
+	ReloadDelay: 50
+	Range: 8c0
+	MinRange: 2c0
+	Burst: 2
+	BurstDelays: 25
+	Report: missile1.wav
+	Warhead@1Dam: SpreadDamage
+		Spread: 512
+		Damage: 2500
+		Falloff: 1000, 500, 200, 80, 0
+		ValidTargets: Ground, Water, Trees
+		Versus:
+			None: 200
+			Wood: 40
+			Tree: 40
+			Light: 5
+			Heavy: 3
+			Concrete: 4
+		DamageTypes: Prone50Percent, TriggerProne, SmallExplosionDeath, Incendiary
+	Warhead@3Eff: CreateEffect
+		Explosions: big_napalm
+
+aot-V2Toxic:
+	Inherits: aot-V2Napalm
+	Warhead@1Dam: SpreadDamage
+		Spread: 512
+		Damage: 2500
+		Falloff: 1000, 500, 200, 80, 0
+		ValidTargets: Ground, Water, Trees
+		Versus:
+			None: 200
+			Wood: 40
+			Tree: 40
+			Light: 6
+			Heavy: 4
+			Concrete: 5
+		DamageTypes: Prone50Percent, TriggerProne, SmallExplosionDeath, Tiberium
+	Warhead@3Eff: CreateEffect
+		Explosions: chemball
+	# Gasfeld der Tiberium Missile (20s-Variante), 1x pro Einschlagstelle trotz Burst: 2
+	Warhead@4Gas: AotSpawnActor
+		Actor: aot-gascloud-v2
+		DedupeRange: 1c0
+
+# === Age of Tiberium (aotmod) - Parabomb (RA-Import, toxisch) ===
+# 1:1 RA ParaBomb (GravityBomb-Fallschirmbombe, Image PARABOMB + OpenSequence), aber der
+# Einschlag ist auf die V2-Toxic-Wirkung umgestellt: chemball-Explosion statt Artillerie +
+# 10s-Gaswolke (aot-gascloud-parabomb) statt Krater-Rauch. Report = chute1 (RA-Fallschirmsound).
+aot-Parabomb:
+	ReloadDelay: 8
+	Range: 6c0
+	Report: aot-chute1.aud
+	ValidTargets: Ground, Water
+	Projectile: GravityBomb
+		Image: aot-parabomb
+		OpenSequence: open
+		Velocity: 0, 0, -50
+		Acceleration: 0, 0, 0
+		Shadow: False
+	# ValidTargets nutzt die CnC-Konvention "Ground/Water" (NICHT RA's "GroundActor/WaterActor" —
+	# das existiert in diesem TD-Mod nicht, sonst trifft der Warhead nichts, vgl. FTUR-Bugfix).
+	# Versus: Infanterie lethal (None 40), Fahrzeuge/Gebäude moderat. Heavy MUSS gesetzt sein,
+	# sonst Default 100% = One-Shot schwerer Panzer.
+	Warhead@1Dam: SpreadDamage
+		Spread: 1000
+		Damage: 30000
+		ValidTargets: Ground, Water
+		Versus:
+			None: 40
+			Wood: 50
+			Light: 35
+			Heavy: 20
+			Concrete: 20
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath, Tiberium
+	Warhead@2Smu: LeaveSmudge
+		SmudgeType: Crater
+		ValidTargets: Ground, Infantry
+	# Toxischer Einschlag wie aot-V2Toxic: chemball-Explosion + Gaswolke.
+	# ImpactSounds ergänzt (aot-V2Toxic hat keinen) — sonst schlägt die Bombe lautlos ein.
+	Warhead@3Eff: CreateEffect
+		Explosions: chemball
+		ImpactSounds: xplobig4.aud
+		ValidTargets: Ground, Water, Trees
+	Warhead@4Gas: AotSpawnActor
+		Actor: aot-gascloud-parabomb
+		DedupeRange: 1c0
+
+# === Age of Tiberium (aotmod) - Banshee-Airstrike-Waffe ===
+# Gleiches Projektil wie der Cyborg Commando (aot-plasma-green Plasma-Bullet), aber:
+#   - Damage = 2/3 der MiG-Rakete (aot-MigMissile 7000 -> 4667), Versus wie MiG (Maverick).
+#   - Burst 3 = 3 Salven pro Anflug (× 2 Anflüge = 6 Salven je Banshee).
+#   - Einschlag identisch zur Parabomb: chemball-Explosion + xplobig4 + 10s-Gaswolke.
+aot-BansheeMissile:
+	Range: 8c0
+	ReloadDelay: 60
+	Report: scrin5b.aud
+	Burst: 3
+	BurstDelays: 4
+	Projectile: Bullet
+		Image: aot-plasma-green
+		Speed: 300
+		Shadow: false
+	Warhead@1Dam: SpreadDamage
+		Spread: 341
+		Damage: 4667
+		ValidTargets: Ground, Water
+		Versus:
+			None: 30
+			Wood: 90
+			Light: 90
+			Heavy: 115
+			Concrete: 100
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath, Tiberium
+	# Einschlag wie Parabomb: toxische chemball-Explosion + Gaswolke
+	Warhead@2Eff: CreateEffect
+		Explosions: chemball
+		ImpactSounds: xplobig4.aud
+		ValidTargets: Ground, Water, Trees
+	Warhead@3Gas: AotSpawnActor
+		Actor: aot-gascloud-parabomb
+		DedupeRange: 1c0
+
+# === Age of Tiberium (aotmod) - Heavy Artillery Shell (1/3 längere Reichweite, TS 155mm Sounds) ===
+# Mobile Howitzer: schnelleres, flacheres Projektil fuer praezisere ballistische Treffer,
+# v.a. gegen fahrende Ziele. Kuerzere Flugzeit (Speed 512 statt 204) + geringere Streuung +
+# flacherer Abschusswinkel = weniger Vorhalt noetig. Mittlere Reichweite (11c0) bleibt.
+# Gegenstueck zur Heavy Artillery (aot-ArtilleryShell-Heavy: lobend, langsam, grosse Reichweite).
+aot-ArtilleryShell-Howitzer:
+	Inherits: ArtilleryShell
+	Range: 11c0
+	Report: 120mmf.aud
+	Projectile: Bullet
+		Speed: 512
+		LaunchAngle: 40
+		Inaccuracy: 426
+	Warhead@2Eff: CreateEffect
+		Explosions: med_frag
+		ImpactSounds: expnew06.aud
+		ValidTargets: Ground, Air, GroundActor, AirborneActor, WaterActor, Trees
+
+# Heavy Artillery: langsames, hoch lobendes Geschoss mit grosser Reichweite (17c0, deutlich mehr
+# als der Howitzer). Traegt zusammen mit der groesseren Sichtweite den Belagerungs-Charakter.
+aot-ArtilleryShell-Heavy:
+	Inherits: ArtilleryShell
+	Range: 17c0
+	Report: 120mmf.aud
+	Projectile: Bullet
+		# Abschusswinkel = Rohrneigung, damit Flugbahn und Geschuetzlauf synchron sind.
+		# LaunchAngle ist WAngle (1024 = 360 Grad); der Barrel ist mit 45 Grad gebacken
+		# (ELEVATION=45 in bake-vxl-test.sh), also 45/360*1024 = 128.
+		LaunchAngle: 128
+	Warhead@2Eff: CreateEffect
+		Explosions: med_frag
+		ImpactSounds: expnew06.aud
+		ValidTargets: Ground, Air, GroundActor, AirborneActor, WaterActor, Trees
+
+# === Age of Tiberium (aotmod) - Baeume faellbar durch konventionelle Waffen ===
+# Konventionelle Projektile (Panzerkanonen, Artillerie, Granaten, Standard-Raketen)
+# koennen jetzt Baeume faellen. Umgesetzt an den Basisvorlagen ^BallisticWeapon und
+# ^MissileWeapon: Trees als gueltiges Ziel + Tree:50 Versus (halbe Wirkung = doppelter
+# Schaden noetig, User-Wunsch 2026-07-12). MGs/Chainguns/Vulcans/Laser/Railguns haben
+# EIGENE Basen und sind damit automatisch ausgenommen. Baeume nutzen den eigenen
+# Ruestungstyp Tree (siehe aot-world.yaml ^Tree), daher wirken diese Tree-Werte NICHT
+# gegen Gebaeude (die Wood-Ruestung tragen). Baeume sind Neutral -> kein Auto-Angriff;
+# Faellen per Force-Fire (Strg+Klick), wie in Red Alert.
+^BallisticWeapon:
+	ValidTargets: Ground, Water, Trees
+	Warhead@1Dam:
+		ValidTargets: Ground, Water, Trees
+		Versus:
+			Tree: 50
+
+^MissileWeapon:
+	ValidTargets: Ground, Water, Air, Trees
+	Warhead@1Dam:
+		ValidTargets: Ground, Air, Trees
+		Versus:
+			Tree: 50
+
+# Diese drei ueberschreiben ihre ValidTargets vollstaendig und erben Trees daher NICHT
+# von der Basis -> explizit ergaenzen. Orca-AG deckt via Vererbung auch Apache/MiG ab.
+OrcaAGMissiles:
+	ValidTargets: Ground, Water, Trees
+	Warhead@1Dam:
+		ValidTargets: Ground, Trees
+		Versus:
+			Tree: 50
+
+227mm:
+	ValidTargets: Ground, Water, Trees
+	Warhead@1Dam:
+		ValidTargets: Ground, Trees
+		Versus:
+			Tree: 50
+
+227mm.stnk:
+	ValidTargets: Ground, Water, Trees
+	Warhead@1Dam:
+		Versus:
+			Tree: 50
+
+BridgeExplode:
+	Warhead@1Eff: CreateEffect
+		Explosions: building, med_frag, poof
+		ImpactSounds: crumble.aud
+		ImpactActors: false
+		ValidTargets: Bridge, Ground, Water
+
+# === Age of Tiberium (aotmod) — Counter-Strike Ant Weapons ===
+# ACHTUNG ValidTargets: "Ground", NICHT RA's "GroundActor" (siehe aot-ATMine oben) — in diesem
+# TD-basierten Mod tragen ^Infantry/^Vehicle/^Building alle den TargetType "Ground". "GroundActor"
+# existiert hier gar nicht -> die Waffe haette NIE ein gueltiges Ziel und die Ameise greift nichts an.
+# Worker Ant: Mittlerer Biss, effektiv gegen Infanterie.
+aot-AntBite:
+	ValidTargets: Ground
+	ReloadDelay: 10
+	Burst: 2
+	BurstDelays: 14
+	Range: 1c512
+	Report: aot-antbite.wav
+	TargetActorCenter: true
+	Projectile: InstantHit
+	# aotmod 2026-08-21: alle Ant-Waffen +50% Schaden (User: "Ants toedlicher"). 6000 -> 9000.
+	Warhead@DAMAGE: TargetDamage
+		Damage: 9000
+		Versus:
+			None: 90
+			Wood: 10
+			Light: 30
+			Heavy: 10
+			Concrete: 10
+		DamageTypes: Small_Arms
+
+# Fire Ant: Feuerball-Fernkampf (Range 4c0, wie RA AntFireball).
+aot-FireAntBite:
+	# aotmod 2026-08-21: Feuerbaelle wirken jetzt auch als Anti-Air (User) -> ValidTargets +Air.
+	# Die Fire Ant ist damit toedlich gegen Boden UND Luft.
+	ValidTargets: Ground, Air
+	ReloadDelay: 50
+	Burst: 2
+	BurstDelays: 20
+	Range: 4c0
+	Report: aot-antbite.wav
+	# Echter Feuerball statt InstantHit (User-Fund 2026-08-05: Fire Ant schoss keine
+	# Feuerbaelle). Vorbild ist RA's AntFireball (Projectile Bullet, Speed 200); die
+	# Feuerball-Sprites aot-ftur-fb1/-fb2 nutzt bereits der Flame Tower. Vorher flog gar
+	# kein Projektil -- der Schaden traf unsichtbar aus 4 Zellen. Blockable: false wie beim
+	# Flame Tower, damit die Ameise ueber Zaeune/Mauern feuern kann.
+	Projectile: Bullet
+		Speed: 200
+		Image: aot-ftur-fb1
+		TrailImage: aot-ftur-fb2
+		Blockable: false
+	# Boden-Warhead: nur Ground (der Luft-Schaden laeuft ueber Warhead@AIR). +50% (4000 -> 6000).
+	Warhead@DAMAGE: SpreadDamage
+		Spread: 213
+		Damage: 6000
+		ValidTargets: Ground
+		Versus:
+			None: 80
+			Wood: 85
+			Light: 45
+			Heavy: 20
+			Concrete: 15
+		DamageTypes: FireDeath
+	# aotmod 2026-08-21: dedizierter Anti-Air-Warhead. User: Fireballs muessen VERHEEREND gegen
+	# Luft sein. Der Boden-Warhead war mit Light 45%/Heavy 20% viel zu schwach gegen Flieger
+	# (HIND 12500 HP, Armor Light). Hier volle 100% gegen Flieger-Ruestung (Light/Heavy) +
+	# 12000 Schaden -> ein HIND faellt in ~1-2 Treffern. Nur ValidTargets:Air -> Bodenziele
+	# bleiben unberuehrt (bekommen ausschliesslich Warhead@DAMAGE).
+	Warhead@AIR: SpreadDamage
+		Spread: 256
+		Damage: 12000
+		ValidTargets: Air
+		Versus:
+			None: 100
+			Light: 100
+			Heavy: 100
+			Wood: 100
+			Concrete: 100
+		DamageTypes: FireDeath
+
+# Scout Ant: Schneller Doppelbiss wie Mandible (RA ScoutAnt nutzt dieselbe Waffe).
+aot-ScoutAntBite:
+	ValidTargets: Ground
+	ReloadDelay: 10
+	Burst: 2
+	BurstDelays: 14
+	Range: 1c512
+	Report: aot-antbite.wav
+	TargetActorCenter: true
+	Projectile: InstantHit
+	# aotmod 2026-08-21: +50% Schaden (6000 -> 9000).
+	Warhead@DAMAGE: TargetDamage
+		Damage: 9000
+		Versus:
+			None: 90
+			Wood: 10
+			Light: 30
+			Heavy: 10
+			Concrete: 10
+		DamageTypes: Small_Arms
+
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Eis-Einbruch-Splash ===
+# Nur Optik: das Fahrzeug wird von AotIceBreaks per Dispose() entfernt (KEIN Kill),
+# damit seine normale FireWarheadsOnDeath-Explosion nicht feuert. Dieser Effekt
+# ersetzt sie durch den RA-Remaster-Wassereinschlag.
+AotIceSplash:
+	ValidTargets: Ground, Water
+	Warhead@Eff: CreateEffect
+		Explosions: aot-h2o-splash, aot-h2o-splash2, aot-h2o-splash3
+		ImpactActors: false
+
+# === Age of Tiberium (aotmod) - Vein Heart Gas: Reaktion des Veinhole-Heart auf Angriffe ===
+# Von AotEmitWeaponWhenAttacked direkt am Heart ausgeloest (kein Projektil). Spawnt dieselbe
+# Toxic-Gaswolke wie die Toxic Missile (aot-gascloud). Siehe [[ice-growth-system]]/Veins.
+aot-VeinGas:
+	ValidTargets: Ground, Water, Air, Trees
+	Warhead@1Dam: SpreadDamage
+		Spread: 512
+		Damage: 400
+		ValidTargets: Ground, Air, Trees
+		Versus:
+			None: 150
+			Wood: 15
+			Light: 35
+			Heavy: 25
+			Concrete: 8
+		DamageTypes: Prone50Percent, TriggerProne, TiberiumDeath
+	Warhead@2Eff: CreateEffect
+		Image: aot-gascloud-formation
+		Explosions: idle
+		ImpactSounds: xplos.aud
+		ImpactActors: false
+	Warhead@3Spawn: AotSpawnActor
+		Actor: aot-gascloud
+
+# === Age of Tiberium (aotmod) - Tesla Coil (RA-Import, neutrales Verteidigungsgebaeude) ===
+# Stats 1:1 von RA's TeslaZap/^TeslaWeapon (engine/mods/ra/weapons/other.yaml), User-Wunsch
+# 2026-07-29. Projektil-Bild "aot-litning" ist bereits importiert (LITNING.ZIP, siehe
+# IonStormBolt unten) und identisch mit RA's eigener "litning"-Sequenz -> kein Zweitimport
+# noetig, nur der Bild-Name muss dem Projectile-Default (Image: "litning") explizit
+# ueberschrieben werden.
+aot-TeslaZap:
+	ReloadDelay: 3
+	Range: 7c0
+	Report: aot-tesla-fire.aud
+	Projectile: TeslaZap
+		Image: aot-litning
+	# "GroundActor"/"WaterActor" sind RA-Composite-TargetTypes, die es in diesem TD-basierten Mod
+	# NICHT gibt (siehe aot-critters.yaml-Kommentar bei ^AotAnt) - der Warhead traf dadurch
+	# NIEMALS einen echten Aktor (Bug 2026-07-29, User-Fund "macht uns praktisch keinen
+	# Schaden"). Weapon- und Warhead-Level auf die Engine-Defaults {Ground, Water} zurueckgesetzt,
+	# die hier tatsaechlich verwendet werden (TowerMissile in engine/mods/cnc/weapons/missiles.yaml
+	# macht es genauso).
+	ValidTargets: Ground, Water
+	Warhead@1Dam: SpreadDamage
+		Spread: 42
+		Damage: 10000
+		Versus:
+			None: 1000
+			Wood: 60
+		DamageTypes: Prone50Percent, TriggerProne, ElectricityDeath
+
+# === Age of Tiberium (aotmod) - Ion Storm Blitz (Civilian Array Superpower) ===
+# Schadenswerte 1:1 vom Obelisk (engine/mods/cnc/weapons/other.yaml "Laser"), User-Vorgabe:
+# "die blitze machen auch den gleichen schaden wie der obelisk" + "infanterie wird gegrillt
+# wie vom obelisk" -> FireDeath loest dieselbe Verbrennungs-Todesanimation aus.
+# Projektil TeslaZap zeichnet den Blitz mit den RA-Remaster-LITNING-Frames von der
+# Wolkenhoehe senkrecht nach unten (Source setzt AotIonStormPower.cs).
+IonStormBolt:
+	ValidTargets: Ground, Water, GroundActor, WaterActor, Air
+	Projectile: TeslaZap
+		Image: aot-litning
+		BrightZaps: 2
+		DimZaps: 3
+		Duration: 5
+		DamageDuration: 1
+		TrackTarget: false
+	Warhead@1Dam: SpreadDamage
+		Spread: 42
+		Damage: 36000
+		Versus:
+			Wood: 50
+		DamageTypes: Prone50Percent, TriggerProne, FireDeath
+	Warhead@2Smu: LeaveSmudge
+		SmudgeType: Scorch
+	# Vollbild-Weissblitz bei jedem Einschlag (User-Wunsch). Trifft ueber den Type gezielt
+	# FlashPostProcessEffect@aot-ionstorm (in aot-ts-civilian.yaml), nicht den Standard-Flash.
+	Warhead@3Flash: FlashEffect
+		FlashType: aot-ionstorm
+		Duration: 12
+
+# === Mobile Repair Drone (aot-repv) — Repair-Beam ===
+# Reine Reparatur-Waffe: negativer Schaden auf Targetable@AOTREPAIR (Ziel muss beschaedigt sein).
+# Sichtbare Funken via piffs (piffpiff.shp) auf dem Ziel; haeufiges Feuern (ReloadDelay 15)
+# laesst die Funken kontinuierlich spruehen. TS-Repair-Sound (repair11.aud) beim Feuern.
+aot-RepairBeam:
+	ReloadDelay: 15
+	Range: 3c0
+	Report: repair11.aud
+	ValidTargets: Repair
+	Projectile: InstantHit
+	Warhead@1Eff: FlashTargetsInRadius
+		Radius: 1065
+		ValidRelationships: Ally
+		ValidTargets: Repair
+	Warhead@2Dam: SpreadDamage
+		Spread: 213
+		Damage: -700
+		ValidRelationships: Ally
+		ValidTargets: Repair
+	# Funken direkt auf dem reparierten Ziel — piffs (piffpiff.shp) ist der TS/TD-Funkensprueh
+	# (spruehende helle Funken-Specks), KEIN Explosions-/Truemmereffekt. ValidTargets: Repair,
+	# damit die Funken nur am echten Repair-Ziel erscheinen.
+	Warhead@3Spark: CreateEffect
+		Explosions: piffs
+		ExplosionPalette: effect
+		ValidTargets: Repair
+		ValidRelationships: Ally
+
+# === Age of Tiberium (aotmod) - GUN Turret Reichweite (User 2026-08-24) ===
+# Basis-Gun-Turret auf 5 Zellen (vorher engine-default 6c0). Das Laser-Upgrade (aot-GunLaser ->
+# aot-LtnkLaser) bleibt bei 6c0 und bringt so einen echten Reichweiten-Vorteil (5 -> 6).
+# Field-Merge-Override der Engine-Waffe (aot-weapons.yaml laedt nach ballistics.yaml).
+TurretGun:
+	Range: 5c0
+
+# === Age of Tiberium (aotmod) - Ore-Minen: Explosion ohne Krater-Smudge ===
+# Ore-Minen (aot-ore-mine, aot-ore-mine-rich) explodieren beim Erschoepfen/Zerstoeren, sollen
+# aber KEINEN Krater-Smudge auf dem Boden hinterlassen. Kopie von BuildingExplode (engine/mods/
+# cnc/weapons/explosions.yaml) OHNE dessen Warhead@2Smu (LeaveSmudge/SmudgeType: Crater). Die
+# Zerstoerungs-Sounds haengen an ^Building.SoundOnDamageTransition und bleiben davon unberuehrt.
+aot-mine-explode-nocrater:
+	Warhead@1Eff: CreateEffect
+		Explosions: building, building_napalm, med_frag, poof, small_building
+		Delay: 1
+		ImpactActors: false
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod 2026-08-29) - Allied Flak (RA AA Gun ZSU-23) ===
+# Portiert aus engine/mods/ra ^AACannon + ZSU-23. ValidTargets Air (cnc-Flieger tragen Air,
+# nicht RAs AirborneActor). Luft-Impact-Effekt small_building wie die cnc-SAM (Dragon@4EffAir).
+aot-FlakAA:
+	ReloadDelay: 6
+	Range: 10c0
+	Report: aot-flak-fire.wav
+	Burst: 2
+	BurstDelays: 0
+	ValidTargets: Air
+	Projectile: InstantHit
+	Warhead@1Dam: SpreadDamage
+		Spread: 213
+		Damage: 900
+		ValidTargets: Air
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
+	Warhead@2Eff: CreateEffect
+		Explosions: small_building
+		ImpactSounds: xplos.aud
+		ImpactActors: false
+		ValidTargets: Air, Ground, Water
+
+# === Age of Tiberium (aotmod) - A10 Vulcan: MG-Sound statt "Pistole" ===
+# gun5.aud existiert in TD UND in Red Alert mit UNTERSCHIEDLICHEM Klang. Der Remaster legt
+# beide Varianten nebeneinander ab (SFX3D.MEG: TDR_/TDC_/RAR_/RAC_SFX_GUN5.WAV). Gewinnt die
+# RA-Variante die Aufloesung, klingt das MG wie eine Pistole -- genau der Bug, der beim HIND
+# immer wieder auftrat und dort mit einer eigenen, kollisionsfreien Datei geloest wurde
+# (aot-HindAGGun -> aot-hind-mg.aud). Vulcan wird ausschliesslich vom A10 benutzt, deshalb
+# hier derselbe Fix. Kein Sound-Fehler im Log: die Datei WIRD gefunden, nur die falsche.
+Vulcan:
+	Report: aot-hind-mg.aud
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Sub-Hunter Corvette: Orca-Bomber Fallschirm-Torpedo ===
+# Zweistufig, wie vom User spezifiziert:
+#  1. aot-CorvetteTorpedoDrop -- der Bomber wirft im Ueberflug (AttackBomber, wie die Badger-
+#     Parabombs) ZWEI Torpedos als Burst ab. Sie sinken am RA-Remaster-Fallschirm (parach).
+#  2. Beim Wasserkontakt: Splash-Sound + -Animation, dann startet via AotLaunchTorpedo der
+#     ECHTE Torpedo (aot-CorvetteTorpedo) und faehrt sofort aufs naechste U-Boot zu.
+aot-CorvetteTorpedoDrop:
+	# KEIN Burst: der Bomber wirft EINZELN ab, eine halbe Sekunde (12 Ticks) auseinander. Zusammen
+	# mit AmmoPool 3 sind das hoechstens 3 Torpedos -- und wenn das Ziel vorher sinkt, spart er
+	# die restlichen Schuesse (die Corvette holt ihn dann zurueck).
+	ReloadDelay: 12
+	# Kleine Range = der Abwurf passiert eng um den angepeilten Punkt (AttackBomber feuert,
+	# sobald das Ziel in Waffenreichweite ist). Der Punkt selbst liegt via
+	# AotCorvetteBomber.DropLead bewusst VOR dem U-Boot.
+	Range: 1c512
+	Report: aot-chute1.aud
+	Burst: 1
+	ValidTargets: Water, Underwater
+	Projectile: GravityBomb
+		Image: parach
+		OpenSequence: open
+		Sequence: idle
+		Velocity: 0, 0, -38
+		Acceleration: 0, 0, 0
+		Shadow: True
+	# Wasser-"Flatschen" beim Aufsetzen des Fallschirms.
+	Warhead@1Splash: CreateEffect
+		Explosions: aot-h2o-splash, aot-h2o-splash2, aot-h2o-splash3
+		ImpactSounds: splash9.wav
+		ValidTargets: Water, Underwater
+	# Der Torpedo loest sich und nimmt Fahrt auf das naechste U-Boot auf.
+	Warhead@2Launch: AotLaunchTorpedo
+		Weapon: aot-CorvetteTorpedo
+		SearchRadius: 12c0
+		ValidTargets: Water, Underwater
+
+# Der eigentliche Torpedo: identische Werte zum U-Boot-Torpedo (aot-SubTorpedo), aber
+# Burst 1 (jeder abgeworfene Fallschirm-Torpedo ist ein einzelner Torpedo).
+aot-CorvetteTorpedo:
+	Inherits: aot-SubTorpedo
+	Burst: 1
+	ReloadDelay: 1
+	Range: 14c0
+	Report: torpedo1.wav
+	Projectile: Missile
+		Image: aot-torpedo-remastered
+		Arm: 2
+		Speed: 85
+		TrailImage: bubbles
+		HorizontalRateOfTurn: 8
+		RangeLimit: 16c0
+		BoundToTerrainType: Water
+		Shadow: false
+		MaximumLaunchAngle: 0
+		CruiseAltitude: 0
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - Corvette: "Waffe" die nur den Orca-Start ausloest ===
+# Traegt KEINEN Schaden. Sie existiert, damit die Corvette ein echtes AttackBase hat: dadurch
+# liefert die Engine Angriffs-Cursor, Reichweitenpruefung UND das Heranfahren an ein zu weit
+# entferntes Ziel. Den eigentlichen Angriff macht AotCorvetteBomber (IResolveOrder).
+aot-CorvetteOrcaLaunch:
+	ReloadDelay: 200
+	# BEWUSST kleiner als AotCorvetteBomber.MaxLaunchRange (14c0): die Engine faehrt das Schiff
+	# nur bis an diese Waffenreichweite heran. Waeren beide gleich gross, stuende die Corvette
+	# exakt am Rand und der Bomber startete erst nach weiterer Annaeherung.
+	Range: 12c0
+	ValidTargets: Ground, Water, Underwater, Air
+	Projectile: InstantHit
+	Warhead@nothing: SpreadDamage
+		Spread: 1
+		Damage: 0
+		ValidTargets: NoSuchTarget
+
+# === Age of Tiberium (aotmod) - Mutant Vulcan (TS-Import: MUTANT/MWMN/MUTANT3) ===
+# 1:1 aus TS "Vulcan" (smallguns.yaml, erbt ^MG): ReloadDelay 20, Range 4, Damage 2000,
+# Report chaingn1.aud. Basis MachineGun (CnC) wie beim Cyborg-ChainGun; nur die TS-Stats
+# ueberschrieben. Burst 1 (TS-Vulcan feuert einzeln, ^MG-Default).
+aot-MutantVulcan:
+	Inherits: MachineGun
+	Range: 4c0
+	ReloadDelay: 20
+	Burst: 1
+	Report: chaingn1.aud
+	Warhead@1Dam: SpreadDamage
+		Spread: 108
+		Damage: 2000
+		Versus:
+			None: 100
+			Wood: 60
+			Light: 40
+			Heavy: 25
+			Concrete: 10
+		DamageTypes: Prone70Percent, TriggerProne, BulletDeath
+# === Ende aotmod ===

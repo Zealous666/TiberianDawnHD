@@ -1,10 +1,35 @@
 Speech:
+	# === Age of Tiberium (aotmod) - Spy-Plane-Ansage aus RA (RA-Remastered EVA) ===
+	# aot-eva-spyplane.aud (bits/) ist die extrahierte RA-Remastered-Ansage RAR_SFX_EVA_SPYPLN1.
+	# Prefix/Variant deaktiviert, damit kein TDR_SFX_EVA_/_EN-US.WAV drangehängt wird — es wird
+	# direkt bits/aot-eva-spyplane.aud geladen (Sound-Loader erkennt WAV-Inhalt am RIFF-Header,
+	# die .aud-Endung stammt nur vom Default-Variant-Suffix). Sprachunabhängig.
+	DisablePrefixes: SpyPlaneReady, BridgeRepaired, CloakedUnitDetected, CloakedUnitDetectedGdi, SubterraneanUnitDetected, SubterraneanUnitDetectedGdi, MissileLaunchDetected
+	DisableVariants: SpyPlaneReady, BridgeRepaired, CloakedUnitDetected, CloakedUnitDetectedGdi, SubterraneanUnitDetected, SubterraneanUnitDetectedGdi, MissileLaunchDetected
 	Notifications:
+		SpyPlaneReady: aot-eva-spyplane
+		# Bridge Repair Hut EVA (TS 00-i118 "Bridge repaired."), sprachunabhängig direkt aus bits/.
+		BridgeRepaired: aot-bridge-repaired
+		CloakedUnitDetected: aot-eva-cloaked-detected
+		CloakedUnitDetectedGdi: aot-eva-cloaked-detected-gdi
+		# TS 00-i174 "Subterranean unit detected." — fuer CABAL (NOD) und GDI EVA gleich.
+		SubterraneanUnitDetected: aot-eva-subterranean-detected
+		SubterraneanUnitDetectedGdi: aot-eva-subterranean-detected
+		# === Age of Tiberium (aotmod) - Missile Launch Warning (TS 00-i150) ===
+		# "Missile launch detected." -- Vorwarnung fuer ALLE Spieler bei jedem Raketenstart vom
+		# Missile Silo (Mine Cluster, Mine Cluster Enhanced, Tiberium). Die Atombombe behaelt ihre
+		# eigenen Nuklear-Ansagen. Gibt dem Gegner Zeit, die Firestorm Defense zu aktivieren.
+		# DIESE Datei ist bei Remaster-Content die GELADENE (RemasterFileSystemLoader.cs ersetzt
+		# den Notifications-Eintrag des Manifests durch notifications-base.yaml + Sprachdatei) --
+		# mod.yaml zeigt truegerisch nur auf cnc|audio/notifications.yaml. Der Key muss deshalb in
+		# BEIDEN Dateien stehen, sonst fehlt er je nach Content-Variante.
+		MissileLaunchDetected: aot-eva-missile-launch
 		AirstrikeReady: AIRREDY1
 		BaseAttack: BASEATK1
 		Building: BLDGING1
 		BuildingCannotPlaceAudio: DEPLOY1
 		BuildingCaptured: CAPT1
+		BuildingInfiltrated: CAPT1
 		BuildingInProgress: BLDG1
 		BuildingLost: STRCLOST
 		Cancelled: CANCEL1

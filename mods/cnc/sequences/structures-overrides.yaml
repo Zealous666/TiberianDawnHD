@@ -158,6 +158,8 @@ afld:
 				Count: 8
 		RemasteredPremultiplied: false
 	icon:
+		Filename: afld_icon.png
+		Length: 1
 		RemasteredFilename:
 
 hq:
@@ -183,6 +185,34 @@ nuk2:
 	make:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\NUK2MAKE.ZIP
 	bib:
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\TEMPERATE\BIB2\BIB2.TEM-{0:D4}.DDS
+			Count: 6
+		RemasteredTilesetFilenamesPattern:
+			WINTER: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\BIB2.WIN\BIB2.WIN-{0:D4}.DDS
+				Count: 6
+			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\BIB2.DES\BIB2.DES-{0:D4}.DDS
+				Count: 6
+		RemasteredPremultiplied: false
+	icon:
+		RemasteredFilename:
+
+hpad:
+	Defaults:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\HPAD.ZIP
+	make:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\HPADMAKE.ZIP
+	# Bib-Smudge (User-Wunsch 2026-08-02, NOD Helipad): 1:1 vom NOD Radar uebernommen
+	# (aot-sequences.yaml, Block "aot-nod-radar"). BIB3 = die 2 Zellen breite Variante,
+	# Count 4 = 2 Reihen x 2 Spalten -- genau was WithBuildingBib bei Dimensions.X=2 und
+	# rows=2 anfordert (WithBuildingBib.cs: rows*width Frames). Nur aot-hpad-nod verdrahtet
+	# den Bib tatsaechlich; das GDI-Helipad bleibt unveraendert ohne Bib.
+	bib:
+		TilesetFilenames:
+			DESERT: bib3.des
+			WINTER: bib3.win
+			SNOW: bib3.sno
+			TEMPERAT: bib3.tem
+		Length: *
 		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\TEMPERATE\BIB3\BIB3.TEM-{0:D4}.DDS
 			Count: 4
 		RemasteredTilesetFilenamesPattern:
@@ -193,22 +223,178 @@ nuk2:
 		RemasteredPremultiplied: false
 	icon:
 		RemasteredFilename:
-
-hpad:
-	Defaults:
-		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\HPAD.ZIP
-	make:
-		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\HPADMAKE.ZIP
-	icon:
+	hpad-blue-icon:
+		Filename: hpad_blue.png
+		Length: 1
 		RemasteredFilename:
+	hpad-red-icon:
+		Filename: hpad_red.png
+		Length: 1
+		RemasteredFilename:
+	# Age-2 Gemini-Sprite NOD-Helipad (2026-08-30). Scale = 0.1875 (Referenz-HPAD-Pad-
+	# Breite, 128px/Zelle) * 256 (Referenz-Content-Breite) / 1113 (Gemini-Content-Breite,
+	# vor dem 20px-Padding-Crop gemessen) = 0.0431, dann -10% (User-Test: "10% kleiner")
+	# = 0.0388. Downscale-before-bake auf Scale 0.1667 (factor=min(1.0,6*0.0388)=0.2328,
+	# Scale_neu=1/6, siehe make-animation-interpolation.md) NACHTRAEGLICH ergaenzt: bei
+	# voller 1148px-Aufloesung + Scale 0.0388 (~26x Supersampling) hat die Engine beim
+	# Runterskalieren auf Bildschirmgroesse rohe PALETTE-INDIZES des Remap-Layers geblendet
+	# statt aufgeloester Farben -- die 16 Rampen-Level liegen an nicht benachbarten
+	# Index-Nummern (176,178,...,191,177,...), Blending zwischen ihnen ergibt Muell-Indizes
+	# = sichtbares "pixeliges/kraeuseliges" Rauschen auf dem Container (User-Befund). Fix:
+	# Quelle selbst auf ~6x Supersampling vorskaliert, Rot-Erkennung+Rampe laeuft auf dem
+	# bereits kleinen Bild -- Diskretisierung passiert einmalig nah an der Zielaufloesung.
+	# ZOffset -1023 identisch zur "idle"-Sequenz oben, damit gelandete Aircraft weiter
+	# korrekt vor dem Pad sortieren (siehe hpad-quad-system.md fuer die Sortier-Formel).
+	aot-age2-nod-idle:
+		Filename: aot-hpad-nod-age2-idle-base.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.1667
+		Offset: 0,0
+		ZOffset: -1023
+	damaged-aot-age2-nod-idle:
+		Filename: aot-hpad-nod-age2-idle-base.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.1667
+		Offset: 0,0
+		ZOffset: -1023
+	aot-age2-nod-idle-remap:
+		Filename: aot-hpad-nod-age2-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.1667
+		Offset: 0,0
+		ZOffset: -1023
+	damaged-aot-age2-nod-idle-remap:
+		Filename: aot-hpad-nod-age2-idle-remap.png
+		RemasteredFilename:
+		Length: 1
+		Scale: 0.1667
+		Offset: 0,0
+		ZOffset: -1023
+	# Synthetische Bau-Animation (Bottom-up-Reveal-Wipe aus dem fertigen Age-2-Idle-Sprite,
+	# siehe make-animation-interpolation.md) - kein echtes Bau-Renderset vorhanden. Downscale
+	# vor dem Backen (factor=min(1.0, 6*0.0388)=0.2328) haelt die 14-Frame-Sheet klein;
+	# Scale_neu = Scale_alt/factor = 1/6 = 0.1667 (Idle UND Make sind beide reine Filename:-
+	# Sequenzen, kein classicUpscaleFactor-Mismatch wie bei gemischten Remastered/Filename-Paaren).
+	aot-age2-nod-make:
+		Filename: aot-hpad-nod-age2-make.png
+		RemasteredFilename:
+		Length: 14
+		Tick: 40
+		Scale: 0.1667
+		Offset: 0,0
+
+# === Age of Tiberium (aotmod) - AFLT: Air Field Sprites (RA Soviet Airfield) ===
+# 0–7:  Idle-Loop unbeschädigt (leuchtende Lichter)
+# 8–15: Idle-Loop beschädigt (gleiche Lichter, Schadensstufen)
+# active / damaged-active spielen während Resupply (WithResupplyAnimation Sequence: "active")
+aflt:
+	Defaults:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\AFLD.ZIP
+	# RemasteredOffset (NICHT Offset!) verwenden - aflt laedt Sprites ueber RemasteredFilename,
+	# RemasterSpriteSequence.cs ignoriert dabei komplett das klassische "Offset:"-Feld und nutzt
+	# stattdessen "RemasteredOffset:" (128px/Zelle-Referenz, ungeskaliert). Eine halbe Zelle
+	# noerdlich = -64px in Y bei dieser Referenzaufloesung.
+	idle:
+		Length: 1
+		ZOffset: -1023
+		RemasteredOffset: 0,-64
+	active:
+		Length: 8
+		Tick: 100
+		ZOffset: -1023
+		RemasteredOffset: 0,-64
+	damaged-idle:
+		Start: 8
+		Length: 1
+		ZOffset: -1023
+		RemasteredOffset: 0,-64
+	damaged-active:
+		Start: 8
+		Length: 8
+		Tick: 100
+		ZOffset: -1023
+		RemasteredOffset: 0,-64
+	make:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\AFLDMAKE.ZIP
+		Length: 11
+		Tick: 80
+		RemasteredOffset: 0,-64
+	icon:
+		Filename: aflt_blue.png
+		Length: 1
+		RemasteredFilename:
+	aflt-gdi-icon:
+		Filename: aflt_blue.png
+		Length: 1
+		RemasteredFilename:
+	# bib2 = 3-wide x 2-row (6 Frames), passt exakt zum AFLT-Footprint "xxx xxx" (Dimensions 3,2).
+	# Gleiches Prinzip wie bib1 (4-wide) beim GDI-Quad-Helipad (aot-hpad-gdi) — native
+	# MEG-Terrain-Tilesets sind immer für eine bestimmte Footprint-Breite gebacken,
+	# NICHT frei kachelbar. Bib-Breite muss zur Building.Dimensions.X passen (siehe LITE/ATEC).
+	bib:
+		TilesetFilenames:
+			DESERT: bib2.des
+			WINTER: bib2.win
+			SNOW: bib2.sno
+			TEMPERAT: bib2.tem
+			JUNGLE: bib2.jun
+		Length: *
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\TEMPERATE\BIB2\BIB2.TEM-{0:D4}.DDS
+			Count: 6
+		RemasteredTilesetFilenamesPattern:
+			WINTER: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\BIB2.WIN\BIB2.WIN-{0:D4}.DDS
+				Count: 6
+			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\BIB2.DES\BIB2.DES-{0:D4}.DDS
+				Count: 6
+		RemasteredPremultiplied: false
+# === Ende aotmod ===
+
+# === Age of Tiberium (aotmod) - OREREF: Ore Refinery (RA-Remaster PROC) ===
+# PROC.ZIP enthaelt genau 2 Frames: 0 = idle, 1 = damaged. Keine Make-/Rubble-Frames.
+# damaged-idle wird von der Engine bei niedriger Gesundheit automatisch gewaehlt
+# (NormalizeSequence-Konvention). RemasteredOffset 0,-64 hebt das 3-Zellen-hohe
+# Sprite wie beim AFLT halb nach Norden - Feinjustierung ggf. im Spiel pruefen.
+oreref:
+	Defaults:
+		RemasteredFilename: DATA\ART\TEXTURES\SRGB\RED_ALERT\STRUCTURES\PROC.ZIP
+		RemasteredOffset: 0,-64
+	idle:
+		Start: 0
+		Length: 1
+	damaged-idle:
+		Start: 1
+		Length: 1
+# === Ende aotmod ===
 
 fix:
 	Defaults:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\FIX.ZIP
 	make:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\FIXMAKE.ZIP
+	# Wie FACT: BIB2 = 3 breit x 2 Zeilen (6 Frames). Engine-Default war der
+	# Minibib mbFIX.tem mit Offset 0,-9 - der wuerde BIB2 nach oben verschieben,
+	# daher explizit auf 0,0 zuruecksetzen (leerer Wert loescht geerbtes nicht).
 	bib:
-		RemasteredFilename: blank.png
+		Filename: bib2.tem
+		TilesetFilenames:
+			DESERT: bib2.des
+			WINTER: bib2.win
+			SNOW: bib2.sno
+			TEMPERAT: bib2.tem
+			JUNGLE: bib2.jun
+		Length: *
+		Offset: 0,0
+		RemasteredFilenamePattern: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\TEMPERATE\BIB2\BIB2.TEM-{0:D4}.DDS
+			Count: 6
+		RemasteredTilesetFilenamesPattern:
+			WINTER: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\WINTER\BIB2.WIN\BIB2.WIN-{0:D4}.DDS
+				Count: 6
+			DESERT: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\TERRAIN\DESERT\BIB2.DES\BIB2.DES-{0:D4}.DDS
+				Count: 6
+		RemasteredPremultiplied: false
 	icon:
 		RemasteredFilename:
 
@@ -259,8 +445,14 @@ obli:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\OBLIMAKE.ZIP
 	bib:
 		RemasteredFilename: blank.png
+	# Custom Bau-Icon (User-Icon, 2026-07-05), ersetzt den vorherigen leeren
+	# Platzhalter. RemasteredOffset:0,0 explizit noetig, sonst erbt die Icon-
+	# Sequenz das "Defaults: RemasteredOffset: 0,-64" (fuer das Ingame-Sprite
+	# gedacht) und verschiebt/beschneidet das Icon-PNG sichtbar falsch.
 	icon:
-		RemasteredFilename:
+		RemasteredFilename: aot-obli-icon.png
+		RemasteredOffset: 0,0
+		Length: 1
 
 brik:
 	Defaults:
@@ -299,8 +491,23 @@ gun:
 		RemasteredFilename: blank.png
 	muzzle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\GUNFIRE.ZIP
+	# Custom-Icons (User-Zeichnung, 2026-07-04): "icon" = Default-Sequenz fuer
+	# aot-gun-base (kein Icon:-Override auf dem Aktor selbst), "gun-laser-icon"
+	# wird von aot-gun-laser ueber Buildable.Icon referenziert (Pattern wie
+	# aot-ltnk-laser -> ltnk-laser-icon).
 	icon:
+		Filename: aot-gun-base-icon.png
 		RemasteredFilename:
+	gun-laser-icon:
+		Filename: aot-gun-laser-icon.png
+		RemasteredFilename:
+	# Laser Defense Systems Upgrade: rot recolorter Turret-Kanonenlauf (32 Facings,
+	# aus dem remasterten GUN.ZIP extrahiert + Barrel-Pixel per Swept-Silhouette-
+	# Maske isoliert, siehe gun-turret-system.md fuer die Recolor-Pipeline).
+	aot-gun-laser-turret:
+		RemasteredFilename: aot-gun-laser-turret.zip
+		Facings: 32
+		UseClassicFacings: True
 
 sam:
 	Defaults:
@@ -309,8 +516,88 @@ sam:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\STRUCTURES\SAMMAKE.ZIP
 	muzzle:
 		RemasteredFilename: DATA\ART\TEXTURES\SRGB\TIBERIAN_DAWN\VFX\SAMFIRE.ZIP
+	# Custom Bau-Icon (User-Icon, 2026-07-05), ersetzt den vorherigen leeren
+	# Platzhalter. Wird von SAM UND beiden Upgrade-Aktoren geteilt (User-Wunsch:
+	# "verwende ueberall dasselbe Icon ohne Aenderung").
 	icon:
-		RemasteredFilename:
+		RemasteredFilename: aot-sam-icon.png
+		Length: 1
+	# Variant-Bau-Icons fuer die Proxy-Bau-Aktoren aot-sam-build-bunkered/-cloak (2026-09-02):
+	# nach dem Erforschen des jeweiligen Upgrades wechselt der SAM-Baumenue-Eintrag auf diese
+	# Icons (via Buildable.Icon auf dem Proxy, siehe aot-structures.yaml). Dieselben PNGs wie die
+	# Upgrade-Icons.
+	icon-bunkered:
+		RemasteredFilename: aot-sam-bunkered-icon.png
+		Length: 1
+	icon-cloak:
+		RemasteredFilename: aot-sam-cloak-icon.png
+		Length: 1
+	# RA-Remastered-Sprite (2026-07-05, User-Wunsch): neuer Standard-Look, ersetzt
+	# die TD-Pop-up-Silo-Optik als Default (TD-Frames oben bleiben unveraendert -
+	# aktiv nur noch ueber das "Bunkered SAM"-Upgrade, siehe aot-structures.yaml).
+	# Muss im SELBEN Image "sam" liegen (nicht als eigenes Image) - RenderSprites.
+	# Image ist EIN fester Wert pro Aktor, kann nicht per Bedingung wechseln (siehe
+	# ftur-system.md fuer denselben Lernpunkt bei FTUR/Toxic Tower). Frame-Indizes
+	# 1:1 von RAs eigenem "sam:"-Sequenzblock (engine/mods/ra/sequences/
+	# structures.yaml) uebernommen: turret=Facings 32 ab Frame 0, damaged-turret=
+	# Start 34 Facings 32. "ra-idle" nutzt (wie im RA-Original per gunmake.shp-
+	# Trick) ein Platzhalter-Frame aus der eigenen RA-Bau-Animation.
+	# SAMFIRE/Muzzle-Feuer-Effekt fuer die RA-Variante NICHT verdrahtet (User-
+	# Wunsch: "aendere zunaechst die Gebaeude-Sprites") - Asset liegt bereits als
+	# aot-sam-fire.zip bereit, hat aber eine Luecke bei Frame 54 (143 statt 144
+	# Frames), muss vor Verdrahtung noch genauer geprueft werden.
+	ra-idle:
+		RemasteredFilename: aot-sam-make.zip
+		Length: 1
+	# Bau-Animation des RA-Render-Pfads (18 Frames: Plattform -> fertige SAM).
+	# Lag zuvor faelschlich im Image-Block "aot-upgrade-sam-cloak" (nur ein
+	# Upgrade-Icon-Aktor) und wurde daher von "sam" nie gefunden -> RA-SAM
+	# poppte ohne Aufbau ins Bild. Gehoert in DIESEN Block.
+	ra-make:
+		RemasteredFilename: aot-sam-make.zip
+		Length: *
+	ra-turret:
+		RemasteredFilename: aot-sam.zip
+		Facings: 32
+		UseClassicFacings: True
+	# NAME IST KRITISCH: RenderSprites.NormalizeSequence stellt "damaged-" VORAN und sucht
+	# damit "damaged-ra-turret". Der frueher hier stehende Name "ra-damaged-turret" (damaged
+	# in der Mitte) wurde deshalb nie gefunden -- das SAM zeigte in Age 0 nie ein Schadensbild,
+	# obwohl die Frames korrekt in aot-sam.zip ab Index 34 liegen.
+	damaged-ra-turret:
+		RemasteredFilename: aot-sam.zip
+		Start: 34
+		Facings: 32
+		UseClassicFacings: True
+	# Cloaked-SAM-Turret (2026-09-02): dunkel-metallischer Gemini-Remaster auf dreieckiger
+	# Platte, 8 Facings. Gebacken aus asset wip/sam/sam_cloaked_interpolated.png via
+	# bake-sam-cloaked.py -> bits/aot-sam-cloaked.png (FrameSize 256,128 FrameAmount 8,
+	# gerade Alpha -> RemasteredPremultiplied False). Player-Color liegt in den Warnstreifen
+	# der Platte (Gruen ins PlayerColorShift-Fenster gehoben, Shader-Pfad). Die 8 Frames sind
+	# gleichmaessig 45deg-verteilt (jede 4. der 32 RA-Facings) -> LINEARE Facing-Zuordnung
+	# (kein UseClassicFacings; das gilt nur bei genau 32 Facings). Kein separates Schadensbild
+	# -> damaged- zeigt dasselbe Sprite (Turret nimmt keinen sichtbaren Kampfschaden;
+	# NormalizeSequence braucht den damaged-Namen aber, sonst Crash).
+	ra-cloaked-turret:
+		RemasteredFilename: aot-sam-cloaked.png
+		RemasteredPremultiplied: False
+		Facings: 8
+	damaged-ra-cloaked-turret:
+		RemasteredFilename: aot-sam-cloaked.png
+		RemasteredPremultiplied: False
+		Facings: 8
+
+# Bau-Icons fuer die beiden SAM-Upgrades - dedizierte Icons (User 2026-09-02), je eigenes
+# 64x48-PNG in bits/. Loesen das frueher geteilte aot-sam-icon.png ab.
+aot-upgrade-sam-bunkered:
+	icon:
+		RemasteredFilename: aot-sam-bunkered-icon.png
+		Length: 1
+
+aot-upgrade-sam-cloak:
+	icon:
+		RemasteredFilename: aot-sam-cloak-icon.png
+		Length: 1
 
 gtwr:
 	Defaults:

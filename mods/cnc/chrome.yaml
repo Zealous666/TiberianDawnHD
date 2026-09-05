@@ -562,8 +562,37 @@ production-icons:
 		upgrade: 853, 68, 16, 16
 		upgrade-disabled: 853, 85, 16, 16
 		upgrade-alert: 853, 102, 16, 16
+		# === Age of Tiberium (aotmod) navy button (vorhandenes Anker-Icon auf dem Sheet) ===
+		naval: 955, 68, 16, 16
+		naval-disabled: 955, 85, 16, 16
+		naval-alert: 955, 102, 16, 16
 		# === Ende aotmod ===
-    
+
+# === Age of Tiberium (aotmod) - Stern-Icon fuer Special Units Tab ===
+aot-production-special:
+	Image: aot-star-icon.png
+	Regions:
+		support: 0, 0, 16, 16
+		support-disabled: 0, 16, 16, 16
+		support-alert: 0, 32, 16, 16
+
+# === Age of Tiberium (aotmod) - Platzhalter-Icon fuer gesperrte Queue-Eintraege (C&C3-Stil) ===
+aot-locked-icon:
+	Image: base_none.png
+	Regions:
+		locked: 0, 0, 64, 48
+# Fraktions-Varianten: ProductionPaletteWidget sucht "<LockedIconCollection>-<faction>"
+# und faellt auf aot-locked-icon (base_none.png) zurueck (Observer, fremde Fraktionen).
+aot-locked-icon-gdi:
+	Image: base_gdi.png
+	Regions:
+		locked: 0, 0, 64, 48
+aot-locked-icon-nod:
+	Image: base_nod.png
+	Regions:
+		locked: 0, 0, 64, 48
+# === Ende aotmod ===
+
 order-icons:
 	Inherits: ^Chrome
 	Regions:

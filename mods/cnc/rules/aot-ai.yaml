@@ -1,0 +1,1184 @@
+# =============================================================================
+# Age of Tiberium — KI-Neuanpassung (Phase A, reines YAML)
+# =============================================================================
+# Ersetzt die Vanilla-Bot-Module aus engine/mods/cnc/rules/ai.yaml vollständig.
+# Muss in mod.yaml NACH cnchd|rules/overrides.yaml + aot-*.yaml geladen werden.
+#
+# Konzept + Analyse: memory/ai-system.md. Intelligentes Tuning: memory/ai-tuning-todo.md.
+#
+# Struktur:
+#   - Vanilla-Instanzen (@cabal/@watson/@hal9001) werden entfernt.
+#   - ModularBot + GrantConditionOnBotOwner bleiben aus ai.yaml erhalten.
+#   - Neue geteilte Module (@aot) für alle 3 Persönlichkeiten (RequiresCondition
+#     deckt alle drei ab). Difficulty-Differenzierung = Phase C.
+#
+# WICHTIG — Mod-Muster: baubar sind die aot-*-ageN / aot-*-faction Aktoren.
+# Age-Varianten stehen ALLE in den Fractions; nur die aktuell gültige (per
+# ~aot-ageN Prerequisite) wird tatsächlich gebaut.
+# =============================================================================
+
+Player:
+	# --- Vanilla-Module entfernen (aus engine ai.yaml) ---
+	-SupportPowerBotModule:
+	-HarvesterBotModule:
+	-ResourceMapBotModule:
+	-BuildingRepairBotModule:
+	-BaseBuilderBotModule@cabal:
+	-BaseBuilderBotModule@watson:
+	-BaseBuilderBotModule@hal9001:
+	-SquadManagerBotModule@cabal:
+	-SquadManagerBotModule@watson:
+	-SquadManagerBotModule@hal9001:
+	-UnitBuilderBotModule@cabal:
+	-UnitBuilderBotModule@watson:
+	-UnitBuilderBotModule@hal9001:
+	-McvExpansionManagerBotModule@cabal:
+	-McvExpansionManagerBotModule@watson-hal9001:
+
+	# =========================================================================
+	# WIRTSCHAFT
+	# =========================================================================
+	HarvesterBotModule@aot:
+		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
+		HarvesterTypes: aot-harv, aot-harv-nod
+		RefineryTypes: proc, aot-proc-gdi, aot-proc-gdi-age2, aot-proc-nod, aot-proc-nod-age2
+		# User-Wunsch 2026-08-01: "es gelten nur die, die durch den Kauf von Refineries entstehen"
+		# -- InitialHarvesters ist ein FESTER Mindest-Floor, unabhaengig von der Refinery-Zahl
+		# (harvCountTooLow = harvsNum < InitialHarvesters || harvsNum < refineryCount). Auf 0
+		# gesetzt macht die Refinery-Anzahl zum EINZIGEN Treiber, kein zusaetzlicher Sockel mehr.
+		InitialHarvesters: 0
+
+	# ORET (Ore Transporter): mirrors HarvesterBotModule's own count-vs-reference-building replacement
+	# logic (User 2026-07-22: "genau wie bei HARV, nur zerstoerte nachkaufen, an FACT-Anzahl gekoppelt")
+	# -- but ORET has no Harvester trait (OreTransporter/DockClientManager instead), so it can't just be a
+	# second HarvesterBotModule instance (that indexes actors by the Harvester trait specifically, would
+	# match zero ORET). AotReplacementUnitBotModule is the same pattern generalised: 1 ORET per alive FACT,
+	# requested ONLY when the current count drops below that (i.e. one was actually destroyed) -- MCVs are
+	# unbounded in this mod (age variants are just a sprite/proxy swap, not a hard cap), so a static
+	# UnitLimits number can never track the true FACT count; this ties to it directly instead.
+	AotReplacementUnitBotModule@oret:
+		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
+		UnitTypes: aot-oret-lite
+		ReferenceBuildingTypes: fact, fact.gdi, fact.nod
+		# Deckel auf 1 (User-Vorgabe 2026-08-03): seit der Base Expansion gibt es einen ZWEITEN
+		# Bauhof, der das Ziel sonst automatisch auf 2 heben wuerde. Die Expansion soll aber nur den
+		# ORET bekommen, den ihr Yard gratis mitliefert -- "diese zusatz-oreT war eine reine,
+		# einmalige main-base angelegenheit".
+		MaximumCount: 1
+
+	ResourceMapBotModule@aot:
+		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
+		ResourceCreatorTypes: split2, split3, splitblue
+		ValuableResourceTypes: Tiberium, BlueTiberium
+		HarvesterTypes: aot-harv, aot-harv-nod
+		RefineryTypes: proc, aot-proc-gdi, aot-proc-gdi-age2, aot-proc-nod, aot-proc-nod-age2
+		EnemyBaseBuildingTypes: fact, aot-lite-gdi, aot-lite-nod, weap, aot-weap-age2, afld, aot-pyle-age0, aot-pyle-age1, aot-pyle-age2, aot-hand-age0, aot-hand-age1, aot-hand-age2, aot-atec-age0, aot-atec-age1, aot-atec-age2, aot-stec-age0, aot-stec-age1, aot-stec-age2, aot-tmpl-age1, aot-tmpl-age2, aot-shrine, orbc
+
+	BuildingRepairBotModule@aot:
+		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
+
+	# =========================================================================
+	# BASE-PLANNER (2026-07-20, User-Masterkonzept): flutet die Base-TASCHE (Yard
+	# bis Gates, begrenzt durch Klippen/Wasser/Actors, Pfad-Cap), versiegelt die
+	# Gates, packt das KOMPLETTE Base-Layout hinein (eingezäunte Power-Cluster,
+	# Paare, Lückenfüller, Stealth-Spread) und speichert Plan + Bau-RHYTHMUS für
+	# das ganze Match. Main-Gate = Chokepoint (Squads), alle Gates = Approaches.
+	# Varianten-Listen sind AGE-GEORDNET: der Builder nimmt die aktuell baubare.
+	# =========================================================================
+	AotBasePlannerBotModule@nod:
+		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
+		Faction: nod
+		ConstructionYardTypes: fact, fact.gdi, fact.nod
+		# Kept in sync with AotOperationsBotModule@nod's ChokeClearRadius below (User 2026-08-01): the
+		# gate-defence cluster search stops treating trees within this radius of the primary choke as
+		# blocking, since ClearNearbyObstacles bulldozes exactly this radius at runtime.
+		TreeClearRadius: 5
+		OreMineTypes: aot-ore-mine
+		NukeTypes: aot-nuke-age0, aot-nuke-age1, aot-nuke-age2-nod
+		Nuk2Types: aot-nuk2-age0, aot-nuk2-age1, aot-nuk2-age2
+		SiloTypes: aot-silo-age0, aot-silo-age1, aot-silo-age2
+		LiteTypes: aot-lite-nod
+		HandTypes: aot-hand-age0, aot-hand-age1, aot-hand-age2
+		RadarTypes: aot-nod-radar-age0, aot-nod-radar-age1, aot-nod-radar-age2
+		StecTypes: aot-stec-age0, aot-stec-age1, aot-stec-age2
+		FixTypes: aot-fix-age0, aot-fix-age1-nod, aot-fix-age2-nod
+		HpadTypes: aot-hpad-nod
+		ProcTypes: aot-proc-nod, aot-proc-nod-age2
+		TmplTypes: aot-tmpl-age1, aot-tmpl-age2
+		MsloTypes: aot-mslo-age1, aot-mslo-age2
+		ShrineTypes: aot-shrine
+		SgenTypes: aot-sgen
+		AfldTypes: afld
+		FturTypes: aot-ftur-flame, aot-ftur-toxic
+		GunTypes: aot-gun-base, aot-gun-laser
+		# Basis zuerst; nach dem Erforschen von Bunkered/Cloaked ist die Basis per ~!…-upgrade
+		# nicht mehr baubar und BuildableVariant nimmt automatisch die passende Proxy-Variante
+		# (zustandsabhaengiger Platzier-Ghost, siehe aot-sam-build-* in aot-structures.yaml).
+		SamTypes: sam, aot-sam-build-bunkered, aot-sam-build-cloak
+		ObeliskTypes: obli
+		WallTypes: aot-wall-nod
+		# Blossom-Tree-Actors (Tiberium-Wachstumsquellen, ^TibTree in defaults.yaml) — Plan hält
+		# GrowthSourceMargin Zellen Abstand, damit nachwachsendes Erz die Base-Zellen nicht überwuchert.
+		GrowthSourceTypes: split2, split3, splitblue
+		# Sub Pen: KEIN Rhythmus-Schritt mehr (User-Spec 2026-07-22) — wird jetzt on-demand vom
+		# AotBaseBuilderBotModule gebaut, sobald eine Operation sie via RequestNavalProduction()
+		# anfordert (siehe NavalPenTypes unten). Funktioniert dadurch auch, wenn die Base-Tasche
+		# selbst nicht an Wasser grenzt (Wall-Bridge zur nächsten erreichbaren Küste).
+
+	# GDI bekommt später eine EIGENE Instanz (@gdi) mit eigener Build-Order.
+	# Executor: baut den gespeicherten Plan im Rhythmus des Planners — ein Bau zur
+	# Zeit, Wall-Bridge entlang des PFADS bei Unerreichbarkeit (danach Verkauf),
+	# Age-Gates warten natürlich, zerstörte Plan-Gebäude werden periodisch erkannt
+	# und in Rhythmus-Reihenfolge neu gebaut.
+	AotBaseBuilderBotModule@nod:
+		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
+		Faction: nod
+		BuildingQueues: Building.Nod
+		WallType: aot-wall-nod
+		# Kette fuer den EXPANSIONS-Zaun, bestes zuerst (User-Fund 2026-08-11: Tor in Age 2 gebaut,
+		# aber kein Zaun). aot-wall-nod traegt "~!aot-laser-fence-upgrade" -- sobald der Laserzaun
+		# erforscht ist, ist der Stacheldraht unbaubar, und ein Einzel-Aktor faellt dann still aus.
+		ExpansionWallTypes: aot-wall-nod-laser, aot-wall-nod
+		# Base-Expansion-Layout (User-Briefing 2026-08-03). Die GEOMETRIE ist fest im Code verdrahtet
+		# (RequestExpansionLayout), weil sie vom User exakt im Editor vorgebaut wurde -- siehe
+		# memory/ai-base-expansion-layout.md. Hier stehen nur die Aktor-Ketten.
+		# Gebaut wird auf der EIGENEN Queue des Expansions-Bauhofs: ProductionQueue@NodBuilding sitzt
+		# auf FACT, nicht auf dem Spieler -- ein zweiter Bauhof hat also eine zweite Bau-Queue und die
+		# Expansion laeuft echt parallel zur Hauptbasis statt in deren Bauslot zu warten.
+		ExpansionPowerTypes: aot-nuke-age2-nod, aot-nuke-age1, aot-nuke-age0
+		ExpansionRefineryTypes: aot-proc-nod-age2, aot-proc-nod
+		ExpansionSiloTypes: aot-silo-age2, aot-silo-age1, aot-silo-age0
+		ExpansionSamTypes: sam, aot-sam-build-bunkered, aot-sam-build-cloak
+		ExpansionGateTypes: aot-gate-nod
+		MinimumExcessPower: 10
+		# On-demand naval production (User-Spec 2026-07-22): NICHT Teil des Rhythmus. Wird nur gebaut,
+		# wenn eine Operation sie via Ops.RequestNavalProduction() anfordert (z.B. ein Wave-Ferry ohne
+		# Landweg zum Gegner) -- Wall-Bridge zur nächsten erreichbaren Küste, exakt wie jeder andere
+		# unerreichbare Rhythmus-Schritt.
+		NavalPenTypes: aot-subpen, aot-subpen-age2
+		# aot-transport's actual Locomotor (aot-units.yaml) -- verifies the dock's adjacent water is
+		# really ship-navigable, not just terrain-adjacent to Water (User 2026-07-22: rock-enclosed
+		# inlets can pass the naive terrain check but trap a ship a few cells short forever).
+		# aotmod 2026-08-23: aot-lst -> naval (der NOD-Transport nutzt naval, seit die reinen Schiffe
+		# nicht mehr aufs Eis duerfen und aot-lst entfernt wurde).
+		NavalLocomotor: naval
+		# AgeUpgradeTypes ist ENTFALLEN (2026-08-04): der Age-Aufstieg ist seit dem Techtree-Umbau
+		# keine Produktionsqueue mehr, sondern eine Super Power auf dem Spieler-Aktor -- die
+		# aot-ageN-upgrade-*-Aktoren haben kein Buildable mehr, das Feld lief also ins Leere.
+		# Zustaendig ist jetzt AotAgePowerBotModule (weiter unten).
+		# Techtree-Gatekeeper (User 2026-08-02): KEINE optionalen Kampf-Upgrades, sondern harte
+		# Voraussetzungen fuer spaetere PLAN-Gebaeude. REIHENFOLGE = Abhaengigkeitsreihenfolge,
+		# es wird immer nur EINER gleichzeitig gekauft, und der Core-Rhythmus PAUSIERT solange:
+		#   aot-upgrade-nod-secrettech -> aot-nod-secrettech-upgrade -> Refinery UND Airfield baubar
+		#   aot-upgrade-nod-forbidden  -> aot-nod-forbidden-upgrade -> Shrine (aot-shrine) baubar
+		#   aot-upgrade-laser-fence    -> aot-laser-fence-upgrade   -> Obelisk (OBLI) baubar
+		# Techtree-Umbau 2026-08-04: die Gatekeeper haengen nicht mehr an einem Gebaeude, sondern nur
+		# noch am erreichten Zeitalter -- dafuer haengen die Gebaeude jetzt an ihnen. Secrets ist damit
+		# der ALLERERSTE Schritt in Age 1 (vorher brauchte es erst das Airfield), und die vom User
+		# geforderte Kette ergibt sich ohne Sonderfaelle:
+		# NOD Tiberium Secrets -> Refinery (core) -> Airfield (core) -> SAMs (defence) -> Temple (core)
+		# -> Base Expansion -> restliche Upgrades.
+		# Als gewichteter Zufallskauf (Gewicht 20 bzw. 15) fuehrte das zum harten Deadlock: SHRN ist
+		# ein CORE-Schritt, und Core-Schritte laufen strikt first-open OHNE Timeout -- ein Bot, der
+		# aot-upgrade-nod-forbidden nie zog, blieb ab Age 2 dauerhaft auf "Waiting (age gate /
+		# prerequisites): SHRN" stehen (618 Zeilen in einer Session). Ueber 5 Nod-Bots wurde in
+		# derselben Session KEIN einziger Obelisk gebaut. Reihenfolge = Abhaengigkeitsreihenfolge.
+		# Beide unten aus BuildingFractions entfernt, damit nichts doppelt feuert.
+		GatekeeperUpgradeTypes: aot-upgrade-nod-secrettech, aot-upgrade-nod-forbidden, aot-upgrade-laser-fence
+		# aot-upgrade-turret ist ein ENABLER, kein Gatekeeper (Korrektur 2026-08-15). Es gatet den
+		# GUN-Cluster (aot-gun-base: Prereq aot-turret-upgrade) und MUSS direkt gekauft werden -- der
+		# @aotupgrades-Topf tat das nie (GUN offen -> RhythmPriorityActive dauerhaft an -> Topf nie dran,
+		# Gold mit 24k baute keine GUN). ABER: als voller Gatekeeper (vorher) hielt es den KERN-RHYTHMUS
+		# ~2 Min an, waehrend ein pleiter Bot die 750 zusammenkratzte -- Basisentwicklung eingefroren,
+		# Wellen/Verteidigung liefen weiter -> Age-1-Defizit (User 2026-08-15: "das lief doch bisher
+		# besser"). Der Hold ist ueberfluessig: die Prereq-Pruefung erzwingt "Turret vor GUN" schon
+		# selbst. Enabler feuert das Upgrade sofort bei Verfuegbarkeit (Age1 + lite), OHNE Rhythmus-Hold.
+		EnablerUpgradeTypes: aot-upgrade-turret
+
+	# CHOKEPOINT-FORTIFIER: für V1 DEAKTIVIERT (baute Streu-Zäune, konkurrierte um
+	# die Building-Queue). Kommt als V2 zurück, integriert mit AotBaseBuilder.
+	# AotChokeFortifierBotModule@aot:
+	#	RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
+	#	ConstructionYardTypes: fact, fact.gdi, fact.nod
+	#	WallTypes: aot-wall-nod, aot-wall-gdi
+	#	RepairTypes: aot-fix-age0, aot-fix-age1, aot-fix-age2, aot-fix-age1-nod, aot-fix-age2-nod
+
+	# =========================================================================
+	# BASISBAU (Gebäude + Verteidigung) — Building.GDI/Nod + Support.GDI/Nod
+	# =========================================================================
+	# Gebäude-Queues ENTZOGEN (2026-07-20): AotBaseBuilderBotModule besitzt Building.GDI/Nod
+	# jetzt exklusiv. Diese Instanz bleibt nur für ihre Ökonomie-Dienste (z.B. Pause der
+	# Einheitenproduktion bis Raffinerie existiert); Fractions/Delays unten sind damit inert.
+	BaseBuilderBotModule@aot:
+		# ABGESCHALTET (User-Fund 2026-08-11: "in beiden base expansions scheint die refinery nicht
+		# mehr da zu sein, sieht aus wie verkauft"). Die Vanilla-Automatik verkauft eine Refinery,
+		# wenn im Umkreis von SellRefineryNoResourceDistance (12) kein TIBERIUM und kein Blossom Tree
+		# liegt -- und genau das ist bei einer Expansion der Normalfall: sie steht an einer ORE MINE,
+		# die weder ein Ressourcen-Tile noch ein ResourceCreator ist. Die Expansions-Refinery wurde
+		# damit zuverlaessig kurz nach dem Bau wieder abgerissen.
+		# Zweites Kriterium waere ebenso falsch: PROC2 steht plangemaess nahe der ersten Refinery.
+		SellRefineryInterval: -1
+		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
+		BuildingQueues:
+		DefenseQueues:
+		# HAND/PYLE rally points are managed exclusively by AotOperationsBotModule (User 2026-07-21):
+		# this module's own AssignRallyPointsInterval logic re-validates every RallyPoint-trait
+		# actor via IsCellBuildable, which a rally cell right at the production apron/smudge
+		# essentially never passes -- it kept overwriting our rally point every cycle.
+		RallyPointExcludeTypes: aot-hand-age0, aot-hand-age1, aot-hand-age2, aot-pyle-age0, aot-pyle-age1, aot-pyle-age2
+		ConstructionYardTypes: fact, fact.gdi, fact.nod
+		MinimumExcessPower: 20
+		MaximumExcessPower: 250
+		ExcessPowerIncrement: 40
+		ExcessPowerIncreaseThreshold: 2
+		MaxBaseRadius: 22
+		NewProductionCashThreshold: 3000
+		RefineryTypes: proc, aot-proc-gdi, aot-proc-gdi-age2, aot-proc-nod, aot-proc-nod-age2
+		PowerTypes: aot-nuke-age0, aot-nuke-age1, aot-nuke-age2, aot-nuke-age2-nod, aot-nuke-turbine, aot-nuke-turbine-age2, aot-nuk2-age0, aot-nuk2-age1, aot-nuk2-age2
+		SiloTypes: aot-silo-age0, aot-silo-age1, aot-silo-age2
+		# Erz-Ökonomie: garantiere 1 Silo ganz früh (direkt nach Power, vor Raffinerie),
+		# platziert an der zum nächsten Ore-Mine-Aktor nächstgelegenen baubaren Zelle
+		# (Custom-Engine-Erweiterung BaseBuilderBotModule.SilosNearOreMines). Damit kann
+		# der ORET sofort abliefern. Siehe memory/ai-system.md.
+		SilosNearOreMines: 1
+		ProductionTypes: aot-lite-gdi, aot-lite-nod, weap, aot-weap-age2, afld, aot-pyle-age0, aot-pyle-age1, aot-pyle-age2, aot-hand-age0, aot-hand-age1, aot-hand-age2, aflt, aot-hpad-gdi, aot-hpad-nod, hpad, aot-kennel-nod
+		NavalProductionTypes: aot-shipyard, aot-shipyard-age2, aot-subpen, aot-subpen-age2
+		TechTypes: aot-atec-age0, aot-atec-age1, aot-atec-age2, aot-stec-age0, aot-stec-age1, aot-stec-age2, aot-hq-base, aot-hq-base-age2, aot-hq-ion, aot-hq-ion-age2, aot-nod-radar-age0, aot-nod-radar-age1, aot-nod-radar-age2, aot-tmpl-age1, aot-tmpl-age2, aot-shrine, orbc, aot-slab-age1, aot-slab-age2, aot-mslo-age1, aot-mslo-age2, eye
+		# Mauern (aot-wall-gdi/nod, sbag/cycl/brik) NICHT hier — der AotChokeFortifierBotModule verwaltet
+		# Mauern exklusiv (Wall-Bridge zum Chokepoint + späteres Umzäunen), sonst Queue-Konflikt.
+		DefenseTypes: aot-pillbox-base, aot-pillbox-guard, aot-gun-base, aot-gun-laser, aot-ftur-flame, aot-ftur-toxic, sam, obli, aot-fireposition, atwr, gtwr
+		ExpansionTolerate: 0
+		ForceExpansionTolerate: 1
+		# BuildingDelays = Sperre bis Welt-Tick N (25 Ticks/Sek). Das ist der EINZIGE
+		# Phase-A-Hebel für eine echte Reihenfolge: was noch gesperrt ist, verlässt den
+		# Zufalls-Topf. Kein Eintrag = ab Tick 0 baubar (Kern-Ökonomie).
+		#   Emergente Reihenfolge:
+		#   [0s]    Energie, Raffinerie (proc), Light-Factory (lite), Kaserne, Silo, HQ/Radar
+		#   [~50s]  Tech-Center (Age-Rush: atec/stec)
+		#   [~80s]  schwere Fahrzeugfabrik (weap/afld)
+		#   [~100s] Reparatur (fix)
+		#   [~120s] Verteidigung (pillbox/gun/ftur/sam/obli/atwr/gtwr)
+		#   [~140s] Mauern, Helipad
+		#   [~180s] Jets (aflt), Marine (shipyard/subpen), Stealth/Shroud
+		#   [~200s+] Superwaffen (eye/tmpl/slab/shrine/orbc/mslo)
+		BuildingDelays:
+			# Tech-Center: direkt nach HQ (HQ selbst kein Delay -> früh für Age-Rush)
+			aot-atec-age0: 1250
+			aot-stec-age0: 1250
+			# Schwere Fahrzeugfabrik (LITE bleibt früh/ohne Delay)
+			weap: 2000
+			afld: 2000
+			# Reparatur
+			aot-fix-age0: 2500
+			aot-fix-age1: 2500
+			aot-fix-age2: 2500
+			aot-fix-age1-nod: 2500
+			aot-fix-age2-nod: 2500
+			# Verteidigung (~2 min — erst Wirtschaft, dann Türme)
+			aot-pillbox-base: 3000
+			aot-pillbox-guard: 3000
+			aot-gun-base: 3000
+			aot-gun-laser: 3000
+			aot-ftur-flame: 3000
+			aot-ftur-toxic: 3000
+			sam: 3000
+			obli: 3000
+			atwr: 3000
+			gtwr: 3000
+			# Mauern / Fire Position / Helipad
+			aot-fireposition: 3500
+			aot-wall-gdi: 3500
+			aot-wall-nod: 3500
+			aot-hpad-gdi: 3500
+			aot-hpad-nod: 3500
+			hpad: 3500
+			# Jets / Marine / Stealth / Shroud
+			aflt: 4500
+			aot-shipyard: 4500
+			aot-subpen: 4500
+			aot-sgen: 5000
+			aot-gap: 5000
+			# Superwaffen (spät)
+			eye: 5000
+			aot-tmpl-age1: 5000
+			aot-slab-age1: 5500
+			aot-shrine: 6000
+			orbc: 6500
+			aot-mslo-age1: 6500
+		BuildingLimits:
+			# Produktion: max 1 pro Typ pro Mainbase (Age-Varianten sind eigene Aktoren,
+			# koexistieren -> je Variante 1). Verhindert die Barracks-/Factory-Häufung.
+			aot-lite-gdi: 1
+			aot-lite-nod: 1
+			weap: 1
+			afld: 1
+			aot-pyle-age0: 1
+			aot-pyle-age1: 1
+			aot-pyle-age2: 1
+			aot-hand-age0: 1
+			aot-hand-age1: 1
+			aot-hand-age2: 1
+			# hq / Radar (Fraktions-/Age-Varianten teilen faktisch das Limit via Prereqs)
+			aot-hq-base: 1
+			aot-hq-base-age2: 1
+			aot-hq-ion: 1
+			aot-hq-ion-age2: 1
+			aot-nod-radar-age0: 1
+			aot-nod-radar-age1: 1
+			aot-nod-radar-age2: 1
+			# Tech-Center / Superwaffen (BuildLimit im Aktor bereits 1)
+			aot-atec-age0: 1
+			aot-atec-age1: 1
+			aot-atec-age2: 1
+			aot-stec-age0: 1
+			aot-stec-age1: 1
+			aot-stec-age2: 1
+			orbc: 1
+			aot-slab-age1: 1
+			aot-slab-age2: 1
+			aot-tmpl-age1: 1
+			aot-tmpl-age2: 1
+			aot-shrine: 1
+			aot-mslo-age1: 1
+			aot-mslo-age2: 1
+			eye: 1
+			# Reparatur / Luft / Marine
+			aot-fix-age0: 1
+			aot-fix-age1: 1
+			aot-fix-age2: 1
+			aot-fix-age1-nod: 1
+			aot-fix-age2-nod: 1
+			aot-hpad-gdi: 1
+			aot-hpad-nod: 1
+			hpad: 1
+			aflt: 1
+			aot-shipyard: 1
+			aot-subpen: 1
+			# Stealth / Shroud
+			aot-sgen: 1
+			aot-gap: 1
+			# Silo
+			aot-silo-age0: 4
+			aot-silo-age1: 4
+			aot-silo-age2: 4
+		BuildingFractions:
+			# --- Energie ---
+			aot-nuke-age0: 12
+			aot-nuke-age1: 12
+			aot-nuke-age2: 12
+			aot-nuke-age2-nod: 12
+			aot-nuke-turbine: 12
+			aot-nuke-turbine-age2: 12
+			aot-nuk2-age0: 6
+			aot-nuk2-age1: 6
+			aot-nuk2-age2: 6
+			# --- Raffinerie ---
+			proc: 10
+			aot-proc-gdi: 8
+			aot-proc-gdi-age2: 6
+			aot-proc-nod: 8
+			aot-proc-nod-age2: 6
+			# --- Silo (früh wichtig: ORET-Ablieferdock UND Erz-Lager; ohne Silo
+			#     liefert oret nicht ab. Age-0 hoch, damit früh eins steht) ---
+			aot-silo-age0: 10
+			aot-silo-age1: 5
+			aot-silo-age2: 5
+			# --- Produktion ---
+			aot-lite-gdi: 10
+			aot-lite-nod: 10
+			weap: 9
+			afld: 9
+			aot-pyle-age0: 8
+			aot-pyle-age1: 8
+			aot-pyle-age2: 8
+			aot-hand-age0: 8
+			aot-hand-age1: 8
+			aot-hand-age2: 8
+			# --- hq / Radar (Age-1-Rush wichtig) ---
+			aot-hq-base: 20
+			aot-hq-base-age2: 20
+			aot-hq-ion: 20
+			aot-hq-ion-age2: 20
+			aot-nod-radar-age0: 20
+			aot-nod-radar-age1: 20
+			aot-nod-radar-age2: 20
+			# --- Tech-Center (Gate für Age-Upgrades — hohe Prio) ---
+			aot-atec-age0: 30
+			aot-atec-age1: 30
+			aot-atec-age2: 30
+			aot-stec-age0: 30
+			aot-stec-age1: 30
+			aot-stec-age2: 30
+			# --- Superwaffen-Gebäude ---
+			orbc: 6
+			aot-slab-age1: 6
+			aot-slab-age2: 6
+			aot-tmpl-age1: 6
+			aot-shrine: 5
+			aot-mslo-age1: 4
+			aot-mslo-age2: 4
+			eye: 2
+			# --- Reparatur ---
+			aot-fix-age0: 5
+			aot-fix-age1: 5
+			aot-fix-age2: 5
+			aot-fix-age1-nod: 5
+			aot-fix-age2-nod: 5
+			# --- Luft / Marine ---
+			aot-hpad-gdi: 4
+			aot-hpad-nod: 4
+			hpad: 3
+			aflt: 4
+			aot-shipyard: 3
+			aot-subpen: 3
+			# --- Stealth / Shroud ---
+			aot-sgen: 3
+			aot-gap: 3
+			# --- Verteidigung (in Building-Queue) ---
+			aot-pillbox-base: 6
+			aot-pillbox-guard: 6
+			aot-gun-base: 6
+			aot-gun-laser: 6
+			aot-ftur-flame: 5
+			aot-ftur-toxic: 5
+			sam: 7
+			obli: 8
+			aot-fireposition: 3
+			# aot-wall-gdi/nod + sbag/cycl/brik: vom AotChokeFortifierBotModule verwaltet, nicht hier.
+			# --- Verteidigung (in Support-Queue) ---
+			atwr: 6
+			gtwr: 5
+
+	# =========================================================================
+	# AGE-PROGRESSION + UPGRADES  (eigene BaseBuilder-Instanz)
+	# Queues: Age.GDI/Age.Nod (Player-Level), Upgrade.GDI/Upgrade.Nod (atec/stec)
+	# Upgrades haben KEIN BuildingInfo -> Queue schließt automatisch ab, keine
+	# Platzierung (siehe ProductionQueue.cs:552-565).
+	# =========================================================================
+	BaseBuilderBotModule@aotupgrades:
+		# ABGESCHALTET wie bei @aot (User 2026-08-11: "fein verkauft in expansions weiterhin
+		# sporadisch seine refinery"). Der Schalter stand nur auf der @aot-Instanz -- diese hier hat
+		# ein eigenes SellRefineryInterval (Default 5000) UND ein eigenes RefineryTypes, lief also
+		# unveraendert weiter und verkaufte allein. Klassische Zwei-Instanzen-Falle: von
+		# BaseBuilderBotModule existieren ZWEI Auspraegungen, jede mit eigenem Zustand.
+		# Deshalb sporadisch statt zuverlaessig -- es feuerte nur noch jeder zweite Zaehler.
+		SellRefineryInterval: -1
+		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
+		BuildingQueues: Age.GDI, Age.Nod, Upgrade.GDI, Upgrade.Nod
+		ConstructionYardTypes: fact, fact.gdi, fact.nod
+		RefineryTypes: proc, aot-proc-gdi, aot-proc-gdi-age2, aot-proc-nod, aot-proc-nod-age2
+		MinimumExcessPower: -9999
+		MaximumExcessPower: 999999
+		MaxBaseRadius: 22
+		# Priority tier below base building (User 2026-07-22): base building has no cash reserve
+		# at all (spends immediately), so upgrades only start once at least 500 credits of headroom
+		# exist -- base building gets first claim on freshly-earned cash.
+		NewProductionCashThreshold: 500
+		BuildingLimits:
+			aot-age1-upgrade-gdi: 1
+			aot-age2-upgrade-gdi: 1
+			aot-age3-upgrade-gdi: 1
+			aot-age1-upgrade-nod: 1
+			aot-age2-upgrade-nod: 1
+			aot-age3-upgrade-nod: 1
+		BuildingFractions:
+			# === AGE-UPGRADES GDI — User 2026-07-22: NIEDRIGSTE Priorität innerhalb dieser Queue (unter
+			# jedem anderen Upgrade, Wert < der niedrigste Kampf-Upgrade-Wert unten) — alle sonst
+			# verfügbaren Upgrades der aktuellen Age sollen zuerst dran sein, ehe der Age-Sprung
+			# selbst gekauft wird. BuildingFractions ist gewichtete Zufallsauswahl, keine strikte
+			# Reihenfolge — mit diesem Gewicht wird das Age-Upgrade nur noch selten gezogen,
+			# solange andere Kandidaten in der Queue verfügbar sind, aber keine harte Garantie.
+			# NOD hat KEINE Einträge mehr hier (User 2026-07-31): AotBaseBuilderBotModule@nod feuert
+			# aot-age{1,2,3}-upgrade-nod jetzt direkt selbst (AgeUpgradeTypes), hart an "Rhythm der
+			# aktuellen Age fertig" gekoppelt statt an gewichteten Zufall -- siehe dort.
+			aot-age1-upgrade-gdi: 3
+			aot-age2-upgrade-gdi: 3
+			aot-age3-upgrade-gdi: 3
+			# aot-upgrade-turret ist als GATEKEEPER verschoben (siehe GatekeeperUpgradeTypes oben,
+			# 2026-08-12) und HIER bewusst NICHT mehr gelistet — sonst feuert es doppelt. Es gatet den
+			# GUN-Cluster und muss direkt gefeuert werden, nicht aus diesem deferred Topf (der bei
+			# offenem GUN-Schritt nie an die Reihe kommt -> Kreis-Deadlock, Gold baute mit 24k keine GUN).
+			# aot-upgrade-ftur-napalm bleibt ABSICHTLICH ungelistet: BaseBuilderQueueManager waehlt nur
+			# aus Namen, die hier als Key stehen — ein fehlender Eintrag heisst "die KI kauft das nie".
+			# Das ist der einzige Hebel, um die KI zwingend auf den Turret-Zweig festzulegen (die beiden
+			# Upgrades schliessen sich in den Rules gegenseitig aus, ~!aot-nitro-napalm-upgrade /
+			# ~!aot-turret-upgrade).
+			# === Superwaffen-Enabler (hohe Prio — sonst existiert die Power nie) ===
+			aot-upgrade-ion-cannon: 40
+			aot-upgrade-zonetrooper-drop: 30
+			aot-upgrade-infantry-railgun: 30
+			aot-upgrade-tiberium-missile: 40
+			aot-upgrade-atom-bomb: 30
+			aot-upgrade-mine-cluster-enhancement: 25
+			aot-upgrade-nod-airstrike: 25
+			aot-upgrade-nod-banshee: 25
+			aot-upgrade-nod-spyplane: 20
+			aot-upgrade-nod-parabombs: 20
+			aot-upgrade-firestorm-defense: 25
+			# === Kampf-Upgrades GDI ===
+			# aot-upgrade-gdi-advtech (2026-08-01, User-Briefing): Age-1-Gatekeeper, hohe Prio
+			# analog zu aot-upgrade-turret (NOD) -- soll direkt nach WEAP gekauft werden.
+			aot-upgrade-gdi-advtech: 45
+			aot-upgrade-mtnk-predator: 20
+			aot-upgrade-mtnk-railgun: 20
+			aot-upgrade-mtnk-titan: 18
+			aot-upgrade-mtnk-titan-railgun: 18
+			aot-upgrade-apc2: 12
+			aot-upgrade-minelayer: 10
+			aot-upgrade-orca: 15
+			aot-upgrade-firehawk: 18
+			aot-upgrade-guard-tower: 15
+			aot-upgrade-nuke-turbine: 15
+			aot-upgrade-tran-carryall: 8
+			aot-upgrade-tran-doorgunner: 8
+			aot-upgrade-foundation-gdi: 8
+			aot-upgrade-cruiser-carrier: 10
+			aot-upgrade-cruiser-railgun: 10
+			aot-upgrade-gunboat-frigate: 8
+			aot-upgrade-gunboat-destroyer: 8
+			# === Kampf-Upgrades NOD ===
+			# aot-upgrade-nod-secrettech, aot-upgrade-nod-forbidden und aot-upgrade-laser-fence stehen
+			# BEWUSST NICHT mehr hier: alle drei sind Techtree-Gatekeeper (Refinery / Shrine / Obelisk)
+			# und werden jetzt gezielt ueber AotBaseBuilderBotModule.GatekeeperUpgradeTypes gefeuert,
+			# sobald sie baubar sind -- der Core-Rhythmus pausiert dabei, damit die Reihenfolge
+			# AFLD -> Secrets -> Refinery wirklich eingehalten wird (gewichteter Zufall konnte das nie
+			# garantieren). Ein zusaetzlicher Eintrag hier wuerde sie doppelt kaufen (2026-08-02).
+			# OPERATIONS-ENABLER: dieses Upgrade schaltet den Subterranean APC (Boden-Engineer-Raid)
+			# UND die Devil's Tongue (Subterranean Flame Raid) frei -- es gatet also zwei ganze
+			# Operationen, keine blosse Kampfwert-Steigerung. Prio HOCH ueber die Superwaffen-Enabler
+			# (Ion Cannon/Atom Bomb 30-40) gehoben (User 2026-08-14: "noch nicht ein einziges mal ein
+			# engineer raid per subterrain apc"): der @aotupgrades-Topf kommt nur in den seltenen
+			# Nicht-Spar-Fenstern zum Zug und kaufte dort zuerst die teuren Superwaffen -- das billige,
+			# tief priorisierte Subterrain (4300) wurde praktisch nie erreicht, obwohl der User es fuer
+			# genau diese Raids will. Als Gatekeeper taugt es NICHT (gatet Einheiten, kein Plan-Gebaeude
+			# -> ein rhythmus-haltender Gatekeeper wuerde den Basisbau blockieren); die hohe Prio hier
+			# ist der richtige Hebel.
+			aot-upgrade-ttnk-subterrain: 50
+			aot-upgrade-ltnk-tick: 18
+			aot-upgrade-sam-bunkered: 15
+			aot-upgrade-sam-cloak: 12
+			aot-upgrade-harpy: 15
+			# Laser-Waffen-Upgrades (Age 3, 2026-08-05) -- setzen Laser Technologies voraus.
+			aot-upgrade-ltnk-laser: 15
+			aot-upgrade-buggy-laser: 12
+			aot-upgrade-harpy-laser: 15
+			aot-upgrade-avatar-laser: 15
+			aot-upgrade-e4-toxic: 15
+			aot-upgrade-stnk-cargo: 10
+			aot-upgrade-msub-mine: 12
+			aot-upgrade-msub-drone: 12
+			aot-upgrade-transport-cloak: 8
+			aot-upgrade-v2-howitzer: 12
+			aot-upgrade-heavy-artillery: 10
+			aot-upgrade-tran-parachute: 8
+			aot-upgrade-foundation-nod: 8
+
+	# =========================================================================
+	# EINHEITENBAU — alle Einheiten-Queues inkl. Light/Elite/Jets/Naval/Starport
+	# =========================================================================
+	UnitBuilderBotModule@aot:
+		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
+		ProductionMinCashRequirement: 300
+		# NUR NOCH IBotRequestUnitProduction-KANAL (2026-07-22): Kampfeinheiten produziert das
+		# AotOperationsBotModule EXKLUSIV für seine Missionen (User-Entscheidung; verhindert
+		# Idle-Stau auf den Bau-Slots). Harvester (HarvesterBotModule@aot) und Ore-Transporter
+		# (AotReplacementUnitBotModule@oret) haben eigene dynamische Ersatz-Module und wurden
+		# aus UnitLimits/UnitsToBuild unten entfernt, um Doppel-Produktion zu vermeiden — diese
+		# Instanz bedient nur noch deren IBotRequestUnitProduction-Anfragen + MCV-Expansion.
+		# Luft/Marine ruhen bis Modul 9/13 des Ops-Frameworks.
+		UnitQueues: Vehicle.GDI, Starport, LightVehicle.GDI, LightVehicle.Nod
+		UnitLimits:
+			# aot-mcv-age0/-age1 ENTFERNT (User-Fund 2026-08-04): MCVs werden jetzt AUSSCHLIESSLICH auf
+			# Anforderung der AotExpansionMission gebaut. Als statisches Limit hier wurden sie proaktiv
+			# produziert und standen dann untaetig herum -- und ein untaetiger MCV war genau das, was
+			# McvManagerBotModule sofort mitten in der Basis ausgeklappt hat.
+			# aot-harv/aot-harv-nod and aot-oret-lite REMOVED (User 2026-07-22): both are now handled
+			# EXCLUSIVELY by their own dedicated, dynamic replacement modules (HarvesterBotModule@aot for
+			# HARV -- ties count to alive Refineries, already correct and was silently duplicated by this
+			# static entry; AotReplacementUnitBotModule@oret for ORET -- ties count to alive FACTs, since
+			# MCVs are unbounded in this mod so no static number here could ever track that correctly).
+			# Both request production through the SAME IBotRequestUnitProduction channel this queue serves,
+			# entirely independent of these UnitLimits/UnitsToBuild entries -- leaving them here just let
+			# this module ALSO proactively over-build both units on top of the correct dynamic replacement,
+			# via a completely separate, refinery/FACT-count-unaware static ceiling.
+		UnitsToBuild:
+
+	# =========================================================================
+	# EXPANSION (klassische mcv)
+	# =========================================================================
+	McvExpansionManagerBotModule@aot:
+		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
+		# mcv = Start-MCV (BaseActor in aot-world.yaml StartingUnits, transformiert -> fact).
+		# aot-mcv-age0/1 = baubare Expansions-MCVs. ALLE drei müssen hier stehen,
+		# sonst wird der Start-MCV nie deployt -> kein Construction Yard -> KI tot.
+		# ⚠️ NUR der Start-MCV (User-Fund 2026-08-04)! McvManagerBotModule.DeployMcvs deployt JEDEN
+		# untaetigen MCV seiner Liste sofort -- ohne zu pruefen, ob eine andere Operation ihn gerade
+		# besitzt. Solange aot-mcv-age0/-age1 hier standen, wurde der Expansions-MCV in dem Moment
+		# ausgeklappt, in dem er fertig war: mitten in der Hauptbasis, bevor die Expansions-Mission
+		# ihn losschicken konnte. Folgen im Log: "expansion convoy never came together (mcv=False)",
+		# Bauhoefe an sinnlosen Stellen ohne Layout drumherum, mehrere Yards pro Bot.
+		# Die buildbaren MCVs gehoeren AUSSCHLIESSLICH der AotExpansionMission.
+		McvTypes: mcv
+		ConstructionYardTypes: fact, fact.gdi, fact.nod
+		McvFactoryTypes: aot-lite-gdi, aot-lite-nod
+		# Con-Yard NIE wieder einpacken/umziehen (verursachte Folgeprobleme). -1 = aus.
+		MoveConyardTick: -1
+		MinimumConstructionYardCount: 1
+		# 0 (User 2026-07-22): eine zweite FACT wird von AotBasePlannerBotModule/AotBaseBuilderBotModule
+		# nicht mitgeplant -- die haben nur EINEN Rhythmus fuer die Start-Yard. Eine unerwartete zweite
+		# FACT ausserhalb dieser Planung fuehrte u.a. zu einem Folgebug beim ORET-Ersatzmodul (mehrere
+		# Ore Transporter kurz hintereinander). Basis-Expansion ist ein spaeteres, eigenes Thema -- bis
+		# dahin bleibt es bei der einen Start-Yard.
+		AdditionalConstructionYardCount: 0
+
+	# =========================================================================
+	# MILITÄR (Squads)
+	# =========================================================================
+	# DEAKTIVIERT 2026-07-21 (User-Entscheidung): komplett ersetzt durch das
+	# AoT Operations Framework unten (AotMapIntel + AotOperations). Das
+	# ABGENOMMENE Choke-Reserve-Verhalten (UpdateChokeReserve) wurde 1:1 in
+	# die Starting-Units-Mission portiert. Block bleibt als Referenz stehen.
+	#SquadManagerBotModule@aot:
+	#	RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
+	#	ChokepointReserveSize: 4
+	#	ChokepointHoldRadius: 4
+	#	ChokeClearRadius: 5
+	#	# Ore Mine, Oil Pump, Oil Derrick werden nie beim Chokepoint-Clearing angegriffen
+	#	ChokeClearExcludeTypes: aot-ore-mine, arco, v19
+	#	SquadSize: 8
+	#	SquadSizeRandomBonus: 20
+	#	# oret = Basis-Actor, den der FACT gratis spawnt (SpawnActor: ORET); aot-oret-lite = baubar.
+	#	# BEIDE ausschließen, sonst zieht der SquadManager den unbewaffneten Erz-Transporter in Angriffe.
+	#	ExcludeFromSquadsTypes: aot-harv, aot-harv-nod, aot-mcv-age0, aot-mcv-age1, aot-surveyor-gdi, aot-surveyor-nod, oret, aot-oret-lite, aot-minelayer, aot-aray, aot-mgap, aot-mstealth, truck, mcv
+	#	ConstructionYardTypes: fact, fact.gdi, fact.nod
+	#	AirUnitsTypes: aot-apache-base, aot-orca-upgraded, aot-hind-base, aot-harpy-upgraded, aot-harpy-upgraded-laser, ajet, aot-ajet-firehawk, orca, heli
+	#	NavalUnitsTypes: aot-gunboat-base, aot-gunboat-destroyer, aot-gunboat-frigate, aot-cruiser, aot-cruiser-carrier-proxy, aot-cruiser-railgun-proxy, aot-sub-base, aot-sub-cargo-proxy, aot-msub-base, aot-msub-mine-proxy, aot-msub-drone-proxy
+	#	ProtectionTypes: fact, fact.gdi, fact.nod, aot-lite-gdi, aot-lite-nod, weap, afld, aot-pyle-age0, aot-pyle-age1, aot-pyle-age2, aot-hand-age0, aot-hand-age1, aot-hand-age2, aot-atec-age0, aot-atec-age1, aot-atec-age2, aot-stec-age0, aot-stec-age1, aot-stec-age2, orbc, aot-slab-age1, aot-slab-age2, aot-tmpl-age1, aot-tmpl-age2, aot-shrine, aot-mslo-age1, aot-mslo-age2, proc, aot-proc-gdi, aot-proc-gdi-age2, aot-proc-nod, aot-proc-nod-age2, aot-harv, aot-harv-nod, oret, aot-oret-lite, aot-hq-base, aot-hq-ion, aot-nod-radar-age0, aot-nod-radar-age1
+	#	IgnoredEnemyTargetTypes: Air
+	#	RushInterval: 1200
+	#	MinimumAttackForceDelay: 1000
+	#	ProtectUnitScanRadius: 20
+	#	ProtectionScanRadius: 12
+
+	# =========================================================================
+	# AoT OPERATIONS FRAMEWORK (2026-07-21) — Militär/Missionen
+	# Modul 1 Starting Units (1:1-Port des ABGENOMMENEN Choke-Verhaltens + ARCO-
+	# Raid; Choke bleibt nach Abmarsch LEER — User-Entscheidung), Modul 2 Regular
+	# Waves (75% Kern / 25% adaptiv, Budget +25%/Welle, GDI-Rückzug 75% Stückzahl),
+	# Modul 3 Scouts (2 leichte Fahrzeuge, 50% Spawn-Abdeckung), Modul 4 Derrick-
+	# Engineer-Squads (v19 einnehmen, 10-min-Check, permanente Wache).
+	# Varianten-Ketten enthalten ALLE Ausschluss-Zweige (beste zuerst) —
+	# die erste AKTUELL BAUBARE Variante gewinnt.
+	# =========================================================================
+	AotMapIntelBotModule@aot:
+		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
+		ConstructionYardTypes: fact, fact.gdi, fact.nod
+		GroundLocomotor: foot
+		ArcoTypes: arco
+		DerrickTypes: v19
+		CrateTypes: oilcrate1000
+
+	AotOperationsBotModule@gdi:
+		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
+		Faction: gdi
+		ConstructionYardTypes: fact, fact.gdi, fact.nod
+		ExcludeFromOpsTypes: aot-harv, aot-harv-nod, aot-mcv-age0, aot-mcv-age1, aot-surveyor-gdi, aot-surveyor-nod, oret, aot-oret-lite, aot-minelayer, aot-aray, aot-mgap, aot-mstealth, truck, mcv
+
+		# Gefahrenzonen fuer die Base Expansion (User-Fund 2026-08-10): Ameisen & Co. sind EINHEITEN,
+		# kein Gebaeude -- kein anderer Standortfilter sieht sie, und ein Konvoi wurde neben eine
+		# Ameisenkolonie geschickt. aot-critter-spawner ist der unsichtbare Erzeuger, die uebrigen
+		# sind die Kritter selbst.
+		ExpansionHazardTypes: aot-critter-spawner, aot-ant, aot-fireant, aot-scoutant, aot-visceroid, aot-steg, aot-trex, aot-tric, aot-rapt
+		ChokepointReserveSize: 4
+		ChokepointHoldRadius: 4
+		ChokeClearRadius: 5
+		ChokeClearExcludeTypes: aot-ore-mine, arco, v19
+		WaveTankTypes: aot-mtnk-titn-rail, aot-mtnk-titn, aot-mtnk-rail, aot-mtnk-pred, aot-mtnk-base
+		WaveLightTypes: aot-jeep-wolverine, aot-jeep-humvee, aot-apc-amphibious, aot-jeep-base
+		WaveSupportTypes: aot-jugg, aot-msam-hover-mlrs, aot-msam-hover-aa
+		WaveTankShare: 60
+		WaveLightShare: 25
+		WaveSupportShare: 15
+		WaveRetreatLossPercent: 75
+		AntiInfantryTypes: aot-jeep-wolverine, aot-jeep-humvee, aot-jeep-base
+		AntiTankTypes: aot-htnk-laser, aot-htnk-rocket, aot-htnk-base, aot-mtnk-rail, aot-mtnk-pred, aot-mtnk-base
+		AntiAirTypes: aot-msam-hover-aa
+		# Naval ferry (User 2026-07-21): if there is no ground route to the enemy, a wave builds/
+		# reuses 2 Hovercraft once the Shipyard exists, ferries itself across water in batches
+		# (1 vehicle per transport), regroups on the far shore, then continues the attack.
+		NavalProductionTypes: aot-shipyard, aot-shipyard-age2
+		FerryTypes: aot-transport-hover-proxy
+		FerryCount: 3
+		FerryMaxTotal: 3
+		ScoutTypes: aot-jeep-base, aot-jeep-humvee, aot-jeep-wolverine, aot-apc-amphibious
+		# Scouts only start once Radar/HQ exists (User 2026-07-21).
+		RadarTypes: aot-hq-base, aot-hq-base-age2, aot-hq-ion, aot-hq-ion-age2
+		# PYLE has 2 Exit cells; without a rally point the engine picks one at random per unit,
+		# scattering fresh infantry (User 2026-07-21).
+		InfantryRallyTypes: aot-pyle-age0, aot-pyle-age1, aot-pyle-age2
+		DerrickMaxTargets: 2
+		EngineerTypes: aot-e6-gdi
+		RocketInfantryTypes: aot-e3-gdi
+		MgInfantryTypes: aot-e1-gdi
+		# Brueckenreparatur, siehe NOD-Instanz weiter unten. Fraktionsneutrale Mission -- laeuft
+		# hier bereits mit, sobald GDI ueberhaupt eine Basis bauen kann (aktuell existieren
+		# AotBasePlannerBotModule/AotBaseBuilderBotModule nur als @nod, siehe ai-army-operations.md).
+		EnableBridgeRepair: True
+		BridgeCheckInterval: 7500
+		BridgeMaxTargets: 1
+		# Erster Bruecken-Scan erst ab Tech-Center (User 2026-08-03): eine Reparatur kostet einen
+		# ganzen Engineer, der frueh besser in die Basis geht.
+		BridgeRequiresTypes: aot-atec-age0, aot-atec-age1, aot-atec-age2
+		# Engineer-Raids, siehe NOD-Instanz weiter unten. GDI nutzt den normalen APC als
+		# Boden-Transport; der Chinook ist derselbe Aktor-Unterbau, nur mit eigenen Upgrade-Proxies.
+		RefineryTypes: proc, aot-proc-gdi, aot-proc-gdi-age2
+		# Wirtschafts-Notlage (User 2026-08-04): Solange es KEINEN Ore Transporter und noch weder
+		# Refinery noch Harvester gibt, haengt die gesamte Wirtschaft an dieser einen Einheit. Ops
+		# stellt dann komplett ein, damit der Ersatz-ORET ueberhaupt bezahlt werden kann -- sonst
+		# verliert er jeden Wettstreit um die Fahrzeug-Queue gegen die Angriffswellen (beobachtet:
+		# ein Bot haeng ueber fuenf Minuten bei 0 Cash und 500/min fest).
+		EconomyTransporterTypes: aot-oret-lite, oret
+		EconomyHarvesterTypes: aot-harv, aot-harv-nod
+		EnableHeliRaids: True
+		HeliRaidTransportTypes: aot-tran-gdi-base
+		EnableGroundRaids: True
+		GroundRaidTransportTypes: apc
+		# Escalation (User 2026-07-22): after 2 failed waves at the primary choke, the next wave
+		# routes via a secondary approach instead (if one exists); after 3 failed waves total (with
+		# a Helipad built) 4 helicopters raid the enemy construction yard directly, then the loop
+		# resets to ground waves regardless of the raid's outcome.
+		HelipadTypes: aot-hpad-gdi
+		AirRaidHelicopterTypes: aot-apache-base, aot-orca-upgraded
+		# Retreating survivors that are damaged head to the repair bay before rejoining the pool
+		# (User 2026-07-22).
+		RepairTypes: aot-fix-age0, aot-fix-age1, aot-fix-age2
+		# Module 5 Base Defense (User 2026-07-22): standing garrison ~= one regular wave in size,
+		# ProtectionMinProduced guaranteed via production, rest opportunistic from the pool.
+		ProtectionFloorTypes: aot-jeep-wolverine, aot-jeep-humvee, aot-apc-amphibious, aot-jeep-base
+		ProtectionMinProduced: 3
+		ProtectionScanRadius: 10
+		ProtectionResponseRatio: 2
+		ProtectionMinResponse: 2
+		# Module 0 OreT Boost + startup priority (User 2026-07-22): one extra ORET ordered directly
+		# (bypasses Ops claiming entirely, see ExcludeFromOpsTypes above), purely for early cashflow.
+		# The first Regular Attack Wave waits for this + the first Derrick scan + every Scout group
+		# before firing -- cashflow and reconnaissance before the first real offensive.
+		OreBoostTypes: aot-oret-lite
+
+	AotOperationsBotModule@nod:
+		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
+		Faction: nod
+		# Priority tier below base building AND upgrades (User 2026-07-22, lowered from 1000 same day):
+		# army production waits for at least 500 credits of headroom before spending any unit -- below
+		# that, no units at all (economy stays cash-starved on some spawns, e.g. no land route to
+		# derricks; 500 is the floor, not a target).
+		ProductionMinCash: 500
+		ConstructionYardTypes: fact, fact.gdi, fact.nod
+		ExcludeFromOpsTypes: aot-harv, aot-harv-nod, aot-mcv-age0, aot-mcv-age1, aot-surveyor-gdi, aot-surveyor-nod, oret, aot-oret-lite, aot-minelayer, aot-aray, aot-mgap, aot-mstealth, truck, mcv
+		ChokepointReserveSize: 4
+		ChokepointHoldRadius: 4
+		ChokeClearRadius: 5
+		ChokeClearExcludeTypes: aot-ore-mine, arco, v19
+		# Legacy role/share fields (User 2026-07-31): kept only for Module 5 Base Defense's reserve
+		# garrison (AotBaseDefenseMission.RequestMixedRoles still reads these) -- Regular Attack Waves
+		# themselves now use WaveSlot1-5 below instead, see the comment there.
+		# Starport-routed variants removed 2026-08-01 (User: "LTNK nie zu sehen, obwohl AFLD+Age1
+		# stehen"): confirmed via new diagnostic logging that the SHARED Starport BulkProductionQueue
+		# (MaxCapacity 5, see overrides.yaml) was sitting permanently full -- Module 5's CONTINUOUS
+		# garrison refill kept pulling aot-ttnk-flame/toxin (ex-WaveTankTypes) and aot-v2-napalm/toxic +
+		# Arty (ex-WaveSupportTypes) through it nonstop, so a wave's one-shot Compose() almost always hit
+		# the queue while full (BuildableItems() returns COMPLETELY empty when a bulk queue is full, not
+		# just for the item that filled it). Trimmed to the LightVehicle.Nod-routed fallback variant for
+		# each role (always buildable, no Starport contention) -- Module 5's garrison mix is otherwise
+		# unaffected (still Tank+Light+Support), it just never touches the shared queue anymore, freeing
+		# it for actual wave composition.
+		WaveTankTypes: aot-ttnk-base
+		WaveLightTypes: aot-bggy-laser, aot-bike-base, aot-bggy-base
+		WaveSupportTypes: aot-v2-base
+		WaveTankShare: 50
+		WaveLightShare: 30
+		WaveSupportShare: 20
+		WaveRetreatLossPercent: 0
+		# Smaller, more frequent Age0 waves (User 2026-07-31: "wellen-größe in age-0 reduzieren, lieber
+		# öfter aber momentan hat er oft ein geld problem"). WaveVehiclesPerAge only feeds the adaptive
+		# share on top of the wave-slot static composition (see below) -- lowering just index 0 shrinks
+		# that share for Age0 without touching Age1-3. WaveCooldown is a single global value (no per-tier
+		# knob exists), lowered from the 1500 default to fire waves noticeably more often at every tier.
+		WaveVehiclesPerAge: 4, 8, 10, 12
+		WaveCooldown: 900
+		# Wave slots (User 2026-07-31, replaces the role/share split above for Regular Attack Waves):
+		# 4 independent, SIMULTANEOUS unit lines per wave instead of one chain always winning the whole
+		# "tank" role -- the old chain mixed TTNK (never age-gated, always buildable via `lite` alone)
+		# and LTNK (`~aot-age1`-gated) in one slot, so LTNK could structurally never win once unlocked.
+		# Per-tier [Age0, Age1, Age2, Age3] Min (floor, always requested if buildable) and Max (ceiling,
+		# even with full budget escalation). Age1 target (user spec): 1-2 Bike, 1-2 Buggy, 1-2 TTNK,
+		# 2-3 LTNK. Age2/3: same 4 lines, just more of each as budget allows ("ab Age2 einfach mehr von
+		# jeder Einheit, wenn Cashflow passt") -- Howitzer/Heavy Arty return later via a SEPARATE
+		# operation type, deliberately excluded from Regular Waves from Age1 onward.
+		WaveSlot1Types: aot-bike-base
+		WaveSlot1Min: 0, 1, 1, 2
+		WaveSlot1Max: 0, 2, 3, 4
+		WaveSlot2Types: aot-bggy-laser, aot-bggy-base
+		WaveSlot2Min: 0, 1, 1, 2
+		WaveSlot2Max: 0, 2, 3, 4
+		WaveSlot3Types: aot-ttnk-toxin, aot-ttnk-flame, aot-ttnk-base
+		# Age0 raised back to 2 (User 2026-07-31, same day: "wellen sind dann doch zu klein. mach 2
+		# TTNK und 1 V2" -- pinned at exactly 2, immune to budget escalation).
+		WaveSlot3Min: 2, 1, 2, 2
+		WaveSlot3Max: 2, 2, 4, 5
+		WaveSlot4Types: aot-ltnk-tick, aot-ltnk-laser, aot-ltnk-base
+		WaveSlot4Min: 0, 2, 2, 3
+		WaveSlot4Max: 0, 3, 5, 7
+		# V2: Age0-only stand-in for the old Support role (matches prior "TTNK + V2" Age0 behaviour) --
+		# excluded from Age1+ like Howitzer/Heavy Arty above, per the user's exhaustive Age1 slot list.
+		# Age0 max lowered 2 -> 1, same reasoning as WaveSlot3 above.
+		WaveSlot5Types: aot-v2-base
+		WaveSlot5Min: 1, 0, 0, 0
+		WaveSlot5Max: 1, 0, 0, 0
+		# Cash-conditional Age0 wave size (User 2026-07-31: "wenn in age 0 über 2000 credits: dann
+		# sollte welle größer sein: 3-4 TTNK, 2-3 V2. wenn unter 2000, dann so wie jetzt konfiguriert").
+		WaveWealthyCashThreshold: 2000
+		WaveSlot3MinWealthy: 3
+		WaveSlot3MaxWealthy: 4
+		WaveSlot5MinWealthy: 2
+		WaveSlot5MaxWealthy: 3
+		AntiInfantryTypes: aot-ttnk-flame, aot-v2-napalm, aot-bggy-laser, aot-bggy-base
+		AntiTankTypes: aot-ltnk-tick, aot-ltnk-laser, aot-ltnk-base, aot-ttnk-base
+		# Naval ferry (User 2026-07-21): if there is no ground route to the enemy, a wave builds/
+		# reuses 2 Transport Vessels once the Sub Pen exists, ferries itself across water in
+		# batches (1 vehicle per transport), regroups on the far shore, then continues the attack.
+		NavalProductionTypes: aot-subpen, aot-subpen-age2
+		FerryTypes: aot-transport-base, aot-transport-cloak-proxy
+		# 3 Vessels fahren als EIN Konvoi (laden -> gemeinsam ueberfahren -> gemeinsam anlanden).
+		FerryCount: 3
+		FerryMaxTotal: 3
+		# Eskorte: pro Vessel 1 U-Boot. Es begleitet NICHT, sondern sichert den Landepunkt und
+		# verweilt dort. Ab Age 1 (STEC) kommt zusaetzlich ein Missile Sub dazu.
+		FerryEscortTypes: aot-sub-base
+		FerryEscortPerVessel: 1
+		FerryEscortSecondaryTypes: aot-msub-drone-proxy, aot-msub-mine-proxy, aot-msub-base
+		FerryEscortSecondaryCount: 1
+		# Both variants inherit aot-transport's actual Locomotor (aot-units.yaml) -- verifies the chosen
+		# embark/landing cell's adjacent water is really ship-navigable, not just terrain-adjacent to
+		# Water (User 2026-07-22: rock-enclosed inlets can pass the naive terrain check but trap a ship
+		# a few cells short of the shore forever, boarding never completes).
+		# aotmod 2026-08-23: aot-lst -> naval (siehe NavalLocomotor oben).
+		FerryLocomotor: naval
+		# Bike/Buggy need ~aot-age1 -> not buildable in Age 0. Scout squad is a 5-man
+		# infantry mix instead (User 2026-07-21, corrected 2026-07-21b): 3x Gunner (Role A) +
+		# 2x Flame Trooper (Role B, falls back to the toxic variant post-Age3). Rocket
+		# Infantry (Speed 39) dropped -- Gunner/Flame are both Speed 54 (verified in base
+		# infantry.yaml), a mixed-speed squad spread out badly on the move.
+		ScoutTypes: aot-e1-nod
+		ScoutRoleACount: 3
+		ScoutRoleBTypes: aot-e4-nod-flame, aot-e4-nod-toxic
+		ScoutRoleBCount: 2
+		# Scouts only start once Radar/HQ exists (User 2026-07-21).
+		RadarTypes: aot-nod-radar-age0, aot-nod-radar-age1, aot-nod-radar-age2
+		# HAND has 2 Exit cells (near-opposite sides); without a rally point the engine picks one
+		# at random per unit, scattering fresh infantry (User 2026-07-21).
+		InfantryRallyTypes: aot-hand-age0, aot-hand-age1, aot-hand-age2
+		DerrickMaxTargets: 2
+		EngineerTypes: aot-e6-nod
+		RocketInfantryTypes: aot-e3-nod
+		MgInfantryTypes: aot-e1-nod
+		# Brueckenreparatur (User-Briefing 2026-08-03, Age 0): alle 5 Minuten map-weiter Scan nach
+		# beschaedigten Bruecken-Huetten, dann EIN Engineer (aot-e6-nod -- nur E6 traegt in diesem
+		# Mod ueberhaupt RepairsBridges). Der Engineer wird von der Reparatur VERBRAUCHT
+		# (EnterBehaviour.Dispose), deshalb bewusst nur eine Bruecke gleichzeitig.
+		EnableBridgeRepair: True
+		BridgeCheckInterval: 7500
+		BridgeMaxTargets: 1
+		# Erster Bruecken-Scan erst ab STEC (User 2026-08-03), siehe GDI-Instanz.
+		BridgeRequiresTypes: aot-stec-age0, aot-stec-age1, aot-stec-age2
+		# Engineer-Raids (User-Briefing 2026-08-03): 3 Engineers + 2 Rocket Trooper. Die Rocket
+		# Trooper sind KEINE Deko -- sie schiessen eine Zaunzelle frei, damit die Engineers an ein
+		# eingezaeuntes Gebaeude kommen (eingezaeunte Ziele sind daher ausdruecklich erlaubt).
+		RefineryTypes: proc, aot-proc-nod, aot-proc-nod-age2
+		# Wirtschafts-Notlage (User 2026-08-04): Solange es KEINEN Ore Transporter und noch weder
+		# Refinery noch Harvester gibt, haengt die gesamte Wirtschaft an dieser einen Einheit. Ops
+		# stellt dann komplett ein, damit der Ersatz-ORET ueberhaupt bezahlt werden kann -- sonst
+		# verliert er jeden Wettstreit um die Fahrzeug-Queue gegen die Angriffswellen (beobachtet:
+		# ein Bot haeng ueber fuenf Minuten bei 0 Cash und 500/min fest).
+		EconomyTransporterTypes: aot-oret-lite, oret
+		EconomyHarvesterTypes: aot-harv, aot-harv-nod
+		# Heli-Raid ab Age 1: Chinook fliegt am Kartenrand entlang und setzt HINTER der Feindbasis ab.
+		# Geht der Transporter vor dem Ausladen verloren, steigt die Gefahrenstufe und der naechste
+		# Raid setzt HeliRaidDropDistanceStep Zellen weiter draussen ab -- wirkt, als haette die KI
+		# gelernt, wo die Flugabwehr steht. aot-tran-nod = derselbe Chinook wie GDI.
+		# aot-tran-nod-para: nach dem Parachute-Bay-Upgrade ist nur noch dieser Proxy baubar
+		# (aot-tran-nod wird per ~!aot-tran-parachute-upgrade ausgeblendet) -- beide gleichwertig.
+		EnableHeliRaids: True
+		HeliRaidTransportTypes: aot-tran-nod, aot-tran-nod-para
+		# Boden-Raid ab Age 2: NOD hat KEINEN normalen APC -- der Subterranean APC ist der Transport
+		# (Starport-Queue, braucht aot-subterrain-upgrade). Er tunnelt ohnehin an der Front vorbei.
+		EnableGroundRaids: True
+		GroundRaidTransportTypes: aot-subapc
+		# aot-subapc wurde 2026-08-03 aus ExcludeFromOpsTypes ENTFERNT: solange er dort stand, hat
+		# das Ops-Modul ihn nie beansprucht (IsEligibleCombatUnit filtert die Liste vorher raus) und
+		# die Transport-Anforderung des Boden-Raids waere nie erfuellt worden.
+		# Base Expansion (User-Briefing 2026-08-03): 1 pro Bot, ab Age 1 nach Refinery. MCV + 6 Light
+		# Tanks als Eskorte, die sich ab Age 2 (Tick-Tank-Upgrade) an sechs Posten rund um die
+		# Expansion eingraben -- genau die 6 aot-ltnk-deployed aus dem vorgebauten Layout.
+		# Standortwahl ueber ResourceMapBotModule: viel Tiberium, weit genug weg, keine Feindbasis in
+		# der Naehe. Ohne Landweg wird eine Faehre gebucht (Prioritaet Expansion).
+		# ⚠️ aot-mcv-age0/-age1 BLEIBEN in ExcludeFromOpsTypes (sonst wuerde Ops den START-MCV
+		# beanspruchen und er wuerde nie deployen -> keine Basis). Damit die Expansion ihren eigenen
+		# MCV trotzdem bekommt, macht IsEligibleCombatUnit eine gezielte Ausnahme fuer ausgeschlossene
+		# Typen, die eine Mission AKTIV angefordert hat -- siehe Kommentar dort.
+		EnableExpansion: True
+		ExpansionMcvTypes: aot-mcv-age1, aot-mcv-age0
+		# Reine Light-Tank-Eskorte (User-Vorgabe "6 light-tanks"). KEINE Fallbacks noetig: die
+		# Starport-Queue des Airfields liefert LTNKs zuverlaessig -- im Log 53x "produce aot-ltnk-base
+		# for expansion (escort)" plus 63 Claims. Der MCV fuhr NICHT ohne Eskorte los, er ist ihr
+		# davongefahren (Konvoi-Zusammenhalt, in AotExpansionMission.TickMoving behoben).
+		ExpansionEscortTypes: aot-ltnk-tick, aot-ltnk-laser, aot-ltnk-base
+		# Eingegrabene Form der Eskorte (ab Age 2). DeployTransform erzeugt aus dem mobilen Panzer den
+		# stationaeren aot-ltnk-deployed -- ein neuer Aktor, der NICHT in ExpansionEscortTypes steht und
+		# der Mission nicht mehr gehoert. Ohne diese Zeile zaehlte die Wachstaerke-Pruefung ihn als
+		# verloren und orderte endlos Ersatz (User 2026-08-15).
+		ExpansionDeployedTypes: aot-ltnk-deployed
+		# 4 statt 6 (User 2026-08-04): 6 x 1500 + 3000 MCV = 12000 pro Konvoi, das sind rund vier
+		# Minuten Gesamteinnahmen eines Age-1-Bots -- im Test wurde nie einer fertig. Die sechs
+		# Wachposten im Layout bleiben, vier Panzer verteilen sich darauf.
+		ExpansionEscortCount: 4
+		ExpansionEscortMinimum: 2
+		# Derrick squad composition (User 2026-07-31, corrected same day -- Flame Trooper needs Radar,
+		# which would have deadlocked the sequential build): 1 rocketeer, 1 engineer, 1 mg, 1 mg.
+		# Escalation (User 2026-07-22): after 2 failed waves at the primary choke, the next wave
+		# routes via a secondary approach instead (if one exists); after 3 failed waves total (with
+		# a Helipad built) 4 Hinds raid the enemy construction yard directly, then the loop resets
+		# to ground waves regardless of the raid's outcome.
+		HelipadTypes: aot-hpad-nod
+		AirRaidHelicopterTypes: aot-hind-base, aot-harpy-upgraded, aot-harpy-upgraded-laser
+		# Subterranean Flame Raid (User-Briefing #5, Spec 2026-08-13): ab Age 2 / Subterrain-Upgrade
+		# schickt der Bot als ZUFALLS-Alternative zu einer regulaeren Welle oder einem Hind-Angriff
+		# 5 Devil's Tongue ALLEIN los. Kette: aot-ttnk-devil (Starport) zuerst, aot-ttnk-devil-base
+		# als Fallback. Nur baubar mit Subterrain-Upgrade -> das gatet den Raid selbst, keine extra
+		# Prerequisite-Buchhaltung. Devils tunneln an der Front vorbei -> kein Routen-/Faehren-Code.
+		DevilRaidTypes: aot-ttnk-devil, aot-ttnk-devil-base
+		# Retreating survivors that are damaged head to the repair bay before rejoining the pool
+		# (User 2026-07-22).
+		RepairTypes: aot-fix-age0, aot-fix-age1-nod, aot-fix-age2-nod
+		# Module 5 Base Defense (User 2026-07-22): standing garrison ~= one regular wave in size,
+		# ProtectionMinProduced guaranteed via production, rest opportunistic from the pool.
+		ProtectionFloorTypes: aot-bggy-laser, aot-bike-base, aot-bggy-base
+		ProtectionMinProduced: 3
+		ProtectionScanRadius: 10
+		ProtectionResponseRatio: 2
+		ProtectionMinResponse: 2
+		# Module 0 OreT Boost + startup priority (User 2026-07-22): one extra ORET ordered directly
+		# (bypasses Ops claiming entirely, see ExcludeFromOpsTypes above), purely for early cashflow.
+		# The first Regular Attack Wave waits for this + the first Derrick scan + every Scout group
+		# before firing -- cashflow and reconnaissance before the first real offensive.
+		OreBoostTypes: aot-oret-lite
+
+
+	# =========================================================================
+	# SUPERWAFFEN (offensive, ziel-suchend). Defensiv/Self-Cast (Firestorm,
+	# Iron Dome) + reine Reveal (Satellite) = Phase B (Custom-Logik).
+	# OrderName-Default = {InfoClassName}Order (siehe AotNukePowerVariants.cs).
+	# =========================================================================
+	# === Age-Aufstieg (User-Wunsch 2026-08-04) ===
+	# Der Aufstieg ist seit 2026-08-04 keine Produktionsqueue mehr, sondern eine Super Power auf
+	# dem Spieler-Aktor: sie laedt von selbst, sobald die Voraussetzungen stehen, und muss dann
+	# per Klick ausgeloest werden (Kosten einmalig). Die KI klickt nicht und kauft sonst nur aus
+	# Queues -- ohne dieses Modul stiege sie nie auf.
+	#
+	# Das Modul spart waehrend der Ladezeit linear auf die Kosten an (echtes TakeCash auf ein
+	# modul-eigenes Konto, damit die anderen Bot-Module das Geld nicht vorher ausgeben) und loest
+	# aus, sobald die Power fertig ist. Silo-Obergrenzen sind davon nicht betroffen:
+	# ResourceCapacity deckelt nur das ungemuenzte Erz in PlayerResources, das Konto liegt
+	# ausserhalb davon.
+	#
+	# Faction-Split ist unnoetig: die Powers selbst sind faction-neutral, ihre Freischaltung
+	# haengt an ATEC bzw. STEC (siehe overrides.yaml, Player-Block).
+	# Hält das vom AotAgePowerBotModule fuer das naechste Age reservierte Geld. Bewegung laeuft ueber
+	# eine aufgezeichnete Order (nicht direktes TakeCash aus Bot-Code) -> save-load-sicher. Immer aktiv;
+	# bei menschlichen Spielern bleibt Stored einfach 0.
+	AotBotCashVault:
+
+	AotAgePowerBotModule:
+		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
+		PowerOrderNames: AotAge1PowerInfoOrder, AotAge2PowerInfoOrder, AotAge3PowerInfoOrder
+
+	SupportPowerBotModule@aot:
+		RequiresCondition: enable-cabal-ai || enable-watson-ai || enable-hal9001-ai
+		Decisions:
+			# --- Ion Cannon Strike (orbc) ---
+			# Zielt auf das Construction Yard (User-Wunsch 2026-08-01). ActorTypes ist eine
+			# aotmod-Erweiterung von Consideration (SupportPowerDecision.cs) -- Types allein kennt
+			# nur grobe Kategorien und kann kein einzelnes Gebaeude auswaehlen.
+			IonCannon:
+				OrderName: IonCannonPowerInfoOrder
+				MinimumAttractiveness: 1000
+				FineScanRadius: 2
+				Consideration@1:
+					Against: Enemy
+					Types: Structure
+					ActorTypes: fact, fact.gdi, fact.nod
+					Attractiveness: 5
+					TargetMetric: Value
+					CheckRadius: 2c0
+				Consideration@3:
+					Against: Ally
+					Types: Ground, Water
+					Attractiveness: -10
+					TargetMetric: Value
+					CheckRadius: 3c0
+			# --- Tiberium/Nuke Strike (tmpl Tiberium Strike, mslo Mine Cluster) ---
+			# Mine Cluster streut Minen -> auf feindliche VERTEIDIGUNGSANLAGEN (User-Wunsch
+			# 2026-08-01: "die stehen i.d.R. an Chokepoints"). SAMs bewusst NICHT in der Liste.
+			NukeStrike:
+				OrderName: NukePowerInfoOrder
+				MinimumAttractiveness: 1000
+				Consideration@1:
+					Against: Enemy
+					Types: Structure
+					ActorTypes: aot-pillbox-base, aot-pillbox-guard, aot-gun-base, aot-gun-laser, aot-ftur-flame, aot-ftur-toxic, obli, aot-fireposition, atwr, gtwr
+					Attractiveness: 5
+					TargetMetric: Value
+					CheckRadius: 5c0
+				Consideration@2:
+					Against: Ally
+					Types: Air, Ground, Water
+					Attractiveness: -10
+					TargetMetric: Value
+					CheckRadius: 7c0
+			# --- Tiberium Missile (mslo, aufgerüstet) ---
+			# Zielt auf Kraftwerke (User-Wunsch 2026-08-01).
+			TiberiumMissile:
+				OrderName: AotTiberiumMissilePowerInfoOrder
+				MinimumAttractiveness: 1000
+				Consideration@1:
+					Against: Enemy
+					Types: Structure
+					ActorTypes: aot-nuke-age0, aot-nuke-age1, aot-nuke-age2, aot-nuke-age2-nod, aot-nuke-turbine, aot-nuke-turbine-age2, aot-nuk2-age0, aot-nuk2-age1, aot-nuk2-age2
+					Attractiveness: 5
+					TargetMetric: Value
+					CheckRadius: 5c0
+				Consideration@2:
+					Against: Ally
+					Types: Air, Ground, Water
+					Attractiveness: -10
+					TargetMetric: Value
+					CheckRadius: 7c0
+			# --- Atom Bomb (mslo) --- NEU 2026-08-01: hatte bisher GAR KEINE Decision, die KI hat
+			# die Superwaffe also nie gezuendet (OrderName wird aus dem Info-Klassennamen
+			# abgeleitet, siehe AotNukePowerVariants.cs). Zielt auf das Construction Yard.
+			AtomBomb:
+				OrderName: AotAtomBombPowerInfoOrder
+				MinimumAttractiveness: 1000
+				Consideration@1:
+					Against: Enemy
+					Types: Structure
+					ActorTypes: fact, fact.gdi, fact.nod
+					Attractiveness: 5
+					TargetMetric: Value
+					CheckRadius: 5c0
+				Consideration@2:
+					Against: Ally
+					Types: Air, Ground, Water
+					Attractiveness: -10
+					TargetMetric: Value
+					CheckRadius: 7c0
+			# --- Mine Cluster Enhanced (mslo) --- ebenfalls NEU: gleiche Luecke wie bei der Atom
+			# Bomb. Zielt wie die Basis-Variante auf feindliche Verteidigungsanlagen.
+			MineClusterEnhanced:
+				OrderName: AotMineClusterEnhancedPowerInfoOrder
+				MinimumAttractiveness: 1000
+				Consideration@1:
+					Against: Enemy
+					Types: Structure
+					ActorTypes: aot-pillbox-base, aot-pillbox-guard, aot-gun-base, aot-gun-laser, aot-ftur-flame, aot-ftur-toxic, obli, aot-fireposition, atwr, gtwr
+					Attractiveness: 5
+					TargetMetric: Value
+					CheckRadius: 5c0
+				Consideration@2:
+					Against: Ally
+					Types: Air, Ground, Water
+					Attractiveness: -10
+					TargetMetric: Value
+					CheckRadius: 7c0
+			# --- Zone Trooper Drop (orbc) — Truppen auf feindliche Konzentration ---
+			ZoneTrooperDrop:
+				OrderName: AotZoneTrooperDropPowerInfoOrder
+				MinimumAttractiveness: 2000
+				Consideration@1:
+					Against: Enemy
+					Types: Structure
+					Attractiveness: 2
+					TargetMetric: Value
+					CheckRadius: 3c0
+				Consideration@2:
+					Against: Enemy
+					Types: Vehicle, Infantry
+					Attractiveness: 1
+					TargetMetric: Value
+					CheckRadius: 3c0
+			# --- NOD Airstrike (MiG) ---
+			MigAirstrike:
+				OrderName: AotMigAirstrikeOrder
+				MinimumAttractiveness: 2000
+				Consideration@1:
+					Against: Enemy
+					Types: Vehicle, Infantry
+					Attractiveness: 3
+					TargetMetric: Value
+					CheckRadius: 2c0
+				Consideration@2:
+					Against: Enemy
+					Types: Structure
+					Attractiveness: 1
+					TargetMetric: Value
+					CheckRadius: 2c0
+				Consideration@3:
+					Against: Ally
+					Types: Ground, Water
+					Attractiveness: -20
+					TargetMetric: Value
+					CheckRadius: 2c0
+			# --- NOD Banshee Airstrike ---
+			BansheeAirstrike:
+				OrderName: AotBansheeAirstrikeOrder
+				MinimumAttractiveness: 2000
+				Consideration@1:
+					Against: Enemy
+					Types: Vehicle, Infantry
+					Attractiveness: 3
+					TargetMetric: Value
+					CheckRadius: 2c0
+				Consideration@2:
+					Against: Enemy
+					Types: Structure
+					Attractiveness: 1
+					TargetMetric: Value
+					CheckRadius: 2c0
+				Consideration@3:
+					Against: Ally
+					Types: Ground, Water
+					Attractiveness: -20
+					TargetMetric: Value
+					CheckRadius: 2c0
+			# --- NOD Parabombs ---
+			Parabombs:
+				OrderName: AotParabombsOrder
+				MinimumAttractiveness: 2500
+				Consideration@1:
+					Against: Enemy
+					Types: Structure
+					Attractiveness: 2
+					TargetMetric: Value
+					CheckRadius: 3c0
+				Consideration@2:
+					Against: Enemy
+					Types: Vehicle, Infantry
+					Attractiveness: 1
+					TargetMetric: Value
+					CheckRadius: 3c0
+				Consideration@3:
+					Against: Ally
+					Types: Ground, Water
+					Attractiveness: -20
+					TargetMetric: Value
+					CheckRadius: 3c0

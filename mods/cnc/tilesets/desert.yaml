@@ -40,6 +40,14 @@ Terrain:
 		Type: Rock
 		TargetTypes: Ground
 		Color: 745A3F
+	# === Age of Tiberium (aotmod) - Jumpjet Custom-Movement-Layer (Zone Trooper Hover) ===
+	TerrainType@Jumpjet:
+		Type: Jumpjet
+		Color: 745A3F
+	# === Age of Tiberium (aotmod) - Subterranean Custom-Movement-Layer (Devil's Tongue / Sub APC) ===
+	TerrainType@Subterranean:
+		Type: Subterranean
+		Color: 745537
 	TerrainType@Rough:
 		Type: Rough
 		TargetTypes: Ground

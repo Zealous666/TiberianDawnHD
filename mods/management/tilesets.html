@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>AoT – Tilesets</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --col-bg: #1a1d27;
+    --card-bg: #252938;
+    --card-bg-hover: #2d3142;
+    --accent: #d9a82e;
+    --text: #e6e8ee;
+    --text-dim: #9aa0ad;
+    --border: #2f3340;
+    --phase2-bg: #1a1f2e;
+    --phase2-border: #2f3a5a;
+    --phase2-accent: #5b8def;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding-top: 42px;
+  }
+  .top-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; gap: 2px; padding: 6px 16px; background: rgba(15,17,23,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
+  .top-nav a { padding: 5px 14px; border-radius: 5px; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; color: var(--text-dim); text-decoration: none; transition: color .15s, background .15s; }
+  .top-nav a:hover { color: var(--text); background: var(--card-bg); }
+  .top-nav a.active { color: var(--text); background: var(--card-bg); }
+  header {
+    padding: 24px 32px 8px;
+  }
+  header h1 {
+    font-size: 20px;
+    margin: 0 0 4px;
+    font-weight: 600;
+  }
+  header p {
+    color: var(--text-dim);
+    font-size: 13px;
+    margin: 0;
+  }
+  .section-label {
+    padding: 20px 32px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    margin: 0 32px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+    padding: 20px 32px 32px;
+  }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+  .card.phase2 {
+    background: var(--phase2-bg);
+    border-color: var(--phase2-border);
+  }
+  .card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .card-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 2px 8px;
+    border-radius: 10px;
+    flex-shrink: 0;
+    margin-left: 10px;
+    margin-top: 2px;
+  }
+  .badge.id {
+    background: rgba(217,168,46,0.15);
+    color: var(--accent);
+    border: 1px solid rgba(217,168,46,0.3);
+  }
+  .badge.phase2 {
+    background: rgba(91,141,239,0.15);
+    color: var(--phase2-accent);
+    border: 1px solid rgba(91,141,239,0.3);
+  }
+  .card-meta {
+    font-size: 11.5px;
+    color: var(--text-dim);
+    margin-bottom: 14px;
+    line-height: 1.6;
+  }
+  .card-meta strong {
+    color: var(--text);
+  }
+  .checklist {
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+  }
+  .checklist-header {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+  .checklist-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 3px 0;
+    font-size: 12.5px;
+    line-height: 1.4;
+  }
+  .checklist-item input[type="checkbox"] {
+    margin-top: 2px;
+    flex-shrink: 0;
+    cursor: default;
+    pointer-events: none;
+    accent-color: var(--accent);
+  }
+  .card.phase2 .checklist-item input[type="checkbox"] {
+    accent-color: var(--phase2-accent);
+  }
+  .checklist-item label {
+    cursor: default;
+    flex: 1;
+  }
+  .checklist-item input:checked + label {
+    color: var(--text-dim);
+    text-decoration: line-through;
+  }
+  .progress-bar-wrap {
+    background: var(--col-bg);
+    border-radius: 4px;
+    height: 4px;
+    margin-top: 10px;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 4px;
+    border-radius: 4px;
+    background: var(--accent);
+    transition: width 0.3s;
+  }
+  .card.phase2 .progress-bar {
+    background: var(--phase2-accent);
+  }
+  .progress-label {
+    font-size: 10.5px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    text-align: right;
+  }
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <a href="kanban-board.html">Planning</a>
+  <a href="techtree.html">Techtree</a>
+  <a href="buildorder.html">Build Order</a>
+  <a href="tilesets.html" class="active">Tilesets</a>
+  <a href="operations.html">Operation</a>
+  <a href="building-economy.html">Building &amp; Economy</a>
+</nav>
+
+<header>
+  <h1>AoT – Tileset-Übersicht</h1>
+  <p>Option 2: Eigene AoT-IDs für alle Tilesets. Phase 1 = RA-basiert + TD-Desert/Winter. Phase 2 = Jungle.</p>
+</header>
+
+<div class="section-label">Phase 1 — Tileset-Implementierung</div>
+<div class="grid" id="grid-p1"></div>
+
+<div class="section-label">Phase 2 — Erweiterung</div>
+<div class="grid" id="grid-p2"></div>
+
+<script>
+const STORAGE_KEY = "aot-tilesets-data-v1";
+
+// Default checked states hardcoded here; localStorage stores user overrides on top.
+const DEFAULT_CHECKS = {
+  "aot-temperat-ms-0": true,
+  "aot-temperat-ms-1": true,
+  "aot-temperat-ms-2": true,
+  "aot-temperat-ms-3": true,
+  "aot-temperat-ms-4": true,
+  "aot-temperat-ms-5": true,
+  "aot-temperat-ms-6": true,
+  "aot-temperat-ms-7": true,
+  "aot-temperat-ms-8": true,
+  "aot-temperat-ms-9": true,
+  "aot-arctic-ms-0": true,
+  "aot-arctic-ms-1": true,
+  "aot-arctic-ms-2": true,
+  "aot-arctic-ms-3": true,
+  "aot-arctic-ms-4": true,
+  "aot-arctic-ms-5": true,
+  "aot-arctic-ms-6": true,
+  "aot-desert-ms-0": true,
+  "aot-desert-ms-1": true,
+  "aot-desert-ms-2": true,
+  "aot-desert-ms-3": true,
+  "aot-desert-ms-4": true,
+  "aot-desert-ms-5": true,
+};
+
+const tilesets = [
+  {
+    id: "aot-temperat",
+    title: "Temperate",
+    tilesetId: "AOT_TEMPERAT",
+    phase: 1,
+    meta: [
+      { label: "Basis", value: "RA Temperate (engine/mods/ra/tilesets/temperat.yaml)" },
+      { label: "Templates", value: "308 (vs. 145 im TD-Original)" },
+      { label: "Tile-Dateien", value: ".tem – aus RA temperat.mix" },
+      { label: "Ersetzt", value: "TD Temperate vollständig (kein Parallelbetrieb nötig)" },
+    ],
+    milestones: [
+      "RA-Content via ra-classic-content Installer installieren (temperat.mix)",
+      "temperat.mix als Package in mod.yaml mounten",
+      "aot-temperat.yaml aus RA-Engine-Vorlage ableiten",
+      "Terrain-Typen auf AoT-Begriffe anpassen (Ore→Tiberium, Gems→BlueTiberium, kein Ore/Gems)",
+      "Tileset-ID auf AOT_TEMPERAT setzen",
+      "TileSets-Eintrag in mod.yaml: cnchd|tilesets/aot-temperat.yaml",
+      "Alten temperat.yaml-Eintrag in mod.yaml entfernen",
+      "Im Editor laden und alle Template-Kategorien prüfen",
+      "Test-Map mit allen wichtigen Terrain-Typen erstellen",
+      "Sequenzen-Override prüfen (TilesetFilenames in decorations.yaml etc.)",
+    ]
+  },
+  {
+    id: "aot-arctic",
+    title: "Arctic",
+    tilesetId: "AOT_ARCTIC",
+    phase: 1,
+    meta: [
+      { label: "Basis", value: "Merge aus AOT_WINTER (führend, TD Winter) + AOT_SNOW (RA Snow). Ersetzt beide." },
+      { label: "Templates", value: "451 (142 Winter nativ + 257 Snow @+1000 'X (Snow)' + 54 Temperate-Beach @+2000)" },
+      { label: "Tile-Dateien", value: ".win/.sno/.tem – DDS direkt aus TEXTURES_TD_SRGB.MEG / TEXTURES_RA_SRGB.MEG" },
+      { label: "Portierte Maps", value: "Polar Panic + zoomap + Snow-Shellmap (+1000 Zell-Remap); Hammerfest + Winter-Shellmap (nur Feld-Rename)" },
+    ],
+    milestones: [
+      "aot-winter.yaml → aot-arctic.yaml umbenannt, Id AOT_WINTER → AOT_ARCTIC (Winter führend, IDs unverändert)",
+      "Alle AOT_SNOW/AOT_WINTER-Referenzen (Regeln, Sequenzen, Deko-Keys, Ice-Floes, Paletten) → AOT_ARCTIC, Listen dedupliziert",
+      "Snow-Maps portiert: map.bin +1000 Zell-Remap + Sentinel-Clear (0/255/65535→1000) zusammengeführt (Polar Panic, zoomap, Snow-Shellmap)",
+      "Winter-Maps: nur Tileset-Feld WINTER→AOT_ARCTIC (Hammerfest, Winter-Shellmap)",
+      "engine Game.cs DefaultShellmapTileset → AOT_ARCTIC",
+      "AOT_SNOW-Tileset + Paletten entfernt, mod.yaml/fluent bereinigt",
+      "check-yaml sauber (0 AOT_SNOW-Leichen, alle 5 Maps referenzieren nur gültige Arctic-IDs)",
+    ]
+  },
+  {
+    id: "aot-desert",
+    title: "Desert",
+    tilesetId: "AOT_DESERT",
+    phase: 1,
+    meta: [
+      { label: "Basis", value: "TD Desert (engine/mods/cnc/tilesets/desert.yaml), eigene Instanz" },
+      { label: "Templates", value: "168/178 – 10 ohne Remaster-Asset im MEG ausgelassen" },
+      { label: "Tile-Dateien", value: ".des – DDS-Pfade direkt aus TEXTURES_TD_SRGB.MEG aufgelöst" },
+      { label: "Hinweis", value: "Desert-exklusive Bäume/Zivilgebäude (T04/T09/T18, V20-V37) per overrides.yaml auf AOT_DESERT freigeschaltet" },
+    ],
+    milestones: [
+      "aot-desert.yaml aus desert.yaml dupliziert (eigene Instanz, TD desert.yaml bleibt unverändert)",
+      "Tileset-ID auf AOT_DESERT gesetzt",
+      "RemasteredFilenames direkt aus TEXTURES_TD_SRGB.MEG generiert (168/178, verwaiste MultiBrush/FromTemplates-Referenzen bereinigt)",
+      "Jumpjet + Subterranean Terrain-Typen ergänzt",
+      "TileSets-Eintrag + Palette (palettes.yaml) eingetragen",
+      "Im Editor geladen und validiert",
+    ]
+  },
+];
+
+const phase2 = [
+  {
+    id: "aot-interior",
+    title: "Interior (Indoor)",
+    tilesetId: "in TEMPERAT",
+    phase: 2,
+    meta: [
+      { label: "Ansatz", value: "KEIN eigenes Tileset — RA-Interior EXKLUSIV an AOT_TEMPERAT angehängt (wie Snow→Winter). Desert bewusst NICHT (User 2026-08-25)." },
+      { label: "Templates", value: "141 (RA Interior 253-399), Offset +3000, Kategorien 'Floor (Indoor)' / 'Wall (Indoor)'" },
+      { label: "Tile-Dateien", value: ".int – DDS direkt aus TEXTURES_RA_SRGB.MEG" },
+      { label: "Terrain/Bewegung", value: "TerrainType@ClearNoSmudges ergänzt + in 14 Locomotors begehbar; DDS truecolor (keine Palette nötig)" },
+    ],
+    milestones: [
+      "MEG-Interior inventarisiert (163 .INT, RA interior.yaml als Vorlage)",
+      "141 Interior-Templates (+3000) an AOT_TEMPERAT angehängt",
+      "TerrainType@ClearNoSmudges in AOT_TEMPERAT + Locomotor-Speeds (14)",
+      "EditorTemplateOrder um Floor (Indoor)/Wall (Indoor) erweitert",
+      "Im Editor Temperate getestet (Kategorien, Optik, Begehbarkeit)",
+      "End-to-End: RA-Map 'Core of the Matter' 1:1 als AOT_TEMPERAT-Indoor nachgebaut (+3000-Remap, 120x120)",
+      "Desert-Integration wieder entfernt — Indoor bleibt Temperate-exklusiv",
+    ]
+  },
+  {
+    id: "aot-jungle-ai",
+    title: "Jungle (KI-Assets)",
+    tilesetId: "in TEMPERAT",
+    phase: 2,
+    meta: [
+      { label: "Ansatz", value: "Kein Remaster-Jungle vorhanden (siehe verworfener Eintrag unten) — stattdessen Klippen + Bäume per Gemini aus den Temperate-Originalen begrünt und an AOT_TEMPERAT angehängt." },
+      { label: "Klippen", value: "38 Templates, Offset +4000, Kategorie 'Cliffs (Jungle)', 157 DDS in mods/cnc/bits/jungle/" },
+      { label: "Bäume", value: "15 Aktoren aot-jng-t01…t17 (rules/aot-jungle.yaml), erben von T## → Original-Husk, Kategorie 'Trees (Jungle)', RequireTilesets AOT_TEMPERAT" },
+      { label: "Mount", value: "OverridePackages: cnchd|bits/jungle (cnchd| = mods/cnc — NICHT cnc|, das ist die Vanilla-Engine)" },
+      { label: "Bake-Regel Klippen", value: "KRITISCH: Gras/Alpha 1:1 vom Original übernehmen, Ranken NUR innerhalb der Felsfläche (1px erodiert). Jede Alpha-/Gras-Manipulation erzeugt sichtbare Kachel-Rahmen." },
+      { label: "Bake-Regel Bäume", value: "Gemini auf Magenta-Grund → weicher Chroma-Key + De-Spill; enger Crop (4px Sheet-Inset) + Clip auf dilatierte Original-Silhouette gegen Sheet-Gitterlinien; Schatten aus dem Original extrahieren (Alpha 40–235 & Luminanz<40) und unterlegen." },
+    ],
+    milestones: [
+      "Klippen + Bäume als Sheets exportiert und von Gemini begrünt (Klippen: Gras behalten / Bäume: Magenta-Grund)",
+      "38 Jungle-Cliff-Templates (+4000) an AOT_TEMPERAT angehängt, 157 DDS gebacken",
+      "15 Baum-Aktoren + Sequenzen (aot-jungle.yaml / aot-sequences.yaml)",
+      "cnchd|bits/jungle als OverridePackage gemountet",
+      "Klippen: Grasnaht gelöst (Original-Gras bitgenau, 0/4199 Pixel verändert)",
+      "Bäume: Magenta-Reste, weiße Sheet-Linien und Halo entfernt (0 Restlinien über alle 15)",
+      "Original-Schattenwurf übernommen; t01/t02/t07/t16 nutzen den Schatten von t03",
+      "Im Editor abgenommen (User 2026-08-29)",
+    ]
+  },
+  {
+    id: "aot-jungle",
+    title: "Jungle (Remaster-Theater)",
+    tilesetId: "AOT_JUNGLE",
+    phase: 2,
+    scrapped: true,
+    scrappedReason: "Verworfen (2026-07-25): C&C Remastered Collection liefert kein Jungle-Theater aus. Verifiziert per Binär-Scan aller 5 Textur-MEGs (TD/RA/COMMON/SRGB/PATCHES) — keine JUNGLE-Pfade. Zusätzlich im offiziellen EA-Repo (CnC_Remastered_Collection, CnCTDRAMapEditor/{TiberianDawn,RedAlert}/TheaterTypes.cs) bestätigt: TD kennt nur Desert/Temperate/Winter, RA nur Temperate/Snow/Interior. Ein THEATER_JUNGLE-Enum existiert nur als Legacy-Rest der Original-Engine ohne zugehörige Remaster-Assets. Unter der 'nur Remaster-Assets'-Regel nicht baubar.",
+    meta: [
+      { label: "Basis", value: "TD Remastered Jungle — existiert NICHT (siehe scrappedReason)" },
+      { label: "Templates", value: "~150+ – vollständig neu zu definieren" },
+      { label: "Tile-Dateien", value: ".jun – kein bestehendes YAML in OpenRA, keine DDS im Remaster" },
+      { label: "Aufwand", value: "Nicht durchführbar – keine Remaster-Assets vorhanden" },
+    ],
+    milestones: [
+      "Remaster-Jungle-DDS-Dateien inventarisieren (welche Tiles existieren?)",
+      "TD-Original-Jungle-Tiles (falls .mix vorhanden) als Referenz extrahieren",
+      "Template-Struktur anhand Temperate als Vorlage entwickeln",
+      "aot-jungle.yaml mit allen Terrain-Typen anlegen",
+      "Alle Jungle-Templates definieren (Clear, Tree, Cliff, River, Road, Beach…)",
+      "Tileset-ID auf AOT_JUNGLE setzen",
+      "RemasteredFilenames für alle DDS-Pfade eintragen",
+      "TileSets-Eintrag in mod.yaml eintragen",
+      "Im Editor laden und alle Kategorien validieren",
+      "Test-Map mit repräsentativen Terrain-Kombinationen",
+    ]
+  }
+];
+
+function uid() { return Math.random().toString(36).slice(2, 8); }
+
+function loadChecks() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    return Object.assign({}, DEFAULT_CHECKS, stored);
+  } catch { return Object.assign({}, DEFAULT_CHECKS); }
+}
+function saveChecks(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+let checks = loadChecks();
+
+function buildCard(ts) {
+  const isPhase2 = ts.phase === 2;
+  const checkIds = ts.milestones.map((_, i) => `${ts.id}-ms-${i}`);
+  const doneCount = checkIds.filter(id => checks[id]).length;
+  const total = checkIds.length;
+  const pct = total ? Math.round((doneCount / total) * 100) : 0;
+
+  const card = document.createElement("div");
+  card.className = "card" + (isPhase2 ? " phase2" : "") + (ts.scrapped ? " scrapped" : "");
+  if (ts.scrapped) card.style.opacity = "0.55";
+
+  const head = document.createElement("div");
+  head.className = "card-head";
+
+  const title = document.createElement("h2");
+  title.className = "card-title";
+  title.textContent = ts.title;
+  head.appendChild(title);
+
+  const badge = document.createElement("span");
+  badge.className = "badge " + (isPhase2 ? "phase2" : "id");
+  badge.textContent = ts.tilesetId;
+  head.appendChild(badge);
+
+  if (ts.scrapped) {
+    const scrapBadge = document.createElement("span");
+    scrapBadge.className = "badge";
+    scrapBadge.style.background = "#7a1f1f";
+    scrapBadge.style.color = "#fff";
+    scrapBadge.textContent = "SCRAPPED";
+    head.appendChild(scrapBadge);
+  }
+  card.appendChild(head);
+
+  if (ts.scrapped) {
+    const reason = document.createElement("div");
+    reason.className = "card-meta";
+    reason.style.color = "#e08080";
+    reason.style.fontStyle = "italic";
+    reason.textContent = ts.scrappedReason;
+    card.appendChild(reason);
+  }
+
+  const meta = document.createElement("div");
+  meta.className = "card-meta";
+  ts.meta.forEach(m => {
+    const line = document.createElement("div");
+    line.innerHTML = `<strong>${m.label}:</strong> ${m.value}`;
+    meta.appendChild(line);
+  });
+  card.appendChild(meta);
+
+  const cl = document.createElement("div");
+  cl.className = "checklist";
+
+  const clHeader = document.createElement("div");
+  clHeader.className = "checklist-header";
+  clHeader.textContent = "Milestones";
+  cl.appendChild(clHeader);
+
+  ts.milestones.forEach((text, i) => {
+    const id = checkIds[i];
+    const row = document.createElement("div");
+    row.className = "checklist-item";
+
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.id = id;
+    cb.checked = !!checks[id];
+    cb.onchange = () => {
+      checks[id] = cb.checked;
+      saveChecks(checks);
+      updateProgress(card, checkIds);
+    };
+
+    const lbl = document.createElement("label");
+    lbl.htmlFor = id;
+    lbl.textContent = text;
+
+    row.appendChild(cb);
+    row.appendChild(lbl);
+    cl.appendChild(row);
+  });
+
+  const barWrap = document.createElement("div");
+  barWrap.className = "progress-bar-wrap";
+  const bar = document.createElement("div");
+  bar.className = "progress-bar";
+  bar.style.width = pct + "%";
+  bar.dataset.checkIds = checkIds.join(",");
+  barWrap.appendChild(bar);
+  cl.appendChild(barWrap);
+
+  const pLabel = document.createElement("div");
+  pLabel.className = "progress-label";
+  pLabel.textContent = `${doneCount} / ${total} erledigt`;
+  pLabel.dataset.for = ts.id;
+  cl.appendChild(pLabel);
+
+  card.appendChild(cl);
+  return card;
+}
+
+function updateProgress(card, checkIds) {
+  const doneCount = checkIds.filter(id => checks[id]).length;
+  const total = checkIds.length;
+  const pct = total ? Math.round((doneCount / total) * 100) : 0;
+  const bar = card.querySelector(".progress-bar");
+  if (bar) bar.style.width = pct + "%";
+  const lbl = card.querySelector(".progress-label");
+  if (lbl) lbl.textContent = `${doneCount} / ${total} erledigt`;
+}
+
+const g1 = document.getElementById("grid-p1");
+tilesets.forEach(ts => g1.appendChild(buildCard(ts)));
+
+const g2 = document.getElementById("grid-p2");
+phase2.forEach(ts => g2.appendChild(buildCard(ts)));
+</script>
+</body>
+</html>

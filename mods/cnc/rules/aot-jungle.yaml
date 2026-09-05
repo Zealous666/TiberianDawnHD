@@ -1,0 +1,124 @@
+# === Age of Tiberium (aotmod) — Jungle-Bäume (Aktoren) ===
+# Erben vom Basis-Baum (Health/Armor/^Tree + SpawnActorOnDeath = Original-Husk),
+# nur Sprite -> Jungle-Variante. Editor-Kategorie 'Trees (Jungle)', nur AOT_TEMPERAT.
+
+aot-jng-t01:
+	Inherits: T01
+	RenderSprites:
+		Image: aot-jng-t01
+	MapEditorData:
+		Categories: Trees (Jungle)
+		RequireTilesets: AOT_TEMPERAT
+
+aot-jng-t02:
+	Inherits: T02
+	RenderSprites:
+		Image: aot-jng-t02
+	MapEditorData:
+		Categories: Trees (Jungle)
+		RequireTilesets: AOT_TEMPERAT
+
+aot-jng-t03:
+	Inherits: T03
+	RenderSprites:
+		Image: aot-jng-t03
+	MapEditorData:
+		Categories: Trees (Jungle)
+		RequireTilesets: AOT_TEMPERAT
+
+aot-jng-t05:
+	Inherits: T05
+	RenderSprites:
+		Image: aot-jng-t05
+	MapEditorData:
+		Categories: Trees (Jungle)
+		RequireTilesets: AOT_TEMPERAT
+
+aot-jng-t06:
+	Inherits: T06
+	RenderSprites:
+		Image: aot-jng-t06
+	MapEditorData:
+		Categories: Trees (Jungle)
+		RequireTilesets: AOT_TEMPERAT
+
+aot-jng-t07:
+	Inherits: T07
+	RenderSprites:
+		Image: aot-jng-t07
+	MapEditorData:
+		Categories: Trees (Jungle)
+		RequireTilesets: AOT_TEMPERAT
+
+aot-jng-t08:
+	Inherits: T08
+	RenderSprites:
+		Image: aot-jng-t08
+	MapEditorData:
+		Categories: Trees (Jungle)
+		RequireTilesets: AOT_TEMPERAT
+
+aot-jng-t10:
+	Inherits: T10
+	RenderSprites:
+		Image: aot-jng-t10
+	MapEditorData:
+		Categories: Trees (Jungle)
+		RequireTilesets: AOT_TEMPERAT
+
+aot-jng-t11:
+	Inherits: T11
+	RenderSprites:
+		Image: aot-jng-t11
+	MapEditorData:
+		Categories: Trees (Jungle)
+		RequireTilesets: AOT_TEMPERAT
+
+aot-jng-t12:
+	Inherits: T12
+	RenderSprites:
+		Image: aot-jng-t12
+	MapEditorData:
+		Categories: Trees (Jungle)
+		RequireTilesets: AOT_TEMPERAT
+
+aot-jng-t13:
+	Inherits: T13
+	RenderSprites:
+		Image: aot-jng-t13
+	MapEditorData:
+		Categories: Trees (Jungle)
+		RequireTilesets: AOT_TEMPERAT
+
+aot-jng-t14:
+	Inherits: T14
+	RenderSprites:
+		Image: aot-jng-t14
+	MapEditorData:
+		Categories: Trees (Jungle)
+		RequireTilesets: AOT_TEMPERAT
+
+aot-jng-t15:
+	Inherits: T15
+	RenderSprites:
+		Image: aot-jng-t15
+	MapEditorData:
+		Categories: Trees (Jungle)
+		RequireTilesets: AOT_TEMPERAT
+
+aot-jng-t16:
+	Inherits: T16
+	RenderSprites:
+		Image: aot-jng-t16
+	MapEditorData:
+		Categories: Trees (Jungle)
+		RequireTilesets: AOT_TEMPERAT
+
+aot-jng-t17:
+	Inherits: T17
+	RenderSprites:
+		Image: aot-jng-t17
+	MapEditorData:
+		Categories: Trees (Jungle)
+		RequireTilesets: AOT_TEMPERAT
+
